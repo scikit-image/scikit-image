@@ -25,7 +25,7 @@ def _normalize(x):
     --------
     >>> x = np.arange(5)
     >>> uX = _normalize(x)
-    >>> np.isclose(np.lingalg.norm(uX), 1)
+    >>> np.isclose(np.linalg.norm(uX), 1)
     True
     """
     u = np.asarray(x)
@@ -128,10 +128,11 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     >>> X = np.asarray([1, 0])
     >>> Y = np.asarray([0.5, 0.5])
 
-    >>> M = _rotation(X, Y)
+    >>> M = _compute_rotation_matrix(X, Y)
     >>> Z = np.matmul(M, X)
 
-    >>> np.allclose(Z, Y)
+    >>> uY = Y / np.linalg.norm(Y)
+    >>> np.allclose(Z, uY)
     True
     """
     homogeneous_slice = -use_homogeneous_coords or None
@@ -151,15 +152,23 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     return M
 
 
-def _sigma_prefactor(bandwidth):
-    b = bandwidth
-    # See http://www.cs.rug.nl/~imaging/simplecell.html
-    return 1.0 / np.pi * np.sqrt(np.log(2) / 2.0) * \
-        (2.0 ** b + 1) / (2.0 ** b - 1)
-
-
 def _decompose_quasipolar_coords(r, thetas):
     """Decomposes quasipolar coordinates into their cartesian components.
+
+    Quasipolar coordinate decomposition is defined as follows:
+
+    .. math::
+
+         \left\{
+         \begin{array}{llllll}
+	         x_0     & \quad = r \sin \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+	         x_1     & \quad = r \cos \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+	         x_2     & \quad = r \cos \theta_1 \sin \theta_2 ... \sin \theta_{n-1} \\
+	         ...                                                                   \\
+	         x_{n-1} & \quad = r \cos \theta_{n-2} \sin \theta_{n-1}               \\
+	         x_n     & \quad = r \cos \theta_{n-1}
+         \end{array}
+         \right.
 
     Parameters
     ----------
@@ -181,22 +190,7 @@ def _decompose_quasipolar_coords(r, thetas):
 
     Notes
     -----
-    Quasipolar coordinate decomposition is defined as follows:
-
-    .. math::
-
-         \left\{
-         \begin{array}{llllll}
-	         x_0     & \quad = r \sin \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
-	         x_1     & \quad = r \cos \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
-	         x_2     & \quad = r \cos \theta_1 \sin \theta_2 ... \sin \theta_{n-1} \\
-	         ...                                                                   \\
-	         x_{n-1} & \quad = r \cos \theta_{n-2} \sin \theta_{n-1}               \\
-	         x_n     & \quad = r \cos \theta_{n-1}
-         \end{array}
-         \right.
-
-    For polar coordinates:
+    In terms of polar coordinate decomposition:
 
     .. math::
 
@@ -207,7 +201,7 @@ def _decompose_quasipolar_coords(r, thetas):
          \end{array}
          \right.
 
-    For spherical coordinates:
+    In terms of spherical coordinate decomposition:
 
     .. math::
 
@@ -221,10 +215,10 @@ def _decompose_quasipolar_coords(r, thetas):
 
     Examples
     --------
-    >>> _decompose_quasipolar_coords(1, (0))
-    [ 0., 1.]
-    >>> _decompose_quasipolar_coords(10, (np.pi / 2, 0))
-    [ 10., 0., 0.]
+    >>> _decompose_quasipolar_coords(1, [0])
+    array([ 0.,  1.])
+    >>> _decompose_quasipolar_coords(10, [np.pi / 2, 0])
+    array([  0.,   0.,  10.])
     """
     num_axes = len(thetas) + 1
     coords = r * np.ones(num_axes)
@@ -290,6 +284,13 @@ def _gaussian_kernel(image, center=0, sigma=1, ndim=None):
     return gauss / norm
 
 
+def _sigma_prefactor(bandwidth):
+    b = bandwidth
+    # See http://www.cs.rug.nl/~imaging/simplecell.html
+    return 1.0 / np.pi * np.sqrt(np.log(2) / 2.0) * \
+        (2.0 ** b + 1) / (2.0 ** b - 1)
+
+
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
                  n_stds=3, offset=0, axes=1, ndim=2, **kwargs):
     """Multi-dimensional complex Gabor kernel.
@@ -326,11 +327,10 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     offset : float, optional
         Phase offset of harmonic function in radians.
     axes : int or sequence of int, optional
-        Ordering of axes that defines the plane with regards to
-        orientation. Ordering not specified will be padded with
-        remaining axes in ascending order. Non-iterable values
-        will be treated as the single element of a tuple.
-        For classical cartesian ordering `(x, y, ...)`, set to `1`.
+        Ordering of axes that defines the plane of rotation. Ordering not
+        specified will be padded with remaining axes in ascending order.
+        Non-iterable values will be treated as the single element of a
+        tuple. For classical cartesian ordering `(x, y, ...)`, set to `1`.
     ndim : int, optional
         Dimensionality of the kernel.
 
@@ -400,12 +400,12 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     base_axis = (1,) + (0,) * (ndim - 1)
     rot = _compute_rotation_matrix(base_axis, coords[axes])
 
-    # calculate & rotate kernel size
+    # calculate rotated kernel size
     spatial_size = np.max(np.abs(n_stds * sigma * rot), axis=-1)
-    spatial_size = np.ceil(spatial_size).astype(int)
+    spatial_size = np.ceil(spatial_size).astype(np.int)
     spatial_size[spatial_size < 1] = 1
 
-    # create mesh grid
+    # create kernel space
     m = np.asarray(np.meshgrid(*[range(-c, c + 1) for c in spatial_size],
                                indexing='ij'))
 
