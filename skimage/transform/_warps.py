@@ -353,7 +353,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     tform1 = SimilarityTransform(translation=center)
     tform2 = SimilarityTransform(rotation=np.deg2rad(angle))
     tform3 = SimilarityTransform(translation=-center)
-    tform = tform1 @ tform2 @ tform3
+    # 2.7
+    tform = tform1.__matmul__(tform2).__matmul__(tform3)
+    # tform = tform1 @ tform2 @ tform3
 
     output_shape = None
     if resize:
@@ -376,7 +378,8 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         # fit output image in new shape
         translation = (minc, minr)
         tform4 = SimilarityTransform(translation=translation)
-        tform = tform @ tform4
+        # tform = tform @ tform4
+        tform = tform.__matmul__(tform4)
 
     # Make sure the transform is exactly affine, to ensure fast warping.
     tform.params[2] = (0, 0, 1)

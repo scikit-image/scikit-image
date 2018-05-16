@@ -680,7 +680,8 @@ class ProjectiveTransform(GeometricTransform):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(matrix=self.params @ other.params)
+            # 2.7 compatibility
+            return tform(matrix=self.params.dot(other.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -741,7 +742,7 @@ class AffineTransform(ProjectiveTransform):
 
     _coeffs = range(6)
 
-    def __init__(self, matrix=None, *, scale=(1, 1), rotation=0, shear=0,
+    def __init__(self, matrix=None, scale=(1, 1), rotation=0, shear=0,
                  translation=(0, 0)):
         if matrix is not None:
             if matrix.shape != (3, 3):
@@ -952,7 +953,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     """
 
-    def __init__(self, matrix=None, *, rotation=0, translation=(0, 0)):
+    def __init__(self, matrix=None, rotation=0, translation=(0, 0)):
         if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
@@ -1045,7 +1046,7 @@ class SimilarityTransform(EuclideanTransform):
 
     """
 
-    def __init__(self, matrix=None, *, scale=1, rotation=0,
+    def __init__(self, matrix=None, scale=1, rotation=0,
                  translation=(0, 0)):
         if matrix is not None:
             if matrix.shape != (3, 3):

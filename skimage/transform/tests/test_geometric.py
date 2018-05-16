@@ -353,7 +353,8 @@ def test_union():
     assert tform.__class__ == SimilarityTransform
 
     # Multiply version swaps the order of operands to match linear algebra
-    tform = tform2 @ tform1
+    # tform = tform2 @ tform1
+    tform = tform2.__matmul__(tform1)
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == SimilarityTransform
 
@@ -366,15 +367,18 @@ def test_union():
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
-    tform = tform2 @ tform1
+    # tform = tform2 @ tform1
+    tform = tform2.__matmul__(tform1)
     assert_almost_equal(tform.params, tform3.params)
     assert tform.__class__ == ProjectiveTransform
 
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     with expected_warnings(['deprecated']):
         assert_almost_equal((tform + tform.inverse).params, np.eye(3))
-    assert_almost_equal((tform @ tform.inverse).params, np.eye(3))
-    assert_almost_equal((tform.inverse @ tform).params, np.eye(3))
+    # assert_almost_equal((tform @ tform.inverse).params, np.eye(3))
+    # assert_almost_equal((tform.inverse @ tform).params, np.eye(3))
+    assert_almost_equal((tform.__matmul__(tform.inverse)).params, np.eye(3))
+    assert_almost_equal((tform.inverse.__matmul__(tform)).params, np.eye(3))
 
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
@@ -382,13 +386,15 @@ def test_union():
     with expected_warnings(['deprecated']):
         tform = tform1 + tform2.inverse
     assert_almost_equal(tform.params, tform3.params)
-    tform = tform2.inverse @ tform1
+    # tform = tform2.inverse @ tform1
+    tform = tform2.inverse.__matmul__(tform1)
     assert_almost_equal(tform.params, tform3.params)
 
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(translation=(10, 20))
     tform3 = SimilarityTransform(scale=0.1, rotation=0.3, translation=(10, 20))
-    tform = tform2 @ tform1
+    # tform = tform2 @ tform1
+    tform = tform2.__matmul__(tform1)
     assert_almost_equal(tform.params, tform3.params)
 
 
@@ -400,7 +406,8 @@ def test_union_differing_types():
             tform1.__add__(tform2)
 
     with testing.raises(TypeError):
-            tform1 @ tform2
+            # tform1 @ tform2
+            tform1.__matmul__(tform2)
 
 
 def test_geometric_tform():
