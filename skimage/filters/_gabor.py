@@ -158,7 +158,7 @@ def _sigma_prefactor(bandwidth):
         (2.0 ** b + 1) / (2.0 ** b - 1)
 
 
-def _decompose_quasipolar_coords(r, thetas, axes=0):
+def _decompose_quasipolar_coords(r, thetas):
     """Decomposes quasipolar coordinates into their cartesian components.
 
     Parameters
@@ -167,12 +167,6 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
         Radial coordinate.
     thetas : (N, ) array
         Quasipolar angles.
-    axes : int or sequence of int, optional
-        Ordering of axes that defines the plane with regards to
-        orientation. Ordering not specified will be padded with
-        remaining axes in ascending order. Non-iterable values
-        will be treated as the single element of a tuple.
-        For classical cartesian ordering `(x, y, ...)`, set to `1`.
 
     Returns
     -------
@@ -229,19 +223,11 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
     --------
     >>> _decompose_quasipolar_coords(1, (0))
     [ 0., 1.]
-    >>> _decompose_quasipolar_coords(1, (0), leading_axis=1)
-    [ 1., 0.]
     >>> _decompose_quasipolar_coords(10, (np.pi / 2, 0))
     [ 10., 0., 0.]
-    >>> _decompose_quasipolar_coords(5, (np.pi / 2, 0), leading_axis=2)
-    [ 0., 5., 0.]
     """
     num_axes = len(thetas) + 1
     coords = r * np.ones(num_axes)
-
-    if not isinstance(axes, coll.Iterable):
-        axes = (axes,)
-    axes = np.append(axes, np.setdiff1d(range(num_axes), axes))
 
     for which_theta, theta in enumerate(thetas[::-1]):
         sine = np.sin(theta)
@@ -252,7 +238,7 @@ def _decompose_quasipolar_coords(r, thetas, axes=0):
 
         coords[theta_index] *= np.cos(theta)
 
-    return coords[axes]
+    return coords
 
 
 def _gaussian_kernel(image, center=0, sigma=1, ndim=None):
@@ -385,7 +371,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     # handle deprecation
     message = ('Using deprecated, 2D-only interface to gabor_kernel. '
                'This interface will be removed in scikit-image 0.16. Use '
-               'gabor_kernel(frequency, sigma=(sigma_x, sigma_y)).')
+               'gabor_kernel(frequency, sigma=(sigma_y, sigma_x)).')
 
     if sigma_y is not None:
         warn(message)
@@ -406,9 +392,13 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     sigma[sigma == None] = default_sigma  # noqa
     sigma = sigma.astype(None)
 
-    coords = _decompose_quasipolar_coords(1, theta, axes=axes)
+    if not isinstance(axes, coll.Iterable):
+        axes = (axes,)
+    axes = np.append(axes, np.setdiff1d(range(ndim), axes))
+
+    coords = _decompose_quasipolar_coords(1, theta)
     base_axis = (1,) + (0,) * (ndim - 1)
-    rot = _compute_rotation_matrix(base_axis, coords)
+    rot = _compute_rotation_matrix(base_axis, coords[axes])
 
     # calculate & rotate kernel size
     spatial_size = np.max(np.abs(n_stds * sigma * rot), axis=-1)
@@ -419,7 +409,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     m = np.asarray(np.meshgrid(*[range(-c, c + 1) for c in spatial_size],
                                indexing='ij'))
 
-    rotm = np.matmul(m.T, rot).T
+    rotm = np.matmul(m.T, rot.T).T
 
     gauss = _gaussian_kernel(rotm, sigma=sigma, center=0, ndim=ndim)
 
