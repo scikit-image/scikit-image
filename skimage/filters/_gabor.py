@@ -355,8 +355,14 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [1] Tie Yun and Ling Guan. Human Emotion Recognition Using Real 3D
+           Visual Features from Gabor Library. 2010 IEEE International
+           Workshop on Multimedia Signal Processing: Saint Malo, France, 2010.
+           https://doi.org/10.1109/MMSP.2010.5662073
+    .. [2] Yingjie Wang and Chin-Seng Chua. Face recognition from 2D and 3D
+           images using 3D Gabor filters. School of Electrical and Electronic
+           Engineering, Nanyang Technological University: Singapore,
+           Singapore, 2005. https://doi.org/10.1016/j.imavis.2005.07.005
 
     Examples
     --------
@@ -494,8 +500,14 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [1] Tie Yun and Ling Guan. Human Emotion Recognition Using Real 3D
+           Visual Features from Gabor Library. 2010 IEEE International
+           Workshop on Multimedia Signal Processing: Saint Malo, France, 2010.
+           https://doi.org/10.1109/MMSP.2010.5662073
+    .. [2] Yingjie Wang and Chin-Seng Chua. Face recognition from 2D and 3D
+           images using 3D Gabor filters. School of Electrical and Electronic
+           Engineering, Nanyang Technological University: Singapore,
+           Singapore, 2005. https://doi.org/10.1016/j.imavis.2005.07.005
 
     Examples
     --------
