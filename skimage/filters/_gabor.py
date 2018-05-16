@@ -161,12 +161,12 @@ def _decompose_quasipolar_coords(r, thetas):
 
          \left\{
          \begin{array}{llllll}
-	         x_0     & \quad = r \sin \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
-	         x_1     & \quad = r \cos \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
-	         x_2     & \quad = r \cos \theta_1 \sin \theta_2 ... \sin \theta_{n-1} \\
-	         ...                                                                   \\
-	         x_{n-1} & \quad = r \cos \theta_{n-2} \sin \theta_{n-1}               \\
-	         x_n     & \quad = r \cos \theta_{n-1}
+                 x_0     & \quad = r \sin \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+                 x_1     & \quad = r \cos \theta_0 \sin \theta_1 ... \sin \theta_{n-1} \\
+                 x_2     & \quad = r \cos \theta_1 \sin \theta_2 ... \sin \theta_{n-1} \\
+                 ...                                                                   \\
+                 x_{n-1} & \quad = r \cos \theta_{n-2} \sin \theta_{n-1}               \\
+                 x_n     & \quad = r \cos \theta_{n-1}
          \end{array}
          \right.
 
@@ -196,8 +196,8 @@ def _decompose_quasipolar_coords(r, thetas):
 
          \left\{
          \begin{array}{ll}
-	         y = x_0 = r \sin \theta_0 \\
-	         x = x_1 = r \cos \theta_0
+                 y = x_0 = r \sin \theta_0 \\
+                 x = x_1 = r \cos \theta_0
          \end{array}
          \right.
 
@@ -207,9 +207,9 @@ def _decompose_quasipolar_coords(r, thetas):
 
          \left\{
          \begin{array}{lll}
-	         y = x_0 = r \sin \theta_0 \sin \theta_1 \\
-	         x = x_1 = r \cos \theta_0 \sin \theta_1 \\
-	         z = x_2 = r \cos \theta_1
+                 y = x_0 = r \sin \theta_0 \sin \theta_1 \\
+                 x = x_1 = r \cos \theta_0 \sin \theta_1 \\
+                 z = x_2 = r \cos \theta_1
          \end{array}
          \right.
 
@@ -295,12 +295,12 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
                  n_stds=3, offset=0, axes=1, ndim=2, **kwargs):
     """Multi-dimensional complex Gabor kernel.
 
-    A Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
-    Harmonic function consists of an imaginary sine function and a real
-    cosine function. Spatial frequency is inversely proportional to the
-    wavelength of the harmonic and to the standard deviation of a Gaussian
-    kernel. The bandwidth is also inversely proportional to the standard
-    deviation.
+    A Gabor kernel is a Gaussian kernel modulated by a complex harmonic
+    function. Harmonic function consists of an imaginary sine function
+    and a real cosine function. Spatial frequency is inversely proportional
+    to the wavelength of the harmonic and to the standard deviation of a
+    Gaussian kernel. The bandwidth is also inversely proportional to the
+    standard deviation.
 
     Parameters
     ----------
@@ -424,9 +424,9 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     return g
 
 
-def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None, sigma_y=None,
-          n_stds=3, offset=0, mode='reflect', cval=0, axes=1, ndim=None,
-          kernel=None, **kwargs):
+def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None,
+          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0,
+          axes=1, ndim=None, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
