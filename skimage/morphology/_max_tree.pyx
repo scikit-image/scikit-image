@@ -98,7 +98,8 @@ cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
     cdef DTYPE_INT64_t res_coord = 0
     cdef int i = 0
 
-    p_coord = np.array(np.unravel_index(index, shape))
+    cdef np.ndarray[DTYPE_INT32_t, ndim = 1] p_coord = np.array(np.unravel_index(index, shape),
+                                                                dtype = np.int32)
 
     # get the coordinates of the point from a 1D index
     for i in range(number_of_dimensions):
@@ -110,6 +111,7 @@ cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
             return 0
 
     return 1
+
 
 # computes the area of all max-tree components
 # attribute to be used in area opening and closing
@@ -127,10 +129,12 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
             continue
         q = parent[p]
         area[q] = area[q] + area[p]
+
     return area
 
+
 # computes the bounding box extension of all max-tree components
-# attribute to be used in area opening and closing
+# attribute to be used in diameter opening and closing
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] image,
                                                                DTYPE_INT32_t[::1] shape,
                                                                DTYPE_INT64_t[::1] parent,
@@ -140,26 +144,20 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] imag
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
     cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] extension = np.ones(number_of_pixels,
                                                                    dtype=np.float64)
-    cdef DTYPE_UINT64_t number_of_dimensions = len(shape)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] max_coord = np.zeros([number_of_pixels, number_of_dimensions],
-                                                                    dtype=np.float64)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] min_coord = np.zeros([number_of_pixels, number_of_dimensions],
-                                                                    dtype=np.float64)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] max_coord = np.array(np.unravel_index(np.arange(number_of_pixels),
+                                                                                   shape), dtype=np.float64).T
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] min_coord = np.array(np.unravel_index(np.arange(number_of_pixels),
+                                                                                   shape), dtype=np.float64).T
 
-    #cdef np.ndarray[DTYPE_INT64_t, ndim=1] coord = np.zeros(number_of_dimensions, dtype=np.int64)
-    
-    #p_coord = np.array(np.unravel_index(index, shape))
-    
     for p in sorted_indices[::-1]:
         if p == p_root:
             continue
         q = parent[p]
-        coord = np.array(np.unravel_index(q, shape), dtype=np.float64)
         max_coord[q] = np.maximum(max_coord[q], max_coord[p])
         min_coord[q] = np.minimum(min_coord[q], min_coord[p])
-        extension[q] = max_coord[q] - min_coord[q]
-        area[q] = area[q] + area[p]
-    return area
+        extension[q] = np.max(max_coord[q] - min_coord[q]) + 1
+
+    return extension
 
 
 # direct filter (criteria based filter)

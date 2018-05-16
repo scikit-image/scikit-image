@@ -185,6 +185,7 @@ def area_opening(image, area_threshold, connectivity=2,
     skimage.morphology.max_tree.area_closing
     skimage.morphology.max_tree.diameter_opening
     skimage.morphology.max_tree.diameter_closing
+    skimage.morphology.max_tree.build_max_tree
 
 
     References
@@ -240,6 +241,97 @@ def area_opening(image, area_threshold, connectivity=2,
     return output
 
 
+def diameter_opening(image, diameter_threshold, connectivity=2,
+                     parent=None, tree_traverser=None):
+    """Performs a diameter opening of the image.
+
+    Diameter opening removes all bright structures of an image with
+    maximal extension smaller than diameter_threshold. The maximal
+    extension is defined as the maximal extension of the bounding box.
+    The operator is also called Bounding Box Opening. In practice,
+    the result is similar to a morphological opening, but long and thin
+    structures are not removed.
+
+    Technically, this operator is based on the max-tree representation of
+    the image.
+
+    Parameters
+    ----------
+    img: ndarray
+        The input image for which the area_opening is to be calculated.
+        This image can be of any type.
+    diameter_threshold: unsigned int
+        The maximal extension parameter.
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
+    parent: ndarray, int64, optional
+        The value of each pixel is the index of its parent in the ravelled
+        array.
+    tree_traverser: 1D array, int64, optional
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
+
+    Returns
+    -------
+    output: ndarray
+        Output image of the same shape and type as img.
+
+    See also
+    --------
+    skimage.morphology.max_tree.area_opening
+    skimage.morphology.max_tree.area_closing
+    skimage.morphology.max_tree.diameter_closing
+    skimage.morphology.max_tree.build_max_tree
+
+    References
+    ----------
+    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+           Microaneurysms in Color Fundus Images of the Human Retina by Means
+           of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
+           A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
+           Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+    .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885-3895.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
+
+    We create an image (quadratic function with a maximum in the center and
+    4 additional local maxima.
+
+    >>> w = 12
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:3,1:5] = 40; f[2:4,9:11] = 60; f[9:11,2:4] = 80
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate the diameter opening:
+
+    >>> open = diameter_opening(f, 3, connectivity=1)
+
+    The peaks with a maximal extension of 2 or less are removed.
+    The remaining peaks have all a maximal extension of at least 3.
+    """
+    output = image.copy()
+
+    if parent is None or tree_traverser is None:
+        parent, tree_traverser = build_max_tree(image, connectivity)
+
+    diam = _max_tree._compute_extension(image.ravel(), np.array(image.shape, dtype=np.int32),
+                                        parent.ravel(), tree_traverser)
+
+    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+                             tree_traverser, diam, diameter_threshold)
+    return output
+
+
 def area_closing(image, area_threshold, connectivity=2,
                  parent=None, tree_traverser=None):
     """Performs an area closing of the image.
@@ -286,6 +378,7 @@ def area_closing(image, area_threshold, connectivity=2,
     skimage.morphology.max_tree.area_opening
     skimage.morphology.max_tree.diameter_opening
     skimage.morphology.max_tree.diameter_closing
+    skimage.morphology.max_tree.build_max_tree
 
 
     References
@@ -314,7 +407,7 @@ def area_closing(image, area_threshold, connectivity=2,
     >>> from skimage.morphology import max_tree
 
     >>> import numpy as np
-    >>> from skimage.morphology import attribute
+    >>> from skimage.morphology import max_tree
 
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
@@ -328,7 +421,7 @@ def area_closing(image, area_threshold, connectivity=2,
 
     We can calculate the area closing:
 
-    >>> closed = attribute.area_closing(f, 8, connectivity=1)
+    >>> closed = max_tree.area_closing(f, 8, connectivity=1)
 
     All small minima are removed, and the remaining minima have at least
     a size of 8.
@@ -349,6 +442,101 @@ def area_closing(image, area_threshold, connectivity=2,
     # inversion of the output image
     output = invert(output)
 
+    return output
+
+
+def diameter_closing(image, diameter_threshold, connectivity=2,
+                     parent=None, tree_traverser=None):
+    """Performs a diameter closing of the image.
+
+    Diameter closing removes all dark structures of an image with
+    maximal extension smaller than diameter_threshold. The maximal
+    extension is defined as the maximal extension of the bounding box.
+    The operator is also called Bounding Box Closing. In practice,
+    the result is similar to a morphological closing, but long and thin
+    structures are not removed.
+
+    Technically, this operator is based on the max-tree representation of
+    the image.
+
+    Parameters
+    ----------
+    img: ndarray
+        The input image for which the diameter_closing is to be calculated.
+        This image can be of any type.
+    diameter_threshold: unsigned int
+        The maximal extension.
+    connectivity: unsigned int, optional
+        The neighborhood connectivity. The integer represents the maximum
+        number of orthogonal steps to reach a neighbor. It is 1 for
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
+    parent: ndarray, int64, optional
+        The value of each pixel is the index of its parent in the ravelled
+        array.
+    tree_traverser: 1D array, int64, optional
+        The ordered pixel indices (referring to the ravelled array). The pixels
+        are ordered such that every pixel is preceded by its parent (except for
+        the root which has no parent).
+
+    Returns
+    -------
+    output: ndarray
+        Output image of the same shape and type as img.
+
+    See also
+    --------
+    skimage.morphology.max_tree.area_opening
+    skimage.morphology.max_tree.area_closing
+    skimage.morphology.max_tree.diameter_opening
+    skimage.morphology.max_tree.build_max_tree
+
+    References
+    ----------
+    .. [1] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+           Microaneurysms in Color Fundus Images of the Human Retina by Means
+           of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
+           A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
+           Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+    .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+           Component Tree Computation Algorithms. IEEE Transactions on Image
+           Processing, 23(9), 3885-3895.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
+
+    We create an image (quadratic function with a minimum in the center and
+    4 additional local minima.
+
+    >>> w = 12
+    >>> x, y = np.mgrid[0:w,0:w]
+    >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
+    >>> f[2:3,1:5] = 160; f[2:4,9:11] = 140; f[9:11,2:4] = 120
+    >>> f[9:10,9:11] = 100; f[10,10] = 100
+    >>> f = f.astype(np.int)
+
+    We can calculate the diameter closing:
+
+    >>> closed = max_tree.diameter_closing(f, 3, connectivity=1)
+
+    All small minima with a maximal extension of 2 or less are removed.
+    The remaining minima have all a maximal extension of at least 3.
+    """
+    # inversion of the input image
+    image_inv = invert(image)
+    output = image_inv.copy()
+
+    if parent is None or tree_traverser is None:
+        parent, tree_traverser = build_max_tree(image, connectivity)
+
+    diam = _max_tree._compute_extension(image.ravel(), 
+                                        np.array(image.shape, dtype=np.int32),
+                                        parent.ravel(), tree_traverser)
+
+    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+                             tree_traverser, diam, diameter_threshold)
+    output = invert(output)
     return output
 
 
@@ -391,9 +579,7 @@ def local_maxima(image, label=False, connectivity=2,
 
     See also
     --------
-    skimage.morphology.extrema.h_minima
-    skimage.morphology.extrema.h_maxima
-    skimage.morphology.extrema.local_minima
+    skimage.morphology.extrema.local_maxima
     skimage.morphology.max_tree.build_max_tree
 
     References
@@ -446,3 +632,5 @@ def local_maxima(image, label=False, connectivity=2,
                             parent.ravel(), tree_traverser)
 
     return output
+
+
