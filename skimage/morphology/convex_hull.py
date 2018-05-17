@@ -6,6 +6,7 @@ from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
+from .._shared.utils import warn
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
@@ -47,7 +48,10 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     """
     ndim = image.ndim
-
+    if np.count_nonzero(image) == 0:
+        warn("Input image is entirely zero, no valid convex hull. "
+             "Returning empty image", UserWarning)
+        return np.zeros(image.shape, dtype=np.bool_)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.

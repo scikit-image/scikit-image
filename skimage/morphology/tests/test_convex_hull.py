@@ -26,6 +26,12 @@ def test_basic():
     assert_array_equal(convex_hull_image(image), expected)
 
 
+def test_empty_image():
+    image = np.zeros((6, 6), dtype=bool)
+    
+    assert_array_equal(convex_hull_image(image), image)
+
+
 def test_qhull_offset_example():
     nonzeros = (([1367, 1368, 1368, 1368, 1369, 1369, 1369, 1369, 1369, 1370,
                   1370, 1370, 1370, 1370, 1370, 1370, 1371, 1371, 1371, 1371,
