@@ -12,7 +12,6 @@ The API consists of functions to convert to and from RGB as defined above, as
 well as a generic function to convert to and from any supported color space
 (which is done through RGB in most cases).
 
-
 Supported color spaces
 ----------------------
 * RGB : Red Green Blue.
@@ -98,11 +97,9 @@ def convert_colorspace(arr, fromspace, tospace):
     ----------
     arr : array_like
         The image to convert.
-    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-                 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
         The color space to convert from. Can be specified in lower case.
-    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-               'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
         The color space to convert to. Can be specified in lower case.
 
     Returns

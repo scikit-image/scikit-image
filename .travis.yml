@@ -73,7 +73,7 @@ before_install:
 
 install:
     - section build
-    - python setup.py develop
+    - pip install -e .
     - section_end build
 
 script: tools/travis/script.sh

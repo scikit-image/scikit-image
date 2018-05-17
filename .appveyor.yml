@@ -42,7 +42,7 @@ install:
   # pre-release at the time of writing (03-10-2017)
   - pip install --pre -r requirements.txt
   - pip install -r requirements/build.txt
-  - python setup.py bdist_wheel bdist_wininst
+  - pip wheel -w dist .
   - ps: "ls dist"
 
   # Install the generated wheel package to test it
