@@ -119,6 +119,7 @@ def test_bool():
         converted8 = func(img8)
         assert np.sum(converted8) == dtype_range[dt][1]
 
+
 def test_clobber():
     # The image functions should not clobber the input arrays
     # This is necessary in case somebody tries to optimize

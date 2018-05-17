@@ -266,7 +266,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
             image_out = np.multiply(image, imax_out + 1,
-                        dtype=computation_type)
+                                    dtype=computation_type)
             np.clip(image_out, 0, imax_out, out=image_out)
         else:
             image_out = np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
