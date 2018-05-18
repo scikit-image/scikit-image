@@ -44,9 +44,6 @@ matrix:
     - os: linux
       python: 2.7
       env: WITH_PYAMG=1 QT=PyQt4
-      # Examples need strange versions of Matplotlib and Qt
-      # I don't think we should be increasing the minimum version requirement
-      # Because somebody is using fancy plotting in an example
     - os: linux
       python: 2.7
       env: MINIMUM_REQUIREMENTS=1
@@ -61,7 +58,7 @@ matrix:
       osx_image: xcode9
       language: objective-c
       # OS X has a hard time installing the docs dependencies
-      env: TRAVIS_PYTHON_VERSION=3.5 TEST_EXAMPLES=1
+      env: TRAVIS_PYTHON_VERSION=3.5 TEST_EXAMPLES=0
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
