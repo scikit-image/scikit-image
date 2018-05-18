@@ -141,7 +141,7 @@ def test_labeled_image_holes():
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1]], dtype=np.bool_)
-    with expected_warnings(['Any labeled images will be returned as a boolean array.']):  # noqa
+    with expected_warnings(['returned as a boolean array']):
         observed = remove_small_holes(labeled_holes_image, area_threshold=3)
     assert_array_equal(observed, expected)
 

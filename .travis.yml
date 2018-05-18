@@ -43,6 +43,9 @@ matrix:
       env: WITH_PYAMG=1 QT=PyQt4
     - os: linux
       python: 2.7
+      env: WITH_PYAMG=1 QT=PyQt4 PIP_FLAGS="--pre"
+    - os: linux
+      python: 2.7
       env: MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.4
@@ -51,11 +54,14 @@ matrix:
     - os: linux
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+    - os: linux
+      python: 3.6
+      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
       # OS X has a hard time installing the docs dependencies
-      env: TRAVIS_PYTHON_VERSION=3.5 TEST_EXAMPLES=1
+      env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -93,43 +99,7 @@ install:
       fi
     - source tools/travis/install_qt.sh
 
-script:
-    - export PY=${TRAVIS_PYTHON_VERSION}
-    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
-    # run tests again with optional dependencies to get more coverage
-    - |
-      if [[ "$OPTIONAL_DEPS" == "1" ]]; then
-        export TEST_ARGS="${TEST_ARGS} --cov=skimage"
-      fi
-    # Show what's installed
-    - pip list
-    - pytest ${TEST_ARGS} skimage
-    # Run example applications
-    # OSX Can't install sphinx-gallery.
-    # I think all it needs is scikit-learn from that requirements doc
-    # to run the tests.
-    - echo Build or run examples
-    - |
-      if [[ "${BUILD_DOCS}" == "1" ]]; then
-        # requirements/docs.txt fails on Travis OSX
-        pip install --retries 3 -q -r ./requirements/docs.txt
-        export SPHINXCACHE=${HOME}/.cache/sphinx; make html
-      elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
-        if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-          pip install --retries 3 -q scikit-learn
-        else
-          pip install --retries 3 -q -r ./requirements/docs.txt
-        fi
-        cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
-        echo 'backend : Template' > $MPL_DIR/matplotlibrc
-        for f in doc/examples/*/*.py; do
-            python "${f}"
-            if [ $? -ne 0 ]; then
-                exit 1
-            fi
-        done
-        mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
-      fi
+script: tools/travis/script.sh
 
 after_success:
     - codecov
