@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
 from skimage import feature
-from skimage.filters import threshold_li, threshold_otsu
+from skimage.filters import threshold_otsu
 
 
 # Generate noisy image of a square
@@ -74,7 +74,7 @@ axes[0][3].set_title('Canny filter, $\sigma=3$\nusing quantiles')
 
 axes[0][4].imshow(edges1_4,  cmap=plt.cm.gray)
 axes[0][4].axis('off')
-axes[0][4].set_title('Canny filter, $\sigma=3$\nLi thresholding')
+axes[0][4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
 
 axes[1][0].imshow(im2, cmap=plt.cm.gray)
 axes[1][0].axis('off')
@@ -94,7 +94,7 @@ axes[1][3].set_title('Canny filter, $\sigma=3$\nquantiles')
 
 axes[1][4].imshow(edges2_4,  cmap=plt.cm.gray)
 axes[1][4].axis('off')
-axes[1][4].set_title('Canny filter, $\sigma=3$\nLi thresholding')
+axes[1][4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
 
 fig.tight_layout()
 
