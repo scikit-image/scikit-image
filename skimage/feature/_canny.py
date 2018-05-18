@@ -277,7 +277,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         if callable(high_threshold):
             high_threshold = high_threshold(magnitude)
         if callable(low_threshold):
-            low_threshold = low_threshold(magnitude)
+            mask_threshold = magnitude < high_threshold
+            low_threshold = low_threshold(magnitude[mask_threshold])
 
 
     #
