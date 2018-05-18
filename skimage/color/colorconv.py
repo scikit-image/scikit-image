@@ -94,7 +94,7 @@ def guess_spatial_dimensions(image):
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
-    Valid color spaces include:
+    Valid color spaces are:
         'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'
 
     Parameters

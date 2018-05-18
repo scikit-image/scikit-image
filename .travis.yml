@@ -74,7 +74,6 @@ before_install:
 install:
     - python setup.py develop
     # Matplotlib settings - do not show figures during doc examples
-    # Where is the matplotlib home on a mac?
     - |
       if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
         export MPL_DIR=${HOME}/.matplotlib

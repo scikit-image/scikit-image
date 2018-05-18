@@ -52,7 +52,7 @@ def test_png_round_trip():
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
-def test_img_as_grey_flatten():
+def test_img_as_gray_flatten():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     with expected_warnings(['deprecated']):
         img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)

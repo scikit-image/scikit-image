@@ -26,6 +26,8 @@ Version 0.15
 * Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
 * In ``skimage.transform.resize`` change default argument from
   ``anti_aliasing=None`` to ``anti_aliasing=True``.
+* In ``skimage/restoration/tests/test_denoise.py``, there is an optional
+  warning that needs to be made manditory when we move on from python 2.7
 
 Version 0.16
 ------------

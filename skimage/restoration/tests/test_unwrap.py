@@ -118,7 +118,7 @@ dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
 @skipif(sys.version_info[:2] == (3, 4),
-        reason="Doesn't with python 3.4. See issue #3079")
+        reason="Doesn't work with python 3.4. See issue #3079")
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
