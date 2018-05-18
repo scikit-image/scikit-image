@@ -62,13 +62,15 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         Standard deviation of the Gaussian filter.
     low_threshold : float or callable
         Lower bound for hysteresis thresholding (linking edges).
-        If callable is given, it is applied to the gradient image
-        to generate the low_threshold.
+        If callable is given, it should take one input, `image`,
+        the gradient magnitude image, and return a float or an
+        array of the same shape as `image`.
         If None, low_threshold is set to 10% of dtype's max.
     high_threshold : float or callable
         Upper bound for hysteresis thresholding (linking edges).
-        If callable is given, it is applied to the gradient image
-        to generate the high_threshold.
+        If callable is given, it should take one input, `image`,
+        the gradient magnitude image, and return a float or an
+        array of the same shape as `image`.
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
@@ -270,10 +272,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
     else:
-        #
         # Else if high_threshold and/or low_threshold are callables
-        # call them to determine the threshold value / image
-        #
+        # apply them to determine the threshold value / image
         if callable(high_threshold):
             high_threshold = high_threshold(magnitude)
         if callable(low_threshold):
