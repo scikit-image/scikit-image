@@ -55,7 +55,7 @@ matrix:
       osx_image: xcode9
       language: objective-c
       # OS X has a hard time installing the docs dependencies
-      env: TRAVIS_PYTHON_VERSION=3.5 TEST_EXAMPLES=0
+      env: TRAVIS_PYTHON_VERSION=3.5 TEST_EXAMPLES=1
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -106,6 +106,9 @@ script:
     - pip list
     - pytest ${TEST_ARGS} skimage
     # Run example applications
+    # OSX Can't install sphinx-gallery.
+    # I think all it needs is scikit-learn from that requirements doc
+    # to run the tests.
     - echo Build or run examples
     - |
       if [[ "${BUILD_DOCS}" == "1" ]]; then
@@ -113,7 +116,11 @@ script:
         pip install --retries 3 -q -r ./requirements/docs.txt
         export SPHINXCACHE=${HOME}/.cache/sphinx; make html
       elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
-        pip install --retries 3 -q -r ./requirements/docs.txt
+        if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+          pip install --retries 3 -q scikit-learn
+        else
+          pip install --retries 3 -q -r ./requirements/docs.txt
+        fi
         cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
         echo 'backend : Template' > $MPL_DIR/matplotlibrc
         for f in doc/examples/*/*.py; do
