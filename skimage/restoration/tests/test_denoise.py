@@ -228,7 +228,7 @@ def test_denoise_bilateral_nan():
 
     # TODO: This warning is not optional in python3. This should be
     # made a strict warning when we get to 0.15
-    with expected_warnings(['invalid|\A\Z`']):
+    with expected_warnings(['invalid|\A\Z']):
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
