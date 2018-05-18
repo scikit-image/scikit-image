@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
 from skimage import feature
+from skimage.filters import threshold_li, threshold_otsu
 
 
 # Generate noisy image of a square
@@ -30,25 +31,70 @@ im = ndi.rotate(im, 15, mode='constant')
 im = ndi.gaussian_filter(im, 4)
 im += 0.2 * np.random.random(im.shape)
 
+# Generate lower SNR noisy image of a square
+im2 = np.zeros((128, 128))
+im2[32:-32, 32:-32] = 1
+
+im2 = ndi.rotate(im2, 15, mode='constant')
+im2 = ndi.gaussian_filter(im2, 4)
+im2 += 0.4 * np.random.randn(*(im2.shape))
+
 # Compute the Canny filter for two values of sigma
-edges1 = feature.canny(im)
-edges2 = feature.canny(im, sigma=3)
+edges1_1 = feature.canny(im)
+edges1_2 = feature.canny(im, sigma=3)
+edges1_3 = feature.canny(im, use_quantiles=True, sigma=3)
+edges1_4 = feature.canny(im, sigma=3, high_threshold=threshold_otsu,
+                         low_threshold=threshold_otsu)
+
+edges2_1 = feature.canny(im2)
+edges2_2 = feature.canny(im2, sigma=3)
+edges2_3 = feature.canny(im2, sigma=3, use_quantiles=True)
+edges2_4 = feature.canny(im2, sigma=3, low_threshold=threshold_otsu,
+                         high_threshold=threshold_otsu)
 
 # display results
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3),
+fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(12, 6),
                                     sharex=True, sharey=True)
 
-ax1.imshow(im, cmap=plt.cm.gray)
-ax1.axis('off')
-ax1.set_title('noisy image', fontsize=20)
+axes[0][0].imshow(im, cmap=plt.cm.gray)
+axes[0][0].axis('off')
+axes[0][0].set_title('Low noise image')
 
-ax2.imshow(edges1, cmap=plt.cm.gray)
-ax2.axis('off')
-ax2.set_title('Canny filter, $\sigma=1$', fontsize=20)
+axes[0][1].imshow(edges1_1, cmap=plt.cm.gray)
+axes[0][1].axis('off')
+axes[0][1].set_title('Canny filter, $\sigma=1$')
 
-ax3.imshow(edges2, cmap=plt.cm.gray)
-ax3.axis('off')
-ax3.set_title('Canny filter, $\sigma=3$', fontsize=20)
+axes[0][2].imshow(edges1_2, cmap=plt.cm.gray)
+axes[0][2].axis('off')
+axes[0][2].set_title('Canny filter, $\sigma=3$')
+
+axes[0][3].imshow(edges1_3, cmap=plt.cm.gray)
+axes[0][3].axis('off')
+axes[0][3].set_title('Canny filter, $\sigma=3$\nusing quantiles')
+
+axes[0][4].imshow(edges1_4,  cmap=plt.cm.gray)
+axes[0][4].axis('off')
+axes[0][4].set_title('Canny filter, $\sigma=3$\nLi thresholding')
+
+axes[1][0].imshow(im2, cmap=plt.cm.gray)
+axes[1][0].axis('off')
+axes[1][0].set_title('High noise image')
+
+axes[1][1].imshow(edges2_1, cmap=plt.cm.gray)
+axes[1][1].axis('off')
+axes[1][1].set_title('Canny filter, $\sigma=1$\ndefault threshold')
+
+axes[1][2].imshow(edges2_2, cmap=plt.cm.gray)
+axes[1][2].axis('off')
+axes[1][2].set_title('Canny filter, $\sigma=3$\ndefault threshold')
+
+axes[1][3].imshow(edges2_3, cmap=plt.cm.gray)
+axes[1][3].axis('off')
+axes[1][3].set_title('Canny filter, $\sigma=3$\nquantiles')
+
+axes[1][4].imshow(edges2_4,  cmap=plt.cm.gray)
+axes[1][4].axis('off')
+axes[1][4].set_title('Canny filter, $\sigma=3$\nLi thresholding')
 
 fig.tight_layout()
 
