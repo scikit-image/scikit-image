@@ -223,10 +223,17 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
+    import sys
     img = np.full((50, 50), np.NaN)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+
+    # TODO: Remove this in 0.15
+    # No warning on python 2
+    if sys.version_info[0] == 2:
         out = restoration.denoise_bilateral(img, multichannel=False)
+    else:
+        # warning on python 3
+        with expected_warnings(['invalid']):
+            out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 

@@ -249,8 +249,8 @@ def test_rescale_multichannel_defaults():
 def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10), order=0, anti_aliasing=False)
+    resized = resize(x, (10, 10), order=0, anti_aliasing=False,
+                     mode='constant')
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -260,16 +260,16 @@ def test_resize3d_keep():
     # keep 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
-    with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10), order=0, anti_aliasing=False)
-        with testing.raises(ValueError):
-            # output_shape too short
-            resize(x, (10, ), order=0, anti_aliasing=False)
+    resized = resize(x, (10, 10), order=0, anti_aliasing=False,
+                     mode='constant')
+    with testing.raises(ValueError):
+        # output_shape too short
+        resize(x, (10, ), order=0, anti_aliasing=False, mode='constant')
     ref = np.zeros((10, 10, 3))
     ref[2:4, 2:4, :] = 1
     assert_almost_equal(resized, ref)
-    with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 3), order=0, anti_aliasing=False)
+    resized = resize(x, (10, 10, 3), order=0, anti_aliasing=False,
+                     mode='constant')
     assert_almost_equal(resized, ref)
 
 
@@ -277,8 +277,8 @@ def test_resize3d_resize():
     # resize 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
-    with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False)
+    resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
+                     mode='constant')
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -288,8 +288,8 @@ def test_resize3d_2din_3dout():
     # 3D output with 2D input
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
-    with expected_warnings(['The default mode']):
-        resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False)
+    resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
+                     mode='constant')
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_almost_equal(resized, ref)
@@ -476,22 +476,18 @@ def test_slow_warp_nonint_oshape():
 
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
-
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        out = rescale(image, 2, preserve_range=False, clip=True, order=0,
-                      anti_aliasing=False)
+    out = rescale(image, 2, preserve_range=False, clip=True, order=0,
+                  mode='constant', multichannel='False', anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        out = rescale(image, 2, preserve_range=True, clip=True, order=0,
-                      anti_aliasing=False)
+    out = rescale(image, 2, preserve_range=True, clip=True, order=0,
+                  mode='constant', multichannel='False', anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
-    with expected_warnings(['The default mode', 'The default multichannel']):
-        out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                      anti_aliasing=False,
-                      clip=True, order=0)
+    out = rescale(image.astype(np.uint8), 2, preserve_range=False,
+                  mode='constant', multichannel='False', anti_aliasing=False,
+                  clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
