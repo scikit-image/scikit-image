@@ -226,14 +226,10 @@ def test_denoise_bilateral_nan():
     import sys
     img = np.full((50, 50), np.NaN)
 
-    # TODO: Remove this in 0.15
-    # No warning on python 2
-    if sys.version_info[0] == 2:
+    # TODO: This warning is not optional in python3. This should be
+    # made a strict warning when we get to 0.15
+    with expected_warnings(['invalid|\A\Z`']):
         out = restoration.denoise_bilateral(img, multichannel=False)
-    else:
-        # warning on python 3
-        with expected_warnings(['invalid']):
-            out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 
