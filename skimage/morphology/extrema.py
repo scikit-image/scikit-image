@@ -108,8 +108,8 @@ def h_maxima(img, h, selem=None):
 
     The resulting image will contain 4 local maxima.
     """
-    if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
+    if np.issubdtype(img.dtype, np.floating):
+        resolution = 2 * np.finfo(img.dtype).resolution
         if h < resolution:
             h = resolution
         h_corrected = h - resolution / 2.0
@@ -189,8 +189,8 @@ def h_minima(img, h, selem=None):
 
     The resulting image will contain 4 local minima.
     """
-    if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
+    if np.issubdtype(img.dtype, np.floating):
+        resolution = 2 * np.finfo(img.dtype).resolution
         if h < resolution:
             h = resolution
         h_corrected = h - resolution / 2.0
@@ -279,7 +279,7 @@ def local_maxima(img, selem=None):
     h = _find_min_diff(image)
     if h == 0:
         return np.zeros(image.shape, np.uint8)
-    if not np.issubdtype(image.dtype, np.floating):
+    if not np.issubdtype(img.dtype, np.floating):
         h = 1
     local_max = h_maxima(img, h, selem=selem)
     return local_max
@@ -348,7 +348,7 @@ def local_minima(img, selem=None):
     h = _find_min_diff(image)
     if h == 0:
         return np.zeros(image.shape, np.uint8)
-    if not np.issubdtype(image.dtype, np.floating):
+    if not np.issubdtype(img.dtype, np.floating):
         h = 1
     local_min = h_minima(img, h, selem=selem)
     return local_min
