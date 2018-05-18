@@ -21,9 +21,6 @@ addons:
     - texlive-latex-extra
     - dvipng
     - python-qt4
-    # - python3-qt4
-    # - python3-qt5
-    # - python3-pyside
 
 env:
   global:
