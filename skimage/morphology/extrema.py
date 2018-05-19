@@ -217,7 +217,7 @@ def _set_edge_values_inplace(image, value):
     ----------
     image : ndarray
         The array to modify inplace.
-    value : number
+    value : scalar
         The value to use. Should be compatible with `image`'s dtype.
 
     Examples
@@ -247,7 +247,7 @@ def _fast_pad(image, value):
     ----------
     image : ndarray
         Image to pad.
-    value : number
+    value : scalar
          The value to use. Should be compatible with `image`'s dtype.
 
     Returns
@@ -292,10 +292,8 @@ def _offset_to_raveled_neighbours(image_shape, selem):
     ----------
     image_shape : tuple
         The image for which the offsets are computed.
-    selem : ndarray, optional
+    selem : ndarray
         The neighborhood expressed as an n-D array of 1's and 0's.
-        Default is the ball of radius 1 according to the maximum norm
-        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
 
     Returns
     -------
