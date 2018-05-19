@@ -276,7 +276,7 @@ def local_maxima(img, selem=None):
     The resulting image will contain all 6 local maxima.
     """
     # find the minimal grey level difference
-    h = _find_min_diff(image)
+    h = _find_min_diff(img)
     if h == 0:
         return np.zeros(image.shape, np.uint8)
     if not np.issubdtype(img.dtype, np.floating):
@@ -345,7 +345,7 @@ def local_minima(img, selem=None):
     The resulting image will contain all 6 local minima.
     """
     # find the minimal grey level difference
-    h = _find_min_diff(image)
+    h = _find_min_diff(img)
     if h == 0:
         return np.zeros(image.shape, np.uint8)
     if not np.issubdtype(img.dtype, np.floating):
