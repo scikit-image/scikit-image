@@ -26,24 +26,8 @@ noisy = np.clip(noisy, 0, 1)
 
 denoise = denoise_nl_means(noisy, 7, 9, 0.08, multichannel=True)
 
-# slow algorithm
-denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False,
-                           **patch_kw)
-
-# slow algorithm, sigma provided
-denoise2 = denoise_nl_means(noisy, h=0.8 * sigma_est, sigma=sigma_est,
-                            fast_mode=False, **patch_kw)
-
-# fast algorithm
-denoise_fast = denoise_nl_means(noisy, h=0.8 * sigma_est, fast_mode=True,
-                                **patch_kw)
-
-# fast algorithm, sigma provided
-denoise2_fast = denoise_nl_means(noisy, h=0.6 * sigma_est, sigma=sigma_est,
-                                 fast_mode=True, **patch_kw)
-
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6),
-                       sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True,
+                       subplot_kw={'adjustable': 'box-forced'})
 
 ax[0].imshow(noisy)
 ax[0].axis('off')
