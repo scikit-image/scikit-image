@@ -9,9 +9,13 @@ __pycache__
 *.pyd
 *.bak
 *.c
+skimage/feature/_haar.cpp
 *.new
 *.md5
 *.old
+.pytest_cache
+temp.tif
+.ropeproject
 doc/source/api
 doc/build
 source/api

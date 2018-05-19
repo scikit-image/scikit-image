@@ -371,7 +371,8 @@ class Picture(object):
             # skimage dimensions are flipped: y, x
             new_size = (int(value[1]), int(value[0]))
             new_array = resize(self.array, new_size, order=0,
-                               preserve_range=True)
+                               preserve_range=True, mode='constant',
+                               anti_aliasing=False)
             self.array = new_array.astype(np.uint8)
 
             self._array_modified()
