@@ -413,6 +413,9 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     image = np.asarray(image)
+    if image.size == 0:
+        # Return early for empty input
+        return np.array([], dtype=(np.intp if indices else np.uint8))
 
     if include_border:
         # Ensure that local maxima are always at least one smaller sample away
@@ -420,6 +423,7 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
         image = _fast_pad(image, image.min())
 
     if selem is None:
+        # Choose maximal connectivity if not provided
         selem = image.ndim
     if np.isscalar(selem):
         selem = ndi.generate_binary_structure(image.ndim, selem)

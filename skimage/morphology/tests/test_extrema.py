@@ -6,7 +6,6 @@ from numpy.testing import assert_equal
 from pytest import raises
 
 from skimage.morphology import extrema
-from scipy import ndimage as ndi
 
 eps = 1e-12
 
@@ -21,7 +20,7 @@ def diff(a, b):
 class TestExtrema(unittest.TestCase):
 
     def test_saturated_arithmetic(self):
-        "Adding/subtracting a constant and clipping"
+        """Adding/subtracting a constant and clipping"""
         # Test for unsigned integer
         data = np.array([[250, 251, 5, 5],
                          [100, 200, 253, 252],
@@ -61,7 +60,7 @@ class TestExtrema(unittest.TestCase):
         assert error < eps
 
     def test_h_maxima(self):
-        "h-maxima for various data types"
+        """h-maxima for various data types"""
 
         data = np.array([[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
                          [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
@@ -94,7 +93,7 @@ class TestExtrema(unittest.TestCase):
             assert error < eps
 
     def test_h_minima(self):
-        "h-minima for various data types"
+        """h-minima for various data types"""
 
         data = np.array([[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
                          [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
@@ -128,7 +127,7 @@ class TestExtrema(unittest.TestCase):
             assert out.dtype == expected_result.dtype
 
     def test_extrema_float(self):
-        "specific tests for float type"
+        """specific tests for float type"""
         data = np.array([[0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14,
                           0.14, 0.13, 0.11],
                          [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16,
@@ -176,7 +175,11 @@ class TestExtrema(unittest.TestCase):
 class TestLocalMaxima(unittest.TestCase):
     """Some tests for local_minima are included as well."""
 
-    # Shared data between unit tests
+    supported_dtypes = [
+        np.uint8, np.uint16, np.uint32, np.uint64,
+        np.int8, np.int16, np.int32, np.int64,
+        np.float16, np.float32, np.float64
+    ]
     image = np.array(
         [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
          [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
@@ -207,16 +210,27 @@ class TestLocalMaxima(unittest.TestCase):
         dtype=np.uint8
     )
 
+    def test_empty(self):
+        """Test result with empty image."""
+        result = extrema.local_maxima(np.array([]), indices=False)
+        assert result.size == 0
+        assert result.dtype == np.uint8
+
+        result = extrema.local_maxima(np.array([]), indices=True)
+        assert result.size == 0
+        assert result.dtype == np.intp
+
     def test_dtypes(self):
-        dtypes = [np.uint8, np.uint16, np.uint32, np.uint64,
-                  np.int8, np.int16, np.int32, np.int64,
-                  np.float16, np.float32, np.float64]
-        for dtype in dtypes:
+        """Test results with default configuration for all supported dtypes."""
+        for dtype in self.supported_dtypes:
             result = extrema.local_maxima(self.image.astype(dtype))
             assert_equal(result, self.expected_default)
 
     def test_dtypes_old(self):
-        # Copied from old unit test of local_maxima
+        """
+        Test results with default configuration and data copied from old unit
+        tests for all supported dtypes.
+        """
         data = np.array(
             [[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
              [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
@@ -243,12 +257,13 @@ class TestLocalMaxima(unittest.TestCase):
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
             dtype=np.uint8
         )
-        for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
+        for dtype in self.supported_dtypes:
             image = data.astype(dtype)
             result = extrema.local_maxima(image)
             assert_equal(result, expected)
 
     def test_selem_as_scalar(self):
+        """Test results if selem is a scalar."""
         # Connectivity 1: generates cross shaped structuring element
         result_conn1 = extrema.local_maxima(self.image, selem=1)
         assert_equal(result_conn1, self.expected_cross)
@@ -262,7 +277,8 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result_conn3, self.expected_default)
 
     def test_selem_as_array(self):
-        selem_cross = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
+        """Test results if selem is an array."""
+        selem_cross = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
         result_selem_cross = extrema.local_maxima(
             self.image, selem=selem_cross)
         assert_equal(result_selem_cross, self.expected_cross)
@@ -272,7 +288,7 @@ class TestLocalMaxima(unittest.TestCase):
             self.image, selem=selem_square)
         assert_equal(result_selem_square, self.expected_default)
 
-        selem_x = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+        selem_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
         expected_selem_x = np.array(
             [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
              [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -286,6 +302,7 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result_selem_x, expected_selem_x)
 
     def test_indices(self):
+        """Test output if indices of peaks are desired."""
         # Connectivity 1
         expected_conn1 = np.nonzero(self.expected_cross)
         result_conn1 = extrema.local_maxima(self.image, selem=1, indices=True)
@@ -297,6 +314,7 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result_conn2, expected_conn2)
 
     def test_include_border(self):
+        """Test maxima detection at the image border."""
         # Use connectivity 1 to allow many maxima, only filtering at border is
         # of interest
         result_with_boder = extrema.local_maxima(
@@ -317,6 +335,7 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result_without_border, expected_without_border)
 
     def test_nd(self):
+        """Test one- and three-dimensional case."""
         # One-dimension
         x_1d = np.array([1, 1, 0, 1, 2, 3, 0, 2, 1, 2, 0])
         expected_1d = np.array([1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
@@ -324,7 +343,7 @@ class TestLocalMaxima(unittest.TestCase):
         result_1d = extrema.local_maxima(x_1d)
         assert_equal(result_1d, expected_1d)
 
-        # 3-dimensions
+        # 3-dimensions (adapted from old unit test)
         x_3d = np.zeros((8, 8, 8), dtype=np.uint8)
         expected_3d = np.zeros((8, 8, 8), dtype=np.uint8)
         # first maximum: only one pixel
@@ -349,10 +368,11 @@ class TestLocalMaxima(unittest.TestCase):
         result_3d = extrema.local_maxima(x_3d)
         assert_equal(result_3d, expected_3d)
 
-    def test_uniform(self):
+    def test_constant(self):
+        """Test behaviour for 'flat' images."""
         const_image = np.full((7, 6), 42, dtype=np.uint8)
         expected = np.zeros((7, 6), dtype=np.uint8)
-        for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
+        for dtype in self.supported_dtypes:
             const_image = const_image.astype(dtype)
             # test for local maxima
             result = extrema.local_maxima(const_image)
@@ -362,7 +382,7 @@ class TestLocalMaxima(unittest.TestCase):
             assert_equal(result, expected)
 
     def test_extrema_float(self):
-        # Specific tests for float type
+        """Specific tests for float type."""
         # Copied from old unit test for local_maxma
         image = np.array(
             [[0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14, 0.14, 0.13, 0.11],
@@ -401,6 +421,7 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(out, expected_result)
 
     def test_exceptions(self):
+        """Test if input validation triggers correct exceptions."""
         # Mismatching number of dimensions
         with raises(ValueError, match="number of dimensions"):
             extrema.local_maxima(self.image, selem=np.ones((3, 3, 3)))
