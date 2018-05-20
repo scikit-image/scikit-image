@@ -3,6 +3,7 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_equal
+from pytest import raises
 
 from skimage.morphology import extrema
 from scipy import ndimage as ndi
@@ -398,6 +399,19 @@ class TestLocalMaxima(unittest.TestCase):
         # Test for local minima with automatic step calculation
         out = extrema.local_minima(inverted_image)
         assert_equal(out, expected_result)
+
+    def test_exceptions(self):
+        # Mismatching number of dimensions
+        with raises(ValueError, match="number of dimensions"):
+            extrema.local_maxima(self.image, selem=np.ones((3, 3, 3)))
+        with raises(ValueError, match="number of dimensions"):
+            extrema.local_maxima(self.image, selem=np.ones((3,)))
+
+        # All dimensions in selem must be of size 3
+        with raises(ValueError, match="dimension size"):
+            extrema.local_maxima(self.image, selem=np.ones((2, 3)))
+        with raises(ValueError, match="dimension size"):
+            extrema.local_maxima(self.image, selem=np.ones((5, 5)))
 
 
 if __name__ == "__main__":
