@@ -118,8 +118,7 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Returns
     -------
-    result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)],
-          or None
+    result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)]
           Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
           axes, respectively. The `orientation` value follows
           `skimage.draw.ellipse_perimeter` convention.
