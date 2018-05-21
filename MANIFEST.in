@@ -1,6 +1,9 @@
 include setup*.py
 include MANIFEST.in
 include *.txt
+include *.rst
+recursive-include requirements *.txt
+include requirements/README.md
 include Makefile
 include bento.info
 include skimage/scripts/skivi

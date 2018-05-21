@@ -28,8 +28,7 @@ export WHEELHOUSE
 
 export DISPLAY=:99.0
 export PYTHONWARNINGS="d,all:::skimage"
-# Skip doctests because I just can't deal with formatting " --doctest-modules"
-export TEST_ARGS="-v"
+export TEST_ARGS="-v --doctest-modules"
 WHEELBINARIES="matplotlib scipy pillow cython"
 
 retry () {
