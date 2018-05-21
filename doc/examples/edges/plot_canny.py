@@ -56,45 +56,38 @@ edges2_4 = feature.canny(im2, sigma=3, low_threshold=threshold_otsu,
 fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(12, 6),
                                     sharex=True, sharey=True)
 
-axes[0][0].imshow(im, cmap=plt.cm.gray)
-axes[0][0].axis('off')
-axes[0][0].set_title('Low noise image')
+axes[0, 0].imshow(im, cmap=plt.cm.gray)
+axes[0, 0].set_title('Low noise image')
 
-axes[0][1].imshow(edges1_1, cmap=plt.cm.gray)
-axes[0][1].axis('off')
-axes[0][1].set_title('Canny filter, $\sigma=1$')
+axes[0, 1].imshow(edges1_1, cmap=plt.cm.gray)
+axes[0, 1].set_title('Canny filter, $\sigma=1$')
 
-axes[0][2].imshow(edges1_2, cmap=plt.cm.gray)
-axes[0][2].axis('off')
-axes[0][2].set_title('Canny filter, $\sigma=3$')
+axes[0, 2].imshow(edges1_2, cmap=plt.cm.gray)
+axes[0, 2].set_title('Canny filter, $\sigma=3$')
 
-axes[0][3].imshow(edges1_3, cmap=plt.cm.gray)
-axes[0][3].axis('off')
-axes[0][3].set_title('Canny filter, $\sigma=3$\nusing quantiles')
+axes[0, 3].imshow(edges1_3, cmap=plt.cm.gray)
+axes[0, 3].set_title('Canny filter, $\sigma=3$\nusing quantiles')
 
-axes[0][4].imshow(edges1_4,  cmap=plt.cm.gray)
-axes[0][4].axis('off')
-axes[0][4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
+axes[0, 4].imshow(edges1_4,  cmap=plt.cm.gray)
+axes[0, 4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
 
-axes[1][0].imshow(im2, cmap=plt.cm.gray)
-axes[1][0].axis('off')
-axes[1][0].set_title('High noise image')
+axes[1, 0].imshow(im2, cmap=plt.cm.gray)
+axes[1, 0].set_title('High noise image')
 
-axes[1][1].imshow(edges2_1, cmap=plt.cm.gray)
-axes[1][1].axis('off')
-axes[1][1].set_title('Canny filter, $\sigma=1$\ndefault threshold')
+axes[1, 1].imshow(edges2_1, cmap=plt.cm.gray)
+axes[1, 1].set_title('Canny filter, $\sigma=1$\ndefault threshold')
 
-axes[1][2].imshow(edges2_2, cmap=plt.cm.gray)
-axes[1][2].axis('off')
-axes[1][2].set_title('Canny filter, $\sigma=3$\ndefault threshold')
+axes[1, 2].imshow(edges2_2, cmap=plt.cm.gray)
+axes[1, 2].set_title('Canny filter, $\sigma=3$\ndefault threshold')
 
-axes[1][3].imshow(edges2_3, cmap=plt.cm.gray)
-axes[1][3].axis('off')
-axes[1][3].set_title('Canny filter, $\sigma=3$\nquantiles')
+axes[1, 3].imshow(edges2_3, cmap=plt.cm.gray)
+axes[1, 3].set_title('Canny filter, $\sigma=3$\nquantiles')
 
-axes[1][4].imshow(edges2_4,  cmap=plt.cm.gray)
-axes[1][4].axis('off')
-axes[1][4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
+axes[1, 4].imshow(edges2_4,  cmap=plt.cm.gray)
+axes[1, 4].set_title('Canny filter, $\sigma=3$\nOtsu threshold (callable)')
+
+for ax in axes.ravel():
+    ax.axis('off')
 
 fig.tight_layout()
 

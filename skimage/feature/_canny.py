@@ -16,6 +16,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy.ndimage import (gaussian_filter,
                            generate_binary_structure, binary_erosion, label)
+import numbers
+import traceback
 from .. import dtype_limits
 from .._shared.utils import assert_nD
 
@@ -275,11 +277,27 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
         # Else if high_threshold and/or low_threshold are callables
         # apply them to determine the threshold value / image
         if callable(high_threshold):
-            high_threshold = high_threshold(magnitude)
+            try:
+                high_threshold = high_threshold(magnitude)
+            except:
+                traceback.print_exc()
+                raise ValueError("Callable `high_threshold` raised above exception.\nIt must take one input (image array) and return a scalar value or image array of the same shape as input image")
+
+            if not( isinstance(high_threshold, numbers.Number) or (
+                    isinstance(high_threshold, np.ndarray) and
+                    (high_threshold.shape == magnitude.shape))):
+                raise ValueError("Callable `high_threshold` must take one input (image array) and return a scalar value or image array of the same shape as input image")
         if callable(low_threshold):
             mask_threshold = magnitude < high_threshold
-            low_threshold = low_threshold(magnitude[mask_threshold])
-
+            try:
+                low_threshold = low_threshold(magnitude[mask_threshold])
+            except:
+                traceback.print_exc()
+                raise ValueError("Callable `low_threshold` raised above exception.\nIt must take one input (image array) and return a scalar value or image array of the same shape as input image")
+            if not( isinstance(low_threshold, numbers.Number) or (
+                    isinstance(low_threshold, np.ndarray) and
+                    (low_threshold.shape == magnitude.shape))):
+                raise ValueError("Callable `low_threshold` must take one input (image array) and return a scalar value or image array of the same shape as input image")
 
     #
     #---- Create two masks at the two thresholds.
