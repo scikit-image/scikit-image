@@ -8,7 +8,8 @@ from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
 from .pnpoly import points_in_poly, grid_points_in_poly
-from ._moments import (moments, moments_central, moments_normalized, centroid,
+from ._moments import (moments, moments_central, moments_coords,
+                       moments_coords_central, moments_normalized, centroid,
                        moments_hu, inertia_tensor, inertia_tensor_eigvals)
 from .profile import profile_line
 from .fit import LineModelND, CircleModel, EllipseModel, ransac
@@ -29,6 +30,8 @@ __all__ = ['find_contours',
            'block_reduce',
            'moments',
            'moments_central',
+           'moments_coords',
+           'moments_coords_central'
            'moments_normalized',
            'moments_hu',
            'marching_cubes_lewiner',

@@ -26,6 +26,8 @@ Version 0.15
 * Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
 * In ``skimage.transform.resize`` change default argument from
   ``anti_aliasing=None`` to ``anti_aliasing=True``.
+* In ``skimage/restoration/tests/test_denoise.py``, there is an optional
+  warning that needs to be made mandatory when we move on from python 2.7
 
 Version 0.16
 ------------
@@ -39,6 +41,8 @@ Version 0.16
 * Remove checks for the ``multichannel`` deprecation warnings in several tests
   in ``skimage.transform.tests.test_pyramids.py`` and
   ``skimage.transform.tests.test_warps.py``.
+* Remove `flatten` for `imread` in ``skimage.io._io.py``.
+* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
 * In ``skimage.measure._regionprops``, remove all references to

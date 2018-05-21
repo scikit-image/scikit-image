@@ -6,7 +6,7 @@ from skimage import img_as_float
 from skimage import draw
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import test_parallel, expected_warnings
 from skimage._shared import testing
 import pytest
 
@@ -170,7 +170,8 @@ def test_hessian_matrix_det_3d(im3d):
 def test_shape_index():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    s = shape_index(square, sigma=0.1)
+    with expected_warnings(['divide by zero', 'invalid value']):
+        s = shape_index(square, sigma=0.1)
     assert_almost_equal(
         s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
                      [ np.nan,      0, np.nan,      0, np.nan],
