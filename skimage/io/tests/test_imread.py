@@ -77,7 +77,7 @@ class TestSave:
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-            if np.issubdtype(dtype, float):
+            if np.issubdtype(dtype, np.floating):
                 yield self.roundtrip, x, 255
             else:
                 x = (x * 255).astype(dtype)

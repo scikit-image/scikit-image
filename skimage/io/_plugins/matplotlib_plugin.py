@@ -48,7 +48,7 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.float) and
+    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
                          is_low_contrast(image))
@@ -159,7 +159,6 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(ax_im, cax=cax)
-    ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
 
     return ax_im

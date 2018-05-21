@@ -17,7 +17,7 @@ class CannyPlugin(OverlayPlugin):
     def attach(self, image_viewer):
         image = image_viewer.image
         imin, imax = skimage.dtype_limits(image, clip_negative=False)
-        itype = 'float' if np.issubdtype(image.dtype, float) else 'int'
+        itype = 'float' if np.issubdtype(image.dtype, np.floating) else 'int'
         self.add_widget(Slider('sigma', 0, 5, update_on='release'))
         self.add_widget(Slider('low threshold', imin, imax, value_type=itype,
                         update_on='release'))
