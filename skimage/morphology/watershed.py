@@ -120,19 +120,36 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
-def _compute_neighbors(image, structure, offset):
-    """Compute neighborhood as an array of linear offsets into the image.
+def _offsets_to_raveled_neighbors(image_shape, selem, center):
+    """Compute offsets to a samples neighbors if the image would be raveled.
 
-    These are sorted according to Euclidean distance from the center (given
-    by `offset`), ensuring that immediate neighbors are visited first.
+    Parameters
+    ----------
+    image_shape : tuple
+        The shape of the image for which the offsets are computed.
+    selem : ndarray
+        A structuring element determining the neighborhood expressed as an
+        n-D array of 1's and 0's.
+    center : sequence
+        Tuple of indices specifying the center of `selem`.
+
+    Returns
+    -------
+    offsets : ndarray
+        Linear offsets to a samples neighbors in the raveled image, sorted by
+        their Euclidean distance from the center.
+
+    Examples
+    --------
+    >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
+    array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
-    structure[tuple(offset)] = 0  # ignore the center; it's not a neighbor
-    locations = np.transpose(np.nonzero(structure))
-    sqdistances = np.sum((locations - offset)**2, axis=1)
-    neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
-                    np.ravel_multi_index(offset, image.shape))
-    sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
-    return sorted_neighborhood
+    selem[tuple(center)] = 0  # Ignore the center; it's not a neighbor
+    connection_indices = np.transpose(np.nonzero(selem))
+    offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
+               np.ravel_multi_index(center, image_shape))
+    squared_distances = np.sum((connection_indices - center) ** 2, axis=1)
+    return offsets[np.argsort(squared_distances)]
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
@@ -253,7 +270,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     mask = np.pad(mask, pad_width, mode='constant').ravel()
     output = np.pad(markers, pad_width, mode='constant')
 
-    flat_neighborhood = _compute_neighbors(image, connectivity, offset)
+    flat_neighborhood = _offsets_to_raveled_neighbors(
+        image.shape, connectivity, center=offset)
     marker_locations = np.flatnonzero(output)
     image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
