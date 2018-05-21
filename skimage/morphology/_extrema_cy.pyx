@@ -25,9 +25,10 @@ cdef:
     # First or last index in a dimension
     unsigned char BORDER_INDEX = 3
     # Potentially part of a maximum
-    unsigned char MAYBE_MAXIMUM = 2
-    # Index was queued (flood-fill) and might still be part of maximum
-    unsigned char QUEUED_MAYBE_MAXIMUM = 1
+    unsigned char CANDIDATE = 2
+    # Index was queued (flood-fill) and might still be part of maximum OR
+    # when evaluation is complete this flag value marks definite local maxima
+    unsigned char QUEUED_CANDIDATE = 1
     # None of the above is true
     unsigned char NOT_MAXIMUM = 0
 
@@ -55,53 +56,100 @@ def _local_maxima(dtype_t[::1] image not None,
     """
     cdef:
         RestorableQueue queue
-        Py_ssize_t i, i_max, i_ahead
-        unsigned char prefilter
+        unsigned char last_dim_in_neighbors
 
-    # Prefilter candidates only if neighbors in last dimension are part of
-    # the structuring element
-    prefilter = -1 in neighbor_offsets and 1 in neighbor_offsets
+    # This needs the GIL
+    last_dim_in_neighbors = -1 in neighbor_offsets and 1 in neighbor_offsets
     with nogil:
-        i = 1
-        i_max = image.shape[0]
-
-        if prefilter:
-            while i < i_max:
-                if image[i - 1] < image[i] and flags[i] != BORDER_INDEX:
-                    # Potential maximum (in last dimension) is found, find
-                    # other edge of current plateau or "edge of dimension"
-                    i_ahead = i + 1
-                    while (
-                        image[i] == image[i_ahead] and
-                        flags[i_ahead] != BORDER_INDEX
-                    ):
-                        i_ahead += 1
-                    if image[i] > image[i_ahead]:
-                        # Found local maximum (in one dimension), mark all
-                        # parts of the plateau as potential maximum
-                        flags[i:i_ahead] = MAYBE_MAXIMUM
-                    i = i_ahead
-                else:
-                    i += 1
-
-        else:  # Skip prefiltering and flag entire array as potential maximum
-            while i < i_max:
-                if flags[i] != BORDER_INDEX:
-                    flags[i] = MAYBE_MAXIMUM
-                i += 1
+        if last_dim_in_neighbors:
+            # If adjacent pixels in the last dimension are part of the
+            # neighborhood, the number of candidates which have to be evaluated
+            # in the second algorithmic step `_fill_plateau` can be reduced
+            # ahead of time with this function
+            _mark_candidates_in_last_dimension(image, flags)
+        else:
+            # Otherwise simply mark all pixels (except border) as candidates
+            _mark_candidates_all(flags)
 
         # Initialize a buffer used to queue positions while evaluating each
         # potential maximum (flagged with 2)
         queue_init(&queue, 64)
         try:
             for i in range(image.shape[0]):
-                if flags[i] == MAYBE_MAXIMUM:
+                if flags[i] == CANDIDATE:
                     # Index is potentially part of a maximum:
                     # Find all samples part of the plateau and fill with 0
                     # or 1 depending on whether it's a true maximum
                     _fill_plateau(image, flags, neighbor_offsets, &queue, i)
         finally:
             queue_exit(&queue)
+
+
+cdef inline void _mark_candidates_in_last_dimension(
+        dtype_t[::1] image, unsigned char[::1] flags) nogil:
+    """Mark local maxima in last dimension.
+    
+    This function marks pixels with the "CANDIDATE" flag if it is a local 
+    maximum when only the last dimension of the image is considered. 
+    
+    Parameters
+    ----------
+    image :
+        The raveled view of a n-dimensional array.
+    flags :
+        An array of flags that is used to store the state of each pixel during
+        evaluation.
+    
+    Notes
+    -----
+    By evaluating this necessary but not sufficient condition first, usually a
+    significant amount of pixels can be rejected without having to evaluate the
+    entire neighborhood of their plateau. This can reduces the number of 
+    candidates that need to be evaluated with a the more expensive flood-fill 
+    performed in `_fill_plateaus`.
+    
+    However this is only possible if the adjacent pixels in the last dimension
+    are part of the defined neighborhood (see argument `neighbor_offsets`
+    in `_local_maxima`).
+    """
+    cdef Py_ssize_t i, i_ahead
+    i = 1
+    while i < image.shape[0]:
+        if image[i - 1] < image[i] and flags[i] != BORDER_INDEX:
+            # Potential maximum (in last dimension) is found, find
+            # other edge of current plateau or "edge of dimension"
+            i_ahead = i + 1
+            while (
+                image[i] == image[i_ahead] and
+                flags[i_ahead] != BORDER_INDEX
+            ):
+                i_ahead += 1
+            if image[i] > image[i_ahead]:
+                # Found local maximum (in one dimension), mark all
+                # parts of the plateau as potential maximum
+                flags[i:i_ahead] = CANDIDATE
+            i = i_ahead
+        else:
+            i += 1
+
+
+cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
+    """Mark all pixels as potential maxima, exclude border pixels.
+    
+    This function marks pixels with the "CANDIDATE" flag if they aren't the
+    first or last index in any dimension (not flagged with "BORDER_INDEX"). 
+    
+    Parameters
+    ----------
+    flags :
+        An array of flags that is used to store the state of each pixel during
+        evaluation.
+    """
+    cdef Py_ssize_t i = 1
+    while i < flags.shape[0]:
+        if flags[i] != BORDER_INDEX:
+            flags[i] = CANDIDATE
+        i += 1
 
 
 cdef inline void _fill_plateau(
@@ -133,7 +181,7 @@ cdef inline void _fill_plateau(
     h = image[start_index]
     true_maximum = 1 # Boolean flag
 
-    flags[start_index] = QUEUED_MAYBE_MAXIMUM
+    flags[start_index] = QUEUED_CANDIDATE
 
     # And queue start position after clearing the buffer
     queue_clear(queue_ptr)
@@ -150,10 +198,10 @@ cdef inline void _fill_plateau(
                 if flags[neighbor] == BORDER_INDEX:
                     # Plateau touches border and can't be maximum
                     true_maximum = NOT_MAXIMUM
-                elif flags[neighbor] != QUEUED_MAYBE_MAXIMUM:
+                elif flags[neighbor] != QUEUED_CANDIDATE:
                     # Index wasn't queued already, do so now
                     queue_push(queue_ptr, &neighbor)
-                    flags[neighbor] = QUEUED_MAYBE_MAXIMUM
+                    flags[neighbor] = QUEUED_CANDIDATE
 
             elif image[neighbor] > h:
                 # Current plateau can't be maximum because it borders a
