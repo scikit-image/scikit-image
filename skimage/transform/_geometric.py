@@ -170,9 +170,6 @@ class GeometricTransform(object):
     @property
     def inverse(self):
         """Return the inverse transformation."""
-        # ASK: Can you make a property a class method too?
-        # I don't thinkl that solves out problem though, we would still
-        # have to use some kind of instrospection no?
         return self.__class__(matrix=self.inverse_params)
 
     def residuals(self, src, dst):
@@ -877,7 +874,11 @@ class PiecewiseAffineTransform(GeometricTransform):
 
     @property
     def inverse(self):
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "Inverse transforms for ``PiecewiseAffineTransform`` has not "
+            "been implemented yet. If you need to apply the inverse map, "
+            "consider calling the function ``inverse_map`` instead."
+        )
 
     def inverse_map(self, coords):
         """Apply inverse transformation.
