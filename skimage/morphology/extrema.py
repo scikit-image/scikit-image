@@ -17,6 +17,7 @@ from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
 from . import greyreconstruct
+from .watershed import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
 
 
@@ -285,39 +286,6 @@ def _fast_pad(image, value):
     return new_image
 
 
-def _offset_to_raveled_neighbours(image_shape, selem):
-    """Compute offsets to a samples neighbors if the image would be raveled.
-
-    Parameters
-    ----------
-    image_shape : tuple
-        The image for which the offsets are computed.
-    selem : ndarray
-        The neighborhood expressed as an n-D array of 1's and 0's.
-
-    Returns
-    -------
-    offsets : ndarray
-        Linear offsets to a samples neighbors in the raveled image.
-
-    See Also
-    --------
-    skimage.morphology.watershed._compute_neighbors
-
-    Examples
-    --------
-    >>> _offset_to_raveled_neighbours((4, 5), np.ones((3, 3)))
-    array([-6, -5, -4, -1,  1,  4,  5,  6])
-    """
-    center = np.ones(selem.ndim, dtype=np.intp)
-    # Center of kernel is not a neighbor
-    selem[tuple(center)] = False
-    connection_indices = np.transpose(np.nonzero(selem))
-    offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
-               np.ravel_multi_index(center.T, image_shape))
-    return offsets
-
-
 def local_maxima(image, connectivity=None, selem=None, indices=False,
                  include_border=True):
     """Find local maxima of n-dimensional array.
@@ -441,7 +409,8 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
         if any(s != 3 for s in selem.shape):
             raise ValueError("dimension size in selem is not 3")
 
-    neighbor_offsets = _offset_to_raveled_neighbours(image.shape, selem)
+    neighbor_offsets = _offsets_to_raveled_neighbors(
+        image.shape, selem, center=((1,) * image.ndim))
 
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
