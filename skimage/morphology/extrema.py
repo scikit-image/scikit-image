@@ -441,10 +441,7 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
     neighbor_offsets = _offset_to_raveled_neighbours(image.shape, selem)
 
     # Array of flags used to store the state of each pixel during evaluation.
-    # Possible states are:
-    #   3 - first or last value in a dimension
-    #   2 - potentially part of a maximum
-    #   1 - evaluated and part of a maximum
+    # See _extrema_cy.pyx for their meaning
     flags = np.zeros(image.shape, dtype=np.uint8)
     _set_edge_values_inplace(flags, value=3)
 

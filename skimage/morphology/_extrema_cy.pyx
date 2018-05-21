@@ -20,6 +20,18 @@ ctypedef fused dtype_t:
     cnp.float64_t
 
 
+# Definition of flag values used for `flags` in _local_maxima & _fill_plateau
+cdef:
+    # First or last index in a dimension
+    unsigned char BORDER_INDEX = 3
+    # Potentially part of a maximum
+    unsigned char MAYBE_MAXIMUM = 2
+    # Index was queued (flood-fill) and might still be part of maximum
+    unsigned char QUEUED_MAYBE_MAXIMUM = 1
+    # None of the above is true
+    unsigned char NOT_MAXIMUM = 0
+
+
 def _local_maxima(dtype_t[::1] image not None,
                   unsigned char[::1] flags,
                   Py_ssize_t[::1] neighbor_offsets not None):
@@ -46,12 +58,6 @@ def _local_maxima(dtype_t[::1] image not None,
         Py_ssize_t i, i_max, i_ahead
         unsigned char prefilter
 
-    # Current flag meanings:
-    # 3 - first or last index in a dimension
-    # 2 - potentially part of a maximum
-    # 1 - not used in first loop
-    # 0 - not evaluated or none of the above is true
-
     # Prefilter candidates only if neighbors in last dimension are part of
     # the structuring element
     prefilter = -1 in neighbor_offsets and 1 in neighbor_offsets
@@ -61,24 +67,27 @@ def _local_maxima(dtype_t[::1] image not None,
 
         if prefilter:
             while i < i_max:
-                if image[i - 1] < image[i] and flags[i] != 3:
+                if image[i - 1] < image[i] and flags[i] != BORDER_INDEX:
                     # Potential maximum (in last dimension) is found, find
                     # other edge of current plateau or "edge of dimension"
                     i_ahead = i + 1
-                    while image[i] == image[i_ahead] and flags[i_ahead] != 3:
+                    while (
+                        image[i] == image[i_ahead] and
+                        flags[i_ahead] != BORDER_INDEX
+                    ):
                         i_ahead += 1
                     if image[i] > image[i_ahead]:
                         # Found local maximum (in one dimension), mark all
                         # parts of the plateau as potential maximum
-                        flags[i:i_ahead] = 2
+                        flags[i:i_ahead] = MAYBE_MAXIMUM
                     i = i_ahead
                 else:
                     i += 1
 
         else:  # Skip prefiltering and flag entire array as potential maximum
             while i < i_max:
-                if flags[i] != 3:
-                    flags[i] = 2
+                if flags[i] != BORDER_INDEX:
+                    flags[i] = MAYBE_MAXIMUM
                 i += 1
 
         # Initialize a buffer used to queue positions while evaluating each
@@ -86,7 +95,7 @@ def _local_maxima(dtype_t[::1] image not None,
         queue_init(&queue, 64)
         try:
             for i in range(image.shape[0]):
-                if flags[i] == 2:
+                if flags[i] == MAYBE_MAXIMUM:
                     # Index is potentially part of a maximum:
                     # Find all samples part of the plateau and fill with 0
                     # or 1 depending on whether it's a true maximum
@@ -124,13 +133,7 @@ cdef inline void _fill_plateau(
     h = image[start_index]
     true_maximum = 1 # Boolean flag
 
-    # Current / new flag meanings:
-    # 3 - first or last value in a dimension
-    # 2 - not used here
-    # 1 - index was queued and might still be part of maximum
-    # 0 - none of the above is true
-    # Therefore mark current index as true maximum as an initial guess
-    flags[start_index] = 1
+    flags[start_index] = QUEUED_MAYBE_MAXIMUM
 
     # And queue start position after clearing the buffer
     queue_clear(queue_ptr)
@@ -144,21 +147,21 @@ cdef inline void _fill_plateau(
 
             if image[neighbor] == h:
                 # Value is part of plateau
-                if flags[neighbor] == 3:
+                if flags[neighbor] == BORDER_INDEX:
                     # Plateau touches border and can't be maximum
-                    true_maximum = 0
-                elif flags[neighbor] != 1:
+                    true_maximum = NOT_MAXIMUM
+                elif flags[neighbor] != QUEUED_MAYBE_MAXIMUM:
                     # Index wasn't queued already, do so now
                     queue_push(queue_ptr, &neighbor)
-                    flags[neighbor] = 1
+                    flags[neighbor] = QUEUED_MAYBE_MAXIMUM
 
             elif image[neighbor] > h:
                 # Current plateau can't be maximum because it borders a
                 # larger one
-                true_maximum = 0
+                true_maximum = NOT_MAXIMUM
 
     if not true_maximum:
         queue_restore(queue_ptr)
         # Initial guess was wrong -> replace 1 with 0 for plateau
         while queue_pop(queue_ptr, &neighbor):
-            flags[neighbor] = 0
+            flags[neighbor] = NOT_MAXIMUM
