@@ -262,21 +262,21 @@ class TestLocalMaxima(unittest.TestCase):
             result = extrema.local_maxima(image)
             assert_equal(result, expected)
 
-    def test_selem_as_scalar(self):
+    def test_connectivity(self):
         """Test results if selem is a scalar."""
         # Connectivity 1: generates cross shaped structuring element
-        result_conn1 = extrema.local_maxima(self.image, selem=1)
+        result_conn1 = extrema.local_maxima(self.image, connectivity=1)
         assert_equal(result_conn1, self.expected_cross)
 
         # Connectivity 2: generates square shaped structuring element
-        result_conn2 = extrema.local_maxima(self.image, selem=2)
+        result_conn2 = extrema.local_maxima(self.image, connectivity=2)
         assert_equal(result_conn2, self.expected_default)
 
-        # Connectivity 3: generates disk shaped structuring element
-        result_conn3 = extrema.local_maxima(self.image, selem=3)
+        # Connectivity 3: generates square shaped structuring element
+        result_conn3 = extrema.local_maxima(self.image, connectivity=3)
         assert_equal(result_conn3, self.expected_default)
 
-    def test_selem_as_array(self):
+    def test_selem(self):
         """Test results if selem is an array."""
         selem_cross = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
         result_selem_cross = extrema.local_maxima(
@@ -305,12 +305,14 @@ class TestLocalMaxima(unittest.TestCase):
         """Test output if indices of peaks are desired."""
         # Connectivity 1
         expected_conn1 = np.nonzero(self.expected_cross)
-        result_conn1 = extrema.local_maxima(self.image, selem=1, indices=True)
+        result_conn1 = extrema.local_maxima(self.image, connectivity=1,
+                                            indices=True)
         assert_equal(result_conn1, expected_conn1)
 
         # Connectivity 2
         expected_conn2 = np.nonzero(self.expected_default)
-        result_conn2 = extrema.local_maxima(self.image, selem=2, indices=True)
+        result_conn2 = extrema.local_maxima(self.image, connectivity=2,
+                                            indices=True)
         assert_equal(result_conn2, expected_conn2)
 
     def test_include_border(self):
@@ -318,7 +320,7 @@ class TestLocalMaxima(unittest.TestCase):
         # Use connectivity 1 to allow many maxima, only filtering at border is
         # of interest
         result_with_boder = extrema.local_maxima(
-            self.image, selem=1, include_border=True)
+            self.image, connectivity=1, include_border=True)
         assert_equal(result_with_boder, self.expected_cross)
 
         expected_without_border = np.array(
@@ -331,7 +333,7 @@ class TestLocalMaxima(unittest.TestCase):
             dtype=np.uint8
         )
         result_without_border = extrema.local_maxima(
-            self.image, selem=1, include_border=False)
+            self.image, connectivity=1, include_border=False)
         assert_equal(result_without_border, expected_without_border)
 
     def test_nd(self):

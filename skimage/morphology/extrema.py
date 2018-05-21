@@ -318,7 +318,8 @@ def _offset_to_raveled_neighbours(image_shape, selem):
     return offsets
 
 
-def local_maxima(image, selem=None, indices=False, include_border=True):
+def local_maxima(image, connectivity=None, selem=None, indices=False,
+                 include_border=True):
     """Find local maxima of n-dimensional array.
 
     The local maxima are defined as connected sets of pixels with equal gray
@@ -329,12 +330,16 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
     ----------
     image : ndarray
         An n-dimensional array.
-    selem : int or ndarray, optional
-        The structuring element used to determine the neighborhood of each
-        evaluated pixel. If this is a number it is interpreted as the
-        connectivity of `selem`. If an array, it must only contain 1's and 0's,
-        have the same number of dimensions as `image`. If not given the maximal
-        connectivity is assumed, meaning `selem` is an array of 1's.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is larger or
+        equal to `connectivity` are considered neighbors. If not given, all
+        adjacent pixels are considered as part of the neighborhood. Ignored if
+        `selem` is not None.
+    selem : ndarray, optional
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel. It must only contain 1's and 0's, have the same number
+        of dimensions as `image`.
     indices : bool, optional
         If True, the output will be an array representing indices of local
         maxima. If False, the output will be an array of 0's and 1's with the
@@ -367,9 +372,8 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
 
     2. Perform a flood-fill to find all connected pixels that have the same
        gray value and are part of the plateau.
-    3. Consider the connected neighborhood of a plateau: if any no bordering
-       sample has a higher gray level, mark the plateau as a definite local
-       maximum.
+    3. Consider the connected neighborhood of a plateau: if no bordering sample
+       has a higher gray level, mark the plateau as a definite local maximum.
 
     Examples
     --------
@@ -398,7 +402,7 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
 
     Find local maxima without comparing to diagonal pixels (connectivity 1):
 
-    >>> local_maxima(image, selem=1)
+    >>> local_maxima(image, connectivity=1)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
@@ -406,7 +410,7 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
 
     and exclude maxima that border the image edge:
 
-    >>> local_maxima(image, selem=1, include_border=False)
+    >>> local_maxima(image, connectivity=1, include_border=False)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
@@ -423,10 +427,9 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
         image = _fast_pad(image, image.min())
 
     if selem is None:
-        # Choose maximal connectivity if not provided
-        selem = image.ndim
-    if np.isscalar(selem):
-        selem = ndi.generate_binary_structure(image.ndim, selem)
+        if connectivity is None:
+            connectivity = image.ndim
+        selem = ndi.generate_binary_structure(image.ndim, connectivity)
     else:
         # Validate custom structured element
         selem = np.asarray(selem, dtype=bool)
@@ -469,7 +472,8 @@ def local_maxima(image, selem=None, indices=False, include_border=True):
         return flags
 
 
-def local_minima(image, selem=None, indices=False, include_border=True):
+def local_minima(image, connectivity=None, selem=None, indices=False,
+                 include_border=True):
     """Find local minima of n-dimensional array.
 
     The local minima are defined as connected sets of pixels with equal gray
@@ -480,12 +484,16 @@ def local_minima(image, selem=None, indices=False, include_border=True):
     ----------
     image : ndarray
         An n-dimensional array.
-    selem : int or ndarray, optional
-        The structuring element used to determine the neighborhood of each
-        evaluated pixel. If this is a number it is interpreted as the
-        connectivity of `selem`. If an array, it must only contain 1's and 0's,
-        have the same number of dimensions as `image`. If not given the maximal
-        connectivity is assumed, meaning `selem` is an array of 1's.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is larger or
+        equal to `connectivity` are considered neighbors. If not given, all
+        adjacent pixels are considered as part of the neighborhood. Ignored if
+        `selem` is not None.
+    selem : ndarray, optional
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel. It must only contain 1's and 0's, have the same number
+        of dimensions as `image`.
     indices : bool, optional
         If True, the output will be an array representing indices of local
         minima. If False, the output will be an array of 0's and 1's with the
@@ -518,9 +526,8 @@ def local_minima(image, selem=None, indices=False, include_border=True):
 
     2. Perform a flood-fill to find all connected pixels that have the same
        gray value and are part of the plateau.
-    3. Consider the connected neighborhood of a plateau: if any no bordering
-       sample has a smaller gray level, mark the plateau as a definite local
-       minimum.
+    3. Consider the connected neighborhood of a plateau: if no bordering sample
+       has a smaller gray level, mark the plateau as a definite local minimum.
 
     Examples
     --------
@@ -549,7 +556,7 @@ def local_minima(image, selem=None, indices=False, include_border=True):
 
     Find local minima without comparing to diagonal pixels (connectivity 1):
 
-    >>> local_minima(image, selem=1)
+    >>> local_minima(image, connectivity=1)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
@@ -557,10 +564,16 @@ def local_minima(image, selem=None, indices=False, include_border=True):
 
     and exclude minima that border the image edge:
 
-    >>> local_minima(image, selem=1, include_border=False)
+    >>> local_minima(image, connectivity=1, include_border=False)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    return local_maxima(invert(image), selem, indices, include_border)
+    return local_maxima(
+        image=invert(image),
+        connectivity=connectivity,
+        selem=selem,
+        indices=indices,
+        include_border=include_border
+    )
