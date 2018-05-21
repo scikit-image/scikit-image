@@ -212,7 +212,7 @@ def test_invalid_input():
         ssim(X, Y)
     # win_size exceeds image extent
     with testing.raises(ValueError):
-        ssim(X, X, win_size=X.shape[0]+1)
+        ssim(X, X, win_size=X.shape[0] + 1)
     # some kwarg inputs must be non-negative
     with testing.raises(ValueError):
         ssim(X, X, K1=-0.1)
