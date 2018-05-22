@@ -275,7 +275,7 @@ def _fast_pad(image, value):
     """
     # Allocate padded image
     new_shape = np.array(image.shape) + 2
-    new_image = np.empty(new_shape, dtype=image.dtype)
+    new_image = np.empty(new_shape, dtype=image.dtype, order="C")
 
     # Copy old image into new space
     original_slice = tuple(slice(1, -1) for _ in range(image.ndim))
@@ -426,7 +426,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
            [0, 1, 1, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    image = np.asarray(image)
+    image = np.asarray(image, order="C")
     if image.size == 0:
         # Return early for empty input
         return np.array([], dtype=(np.intp if indices else np.uint8))
