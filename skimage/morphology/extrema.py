@@ -287,7 +287,7 @@ def _fast_pad(image, value):
 
 
 def local_maxima(image, connectivity=None, selem=None, indices=False,
-                 include_border=True):
+                 allow_borders=True):
     """Find local maxima of n-dimensional array.
 
     The local maxima are defined as connected sets of pixels with equal gray
@@ -312,7 +312,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
         If True, the output will be an array representing indices of local
         maxima. If False, the output will be an array of 0's and 1's with the
         same shape as `image`.
-    include_border : bool, optional
+    allow_borders : bool, optional
         If true, plateaus that touch the image border are valid maxima.
 
     Returns
@@ -378,7 +378,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
 
     and exclude maxima that border the image edge:
 
-    >>> local_maxima(image, connectivity=1, include_border=False)
+    >>> local_maxima(image, connectivity=1, allow_borders=False)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
@@ -389,7 +389,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
         # Return early for empty input
         return np.array([], dtype=(np.intp if indices else np.uint8))
 
-    if include_border:
+    if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
         # from the image border
         image = _fast_pad(image, image.min())
@@ -428,7 +428,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
 
     _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
 
-    if include_border:
+    if allow_borders:
         # Revert padding performed at the beginning of the function
         flags = crop(flags, 1)
     else:
@@ -442,7 +442,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
 
 
 def local_minima(image, connectivity=None, selem=None, indices=False,
-                 include_border=True):
+                 allow_borders=True):
     """Find local minima of n-dimensional array.
 
     The local minima are defined as connected sets of pixels with equal gray
@@ -467,7 +467,7 @@ def local_minima(image, connectivity=None, selem=None, indices=False,
         If True, the output will be an array representing indices of local
         minima. If False, the output will be an array of 0's and 1's with the
         same shape as `image`.
-    include_border : bool, optional
+    allow_borders : bool, optional
         If true, plateaus that touch the image border are valid minima.
 
     Returns
@@ -533,7 +533,7 @@ def local_minima(image, connectivity=None, selem=None, indices=False,
 
     and exclude minima that border the image edge:
 
-    >>> local_minima(image, connectivity=1, include_border=False)
+    >>> local_minima(image, connectivity=1, allow_borders=False)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 1, 1, 0, 1, 1, 0],
            [0, 1, 1, 0, 1, 1, 0],
@@ -544,5 +544,5 @@ def local_minima(image, connectivity=None, selem=None, indices=False,
         connectivity=connectivity,
         selem=selem,
         indices=indices,
-        include_border=include_border
+        allow_borders=allow_borders
     )
