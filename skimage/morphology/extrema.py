@@ -286,6 +286,48 @@ def _fast_pad(image, value):
     return new_image
 
 
+def _resolve_neighborhood(selem, connectivity, ndim):
+    """Validate or create structuring element for use in `local_maxima`.
+
+    Depending on the values of `connectivity` and `selem` this function
+    either creates a new structuring element (`selem` is None) using
+    `connectivity` or validates the given structuring element (`selem` is not
+    None).
+
+    Parameters
+    ----------
+    selem : array-like or None
+        The structuring element to validate. See same argument in
+        `local_maxima`.
+    connectivity : int or None
+        A number used to determine the neighborhood of each evaluated pixel.
+        See same argument in `local_maxima`.
+    ndim : int
+        Number of dimensions `selem` ought to have.
+
+    Returns
+    -------
+    selem : ndarray
+        Validated or new structuring element specifying the neighborhood.
+    """
+    if selem is None:
+        if connectivity is None:
+            connectivity = ndim
+        selem = ndi.generate_binary_structure(ndim, connectivity)
+    else:
+        # Validate custom structured element
+        selem = np.asarray(selem, dtype=bool)
+        # Must specify neighbors for all dimensions
+        if selem.ndim != ndim:
+            raise ValueError("selem and image must have the same number of "
+                             "dimensions")
+        # Must only specify direct neighbors
+        if any(s != 3 for s in selem.shape):
+            raise ValueError("dimension size in selem is not 3")
+
+    return selem
+
+
 def local_maxima(image, connectivity=None, selem=None, indices=False,
                  allow_borders=True):
     """Find local maxima of n-dimensional array.
@@ -394,21 +436,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
         # from the image border
         image = _fast_pad(image, image.min())
 
-    if selem is None:
-        if connectivity is None:
-            connectivity = image.ndim
-        selem = ndi.generate_binary_structure(image.ndim, connectivity)
-    else:
-        # Validate custom structured element
-        selem = np.asarray(selem, dtype=bool)
-        # Must specify neighbors for all dimensions
-        if selem.ndim != image.ndim:
-            raise ValueError("selem and image must have the same number of "
-                             "dimensions")
-        # Must only specify direct neighbors
-        if any(s != 3 for s in selem.shape):
-            raise ValueError("dimension size in selem is not 3")
-
+    selem = _resolve_neighborhood(selem, connectivity, image.ndim)
     neighbor_offsets = _offsets_to_raveled_neighbors(
         image.shape, selem, center=((1,) * image.ndim))
 
