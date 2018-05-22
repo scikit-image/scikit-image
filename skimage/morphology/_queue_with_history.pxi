@@ -1,6 +1,9 @@
-"""FIFO queue whose items can be iterated multiple times.
+"""FIFO queue that preserves history until explicitly cleared.
 
-.. warning:: Expects "QueueItem" to be defined before inclusion!
+.. warning::
+
+    One must define the type "QueueItem" before including this file. This makes
+    it possible to store different types as QueueItems.
 
 This queue can be operated like a class. The structure stores the state of the
 instance and the contained functions act as instance methods. The important
@@ -9,11 +12,14 @@ it internally. Thus unless the queue's internal buffer is explicitly cleared
 (see `queue_clear`) popped items can be restored at anytime using
 `queue_restore`.
 
+A possible application of this special functionality might be when actions
+performed on popped items must be undone at a later stage.
+
 Example
 -------
 ::
 
-    cdef RestorableQueue queue
+    cdef QueueWithHistory queue
     cdef QueueItem item
 
     queue_init(&queue, 5)
@@ -37,14 +43,14 @@ from libc.stdlib cimport malloc, realloc, free
 
 
 # Store state of queue
-cdef struct RestorableQueue:
+cdef struct QueueWithHistory:
     QueueItem* _buffer_ptr
     Py_ssize_t _buffer_size  # Maximal number of elements the buffer can store
     Py_ssize_t _index_valid  # Index to most recently inserted item
     Py_ssize_t _index_consumed  # Index to most recently consumed item
 
 
-cdef inline void queue_init(RestorableQueue* self, Py_ssize_t buffer_size) nogil:
+cdef inline void queue_init(QueueWithHistory* self, Py_ssize_t buffer_size) nogil:
     """Initialize the queue and its buffer size.
     
     The size is defined as the number of queue items to fit into the initial 
@@ -61,7 +67,7 @@ cdef inline void queue_init(RestorableQueue* self, Py_ssize_t buffer_size) nogil
     self._index_valid = -1
 
 
-cdef inline void queue_push(RestorableQueue* self, QueueItem* item_ptr) nogil:
+cdef inline void queue_push(QueueWithHistory* self, QueueItem* item_ptr) nogil:
     """Enqueue a new item."""
     self._index_valid += 1
     if self._buffer_size <= self._index_valid:
@@ -69,7 +75,7 @@ cdef inline void queue_push(RestorableQueue* self, QueueItem* item_ptr) nogil:
     self._buffer_ptr[self._index_valid] = item_ptr[0]
 
 
-cdef inline unsigned char queue_pop(RestorableQueue* self,
+cdef inline unsigned char queue_pop(QueueWithHistory* self,
                                     QueueItem* item_ptr) nogil:
     """If not empty pop an item and return 1 otherwise return 0.
     
@@ -83,12 +89,16 @@ cdef inline unsigned char queue_pop(RestorableQueue* self,
     return 0
 
 
-cdef inline void queue_restore(RestorableQueue* self) nogil:
-    """Restore all consumed items to the queue."""
+cdef inline void queue_restore(QueueWithHistory* self) nogil:
+    """Restore all consumed items to the queue.
+    
+    The order of the restored queue is the same as previous one, meaning older
+    items are popped first.
+    """
     self._index_consumed = -1
 
 
-cdef inline void queue_clear(RestorableQueue* self) nogil:#
+cdef inline void queue_clear(QueueWithHistory* self) nogil:#
     """Remove all consumable items.
     
     After this the old items can't be restored with `queue_restore`.
@@ -97,7 +107,7 @@ cdef inline void queue_clear(RestorableQueue* self) nogil:#
     self._index_valid = -1
 
 
-cdef inline void queue_exit(RestorableQueue* self) nogil:
+cdef inline void queue_exit(QueueWithHistory* self) nogil:
     """Free the buffer of the queue.
     
     Don't use the queue after this command unless `queue_init` is called again.
@@ -105,7 +115,7 @@ cdef inline void queue_exit(RestorableQueue* self) nogil:
     free(self._buffer_ptr)
 
 
-cdef inline void _queue_grow_buffer(RestorableQueue* self) nogil:
+cdef inline void _queue_grow_buffer(QueueWithHistory* self) nogil:
     """Double the memory used for the buffer."""
     cdef QueueItem* new_buffer
     self._buffer_size *= 2

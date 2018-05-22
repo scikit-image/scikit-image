@@ -8,10 +8,10 @@
 cimport numpy as cnp
 
 
-# Must be defined to use RestorableQueue
+# Must be defined to use QueueWithHistory
 ctypedef Py_ssize_t QueueItem
 
-include "_restorable_queue.pxi"
+include "_queue_with_history.pxi"
 
 
 ctypedef fused dtype_t:
@@ -62,7 +62,7 @@ def _local_maxima(dtype_t[::1] image not None,
         A "boolean" array that is 1 where local maxima exist.
     """
     cdef:
-        RestorableQueue queue
+        QueueWithHistory queue
         unsigned char last_dim_in_neighbors
 
     # This needs the GIL
@@ -161,7 +161,7 @@ cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
 
 cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
-        Py_ssize_t[::1] neighbor_offsets, RestorableQueue* queue_ptr,
+        Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index) nogil:
     """Fill with 1 if plateau is local maximum else with 0.
     
