@@ -417,16 +417,15 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
     flags = np.zeros(image.shape, dtype=np.uint8)
     _set_edge_values_inplace(flags, value=3)
 
-    # Up-cast dtype of image for wrapped Cython function
-    if np.issubdtype(image.dtype, np.unsignedinteger):
-        dtype = np.uint64
-    elif np.issubdtype(image.dtype, np.integer):
-        dtype = np.int64
-    else:
-        dtype = np.float64
-    image = image.astype(dtype, order="C", copy=False)
-
-    _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
+    try:
+        _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
+    except TypeError:
+        if image.dtype == np.float16:
+            # Provide the user with clearer error message
+            raise TypeError("dtype of `image` is float16 which is not "
+                            "supported, try upcasting to float32")
+        else:
+            raise
 
     if allow_borders:
         # Revert padding performed at the beginning of the function

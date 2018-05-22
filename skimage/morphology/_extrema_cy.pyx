@@ -15,8 +15,15 @@ include "_restorable_queue.pxi"
 
 
 ctypedef fused dtype_t:
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
     cnp.uint64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
     cnp.int64_t
+    cnp.float32_t
     cnp.float64_t
 
 

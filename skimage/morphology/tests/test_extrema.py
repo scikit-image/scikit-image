@@ -178,7 +178,7 @@ class TestLocalMaxima(unittest.TestCase):
     supported_dtypes = [
         np.uint8, np.uint16, np.uint32, np.uint64,
         np.int8, np.int16, np.int32, np.int64,
-        np.float16, np.float32, np.float64
+        np.float32, np.float64
     ]
     image = np.array(
         [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -435,6 +435,9 @@ class TestLocalMaxima(unittest.TestCase):
             extrema.local_maxima(self.image, selem=np.ones((2, 3)))
         with raises(ValueError, match="dimension size"):
             extrema.local_maxima(self.image, selem=np.ones((5, 5)))
+
+        with raises(TypeError, match="float16 which is not supported"):
+            extrema.local_maxima(np.empty(1, dtype=np.float16))
 
 
 if __name__ == "__main__":
