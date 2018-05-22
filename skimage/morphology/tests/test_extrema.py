@@ -315,12 +315,12 @@ class TestLocalMaxima(unittest.TestCase):
                                             indices=True)
         assert_equal(result_conn2, expected_conn2)
 
-    def test_include_border(self):
+    def test_allow_borders(self):
         """Test maxima detection at the image border."""
         # Use connectivity 1 to allow many maxima, only filtering at border is
         # of interest
         result_with_boder = extrema.local_maxima(
-            self.image, connectivity=1, include_border=True)
+            self.image, connectivity=1, allow_borders=True)
         assert_equal(result_with_boder, self.expected_cross)
 
         expected_without_border = np.array(
@@ -333,7 +333,7 @@ class TestLocalMaxima(unittest.TestCase):
             dtype=np.uint8
         )
         result_without_border = extrema.local_maxima(
-            self.image, connectivity=1, include_border=False)
+            self.image, connectivity=1, allow_borders=False)
         assert_equal(result_without_border, expected_without_border)
 
     def test_nd(self):
