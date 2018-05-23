@@ -251,42 +251,50 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # floating point -> integer
         prec_loss()
         # use float type that can represent output integer type
-        image = image.astype(_dtype_itemsize(itemsize_out, dtype_in,
-                                             np.float32, np.float64))
+        computation_type = _dtype_itemsize(itemsize_out, dtype_in,
+                                           np.float32, np.float64)
+
         if not uniform:
             if kind_out == 'u':
-                image *= imax_out
+                image_out = np.multiply(image, imax_out,
+                                        dtype=computation_type)
             else:
-                image *= imax_out - imin_out
-                image -= 1.0
-                image /= 2.0
-            np.rint(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
+                image_out = np.multiply(image, (imax_out - imin_out) / 2,
+                                        dtype=computation_type)
+                image_out -= 1.0 / 2.
+            np.rint(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            image *= imax_out + 1
-            np.clip(image, 0, imax_out, out=image)
+            image_out = np.multiply(image, imax_out + 1,
+                                    dtype=computation_type)
+            np.clip(image_out, 0, imax_out, out=image_out)
         else:
-            image *= (imax_out - imin_out + 1.0) / 2.0
-            np.floor(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
-        return image.astype(dtype_out)
+            image_out = np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
+                                    dtype=computation_type)
+            np.floor(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
+        return image_out.astype(dtype_out)
 
     # signed/unsigned int -> float
     if kind_out == 'f':
         if itemsize_in >= itemsize_out:
             prec_loss()
+
         # use float type that can exactly represent input integers
-        image = image.astype(_dtype_itemsize(itemsize_in, dtype_out,
-                                             np.float32, np.float64))
+        computation_type = _dtype_itemsize(itemsize_in, dtype_out,
+                                           np.float32, np.float64)
         if kind_in == 'u':
-            image /= imax_in
+            # using np.divide or np.multiply doesn't copy the data
+            # until the computation time
+            image = np.multiply(image, 1. / imax_in,
+                                dtype=computation_type)
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
         else:
-            image *= 2.0
-            image += 1.0
-            image /= imax_in - imin_in
+            image = np.multiply(image, 2. / (imax_in - imin_in),
+                                dtype=computation_type)
+            image += 1.0 / (imax_in - imin_in)
         return np.asarray(image, dtype_out)
 
     # unsigned int -> signed/unsigned int
