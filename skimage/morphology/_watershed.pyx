@@ -17,7 +17,6 @@ cimport cython
 
 
 ctypedef cnp.int32_t DTYPE_INT32_t
-ctypedef cnp.int64_t DTYPE_INT64_t
 ctypedef cnp.int8_t DTYPE_BOOL_t
 
 
@@ -29,8 +28,8 @@ include "heap_watershed.pxi"
 @cython.cdivision(True)
 @cython.overflowcheck(False)
 @cython.unraisable_tracebacks(False)
-cdef inline double _euclid_dist(cnp.int64_t pt0, cnp.int64_t pt1,
-                                cnp.int64_t[::1] strides):
+cdef inline double _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
+                                cnp.intp_t[::1] strides):
     """Return the Euclidean distance between raveled points pt0 and pt1."""
     cdef double result = 0
     cdef double curr = 0
@@ -47,7 +46,7 @@ cdef inline double _euclid_dist(cnp.int64_t pt0, cnp.int64_t pt1,
 @cython.cdivision(True)
 @cython.unraisable_tracebacks(False)
 cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
-                                         DTYPE_INT64_t[::1] structure,
+                                         cnp.intp_t[::1] structure,
                                          DTYPE_BOOL_t[::1] mask,
                                          Py_ssize_t index):
     """
@@ -79,10 +78,10 @@ cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def watershed_raveled(cnp.float64_t[::1] image,
-                      DTYPE_INT64_t[::1] marker_locations,
-                      DTYPE_INT64_t[::1] structure,
+                      cnp.intp_t[::1] marker_locations,
+                      cnp.intp_t[::1] structure,
                       DTYPE_BOOL_t[::1] mask,
-                      cnp.int64_t[::1] strides,
+                      cnp.intp_t[::1] strides,
                       cnp.double_t compactness,
                       DTYPE_INT32_t[::1] output,
                       DTYPE_BOOL_t wsl):
