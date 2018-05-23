@@ -406,7 +406,8 @@ class MultiImage(ImageCollection):
 
         self._filename = load_pattern
         self._searched_files = super(MultiImage, self)._find_files(
-                         load_pattern)
+            load_pattern
+        )
 
         if load_func is None:
             from ._io import imread
