@@ -1,11 +1,9 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-Version 0.14
-------------
-* Finalize ``skimage.future.graph`` API.
 
 Version 0.15
 ------------
+* Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
 * In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
