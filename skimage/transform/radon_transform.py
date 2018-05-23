@@ -124,6 +124,64 @@ def _sinogram_circle_to_square(sinogram):
     return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
+def iradon_filter(filter_name, size):
+    """
+    Create iradon filter.
+
+    Generate a reconstruction kernel to be used in iradon during
+    the filtered back-projection algorithm.
+
+    Parameters
+    ----------
+    filter_name : str
+        Name of the filter.
+    size : int
+        Length of the filter array.
+
+    Returns
+    -------
+    kernel : array_like, dtype=float
+        Reconstruction filter to be used in iradon.
+
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+    """
+    # Construct the Fourier filter
+    n1 = np.arange(0, size / 2 + 1, dtype=np.int)
+    n2 = np.arange(size / 2 - 1, 0, -1, dtype=np.int)
+    n = np.concatenate((n1, n2))
+    f = np.zeros(size)
+    f[0] = 0.25
+    f[1::2] = -1 / (np.pi * n[1::2])**2
+
+    omega = 2 * np.pi * fftfreq(size)
+    kernel = 2 * np.real(fft(f))         # ramp filter
+    if filter_name == "ramp":
+        pass
+    elif filter_name == "shepp-logan":
+        # Start from first element to avoid divide by zero
+        kernel[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
+    elif filter_name == "cosine":
+        freq = (0.5 * np.arange(0, size)
+                / size)
+        cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
+        kernel *= cosine_filter
+    elif filter_name == "hamming":
+        hamming_filter = np.fft.fftshift(np.hamming(size))
+        kernel *= hamming_filter
+    elif filter_name == "hann":
+        hanning_filter = np.fft.fftshift(np.hanning(size))
+        kernel *= hanning_filter
+    elif filter_name is None:
+        kernel[:] = 1
+    else:
+        raise ValueError("Unknown filter: %s" % filter_name)
+
+    return kernel[:, np.newaxis]
+ 
+
 def iradon(radon_image, theta=None, output_size=None,
            filter="ramp", interpolation="linear", circle=None):
     """
@@ -215,38 +273,10 @@ def iradon(radon_image, theta=None, output_size=None,
     pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
-    # Construct the Fourier filter
-    n1 = np.arange(0, projection_size_padded / 2 + 1, dtype=np.int)
-    n2 = np.arange(projection_size_padded / 2 - 1, 0, -1, dtype=np.int)
-    n = np.concatenate((n1, n2))
-    f = np.zeros(projection_size_padded)
-    f[0] = 0.25
-    f[1::2] = -1 / (np.pi * n[1::2])**2
+    fourier_filter = iradon_filter(filter, projection_size_padded)
 
-    omega = 2 * np.pi * fftfreq(projection_size_padded)
-    fourier_filter = 2 * np.real(fft(f))         # ramp filter
-    if filter == "ramp":
-        pass
-    elif filter == "shepp-logan":
-        # Start from first element to avoid divide by zero
-        fourier_filter[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
-    elif filter == "cosine":
-        freq = (0.5 * np.arange(0, projection_size_padded)
-                / projection_size_padded)
-        cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
-        fourier_filter *= cosine_filter
-    elif filter == "hamming":
-        hamming_filter = np.fft.fftshift(np.hamming(projection_size_padded))
-        fourier_filter *= hamming_filter
-    elif filter == "hann":
-        hanning_filter = np.fft.fftshift(np.hanning(projection_size_padded))
-        fourier_filter *= hanning_filter
-    elif filter is None:
-        fourier_filter[:] = 1
-    else:
-        raise ValueError("Unknown filter: %s" % filter)
     # Apply filter in Fourier domain
-    projection = fft(img, axis=0) * fourier_filter[:, np.newaxis]
+    projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0))
 
     # Resize filtered image back to original size
