@@ -121,9 +121,7 @@ def test_bool():
 
 
 def test_clobber():
-    # The image functions should not clobber the input arrays
-    # This is necessary in case somebody tries to optimize
-    # by not having a copy of the array during computation
+    # The `img_as_*` functions should never modify input arrays.
     for func_input_type in img_funcs:
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
@@ -131,8 +129,7 @@ def test_clobber():
             with warnings.catch_warnings():
                 # UserWarning for possible precision loss, expected
                 warnings.simplefilter('ignore', UserWarning)
-                img_in = func_input_type(img)  # , issue_warnings=False)
-
+                img_in = func_input_type(img)
                 img_in_before = img_in.copy()
                 img_out = func_output_type(img_in)
 
