@@ -87,7 +87,6 @@ ax[3].set_title('Median $r=20$')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -120,7 +119,6 @@ ax[1].set_title('Local mean $r=10$')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -158,7 +156,6 @@ ax[3].imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -239,7 +236,6 @@ ax[1].set_title('Local autolevel')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -284,7 +280,6 @@ for i in range(0, len(image_list)):
     ax[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     ax[i].set_title(title_list[i])
     ax[i].axis('off')
-    ax[i].set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -315,7 +310,6 @@ ax[3].imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -345,7 +339,6 @@ ax[3].imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -404,7 +397,6 @@ ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -431,7 +423,6 @@ ax[1].set_title('Local Otsu ($r=%d$)' % radius)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -472,7 +463,6 @@ ax[3].set_title('Morphological gradient')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -513,7 +503,6 @@ ax[1].set_title('Entropy')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -661,7 +650,6 @@ ax[1].imshow(rndi, cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -689,3 +677,5 @@ ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
 plt.tight_layout()
+
+plt.show()

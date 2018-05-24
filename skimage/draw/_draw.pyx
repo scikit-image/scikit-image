@@ -385,7 +385,7 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
 
     while r > c + 1:
         c += 1
-        dceil = sqrt(radius**2 - c**2)
+        dceil = sqrt(radius * radius - c * c)
         dceil = ceil(dceil) - dceil
         if dceil < dceil_prev:
             r -= 1
@@ -447,8 +447,8 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
     cdef list cc = list()
 
     # Compute useful values
-    cdef  Py_ssize_t rd = r_radius**2
-    cdef  Py_ssize_t cd = c_radius**2
+    cdef  Py_ssize_t rd = r_radius * r_radius
+    cdef  Py_ssize_t cd = c_radius * c_radius
 
     cdef Py_ssize_t r, c, e2, err
 

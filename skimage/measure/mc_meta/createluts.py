@@ -8,6 +8,8 @@ The luts are tuples of shape and base64 encoded bytes.
 
 """
 
+import numpy as np
+
 import sys
 import base64
 
@@ -18,6 +20,7 @@ if sys.version_info >= (3, ):
 else:
     base64encode = base64.encodestring
     base64decode = base64.decodestring
+
 
 def create_luts(fname):
 
@@ -151,22 +154,10 @@ if __name__ == '__main__':
     import os
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
 
-    if True:
-        with open(os.path.join(os.getcwd(), 'mcluts.py'), 'w') as f:
-            f.write('# -*- coding: utf-8 -*-\n')
-            f.write('# Copyright (C) 2012, Almar Klein\n# Copyright (C) 2002, Thomas Lewiner\n\n')
-            f.write('# This file was auto-generated from LookUpTable.h by createluts.py.\n\n')
-            f.write(create_luts(fname))
-
-    else:
-        for prefix in ['TILING', 'TEST']:
-            tmp = ['luts.'+a for a in getLutNames(prefix)]
-            print(', '.join(tmp))
-            print('')
-            for name in getLutNames(prefix):
-                print('self.%s = Lut(%s)' % (name, name))
-            print('')
-            for name in getLutNames(prefix):
-                print('cdef Lut %s' % name)
-            print('')
-            print('')
+    with open(os.path.join(os.getcwd(), 'mcluts.py'), 'w') as f:
+        f.write('# -*- coding: utf-8 -*-\n')
+        f.write(
+            '# This file was auto-generated from `mc_meta/LookUpTable.h` by\n'
+            '# `mc_meta/createluts.py`.\n\n'
+        )
+        f.write(create_luts(fname))

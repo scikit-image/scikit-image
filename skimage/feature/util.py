@@ -41,7 +41,8 @@ class DescriptorExtractor(object):
 
 
 def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
-                 keypoints_color='k', matches_color=None, only_matches=False):
+                 keypoints_color='k', matches_color=None, only_matches=False,
+                 alignment='horizontal'):
     """Plot matched features.
 
     Parameters
@@ -67,6 +68,9 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         color is chosen randomly.
     only_matches : bool, optional
         Whether to only plot matches and not plot the keypoint locations.
+    alignment : {'horizontal', 'vertical'}, optional
+        Whether to show images side by side, ``'horizontal'``, or one above
+        the other, ``'vertical'``.
 
     """
 
@@ -96,18 +100,28 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         new_image2[:image2.shape[0], :image2.shape[1]] = image2
         image2 = new_image2
 
-    image = np.concatenate([image1, image2], axis=1)
-
-    offset = image1.shape
+    offset = np.array(image1.shape)
+    if alignment == 'horizontal':
+        image = np.concatenate([image1, image2], axis=1)
+        offset[0] = 0
+    elif alignment == 'vertical':
+        image = np.concatenate([image1, image2], axis=0)
+        offset[1] = 0
+    else:
+        mesg = ("plot_matches accepts either 'horizontal' or 'vertical' for "
+                "alignment, but '{}' was given. See "
+                "http://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matches "  # noqa
+                "for details.").format(alignment)
+        raise ValueError(mesg)
 
     if not only_matches:
         ax.scatter(keypoints1[:, 1], keypoints1[:, 0],
                    facecolors='none', edgecolors=keypoints_color)
-        ax.scatter(keypoints2[:, 1] + offset[1], keypoints2[:, 0],
+        ax.scatter(keypoints2[:, 1] + offset[1], keypoints2[:, 0] + offset[0],
                    facecolors='none', edgecolors=keypoints_color)
 
     ax.imshow(image, interpolation='nearest', cmap='gray')
-    ax.axis((0, 2 * offset[1], offset[0], 0))
+    ax.axis((0, image1.shape[1] + offset[1], image1.shape[0] + offset[0], 0))
 
     for i in range(matches.shape[0]):
         idx1 = matches[i, 0]
@@ -119,7 +133,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
             color = matches_color
 
         ax.plot((keypoints1[idx1, 1], keypoints2[idx2, 1] + offset[1]),
-                (keypoints1[idx1, 0], keypoints2[idx2, 0]),
+                (keypoints1[idx1, 0], keypoints2[idx2, 0] + offset[0]),
                 '-', color=color)
 
 

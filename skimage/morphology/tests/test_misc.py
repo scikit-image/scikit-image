@@ -141,7 +141,8 @@ def test_labeled_image_holes():
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1]], dtype=np.bool_)
-    observed = remove_small_holes(labeled_holes_image, area_threshold=3)
+    with expected_warnings(['returned as a boolean array']):
+        observed = remove_small_holes(labeled_holes_image, area_threshold=3)
     assert_array_equal(observed, expected)
 
 
@@ -163,7 +164,8 @@ def test_uint_image_holes():
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 1, 1, 1]], dtype=np.bool_)
-    observed = remove_small_holes(labeled_holes_image, area_threshold=3)
+    with expected_warnings(['returned as a boolean array']):
+        observed = remove_small_holes(labeled_holes_image, area_threshold=3)
     assert_array_equal(observed, expected)
 
 
@@ -179,6 +181,7 @@ def test_label_warning_holes():
                                    dtype=np.int_)
     with expected_warnings(['use a boolean array?']):
         remove_small_holes(labeled_holes_image, area_threshold=3)
+    remove_small_holes(labeled_holes_image.astype(bool), area_threshold=3)
 
 
 def test_float_input_holes():

@@ -40,7 +40,6 @@ def plot_img_and_hist(image, axes, bins=256):
     # Display image
     ax_img.imshow(image, cmap=plt.cm.gray)
     ax_img.set_axis_off()
-    ax_img.set_adjustable('box-forced')
 
     # Display histogram
     ax_hist.hist(image.ravel(), bins=bins, histtype='step', color='black')

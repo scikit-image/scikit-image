@@ -45,18 +45,26 @@ def test_png_round_trip():
     fname = f.name
     f.close()
     I = np.eye(3)
-    imsave(fname, I)
+    with expected_warnings(['Possible precision loss']):
+        imsave(fname, I)
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
+def test_img_as_gray_flatten():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    with expected_warnings(['deprecated']):
+        img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    assert_array_equal(img, img_flat)
+
+
 def test_imread_flatten():
     # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
@@ -172,7 +180,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:
@@ -190,9 +198,11 @@ class TestSave:
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 3, 1)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 3, 1)))
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 2)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 2)))
 
 
 def test_imsave_filelike():
@@ -208,7 +218,24 @@ def test_imsave_filelike():
     # read from file-like object
     s.seek(0)
     out = imread(s)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
+    assert_allclose(out, image)
+
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.eye(*shape, dtype=np.bool)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(
+            ['is a boolean image: setting True to 1 and False to 0']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert_equal(out.shape, shape)
     assert_allclose(out, image)
 
 
@@ -218,16 +245,19 @@ def test_imexport_imimport():
     with expected_warnings(['precision loss']):
         pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
 
 
 def test_all_color():
-    color_check('pil')
-    color_check('pil', 'bmp')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    mono_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        mono_check('pil')
 
 
 def test_multi_page_gif():

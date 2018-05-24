@@ -25,8 +25,7 @@ image_max = ndi.maximum_filter(im, size=20, mode='constant')
 coordinates = peak_local_max(im, min_distance=20)
 
 # display results
-fig, axes = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(8, 3), sharex=True, sharey=True)
 ax = axes.ravel()
 ax[0].imshow(im, cmap=plt.cm.gray)
 ax[0].axis('off')

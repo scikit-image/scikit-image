@@ -3,10 +3,12 @@ from skimage._shared.testing import assert_array_equal
 from skimage._shared.testing import assert_almost_equal, assert_warns
 from skimage import data
 from skimage import img_as_float
+from skimage import draw
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import test_parallel, expected_warnings
 from skimage._shared import testing
+import pytest
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -15,6 +17,15 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
                              hessian_matrix_det, shape_index)
+
+
+@pytest.fixture
+def im3d():
+    r = 10
+    pad = 10
+    im3 = draw.ellipsoid(r, r, r)
+    im3 = np.pad(im3, pad, mode='constant').astype(np.uint8)
+    return im3
 
 
 def test_structure_tensor():
@@ -97,8 +108,8 @@ def test_structure_tensor_eigvals():
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
-    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
+    H = hessian_matrix(square, sigma=0.1, order='rc')
+    l1, l2 = hessian_matrix_eigvals(H)
     assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
                                       [0, 1,  0, 1, 0],
                                       [2, 0, -2, 0, 2],
@@ -111,6 +122,26 @@ def test_hessian_matrix_eigvals():
                                       [0,  0,  0,  0, 0]]))
 
 
+def test_hessian_matrix_eigvals_3d(im3d):
+    H = hessian_matrix(im3d)
+    E = hessian_matrix_eigvals(H)
+    # test descending order:
+    e0, e1, e2 = E
+    assert np.all(e0 >= e1) and np.all(e1 >= e2)
+
+    E0, E1, E2 = E[:, E.shape[1] // 2]  # cross section
+    row_center, col_center = np.array(E0.shape) // 2
+    circles = [draw.circle_perimeter(row_center, col_center, radius,
+                                     shape=E0.shape)
+               for radius in range(1, E0.shape[1] // 2 - 1)]
+    response0 = np.array([np.mean(E0[c]) for c in circles])
+    response2 = np.array([np.mean(E2[c]) for c in circles])
+    # eigenvalues are negative just inside the sphere, positive just outside
+    assert np.argmin(response2) < np.argmax(response0)
+    assert np.min(response2) < 0
+    assert np.max(response0) > 0
+
+
 @test_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
@@ -119,10 +150,28 @@ def test_hessian_matrix_det():
     assert_almost_equal(det, 0, decimal=3)
 
 
+def test_hessian_matrix_det_3d(im3d):
+    D = hessian_matrix_det(im3d)
+    D0 = D[D.shape[0] // 2]
+    row_center, col_center = np.array(D0.shape) // 2
+    # testing in 3D is hard. We test this by showing that you get the
+    # expected flat-then-low-then-high 2nd derivative response in a circle
+    # around the midplane of the sphere.
+    circles = [draw.circle_perimeter(row_center, col_center, r, shape=D0.shape)
+               for r in range(1, D0.shape[1] // 2 - 1)]
+    response = np.array([np.mean(D0[c]) for c in circles])
+    lowest = np.argmin(response)
+    highest = np.argmax(response)
+    assert lowest < highest
+    assert response[lowest] < 0
+    assert response[highest] > 0
+
+
 def test_shape_index():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    s = shape_index(square, sigma=0.1)
+    with expected_warnings(['divide by zero', 'invalid value']):
+        s = shape_index(square, sigma=0.1)
     assert_almost_equal(
         s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
                      [ np.nan,      0, np.nan,      0, np.nan],

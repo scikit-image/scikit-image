@@ -8,7 +8,8 @@ from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
 from skimage import data_dir
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose
+from skimage._shared.testing import (assert_equal, assert_allclose,
+                                     expected_warnings)
 from skimage._shared.utils import all_warnings
 
 
@@ -158,14 +159,14 @@ def test_update_on_save():
     assert pic.modified
     assert pic.path is None
 
-    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    fd, filename = tempfile.mkstemp(suffix=".png")
     os.close(fd)
     try:
         pic.save(filename)
 
         assert not pic.modified
         assert_equal(pic.path, os.path.abspath(filename))
-        assert_equal(pic.format, "jpeg")
+        assert_equal(pic.format, "png")
     finally:
         os.unlink(filename)
 
@@ -174,9 +175,10 @@ def test_save_with_alpha_channel():
     # create an image with an alpha channel
     pic = novice.Picture(array=np.zeros((3, 3, 4)))
 
-    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    fd, filename = tempfile.mkstemp(suffix=".png")
     os.close(fd)
-    pic.save(filename)
+    with expected_warnings(['is a low contrast']):
+        pic.save(filename)
     os.unlink(filename)
 
 

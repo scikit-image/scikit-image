@@ -54,11 +54,8 @@ fig.tight_layout()
 
 image = img_as_ubyte(data.camera())
 
-fig, (ax0, ax1) = plt.subplots(ncols=2,
-                               figsize=(12, 4),
-                               sharex=True,
-                               sharey=True,
-                               subplot_kw={"adjustable": "box-forced"})
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(12, 4),
+                               sharex=True, sharey=True)
 
 img0 = ax0.imshow(image, cmap=plt.cm.gray)
 ax0.set_title("Image")

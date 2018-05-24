@@ -33,7 +33,7 @@ API Changes
 Deprecations
 ------------
 
-- Python 2.6 support has been dropped. Minimal required Python version is 2.7.
+
 
 
 Contributors to this release
