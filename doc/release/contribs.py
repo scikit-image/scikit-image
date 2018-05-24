@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import subprocess
-import sys
-import os
+import sys, os
 import string
 import shlex
 import json
+from datetime import datetime
+import math
+import time
 
 if sys.version_info[0] < 3:
     from urllib import urlopen, urlencode
@@ -15,11 +17,10 @@ else:
     from urllib.parse import urlencode
     from urllib.error import HTTPError
 
-USER = 'scikit-image'
-REPO = 'scikit-image'
+GH_USER = 'scikit-image'
+GH_REPO = 'scikit-image'
+
 GH_TOKEN = os.environ.get('GH_TOKEN')
-if GH_TOKEN is None:
-    print('No GH_TOKEN found. API may be timed out.')
 
 if len(sys.argv) != 2:
     print("Usage: ./contribs.py tag-of-previous-release")
@@ -33,72 +34,96 @@ def call(cmd):
                                    universal_newlines=True).split('\n')
 
 
-def req(url):
+def request(url, query=None):
+    query_string = ''
+    if query:
+        query_string += urlencode(query)
+    if GH_TOKEN:
+        if query_string:
+            query_string += '&'
+        query_string += 'access_token=' + GH_TOKEN
+    if query_string:
+        query_string = '?' + query_string
+
     try:
-        response = urlopen(url).read()
-        if isinstance(response, bytes):
-            response = response.decode('utf-8')
+        response = urlopen(url + query_string).read()
         return json.loads(response)
-    except HTTPError:
-        print('=== API limit rate exceeded ===')
-    return None
+    except HTTPError as e:
+        if GH_TOKEN and e.hdrs.get('X-RateLimit-Remaining') == 0:
+            # wait until can try again
+            reset = datetime.fromtimestamp(e.hdrs['X-RateLimit-Reset'])
+            time_left = reset - datetime.today()
+            time_left = math.ceil(time_left.total_seconds())
+            time.sleep(time_left)
+            request(url, query=query)
+        else:
+            raise Exception(e.info)
 
 
-def get_user_name(login):
+def get_user(login):
     # See https://developer.github.com/v3/users/#get-a-single-user
     url = 'https://api.github.com/users/' + login
-    if GH_TOKEN is not None:
-        url += '?access_token=' + GH_TOKEN
-    user = req(url)
-    if user is None:
-        return None
-    return user.get('name')
+    user = request(url)
+    return user
+
+
+def get_merged_pulls(user, repo, date):
+    # See https://developer.github.com/v3/search/#search-issues
+    # See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
+    query = 'user:%s repo:%s merged:>=%s' % (user, repo, date)
+    url = 'https://api.github.com/search/issues'
+    merges = request(url, query=dict(q=query))
+    return merges
+
+
+def get_reviews(user, repo, pull):
+    # See https://developer.github.com/v3/pulls/reviews/
+    url = 'https://api.github.com/repos/%s/%s/pulls/%s/reviews'
+    url %= user, repo, pull
+    reviews = request(url)
+    return reviews
 
 
 # See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
 tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
-print("Release %s was on %s\n" % (tag, tag_date))
-
 num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
-print("A total of %s changes have been committed.\n" % num_commits)
-
 authors = call("git log --since='%s' --format=%%aN" % tag_date)
-authors = [a.strip() for a in authors if a.strip()]
+authors = {a.strip() for a in authors if a.strip()}
 
-# See https://developer.github.com/v3/search/#search-issues
-# See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
-query_string = ('user:' + USER + ' '
-                + 'repo:' + REPO + ' '
-                + 'merged:>=' + tag_date)
-merges_url = ('https://api.github.com/search/issues?'
-              + urlencode(dict(q=query_string)))
-if GH_TOKEN is not None:
-    merges_url += '&access_token=' + GH_TOKEN
-merges = req(merges_url)
-PRs = []
 
-if merges is not None:
-    merges = merges.get('items')
-    print("It contained the following %d merged pull requests:"
-          % len(merges))
-    for merge in merges:
-        PR = str(merge.get('number'))
-        title = merge.get('title')
-        PRs += [PR]
+merges = get_merged_pulls(GH_USER, GH_REPO, tag_date)
+num_merges = merges['total_count']
 
-        author = merge.get('user')
-        if author is not None:
-            author = author.get('login')
-            if author is not None:
-                name = get_user_name(author)
-                if name is not None:
-                    author = name
-                if author not in authors:
-                    authors += [author]
+pulls = merges['items']
+reviewers = set()
+users = dict()  # keep track of known usernames
+for pull in pulls:
+    id = pull['number']
+    title = pull['title']
 
-        print('- ' + PR + ' : ' + title)
+    try:
+        author = pull['user']['login']
+        if author not in users:
+            name = get_user(author).get('name')
+            if name is None:
+                name = author
+            authors.add(name)
+            users[author] = name
+    except KeyError:
+        pass
 
-print("\nMade by the following committers [alphabetical by last name]:")
+    reviews = get_reviews(GH_USER, GH_REPO, id)
+    for review in reviews:
+        try:
+            reviewer = review['user']['login']
+            if reviewer not in users:
+                name = get_user(reviewer).get('name')
+                if name is None:
+                    name = handle
+                reviewers.add(name)
+                users[reviewer] = name
+        except KeyError:
+            pass
 
 
 def key(name):
@@ -107,49 +132,19 @@ def key(name):
         return name[-1]
 
 
-authors = sorted(set(authors), key=key)
+print("Release %s was on %s\n" % (tag, tag_date))
+print("A total of %s changes have been committed.\n" % num_commits)
 
-for a in authors:
-    print('- ' + a)
+print("It contained the following %d merged pull requests:" % num_merges)
+for pull in pulls:
+    print('- %s : %s' % (pull['number'], pull['title']))
+print()
 
+print("Made by the following committers [alphabetical by last name]:")
+for a in sorted(authors, key=key):
+    print('- %s' % a)
+print()
 
-# See https://developer.github.com/v3/pulls/reviews/
-pr_url = ('https://api.github.com/repos/'
-          + USER + '/'
-          + REPO
-          + '/pulls/%s/reviews')
-if GH_TOKEN is not None:
-    pr_url += '?access_token=' + GH_TOKEN
-reviewers = {}
-
-for PR in PRs:
-    req_url = pr_url % PR
-    reviews = req(req_url)
-
-    if reviews is None:
-        continue
-    for review in reviews:
-        if not isinstance(review, dict):
-            continue
-        reviewer = review.get('user')
-        if reviewer is not None:
-            handle = reviewer.get('login')
-        reviewer = get_user_name(handle)
-
-        if reviewer is None:
-            reviewer = handle
-
-        if handle is not None:
-            reviewers[handle] = reviewer
-
-reviewers = reviewers.values()
-
-if reviewers == []:
-    quit()
-
-print('\nReviewed by the following reviewers [alphabetical by last name]:')
-
-reviewers = sorted(set(reviewers), key=key)
-
-for r in reviewers:
-    print('- ' + r)
+print('Reviewed by the following reviewers [alphabetical by last name]:')
+for r in sorted(reviewers, key=key):
+    print('- %s' % r)
