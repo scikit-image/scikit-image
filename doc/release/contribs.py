@@ -134,6 +134,8 @@ for pull in pulls:
     for review in reviews:
         try:
             reviewer = review['user']['login']
+            if author == reviewer:  # author reviewing own PR
+                continue
             if reviewer not in users:
                 name = get_user(reviewer).get('name')
                 if name is None:
