@@ -93,7 +93,7 @@ Deprecations
 Highlights
 ----------
 This release is the result of 8 months of work.
-It contains the following 57 merges by 42 contributors:
+It contains the following 60 merges by 42 contributors:
 
 - Make simple watershed fast again (#2821)
 - Slice PIL palette correctly using extreme image value. (#2818)
@@ -152,6 +152,9 @@ It contains the following 57 merges by 42 contributors:
 - Example for haar-like features (#2898)
 - Force Appveyor to fail on failed tests (#3093)
 - speedup img_as_float by making division multiplication and avoiding unecessary allocation (#3056)
+- Add `threshold_local` to `filters` module namespace (#3096)
+- Optimize _probabilistic_hough_line function (#3100)
+- Replace grey by gray where no deprecation is needed (#3098)
 
 
 Contributors to this release
