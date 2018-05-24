@@ -123,7 +123,9 @@ for pull in pulls:
             name = get_user(author).get('name')
             if name is None:
                 name = author
-            authors.add(name)
+            elif author in authors:
+                authors.discard(author)
+                authors.add(name)
             users[author] = name
     except KeyError:
         pass
@@ -136,6 +138,9 @@ for pull in pulls:
                 name = get_user(reviewer).get('name')
                 if name is None:
                     name = handle
+                elif reviewer in authors:
+                    authors.discard(reviewer)
+                    authors.add(name)
                 users[reviewer] = name
             else:
                 name = users[reviewer]
