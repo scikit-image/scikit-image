@@ -134,8 +134,10 @@ for pull in pulls:
                 name = get_user(reviewer).get('name')
                 if name is None:
                     name = handle
-                reviewers.add(name)
                 users[reviewer] = name
+            else:
+                name = users[reviewer]
+            reviewers.add(name)
         except KeyError:
             pass
 
