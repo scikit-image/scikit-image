@@ -48,6 +48,8 @@ def request(url, query=None):
 
     try:
         response = urlopen(url + query_string).read()
+        if isinstance(response, bytes):
+            response = response.decode('utf-8')
         return json.loads(response)
     except HTTPError as e:
         if GH_TOKEN and e.hdrs.get('X-RateLimit-Remaining') == 0:
