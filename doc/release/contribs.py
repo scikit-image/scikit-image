@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import subprocess
-import sys, os
+import os
+import sys
 import string
 import shlex
 import json
@@ -23,7 +24,7 @@ GH_REPO = 'scikit-image'
 GH_TOKEN = os.environ.get('GH_TOKEN')
 
 if len(sys.argv) != 2:
-    print("Usage: ./contribs.py tag-of-previous-release")
+    print("Usage: ./contribs.py [--latest|tag-of-previous-release]")
     sys.exit(-1)
 
 tag = sys.argv[1]
@@ -83,6 +84,11 @@ def get_reviews(user, repo, pull):
     reviews = request(url)
     return reviews
 
+
+if tag == '--latest':
+    tag = call('git tag -l v*.*.* --sort="-version:refname"')[0]
+    if tag == '':
+        tag = call('git rev-list HEAD')[-1]
 
 # See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
 tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
