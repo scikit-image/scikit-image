@@ -2,11 +2,13 @@ Announcement: scikit-image 0.14.0
 =================================
 
 We're happy to announce the release of scikit-image v0.14.0!
-This is the last major release with an official support of Python 2, the future
+
+This is the last major release with an official support of Python 2, future
 releases will be developed broadly using Python 3 capabilities, and will be
-tested against Python 3 and greater environments only. This release is also a
-long-time support (LTS) release, meaning that it will receive important
-backports and bugfixes for several years.
+tested against Python 3 (or greater) environments only.
+
+This release is also a long-time support (LTS) release, which means that it will
+receive important backports and bugfixes for several years.
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
@@ -90,7 +92,8 @@ Deprecations
 
 Highlights
 ----------
-This release is the result of 8 months of work. It contains the following 57 merges by 42 contributors:
+This release is the result of 8 months of work.
+It contains the following 57 merges by 42 contributors:
 
 - Make simple watershed fast again (#2821)
 - Slice PIL palette correctly using extreme image value. (#2818)
@@ -140,7 +143,7 @@ This release is the result of 8 months of work. It contains the following 57 mer
 - Bugfix: LineModelND.residuals does not use the optional parameter `params` (#2979)
 - Add Computation of Image Moments to Coordinates (#2859)
 - Type dependent inversion (#3030)
-- * Minor style and documentation updates for #2859 (#3023)
+- Minor style and documentation updates for #2859 (#3023)
 - Fix RuntimeError: generator raised StopIteration on Python 3.7 (#3038)
 - Correct reference for the coins sample image (#3042)
 - Switch to basis numpy int dtypes in dtype_range (#3050)
@@ -191,10 +194,41 @@ Contributors to this release
 - Stefan van der Walt
 - Scott Warchal
 - Nicholas Weir
-- blochl
 - corrado9999
 - ed1d1a8d
 - eepaillard
 - mikigom
 - mutterer
 
+
+We'd like also to thank all the people who contributed their time to perform the reviews:
+
+- Leonid Bloch
+- Jirka Borovec
+- François Boulogne
+- Kira Evans
+- Christoph Gohlke
+- Peter Goldsborough
+- Emmanuelle Gouillart
+- Mark Harfouche
+- Almar Klein
+- Gregory R. Lee
+- Guillaume Lemaitre
+- Kevin Mader
+- Joan Massich
+- Viraj Navkal
+- Juan Nunez-Iglesias
+- Daniil Pakhomov
+- Egor Panfilov
+- Oleksandr Pavlyk
+- Alex Rothberg
+- Johannes Schönberger
+- Steven Silvester
+- Saurav R. Tuladhar
+- Nelle Varoquaux
+- Stefan van der Walt
+- Thomas Walter
+- Josh Warner
+- Eric Wieser
+- eepaillard
+- nelzas
