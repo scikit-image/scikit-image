@@ -1,7 +1,7 @@
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
                               hough_circle_peaks, hough_ellipse)
-from .radon_transform import (radon, iradon, iradon_sart,
+from .radon_transform import (radon, iradon, iradon_filter, iradon_sart,
                               order_angles_golden_ratio)
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
@@ -26,6 +26,7 @@ __all__ = ['hough_circle',
            'hough_line_peaks',
            'radon',
            'iradon',
+           'iradon_filter',
            'iradon_sart',
            'order_angles_golden_ratio',
            'frt2',

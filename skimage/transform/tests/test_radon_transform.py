@@ -6,7 +6,7 @@ import itertools
 import numpy as np
 from skimage import data_dir
 from skimage.io import imread
-from skimage.transform import radon, iradon, iradon_sart, rescale
+from skimage.transform import radon, iradon, iradon_sart, rescale, iradon_filter
 
 from skimage._shared import testing
 from skimage._shared.testing import test_parallel
@@ -65,7 +65,19 @@ def test_iradon_bias_circular_phantom():
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
     assert( roi_err < tol )
-    
+
+
+def test_iradon_filter_shepp_logan_peaks():
+    """
+
+    """
+    filter_name = 'shepp-logan'
+    size = 1024
+
+    fourier_filter = iradon_filter(filter_name, size)
+    import matplotlib.pyplot as plt
+    plt.plot(fourier_filter), plt.show()
+
 
 def check_radon_center(shape, circle):
     # Create a test image with only a single non-zero pixel at the origin
