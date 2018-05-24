@@ -11,6 +11,9 @@ then
     git config --global user.email "travis@travis-ci.com"
     git config --global user.name "Travis Bot"
 
+    # build docs a second time to fix links to Javascript
+    (cd doc && make html)
+
     git clone --quiet --branch=gh-pages https://${GH_REF} doc_build
     cd doc_build
 
