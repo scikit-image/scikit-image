@@ -96,7 +96,7 @@ Deprecations
 Highlights
 ----------
 This release is the result of 8 months of work.
-It contains the following 105 merged pull requests by 42 authors:
+It contains the following 105 merged pull requests by 42 committers:
 
 - Make HOG visualization use midpoints of orientation bins (#2525)
 - Update conditional requirement for PySide (#2578)
