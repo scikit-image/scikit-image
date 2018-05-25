@@ -3,16 +3,15 @@ Announcement: scikit-image 0.14.0
 
 We're happy to announce the release of scikit-image v0.14.0!
 
-This is the last major release with an official support of Python 2, future
-releases will be developed broadly using Python 3 capabilities, and will be
-tested against Python 3 (or greater) environments only.
-
-This release is also a long-time support (LTS) release, which means that it will
-receive important backports and bugfixes for several years.
-
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
+
+This is the last major release with official support for Python 2.7. Future
+releases will be developed using Python 3 only-syntax.
+
+However, 0.14 is a long-time support (LTS) release and will receive bug fixes
+and backported features deemed important (by community demand) for several years.
 
 For more information, examples, and documentation, please visit our website:
 
@@ -21,32 +20,35 @@ http://scikit-image.org
 
 New Features
 ------------
-- Manual segmentation with matplotlib:
+- Lookfor function to search across the library: ``skimage.lookfor``. (#2713)
+- Manual segmentation with matplotlib for fast data annotation:
   ``skimage.future.manual_polygon_segmentation``,
   ``skimage.future.manual_lasso_segmentation``. (#2584)
 - Hysteresis thresholding:
   ``skimage.filters.apply_hysteresis_threshold``. (#2665)
-- Lookfor function: ``skimage.lookfor``. (#2713)
-- Reworked montage function: ``skimage.util.montage``. (#2626)
-- 2D and 3D segmentation with morphological snakes:
-  ``skimage.segmentation.morphological_chan_vese``,
-  ``skimage.segmentation.morphological_geodesic_active_contour``. (#2791)
-- nD support for image moments:
-  ``skimage.measure.moments_central``, ``skimage.measure.moments_central``,
-  ``skimage.measure.moments_normalized``, ``skimage.measure.moments_hu``. (#2603)
+- Segmentation with morphological snakes:
+  ``skimage.segmentation.morphological_chan_vese`` (2D),
+  ``skimage.segmentation.morphological_geodesic_active_contour`` (2D and 3D). (#2791)
+- nD support for image moments: ``skimage.measure.moments_central``,
+  ``skimage.measure.moments_central``, ``skimage.measure.moments_normalized``,
+  ``skimage.measure.moments_hu``. This change leads to nD compatibility for many
+  regionprops. (#2603)
+- Image moments from coordinate input: ``skimage.measure.moments_coords``,
+  ``skimage.measure.moments_coords_central``. (#2859)
 - Inertia tensor and its eigenvalues can now be computed outside of
   regionprops; available in ``skimage.measure.inertia_tensor``. (#2603)
 - Cycle-spinning function for approximating shift-invariance by averaging
   results from a series of spatial shifts:
   ``skimage.restoration.cycle_spin``. (#2647)
-- Data generation with random_shapes function:
-  ``skimage.draw.random_shapes``. (#2773)
 - Haar-like feature: ``skimage.feature.haar_like_feature``,
   ``skimage.feature.haar_like_feature_coord``,
   ``skimage.feature.draw_haar_like_feature``. (#2848)
-- Subset of LFW database: ``skimage.data.cbcl_face_database``. (#2905)
-- Image moments from coordinate input: ``skimage.measure.moments_coords``,
-  ``skimage.measure.moments_coords_central``. (#2859)
+- Data generation with random_shapes function:
+  ``skimage.draw.random_shapes``. (#277)
+- Subset of LFW (Labeled Faces in the Wild) database:
+  ``skimage.data.cbcl_face_database``. (#2905)
+- Fully reworked montage function (now with a better padding behavior):
+  ``skimage.util.montage``. (#2626)
 
 
 Improvements
@@ -64,7 +66,8 @@ Improvements
 
 API Changes
 -----------
-- ``skimage.util.montage.montage2d`` is now available as
+- ``skimage.util.montage.`` namespace has been removed, and
+  ``skimage.util.montage.montage2d`` function is now available as
   ``skimage.util.montage2d``.
 - ``skimage.morphology.binary_erosion`` now uses ``True`` as border
   value, and is now consistent with ``skimage.morphology.erosion``.
@@ -73,7 +76,7 @@ API Changes
 Deprecations
 ------------
 - ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
-  Use ``skimage.util.montage`` instead.
+  Use ``skimage.util.montage`` function instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
   ``anti_aliasing`` option that avoids aliasing artifacts when down-sampling
@@ -204,7 +207,7 @@ Contributors to this release
 - mutterer
 
 
-We'd like also to thank all the people who contributed their time to perform the reviews:
+We'd also like to thank all the people who contributed their time to perform the reviews:
 
 - Leonid Bloch
 - Jirka Borovec
