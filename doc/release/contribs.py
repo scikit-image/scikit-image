@@ -29,6 +29,11 @@ if len(sys.argv) != 2:
 
 tag = sys.argv[1]
 
+if GH_TOKEN is None:
+    print("It is recommended that the environment variable `GH_TOKEN` "
+          "be set to avoid running into problems with rate limiting. "
+          "One can be acquired at https://github.com/settings/tokens.\n\n")
+
 
 def call(cmd):
     return subprocess.check_output(shlex.split(cmd),
