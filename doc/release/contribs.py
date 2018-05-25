@@ -157,19 +157,21 @@ def key(name):
         return name[-1]
 
 
-print("Release %s was on %s\n" % (tag, tag_date))
-print("A total of %s changes have been committed.\n" % num_commits)
+print('Release %s was on %s\n' % (tag, tag_date))
+print('A total of %s changes have been committed.\n' % num_commits)
 
-print("It contained the following %d merged pull requests:" % num_merges)
+print('It contained the following %d merged pull requests:' % num_merges)
 for pull in pulls:
-    print('- %s : %s' % (pull['number'], pull['title']))
+    print('- %s (#%s)' % (pull['title'], pull['number']))
 print()
 
-print("Made by the following committers [alphabetical by last name]:")
+print('Made by the following %d committers [alphabetical by last name]:'
+      % len(authors))
 for a in sorted(authors, key=key):
     print('- %s' % a)
 print()
 
-print('Reviewed by the following reviewers [alphabetical by last name]:')
+print('Reviewed by the following %d reviewers [alphabetical by last name]:'
+      % len(reviewers))
 for r in sorted(reviewers, key=key):
     print('- %s' % r)
