@@ -108,16 +108,18 @@ if tag == '--latest':
 # See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
 tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
 num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
-authors = call("git log --since='%s' --format=%%aN" % tag_date)
-authors = {a.strip() for a in authors if a.strip()}
+committers = call("git log --since='%s' --format=%%aN" % tag_date)
+committers = {c.strip() for c in committers if c.strip()}
 
 
 merges = get_merged_pulls(GH_USER, GH_REPO, tag_date)
 num_merges = merges['total_count']
 
-pulls = merges['items']
 reviewers = set()
+authors = set()
 users = dict()  # keep track of known usernames
+
+pulls = merges['items']
 for pull in pulls:
     id = pull['number']
     title = pull['title']
@@ -128,10 +130,13 @@ for pull in pulls:
             name = get_user(author).get('name')
             if name is None:
                 name = author
-            elif author in authors:
-                authors.discard(author)
-                authors.add(name)
+            elif author in committers:
+                committers.discard(author)
+                committers.add(name)
             users[author] = name
+        else:
+            name = users[author]
+        authors.add(name)
     except KeyError:
         author = None
 
@@ -145,9 +150,9 @@ for pull in pulls:
                 name = get_user(reviewer).get('name')
                 if name is None:
                     name = handle
-                elif reviewer in authors:
-                    authors.discard(reviewer)
-                    authors.add(name)
+                elif reviewer in committers:
+                    committers.discard(reviewer)
+                    committers.add(name)
                 users[reviewer] = name
             else:
                 name = users[reviewer]
@@ -165,12 +170,18 @@ def key(name):
 print('Release %s was on %s\n' % (tag, tag_date))
 print('A total of %s changes have been committed.\n' % num_commits)
 
+print('Made by the following %d committers [alphabetical by last name]:'
+      % len(committers))
+for c in sorted(committers, key=key):
+    print('- %s' % c)
+print()
+
 print('It contained the following %d merged pull requests:' % num_merges)
 for pull in pulls:
     print('- %s (#%s)' % (pull['title'], pull['number']))
 print()
 
-print('Made by the following %d committers [alphabetical by last name]:'
+print('Created by the following %d authors [alphabetical by last name]:'
       % len(authors))
 for a in sorted(authors, key=key):
     print('- %s' % a)
