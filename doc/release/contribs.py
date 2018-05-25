@@ -78,7 +78,7 @@ def get_user(login):
 def get_merged_pulls(user, repo, date, page=1, results=0):
     # See https://developer.github.com/v3/search/#search-issues
     # See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
-    query = 'repo:%s/%s merged:>=%s' % (user, repo, date)
+    query = 'repo:%s/%s merged:>%s sort:created-asc' % (user, repo, date)
     url = 'https://api.github.com/search/issues'
     merges = request(url, query=dict(q=query, page=page, per_page=100))
 
@@ -133,7 +133,7 @@ for pull in pulls:
                 authors.add(name)
             users[author] = name
     except KeyError:
-        pass
+        author = None
 
     reviews = get_reviews(GH_USER, GH_REPO, id)
     for review in reviews:
