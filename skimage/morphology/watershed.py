@@ -120,14 +120,14 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
-def _offsets_to_raveled_neighbors(image_shape, selem, center):
+def _offsets_to_raveled_neighbors(image_shape, structure, center):
     """Compute offsets to a samples neighbors if the image would be raveled.
 
     Parameters
     ----------
     image_shape : tuple
         The shape of the image for which the offsets are computed.
-    selem : ndarray
+    structure : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
     center : sequence
@@ -144,8 +144,9 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center):
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
-    selem[tuple(center)] = 0  # Ignore the center; it's not a neighbor
-    connection_indices = np.transpose(np.nonzero(selem))
+    structure = structure.copy()  # Don't modify original input
+    structure[tuple(center)] = 0  # Ignore the center; it's not a neighbor
+    connection_indices = np.transpose(np.nonzero(structure))
     offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
                np.ravel_multi_index(center, image_shape))
     squared_distances = np.sum((connection_indices - center) ** 2, axis=1)

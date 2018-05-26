@@ -328,7 +328,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     return selem
 
 
-def local_maxima(image, connectivity=None, selem=None, indices=False,
+def local_maxima(image, selem=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local maxima of n-dimensional array.
 
@@ -340,16 +340,16 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
     ----------
     image : ndarray
         An n-dimensional array.
-    connectivity : int, optional
-        A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
-        equal to `connectivity` are considered neighbors. If not given, all
-        adjacent pixels are considered as part of the neighborhood. Ignored if
-        `selem` is not None.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must only contain 1's and 0's, have the same number
-        of dimensions as `image`.
+        of dimensions as `image`. If not given, all adjacent pixels are
+        considered as part of the neighborhood.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is larger or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
     indices : bool, optional
         If True, the output will be an array representing indices of local
         maxima. If False, the output will be an array of 0's and 1's with the
@@ -468,7 +468,7 @@ def local_maxima(image, connectivity=None, selem=None, indices=False,
         return flags
 
 
-def local_minima(image, connectivity=None, selem=None, indices=False,
+def local_minima(image, selem=None, connectivity=None, indices=False,
                  allow_borders=True):
     """Find local minima of n-dimensional array.
 
@@ -480,16 +480,16 @@ def local_minima(image, connectivity=None, selem=None, indices=False,
     ----------
     image : ndarray
         An n-dimensional array.
-    connectivity : int, optional
-        A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
-        equal to `connectivity` are considered neighbors. If not given, all
-        adjacent pixels are considered as part of the neighborhood. Ignored if
-        `selem` is not None.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must only contain 1's and 0's, have the same number
-        of dimensions as `image`.
+        of dimensions as `image`. If not given, all adjacent pixels are
+        considered as part of the neighborhood.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is larger or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
     indices : bool, optional
         If True, the output will be an array representing indices of local
         minima. If False, the output will be an array of 0's and 1's with the
@@ -568,8 +568,8 @@ def local_minima(image, connectivity=None, selem=None, indices=False,
     """
     return local_maxima(
         image=invert(image),
-        connectivity=connectivity,
         selem=selem,
+        connectivity=connectivity,
         indices=indices,
         allow_borders=allow_borders
     )
