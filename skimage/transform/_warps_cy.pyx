@@ -140,6 +140,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         interp_func = biquadratic_interpolation
     elif order == 3:
         interp_func = bicubic_interpolation
+    else:
+        raise ValueError("Unsupported interpolation order", order)
 
     with nogil:
         for tfr in range(out_r):
