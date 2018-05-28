@@ -10,6 +10,24 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bicubic_interpolation)
 
 
+cdef inline void _transform_metric(double x, double y, double* H,
+                                   double *x_, double *y_) nogil:
+    """Apply a metric transformation to a coordinate.
+
+    Parameters
+    ----------
+    x, y : double
+        Input coordinate.
+    H : (3,3) *double
+        Transformation matrix.
+    x_, y_ : *double
+        Output coordinate.
+
+    """
+    x_[0] = H[0] * x + H[2]
+    y_[0] = H[4] * y + H[5]
+
+
 cdef inline void _transform_affine(double x, double y, double* H,
                                    double *x_, double *y_) nogil:
     """Apply an affine transformation to a coordinate.
@@ -126,7 +144,10 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     cdef void (*transform_func)(double, double, double*, double*, double*) nogil
     if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
-        transform_func = _transform_affine
+        if M[0, 1] == 0 and M[1, 0] == 0:
+            transform_func = _transform_metric
+        else:
+            transform_func = _transform_affine
     else:
         transform_func = _transform_projective
 
