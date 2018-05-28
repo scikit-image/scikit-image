@@ -230,7 +230,8 @@ def convert_to_float(image, preserve_range):
         Input image.
     preserve_range : bool
         Determines if the range of the image should be kept or transformed
-        using img_as_float.
+        using img_as_float. See URL for more
+        http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -242,4 +243,3 @@ def convert_to_float(image, preserve_range):
     else:
         image = img_as_float(image)
     return image
-
