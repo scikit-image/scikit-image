@@ -378,7 +378,36 @@ def img_as_float64(image, force_copy=False):
     return convert(image, np.float64, force_copy)
 
 
-img_as_float = img_as_float64
+def img_as_float(image, force_copy=False, default_dtype=np.float64):
+    """Ensure that an image is of floating point type.
+
+    First checks if the image is a floating point (any precision). If not
+    it will convert it to the desired precision (by default, 64-bit).
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+    default_dtype: np.dtype
+        Desired for the image if it is not already a float.
+
+    Returns
+    -------
+    out : ndarray of desired precision
+        Output image.
+    """
+    if np.dtype(default_dtype).kind != 'f':
+        raise ValueError('Provided default_dtype should be a float.')
+
+    if image.dtype.kind == 'f':
+        if force_copy:
+            return image.copy()
+        else:
+            return image
+    else:
+        return convert(image, dtype=default_dtype, force_copy=force_copy)
 
 
 def img_as_uint(image, force_copy=False):
