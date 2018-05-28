@@ -3,7 +3,7 @@ from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.filters._gabor import (gabor_kernel, gabor, _sigma_prefactor,
-                                    _decompose_quasipolar_coords, _normalize,
+                                    _convert_quasipolar_coords, _normalize,
                                     _compute_rotation_matrix)
 
 
@@ -37,7 +37,7 @@ def test_sigma_prefactor():
     assert_almost_equal(_sigma_prefactor(0.5), 1.09, 2)
 
 
-def test_decompose_quasipolar_coords():
+def test_convert_quasipolar_coords():
     s = np.sin
     c = np.cos
 
@@ -45,17 +45,17 @@ def test_decompose_quasipolar_coords():
         return n * np.pi / d
 
     # test polar case
-    y, x = _decompose_quasipolar_coords(2, (p(1, 4),))
+    y, x = _convert_quasipolar_coords(2, (p(1, 4),))
     assert_almost_equal([x, y], [np.sqrt(2), np.sqrt(2)])
 
     # test spherical case
-    y, x, z = _decompose_quasipolar_coords(10, (p(1, 4), p(1, 2)))
+    y, x, z = _convert_quasipolar_coords(10, (p(1, 4), p(1, 2)))
     assert_almost_equal([x, y, z], [10 * s(p(1, 2)) * c(p(1, 4)),
                                     10 * s(p(1, 2)) * s(p(1, 4)),
                                     10 * c(p(1, 2))])
 
     # test higher-dimensional case
-    coords = _decompose_quasipolar_coords(1, (p(1, 3),
+    coords = _convert_quasipolar_coords(1, (p(1, 3),
                                               p(5, 6),
                                               p(3, 4),
                                               p(1, 6),
@@ -141,7 +141,7 @@ def test_compute_rotation_matrix_homogeneous():
 def test_compute_rotation_matrix_quasipolar():
     # 2D case
     X = np.asarray([1, 0])
-    y, x = _decompose_quasipolar_coords(5, [np.pi / 6])
+    y, x = _convert_quasipolar_coords(5, [np.pi / 6])
     Y = np.asarray([x, y])
 
     M = _compute_rotation_matrix(X, Y)
@@ -153,7 +153,7 @@ def test_compute_rotation_matrix_quasipolar():
     # FIXME: actually check components of the matrix; this test is redundant
     # 3D case
     X = np.asarray([0, 1, 0])
-    y, x, z = _decompose_quasipolar_coords(1, [np.pi / 3, np.pi / 6])
+    y, x, z = _convert_quasipolar_coords(1, [np.pi / 3, np.pi / 6])
     Y = np.asarray([x, y, z])
 
     M = _compute_rotation_matrix(X, Y)

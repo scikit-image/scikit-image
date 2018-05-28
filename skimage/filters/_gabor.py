@@ -32,18 +32,16 @@ def _normalize(x):
 
     norm = np.linalg.norm(u)
 
-    if not np.isclose(norm, 1):
-        u = u / norm
-
-    return u
+    return u / norm
 
 
-def _compute_projection_matrix(axis, indices=None):
-    """Generates a matrix that projects an axis onto the 0th coordinate axis.
+def _axis_0_rotation_matrix(u, indices=None):
+    """Generates a matrix that rotates a vector to coincide with the 0th (y-)
+       coordinate axis.
 
     Parameters
     ----------
-    axis : (N, ) array
+    u : (N, ) array
         Unit vector.
     indices : sequence of int, optional
         Indices of the components of `axis` that should be transformed.
@@ -61,12 +59,12 @@ def _compute_projection_matrix(axis, indices=None):
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
     """
-    ndim = len(axis)
+    ndim = len(u)
 
     if indices is None:
         indices = range(ndim)
 
-    x = axis
+    x = u
     w = indices
 
     R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
@@ -79,19 +77,23 @@ def _compute_projection_matrix(axis, indices=None):
             if n + step >= len(w):
                 break
 
-            r2 = x[w[n]] * x[w[n]] + x[w[n + step]] * x[w[n + step]]
-            if r2 > 0:
-                r = np.sqrt(r2)
-                pcos = x[w[n]] / r  # Calculation of coefficients
-                psin = -x[w[n + step]] / r
+            i = w[n]
+            j = w[n + step]
+
+            r = np.hypot(x[i], x[j])
+            if r > 0:
+                # Calculation of coefficients
+                pcos = x[i] / r
+                psin = -x[j] / r
 
                 # Base 2-dimensional rotation
-                A[w[n], w[n]] = pcos
-                A[w[n], w[n + step]] = -psin
-                A[w[n + step], w[n]] = psin
-                A[w[n + step], w[n + step]] = pcos
-                x[w[n + step]] = 0
-                x[w[n]] = r
+                A[i, i] = pcos
+                A[i, j] = -psin
+                A[j, i] = psin
+                A[j, j] = pcos
+
+                x[i] = r
+                x[j] = 0
 
         R = np.matmul(A, R)  # Multiply R by current matrix of stage A
 
@@ -109,7 +111,7 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     dst : (N, ) array
         Vector of desired direction.
     use_homogeneous_coords : bool, optional
-        If the input vectors should be treated as homoegeneous coordinates.
+        If the input vectors should be treated as homogeneous coordinates.
 
     Returns
     -------
@@ -136,8 +138,8 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     True
     """
     homogeneous_slice = -use_homogeneous_coords or None
-    X = _normalize(np.array(src)[:homogeneous_slice])
-    Y = _normalize(np.array(dst)[:homogeneous_slice])
+    X = _normalize(src[:homogeneous_slice])
+    Y = _normalize(dst[:homogeneous_slice])
 
     if use_homogeneous_coords:
         X = np.append(X, 1)
@@ -145,17 +147,19 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
 
     w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
 
-    Mx = _compute_projection_matrix(X, w)
-    My = _compute_projection_matrix(Y, w)
-    M = np.matmul(My.T, Mx)
+    Mx = _axis_0_rotation_matrix(X, w)
+    My = _axis_0_rotation_matrix(Y, w)
+
+    My_inverse = My.T  # since My is orthogonal its inverse is its transpose
+    M = np.matmul(My_inverse, Mx)
 
     return M
 
 
-def _decompose_quasipolar_coords(r, thetas):
-    """Decomposes quasipolar coordinates into their cartesian components.
+def _convert_quasipolar_coords(r, thetas):
+    """Converts quasipolar coordinates to their Cartesian equivalents.
 
-    Quasipolar coordinate decomposition is defined as follows:
+    Quasipolar coordinate conversion is defined as follows:
 
     .. math::
 
@@ -180,7 +184,7 @@ def _decompose_quasipolar_coords(r, thetas):
     Returns
     -------
     coords : (``N + 1``, ) array
-        Cartesian components of the quasipolar coordinates.
+        Cartesian conversion of the quasipolar coordinates.
 
     References
     ----------
@@ -190,7 +194,7 @@ def _decompose_quasipolar_coords(r, thetas):
 
     Notes
     -----
-    In terms of polar coordinate decomposition:
+    In terms of polar coordinate conversion:
 
     .. math::
 
@@ -201,7 +205,7 @@ def _decompose_quasipolar_coords(r, thetas):
          \end{array}
          \right.
 
-    In terms of spherical coordinate decomposition:
+    In terms of spherical coordinate conversion:
 
     .. math::
 
@@ -215,9 +219,9 @@ def _decompose_quasipolar_coords(r, thetas):
 
     Examples
     --------
-    >>> _decompose_quasipolar_coords(1, [0])
+    >>> _convert_quasipolar_coords(1, [0])
     array([ 0.,  1.])
-    >>> _decompose_quasipolar_coords(10, [np.pi / 2, 0])
+    >>> _convert_quasipolar_coords(10, [np.pi / 2, 0])
     array([  0.,   0.,  10.])
     """
     num_axes = len(thetas) + 1
@@ -235,13 +239,13 @@ def _decompose_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian_kernel(image, center=0, sigma=1, ndim=None):
+def _gaussian_kernel(coords, center=0, sigma=1, ndim=None):
     """Multi-dimensional Gaussian kernel.
 
     Parameters
     ----------
-    image : non-complex array
-        Linear space to map the filter to.
+    coords : non-complex array
+        Coordinate matrices.
     center : scalar or sequence of scalars, optional
         Center of Gaussian kernel. The coordinates of the center are given for
         each axis as a sequence, or as a single number, in which case it is
@@ -260,26 +264,25 @@ def _gaussian_kernel(image, center=0, sigma=1, ndim=None):
 
     References
     ----------
-    .. [1] Bart M. ter Haar Romeny. Front-End Vision and Multi-Scale Image
-           Analysis. Computation Imaging and Vision, Vol. 27, Springer:
-           Dordrecht, 2003: pp. 37-51.
+    .. [1] Bart M. ter Haar Romeny. The Gaussian Kernel. In: Front-End Vision
+           and Multi-Scale Image Analysis. Computational Imaging and Vision,
+           Vol. 27, Springer: Dordrecht, 2003: pp. 37-51.
+           ISBN: 978-1-4020-8840-7
            https://doi.org/10.1007/978-1-4020-8840-7_3
     """
     if ndim is None:
-        ndim = np.ndim(image)
-
-    sigma_prod = np.prod(sigma)
+        ndim = np.ndim(coords)
 
     # normalization factor
-    norm = (2 * np.pi) ** (ndim / 2) * sigma_prod
+    norm = (2 * np.pi) ** (ndim / 2) * np.prod(sigma)
 
     # center image
-    image = np.asarray(image) - center
+    coords = np.asarray(coords) - center
 
-    norm_image = np.transpose(image.T / sigma) ** 2
+    scaled_coords = np.transpose(coords.T / sigma)
 
     # gaussian function
-    gauss = np.exp(-0.5 * np.sum(norm_image, axis=0))
+    gauss = np.exp(-0.5 * np.sum(scaled_coords ** 2, axis=0))
 
     return gauss / norm
 
@@ -396,7 +399,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
         axes = (axes,)
     axes = np.append(axes, np.setdiff1d(range(ndim), axes))
 
-    coords = _decompose_quasipolar_coords(1, theta)
+    coords = _convert_quasipolar_coords(1, theta)
     base_axis = (1,) + (0,) * (ndim - 1)
     rot = _compute_rotation_matrix(base_axis, coords[axes])
 
