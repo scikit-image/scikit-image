@@ -33,11 +33,12 @@ API Changes
 Deprecations
 ------------
 
-- Python 2 support has been dropped. Minimal required Python version is 3.4.
-  - ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
+- Python 2 support has been dropped in the development version. Users of the
+  development version should have Python >= 3.5.
+- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
-  ``anti_aliasing`` has been enabled.
+  ``anti_aliasing`` has been enabled by default.
 - ``regionprops`` will use row-column coordinates in 0.16. You can start
   using them now with ``regionprops(..., coordinates='rc')``. You can silence
   warning messages, and retain the old behavior, with
