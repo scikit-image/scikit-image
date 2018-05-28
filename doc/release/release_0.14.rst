@@ -186,7 +186,7 @@ We'd also like to thank all the people who contributed their time to perform the
 Full list of changes
 --------------------
 This release is the result of 8 months of work.
-It contains the following 105 merged pull requests by 42 committers:
+It contains the following 107 merged pull requests by 42 committers:
 
 - Make HOG visualization use midpoints of orientation bins (#2525)
 - Update conditional requirement for PySide (#2578)
@@ -293,3 +293,5 @@ It contains the following 105 merged pull requests by 42 committers:
 - Add `threshold_local` to `filters` module namespace (#3096)
 - Replace grey by gray where no deprecation is needed (#3098)
 - Optimize _probabilistic_hough_line function (#3100)
+- Rebuild docs upon deploy to ensure Javascript is generated (#3104)
+- Fix random gallery script generation (#3106)
