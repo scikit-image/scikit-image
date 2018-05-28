@@ -8,10 +8,11 @@ for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
 This is the last major release with official support for Python 2.7. Future
-releases will be developed using Python 3 only-syntax.
+releases will be developed using Python 3-only syntax.
 
 However, 0.14 is a long-time support (LTS) release and will receive bug fixes
-and backported features deemed important (by community demand) for several years.
+and backported features deemed important (by community demand) for two years
+(till the end of maintenance of Python 2.7; see PEP 373 for the details).
 
 For more information, examples, and documentation, please visit our website:
 
@@ -31,10 +32,11 @@ New Features
   ``skimage.segmentation.morphological_geodesic_active_contour`` (2D and 3D). (#2791)
 - nD support for image moments: ``skimage.measure.moments_central``,
   ``skimage.measure.moments_central``, ``skimage.measure.moments_normalized``,
-  ``skimage.measure.moments_hu``. This change leads to nD compatibility for many
-  regionprops. (#2603)
+  ``skimage.measure.moments_hu``. This change leads to 3D/nD compatibility for
+  many regionprops. (#2603)
 - Image moments from coordinate input: ``skimage.measure.moments_coords``,
   ``skimage.measure.moments_coords_central``. (#2859)
+- Added 3D support to ``blob_dog`` and ``blob_log``. (#2854)
 - Inertia tensor and its eigenvalues can now be computed outside of
   regionprops; available in ``skimage.measure.inertia_tensor``. (#2603)
 - Cycle-spinning function for approximating shift-invariance by averaging
@@ -44,11 +46,13 @@ New Features
   ``skimage.feature.haar_like_feature_coord``,
   ``skimage.feature.draw_haar_like_feature``. (#2848)
 - Data generation with random_shapes function:
-  ``skimage.draw.random_shapes``. (#277)
+  ``skimage.draw.random_shapes``. (#2773)
 - Subset of LFW (Labeled Faces in the Wild) database:
   ``skimage.data.cbcl_face_database``. (#2905)
 - Fully reworked montage function (now with a better padding behavior):
   ``skimage.util.montage``. (#2626)
+- YDbDr colorspace conversion routines: ``skimage.color.rgb2ydbdr``,
+  ``skimage.color.ydbdr2rgb``. (#3018)
 
 
 Improvements
@@ -61,7 +65,25 @@ Improvements
 - Non-local means denoising (``skimage.restoration.denoise_nl_means``) has
   a new optional parameter, ``sigma``, that can be used to specify the noise
   standard deviation. This enables noise-robust patch distance estimation. (#2890)
+- Mixed dtypes support for ``skimage.measure.compare_ssim``,
+  ``skimage.measure.compare_psnr``, etc. (#2893)
 - New ``alignment`` parameter in ``skimage.feature.plot_matches``. (#2955)
+- New ``seed`` parameter in ``skimage.transform.probabilistic_hough_line``. (#2960)
+- Various performance improvements. (#2821, #2878, #2967, #3035, #3056, #3100)
+
+
+Bugfixes
+--------
+- Fixed ``skimage.measure.regionprops.bbox_area`` returning incorrect value. (#2837)
+- Changed gradient and L2-Hys norm computation in ``skimage.feature.hog``
+  to closely follow the paper. (#2864)
+- Fixed ``skimage.color.convert_colorspace`` not working for YCbCr, YPbPr. (#2780)
+- Fixed incorrect composition of projective tranformation with inverse transformation. (#2826)
+- Fixed bug in random walker appearing when seed pixels are isolated inside pruned zones. (#2946)
+- Fixed ``rescale`` not working properly with different rescale factors in multichannel case. (#2959)
+- Fixed float and integer dtype support in ``skimage.util.invert``. (#3030)
+- Fixed ``skimage.measure.find_contours`` raising StopIteration on Python 3.7. (#3038)
+- Fixed platform-specific issues appearing in Windows and/or 32-bit environments. (#2867, #3033)
 
 
 API Changes
@@ -93,8 +115,76 @@ Deprecations
   and will be removed in 0.16. Use ``area_threshold`` instead.
 
 
-Highlights
-----------
+Contributors to this release
+----------------------------
+
+- Alvin
+- Norman Barker
+- Leonid Bloch
+- Benedikt Boecking
+- François Boulogne
+- Larry Bradley
+- Matthew Brett
+- Alex Chum
+- Yannick Copin
+- Nethanel Elzas
+- Kira Evans
+- Christoph Gohlke
+- Peter Goldsborough
+- Emmanuelle Gouillart
+- Ben Hadfield
+- Mark Harfouche
+- Scott Heatwole
+- Gregory R. Lee
+- Guillaume Lemaitre
+- Kevin Mader
+- Jarrod Millman
+- Pradyumna Narayana
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Oleksandr Pavlyk
+- Alex Rothberg
+- Max Schambach
+- Johannes Schönberger
+- Matt Swain
+- Saurav R. Tuladhar
+- Nelle Varoquaux
+- Viraj
+- David Volgyes
+- Stefan van der Walt
+- Thomas Walter
+- Scott Warchal
+- Nicholas Weir
+- corrado9999
+- ed1d1a8d
+- eepaillard
+- mikigom
+- mutterer
+
+
+We'd also like to thank all the people who contributed their time to perform the reviews:
+
+- Leonid Bloch
+- Jirka Borovec
+- François Boulogne
+- Kira Evans
+- Peter Goldsborough
+- Emmanuelle Gouillart
+- Almar Klein
+- Gregory R. Lee
+- Joan Massich
+- Juan Nunez-Iglesias
+- Daniil Pakhomov
+- Egor Panfilov
+- Johannes Schönberger
+- Steven Silvester
+- Stefan van der Walt
+- Josh Warner
+- Eric Wieser
+
+
+Full list of changes
+--------------------
 This release is the result of 8 months of work.
 It contains the following 105 merged pull requests by 42 committers:
 
@@ -203,71 +293,3 @@ It contains the following 105 merged pull requests by 42 committers:
 - Add `threshold_local` to `filters` module namespace (#3096)
 - Replace grey by gray where no deprecation is needed (#3098)
 - Optimize _probabilistic_hough_line function (#3100)
-
-
-Contributors to this release
-----------------------------
-
-- Alvin
-- Norman Barker
-- Leonid Bloch
-- Benedikt Boecking
-- François Boulogne
-- Larry Bradley
-- Matthew Brett
-- Alex Chum
-- Yannick Copin
-- Nethanel Elzas
-- Kira Evans
-- Christoph Gohlke
-- Peter Goldsborough
-- Emmanuelle Gouillart
-- Ben Hadfield
-- Mark Harfouche
-- Scott Heatwole
-- Gregory R. Lee
-- Guillaume Lemaitre
-- Kevin Mader
-- Jarrod Millman
-- Pradyumna Narayana
-- Juan Nunez-Iglesias
-- Egor Panfilov
-- Oleksandr Pavlyk
-- Alex Rothberg
-- Max Schambach
-- Johannes Schönberger
-- Matt Swain
-- Saurav R. Tuladhar
-- Nelle Varoquaux
-- Viraj
-- David Volgyes
-- Stefan van der Walt
-- Thomas Walter
-- Scott Warchal
-- Nicholas Weir
-- corrado9999
-- ed1d1a8d
-- eepaillard
-- mikigom
-- mutterer
-
-
-We'd also like to thank all the people who contributed their time to perform the reviews:
-
-- Leonid Bloch
-- Jirka Borovec
-- François Boulogne
-- Kira Evans
-- Peter Goldsborough
-- Emmanuelle Gouillart
-- Almar Klein
-- Gregory R. Lee
-- Joan Massich
-- Juan Nunez-Iglesias
-- Daniil Pakhomov
-- Egor Panfilov
-- Johannes Schönberger
-- Steven Silvester
-- Stefan van der Walt
-- Josh Warner
-- Eric Wieser
