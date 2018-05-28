@@ -253,3 +253,6 @@
 
 - Kevin Mader
   Montage improvements
+
+- David Volgyes
+  Unsharp masking
