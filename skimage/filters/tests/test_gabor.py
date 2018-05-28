@@ -96,7 +96,7 @@ def test_compute_rotation_matrix():
 
     M = _compute_rotation_matrix(X, Y)
 
-    Z = np.matmul(M, X)
+    Z = M @ X
 
     assert_almost_equal(Z, Y)
 
@@ -107,7 +107,7 @@ def test_compute_rotation_matrix():
 
     M = _compute_rotation_matrix(X, Y)
 
-    Z = np.matmul(M, X)
+    Z = M @ X
 
     assert_almost_equal(Z, uY)
 
@@ -118,7 +118,7 @@ def test_compute_rotation_matrix():
     M = _compute_rotation_matrix(X, Y)
 
     Z = np.arange(250, 300)
-    rotZ = np.matmul(M, Z)
+    rotZ = M @ Z
 
     assert_almost_equal(np.linalg.norm(rotZ), np.linalg.norm(Z))
 
@@ -133,7 +133,7 @@ def test_compute_rotation_matrix_homogeneous():
     assert_equal(M[:, -1], [0, 0, 0, 0, 1])
 
     Z = np.arange(100, 105)
-    rotZ = np.matmul(M, Z)
+    rotZ = M @ Z
 
     assert_equal(rotZ[-1], Z[-1])
 
@@ -158,7 +158,7 @@ def test_compute_rotation_matrix_quasipolar():
 
     M = _compute_rotation_matrix(X, Y)
 
-    Z = np.matmul(M, X)
+    Z = M @ X
 
     assert_almost_equal(Z, Y)
 

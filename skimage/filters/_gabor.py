@@ -131,7 +131,7 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     >>> Y = np.asarray([0.5, 0.5])
 
     >>> M = _compute_rotation_matrix(X, Y)
-    >>> Z = np.matmul(M, X)
+    >>> Z = M @ X
 
     >>> uY = Y / np.linalg.norm(Y)
     >>> np.allclose(Z, uY)
@@ -306,8 +306,6 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     ----------
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
-    theta : float or sequence of floats, optional
-        Orientation in radians. If 0, the harmonic is in the x-direction.
     theta : scalar or sequence of scalars, optional
         Orientation in radians. The angles that describe the orientation
         are given for each axis as a sequence, or as a single number, in
@@ -409,7 +407,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     m = np.asarray(np.meshgrid(*[range(-c, c + 1) for c in spatial_size],
                                indexing='ij'))
 
-    rotm = np.matmul(m.T, rot.T).T
+    rotm = np.transpose(m.T @ rot.T)
 
     gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
 
