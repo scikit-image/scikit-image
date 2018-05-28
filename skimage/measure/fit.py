@@ -430,7 +430,7 @@ class EllipseModel(BaseModel):
 
         try:
             # Reduced scatter matrix [eqn. 29]
-            M = inv(C1) @ (S1 - S2 @ inv(S3)) @ S2.T
+            M = inv(C1) @ (S1 - S2 @ inv(S3) @ S2.T)
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
             return False
 
