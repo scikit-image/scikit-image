@@ -239,7 +239,7 @@ def _convert_quasipolar_coords(r, thetas):
     return coords
 
 
-def _gaussian_kernel(coords, center=0, sigma=1, ndim=None):
+def _gaussian_kernel(coords, center=0, sigma=1):
     """Multi-dimensional Gaussian kernel.
 
     Parameters
@@ -254,8 +254,6 @@ def _gaussian_kernel(coords, center=0, sigma=1, ndim=None):
         Standard deviation for Gaussian kernel. The standard deviations of the
         Gaussian filter are given for each axis as a sequence, or as a single
         number, in which case it is equal for all axes.
-    ndim : int, optional
-        Dimensionality of the kernel. If `None`, defaults to `image.ndim`.
 
     Returns
     -------
@@ -270,8 +268,7 @@ def _gaussian_kernel(coords, center=0, sigma=1, ndim=None):
            ISBN: 978-1-4020-8840-7
            https://doi.org/10.1007/978-1-4020-8840-7_3
     """
-    if ndim is None:
-        ndim = np.ndim(coords)
+    ndim = np.shape(coords)[0]
 
     # normalization factor
     norm = (2 * np.pi) ** (ndim / 2) * np.prod(sigma)
@@ -414,7 +411,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
     rotm = np.matmul(m.T, rot.T).T
 
-    gauss = _gaussian_kernel(rotm, sigma=sigma, center=0, ndim=ndim)
+    gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
 
     compm = frequency * (m.T * coords).T
 
@@ -429,7 +426,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
 
 def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None,
           sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0,
-          axes=1, ndim=None, kernel=None, **kwargs):
+          axes=1, kernel=None, **kwargs):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -478,8 +475,6 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None,
         remaining axes in ascending order. Non-iterable values
         will be treated as the single element of a tuple.
         For classical cartesian ordering `(x, y, ...)`, set to `1`.
-    ndim : int, optional
-        Dimensionality of the kernel. If `None`, defaults to `image.ndim`.
     kernel : complex array, optional
         Pre-computed gabor kernel. When applying the same filter to many
         images, using a kernel generated from `gabor_kernel` and passing it
@@ -519,21 +514,18 @@ def gabor(image, frequency=None, theta=0, bandwidth=1, sigma=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    if ndim is None:
-        ndim = np.ndim(image)
-
     if kernel is None:
         if frequency is None:
             raise TypeError("gabor() must specify 'frequency' "
                             "if 'kernel' is not provided")
         kernel = gabor_kernel(frequency, theta, bandwidth, sigma, sigma_y,
-                              n_stds, offset, ndim=ndim, **kwargs)
+                              n_stds, offset, ndim=np.ndim(image), **kwargs)
     else:
         if frequency is not None:
             warn("gabor() received arguments of "
                  "both 'kernel' and 'frequency'; "
                  "'frequency' will be ignored")
-        assert_nD(ndim, kernel.ndim)
+        assert_nD(np.ndim(image), np.ndim(image))
 
     filtered_real = ndi.convolve(image, np.real(kernel), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(kernel), mode=mode, cval=cval)
