@@ -58,6 +58,7 @@ PROPS = {
     'Perimeter': 'perimeter',
     # 'PixelIdxList',
     # 'PixelList',
+    'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
     'WeightedCentralMoments': 'weighted_moments_central',
@@ -110,6 +111,7 @@ class _RegionProperties(object):
         self.label = label
 
         self._slice = slice
+        self.slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
 
@@ -143,8 +145,8 @@ class _RegionProperties(object):
         A tuple of the bounding box's start coordinates for each dimension,
         followed by the end coordinates for each dimension
         """
-        return tuple([self._slice[i].start for i in range(self._ndim)] +
-                     [self._slice[i].stop for i in range(self._ndim)])
+        return tuple([self.slice[i].start for i in range(self._ndim)] +
+                     [self.slice[i].stop for i in range(self._ndim)])
 
     def bbox_area(self):
         return self.image.size
@@ -163,7 +165,7 @@ class _RegionProperties(object):
 
     def coords(self):
         indices = np.nonzero(self.image)
-        return np.vstack([indices[i] + self._slice[i].start
+        return np.vstack([indices[i] + self.slice[i].start
                           for i in range(self._ndim)]).T
 
     @only2d
@@ -198,7 +200,7 @@ class _RegionProperties(object):
 
     @_cached
     def image(self):
-        return self._label_image[self._slice] == self.label
+        return self._label_image[self.slice] == self.label
 
     @_cached
     def inertia_tensor(self):
@@ -214,7 +216,7 @@ class _RegionProperties(object):
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
-        return self._intensity_image[self._slice] * self.image
+        return self._intensity_image[self.slice] * self.image
 
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
@@ -291,7 +293,7 @@ class _RegionProperties(object):
     def weighted_centroid(self):
         ctr = self.weighted_local_centroid
         return tuple(idx + slc.start
-                     for idx, slc in zip(ctr, self._slice))
+                     for idx, slc in zip(ctr, self.slice))
 
     def weighted_local_centroid(self):
         M = self.weighted_moments
@@ -474,6 +476,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **slice** : tuple of slices
+        A slice to extract the object from the source image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
     **weighted_centroid** : array
