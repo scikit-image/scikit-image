@@ -111,7 +111,18 @@ def convert(image, dtype, force_copy=False, uniform=False):
     itemsize_in = dtypeobj_in.itemsize
     itemsize_out = dtypeobj_out.itemsize
 
-    if dtype_in == dtype_out:
+    # Below, we do an `issubdtype` check.  Its purpose is to find out
+    # whether we can get away without doing any image conversion.  This happens
+    # when:
+    #
+    # - the output and input dtypes are the same or
+    # - when the output is specified as a type, and the input dtype
+    #   is a subclass of that type (e.g. `np.floating` will allow
+    #   `float32` and `float64` arrays through)
+
+    type_out = dtype if isinstance(dtype, type) else dtypeobj_out
+
+    if np.issubdtype(dtypeobj_in, type_out):
         if force_copy:
             image = image.copy()
         return image
@@ -283,6 +294,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # use float type that can exactly represent input integers
         computation_type = _dtype_itemsize(itemsize_in, dtype_out,
                                            np.float32, np.float64)
+
         if kind_in == 'u':
             # using np.divide or np.multiply doesn't copy the data
             # until the computation time
@@ -378,7 +390,33 @@ def img_as_float64(image, force_copy=False):
     return convert(image, np.float64, force_copy)
 
 
-img_as_float = img_as_float64
+def img_as_float(image, force_copy=False):
+    """Convert an image to floating point format.
+
+    This function is similar to `img_as_float64`, but will not convert
+    lower-precision floating point arrays to `float64`.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return convert(image, np.floating, force_copy)
 
 
 def img_as_uint(image, force_copy=False):
