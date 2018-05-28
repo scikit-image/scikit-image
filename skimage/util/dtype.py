@@ -292,9 +292,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
         else:
-            image = np.multiply(image, 2. / (imax_in - imin_in),
-                                dtype=computation_type)
-            image += 1.0 / (imax_in - imin_in)
+            image = np.add(image, 0.5, dtype=computation_type)
+            image *= 2 / (imax_in - imin_in)
+
         return np.asarray(image, dtype_out)
 
     # unsigned int -> signed/unsigned int
