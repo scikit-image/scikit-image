@@ -24,9 +24,8 @@ cdef inline void _transform_affine(double x, double y, double* H,
         Output coordinate.
 
     """
-    cdef double xx, yy
-    xx = H[0] * x + H[1] * y + H[2]
-    yy = H[3] * x + H[4] * y + H[5]
+    x_[0] = H[0] * x + H[1] * y + H[2]
+    y_[0] = H[3] * x + H[4] * y + H[5]
 
 
 cdef inline void _transform_projective(double x, double y, double* H,
@@ -43,12 +42,10 @@ cdef inline void _transform_projective(double x, double y, double* H,
         Output coordinate.
 
     """
-    cdef double xx, yy, zz
-    xx = H[0] * x + H[1] * y + H[2]
-    yy = H[3] * x + H[4] * y + H[5]
-    zz = H[6] * x + H[7] * y + H[8]
-    x_[0] = xx / zz
-    y_[0] = yy / zz
+    cdef double z_
+    z_ = H[6] * x + H[7] * y + H[8]
+    x_[0] = (H[0] * x + H[1] * y + H[2]) / z_
+    y_[0] = (H[3] * x + H[4] * y + H[5]) / z_
 
 
 def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
