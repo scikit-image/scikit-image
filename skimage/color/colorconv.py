@@ -1136,7 +1136,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     eps = np.finfo(np.float).eps
 
     # compute y_r and L
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
@@ -1213,7 +1213,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     y *= xyz_ref_white[1]
 
     # reference white x,z
-    uv_weights = [1, 15, 3]
+    uv_weights = np.array([1, 15, 3])
     u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
     v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
