@@ -42,46 +42,34 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
         If True, the last `image` dimension is considered as a color channel,
         otherwise as spatial. Color channels are processed individually.
     preserve_range: bool, optional
-        If False, the integer/unsigned types will be scaled to [-1,1]/[0,1]
-        before applying unsharp masking filter. If the output exceeds this
-        limit, it will be clipped to [-1,1]/[0,1].
-        If True, then the original ranges will be kept in the input, but the
-        values will be converted to floats.
-        See more details at the data types section in the documentation.
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
 
     Returns
     -------
-    output : [P, ..., ]M[, N][, C] ndarray
-        Image with unsharp mask applied. It returns float type, regardless
-        of the input type. The user is responsible to cast the result to
-        the expected type.
-
+    output : [P, ..., ]M[, N][, C] ndarray of float
+        Image with unsharp mask applied.
 
     Notes
     -----
     Unsharp masking is an image sharpening technique. It is a linear image
     operation, and numerically stable, unlike deconvolution which is an
-    ill-posed problem. Because of this stability, it is often more
-    preferred than deconvolution.
+    ill-posed problem. Because of this stability, it is often
+    preferred over deconvolution.
 
-    The main idea is the following: sharp details are identified as the
+    The main idea is as follows: sharp details are identified as the
     difference between the original image and its blurred version.
     These details are added back to the original image after a scaling step:
 
         enhanced image = original + amount * (original - blurred)
 
-    Despite being relatively simple algorithm, it might have issues when
-    RGB color channels are processed, i.e., it might lead to color bleading.
-    Often visually more pleasing result can be achieved with processing
-    only the brightness/lightness/intensity channel in a suitable color space,
-    like HSV, HSL, YUV, YCbCr, etc. In these case, a color space conversion
-    step should be performed before and after the unsharp masking.
-    Note that some color spaces have different than [0,1]/[0,255] dynamic
-    range, and it is the user's responsibility to take this into account.
-    See the ``skimage.color`` module for details about color space conversion.
-
-    Unsharp mask filter is described in most of the digital image processing
-    books. This implementation is based on [1]_.
+    When applying this filter to several color layers independently,
+    color bleeding may occur. More visually pleasing result can be
+    achieved by processing only the brightness/lightness/intensity
+    channel in a suitable color space such as HSV, HSL, YUV, or YCbCr.
+ 
+    Unsharp masking is described in most introductory digital image
+    processing books. This implementation is based on [1]_.
 
     Examples
     --------
@@ -126,7 +114,6 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
             https://en.wikipedia.org/wiki/Unsharp_masking
 
     """
-
     vrange = None  # Range for valid values; used for clipping.
     if preserve_range:
         fimg = image.astype(np.float)
