@@ -51,7 +51,7 @@ def _get_chunks(shape, ncpu):
 
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords={}):
+                   extra_arguments=(), extra_keywords={}, compute=True):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -112,4 +112,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         return function(arr, *extra_arguments, **extra_keywords)
 
     darr = da.from_array(array, chunks=chunks)
-    return darr.map_overlap(wrapped_func, depth, boundary=mode).compute()
+
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    if compute:
+        res = dres.compute()
+
+    return res
