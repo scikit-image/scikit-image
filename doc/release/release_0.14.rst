@@ -10,9 +10,9 @@ analysis, filtering, morphology, feature detection, and more.
 This is the last major release with official support for Python 2.7. Future
 releases will be developed using Python 3-only syntax.
 
-However, 0.14 is a long-time support (LTS) release and will receive bug fixes
-and backported features deemed important (by community demand) for two years
-(till the end of maintenance of Python 2.7; see PEP 373 for the details).
+However, 0.14 is a long-term support (LTS) release and will receive bug fixes
+and backported features deemed important (by community demand) until January
+1st 2020 (end of maintenance for Python 2.7; see PEP 373 for details).
 
 For more information, examples, and documentation, please visit our website:
 
