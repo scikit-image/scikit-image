@@ -43,7 +43,7 @@ def test_apply_parallel_lazy():
                              extra_keywords={'mode': 'reflect'},
                              compute=False)
 
-    assert isinstance(result, da.Array)
+    assert isinstance(result1, da.Array)
 
     assert_array_almost_equal(result1.compute(), expected1)
 
