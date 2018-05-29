@@ -93,13 +93,18 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         raise RuntimeError("Could not import 'dask'.  Please install "
                            "using 'pip install dask'")
 
-    if chunks is None:
-        shape = array.shape
-        try:
-            ncpu = cpu_count()
-        except NotImplementedError:
-            ncpu = 4
-        chunks = _get_chunks(shape, ncpu)
+    if not isinstance(array, da.Array):
+        if chunks is None:
+            shape = array.shape
+            try:
+                ncpu = cpu_count()
+            except NotImplementedError:
+                ncpu = 4
+            chunks = _get_chunks(shape, ncpu)
+
+        darr = da.from_array(array, chunks=chunks)
+    else:
+        darr = array
 
     if mode == 'wrap':
         mode = 'periodic'
@@ -110,8 +115,6 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
-
-    darr = da.from_array(array, chunks=chunks)
 
     res = darr.map_overlap(wrapped_func, depth, boundary=mode)
     if compute:
