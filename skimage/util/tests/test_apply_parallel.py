@@ -35,6 +35,7 @@ def test_apply_parallel_lazy():
 
     # data
     a = np.arange(144).reshape(12, 12).astype(float)
+    d = da.from_array(a, chunks=(6, 6))
 
     # apply the filter
     expected1 = threshold_local(a, 3)
@@ -43,9 +44,19 @@ def test_apply_parallel_lazy():
                              extra_keywords={'mode': 'reflect'},
                              compute=False)
 
+    # apply the filter on a Dask Array
+    result2 = apply_parallel(threshold_local, d, depth=5,
+                             extra_arguments=(3,),
+                             extra_keywords={'mode': 'reflect'},
+                             compute=False)
+
     assert isinstance(result1, da.Array)
 
     assert_array_almost_equal(result1.compute(), expected1)
+
+    assert isinstance(result2, da.Array)
+
+    assert_array_almost_equal(result2.compute(), expected1)
 
 
 @testing.skipif(not dask_available, reason="dask not installed")
