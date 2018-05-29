@@ -74,8 +74,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        See URL for more
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        Also see http://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
@@ -231,7 +230,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        See URL for more
+        Also see
         http://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
@@ -327,7 +326,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        See URL for more
+        Also see
         http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Notes
@@ -497,7 +496,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        See URL for more
+        Also see
         http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     """
@@ -733,7 +732,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        See URL for more
+        Also see
         http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
