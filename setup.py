@@ -25,10 +25,21 @@ import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 
-if sys.version_info[0] < 3:
-    import __builtin__ as builtins
-else:
-    import builtins
+if sys.version_info < (3, 4):
+
+    error = """Python {py} detected.
+
+scikit-image 0.15+ support only Python 3.5 and above.
+
+For Python 2.7, please install the 0.14.x Long Term Support using:
+
+ $ pip install 'scikit-image<0.15'
+""".format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+
+    sys.stderr.write(error + "\n")
+    sys.exit(1)
+
+import builtins
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
