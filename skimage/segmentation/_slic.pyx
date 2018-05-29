@@ -4,6 +4,7 @@
 #cython: wraparound=False
 from libc.float cimport DBL_MAX
 from cpython cimport bool
+from cython.parallel import prange
 
 import numpy as np
 cimport numpy as cnp
@@ -125,22 +126,22 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
                 for z in range(z_min, z_max):
                     dz = sz * (cz - z)
-                    dz *= dz
-                    for y in range(y_min, y_max):
+                    dz = dz * dz
+                    for y in prange(y_min, y_max):
                         dy = sy * (cy - y)
-                        dy *= dy
+                        dy = dy * dy
                         for x in range(x_min, x_max):
                             dx = sx * (cx - x)
-                            dx *= dx
+                            dx = dx * dx
                             dist_center = (dz + dy + dx) * spatial_weight
                             dist_color = 0
                             for c in range(3, n_features):
                                 t = image_zyx[z, y, x, c - 3] - segments[k, c]
-                                dist_color += t * t
+                                dist_color = dist_color + t * t
                             if slic_zero:
-                                dist_center += dist_color / max_dist_color[k]
+                                dist_center = dist_center + dist_color / max_dist_color[k]
                             else:
-                                dist_center += dist_color
+                                dist_center = dist_center + dist_color
 
                             if distance[z, y, x] > dist_center:
                                 nearest_segments[z, y, x] = k
@@ -157,15 +158,15 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             n_segment_elems[:] = 0
             segments[:, :] = 0
             for z in range(depth):
-                for y in range(height):
-                    for x in range(width):
+                for y in prange(height):
+                    for x in prange(width):
                         k = nearest_segments[z, y, x]
-                        n_segment_elems[k] += 1
-                        segments[k, 0] += z
-                        segments[k, 1] += y
-                        segments[k, 2] += x
+                        n_segment_elems[k] = n_segment_elems[k] + 1
+                        segments[k, 0] = segments[k, 0] + z
+                        segments[k, 1] = segments[k, 1] + y
+                        segments[k, 2] = segments[k, 2] + x
                         for c in range(3, n_features):
-                            segments[k, c] += image_zyx[z, y, x, c - 3]
+                            segments[k, c] = segments[k, c] + image_zyx[z, y, x, c - 3]
 
             # divide by number of elements per segment to obtain mean
             for k in range(n_segments):

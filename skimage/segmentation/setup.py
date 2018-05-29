@@ -19,7 +19,10 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_compile_args = ["-O3", "-ffast-math",
+                                                "-march=native", "-fopenmp" ],
+                                                                                                         extra_link_args=['-fopenmp'])
 
     return config
 
