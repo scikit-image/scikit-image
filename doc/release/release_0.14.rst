@@ -22,6 +22,9 @@ http://scikit-image.org
 New Features
 ------------
 - Lookfor function to search across the library: ``skimage.lookfor``. (#2713)
+- nD support for ``skimage.transform.rescale``, ``skimage.transform.resize``,
+  and ``skimage.transform.pyramid_*`` transforms. (#1522)
+- Chan-Vese segmentation algorithm. (#1957)
 - Manual segmentation with matplotlib for fast data annotation:
   ``skimage.future.manual_polygon_segmentation``,
   ``skimage.future.manual_lasso_segmentation``. (#2584)
@@ -58,6 +61,7 @@ New Features
 Improvements
 ------------
 - ``VisuShrink`` method for ``skimage.restoration.denoise_wavelet``. (#2470)
+- New ``max_ratio`` parameter for ``skimage.feature.match_descriptors``. (#2472)
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
   ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
   images. (#2802)
@@ -97,6 +101,7 @@ API Changes
 
 Deprecations
 ------------
+- ``freeimage`` plugin has been removed from ``skimage.io``.
 - ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
   Use ``skimage.util.montage`` function instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
@@ -120,16 +125,22 @@ Contributors to this release
 
 - Alvin
 - Norman Barker
+- Brad Bazemore
 - Leonid Bloch
 - Benedikt Boecking
+- Jirka Borovec
 - François Boulogne
 - Larry Bradley
+- Robert Bradshaw
 - Matthew Brett
+- Floris van Breugel
 - Alex Chum
 - Yannick Copin
 - Nethanel Elzas
 - Kira Evans
 - Christoph Gohlke
+- GGoussar
+- Jens Glaser
 - Peter Goldsborough
 - Emmanuelle Gouillart
 - Ben Hadfield
@@ -137,15 +148,26 @@ Contributors to this release
 - Scott Heatwole
 - Gregory R. Lee
 - Guillaume Lemaitre
+- Theodore Lindsay
 - Kevin Mader
 - Jarrod Millman
+- Vinicius Monego
 - Pradyumna Narayana
 - Juan Nunez-Iglesias
+- Kesavan PS
 - Egor Panfilov
 - Oleksandr Pavlyk
+- Justin Pinkney
+- Robert Pollak
+- Jonathan Reich
+- Émile Robitaille
+- RoseZhao
 - Alex Rothberg
+- Arka Sadhu
 - Max Schambach
 - Johannes Schönberger
+- Sourav Singh
+- Kesavan Subburam
 - Matt Swain
 - Saurav R. Tuladhar
 - Nelle Varoquaux
@@ -154,12 +176,20 @@ Contributors to this release
 - Stefan van der Walt
 - Thomas Walter
 - Scott Warchal
+- Josh Warner
 - Nicholas Weir
+- Sera Yang
+- Chiang, Yi-Yo
 - corrado9999
 - ed1d1a8d
 - eepaillard
+- leaprovenzano
 - mikigom
+- mrastgoo
 - mutterer
+- pmneila
+- timhok
+- zhongzyd
 
 
 We'd also like to thank all the people who contributed their time to perform the reviews:
@@ -167,6 +197,8 @@ We'd also like to thank all the people who contributed their time to perform the
 - Leonid Bloch
 - Jirka Borovec
 - François Boulogne
+- Matthew Brett
+- Thomas A Caswell
 - Kira Evans
 - Peter Goldsborough
 - Emmanuelle Gouillart
@@ -174,10 +206,14 @@ We'd also like to thank all the people who contributed their time to perform the
 - Gregory R. Lee
 - Joan Massich
 - Juan Nunez-Iglesias
+- Faraz Oloumi
 - Daniil Pakhomov
 - Egor Panfilov
+- Dan Schult
 - Johannes Schönberger
 - Steven Silvester
+- Alexandre de Siqueira
+- Nelle Varoquaux
 - Stefan van der Walt
 - Josh Warner
 - Eric Wieser
@@ -185,19 +221,98 @@ We'd also like to thank all the people who contributed their time to perform the
 
 Full list of changes
 --------------------
-This release is the result of 8 months of work.
-It contains the following 107 merged pull requests by 42 committers:
+This release is the result of 14 months of work.
+It contains the following 186 merged pull requests by 67 committers:
 
+- n-dimensional rescale, resize, and pyramid transforms (#1522)
+- Segmentation: Implemention of a simple Chan-Vese Algorithm (#1957)
+- JPEG quality argument in imsave (#2063)
+- improve geometric models fitting (line, circle) using LSM (#2433)
+- Improve input parameter handling in `_sift_read` (#2452)
+- Remove broken test in `_shared/tests/test_interpolation.py` (#2454)
+- [MRG] Pytest migration (#2468)
+- Add VisuShrink method for `denoise_wavelet` (#2470)
+- Ratio test for descriptor matching (#2472)
 - Make HOG visualization use midpoints of orientation bins (#2525)
+- DOC: Add example for rescaling/resizing/downscaling (#2560)
+- Gallery random walker: Rescale image range to -1, 1 (#2575)
 - Update conditional requirement for PySide (#2578)
+- Add configuration file for `pep8_speaks` (#2579)
+- Manual segmentation tool with matplotlib (#2584)
+- Website updates (documentation build) (#2585)
+- Update the release process notes (#2593)
+- Defer matplotlib imports (#2596)
+- Spelling: replaces colour by color (#2598)
 - Add nD support to image moments computation (#2603)
+- Set xlim and ylim in rescale gallery example (#2606)
+- Reduce runtime of local_maxima gallery example (#2608)
 - MAINT _shared.testing now contains pytest's useful functions (#2614)
+- error message misspelled, integral to integer (#2615)
+- Respect standard notations for images in functions arguments (#2617)
+- MAINT: remove unused argument in private inpainting function (#2618)
+- MAINT: some minor edits on Chan Vese segmentation (#2619)
+- Fix UserWarning: Unknown section Example (#2620)
+- Eliminate some TODOs for 0.14 (#2621)
+- Clean up and fix bug in ssim tests (#2622)
+- Add padding_width to montage2d and add montage_rgb (#2626)
+- Add tests covering erroneous input to morphology.watershed (#2631)
+- Fix name of code coverage tool (#2638)
+- MAINT: Remove undefined attributes in skimage.filters (#2643)
+- Improve the support for 1D images in `color.gray2rgb`  (#2645)
 - ENH: add cycle spinning routine (#2647)
 - as_gray replaces as_grey in imread() and load() (#2652)
+- Fix AppVeyor pytest execution (#2658)
+- More TODOs for 0.14 (#2659)
+- pin sphinx to <1.6 (#2662)
+- MAINT: use relative imports instead of absolute ones (#2664)
+- Add hysteresis thresholding function (#2665)
+- Improve hysteresis docstring (#2669)
+- Add helper functions img_as_float32 and img_as_float64 (#2673)
+- Remove unnecessary assignment in pxd file. (#2683)
+- Unused var and function call in documentation example (#2684)
+- Make `imshow_collection` to plot images on a grid of convenient aspect ratio (#2689)
+- Fix typo in Chan-Vese docstrings (#2692)
+- Fix data type error with marching_cubes_lewiner(allow_degenerate=False) (#2694)
+- Add handling for uniform arrays when finding local extrema. (#2699)
+- Avoid uneccesary copies in skimage.morphology.label (#2701)
+- Deprecate `visualise` in favor of `visualize` in `skimage.feature.hog` (#2705)
+- Remove alpha channel when saving to jpg format (#2706)
+- Tweak in-place installation instructions (#2712)
+- Add `skimage.lookfor` function (#2713)
+- Speedup image dtype conversion by switching to `asarray` (#2715)
+- MAINT reorganizing CI-related scripts (#2718)
+- added rect function to draw module (#2719)
+- Remove duplicate parameter in `skimage.io.imread` docstring (#2725)
+- Add support for 1D arrays for grey erosion (#2727)
+- Build with Xcode 9 beta 3, MacOS 10.12 (#2730)
+- Travis docs one platform (#2732)
+- Install documentation build requirements on Travis-CI (#2737)
+- Add reference papers for `restoration.inpaint_biharmonic` (#2738)
+- Completely remove `freeimage` plugin from `skimage.io` (#2744)
+- Implementation and test fix for shannon_entropy calculation. (#2749)
+- Minor cleanup (#2750)
+- Add notes on testing to CONTRIBUTING (#2751)
+- Update OSX install script (#2752)
+- fix bug in horizontal seam_carve and seam_carve test. issue :#2545 (#2754)
+- Recommend merging instead of rebasing, to lower contribution barrier (#2757)
+- updated second link, first link still has paywall (#2768)
+- DOC: set_color docstring, in-place said explicitly (#2771)
 - Add module for generating random, labeled shapes (#2773)
+- Ignore known failures (#2774)
+- Update testdoc (#2775)
+- Remove bento support (#2776)
+- AppVeyor supports dot-file-style (#2779)
 - Fix bug in `color.convert_colorspace` for YCbCr, YPbPr (#2780)
+- Reorganizing requirements (#2781)
+- WIP: Deal with long running command on travis (#2782)
+- Deprecate the novice module (#2742) (#2784)
+- Document mentioning deprecations in the release notes (#2785)
+- [WIP] FIX Swirl center coordinates are reversed (#2790)
+- Implementation of the Morphological Snakes (#2791)
+- Merge TASKS.txt with CONTRIBUTING.txt (#2800)
+- Add Gaussian filter-based antialiasing to resize (#2802)
+- Add morphological snakes to release notes (#2803)
 - Return empty array if hough_line_peaks detects nothing (#2805)
-- Also document submodules, and ignore private modules `_*` (#2810)
 - Add W503 to pep8speaks ignore. (#2816)
 - Slice PIL palette correctly using extreme image value. (#2818)
 - Move INSTALL to top-level (#2819)
