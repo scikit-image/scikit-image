@@ -161,7 +161,7 @@ Contributors to this release
 - Robert Pollak
 - Jonathan Reich
 - Émile Robitaille
-- RoseZhao
+- Rose Zhao
 - Alex Rothberg
 - Arka Sadhu
 - Max Schambach
