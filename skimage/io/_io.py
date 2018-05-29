@@ -1,5 +1,4 @@
 import numpy as np
-import six
 
 from ..io.manage_plugins import call_plugin
 from ..color import rgb2gray
@@ -161,7 +160,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    if isinstance(arr, six.string_types):
+    if isinstance(arr, str):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 

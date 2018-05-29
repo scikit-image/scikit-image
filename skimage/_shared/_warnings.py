@@ -61,8 +61,6 @@ def all_warnings():
     del frame
 
     for mod_name, mod in list(sys.modules.items()):
-        if 'six.moves' in mod_name:
-            continue
         try:
             mod.__warningregistry__.clear()
         except AttributeError:

@@ -20,7 +20,6 @@ a (9, 9) rectangle and divide it into (3, 3) block, upon which we then apply
 MB-LBP.
 
 """
-from __future__ import print_function
 from skimage.feature import multiblock_lbp
 import numpy as np
 from numpy.testing import assert_equal

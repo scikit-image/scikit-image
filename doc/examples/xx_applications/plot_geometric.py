@@ -7,7 +7,6 @@ In this example, we will see how to use geometric transformations in the context
 of image processing.
 """
 
-from __future__ import print_function
 
 import math
 import numpy as np

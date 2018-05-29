@@ -1,5 +1,4 @@
 # coding: utf-8
-from __future__ import division
 from math import sqrt, atan2, pi as PI
 import itertools
 from warnings import warn
@@ -616,7 +615,7 @@ def perimeter(image, neighbourhood=4):
     # but that was measured as taking much longer than bincount + np.dot (5x
     # as much time)
     perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
+    total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
 
@@ -637,12 +636,7 @@ def _install_properties_docs():
 
     for p in [member for member in dir(_RegionProperties)
               if not member.startswith('_')]:
-        try:
-            getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        except AttributeError:
-            # For Python 2.x
-            getattr(_RegionProperties, p).im_func.__doc__ = prop_doc[p]
-
+        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 

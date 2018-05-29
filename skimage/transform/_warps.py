@@ -1,4 +1,3 @@
-import six
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -834,7 +833,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
               inverse_map.__name__ == 'inverse' and
               get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS):
             # inverse_map is the inverse of a homography
-            matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
+            matrix = np.linalg.inv(inverse_map.__self__.params)
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
