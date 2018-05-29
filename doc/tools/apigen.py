@@ -497,7 +497,8 @@ class ApiDocWriter(object):
         w(subtitle + "\n")
         w("-" * len(subtitle) + "\n\n")
 
-        w('.. toctree::\n\n')
+        w('.. toctree::\n')
+        w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
         idx.close()
