@@ -276,7 +276,7 @@ def _gaussian_kernel(coords, center=0, sigma=1):
     # center image
     coords = np.asarray(coords) - center
 
-    scaled_coords = np.transpose(coords.T / sigma)
+    scaled_coords = coords / np.reshape(sigma, [ndim] + [1] * ndim)
 
     # gaussian function
     gauss = np.exp(-0.5 * np.sum(scaled_coords ** 2, axis=0))
@@ -292,7 +292,7 @@ def _sigma_prefactor(bandwidth):
 
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
-                 n_stds=3, offset=0, axes=1, ndim=2, **kwargs):
+                 n_stds=3, offset=0, axes=None, ndim=2, **kwargs):
     """Multi-dimensional complex Gabor kernel.
 
     A Gabor kernel is a Gaussian kernel modulated by a complex harmonic
@@ -329,6 +329,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
         specified will be padded with remaining axes in ascending order.
         Non-iterable values will be treated as the single element of a
         tuple. For classical cartesian ordering `(x, y, ...)`, set to `1`.
+        Defaults to `1` but will default to `0` in scikit-image 0.17.
     ndim : int, optional
         Dimensionality of the kernel.
 
@@ -367,16 +368,21 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     >>> io.show()           # doctest: +SKIP
     """
     # handle deprecation
-    message = ('Using deprecated, 2D-only interface to gabor_kernel. '
-               'This interface will be removed in scikit-image 0.16. Use '
-               'gabor_kernel(frequency, sigma=(sigma_y, sigma_x)).')
-
     if sigma_y is not None:
-        warn(message)
+        warn('Using deprecated, 2D-only interface to gabor_kernel. '
+             'This interface will be removed in scikit-image 0.17. Use '
+             'gabor_kernel(frequency, sigma=(sigma_y, sigma_x)).')
+
         if 'sigma_x' in kwargs:
             sigma = (sigma_y, kwargs['sigma_x'])
         else:
             sigma = (sigma_y, sigma)
+
+    if axes is None:
+        warn('Default value of `axes` will be changed from `1` to `0` in '
+             'scikit-image 0.17. Specify this argument to silence this '
+             ' warning.')
+        axes = 1
 
     # handle translation
     if not isinstance(theta, coll.Iterable):
@@ -407,11 +413,11 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma=None, sigma_y=None,
     m = np.asarray(np.meshgrid(*[range(-c, c + 1) for c in spatial_size],
                                indexing='ij'))
 
-    rotm = np.transpose(m.T @ rot.T)
+    rotm = (m.T @ rot.T).T
 
     gauss = _gaussian_kernel(rotm, sigma=sigma, center=0)
 
-    compm = frequency * (m.T * coords).T
+    compm = frequency * m * np.reshape(coords, [ndim] + [1] * ndim)
 
     # complex harmonic function
     harmonic = np.exp(1j * (2 * np.pi * compm.sum(axis=0) + offset))
