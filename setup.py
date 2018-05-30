@@ -25,7 +25,7 @@ import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 
-if sys.version_info < (3, 4):
+if sys.version_info < (3, 5):
 
     error = """Python {py} detected.
 
