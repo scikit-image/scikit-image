@@ -122,6 +122,6 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     res = darr.map_overlap(wrapped_func, depth, boundary=mode)
     if compute:
-        res = dres.compute()
+        res = res.compute()
 
     return res
