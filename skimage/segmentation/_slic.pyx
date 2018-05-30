@@ -158,8 +158,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             n_segment_elems[:] = 0
             segments[:, :] = 0
             for z in range(depth):
-                for y in prange(height):
-                    for x in prange(width):
+                for y in range(height):
+                    for x in range(width):
                         k = nearest_segments[z, y, x]
                         n_segment_elems[k] = n_segment_elems[k] + 1
                         segments[k, 0] = segments[k, 0] + z
