@@ -35,6 +35,8 @@ Improvements
 
 API Changes
 -----------
+- imageio is now the preferred plugin for reading and writing images.
+- imageio is now a dependency of scikit-image.
 
 - ``rectangular_grid`` now returns a tuple instead of a list for compatiblity
   with numpy 1.15
