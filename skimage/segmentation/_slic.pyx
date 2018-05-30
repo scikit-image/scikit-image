@@ -17,7 +17,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
-                 bint slic_zero):
+                 bint slic_zero,
+                 Py_ssize_t n_jobs):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -127,7 +128,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for z in range(z_min, z_max):
                     dz = sz * (cz - z)
                     dz = dz * dz
-                    for y in prange(y_min, y_max):
+                    for y in prange(y_min, y_max, num_threads=n_jobs):
                         dy = sy * (cy - y)
                         dy = dy * dy
                         for x in range(x_min, x_max):
