@@ -4,7 +4,7 @@
 #cython: wraparound=False
 from libc.float cimport DBL_MAX
 from cpython cimport bool
-from cython.parallel import prange
+from cython.parallel cimport prange
 
 import numpy as np
 cimport numpy as cnp
