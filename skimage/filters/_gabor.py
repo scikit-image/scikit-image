@@ -58,6 +58,7 @@ def _axis_0_rotation_matrix(u, indices=None):
            of N-Dimensional Rotation Matrix Generation Algorithm. International
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+    .. [2] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
     """
     ndim = len(u)
 
@@ -70,6 +71,8 @@ def _axis_0_rotation_matrix(u, indices=None):
     R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
 
     # Loop to create matrices of stages
+    # These stages are 2D rotations around fixed axes that are combined
+    # together to form our nD matrix; see: [2]
     for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
         A = np.eye(ndim)
 
@@ -104,6 +107,15 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     """Generates a matrix for the rotation of one vector to the direction
     of another.
 
+    The MNMRG algorithm cam be described as follows:
+    1. directional vectors X and Y are normalized
+    2. a vector w is initialized containing the indices of the differences
+       between X and Y
+    3. matrices Mx and My for the rotation of X and Y to the same axis are
+       generated
+    4. the inverse of My is combined with Mx to form the rotation matrix M
+       that rotates vector X to the direction of vector Y
+
     Parameters
     ----------
     src : (N, ) array
@@ -124,6 +136,7 @@ def _compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
            of N-Dimensional Rotation Matrix Generation Algorithm. International
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
+    .. [2] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
 
     Examples
     --------
