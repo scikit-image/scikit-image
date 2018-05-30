@@ -89,6 +89,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
+    compute : bool, optional
+        Whether to compute right away (default) or
+        skip computing and return a Dask Array.
 
     Notes
     -----
