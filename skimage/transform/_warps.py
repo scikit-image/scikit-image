@@ -181,7 +181,7 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
     return out
 
 
-def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
+def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=None,
             anti_aliasing=None, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
@@ -211,8 +211,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -252,9 +251,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import rescale
     >>> image = data.camera()
-    >>> rescale(image, 0.1, mode='reflect').shape
+    >>> rescale(image, 0.1).shape
     (51, 51)
-    >>> rescale(image, 0.5, mode='reflect').shape
+    >>> rescale(image, 0.5).shape
     (256, 256)
 
     """

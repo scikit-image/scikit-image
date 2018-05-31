@@ -72,6 +72,8 @@ Deprecations
   ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
 - Default value of ``mode`` parameter in ``skimage.transform.resize``
   has been set to ``reflect``.
+- Default value of ``mode`` parameter in ``skimage.transform.rescale``
+  has been set to ``reflect``.
 
 
 Contributors to this release
