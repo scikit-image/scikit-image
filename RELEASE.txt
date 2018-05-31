@@ -11,10 +11,7 @@ make a PR to update these notes after you are done with the release. ;-)
   you will make your changes gearing up for release, and cherry-pick them as
   appropriate to master.
 
-- In the master branch, update the version number in ``skimage/__init__.py``
-  to the next ``-dev`` version, commit, and push.
-
-- Back on the release branch, update the release notes:
+- On the release branch, update the release notes:
 
   1. Review and cleanup ``doc/release/release_dev.txt``.
 
@@ -39,13 +36,16 @@ make a PR to update these notes after you are done with the release. ;-)
 
 - Submit the release notes for review by other project maintainers:
 
-  - Create a temporary PR from v<major>.<minor>.x branch to master
-    (at this point, the difference should show the full contents of the
-     release notes).
-  - Discuss, and make the changes directly to v<major>.<minor>.x branch.
-  - Once the consensus is found, close the PR and go to the next step.
+  - Create a PR from v<major>.<minor>.x branch to master (at this point,
+    the difference should show the full contents of the release notes).
+  - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
+  - Once the consensus is found, ask the project maintainers to merge the PR.
 
-- Update the version number to stable in ``skimage/__init__.py`` and commit.
+- In the master branch, update the version number in ``skimage/__init__.py``
+  to the next ``-dev`` version, commit, and push.
+
+- Back on the release branch, update the version number to stable in
+  ``skimage/__init__.py``, commit, and push.
 
 - Update the docs:
 
