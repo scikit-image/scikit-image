@@ -57,11 +57,13 @@ Deprecations
 - ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
   and will be removed in 0.16. Use ``area_threshold`` instead.
 - Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to `False`.
+  has been set to ``False``.
 - Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to `True`.
+  has been set to ``True``.
 - Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to `True`.
+  has been set to ``True``.
+- Default value of ``mode`` parameter in ``skimage.transform.swirl``
+  has been set to ``reflect``.
 
 
 Contributors to this release

@@ -5,7 +5,6 @@ Version 0.15
 ------------
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
 * In ``skimage.restoration.denoise_bilateral``, set default behavior of
   `multichannel` to False
 * In ``skimage.restoration.denoise_nl_means``, set default behavior of
