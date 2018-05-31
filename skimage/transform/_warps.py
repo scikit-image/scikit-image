@@ -31,7 +31,7 @@ def _multichannel_default(multichannel, ndim):
 
 
 def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
-           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
+           preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. Note that anti-
@@ -99,11 +99,6 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
     (100, 100)
 
     """
-    if anti_aliasing is None:
-        anti_aliasing = False
-        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
-             "avoid aliasing artifacts when down-sampling images.")
-
     output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
@@ -183,7 +178,7 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
 
 def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=None,
-            anti_aliasing=None, anti_aliasing_sigma=None):
+            anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale images. Note that anti-

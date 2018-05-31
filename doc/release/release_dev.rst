@@ -71,9 +71,9 @@ Deprecations
 - Default value of ``multichannel`` parameter in
   ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
 - Default value of ``mode`` parameter in ``skimage.transform.resize``
-  has been set to ``reflect``.
-- Default value of ``mode`` parameter in ``skimage.transform.rescale``
-  has been set to ``reflect``.
+  and ``skimage.transform.rescale`` has been set to ``reflect``.
+- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
+  and ``skimage.transform.rescale`` has been set to ``True``.
 
 
 Contributors to this release
