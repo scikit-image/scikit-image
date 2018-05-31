@@ -17,7 +17,6 @@ Version 0.15
   ``'reflect'``.
 * In ``skimage.transform.rescale``, set default value of ``mode`` to
   ``'reflect'``.
-* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
 * In ``skimage.transform.resize`` change default argument from
   ``anti_aliasing=None`` to ``anti_aliasing=True``.
 * In ``skimage/restoration/tests/test_denoise.py``, there is an optional
