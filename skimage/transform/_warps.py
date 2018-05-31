@@ -30,7 +30,7 @@ def _multichannel_default(multichannel, ndim):
             return False
 
 
-def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
+def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
            preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
@@ -61,8 +61,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -96,15 +95,10 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import resize
     >>> image = data.camera()
-    >>> resize(image, (100, 100), mode='reflect').shape
+    >>> resize(image, (100, 100)).shape
     (100, 100)
 
     """
-    if mode is None:
-        mode = 'constant'
-        warn("The default mode, 'constant', will be changed to 'reflect' in "
-             "skimage 0.15.")
-
     if anti_aliasing is None:
         anti_aliasing = False
         warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
