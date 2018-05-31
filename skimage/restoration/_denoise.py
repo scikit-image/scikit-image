@@ -4,14 +4,14 @@ import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=None):
+                      bins=10000, mode='constant', cval=0, multichannel=False):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
@@ -74,10 +74,6 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> noisy = np.clip(noisy, 0, 1)
     >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
     """
-    if multichannel is None:
-        warn('denoise_bilateral will default to multichannel=False in v0.15')
-        multichannel = True
-
     if multichannel:
         if image.ndim != 3:
             if image.ndim == 2:

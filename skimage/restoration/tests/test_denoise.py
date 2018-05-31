@@ -8,7 +8,7 @@ import pywt
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_warns, assert_)
-from skimage._shared._warnings import expected_warnings, warnings
+from skimage._shared._warnings import expected_warnings
 
 
 np.random.seed(1234)
@@ -223,7 +223,6 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
-    import sys
     img = np.full((50, 50), np.NaN)
 
     # TODO: This warning is not optional in python3. This should be

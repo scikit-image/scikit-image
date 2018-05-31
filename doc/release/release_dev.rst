@@ -66,6 +66,8 @@ Deprecations
   has been set to ``reflect``.
 - Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
   Use ``skimage.filters_threshold_local`` instead.
+- Default value of ``multichannel`` parameter in
+  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
 
 
 Contributors to this release
