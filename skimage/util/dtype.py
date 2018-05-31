@@ -42,7 +42,6 @@ def dtype_limits(image, clip_negative=False):
     clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
-        The default behavior (None) is equivalent to True.
 
     Returns
     -------

@@ -26,7 +26,6 @@ def radon(image, theta=None, circle=True):
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
-        The default behavior (None) is equivalent to False.
 
     Returns
     -------
@@ -151,7 +150,6 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
-        The default behavior (None) is equivalent to False.
 
     Returns
     -------
