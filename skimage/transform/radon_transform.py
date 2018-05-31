@@ -10,7 +10,7 @@ from warnings import warn
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=None):
+def radon(image, theta=None, circle=True):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -53,10 +53,6 @@ def radon(image, theta=None, circle=None):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
-    if circle is None:
-        warn('The default of `circle` in `skimage.transform.radon` '
-             'will change to `True` in version 0.15.')
-        circle = False
 
     if circle:
         radius = min(image.shape) // 2
