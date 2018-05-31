@@ -60,7 +60,8 @@ def _ensure_dask_array(array, chunks=None):
 
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords={}, *, compute=True):
+                   dtype=None, extra_arguments=(), extra_keywords={}, *,
+                   compute=True):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -135,7 +136,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
     if compute:
         res = res.compute()
 
@@ -143,8 +144,8 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
 
 def check_parallel(function, im=None, shape=(1000, 1000),
-                        dtype=np.uint8, depth_max=10, full_output=False,
-                        verbose = True,
+                        dtype_input=np.uint8, depth_max=10,
+                        full_output=False, verbose = True,
                         extra_arguments=(), extra_keywords={}):
     """
     Run a function on an image with and without chunking with
@@ -152,6 +153,8 @@ def check_parallel(function, im=None, shape=(1000, 1000),
     Returns the smallest overlap size giving the same result as the original
     function.
 
+    Results are likely to be more relevant if an image ``im`` is passed, but
+    the function tries to fabricate a relevant image if no image is passed.
 
     Parameters
     ----------
@@ -161,7 +164,7 @@ def check_parallel(function, im=None, shape=(1000, 1000),
         Image array which the function will be applied to.
     shape: tuple
         Shape of the image. If ``im`` is defined, ``im.shape`` will be used.
-    dtype: dtype
+    dtype_input: dtype
         dtype of the image. If ``im`` is defined, ``im.dtype`` is given.
     depth_max: int
         Maximum overlap size tested.
@@ -178,19 +181,20 @@ def check_parallel(function, im=None, shape=(1000, 1000),
     # Build an image with chosen dtype and shape
     if im is not None:
         shape = im.shape
-        dtype = im.dtype
+        dtype_input = im.dtype
     if im is None:
-        if dtype is np.float:
+        if dtype_input is np.float:
             im = np.random.random(shape)
-        elif dtype is np.bool: # binary objects from data module
+        elif dtype_input is np.bool: # binary objects from data module
             from ..data import binary_blobs
             im = binary_blobs(shape[0])
         else:
-            im = np.random.randint(0, 256, size=shape, dtype=np.uint8) 
+            im = np.random.randint(0, 256, size=shape, dtype=np.uint8)
 
     # Execute function without apply_parallel and time it
     t_init = time()
     out = function(im, *extra_arguments, **extra_keywords)
+    dtype_output = out.dtype
     t_end = time()
     t_not_parallel = t_end - t_init
     res = [out]
@@ -203,7 +207,7 @@ def check_parallel(function, im=None, shape=(1000, 1000),
         depth += 1
         t_init = time()
         out_parallel = apply_parallel(function, im, chunks=l, depth=depth,
-                                        mode='none',
+                                        mode='none', dtype=dtype_output,
                                         extra_arguments=extra_arguments,
                                         extra_keywords=extra_keywords)
         t_end = time()
