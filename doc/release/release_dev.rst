@@ -56,6 +56,8 @@ Deprecations
   row-column coordinates.
 - ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
   and will be removed in 0.16. Use ``area_threshold`` instead.
+- The default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
+  has been set to `False`.
 
 
 Contributors to this release
