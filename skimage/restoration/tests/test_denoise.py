@@ -224,11 +224,8 @@ def test_denoise_bilateral_multidimensional():
 
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
-
-    assert_warns(RuntimeWarning, restoration.denoise_bilateral,
-                 img, multichannel=False)
-    with expected_warnings(['invalid|\A\Z']):
-        out = restoration.denoise_bilateral(img, multichannel=False)
+    out = assert_warns(RuntimeWarning, restoration.denoise_bilateral,
+                       img, multichannel=False)
     assert_equal(img, out)
 
 
