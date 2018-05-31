@@ -120,7 +120,7 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=None):
+           filter="ramp", interpolation="linear", circle=True):
     """
     Inverse radon transform.
 
@@ -195,10 +195,6 @@ def iradon(radon_image, theta=None, output_size=None,
         else:
             output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2
                                                / 2.0)))
-    if circle is None:
-        warn('The default of `circle` in `skimage.transform.iradon` '
-             'will change to `True` in version 0.15.')
-        circle = False
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
 

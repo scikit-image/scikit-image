@@ -60,6 +60,8 @@ Deprecations
   has been set to `False`.
 - Default value of ``circle`` parameter in ``skimage.transform.radon``
   has been set to `True`.
+- Default value of ``circle`` parameter in ``skimage.transform.iradon``
+  has been set to `True`.
 
 
 Contributors to this release
