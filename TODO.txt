@@ -5,8 +5,6 @@ Version 0.15
 ------------
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.restoration.denoise_nl_means``, set default behavior of
-  `multichannel` to False
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
 * In ``skimage.transform.resize``, set default value of ``mode`` to
