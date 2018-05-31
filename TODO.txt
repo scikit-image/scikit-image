@@ -7,8 +7,6 @@ Version 0.15
 * Finalize ``skimage.future.manual_segmentation`` API.
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
-* In ``skimage/restoration/tests/test_denoise.py``, there is an optional
-  warning that needs to be made mandatory when we move on from python 2.7
 
 Version 0.16
 ------------

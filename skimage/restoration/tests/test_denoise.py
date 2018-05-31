@@ -225,8 +225,8 @@ def test_denoise_bilateral_multidimensional():
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
 
-    # TODO: This warning is not optional in python3. This should be
-    # made a strict warning when we get to 0.15
+    assert_warns(RuntimeWarning, restoration.denoise_bilateral,
+                 img, multichannel=False)
     with expected_warnings(['invalid|\A\Z']):
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
