@@ -143,7 +143,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
 
 def check_parallel(function, im=None, shape=(1000, 1000),
-                        dtype=np.float, depth_max=10, full_output=False,
+                        dtype=np.uint8, depth_max=10, full_output=False,
                         verbose = True,
                         extra_arguments=(), extra_keywords={}):
     """
@@ -186,9 +186,9 @@ def check_parallel(function, im=None, shape=(1000, 1000),
             from ..data import binary_blobs
             im = binary_blobs(shape[0])
         else:
-            im = np.random.randint(0, 256, size=shape) 
+            im = np.random.randint(0, 256, size=shape, dtype=np.uint8) 
 
-    # Execute function without appyly_parallel and time it
+    # Execute function without apply_parallel and time it
     t_init = time()
     out = function(im, *extra_arguments, **extra_keywords)
     t_end = time()
