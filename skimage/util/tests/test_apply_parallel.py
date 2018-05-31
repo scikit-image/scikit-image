@@ -7,6 +7,7 @@ from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel, dask_available, \
                                         check_parallel
 from skimage.morphology import binary_erosion
+from skimage.measure import label
 
 
 @testing.skipif(not dask_available, reason="dask not installed")
@@ -110,3 +111,5 @@ def test_check_parallel():
     with testing.raises(ValueError):
         depth = check_parallel(gaussian, shape=(100, 100),
                                      extra_keywords={'sigma':4})
+    with testing.raises(ValueError):
+        check_parallel(label)
