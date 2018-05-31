@@ -45,9 +45,10 @@ or, on conda-based systems::
 Now, clone scikit-image on your local computer, and install::
 
   git clone https://github.com/scikit-image/scikit-image.git
+  cd scikit-image
   pip install -e .
 
-To update the installation:
+To update the installation::
 
   git pull  # Grab latest source
   pip install -e .  # Reinstall
