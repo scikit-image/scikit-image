@@ -64,6 +64,8 @@ Deprecations
   has been set to ``True``.
 - Default value of ``mode`` parameter in ``skimage.transform.swirl``
   has been set to ``reflect``.
+- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
+  Use ``skimage.filters_threshold_local`` instead.
 
 
 Contributors to this release

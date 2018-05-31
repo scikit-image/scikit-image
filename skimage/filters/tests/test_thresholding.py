@@ -5,7 +5,6 @@ import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
-                                          threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
@@ -104,32 +103,6 @@ class TestSimpleImage():
         assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
-
-    def test_threshold_local_equals_adaptive(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        with expected_warnings(['deprecated', 'return value']):
-            thresholded_original = threshold_adaptive(self.image, 3,
-                                                      method='generic',
-                                                      param=func)
-        threshold_new = threshold_local(self.image, 3, method='generic',
-                                        param=func)
-        assert_equal(thresholded_original, self.image > threshold_new)
-
-    def test_threshold_adaptive_generic(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
-        )
-        with expected_warnings(['deprecated', 'return value']):
-            out = threshold_adaptive(self.image, 3, method='generic',
-                                     param=func)
-        assert_equal(ref, out)
 
     def test_threshold_local_gaussian(self):
         ref = np.array(
@@ -255,7 +228,7 @@ def test_yen_coins_image_as_float():
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
-def test_adaptive_even_block_size_error():
+def test_local_even_block_size_error():
     img = data.camera()
     with testing.raises(ValueError):
         threshold_local(img, block_size=4)
