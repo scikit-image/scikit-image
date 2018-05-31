@@ -1,5 +1,7 @@
 from math import ceil
 from multiprocessing import cpu_count
+from time import time
+import numpy as np
 
 __all__ = ['apply_parallel']
 
@@ -138,3 +140,98 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         res = res.compute()
 
     return res
+
+
+def check_parallel(function, im=None, shape=(1000, 1000),
+                        dtype=np.float, depth_max=10, full_output=False,
+                        verbose = True,
+                        extra_arguments=(), extra_keywords={}):
+    """
+    Run a function on an image with and without chunking with
+    ``apply_parallel``, and check whether results are consistent.
+    Returns the smallest overlap size giving the same result as the original
+    function.
+
+
+    Parameters
+    ----------
+    function : function
+        Function to be mapped which takes an array as an argument.
+    im : numpy array
+        Image array which the function will be applied to.
+    shape: tuple
+        Shape of the image. If ``im`` is defined, ``im.shape`` will be used.
+    dtype: dtype
+        dtype of the image. If ``im`` is defined, ``im.dtype`` is given.
+    depth_max: int
+        Maximum overlap size tested.
+    full_output: bool
+        If True, the output of apply_parallel is returned.
+    verbose: bool
+        Additonal comments.
+    extra_arguments : tuple, optional
+        Tuple of arguments to be passed to the function.
+    extra_keywords : dictionary, optional
+        Dictionary of keyword arguments to be passed to the function.
+    """
+
+    # Build an image with chosen dtype and shape
+    if im is not None:
+        shape = im.shape
+        dtype = im.dtype
+    if im is None:
+        if dtype is np.float:
+            im = np.random.random(shape)
+        elif dtype is np.bool: # binary objects from data module
+            from ..data import binary_blobs
+            im = binary_blobs(shape[0])
+        else:
+            im = np.random.randint(0, 256, size=shape) 
+
+    # Execute function without appyly_parallel and time it
+    t_init = time()
+    out = function(im, *extra_arguments, **extra_keywords)
+    t_end = time()
+    t_not_parallel = t_end - t_init
+    res = [out]
+
+    # Execute function with apply_parallel for different overlaps and time it
+    l = im.shape[0] // 2
+    is_equal = False
+    depth = -1
+    while not is_equal and depth < depth_max: # stop when same value as out
+        depth += 1
+        t_init = time()
+        out_parallel = apply_parallel(function, im, chunks=l, depth=depth,
+                                        mode='none',
+                                        extra_arguments=extra_arguments,
+                                        extra_keywords=extra_keywords)
+        t_end = time()
+        t_parallel = t_end - t_init
+        is_equal = np.allclose(out, out_parallel)
+        if full_output:
+            res.append(out_parallel)
+
+
+    if depth == depth_max:
+        raise ValueError(
+"""An overlap value resulting in the same output as the original (non-chunked)
+function could not be found.
+
+You can increase the max_depth parameter for a larger overlap, but it is
+possible that this function is not suited for chunking.""")
+
+    if verbose:
+        print("""An overlap value of %d is safe to use with the input image.
+Note that the overlap value can depend on the image, and not only on the
+function.
+
+Execution time of %s without chunking: %f
+Execution time of %s with apply_parallel; %f"""
+            %(depth, function.__name__, t_not_parallel,
+                                function.__name__, t_parallel)
+         )
+    if full_output:
+        return depth, np.array(res)
+    else:
+        return depth

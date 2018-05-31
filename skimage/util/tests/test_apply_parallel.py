@@ -4,7 +4,9 @@ import numpy as np
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_almost_equal
 from skimage.filters import threshold_local, gaussian
-from skimage.util.apply_parallel import apply_parallel, dask_available
+from skimage.util.apply_parallel import apply_parallel, dask_available, \
+                                        check_parallel
+from skimage.morphology import binary_erosion
 
 
 @testing.skipif(not dask_available, reason="dask not installed")
@@ -93,3 +95,18 @@ def test_apply_parallel_nearest():
                             mode='nearest')
 
     assert_array_almost_equal(result, expected)
+
+
+@testing.skipif(not dask_available, reason="dask not installed")
+def test_check_parallel():
+    depth = check_parallel(gaussian, shape=(100, 100))
+    assert depth == 4
+    depth = check_parallel(gaussian, shape=(100, 100),
+                                     extra_keywords={'sigma':2})
+    assert depth == 8
+    depth = check_parallel(gaussian, shape=(100, 100), depth_max=20,
+                                     extra_keywords={'sigma':4})
+    assert depth == 16
+    with testing.raises(ValueError):
+        depth = check_parallel(gaussian, shape=(100, 100),
+                                     extra_keywords={'sigma':4})
