@@ -101,13 +101,13 @@ Build Requirements
 Build Requirements (docs)
 -------------------------
 
-.. include:: requirements/docs.txt
+.. include:: ../../requirements/docs.txt
    :literal:
 
 Runtime requirements
 --------------------
 
-.. include:: requirements/default.txt
+.. include:: ../../requirements/default.txt
    :literal:
 
 Optional Requirements
@@ -136,11 +136,11 @@ functionality is only available with the following installed:
 Testing requirements
 --------------------
 
-.. include:: requirements/test.txt
+.. include:: ../../requirements/test.txt
    :literal:
 
 Documentation requirements
 --------------------------
 
-.. include:: requirements/docs.txt
+.. include:: ../../requirements/docs.txt
    :literal:
