@@ -100,16 +100,16 @@ def test_apply_parallel_nearest():
 
 @testing.skipif(not dask_available, reason="dask not installed")
 def test_check_parallel():
-    depth = check_parallel(gaussian, shape=(100, 100))
+    depth = check_parallel(gaussian, shape=(100, 100), verbose=False)
     assert depth == 4
-    depth = check_parallel(gaussian, shape=(100, 100),
+    depth = check_parallel(gaussian, shape=(100, 100), verbose=False,
                                      extra_keywords={'sigma':2})
     assert depth == 8
     depth = check_parallel(gaussian, shape=(100, 100), depth_max=20,
-                                     extra_keywords={'sigma':4})
+                                     verbose=False, extra_keywords={'sigma':4})
     assert depth == 16
     with testing.raises(ValueError):
         depth = check_parallel(gaussian, shape=(100, 100),
-                                     extra_keywords={'sigma':4})
+                                     verbose=False, extra_keywords={'sigma':4})
     with testing.raises(ValueError):
-        check_parallel(label)
+        check_parallel(label, shape=(100, 100), verbose=False)

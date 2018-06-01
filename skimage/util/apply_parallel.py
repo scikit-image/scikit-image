@@ -143,7 +143,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     return res
 
 
-def check_parallel(function, im=None, shape=(1000, 1000),
+def check_parallel(function, image=None, shape=(4000, 4000),
                         dtype_input=np.uint8, depth_max=10,
                         full_output=False, verbose = True,
                         extra_arguments=(), extra_keywords={}):
@@ -179,34 +179,36 @@ def check_parallel(function, im=None, shape=(1000, 1000),
     """
 
     # Build an image with chosen dtype and shape
-    if im is not None:
-        shape = im.shape
-        dtype_input = im.dtype
-    if im is None:
+    if image is not None:
+        shape = image.shape
+        dtype_input = image.dtype
+    if image is None:
         if dtype_input is np.float:
-            im = np.random.random(shape)
+            image = np.random.random(shape)
         elif dtype_input is np.bool: # binary objects from data module
             from ..data import binary_blobs
-            im = binary_blobs(shape[0])
+            image = binary_blobs(shape[0])
         else:
-            im = np.random.randint(0, 256, size=shape, dtype=np.uint8)
+            from ..data import binary_blobs
+            from ..measure import label
+            image = binary_blobs(shape[0])
+            image = label(image).astype(np.uint8) # might overflow 
 
     # Execute function without apply_parallel and time it
     t_init = time()
-    out = function(im, *extra_arguments, **extra_keywords)
+    out = function(image, *extra_arguments, **extra_keywords)
     dtype_output = out.dtype
     t_end = time()
     t_not_parallel = t_end - t_init
     res = [out]
 
     # Execute function with apply_parallel for different overlaps and time it
-    l = im.shape[0] // 2
     is_equal = False
     depth = -1
     while not is_equal and depth < depth_max: # stop when same value as out
         depth += 1
         t_init = time()
-        out_parallel = apply_parallel(function, im, chunks=l, depth=depth,
+        out_parallel = apply_parallel(function, image, depth=depth,
                                         mode='none', dtype=dtype_output,
                                         extra_arguments=extra_arguments,
                                         extra_keywords=extra_keywords)
