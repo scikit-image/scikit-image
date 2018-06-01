@@ -91,7 +91,7 @@ Boolean arithmetic can be used to define more complex masks: ::
     >>> lower_half = row > cnt_row
     >>> lower_half_disk = np.logical_and(lower_half, outer_disk_mask)
     >>> camera = data.camera()
-    >>> camera[lower_half_disk] = 0 
+    >>> camera[lower_half_disk] = 0
 
 
 Color images
@@ -209,11 +209,11 @@ in a different order, even if the number of operations is the same:
     >>> def in_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[0])):
     ...         arr[plane, :, :] *= scalar
-    ... 
+    ...
     >>> def out_of_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[2])):
     ...         arr[:, :, plane] *= scalar
-    ... 
+    ...
     >>> import time
     >>> im3d = np.random.rand(100, 1024, 1024)
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
@@ -229,12 +229,11 @@ in a different order, even if the number of operations is the same:
     Speedup: 8.6x
 
 
-When the dimension you are iterating over is even larger, the
-speedup is even more dramatic. It is worth thinking about this
-*data locality* when writing algorithms. In particular, know that
-scikit-image uses C-contiguous arrays unless otherwise specified, so
-one should iterate along the last/rightmost dimension in the
-innermost loop of the computation.
+Consider data locality before iterating over a dimension as the larger the 
+dimension the more dramatic the speedup.
+
+Scikit-image uses c-contigous arrays as default, ideally iteration should occur
+along the last/rightmost dimension in the innermost loop of the computation.
 
 A note on time
 --------------
