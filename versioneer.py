@@ -1480,7 +1480,7 @@ def get_version():
     return get_versions()["version"]
 
 
-def get_cmdclass():
+def get_cmdclass(cmdclass=None):
     """Get the custom setuptools/distutils subclasses used by Versioneer."""
     if "versioneer" in sys.modules:
         del sys.modules["versioneer"]
@@ -1497,7 +1497,7 @@ def get_cmdclass():
         # happens, we protect the child from the parent's versioneer too.
         # Also see https://github.com/warner/python-versioneer/issues/52
 
-    cmds = {}
+    cmds = {} if cmdclass is None else cmdclass.copy()
 
     # we add "version" to both distutils and setuptools
     from distutils.core import Command
@@ -1539,10 +1539,14 @@ def get_cmdclass():
     #  setup.py egg_info -> ?
 
     # we override different "build_py" commands for both environments
-    if "setuptools" in sys.modules:
-        from setuptools.command.build_py import build_py as _build_py
-    else:
-        from distutils.command.build_py import build_py as _build_py
+    try:
+        _build_py = cmds["build_py"]
+        print("Got here")
+    except KeyError:
+        if "setuptools" in sys.modules:
+            from setuptools.command.build_py import build_py as _build_py
+        else:
+            from distutils.command.build_py import build_py as _build_py
 
     class cmd_build_py(_build_py):
         def run(self):
@@ -1620,10 +1624,13 @@ def get_cmdclass():
         cmds["py2exe"] = cmd_py2exe
 
     # we override different "sdist" commands for both environments
-    if "setuptools" in sys.modules:
-        from setuptools.command.sdist import sdist as _sdist
-    else:
-        from distutils.command.sdist import sdist as _sdist
+    try:
+        _sdist = cmds["sdist"]
+    except KeyError:
+        if "setuptools" in sys.modules:
+            from setuptools.command.sdist import sdist as _sdist
+        else:
+            from distutils.command.sdist import sdist as _sdist
 
     class cmd_sdist(_sdist):
         def run(self):

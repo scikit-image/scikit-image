@@ -22,6 +22,8 @@ import os
 import sys
 
 import setuptools
+from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
 import versioneer
 
 if sys.version_info < (3, 5):
@@ -149,6 +151,8 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass=versioneer.get_cmdclass(),
+        cmdclass=versioneer.get_cmdclass(cmdclass={
+            'build_py': build_py,
+            'sdist': sdist}),
         **extra
     )
