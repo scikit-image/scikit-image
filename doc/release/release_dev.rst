@@ -22,8 +22,7 @@ New Features
 Improvements
 ------------
 
-- Version number is now kept updated by versioneer. versioneer has been added as a
-  build dependency.
+- Version number is now kept updated by versioneer (vendored).
 
 
 API Changes
