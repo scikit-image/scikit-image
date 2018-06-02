@@ -22,8 +22,7 @@ import os
 import sys
 
 import setuptools
-from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist
+import versioneer
 
 if sys.version_info < (3, 5):
 
@@ -49,12 +48,6 @@ import builtins
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
 
-
-with open('skimage/__init__.py') as fid:
-    for line in fid:
-        if line.startswith('__version__'):
-            VERSION = line.strip().split()[-1][1:-1]
-            break
 
 with open('requirements/default.txt') as fid:
     INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
@@ -128,7 +121,7 @@ if __name__ == "__main__":
         url=URL,
         license=LICENSE,
         download_url=DOWNLOAD_URL,
-        version=VERSION,
+        version=versioneer.get_version(),
 
         classifiers=[
             'Development Status :: 4 - Beta',
@@ -156,7 +149,6 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass={'build_py': build_py,
-                  'sdist': sdist},
+        cmdclass=versioneer.get_cmdclass(),
         **extra
     )

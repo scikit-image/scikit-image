@@ -24,6 +24,8 @@ Improvements
 
 - ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
   new optional dependency).
+- Version number is now kept updated by versioneer. versioneer has been added as a
+  build dependency.
 
 API Changes
 -----------

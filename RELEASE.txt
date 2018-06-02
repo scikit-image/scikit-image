@@ -41,14 +41,25 @@ make a PR to update these notes after you are done with the release. ;-)
   - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
   - Once the consensus is found, ask the project maintainers to merge the PR.
 
-- In the master branch, update the version number in ``skimage/__init__.py``
-  to the next ``.dev0`` version, commit, and push. This should follow PEP440
-  meaning that the appropriate version number would look something like
-  ``0.20.dev0`` with the period beteween ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``. 
+  - In the master branch, create a new tag with an updated version number and
+    append ``.dev0`` to it. python-versioneer will take care of updating the
+    version number in the source file. This should follow PEP440
+    meaning that the appropriate version number would look something like
+    ``0.20.dev0`` with the period beteween ``20`` and ``dev`` and a trailing
+    ``0`` immediately after ``dev``. 
 
-- Back on the release branch, update the version number to stable in
-  ``skimage/__init__.py``, commit, and push.
+     git checkout master
+     git tag -s [-u <key-id>] v<new_major>.<new_minor>.0.dev
+
+    (If you do not have a gpg key, use -m instead; it is important for
+    Debian packaging that the tags are annotated)
+
+  - Push the new meta-data to github::
+
+     git push --tags upstream master
+
+    (where ``upstream`` is the name of the
+     ``github.com:scikit-image/scikit-image`` repository.)
 
 - Update the docs:
 
@@ -63,10 +74,7 @@ make a PR to update these notes after you are done with the release. ;-)
 
    git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-  (If you do not have a GPG key, follow the tutorial to set it up:
-   https://help.github.com/articles/signing-commits-with-gpg/)
-
-- Push the new tag to GitHub::
+- Push the new meta-data to github::
 
    git push upstream v<major>.<minor>.0
 
