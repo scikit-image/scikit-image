@@ -65,8 +65,9 @@ import sys
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
 
-__version__ = '0.15dev'
-
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
 
 if sys.version_info < (3,):
     raise ImportError("""
