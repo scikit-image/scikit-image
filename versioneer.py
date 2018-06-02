@@ -1639,6 +1639,8 @@ def get_cmdclass(cmdclass=None):
             # unless we update this, the command will keep using the old
             # version
             self.distribution.metadata.version = versions["version"]
+            print("got there")
+            print(_sdist)
             return _sdist.run(self)
 
         def make_release_tree(self, base_dir, files):
