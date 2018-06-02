@@ -70,6 +70,8 @@ before_install:
 
 install:
     - python setup.py develop
+    # Only install requirements after the build process
+    - pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
     # Matplotlib settings - do not show figures during doc examples
     - |
       if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
@@ -82,7 +84,7 @@ install:
     # Install most of the optional packages
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+        pip install --retries 3 -q -r ./requirements/optional.txt
       fi
     - |
       if [[ "${WITH_PYAMG}" == "1" ]]; then

@@ -47,7 +47,6 @@ import builtins
 # the numpy distutils extensions that are used by scikit-image to recursively
 # build the compiled extensions in sub-packages is based on the Python import
 # machinery.
-builtins.__SKIMAGE_SETUP__ = True
 
 
 with open('skimage/__init__.py') as fid:
@@ -88,14 +87,6 @@ if __name__ == "__main__":
     try:
         from numpy.distutils.core import setup
         extra = {'configuration': configuration}
-        # Do not try and upgrade larger dependencies
-        for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
-            try:
-                __import__(lib)
-                INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
-                                    if lib not in i]
-            except ImportError:
-                pass
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
