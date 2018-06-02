@@ -1,13 +1,13 @@
-from __future__ import print_function, division
 
 import numpy as np
 from skimage.restoration import unwrap_phase
+import sys
 
 import warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal_nulp,
                                      assert_almost_equal, assert_array_equal,
-                                     assert_)
+                                     assert_, skipif)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -116,6 +116,8 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
+@skipif(sys.version_info[:2] == (3, 4),
+        reason="Doesn't work with python 3.4. See issue #3079")
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)

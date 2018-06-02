@@ -39,7 +39,7 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
         List of pixel pair angles in radians.
     levels : int
         The input image should contain integers in [0, `levels`-1],
-        where levels indicate the number of grey-levels counted
+        where levels indicate the number of gray-levels counted
         (typically 256 for an 8-bit image).
     out : ndarray
         On input a 4D array of zeros, and on output it contains

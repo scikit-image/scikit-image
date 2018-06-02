@@ -17,7 +17,6 @@ Reference
 http://en.wikipedia.org/wiki/Color_difference
 
 """
-from __future__ import division
 
 import numpy as np
 

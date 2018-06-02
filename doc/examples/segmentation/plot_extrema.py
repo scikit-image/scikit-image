@@ -26,7 +26,7 @@ y_0 = 354
 width = 100
 height = 100
 
-img = color.rgb2grey(color_image)[y_0:(y_0 + height), x_0:(x_0 + width)]
+img = color.rgb2gray(color_image)[y_0:(y_0 + height), x_0:(x_0 + width)]
 
 # the rescaling is done only for visualization purpose.
 # the algorithms would work identically in an unscaled version of the
@@ -49,7 +49,7 @@ overlay = color.label2rgb(label_maxima, img, alpha=0.7, bg_label=0,
 # We observed in the previous image, that there are many local maxima
 # that are caused by the noise in the image.
 # For this, we find all local maxima with a height of h.
-# This height is the grey level value by which we need to descent
+# This height is the gray level value by which we need to descent
 # in order to reach a higher maximum and it can be seen as a local
 # contrast measurement.
 # The value of h scales with the dynamic range of the image, i.e.

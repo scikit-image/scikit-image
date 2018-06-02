@@ -2,7 +2,6 @@
 The arraycrop module contains functions to crop values from the edges of an
 n-dimensional array.
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 from numpy.lib.arraypad import _validate_lengths

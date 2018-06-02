@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from six import BytesIO
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
@@ -45,18 +45,26 @@ def test_png_round_trip():
     fname = f.name
     f.close()
     I = np.eye(3)
-    imsave(fname, I)
+    with expected_warnings(['Possible precision loss']):
+        imsave(fname, I)
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
+def test_img_as_gray_flatten():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    with expected_warnings(['deprecated']):
+        img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    assert_array_equal(img, img_flat)
+
+
 def test_imread_flatten():
     # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
@@ -190,9 +198,11 @@ class TestSave:
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 3, 1)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 3, 1)))
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 2)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 2)))
 
 
 def test_imsave_filelike():
@@ -239,12 +249,15 @@ def test_imexport_imimport():
 
 
 def test_all_color():
-    color_check('pil')
-    color_check('pil', 'bmp')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    mono_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        mono_check('pil')
 
 
 def test_multi_page_gif():

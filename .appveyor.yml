@@ -3,7 +3,6 @@
 
 environment:
   matrix:
-    - PYTHON: C:\Python27-x64
     - PYTHON: C:\Python35-x64
     - PYTHON: C:\Python36
     - PYTHON: C:\Python36-x64
@@ -26,7 +25,7 @@ install:
         throw "There are newer queued builds for this pull request, failing early." }
 
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python -m pip install -U pip"
+  - "python -m pip install --retries 3 -U pip"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
@@ -40,8 +39,8 @@ install:
   # Install the build and runtime dependencies of the project.
   # The --pre flag is necessary to grab a SciPy wheel, which is in
   # pre-release at the time of writing (03-10-2017)
-  - pip install --pre -r requirements.txt
-  - pip install -r requirements/build.txt
+  - pip install --retries 3 --pre -r requirements.txt
+  - pip install --retries 3 -r requirements/build.txt
   - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
@@ -64,7 +63,7 @@ test_script:
   -  echo backend:Agg > matplotlibrc
 
   # Run unit tests with pytest
-  - "python -c \"import pytest; import skimage; pytest.main([skimage.pkg_dir])\""
+  - pytest -v --pyargs skimage
 
 artifacts:
   # Archive the generated wheel package in the ci.appveyor.com build report.

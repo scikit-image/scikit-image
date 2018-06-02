@@ -1,4 +1,3 @@
-from __future__ import division
 import math
 import numpy as np
 from scipy import spatial
@@ -60,7 +59,7 @@ def _center_and_normalize_points(points):
 
     pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
 
-    new_pointsh = np.dot(matrix, pointsh).T
+    new_pointsh = (matrix @ pointsh).T
 
     new_points = new_pointsh[:, :2]
     new_points[:, 0] /= new_pointsh[:, 2]
@@ -106,7 +105,7 @@ def _umeyama(src, dst, estimate_scale):
     dst_demean = dst - dst_mean
 
     # Eq. (38).
-    A = np.dot(dst_demean.T, src_demean) / num
+    A = dst_demean.T @ src_demean / num
 
     # Eq. (39).
     d = np.ones((dim,), dtype=np.double)
@@ -123,22 +122,22 @@ def _umeyama(src, dst, estimate_scale):
         return np.nan * T
     elif rank == dim - 1:
         if np.linalg.det(U) * np.linalg.det(V) > 0:
-            T[:dim, :dim] = np.dot(U, V)
+            T[:dim, :dim] = U @ V
         else:
             s = d[dim - 1]
             d[dim - 1] = -1
-            T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
+            T[:dim, :dim] = U @ np.diag(d) @ V
             d[dim - 1] = s
     else:
-        T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
+        T[:dim, :dim] = U @ np.diag(d) @ V
 
     if estimate_scale:
         # Eq. (41) and (42).
-        scale = 1.0 / src_demean.var(axis=0).sum() * np.dot(S, d)
+        scale = 1.0 / src_demean.var(axis=0).sum() * (S @ d)
     else:
         scale = 1.0
 
-    T[:dim, dim] = dst_mean - scale * np.dot(T[:dim, :dim], src_mean.T)
+    T[:dim, dim] = dst_mean - scale * (T[:dim, :dim] @ src_mean.T)
     T[:dim, :dim] *= scale
 
     return T
@@ -261,7 +260,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return np.dot(coords_homogeneous, self.params.T)
+        return coords_homogeneous @ self.params.T
 
     def inverse(self, coords):
         """Apply inverse transformation.
@@ -278,7 +277,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return np.dot(coords_homogeneous, self.params)
+        return coords_homogeneous @ self.params
 
     def _setup_constraint_matrix(self, src, dst):
         """Setup and solve the homogeneous epipolar constraint matrix::
@@ -358,9 +357,9 @@ class FundamentalMatrixTransform(GeometricTransform):
         # non-zero and one must be zero.
         U, S, V = np.linalg.svd(F_normalized)
         S[2] = 0
-        F = np.dot(U, np.dot(np.diag(S), V))
+        F = U @ np.diag(S) @ V
 
-        self.params = np.dot(dst_matrix.T, np.dot(F, src_matrix))
+        self.params = dst_matrix.T @ F @ src_matrix
 
         return True
 
@@ -385,8 +384,8 @@ class FundamentalMatrixTransform(GeometricTransform):
         src_homogeneous = np.column_stack([src, np.ones(src.shape[0])])
         dst_homogeneous = np.column_stack([dst, np.ones(dst.shape[0])])
 
-        F_src = np.dot(self.params, src_homogeneous.T)
-        Ft_dst = np.dot(self.params.T, dst_homogeneous.T)
+        F_src = self.params @ src_homogeneous.T
+        Ft_dst = self.params.T @ dst_homogeneous.T
 
         dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
 
@@ -446,7 +445,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
             t_x = np.array([0, -translation[2], translation[1],
                             translation[2], 0, -translation[0],
                             -translation[1], translation[0], 0]).reshape(3, 3)
-            self.params = np.dot(t_x, rotation)
+            self.params = t_x @ rotation
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix")
@@ -485,9 +484,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         S[0] = (S[0] + S[1]) / 2.0
         S[1] = S[0]
         S[2] = 0
-        E = np.dot(U, np.dot(np.diag(S), V))
+        E = U @ np.diag(S) @ V
 
-        self.params = np.dot(dst_matrix.T, np.dot(E, src_matrix))
+        self.params = dst_matrix.T @ E @ src_matrix
 
         return True
 
@@ -548,7 +547,7 @@ class ProjectiveTransform(GeometricTransform):
 
         x, y = np.transpose(coords)
         src = np.vstack((x, y, np.ones_like(x)))
-        dst = np.dot(src.transpose(), matrix.transpose())
+        dst = src.T @ matrix.T
 
         # rescale to homogeneous coordinates
         dst[:, 0] /= dst[:, 2]
@@ -685,7 +684,7 @@ class ProjectiveTransform(GeometricTransform):
         H[2, 2] = 1
 
         # De-center and de-normalize
-        H = np.dot(np.linalg.inv(dst_matrix), np.dot(H, src_matrix))
+        H = np.linalg.inv(dst_matrix) @ H @ src_matrix
 
         self.params = H
 
@@ -702,11 +701,11 @@ class ProjectiveTransform(GeometricTransform):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other.params.dot(self.params))
+            return tform(other.params @ self.params)
         elif (hasattr(other, '__name__')
                 and other.__name__ == 'inverse'
                 and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(other.__self__._inv_matrix.dot(self.params))
+            return ProjectiveTransform(other.__self__._inv_matrix @ self.params)
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")

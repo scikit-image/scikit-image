@@ -1,9 +1,7 @@
-from __future__ import division
 
 from itertools import chain
 from operator import add
 
-import six
 import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
@@ -23,7 +21,7 @@ def _validate_feature_type(feature_type):
     if feature_type is None:
         feature_type_ = FEATURE_TYPE
     else:
-        if isinstance(feature_type, six.string_types):
+        if isinstance(feature_type, str):
             feature_type_ = [feature_type]
         else:
             feature_type_ = feature_type
@@ -135,6 +133,17 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         the data type of `int_image`: `int` when the data type of `int_image`
         is `uint` or `int` and `float` when the data type of `int_image` is
         `float`.
+
+    Notes
+    -----
+    When extracting those features in parallel, be aware that the choice of the
+    backend (i.e. multiprocessing vs threading) will have an impact on the
+    performance. The rule of thumb is as follows: use multiprocessing when
+    extracting features for all possible ROI in an image; use threading when
+    extracting the feature at specific location for a limited number of ROIs.
+    Refer to the example
+    :ref:`sphx_glr_auto_examples_xx_applications_plot_haar_extraction_selection_classification.py`
+    for more insights.
 
     Examples
     --------

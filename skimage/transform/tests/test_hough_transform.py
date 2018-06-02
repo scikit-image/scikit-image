@@ -79,7 +79,7 @@ def test_probabilistic_hough_seed():
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
                                                seed=1234)
-    assert len(lines) == 64
+    assert len(lines) == 65
 
 
 def test_probabilistic_hough_bad_input():
@@ -460,3 +460,7 @@ def test_hough_ellipse_non_zero_negangle4():
                                  orientation=best[5])
     assert_equal(rr, rr2)
     assert_equal(cc, cc2)
+
+
+def test_hough_ellipse_all_black_img():
+    assert(transform.hough_ellipse(np.zeros((100, 100))).shape == (0, 6))

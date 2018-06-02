@@ -171,7 +171,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         efree = True
 
     # Only one inversion is needed for implicit spline energy minimization:
-    inv = scipy.linalg.inv(A+gamma*np.eye(n))
+    inv = np.linalg.inv(A + gamma*np.eye(n))
 
     # Explicit time stepping for image energy minimization:
     for i in range(max_iterations):
@@ -189,8 +189,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         if efree:
             fx[-1] *= 2
             fy[-1] *= 2
-        xn = np.dot(inv, gamma*x + fx)
-        yn = np.dot(inv, gamma*y + fy)
+        xn = inv @ (gamma*x + fx)
+        yn = inv @ (gamma*y + fy)
 
         # Movements are capped to max_px_move per iteration:
         dx = max_px_move*np.tanh(xn-x)
