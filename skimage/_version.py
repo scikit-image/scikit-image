@@ -16,6 +16,7 @@ import re
 import subprocess
 import sys
 
+fallback_version = "0.15.0.dev"
 
 def get_keywords():
     """Get the keywords needed to look up the version information."""
@@ -205,10 +206,11 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
                     "full-revisionid": keywords["full"].strip(),
                     "dirty": False, "error": None,
                     "date": date}
-    # no suitable tags, so version is "0+unknown", but full hex is still there
+    # no suitable tags, so version is fallback_version + "+unknown", but
+    # full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")
-    return {"version": "0+unknown",
+    return {"version": fallback_version + "+unknown",
             "full-revisionid": keywords["full"].strip(),
             "dirty": False, "error": "no suitable tags", "date": None}
 
@@ -319,7 +321,8 @@ def render_pep440(pieces):
     get a tagged build and then dirty it, you'll get TAG+0.gHEX.dirty
 
     Exceptions:
-    1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
+    1: no tags. git_describe was just HEX.
+    fallback_version+untagged.DISTANCE.gHEX[.dirty]
     """
     if pieces["closest-tag"]:
         rendered = pieces["closest-tag"]
@@ -330,8 +333,9 @@ def render_pep440(pieces):
                 rendered += ".dirty"
     else:
         # exception #1
-        rendered = "0+untagged.%d.g%s" % (pieces["distance"],
-                                          pieces["short"])
+        rendered = (fallback_version +
+                        ("+untagged.%d.g%s" % (pieces["distance"],
+                                               pieces["short"])))
         if pieces["dirty"]:
             rendered += ".dirty"
     return rendered
@@ -498,7 +502,8 @@ def get_versions():
         for i in cfg.versionfile_source.split('/'):
             root = os.path.dirname(root)
     except NameError:
-        return {"version": "0+unknown", "full-revisionid": None,
+        return {"version": fallback_version + "+unknown",
+                "full-revisionid": None,
                 "dirty": None,
                 "error": "unable to find root of source tree",
                 "date": None}
@@ -515,6 +520,7 @@ def get_versions():
     except NotThisMethod:
         pass
 
-    return {"version": "0+unknown", "full-revisionid": None,
+    return {"version": fallback_version + "+unknown",
+            "full-revisionid": None,
             "dirty": None,
             "error": "unable to compute version", "date": None}
