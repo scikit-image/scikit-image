@@ -18,6 +18,7 @@ import sys
 
 fallback_version = "0.15.0.dev"
 
+
 def get_keywords():
     """Get the keywords needed to look up the version information."""
     # these strings will be replaced by git during git-archive.
@@ -334,8 +335,8 @@ def render_pep440(pieces):
     else:
         # exception #1
         rendered = (fallback_version +
-                        ("+untagged.%d.g%s" % (pieces["distance"],
-                                               pieces["short"])))
+                    ("+untagged.%d.g%s" % (pieces["distance"],
+                                           pieces["short"])))
         if pieces["dirty"]:
             rendered += ".dirty"
     return rendered
