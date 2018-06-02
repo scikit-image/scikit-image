@@ -58,6 +58,12 @@ make a PR to update these notes after you are done with the release. ;-)
     (where ``upstream`` is the name of the
      ``github.com:scikit-image/scikit-image`` repository.)
 
+  - From the homepage, git allows users to download a zip that won't contain
+    enough information for versioneer to work correctly. See their issue
+    #140 and Pull Request #183. We have a modified version of ``_version.py``
+    that allows a ``fallback_version`` to be specified. Update that to include
+    ``<new_major>.<new_minor>.0.dev``.
+
 - Update the docs:
 
   - Edit ``doc/source/_static/docversions.js`` and commit
