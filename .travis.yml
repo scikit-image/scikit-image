@@ -38,16 +38,16 @@ matrix:
   include:
     - os: linux
       python: 3.5
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
+      env: MINIMUM_REQUIREMENTS=1 OPTIONAL_DEPS=0 BUILD_DOCS=0
     - os: linux
       python: 3.5
-      env: QT=PyQt5 WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1
+      env: QT=PyQt5 WITH_PYAMG=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      env: QT=PyQt5 WITH_PYAMG=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
+      env: QT=PyQt5 WITH_PYAMG=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
@@ -82,7 +82,7 @@ install:
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
     - |
-      if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+      if [[ "${OPTIONAL_DEPS}" != "0" ]]; then
         pip install --retries 3 -q -r ./requirements/optional.txt
       fi
     - |
