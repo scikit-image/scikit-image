@@ -58,8 +58,8 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
       else
-        virtualenv -p python ~/venv_build;
-        source ~/venv_build/bin/activate;
+        virtualenv -p python ~/venv;
+        source ~/venv/bin/activate;
       fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
