@@ -58,8 +58,8 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
       else
-        virtualenv -p python ~/venv;
-        source ~/venv/bin/activate;
+        virtualenv -p python ~/venv_build;
+        source ~/venv_build/bin/activate;
       fi
     - ccache -s
     - export PATH=/usr/lib/ccache:${PATH}
@@ -68,7 +68,7 @@ before_install:
     - tools/check_sdist.py
 
 install:
-    - python setup.py develop
+    - python setup.py develop --no-deps
     # Only install requirements after the build process
     - pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
     # Matplotlib settings - do not show figures during doc examples
