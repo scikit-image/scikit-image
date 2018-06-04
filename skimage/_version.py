@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 
-fallback_version = "0.15.0.dev"
+fallback_version = "0.15.dev0"
 
 
 def get_keywords():
