@@ -37,9 +37,12 @@ def cython(pyx_files, working_path=''):
         # the distributed .c files if present
         c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
         for cfile in [os.path.join(working_path, f) for f in c_files]:
-            if not os.path.isfile(cfile):
-                raise RuntimeError('Cython >= %s is required to build scikit-image from git checkout' \
-                                   % CYTHON_VERSION)
+            # check for both c and cpp files (at least _haar.cpp needs this)
+            if not (os.path.isfile(cfile) or os.path.isfile(cfile + 'pp')):
+                raise RuntimeError(
+                    ('Could not find file %s.\n'
+                     'Cython >= %s is required to build scikit-image from git checkout.') \
+                    % (cfile, CYTHON_VERSION))
 
         print("Cython >= %s not found; falling back to pre-built %s" \
               % (CYTHON_VERSION, " ".join(c_files)))
