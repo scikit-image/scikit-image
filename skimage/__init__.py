@@ -62,11 +62,11 @@ import functools
 import warnings
 import sys
 
+from ._version import get_versions as _get_versions
+__version__ = _get_versions()['version']
+
 pkg_dir = osp.abspath(osp.dirname(__file__))
 data_dir = osp.join(pkg_dir, 'data')
-
-__version__ = '0.15dev'
-
 
 if sys.version_info < (3,):
     raise ImportError("""

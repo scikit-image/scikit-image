@@ -22,6 +22,7 @@ New Features
 Improvements
 ------------
 
+- Version number is now kept updated by versioneer (vendored).
 
 
 API Changes

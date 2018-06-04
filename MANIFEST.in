@@ -18,3 +18,5 @@ recursive-include doc/source/_templates *.html
 recursive-include doc *.py
 prune doc/build
 prune doc/gh-pages
+include versioneer.py
+include skimage/_version.py
