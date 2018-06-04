@@ -18,13 +18,18 @@ data = [l.replace('hard linking ', '') for l in data]
 data = ['./' + l.split(' ->')[0] for l in data]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore']
-ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
-               './downloads', './scikit_image.egg-info']
+ignore_dirs = ['./dist', './doc', './viewer_examples',
+               './downloads', './scikit_image.egg-info', './tools/travis']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml',
-                './skimage/filters/rank/README.rst']
+                './skimage/filters/rank/README.rst',
+                './tools/check_sdist.py',
+                './tools/header.py',
+                './tools/mailmap.py',
+                './tools/rm_pyx_c_file.sh',
+                './tools/upload_wheels.sh']
 
 
 missing = []
