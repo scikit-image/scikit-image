@@ -102,7 +102,7 @@ else:
         """Run all unit tests."""
         import pytest
         import warnings
-        args = ['skimage']
+        args = [pkg_dir]
         if verbose:
             args.extend(['-v', '-s'])
         if doctest:
