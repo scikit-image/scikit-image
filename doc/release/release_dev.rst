@@ -27,6 +27,9 @@ Improvements
 API Changes
 -----------
 
+- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
+  base10 instead of the natural logarithm as discussed in issue #2995.
+
 
 
 Bugfixes
