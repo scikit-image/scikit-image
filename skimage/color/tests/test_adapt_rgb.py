@@ -8,7 +8,7 @@ from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 from skimage._shared._warnings import expected_warnings
 
 # Down-sample image for quicker testing.
-COLOR_IMAGE = data.astronaut()[::5, ::5]
+COLOR_IMAGE = data.astronaut()[::5, ::6]
 GRAY_IMAGE = data.camera()[::5, ::5]
 
 SIGMA = 3
@@ -24,6 +24,13 @@ def edges_each(image):
 @adapt_rgb(each_channel)
 def smooth_each(image, sigma):
     return filters.gaussian(image, sigma)
+
+
+@adapt_rgb(each_channel)
+def mask_each(image, mask):
+    result = image.copy()
+    result[mask] = 0
+    return result
 
 
 @adapt_rgb(hsv_value)
@@ -59,6 +66,11 @@ def test_each_channel_with_filter_argument():
     filtered = smooth_each(COLOR_IMAGE, SIGMA)
     for i, channel in enumerate(np.rollaxis(filtered, axis=-1)):
         assert_allclose(channel, smooth(COLOR_IMAGE[:, :, i]))
+
+
+def test_each_channel_with_asymmetric_kernel():
+    mask = np.triu(np.ones(COLOR_IMAGE.shape[:2], dtype=np.bool_))
+    mask_each(COLOR_IMAGE, mask)
 
 
 def test_hsv_value():
