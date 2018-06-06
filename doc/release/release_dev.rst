@@ -65,7 +65,7 @@ Deprecations
 - Default value of ``mode`` parameter in ``skimage.transform.swirl``
   has been set to ``reflect``.
 - Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters_threshold_local`` instead.
+  Use ``skimage.filters.threshold_local`` instead.
 - Default value of ``multichannel`` parameter in
   ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
 - Default value of ``multichannel`` parameter in
