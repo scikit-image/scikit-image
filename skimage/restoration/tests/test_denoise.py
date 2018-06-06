@@ -530,12 +530,6 @@ def test_wavelet_denoising_args():
                                             multichannel=multichannel)
 
 
-def test_multichannel_warnings():
-    img = data.astronaut()
-    assert_warns(UserWarning, restoration.denoise_bilateral, img)
-    assert_warns(UserWarning, restoration.denoise_nl_means, img)
-
-
 def test_cycle_spinning_multichannel():
     sigma = 0.1
     rstate = np.random.RandomState(1234)
