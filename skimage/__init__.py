@@ -64,27 +64,6 @@ data_dir = osp.join(pkg_dir, 'data')
 
 __version__ = '0.15.dev0'
 
-
-if sys.version_info < (3,):
-    raise ImportError("""
-
-You are running scikit-image on Python 2.
-
-Unfortunately, scikit-image 0.15 and above no longer work on this
-version of Python.  You therefore have two options: either upgrade to
-Python 3, or install an older version of scikit-image using
-
- $ pip install 'scikit-image<0.15'
-
-Please also consider updating `pip` and `setuptools`:
-
- $ pip install pip setuptools --upgrade
-
-Newer versions of these tools avoid installing packages incompatible
-with your version of Python.
-""")
-
-
 from .util.dtype import *
 
 
