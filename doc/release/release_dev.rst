@@ -29,7 +29,24 @@ API Changes
 
 - ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
   base10 instead of the natural logarithm as discussed in issue #2995.
-
+- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
+  has been set to ``False``.
+- Default value of ``circle`` parameter in ``skimage.transform.radon``
+  has been set to ``True``.
+- Default value of ``circle`` parameter in ``skimage.transform.iradon``
+  has been set to ``True``.
+- Default value of ``mode`` parameter in ``skimage.transform.swirl``
+  has been set to ``reflect``.
+- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
+  Use ``skimage.filters.threshold_local`` instead.
+- Default value of ``multichannel`` parameter in
+  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
+- Default value of ``multichannel`` parameter in
+  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
+- Default value of ``mode`` parameter in ``skimage.transform.resize``
+  and ``skimage.transform.rescale`` has been set to ``reflect``.
+- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
+  and ``skimage.transform.rescale`` has been set to ``True``.
 
 
 Bugfixes
@@ -56,24 +73,6 @@ Deprecations
   row-column coordinates.
 - ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
   and will be removed in 0.16. Use ``area_threshold`` instead.
-- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to ``False``.
-- Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to ``True``.
-- Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to ``True``.
-- Default value of ``mode`` parameter in ``skimage.transform.swirl``
-  has been set to ``reflect``.
-- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters.threshold_local`` instead.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
-- Default value of ``mode`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``reflect``.
-- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``True``.
 
 
 Contributors to this release
