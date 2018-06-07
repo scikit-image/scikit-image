@@ -5,27 +5,8 @@ Version 0.15
 ------------
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
-* In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
-* In ``skimage.restoration.denoise_bilateral``, set default behavior of
-  `multichannel` to False
-* In ``skimage.restoration.denoise_nl_means``, set default behavior of
-  `multichannel` to False
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
-* Remove deprecated function ``threshold_adaptive`` in
-  ``skimage/filters/thresholding.py``.
-* In ``skimage.transform.resize``, set default value of ``mode`` to
-  ``'reflect'``.
-* In ``skimage.transform.rescale``, set default value of ``mode`` to
-  ``'reflect'``.
-* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
-* In ``skimage.transform.resize`` change default argument from
-  ``anti_aliasing=None`` to ``anti_aliasing=True``.
-* In ``skimage/restoration/tests/test_denoise.py``, there is an optional
-  warning that needs to be made mandatory when we move on from python 2.7
 
 Version 0.16
 ------------

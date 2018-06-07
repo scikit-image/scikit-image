@@ -30,8 +30,8 @@ def _multichannel_default(multichannel, ndim):
             return False
 
 
-def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
+def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
+           preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. Note that anti-
@@ -61,8 +61,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -96,20 +95,10 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import resize
     >>> image = data.camera()
-    >>> resize(image, (100, 100), mode='reflect').shape
+    >>> resize(image, (100, 100)).shape
     (100, 100)
 
     """
-    if mode is None:
-        mode = 'constant'
-        warn("The default mode, 'constant', will be changed to 'reflect' in "
-             "skimage 0.15.")
-
-    if anti_aliasing is None:
-        anti_aliasing = False
-        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
-             "avoid aliasing artifacts when down-sampling images.")
-
     output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
@@ -187,9 +176,9 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     return out
 
 
-def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
+def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=None,
-            anti_aliasing=None, anti_aliasing_sigma=None):
+            anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale images. Note that anti-
@@ -217,8 +206,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -258,9 +246,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import rescale
     >>> image = data.camera()
-    >>> rescale(image, 0.1, mode='reflect').shape
+    >>> rescale(image, 0.1).shape
     (51, 51)
-    >>> rescale(image, 0.5, mode='reflect').shape
+    >>> rescale(image, 0.5).shape
     (256, 256)
 
     """
@@ -450,7 +438,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=1, mode=None, cval=0, clip=True,
+          output_shape=None, order=1, mode='reflect', cval=0, clip=True,
           preserve_range=False):
     """Perform a swirl transformation.
 
@@ -499,11 +487,6 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     """
-    if mode is None:
-        warn('The default of `mode` in `skimage.transform.swirl` '
-             'will change to `reflect` in version 0.15.')
-        mode = 'constant'
-
     if center is None:
         center = np.array(image.shape)[:2][::-1] / 2
 
