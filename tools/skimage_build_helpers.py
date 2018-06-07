@@ -29,19 +29,22 @@ def cython(pyx_files, working_path=''):
     try:
         from Cython import __version__
         if LooseVersion(__version__) < CYTHON_VERSION:
-            raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
+            raise RuntimeError('Cython >= %s needed to build scikit-image' %
+                               CYTHON_VERSION)
 
         from Cython.Build import cythonize
     except ImportError:
         # If cython is not found, the build will make use of
         # the distributed .c files if present
-        c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
+        c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c')
+                   for f in pyx_files]
         for cfile in [os.path.join(working_path, f) for f in c_files]:
             # check for both c and cpp files (at least _haar.cpp needs this)
             if not (os.path.isfile(cfile) or os.path.isfile(cfile + 'pp')):
                 raise RuntimeError(
                     ('Could not find file %s.\n'
-                     'Cython >= %s is required to build scikit-image from git checkout.') \
+                     'Cython >= %s is required to build scikit-image'
+                     ' from git checkout.')
                     % (cfile, CYTHON_VERSION))
 
         print("Cython >= %s not found; falling back to pre-built %s" \
@@ -100,8 +103,8 @@ def process_tempita_pyx(fromfile):
     except ImportError:
         raise Exception('Building requires Tempita: '
                         'pip install --user Tempita')
-    template = tempita.Template.from_filename(fromfile,
-                                              encoding=sys.getdefaultencoding())
+    template = tempita.Template.from_filename(
+        fromfile, encoding=sys.getdefaultencoding())
     pyxcontent = template.substitute()
     if not fromfile.endswith('.pyx.in'):
         raise ValueError("Unexpected extension of %s." % fromfile)
