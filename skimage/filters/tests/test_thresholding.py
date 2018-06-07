@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -15,6 +16,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum,
+                                          try_all_threshold,
                                           _mean_std)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
@@ -27,6 +29,16 @@ class TestSimpleImage():
                                [1, 2, 5, 4, 1],
                                [2, 4, 5, 2, 1],
                                [4, 5, 1, 0, 0]], dtype=int)
+
+    def test_minimum(self):
+        with pytest.raises(RuntimeError):
+            threshold_minimum(self.image)
+
+    def test_try_all_threshold(self):
+        fig, ax = try_all_threshold(self.image)
+        all_texts = [axis.texts for axis in ax if axis.texts != []]
+        text_content = [text.get_text() for x in all_texts for text in x]
+        assert 'RuntimeError' in text_content
 
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
