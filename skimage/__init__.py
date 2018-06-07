@@ -57,9 +57,6 @@ img_as_ubyte
 """
 
 import os.path as osp
-import imp
-import functools
-import warnings
 import sys
 
 pkg_dir = osp.abspath(osp.dirname(__file__))
@@ -88,48 +85,6 @@ with your version of Python.
 """)
 
 
-try:
-    imp.find_module('pytest')
-except ImportError:
-    def _test(doctest=False, verbose=False):
-        """This would run all unit tests, but pytest couldn't be
-        imported so the test suite can not run.
-        """
-        raise ImportError("Could not load pytest. Unit tests not available.")
-
-else:
-    def _test(doctest=False, verbose=False):
-        """Run all unit tests."""
-        import pytest
-        import warnings
-        args = ['--pyargs', 'skimage']
-        if verbose:
-            args.extend(['-v', '-s'])
-        if doctest:
-            args.extend(['--doctest-modules'])
-            # Make sure warnings do not break the doc tests
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                success = pytest.main(args)
-        else:
-            success = pytest.main(args)
-        # Return sys.exit code
-        if success:
-            return 0
-        else:
-            return 1
-
-
-# do not use `test` as function name as this leads to a recursion problem with
-# the nose test suite
-test = _test
-test_verbose = functools.partial(test, verbose=True)
-test_verbose.__doc__ = test.__doc__
-doctest = functools.partial(test, doctest=True)
-doctest.__doc__ = doctest.__doc__
-doctest_verbose = functools.partial(test, doctest=True, verbose=True)
-doctest_verbose.__doc__ = doctest.__doc__
-
 from .util.dtype import *
 
 
@@ -147,4 +102,4 @@ def lookfor(what):
     return np.lookfor(what, sys.modules[__name__])
 
 
-del warnings, functools, osp, imp, sys
+del osp, sys
