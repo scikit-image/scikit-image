@@ -22,7 +22,7 @@ New Features
 Improvements
 ------------
 
-
+- qtpy (MIT) now an optional dependency for skivi to run properly.
 
 API Changes
 -----------
