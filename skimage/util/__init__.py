@@ -13,6 +13,8 @@ from ._montage import montage
 
 from .._shared.utils import copy_func
 
+from .lookfor import lookfor
+
 from numpy import pad as numpy_pad
 pad = copy_func(numpy_pad, name='pad')
 
