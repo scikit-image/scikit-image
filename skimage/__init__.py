@@ -56,15 +56,7 @@ img_as_ubyte
 
 """
 
-import os.path as osp
-import sys
-
-pkg_dir = osp.abspath(osp.dirname(__file__))
-data_dir = osp.join(pkg_dir, 'data')
-
 __version__ = '0.15.dev0'
 from .util.dtype import *
+from .data import data_dir
 from .util import lookfor
-
-
-del osp, sys
