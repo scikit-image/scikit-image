@@ -77,7 +77,7 @@ class MixerPanel(QFrame):
     your image.'''
     def __init__(self, img):
         QFrame.__init__(self)
-        #self.setFrameStyle(QFrame.Box|QFrame.Sunken)
+        # self.setFrameStyle(QFrame.Box | QFrame.Sunken)
 
         self.img = img
         self.mixer = ColorMixer(self.img)

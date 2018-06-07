@@ -206,7 +206,8 @@ class ThreadDispatch(object):
             self.chunks.append((img[(height // 4):(height // 2), :, :],
                                 stateimg[(height // 4):(height // 2), :, :]))
             self.chunks.append((img[(height // 2):(3 * height // 4), :, :],
-                                stateimg[(height // 2):(3 * height // 4), :, :]))
+                                stateimg[(height // 2):(3 * height // 4), :, :]
+                                ))
             self.chunks.append((img[(3 * height // 4):, :, :],
                                 stateimg[(3 * height // 4):, :, :]))
 
