@@ -115,6 +115,6 @@ else:
     from .data import data_dir
 
 
-from .util import lookfor
+from .util.lookfor import lookfor
 
 del warnings, functools, imp, sys
