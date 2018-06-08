@@ -172,8 +172,8 @@ else:
     except ImportError as e:
         _raise_build_error(e)
     from .util.dtype import *
+    from .data import data_dir
 
-from .data import data_dir
 
 def lookfor(what):
     """Do a keyword search on scikit-image docstrings.
