@@ -67,6 +67,7 @@ data_dir = osp.join(pkg_dir, 'data')
 
 __version__ = '0.15dev'
 
+
 if sys.version_info < (3, 5):
     raise ImportError("""
 
@@ -86,6 +87,7 @@ Please also consider updating `pip` and `setuptools`:
 Newer versions of these tools avoid installing packages incompatible
 with your version of Python.
 """)
+
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
