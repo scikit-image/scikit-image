@@ -56,14 +56,10 @@ img_as_ubyte
 
 """
 
-import os.path as osp
 import imp
 import functools
 import warnings
 import sys
-
-pkg_dir = osp.abspath(osp.dirname(__file__))
-data_dir = osp.join(pkg_dir, 'data')
 
 __version__ = '0.15dev'
 
@@ -177,6 +173,7 @@ else:
         _raise_build_error(e)
     from .util.dtype import *
 
+from .data import data_dir
 
 def lookfor(what):
     """Do a keyword search on scikit-image docstrings.
@@ -192,4 +189,4 @@ def lookfor(what):
     return np.lookfor(what, sys.modules[__name__])
 
 
-del warnings, functools, osp, imp, sys
+del warnings, functools, imp, sys
