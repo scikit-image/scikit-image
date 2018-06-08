@@ -42,7 +42,10 @@ make a PR to update these notes after you are done with the release. ;-)
   - Once the consensus is found, ask the project maintainers to merge the PR.
 
 - In the master branch, update the version number in ``skimage/__init__.py``
-  to the next ``-dev`` version, commit, and push.
+  to the next ``.dev0`` version, commit, and push. This should follow PEP440
+  meaning that the appropriate version number would look something like
+  ``0.20.dev0`` with the period beteween ``20`` and ``dev`` and a trailing
+  ``0`` immediately after ``dev``. 
 
 - Back on the release branch, update the version number to stable in
   ``skimage/__init__.py``, commit, and push.
