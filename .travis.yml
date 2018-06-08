@@ -68,7 +68,7 @@ before_install:
     - tools/check_sdist.py
 
 install:
-    - python setup.py develop --no-deps
+    - pip install . --no-deps
     # Only install requirements after the build process
     - pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
     # Matplotlib settings - do not show figures during doc examples
