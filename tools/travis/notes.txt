@@ -12,8 +12,6 @@
      set -ex
    ```
 
-- Use the `retry` bash function from `before_install.sh` before a command to
-  have it try 3 times before failing.
 - Use `pip install --retries N` for retrying package downloads.
 - Use the `section` function to start a folded section of the script.
   Section names must have underscores or dots instead of spaces and must be

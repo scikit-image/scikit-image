@@ -139,6 +139,16 @@ Testing requirements
 .. include:: ../../requirements/test.txt
    :literal:
 
+To test your installation, make sure you have the above installed. From command
+prompt, you may choose to run::
+
+  pytest --pyargs skimage
+
+From your python prompt, you can run the tests with::
+
+  import pytest
+  pytest.main(['--pyargs', 'skimage'])
+
 Documentation requirements
 --------------------------
 

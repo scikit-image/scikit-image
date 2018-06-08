@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython
+from tools.skimage_build_helpers import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 

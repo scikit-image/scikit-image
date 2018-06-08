@@ -1,2 +1,4 @@
-Cython>=0.23
+Cython>=0.23.4
 wheel
+numpydoc>=0.6
+numpy>=1.11

@@ -6,7 +6,7 @@ try:
     import imread as _imread
 except ImportError:
     raise ImportError("Imread could not be found"
-                      "Please refer to http://pypi.python.org/pypi/imread/ "
+                      "Please refer to http://pypi.org/pypi/imread/ "
                       "for further instructions.")
 
 
