@@ -22,7 +22,8 @@ New Features
 Improvements
 ------------
 
-
+- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
+  new optional dependency).
 
 API Changes
 -----------
