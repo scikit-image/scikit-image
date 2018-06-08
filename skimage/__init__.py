@@ -75,7 +75,7 @@ Likely Python 2.
 
 Unfortunately, scikit-image 0.15 and above no longer work on this
 version of Python.  You therefore have two options: either upgrade to
-Python 3.5, or install an older version of scikit-image using
+Python 3.5, or install an older version of scikit-image. For Python 2.7, use
 
  $ pip install 'scikit-image<0.15'
 
