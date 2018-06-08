@@ -69,7 +69,8 @@ before_install:
 
 install:
     - pip install . --no-deps
-    # Only install requirements after the build process
+    # Only install requirements after the build process in case we pinned
+    # them
     - pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
     # Matplotlib settings - do not show figures during doc examples
     - |
