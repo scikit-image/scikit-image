@@ -177,6 +177,6 @@ else:
                              dtype_limits)
 
 
-from .util import lookfor
+from .util.lookfor import lookfor
 
 del warnings, functools, osp, imp, sys
