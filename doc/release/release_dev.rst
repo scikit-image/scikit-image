@@ -47,7 +47,7 @@ API Changes
   and ``skimage.transform.rescale`` has been set to ``reflect``.
 - Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
   and ``skimage.transform.rescale`` has been set to ``True``.
-- Removed the ``skimage.test`` function. This functionality can be acheived
+- Removed the ``skimage.test`` function. This functionality can be achieved
   by calling ``pytest`` directly.
 
 
