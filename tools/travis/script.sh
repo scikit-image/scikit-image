@@ -18,7 +18,7 @@ section "Tests.pytest"
 # Always report coverage as some lines only occure with/without matplotlib
 export TEST_ARGS="${TEST_ARGS} --cov=skimage"
 # `pip install .` doesn't let you do an "in-tree" test
-(cd .. && pytest ${TEST_ARGS} skimage)
+(cd .. && pytest ${TEST_ARGS} --pyargs skimage)
 section_end "Tests.pytest"
 
 
