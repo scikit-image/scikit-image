@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Enable fast finish on non-zero exit
-set -e
+set -ex
 
 export PY=${TRAVIS_PYTHON_VERSION}
 section "Tests.InstallDependencies"
@@ -47,4 +47,3 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
 fi
 section_end "Tests.examples"
 
-set +e
