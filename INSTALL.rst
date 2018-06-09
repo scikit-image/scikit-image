@@ -16,8 +16,10 @@ environment.
 -------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions,
-including Anaconda_, `Enthought Canopy`_, `Python(x,y)`_ and
-`WinPython`_.
+including `Anaconda <https://www.anaconda.com/download/>`_,
+`Enthought Canopy <https://www.enthought.com/product/canopy/>`_,
+`Python(x,y) <https://python-xy.github.io/>`_ and
+`WinPython <https://winpython.github.io/>`_.
 
 On all other systems, install it via shell/command prompt::
 
