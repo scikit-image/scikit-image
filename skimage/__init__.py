@@ -67,8 +67,8 @@ data_dir = osp.join(pkg_dir, 'data')
 
 __version__ = '0.15dev'
 
-from ._shared.version_requirements import check_python_version
-check_python_version((3, 5))
+from ._shared.version_requirements import ensure_python_version
+ensure_python_version((3, 5))
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.

@@ -5,14 +5,13 @@ import re
 import sys
 
 
-def check_python_version(min_version):
+def ensure_python_version(min_version):
     if not isinstance(min_version, tuple):
         min_version = (min_version, )
     if sys.version_info < min_version:
         raise ImportError("""
 
 You are running scikit-image on an unsupported version of Python.
-Likely Python 2.
 
 Unfortunately, scikit-image 0.15 and above no longer work with your installed
 version of Python (%s).  You therefore have two options: either upgrade to
