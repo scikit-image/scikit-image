@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
+
+# Enable fast finish on non-zero exit
 set -e
 
 export PY=${TRAVIS_PYTHON_VERSION}
+section "Tests.InstallDependencies"
+pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
+# Show what's installed
+pip list
+section_end "Tests.InstallDependencies"
 
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
@@ -10,9 +17,8 @@ section_end "Flake8.test"
 section "Tests.pytest"
 # Always report coverage as some lines only occure with/without matplotlib
 export TEST_ARGS="${TEST_ARGS} --cov=skimage"
-# Show what's installed
-pip list
-pytest ${TEST_ARGS} skimage
+# `pip install .` doesn't let you do an "in-tree" test
+(cd .. && pytest ${TEST_ARGS} skimage)
 section_end "Tests.pytest"
 
 
@@ -36,9 +42,6 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
   for f in doc/examples/*/*.py; do
     python "${f}"
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
   done
   mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
 fi
