@@ -116,8 +116,8 @@ Optional Requirements
 You can use ``scikit-image`` with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-* `PyQt4 <http://wiki.python.org/moin/PyQt>`__
-    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
+* `PyQt5 <http://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `pyqt <https://github.com/spyder-ide/qtpy>`__
+    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <http://pyamg.org/>`__
     The ``pyamg`` module is used for the fast `cg_mg` mode of random
