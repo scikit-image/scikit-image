@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 export PY=${TRAVIS_PYTHON_VERSION}
 
 section "Flake8.test"
@@ -41,3 +43,5 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
 fi
 section_end "Tests.examples"
+
+set +e

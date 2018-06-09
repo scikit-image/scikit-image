@@ -82,6 +82,7 @@ http://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
+    import os.path as osp
     # Raise a comprehensible error
     local_dir = osp.split(__file__)[0]
     msg = _STANDARD_MSG
