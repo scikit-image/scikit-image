@@ -64,26 +64,8 @@ import sys
 
 __version__ = '0.15.dev0'
 
-
-if sys.version_info < (3,):
-    raise ImportError("""
-
-You are running scikit-image on Python 2.
-
-Unfortunately, scikit-image 0.15 and above no longer work on this
-version of Python.  You therefore have two options: either upgrade to
-Python 3, or install an older version of scikit-image using
-
- $ pip install 'scikit-image<0.15'
-
-Please also consider updating `pip` and `setuptools`:
-
- $ pip install pip setuptools --upgrade
-
-Newer versions of these tools avoid installing packages incompatible
-with your version of Python.
-""")
-
+from ._shared.version_requirements import ensure_python_version
+ensure_python_version((3, 5))
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
