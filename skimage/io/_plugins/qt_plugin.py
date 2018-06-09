@@ -2,30 +2,14 @@ import numpy as np
 from .util import prepare_for_display, window_manager
 from ..._shared.utils import warn
 
+from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
+                            QGridLayout)
+from qtpy.QtGui import QImage, QPixmap
+from qtpy import QtCore
 
 # We try to aquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
 window_manager.acquire('qt')
-
-try:
-    from PyQt4.QtGui import (QApplication, QImage,
-                             QLabel, QMainWindow, QPixmap, QWidget)
-    from PyQt4 import QtCore, QtGui
-    import sip
-
-except ImportError:
-    window_manager._release('qt')
-
-    raise ImportError("""\
-    PyQt4 libraries not installed. Please refer to
-
-    http://www.riverbankcomputing.co.uk/software/pyqt/intro
-
-    for more information.  PyQt4 is GPL licensed.  For an
-    LGPL equivalent, see
-
-    http://www.pyside.org
-    """)
 
 app = None
 
@@ -65,7 +49,7 @@ class ImageWindow(QMainWindow):
         self.setWindowTitle('skimage')
         self.mgr = mgr
         self.main_widget = QWidget()
-        self.layout = QtGui.QGridLayout(self.main_widget)
+        self.layout = QGridLayout(self.main_widget)
         self.setCentralWidget(self.main_widget)
 
         self.label = ImageLabel(self, arr)
@@ -80,7 +64,7 @@ class ImageWindow(QMainWindow):
         self.mgr.remove_window(self)
 
 
-def imread_qt(filename):
+def imread(filename):
     """
     Read an image using QT's QImage.load
     """
@@ -114,14 +98,6 @@ def imread_qt(filename):
     elif bytes_per_pixel == 4:
         img[:, :, 0:3] = img[:, :, 2::-1]
     return img
-
-if sip.SIP_VERSION >= 0x040c00:
-    # sip.voidptr only acquired a buffer view in 4.12.0, so our imread
-    # doesn't work with earlier versions
-    imread = imread_qt
-else:
-    warn(RuntimeWarning("sip version too old. QT imread disabled"))
-
 
 def imshow(arr, fancy=False):
     global app

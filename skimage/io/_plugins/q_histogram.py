@@ -1,6 +1,7 @@
 import numpy as np
 
-from PyQt4.QtGui import QWidget, QPainter, QGridLayout, QColor, QFrame
+from qtpy.QtGui import QPainter, QColor
+from qtpy.QtWidgets import QWidget, QGridLayout, QFrame
 
 from .util import histograms
 
@@ -122,7 +123,7 @@ class QuadHistogram(QFrame):
 
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.layout = QGridLayout(self)
-        self.layout.setMargin(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
         order_map = {'R': self.r_hist, 'G': self.g_hist, 'B': self.b_hist,
                      'V': self.v_hist}

@@ -22,7 +22,8 @@ New Features
 Improvements
 ------------
 
-
+- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
+  new optional dependency).
 
 API Changes
 -----------
@@ -47,6 +48,8 @@ API Changes
   and ``skimage.transform.rescale`` has been set to ``reflect``.
 - Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
   and ``skimage.transform.rescale`` has been set to ``True``.
+- Removed the ``skimage.test`` function. This functionality can be achieved
+  by calling ``pytest`` directly.
 
 
 Bugfixes
