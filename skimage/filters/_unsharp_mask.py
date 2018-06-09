@@ -93,9 +93,9 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     >>> array[2,2] = 127
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
     array([[ 0.79,  0.79,  0.79,  0.79,  0.79],
-           [ 0.79,  0.79,  0.79,  0.79,  0.79],
-           [ 0.79,  0.79,  1.  ,  0.79,  0.79],
-           [ 0.79,  0.79,  0.79,  0.79,  0.79],
+           [ 0.79,  0.78,  0.75,  0.78,  0.79],
+           [ 0.79,  0.75,  1.  ,  0.75,  0.79],
+           [ 0.79,  0.78,  0.75,  0.78,  0.79],
            [ 0.79,  0.79,  0.79,  0.79,  0.79]])
 
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2, preserve_range=True), 2)
