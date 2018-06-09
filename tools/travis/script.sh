@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Fail on non-zero exit and print commands
+set -ex
 export PY=${TRAVIS_PYTHON_VERSION}
 
 section "Tests.flake8"
