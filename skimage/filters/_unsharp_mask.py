@@ -68,7 +68,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     color bleeding may occur. More visually pleasing result can be
     achieved by processing only the brightness/lightness/intensity
     channel in a suitable color space such as HSV, HSL, YUV, or YCbCr.
- 
+
     Unsharp masking is described in most introductory digital image
     processing books. This implementation is based on [1]_.
 
@@ -84,9 +84,9 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
            [100, 100, 100, 100, 100]], dtype=uint8)
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
     array([[ 0.39,  0.39,  0.39,  0.39,  0.39],
-           [ 0.39,  0.39,  0.39,  0.39,  0.39],
-           [ 0.39,  0.39,  0.47,  0.39,  0.39],
-           [ 0.39,  0.39,  0.39,  0.39,  0.39],
+           [ 0.39,  0.39,  0.38,  0.39,  0.39],
+           [ 0.39,  0.38,  0.53,  0.38,  0.39],
+           [ 0.39,  0.39,  0.38,  0.39,  0.39],
            [ 0.39,  0.39,  0.39,  0.39,  0.39]])
 
     >>> array = np.ones(shape=(5,5), dtype=np.int8)*100
