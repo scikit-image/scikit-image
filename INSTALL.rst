@@ -96,7 +96,7 @@ Build Requirements
 ------------------
 * `Python >= 3.5 <http://python.org>`__
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
-* `Cython >= 0.23 <http://www.cython.org/>`__
+* `Cython >= 0.23.4 <http://www.cython.org/>`__
 
 Build Requirements (docs)
 -------------------------
