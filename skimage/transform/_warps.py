@@ -371,7 +371,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         maxr = corners[:, 1].max()
         out_rows = maxr - minr + 1
         out_cols = maxc - minc + 1
-        output_shape = np.ceil((out_rows, out_cols))
+        output_shape = np.round((out_rows, out_cols))
 
         # fit output image in new shape
         translation = (minc, minr)
