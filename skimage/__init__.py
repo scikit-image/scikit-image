@@ -61,8 +61,8 @@ import functools
 import warnings
 import sys
 
-
-__version__ = '0.15.dev0'
+from ._version import get_versions as _get_versions
+__version__ = _get_versions()['version']
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
