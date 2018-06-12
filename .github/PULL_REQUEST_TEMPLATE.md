@@ -7,6 +7,8 @@
 - [ ] Clean style in [the spirit of PEP8](https://www.python.org/dev/peps/pep-0008/)
 - [ ] [Docstrings for all functions](https://github.com/numpy/numpy/blob/master/doc/example.py)
 - [ ] Gallery example in `./doc/examples` (new features only)
+- [ ] Benchmark in `./benchmarks`, if your changes aren't covered by an
+  existing benchmark
 - [ ] Unit tests
 
 [For detailed information on these and other aspects see [scikit-image contribution guidelines](http://scikit-image.org/docs/dev/contribute.html)]
