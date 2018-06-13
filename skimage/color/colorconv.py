@@ -804,7 +804,7 @@ def rgb2gray(rgb):
     rgb = _prepare_colorarray(rgb[..., :3])
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return np.dot(rgb, coeffs)
-    
+
 
 rgb2grey = rgb2gray
 
