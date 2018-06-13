@@ -147,7 +147,7 @@ Build Requirements
 
 * `Python >= 2.7 <http://python.org>`__
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
-* `Cython >= 0.23 <http://www.cython.org/>`__
+* `Cython >= 0.23.4 <http://www.cython.org/>`__
 * `Six >=1.7.3 <https://pypi.python.org/pypi/six>`__
 * `SciPy >=0.17.0 <http://scipy.org>`__
 * `numpydoc >=0.6 <https://github.com/numpy/numpydoc>`__
