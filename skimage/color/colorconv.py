@@ -270,15 +270,15 @@ def rgb2hsv(rgb):
 
     # -- H channel
     # red is max
-    idx = (arr[:, :, 0] == out_v)
+    idx = (arr[..., 0] == out_v)
     out[idx, 0] = (arr[idx, 1] - arr[idx, 2]) / delta[idx]
 
     # green is max
-    idx = (arr[:, :, 1] == out_v)
+    idx = (arr[..., 1] == out_v)
     out[idx, 0] = 2. + (arr[idx, 2] - arr[idx, 0]) / delta[idx]
 
     # blue is max
-    idx = (arr[:, :, 2] == out_v)
+    idx = (arr[..., 2] == out_v)
     out[idx, 0] = 4. + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
     out_h = (out[:, :, 0] / 6.) % 1.
     out_h[delta == 0.] = 0.
@@ -286,11 +286,13 @@ def rgb2hsv(rgb):
     np.seterr(**old_settings)
 
     # -- output
-    out[:, :, 0] = out_h
-    out[:, :, 1] = out_s
-    out[:, :, 2] = out_v
+    out[..., 0] = out_h
+    out[..., 1] = out_s
+    out[..., 2] = out_v
 
     # remove NaN
+    # use np.nan_to_num(out, copy=False)
+    # when numpy >= 1.13
     out[np.isnan(out)] = 0
 
     return out
@@ -332,9 +334,9 @@ def hsv2rgb(hsv):
     """
     arr = _prepare_colorarray(hsv)
 
-    hi = np.floor(arr[:, :, 0] * 6)
-    f = arr[:, :, 0] * 6 - hi
-    p = arr[:, :, 2] * (1 - arr[:, :, 1])
+    hi = np.floor(arr[..., 0] * 6)
+    f = arr[..., 0] * 6 - hi
+    p = arr[..., 2] * (1 - arr[:, :, 1])
     q = arr[:, :, 2] * (1 - f * arr[:, :, 1])
     t = arr[:, :, 2] * (1 - (1 - f) * arr[:, :, 1])
     v = arr[:, :, 2]
