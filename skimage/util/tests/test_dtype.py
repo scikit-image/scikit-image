@@ -2,8 +2,8 @@ import warnings
 
 import numpy as np
 import itertools
-from skimage import (img_as_int, img_as_float,
-                     img_as_uint, img_as_ubyte)
+from skimage import (img_as_float, img_as_float32, img_as_float64,
+                     img_as_int, img_as_uint, img_as_ubyte)
 from skimage.util.dtype import convert
 
 from skimage._shared._warnings import expected_warnings
@@ -19,8 +19,9 @@ dtype_range = {np.uint8: (0, 255),
                np.float64: (-1.0, 1.0)}
 
 
-img_funcs = (img_as_int, img_as_float, img_as_uint, img_as_ubyte)
-dtypes_for_img_funcs = (np.int16, np.float64, np.uint16, np.ubyte)
+img_funcs = (img_as_int, img_as_float64, img_as_float32,
+             img_as_uint, img_as_ubyte)
+dtypes_for_img_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
 img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
 
 
@@ -134,3 +135,13 @@ def test_clobber():
                 img_out = func_output_type(img_in)
 
             assert_equal(img_in, img_in_before)
+
+def test_signed_scaling_float32():
+    x = np.array([-128,  127], dtype=np.int8)
+    y = img_as_float32(x)
+    assert_equal(y.max(), 1)
+
+def test_float32_passthrough():
+    x = np.array([-1, 1], dtype=np.float32)
+    y = img_as_float(x)
+    assert_equal(y.dtype, x.dtype)
