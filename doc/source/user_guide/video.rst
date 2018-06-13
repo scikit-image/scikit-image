@@ -72,13 +72,15 @@ PyAV's API reflects the way frames are stored in a video file.
 Adding Random Access to PyAV
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `Video` class in `PIMS <github.com/soft-matter/pims>`__ invokes PyAV and
-adds additional functionality to solve a common problem in scientific
-applications, accessing a video by frame number. Video file
-formats are designed to be searched in an approximate way, by time, and they do
-not support an efficient means of seeking a specific frame number. PIMS adds
-this missing functionality by decoding (but not reading) the entire video at
-and producing an internal table of contents that supports indexing by frame.
+The `Video` class in `PIMS <https://github.com/soft-matter/pims>`__
+invokes PyAV and adds additional functionality to solve a common
+problem in scientific applications, accessing a video by frame
+number. Video file formats are designed to be searched in an
+approximate way, by time, and they do not support an efficient means
+of seeking a specific frame number. PIMS adds this missing
+functionality by decoding (but not reading) the entire video at and
+producing an internal table of contents that supports indexing by
+frame.
 
 .. code-block:: python
 
