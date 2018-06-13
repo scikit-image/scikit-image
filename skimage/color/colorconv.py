@@ -280,7 +280,7 @@ def rgb2hsv(rgb):
     # blue is max
     idx = (arr[..., 2] == out_v)
     out[idx, 0] = 4. + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
-    out_h = (out[:, :, 0] / 6.) % 1.
+    out_h = (out[..., 0] / 6.) % 1.
     out_h[delta == 0.] = 0.
 
     np.seterr(**old_settings)
@@ -336,10 +336,10 @@ def hsv2rgb(hsv):
 
     hi = np.floor(arr[..., 0] * 6)
     f = arr[..., 0] * 6 - hi
-    p = arr[..., 2] * (1 - arr[:, :, 1])
-    q = arr[:, :, 2] * (1 - f * arr[:, :, 1])
-    t = arr[:, :, 2] * (1 - (1 - f) * arr[:, :, 1])
-    v = arr[:, :, 2]
+    p = arr[..., 2] * (1 - arr[..., 1])
+    q = arr[..., 2] * (1 - f * arr[..., 1])
+    t = arr[..., 2] * (1 - (1 - f) * arr[..., 1])
+    v = arr[..., 2]
 
     hi = np.dstack([hi, hi, hi]).astype(np.uint8) % 6
     out = np.choose(hi, [np.dstack((v, t, p)),
@@ -988,7 +988,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     arr = _prepare_colorarray(lab).copy()
 
-    L, a, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
     y = (L + 16.) / 116.
     x = (a / 500.) + y
     z = y - (b / 200.)
@@ -1202,7 +1202,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     arr = _prepare_colorarray(luv).copy()
 
-    L, u, v = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
     eps = np.finfo(np.float).eps
 
