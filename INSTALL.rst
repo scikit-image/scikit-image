@@ -27,7 +27,7 @@ On all other systems, install it via shell/command prompt::
 
 If you are running Anaconda or miniconda, use::
 
-  conda install scikit-image
+  conda install -c conda-install scikit-image
 
 2. Development Installation:
 ----------------------------
