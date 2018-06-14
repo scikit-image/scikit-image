@@ -68,7 +68,7 @@ cdef enum:
     D_COUNT
 
 
-# Structure for centralised access to shape data
+# Structure for centralized access to shape data
 # Contains information related to the shape of the input array
 cdef struct s_shpinfo:
     INTS_t x
@@ -77,7 +77,7 @@ cdef struct s_shpinfo:
 
     # Number of elements
     DTYPE_t numels
-    # Number of of the input array
+    # Dimensions of of the input array
     INTS_t ndim
 
     # Offsets between elements recalculated to linear index increments
@@ -85,7 +85,7 @@ cdef struct s_shpinfo:
     # The name DEX is supposed to evoke DE., where . = A, B, C, D, F etc.
     INTS_t DEX[D_COUNT]
 
-    # Function pointer to a function that recalculates multiindex to linear
+    # Function pointer to a function that recalculates multi-index to linear
     # index. Heavily depends on dimensions of the input array.
     fun_ravel ravel_index
 
@@ -561,7 +561,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                  bginfo *bg, DTYPE_t connectivity):
     """
-    Perform forward scan on a 2D array.
+    Perform forward scan on a 3D array.
 
     """
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
