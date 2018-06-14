@@ -180,7 +180,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     Parameters
     ----------
     rgba : array_like
-        The image in RGBA format, in a 3-D array of shape ``(.., .., 4)``.
+        The image in RGBA format, in a N-D array of shape ``(..., 4)``.
     background : array_like
         The color of the background to blend the image with. A tuple
         containing 3 floats between 0 to 1 - the RGB value of the background.
@@ -188,12 +188,12 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgba` is not a 3-D array of shape ``(.., .., 4)``.
+        If `rgba` is not a N-D array of shape ``(..., 4)``.
 
     References
     ----------
@@ -229,17 +229,17 @@ def rgb2hsv(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in HSV format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in HSV format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -306,17 +306,17 @@ def hsv2rgb(hsv):
     Parameters
     ----------
     hsv : array_like
-        The image in HSV format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in HSV format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `hsv` is not a 3-D array of shape ``(.., .., 3)``.
+        If `hsv` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -609,17 +609,17 @@ def xyz2rgb(xyz):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in XYZ format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape ``(.., .., 3)``.
+        If `xyz` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -655,19 +655,17 @@ def rgb2xyz(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        The image in XYZ format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -699,17 +697,17 @@ def rgb2rgbcie(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB CIE format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB CIE format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -731,17 +729,17 @@ def rgbcie2rgb(rgbcie):
     Parameters
     ----------
     rgbcie : array_like
-        The image in RGB CIE format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB CIE format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgbcie` is not a 3-D array of shape ``(.., .., 3)``.
+        If `rgbcie` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -764,9 +762,8 @@ def rgb2gray(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``, or in RGBA format with shape
-        ``(.., ..,[ ..,] 4)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``,
+        or in RGBA format with shape ``(..., 4)``.
 
     Returns
     -------
@@ -777,8 +774,8 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb2gray` is not a 3-D or 4-D arrays of shape
-        ``(.., ..,[ ..,] 3)`` or ``(.., ..,[ ..,] 4)``.
+        If `rgb2gray` is not a N-D arrays of shape
+        ``(..., 3)`` or ``(..., 4)``.
 
     References
     ----------
@@ -830,7 +827,7 @@ def gray2rgb(image, alpha=None):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M[, N][, P])``.
+        Input image of shape ``(...)``.
     alpha : bool, optional
         Ensure that the output image has an alpha layer.  If None,
         alpha layers are passed through but not created.
@@ -838,12 +835,7 @@ def gray2rgb(image, alpha=None):
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M[, N][, P], 3)``.
-
-    Raises
-    ------
-    ValueError
-        If the input is not a 1-, 2- or 3-dimensional image.
+        RGB image of shape ``(..., 3)``.
 
     Notes
     -----
@@ -889,8 +881,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3- or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``.
+        The image in XYZ format, in a N-D array of shape ``(..., 3)``.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
@@ -905,7 +896,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape ``(.., ..,[ ..,] 3)``.
+        If `xyz` is not a N-D array of shape ``(..., 3)``.
     ValueError
         If either the illuminant or the observer angle is unsupported or
         unknown.
@@ -957,7 +948,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     Parameters
     ----------
     lab : array_like
-        The image in lab format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in lab format, in a N-D array of shape ``(..., 3)``.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
@@ -966,12 +957,12 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in XYZ format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `lab` is not a 3-D array of shape ``(.., .., 3)``.
+        If `lab` is not a N-D array of shape ``(..., 3)``.
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1060,7 +1051,7 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     Parameters
     ----------
     lab : array_like
-        The image in Lab format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in Lab format, in a N-D array of shape ``(..., 3)``.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
@@ -1069,12 +1060,12 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `lab` is not a 3-D array of shape ``(.., .., 3)``.
+        If `lab` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -1095,8 +1086,8 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    xyz : (M, N, [P,] 3) array_like
-        The 3 or 4 dimensional image in XYZ format. Final dimension denotes
+    xyz : (..., 3) array_like
+        The N dimensional image in XYZ format. Final dimension denotes
         channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1105,13 +1096,13 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (M, N, [P,] 3) ndarray
+    out : (..., 3) ndarray
         The image in CIE-Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `xyz` is not a N-D array of shape ``(..., 3)``.
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1172,7 +1163,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    luv : (M, N, [P,] 3) array_like
+    luv : (..., 3) array_like
         The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
         channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
@@ -1182,13 +1173,13 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (M, N, [P,] 3) ndarray
+    out : (..., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `luv` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `luv` is not a N-D array of shape ``(..., 3)``.
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1242,19 +1233,19 @@ def rgb2luv(rgb):
 
     Parameters
     ----------
-    rgb : (M, N, [P,] 3) array_like
+    rgb : (..., 3) array_like
         The 3 or 4 dimensional image in RGB format. Final dimension denotes
         channels.
 
     Returns
     -------
-    out : (M, N, [P,] 3) ndarray
+    out : (..., 3) ndarray
         The image in CIE Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1275,19 +1266,19 @@ def luv2rgb(luv):
 
     Parameters
     ----------
-    luv : (M, N, [P,] 3) array_like
+    luv : (..., 3) array_like
         The 3 or 4 dimensional image in CIE Luv format. Final dimension denotes
         channels.
 
     Returns
     -------
-    out : (M, N, [P,] 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `luv` is not a 3-D or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `luv` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1302,17 +1293,17 @@ def rgb2hed(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in HED format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in HED format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
 
     References
@@ -1338,18 +1329,17 @@ def hed2rgb(hed):
     Parameters
     ----------
     hed : array_like
-        The image in the HED color space, in a 3-D array of shape
-        ``(.., .., 3)``.
+        The image in the HED color space, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `hed` is not a 3-D array of shape ``(.., .., 3)``.
+        If `hed` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -1375,20 +1365,19 @@ def separate_stains(rgb, conv_matrix):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
     out : ndarray
-        The image in stain color space, in a 3-D array of shape
-        ``(.., .., 3)``.
+        The image in stain color space, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1431,20 +1420,19 @@ def combine_stains(stains, conv_matrix):
     Parameters
     ----------
     stains : array_like
-        The image in stain color space, in a 3-D array of shape
-        ``(.., .., 3)``.
+        The image in stain color space, in a N-D array of shape ``(..., 3)``.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `stains` is not a 3-D array of shape ``(.., .., 3)``.
+        If `stains` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1595,19 +1583,17 @@ def rgb2yuv(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YUV format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YUV format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1628,19 +1614,17 @@ def rgb2yiq(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YIQ format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YIQ format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
     """
     return _convert(yiq_from_rgb, rgb)
 
@@ -1651,19 +1635,17 @@ def rgb2ypbpr(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YPbPr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YPbPr format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -1679,19 +1661,17 @@ def rgb2ycbcr(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YCbCr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YCbCr format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1716,19 +1696,17 @@ def rgb2ydbdr(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YDbDr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YDbDr format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `rgb` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1750,19 +1728,17 @@ def yuv2rgb(yuv):
     Parameters
     ----------
     yuv : array_like
-        The image in YUV format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YUV format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `yuv` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `yuv` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -1778,19 +1754,17 @@ def yiq2rgb(yiq):
     Parameters
     ----------
     yiq : array_like
-        The image in YIQ format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YIQ format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `yiq` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `yiq` is not a N-D array of shape ``(..., 3)``.
     """
     return _convert(rgb_from_yiq, yiq)
 
@@ -1801,19 +1775,17 @@ def ypbpr2rgb(ypbpr):
     Parameters
     ----------
     ypbpr : array_like
-        The image in YPbPr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YPbPr format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `ypbpr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `ypbpr` is not a N-D array of shape ``(..., 3)``.
 
     References
     ----------
@@ -1829,19 +1801,17 @@ def ycbcr2rgb(ycbcr):
     Parameters
     ----------
     ycbcr : array_like
-        The image in YCbCr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YCbCr format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `ycbcr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `ycbcr` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
@@ -1866,19 +1836,17 @@ def ydbdr2rgb(ydbdr):
     Parameters
     ----------
     ydbdr : array_like
-        The image in YDbDr format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in YDbDr format, in a N-D array of shape ``(..., 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in RGB format, in a 3- or 4-D array of shape
-        ``(M, N, [P,] 3)``.
+        The image in RGB format, in a N-D array of shape ``(..., 3)``.
 
     Raises
     ------
     ValueError
-        If `ydbdr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `ydbdr` is not a N-D array of shape ``(..., 3)``.
 
     Notes
     -----
