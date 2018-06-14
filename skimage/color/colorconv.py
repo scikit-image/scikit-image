@@ -149,9 +149,10 @@ def _prepare_colorarray(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim not in [3, 4] or arr.shape[-1] != 3:
-        msg = ("the input array must be have a shape == (.., ..,[ ..,] 3)), " +
-               "got (" + (", ".join(map(str, arr.shape))) + ")")
+    if arr.shape[-1] != 3:
+        msg = ("the last dimension of the input image must a length of exactly"
+               " 3, got an array of shape (" + (", ".join(map(str, arr.shape)))
+               + ")")
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
@@ -164,9 +165,10 @@ def _prepare_rgba_array(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim not in [3, 4] or arr.shape[-1] != 4:
-        msg = ("the input array must have a shape == (.., ..,[ ..,] 4)), "
-               "got {0}".format(arr.shape))
+    if arr.shape[-1] != 4:
+        msg = ("the last dimension of the input image must a length of exactly"
+               " 4, got an array of shape (" + (", ".join(map(str, arr.shape)))
+               + ")")
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
@@ -205,9 +207,9 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     >>> img_rgb = color.rgba2rgb(img_rgba)
     """
     arr = _prepare_rgba_array(rgba)
-    if isinstance(background, tuple) and len(background) != 3:
-        raise ValueError('the background must be a tuple with 3 items - the '
-                         'RGB color of the background. Got {0} items.'
+    if len(background) != 3:
+        raise ValueError('the background must be array_like with 3 items - '
+                         'the RGB color of the background. Got {0} items.'
                          .format(len(background)))
 
     alpha = arr[..., -1]
@@ -799,10 +801,18 @@ def rgb2gray(rgb):
     >>> img_gray = rgb2gray(img)
     """
 
-    if rgb.ndim == 2:
-        return np.ascontiguousarray(rgb)
+    rgb = np.asanyarray(rgb)
 
-    rgb = _prepare_colorarray(rgb[..., :3])
+    if rgb.ndim == 2:
+        return np.array(rgb, copy=True)
+
+    if rgb.shape[-1] not in [3, 4]:
+        msg = ("The last dimension of the input image must a length of exactly"
+               " 3 or 4. Got an array of shape (" +
+               (", ".join(map(str, rgb.shape)))+ ").")
+        raise ValueError(msg)
+
+    rgb = dtype.img_as_float(rgb[..., :3])
 
     gray = 0.2125 * rgb[..., 0]
     gray[:] += 0.7154 * rgb[..., 1]
@@ -842,14 +852,12 @@ def gray2rgb(image, alpha=None):
     """
     is_rgb = False
     is_alpha = False
-    dims = np.squeeze(image).ndim
 
-    if dims == 3:
-        if image.shape[2] == 3:
-            is_rgb = True
-        elif image.shape[2] == 4:
-            is_alpha = True
-            is_rgb = True
+    if image.shape[-1] == 3:
+        is_rgb = True
+    elif image.shape[-1] == 4:
+        is_alpha = True
+        is_rgb = True
 
     if is_rgb:
         if alpha is False:
@@ -861,18 +869,16 @@ def gray2rgb(image, alpha=None):
             image = np.concatenate((image, alpha_layer), axis=2)
 
         return image
-
-    elif dims in (1, 2, 3):
+    else:
         image = image[..., np.newaxis]
 
         if alpha:
-            alpha_layer = (np.ones_like(image) * dtype_limits(image, clip_negative=False)[1])
+            alpha_layer = (np.ones_like(image) *
+                           dtype_limits(image, clip_negative=False)[1])
             return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
         else:
             return np.concatenate(3 * (image,), axis=-1)
 
-    else:
-        raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 grey2rgb = gray2rgb
 
@@ -1413,8 +1419,8 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = dtype.img_as_float(rgb, force_copy=True)
-    rgb += 2
+    rgb = _prepare_colorarray(rgb)
+    rgb = rgb + 2
     stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
     return np.reshape(stains, rgb.shape)
 
@@ -1474,7 +1480,7 @@ def combine_stains(stains, conv_matrix):
     """
     from ..exposure import rescale_intensity
 
-    stains = dtype.img_as_float(stains)
+    stains = _prepare_colorarray(stains)
     logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
     rgb2 = np.power(10, logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
