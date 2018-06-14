@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -ev
 
 export PIP_DEFAULT_TIMEOUT=60
 

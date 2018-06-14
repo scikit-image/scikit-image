@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
-set -ex
+set -ev
 export PY=${TRAVIS_PYTHON_VERSION}
 
 # Matplotlib settings - do not show figures during doc examples

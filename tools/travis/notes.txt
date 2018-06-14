@@ -9,9 +9,13 @@
 
    ```
      #!/usr/bin/env bash
-     set -ex
+     set -ev
    ```
 
+- The `-e` flag ensures that the script exits on non-zero exit from a command.
+- The `-v` flag will print out the command as it is read.
+- The `-x` flag will print out the expanded parsed command, as well as the PS4.
+  which can be quite verbose. Use this when debugging.
 - Use the `retry` bash function from `before_install.sh` before a command to
   have it try 3 times before failing.
 - Use `pip install --retries N` for retrying package downloads.
