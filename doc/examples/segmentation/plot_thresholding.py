@@ -70,3 +70,16 @@ img = data.page()
 # If it is not specified, only global algorithms are called.
 fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
 plt.show()
+
+######################################################################
+# The corresponding function `try_all_threshold_dict` returns the values
+# of these different threshold methods as an ordered dictionary.
+#
+
+from skimage import data
+from skimage.filters import try_all_threshold_dict
+
+img = data.page()
+threshold_results = try_all_threshold_dict(img)
+for method, result in threshold_results.items():
+    print("{} threshold: {}".format(method, result))
