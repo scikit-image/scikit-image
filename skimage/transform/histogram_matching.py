@@ -26,8 +26,7 @@ def _match_array_values(a, b):
 
 
 def match_histograms(image, reference):
-    """Adjust the pixel values of an image so that its histogram and a target's histogram match. The original image
-    is preserved
+    """Adjust the pixel values of an image so that its histogram and a target's histogram match
 
     Parameters
     ----------
