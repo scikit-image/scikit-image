@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Cython code wrapped in extrema.py."""
+"""Cython code used in extrema.py."""
 
 cimport numpy as cnp
 
@@ -45,21 +45,22 @@ def _local_maxima(dtype_t[::1] image not None,
                   Py_ssize_t[::1] neighbor_offsets not None):
     """Detect local maxima in n-dimensional array.
 
+    Inner function to `local_maxima` that detects all local maxima (including
+    plateaus) in the image. The result is stored inplace inside `flags` with
+    the value of "QUEUED_CANDIDATE".
+
     Parameters
     ----------
     image : ndarray, one-dimensional
         The raveled view of a n-dimensional array.
     flags : ndarray
         An array of flags that is used to store the state of each pixel during
-        evaluation.
+        evaluation and is MODIFIED INPLACE. Initially, pixels that border the
+        image edge must be marked as "BORDER_INDEX" while all other pixels
+        should be marked with "NOT_MAXIMUM".
     neighbor_offsets : ndarray
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
-
-    Returns
-    -------
-    is_maximum : ndarray
-        A "boolean" array that is 1 where local maxima exist.
     """
     cdef:
         QueueWithHistory queue
@@ -85,10 +86,11 @@ def _local_maxima(dtype_t[::1] image not None,
             for i in range(image.shape[0]):
                 if flags[i] == CANDIDATE:
                     # Index is potentially part of a maximum:
-                    # Find all samples part of the plateau and fill with 0
-                    # or 1 depending on whether it's a true maximum
+                    # Find all samples which are part of the plateau and fill
+                    # with 0 or 1 depending on whether it's a true maximum
                     _fill_plateau(image, flags, neighbor_offsets, &queue, i)
         finally:
+            # Ensure that memory is released again
             queue_exit(&queue)
 
 
@@ -96,8 +98,8 @@ cdef inline void _mark_candidates_in_last_dimension(
         dtype_t[::1] image, unsigned char[::1] flags) nogil:
     """Mark local maxima in last dimension.
     
-    This function marks pixels with the "CANDIDATE" flag if it is a local 
-    maximum when only the last dimension of the image is considered. 
+    This function considers only the last dimension of the image and marks 
+    pixels with the "CANDIDATE" flag if it is a local maximum. 
     
     Parameters
     ----------
@@ -112,7 +114,7 @@ cdef inline void _mark_candidates_in_last_dimension(
     By evaluating this necessary but not sufficient condition first, usually a
     significant amount of pixels can be rejected without having to evaluate the
     entire neighborhood of their plateau. This can reduces the number of 
-    candidates that need to be evaluated with a the more expensive flood-fill 
+    candidates that need to be evaluated with the more expensive flood-fill 
     performed in `_fill_plateaus`.
     
     However this is only possible if the adjacent pixels in the last dimension
@@ -181,42 +183,42 @@ cdef inline void _fill_plateau(
         Start position for the flood-fill.
     """
     cdef:
-        dtype_t h
-        unsigned char true_maximum
+        dtype_t height
+        unsigned char is_maximum
         QueueItem current_index, neighbor
 
-    h = image[start_index]
-    true_maximum = 1 # Boolean flag
+    height = image[start_index]  # Height of the evaluated plateau
+    is_maximum = 1 # Boolean flag, initially assume true
 
-    flags[start_index] = QUEUED_CANDIDATE
-
-    # And queue start position after clearing the buffer
+    # Queue start position after clearing the buffer
+    # which might have been used already
     queue_clear(queue_ptr)
     queue_push(queue_ptr, &start_index)
+    flags[start_index] = QUEUED_CANDIDATE
 
     # Break loop if all queued positions were evaluated
     while queue_pop(queue_ptr, &current_index):
-        # Look at all neighbouring samples
+        # Look at all neighboring samples
         for i in range(neighbor_offsets.shape[0]):
             neighbor = current_index + neighbor_offsets[i]
 
-            if image[neighbor] == h:
+            if image[neighbor] == height:
                 # Value is part of plateau
                 if flags[neighbor] == BORDER_INDEX:
                     # Plateau touches border and can't be maximum
-                    true_maximum = NOT_MAXIMUM
+                    is_maximum = 0
                 elif flags[neighbor] != QUEUED_CANDIDATE:
                     # Index wasn't queued already, do so now
                     queue_push(queue_ptr, &neighbor)
                     flags[neighbor] = QUEUED_CANDIDATE
 
-            elif image[neighbor] > h:
+            elif image[neighbor] > height:
                 # Current plateau can't be maximum because it borders a
                 # larger one
-                true_maximum = NOT_MAXIMUM
+                is_maximum = 0
 
-    if not true_maximum:
+    if not is_maximum:
         queue_restore(queue_ptr)
-        # Initial guess was wrong -> replace 1 with 0 for plateau
+        # Initial guess was wrong -> flag as NOT_MAXIMUM
         while queue_pop(queue_ptr, &neighbor):
             flags[neighbor] = NOT_MAXIMUM

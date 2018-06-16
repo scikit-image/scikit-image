@@ -2,9 +2,9 @@
 
 This module provides functions to find local maxima and minima of an image.
 Here, local maxima (minima) are defined as connected sets of pixels with equal
-grey level which is strictly greater (smaller) than the grey level of all
+gray level which is strictly greater (smaller) than the gray level of all
 pixels in direct neighborhood of the connected set. In addition, the module
-provides the closely related functions h-maxima and h-minima.
+provides the related functions h-maxima and h-minima.
 
 Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
@@ -342,7 +342,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must only contain 1's and 0's, have the same number
+        evaluated pixel. It must contain only 1's and 0's, have the same number
         of dimensions as `image`. If not given, all adjacent pixels are
         considered as part of the neighborhood.
     connectivity : int, optional
@@ -377,6 +377,8 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
 
     1. Make a first pass over the image's last dimension and flag candidates
        for local maxima by comparing pixels in only one direction.
+       If the pixels aren't connected in the last dimension all pixels are
+       flagged as candidates instead.
 
     For each candidate:
 
@@ -482,7 +484,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must only contain 1's and 0's, have the same number
+        evaluated pixel. It must contain only 1's and 0's, have the same number
         of dimensions as `image`. If not given, all adjacent pixels are
         considered as part of the neighborhood.
     connectivity : int, optional
@@ -517,6 +519,8 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
 
     1. Make a first pass over the image's last dimension and flag candidates
        for local minima by comparing pixels in only one direction.
+       If the pixels aren't connected in the last dimension all pixels are
+       flagged as candidates instead.
 
     For each candidate:
 
