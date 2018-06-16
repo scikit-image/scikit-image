@@ -16,6 +16,7 @@ from ._warps import (swirl, resize, rotate, rescale,
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 from .seam_carving import seam_carve
+from .histogram_matching import match_histograms
 
 
 __all__ = ['hough_circle',
@@ -53,4 +54,5 @@ __all__ = ['hough_circle',
            'pyramid_expand',
            'pyramid_gaussian',
            'pyramid_laplacian',
-           'seam_carve']
+           'seam_carve',
+           'match_histograms']

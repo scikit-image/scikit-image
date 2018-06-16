@@ -256,3 +256,6 @@
 
 - David Volgyes
   Unsharp masking
+
+- Solutus Immensus
+  Histogram matching
