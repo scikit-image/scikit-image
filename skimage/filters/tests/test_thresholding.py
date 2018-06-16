@@ -43,7 +43,7 @@ class TestSimpleImage():
 
     def test_try_all_threshold_dict_exception(self):
         result = try_all_threshold_dict(self.image)
-        assert result['Minimum'] == None
+        assert result['Minimum'] is None
 
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
