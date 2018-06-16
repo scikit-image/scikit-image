@@ -10,6 +10,7 @@ from ..util import crop, dtype_limits
 
 
 __all__ = ['try_all_threshold',
+           'try_all_threshold_dict',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
@@ -132,6 +133,59 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     return _try_all(image, figsize=figsize,
                     methods=methods, verbose=verbose)
+
+
+def try_all_threshold_dict(image):
+    """Returns a dictionary comparing the output of different threshold methods.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+
+    Returns
+    -------
+    threshold_results : dict
+        Dictionary of threshold results in format: {'threshold_method': result}
+        If an exception is encountered in a thresholding method, None is given
+        for that method.
+
+    Notes
+    -----
+    The following algorithms are used:
+
+    * isodata
+    * li
+    * mean
+    * minimum
+    * otsu
+    * triangle
+    * yen
+
+    Examples
+    --------
+    >>> from skimage.data import text
+    >>> dict = try_all_threshold_dict(text())
+    """
+    # Global algorithms.
+    methods = OrderedDict({'Isodata': threshold_isodata,
+                           'Li': threshold_li,
+                           'Mean': threshold_mean,
+                           'Minimum': threshold_minimum,
+                           'Otsu': threshold_otsu,
+                           'Triangle': threshold_triangle,
+                           'Yen': threshold_yen})
+
+    threshold_results = OrderedDict({})
+    for name, func in methods.items():
+        try:
+            threshold_value = func(image)
+        except Exception:
+            threshold_results[name] = None
+        else:
+            threshold_results[name] = threshold_value
+
+    return threshold_results
 
 
 def threshold_local(image, block_size, method='gaussian', offset=0,
