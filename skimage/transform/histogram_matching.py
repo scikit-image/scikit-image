@@ -10,8 +10,10 @@ def _get_separate_channels(image):
 
 
 def _match_array_values(a, b):
-    """Return modified a array with interpolated values that correspond to the values of the b array"""
-    a_values, a_unique_indices, a_counts = np.unique(a, return_inverse=True, return_counts=True)
+    """Return modified a array with interpolated values that correspond to the
+    values of the b array"""
+    a_values, a_unique_indices, a_counts = \
+        np.unique(a, return_inverse=True, return_counts=True)
     b_values, b_counts = np.unique(b, return_counts=True)
 
     # calculate normalized quantiles for each array
@@ -26,14 +28,16 @@ def _match_array_values(a, b):
 
 
 def match_histograms(image, reference):
-    """Adjust the pixel values of an image so that its histogram and a target's histogram match
+    """Adjust the pixel values of an image so that its histogram and a target's
+    histogram match
 
     Parameters
     ----------
     image : ndarray
         Input image. Can be gray-scale or in color
     reference : ndarray
-        Image to match histogram of.
+        Image to match histogram of. Must have the same number of channels as
+        image, otherwise an exception is thrown
 
      Returns
     -------
@@ -50,7 +54,8 @@ def match_histograms(image, reference):
     ref_channels = _get_separate_channels(reference)
 
     if len(im_channels) != len(ref_channels):
-        raise ValueError('Number of channels in the input image and reference image must match!')
+        raise ValueError('Number of channels in the input image and reference '
+                         'image must match!')
 
     matched_channels = np.empty(im_channels.shape)
 

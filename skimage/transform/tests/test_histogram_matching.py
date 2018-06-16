@@ -4,7 +4,8 @@ from skimage.transform import histogram_matching
 from skimage import transform
 from skimage import data
 
-from skimage._shared.testing import assert_array_equal, assert_array_almost_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_equal, \
+    assert_array_almost_equal, assert_almost_equal
 
 import pytest
 
@@ -50,7 +51,8 @@ def test_match_array_values(array, template, expected_array):
 
 
 def _calculate_image_empirical_pdf(image):
-    """Helper function for calculating empirical probability density function of a given image for all channels"""
+    """Helper function for calculating empirical probability density function
+    of a given image for all channels"""
 
     channels = histogram_matching._get_separate_channels(image)
     channels_pdf = []
@@ -73,7 +75,8 @@ template_rgb = data.astronaut()
     (image_rgb, template_rgb)
 ])
 def test_match_histograms(image, reference):
-    """Assert that pdf of matched image is close to the reference's pdf for all channels and all values of matched"""
+    """Assert that pdf of matched image is close to the reference's pdf for all
+    channels and all values of matched"""
 
     # when
     matched = transform.match_histograms(image, reference)
@@ -88,7 +91,8 @@ def test_match_histograms(image, reference):
 
         for i, matched_value in enumerate(matched_values):
             closest_idx = (np.abs(reference_values - matched_value)).argmin()
-            assert_almost_equal(matched_quantiles[i], reference_quantiles[closest_idx], decimal=2)
+            assert_almost_equal(matched_quantiles[i], 
+                                reference_quantiles[closest_idx], decimal=2)
 
 
 @pytest.mark.parametrize('image, reference', [
