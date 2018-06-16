@@ -62,6 +62,7 @@ plt.show()
 # mechanisms.
 #
 
+from skimage import data
 from skimage.filters import try_all_threshold
 
 img = data.page()
