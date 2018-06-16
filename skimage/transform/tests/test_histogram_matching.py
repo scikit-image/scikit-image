@@ -39,7 +39,7 @@ def test_get_separate_channels_multiple():
 
 
 @pytest.mark.parametrize('array, template, expected_array', [
-    (np.arange(10), np.arange(100), np.arange(9,100,10)),
+    (np.arange(10), np.arange(100), np.arange(9, 100, 10)),
     (np.random.rand(4), np.ones(3), np.ones(4))
 ])
 def test_match_array_values(array, template, expected_array):
@@ -91,7 +91,7 @@ def test_match_histograms(image, reference):
 
         for i, matched_value in enumerate(matched_values):
             closest_idx = (np.abs(reference_values - matched_value)).argmin()
-            assert_almost_equal(matched_quantiles[i], 
+            assert_almost_equal(matched_quantiles[i],
                                 reference_quantiles[closest_idx], decimal=2)
 
 
