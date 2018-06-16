@@ -22,8 +22,8 @@ For a one-off solution, the simplest, surest route is to convert the video to a
 collection of sequentially-numbered image files, often called an image
 sequence. Then the images files can be read into an `ImageCollection` by
 `skimage.io.imread_collection`. Converting the video to frames can be done
-easily in [ImageJ](http://imagej.nih.gov/ij/), a cross-platform, GUI-based
-program from the bio-imaging community, or [FFmpeg](https://www.ffmpeg.org/), a
+easily in `ImageJ <http://imagej.nih.gov/ij/>`__, a cross-platform, GUI-based
+program from the bio-imaging community, or `FFmpeg <https://www.ffmpeg.org/>`__, a
 powerful command-line utility for manipulating video files. 
 
 In FFmpeg, the following command generates an image file from each frame in a
@@ -77,7 +77,7 @@ and its dependencies became available for OSX and Linux.
 
     conda install -c danielballan pyav
     
-Wheels are also avaiable for OSX.::
+Wheels are also available for OSX.
 
 .. code-block:: bash
 

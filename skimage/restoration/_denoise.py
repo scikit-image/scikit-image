@@ -72,7 +72,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> astro = astro[220:300, 220:320]
     >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
-    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
+    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
+    ...                              multichannel=True)
     """
     if multichannel:
         if image.ndim != 3:

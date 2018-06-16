@@ -16,8 +16,10 @@ environment.
 -------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions,
-including Anaconda_, `Enthought Canopy`_, `Python(x,y)`_ and
-`WinPython`_.
+including `Anaconda <https://www.anaconda.com/download/>`_,
+`Enthought Canopy <https://www.enthought.com/product/canopy/>`_,
+`Python(x,y) <https://python-xy.github.io/>`_ and
+`WinPython <https://winpython.github.io/>`_.
 
 On all other systems, install it via shell/command prompt::
 
@@ -25,7 +27,7 @@ On all other systems, install it via shell/command prompt::
 
 If you are running Anaconda or miniconda, use::
 
-  conda install scikit-image
+  conda install -c conda-forge scikit-image
 
 2. Development Installation:
 ----------------------------
@@ -96,7 +98,7 @@ Build Requirements
 ------------------
 * `Python >= 3.5 <http://python.org>`__
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
-* `Cython >= 0.23 <http://www.cython.org/>`__
+* `Cython >= 0.23.4 <http://www.cython.org/>`__
 
 Build Requirements (docs)
 -------------------------
@@ -116,8 +118,8 @@ Optional Requirements
 You can use ``scikit-image`` with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-* `PyQt4 <http://wiki.python.org/moin/PyQt>`__
-    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
+* `PyQt5 <http://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
+    A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
 * `PyAMG <http://pyamg.org/>`__
     The ``pyamg`` module is used for the fast `cg_mg` mode of random

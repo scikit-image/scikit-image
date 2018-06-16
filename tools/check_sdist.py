@@ -17,13 +17,13 @@ data = [l for l in data if l.startswith('hard linking')]
 data = [l.replace('hard linking ', '') for l in data]
 data = ['./' + l.split(' ->')[0] for l in data]
 
-ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore']
+ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
 ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
-               './downloads', './scikit_image.egg-info']
+               './downloads', './scikit_image.egg-info', './benchmarks']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
-                './.pep8speaks.yml',
+                './.pep8speaks.yml', './asv.conf.json',
                 './skimage/filters/rank/README.rst']
 
 

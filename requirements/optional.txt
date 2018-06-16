@@ -4,3 +4,4 @@ SimpleITK
 astropy
 tifffile
 imageio
+qtpy
