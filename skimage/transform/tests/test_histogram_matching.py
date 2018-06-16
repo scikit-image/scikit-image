@@ -92,7 +92,7 @@ def test_match_histograms(image, reference):
         for i, matched_value in enumerate(matched_values):
             closest_idx = (np.abs(reference_values - matched_value)).argmin()
             assert_almost_equal(matched_quantiles[i],
-                                reference_quantiles[closest_idx], decimal=2)
+                                reference_quantiles[closest_idx], decimal=1)
 
 
 @pytest.mark.parametrize('image, reference', [

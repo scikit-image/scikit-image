@@ -29,7 +29,7 @@ def _match_array_values(a, b):
 
 def match_histograms(image, reference):
     """Adjust the pixel values of an image so that its histogram and a target's
-    histogram match
+    histogram match. The original image is preserved.
 
     Parameters
     ----------
@@ -42,13 +42,20 @@ def match_histograms(image, reference):
      Returns
     -------
     matched : ndarray
-        Transformed output image.
+        Transformed output image
+
+    Raises
+    ------
+    ValueError
+        Thrown when the number of channels in the input image and the reference
+        differ
 
     References
     ----------
     .. [1] http://paulbourke.net/miscellaneous/equalisation/
     """
     shape = image.shape
+    image_dtype = image.dtype
 
     im_channels = _get_separate_channels(image)
     ref_channels = _get_separate_channels(reference)
@@ -68,5 +75,6 @@ def match_histograms(image, reference):
         matched_channels[channel] = matched_channel
 
     matched = matched_channels.transpose(1, 2, 0).reshape(shape)
+    matched = np.asarray(matched, image_dtype)
 
     return matched
