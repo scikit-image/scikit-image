@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from scipy import ndimage as ndi
+from collections import OrderedDict
 
 import skimage
 from skimage import data
@@ -16,6 +17,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_triangle,
                                           threshold_minimum,
                                           try_all_threshold,
+                                          try_all_threshold_dict,
                                           _mean_std)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
@@ -38,6 +40,10 @@ class TestSimpleImage():
         all_texts = [axis.texts for axis in ax if axis.texts != []]
         text_content = [text.get_text() for x in all_texts for text in x]
         assert 'RuntimeError' in text_content
+
+    def test_try_all_threshold_dict_exception(self):
+        result = try_all_threshold_dict(self.image)
+        assert result['Minimum'] == None
 
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
@@ -176,6 +182,32 @@ class TestSimpleImage():
         thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
         out = self.image > thres
         assert_equal(ref, out)
+
+
+def test_try_all_threshold_dict_camera_image():
+    camera = skimage.data.camera()
+    expected_result = OrderedDict([('Isodata', 87),
+                                   ('Li', 64.5089042757881),
+                                   ('Mean', 118.31400299072266),
+                                   ('Minimum', 76),
+                                   ('Otsu', 87),
+                                   ('Triangle', 22),
+                                   ('Yen', 198)])
+    result = try_all_threshold_dict(camera)
+    assert result == expected_result
+
+
+def test_try_all_threshold_dict_coins_image():
+    coins = skimage.data.coins()
+    expected_result = OrderedDict([('Isodata', 107),
+                                   ('Li', 96.54139265230047),
+                                   ('Mean', 96.85551602035204),
+                                   ('Minimum', 143),
+                                   ('Otsu', 107),
+                                   ('Triangle', 80),
+                                   ('Yen', 110)])
+    result = try_all_threshold_dict(coins)
+    assert result == expected_result
 
 
 def test_otsu_camera_image():
