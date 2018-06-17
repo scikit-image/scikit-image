@@ -267,11 +267,11 @@ def _fast_pad(image, value):
 
     Examples
     --------
-    >>> _fast_pad(np.zeros((2, 3)), 4)
-    array([[4., 4., 4., 4., 4.],
-           [4., 0., 0., 0., 4.],
-           [4., 0., 0., 0., 4.],
-           [4., 4., 4., 4., 4.]])
+    >>> _fast_pad(np.zeros((2, 3), dtype=int), 4)
+    array([[4, 4, 4, 4, 4],
+           [4, 0, 0, 0, 4],
+           [4, 0, 0, 0, 4],
+           [4, 4, 4, 4, 4]])
     """
     # Allocate padded image
     new_shape = np.array(image.shape) + 2
