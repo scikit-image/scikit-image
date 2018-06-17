@@ -9,22 +9,22 @@ def _get_separate_channels(image):
         return image.transpose(2, 0, 1)
 
 
-def _match_array_values(a, b):
-    """Return modified a array with interpolated values that correspond to the
-    values of the b array"""
-    a_values, a_unique_indices, a_counts = \
-        np.unique(a, return_inverse=True, return_counts=True)
-    b_values, b_counts = np.unique(b, return_counts=True)
+def _match_array_values(source, template):
+    """Return modified source array with interpolated values that correspond to the
+    values of the template array"""
+    src_values, src_unique_indices, src_counts = \
+        np.unique(source, return_inverse=True, return_counts=True)
+    tmpl_values, tmpl_counts = np.unique(template, return_counts=True)
 
     # calculate normalized quantiles for each array
-    a_quantiles = np.cumsum(a_counts).astype(np.float64)
-    a_quantiles /= a_quantiles[-1]
+    src_quantiles = np.cumsum(src_counts).astype(np.float64)
+    src_quantiles /= src_quantiles[-1]
 
-    b_quantiles = np.cumsum(b_counts).astype(np.float64)
-    b_quantiles /= b_quantiles[-1]
+    tmpl_quantiles = np.cumsum(tmpl_counts).astype(np.float64)
+    tmpl_quantiles /= tmpl_quantiles[-1]
 
-    interp_a_values = np.interp(a_quantiles, b_quantiles, b_values)
-    return interp_a_values[a_unique_indices]
+    interp_a_values = np.interp(src_quantiles, tmpl_quantiles, tmpl_values)
+    return interp_a_values[src_unique_indices]
 
 
 def match_histograms(image, reference):

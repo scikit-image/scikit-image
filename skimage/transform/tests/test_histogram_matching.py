@@ -50,55 +50,55 @@ def test_match_array_values(array, template, expected_array):
     assert_array_almost_equal(matched, expected_array)
 
 
-def _calculate_image_empirical_pdf(image):
-    """Helper function for calculating empirical probability density function
-    of a given image for all channels"""
+class TestMatchHistogram:
 
-    channels = histogram_matching._get_separate_channels(image)
-    channels_pdf = []
-    for channel in channels:
-        channel_values, counts = np.unique(channel, return_counts=True)
-        channel_quantiles = np.cumsum(counts).astype(np.float64)
-        channel_quantiles /= channel_quantiles[-1]
+    image_rgb = data.chelsea()
+    template_rgb = data.astronaut()
 
-        channels_pdf.append((channel_values, channel_quantiles))
+    @pytest.mark.parametrize('image, reference', [
+        (image_rgb[:, :, 0], template_rgb[:, :, 0]),
+        (image_rgb, template_rgb)
+    ])
+    def test_match_histograms(self, image, reference):
+        """Assert that pdf of matched image is close to the reference's pdf for all
+        channels and all values of matched"""
 
-    return np.asarray(channels_pdf)
+        # when
+        matched = transform.match_histograms(image, reference)
 
+        matched_pdf = self._calculate_image_empirical_pdf(matched)
+        reference_pdf = self._calculate_image_empirical_pdf(reference)
 
-image_rgb = data.chelsea()
-template_rgb = data.astronaut()
+        # then
+        for channel in range(len(matched_pdf)):
+            reference_values, reference_quantiles = reference_pdf[channel]
+            matched_values, matched_quantiles = matched_pdf[channel]
 
+            for i, matched_value in enumerate(matched_values):
+                closest_idx = (np.abs(reference_values - matched_value)).argmin()
+                assert_almost_equal(matched_quantiles[i],
+                                    reference_quantiles[closest_idx], decimal=1)
 
-@pytest.mark.parametrize('image, reference', [
-    (image_rgb[:, :, 0], template_rgb[:, :, 0]),
-    (image_rgb, template_rgb)
-])
-def test_match_histograms(image, reference):
-    """Assert that pdf of matched image is close to the reference's pdf for all
-    channels and all values of matched"""
+    @pytest.mark.parametrize('image, reference', [
+        (image_rgb, template_rgb[:, :, 0]),
+        (image_rgb[:, :, 0], template_rgb)
+    ])
+    def test_raises_value_error_on_channels_mismatch(self, image, reference):
+        with pytest.raises(ValueError):
+            transform.match_histograms(image, reference)
 
-    # when
-    matched = transform.match_histograms(image, reference)
+    @classmethod
+    def _calculate_image_empirical_pdf(cls, image):
+        """Helper function for calculating empirical probability density function
+        of a given image for all channels"""
 
-    matched_pdf = _calculate_image_empirical_pdf(matched)
-    reference_pdf = _calculate_image_empirical_pdf(reference)
+        channels = histogram_matching._get_separate_channels(image)
+        channels_pdf = []
+        for channel in channels:
+            channel_values, counts = np.unique(channel, return_counts=True)
+            channel_quantiles = np.cumsum(counts).astype(np.float64)
+            channel_quantiles /= channel_quantiles[-1]
 
-    # then
-    for channel in range(len(matched_pdf)):
-        reference_values, reference_quantiles = reference_pdf[channel]
-        matched_values, matched_quantiles = matched_pdf[channel]
+            channels_pdf.append((channel_values, channel_quantiles))
 
-        for i, matched_value in enumerate(matched_values):
-            closest_idx = (np.abs(reference_values - matched_value)).argmin()
-            assert_almost_equal(matched_quantiles[i],
-                                reference_quantiles[closest_idx], decimal=1)
-
-
-@pytest.mark.parametrize('image, reference', [
-    (image_rgb, template_rgb[:, :, 0]),
-    (image_rgb[:, :, 0], template_rgb)
-])
-def test_raises_value_error_on_channels_mismatch(image, reference):
-    with pytest.raises(ValueError):
-        transform.match_histograms(image, reference)
+        return np.asarray(channels_pdf)
