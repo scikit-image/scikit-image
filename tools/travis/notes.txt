@@ -5,11 +5,17 @@
 - Use bash scripts for `before_install` and `script` or any part that
   has conditional statements
    - Make sure they are "executable" (chmod +x)
-   - Use the following header:
+   - Use the following header to enable some local flags:
 
-   ```
+   ```bash
      #!/usr/bin/env bash
      set -ev
+   ```
+
+   - Use the following footer to turn off the flags after the script:
+
+   ```
+     set +ev
    ```
 
 - The `-e` flag ensures that the script exits on non-zero exit from a command.
