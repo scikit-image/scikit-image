@@ -220,7 +220,7 @@ class CenteredWindow(object):
         xmax = min(w, col + r + 1)
         ymin = max(0, row - r)
         ymax = min(h, row + r + 1)
-        return [slice(ymin, ymax), slice(xmin, xmax)]
+        return (slice(ymin, ymax), slice(xmin, xmax))
 
 
 if __name__ == '__main__':  # pragma: no cover
