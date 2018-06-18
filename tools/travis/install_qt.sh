@@ -21,3 +21,5 @@ if [[ "${QT}" == "PyQt5" || "${QT}" == "PySide2" ]]; then
     echo 'backend: Qt5Agg' > $MPL_DIR/matplotlibrc
     echo 'backend.qt5 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 fi
+
+set +ev

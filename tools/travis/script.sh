@@ -63,3 +63,5 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
 fi
 section_end "Tests.examples"
+
+set +ev
