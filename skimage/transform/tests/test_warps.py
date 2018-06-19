@@ -347,7 +347,7 @@ def test_swirl():
 
     swirl_params.pop('mode')
 
-    with expected_warnings(['Bi-quadratic.*bug', 'default']):
+    with expected_warnings(['Bi-quadratic.*bug']):
         swirled = tf.swirl(image, strength=10, **swirl_params)
         unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
 

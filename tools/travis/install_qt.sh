@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -ev
 
 if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     echo "backend : Template" > $MPL_DIR/matplotlibrc
@@ -22,4 +22,4 @@ if [[ "${QT}" == "PyQt5" || "${QT}" == "PySide2" ]]; then
     echo 'backend.qt5 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 fi
 
-set -ex
+set +ev

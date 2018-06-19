@@ -10,7 +10,6 @@ from ..util import crop, dtype_limits
 
 
 __all__ = ['try_all_threshold',
-           'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
@@ -59,8 +58,12 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     i = 1
     for name, func in methods.items():
-        ax[i].imshow(func(image), cmap=plt.cm.gray)
         ax[i].set_title(name)
+        try:
+            ax[i].imshow(func(image), cmap=plt.cm.gray)
+        except Exception as e:
+            ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
+                       ha="center", va="center", transform=ax[i].transAxes)
         i += 1
         if verbose:
             print(func.__orifunc__)
@@ -215,16 +218,6 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
 
     return thresh_image - offset
-
-
-@deprecated('threshold_local', removed_version='0.15')
-def threshold_adaptive(image, block_size, method='gaussian', offset=0,
-                       mode='reflect', param=None):
-    warn('The return value of `threshold_local` is a threshold image, while '
-         '`threshold_adaptive` returned the *thresholded* image.')
-    return image > threshold_local(image, block_size=block_size,
-                                   method=method, offset=offset, mode=mode,
-                                   param=param)
 
 
 def threshold_otsu(image, nbins=256):
