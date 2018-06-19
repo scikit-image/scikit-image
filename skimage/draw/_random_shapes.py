@@ -217,7 +217,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
         # if intensity range only spans a single color
         colors = np.array([np.array(intensity_range_tpl)[:, 0]])
         msg = 'Intensity range spans only excluded intensity value.'
-        if (colors == exclude).all():
+        if np.array(colors == exclude).all():
             raise ValueError(msg)
         return np.repeat(colors, num_colors, axis=0)
 
@@ -225,7 +225,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
               for r in intensity_range_tpl]
     colors = np.transpose(colors)
 
-    to_replace = np.isin(colors, exclude).all(axis=1)
+    to_replace = np.array([(exclude == color).all() for color in colors])
     if to_replace.any():
         colors[to_replace, :] = _generate_random_colors(sum(to_replace),
                                                         num_channels,
@@ -284,12 +284,13 @@ def random_shapes(image_shape,
     intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
         The range of values to sample pixel values from. For grayscale images
         the format is (min, max). For multichannel - ((min, max),) if the
-        ranges are equal across the channels, and ((min_0, max_0), ... (min_N, max_N))
-        if they differ. As the function supports generation of uint8 arrays only,
-        the maximum range is (0, 255). If None, set to (0, 254) for each
-        channel reserving color of intensity = 255 for background.
+        ranges are equal across the channels, and
+        ((min_0, max_0), ... (min_N, max_N)) if they differ. As the function
+        supports generation of uint8 arrays only, the maximum range is
+        (0, 255). If None, set to (0, 255) for each channel reserving color of
+        intensity = 255 for background.
     background : {tuple of ints, int}, optional
-        Pixel intensities for background. Values between 0 and 255 are alloed.
+        Pixel intensities for background. Values between 0 and 255 are allowed.
         For multichannel, a tuple of length num_channels is required. If None,
         set to 255 for each channel.
     allow_overlap : bool, optional

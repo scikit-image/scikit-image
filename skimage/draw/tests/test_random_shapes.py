@@ -193,8 +193,8 @@ def test_excludes_random_colors():
                                      intensity_range, random,
                                      exclude=(21, 25))
     assert len(colors) == 10
-    assert np.isin(colors, [(20, 25), (20, 26), (21, 26)]).all()
-
+    for color in colors:
+        assert tuple(color) in [(20, 25), (20, 26), (21, 26)]
 
 
 def test_throws_when_intensity_range_equals_excluded_intensities():
@@ -254,6 +254,7 @@ def test_throws_when_backgound_out_of_range():
                       num_channels=2,
                       background=(256, 256),
                       random_seed=42)
+
 
 def test_throws_when_background_not_match_nr_of_channels():
 
