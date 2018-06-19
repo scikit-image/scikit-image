@@ -88,7 +88,7 @@ install:
       if [[ "${WITH_PYAMG}" == "1" ]]; then
         pip install --retries 3 -q pyamg
       fi
-    - source tools/travis/install_qt.sh
+    - tools/travis/install_qt.sh
 
 script: tools/travis/script.sh
 
