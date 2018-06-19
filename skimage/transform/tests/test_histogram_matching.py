@@ -4,38 +4,10 @@ from skimage.transform import histogram_matching
 from skimage import transform
 from skimage import data
 
-from skimage._shared.testing import assert_array_equal, \
-    assert_array_almost_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_almost_equal, \
+    assert_almost_equal
 
 import pytest
-
-
-def test_get_separate_channels_single():
-    # given
-    image = np.ones((4, 5))
-    expected_channels = np.ones((1, 4, 5))
-
-    # when
-    channels = histogram_matching._get_separate_channels(image)
-
-    # then
-    assert_array_equal(channels, expected_channels)
-
-
-def test_get_separate_channels_multiple():
-    # given
-    image = np.full((4, 5, 3), [1, 0, 3])  # channels of zeros, ones and threes
-    expected_channels = np.asarray([
-        np.ones((4, 5)),
-        np.zeros((4, 5)),
-        np.full((4, 5), 3)
-    ])
-
-    # when
-    channels = histogram_matching._get_separate_channels(image)
-
-    # then
-    assert_array_equal(channels, expected_channels)
 
 
 @pytest.mark.parametrize('array, template, expected_array', [
@@ -44,7 +16,7 @@ def test_get_separate_channels_multiple():
 ])
 def test_match_array_values(array, template, expected_array):
     # when
-    matched = histogram_matching._match_array_values(array, template)
+    matched = histogram_matching._match_cumulative_cdf(array, template)
 
     # then
     assert_array_almost_equal(matched, expected_array)
@@ -92,7 +64,10 @@ class TestMatchHistogram:
         """Helper function for calculating empirical probability density function
         of a given image for all channels"""
 
-        channels = histogram_matching._get_separate_channels(image)
+        if image.ndim > 2:
+            image = image.transpose(2, 0, 1)
+        channels = np.array(image, copy=False, ndmin=3)
+
         channels_pdf = []
         for channel in channels:
             channel_values, counts = np.unique(channel, return_counts=True)
