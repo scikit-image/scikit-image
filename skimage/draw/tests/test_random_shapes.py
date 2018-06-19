@@ -177,13 +177,13 @@ def test_excludes_random_colors():
 
     random = np.random.RandomState(42)
 
-    num_colors = 1
+    num_colors = 10
     num_channels = 1
     intensity_range = (20, 21)
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random,
                                      exclude=21)
-    assert len(colors) == 1
+    assert len(colors) == 10
     assert (colors == 20).all()
 
     num_colors = 10
@@ -195,7 +195,6 @@ def test_excludes_random_colors():
     assert len(colors) == 10
     assert np.isin(colors, [(20, 25), (20, 26), (21, 26)]).all()
 
-    assert False
 
 
 def test_throws_when_intensity_range_equals_excluded_intensities():
@@ -239,3 +238,34 @@ def test_custom_background_color():
     print(image.shape)
     assert set(image[:, :, 0].flatten()) == {20, 21}
     assert set(image[:, :, 1].flatten()) == {30, 31}
+
+
+def test_throws_when_backgound_out_of_range():
+
+    # monochrome
+    with testing.raises(ValueError):
+        random_shapes((128, 128), max_shapes=1,
+                      multichannel=False,
+                      background=256,
+                      random_seed=42)
+    # multichannel
+    with testing.raises(ValueError):
+        random_shapes((128, 128), max_shapes=1,
+                      num_channels=2,
+                      background=(256, 256),
+                      random_seed=42)
+
+def test_throws_when_background_not_match_nr_of_channels():
+
+    # monochrome
+    with testing.raises(ValueError):
+        random_shapes((128, 128), max_shapes=1,
+                      multichannel=False,
+                      background=(255, 255),
+                      random_seed=42)
+    # multichannel
+    with testing.raises(ValueError):
+        random_shapes((128, 128), max_shapes=1,
+                      num_channels=3,
+                      background=(255, 255),
+                      random_seed=42)
