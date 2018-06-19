@@ -17,11 +17,15 @@ New Features
 ------------
 
 - unsharp mask filtering (#2772)
+- New options ``connectivity``, ``indices`` and ``allow_borders`` for
+  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
 
 
 Improvements
 ------------
 
+- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
+  improved with a new Cython-based implementation. #3022
 
 
 API Changes
