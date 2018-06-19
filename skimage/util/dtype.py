@@ -60,7 +60,9 @@ def _check_precision_loss(dtypeobj_in, dtypeobj_out):
         dtypeobj = np.dtype(t)
         kind = dtypeobj.kind
         if kind == 'f':
-            return np.finfo(dtypeobj).nmant
+            # IEEE floating point point has an implied 1, increasing the number
+            # of significant bits given a mantisa of a certain size
+            return np.finfo(dtypeobj).nmant + 1
         elif kind == 'b':
             return 1
         elif kind == 'u':
