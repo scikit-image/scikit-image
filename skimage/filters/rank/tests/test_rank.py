@@ -310,7 +310,7 @@ class TestRank():
         image = img_as_ubyte(data.camera())[::2, ::2]
         image[image > 127] = 0
         image_s = image.astype(np.int8)
-        with expected_warnings(['sign loss', 'precision loss']):
+        with expected_warnings(['sign loss']):
             image_u = img_as_ubyte(image_s)
             assert_equal(image_u, img_as_ubyte(image_s))
 
@@ -321,7 +321,7 @@ class TestRank():
         for method in methods:
             func = getattr(rank, method)
 
-            with expected_warnings(['sign loss', 'precision loss']):
+            with expected_warnings(['sign loss']):
                 out_u = func(image_u, disk(3))
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)

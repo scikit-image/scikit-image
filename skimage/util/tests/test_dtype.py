@@ -160,7 +160,7 @@ def test_float32_passthrough():
               (np.uint8, np.float32, False),
               (np.uint8, np.float64, False),
 
-              (np.int8, np.uint8, True),
+              (np.int8, np.uint8, False),
               (np.int8, np.int8, False),
               (np.int8, np.uint16, False),
               (np.int8, np.int16, False),
@@ -169,7 +169,7 @@ def test_float32_passthrough():
 
               (np.int16, np.uint8, True),
               (np.int16, np.int8, True),
-              (np.int16, np.uint16, True),
+              (np.int16, np.uint16, False),
               (np.int16, np.int16, False),
               (np.int16, np.float32, False),
               (np.int16, np.float64, False),
@@ -208,6 +208,12 @@ def test_float32_passthrough():
               (np.int16, np.bool, True),
               (np.float32, np.bool, True),
               (np.float64, np.bool, True),
+
+              # we don't support these types yet
+              (np.float32, np.int32, True),
+              (np.float16, np.int32, True),
+              (np.float16, np.int16, True),
+              (np.int16, np.float16, True),
               ])
 def test_check_precision_loss(dtype_in, dtype_out, expecting_loss):
     with expected_warnings(['precision loss|\A\Z']):

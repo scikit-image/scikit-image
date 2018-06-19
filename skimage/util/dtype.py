@@ -56,45 +56,38 @@ def _check_precision_loss(dtypeobj_in, dtypeobj_out):
         be considered lossy.
 
     """
-    dtypeobj_in = np.dtype(dtypeobj_in)
-    dtypeobj_out = np.dtype(dtypeobj_out)
-    kind_in = dtypeobj_in.kind
-    kind_out = dtypeobj_out.kind
-    itemsize_in = dtypeobj_in.itemsize
-    itemsize_out = dtypeobj_out.itemsize
+    def n_significant_bits(t):
+        dtypeobj = np.dtype(t)
+        kind = dtypeobj.kind
+        if kind == 'f':
+            return np.finfo(dtypeobj).nmant
+        elif kind == 'b':
+            return 1
+        elif kind == 'u':
+            # 8 bits per byte
+            return dtypeobj.itemsize * 8
+        elif kind == 'i':
+            # 1 bit used for sign
+            return dtypeobj.itemsize * 8 - 1
+        else:
+            raise ValueError('Unknown image dtype.')
 
-    has_loss = False
+    kind_in = np.dtype(dtypeobj_in).kind
+    kind_out = np.dtype(dtypeobj_out).kind
+    significant_bits_in = n_significant_bits(dtypeobj_in)
+    significant_bits_out = n_significant_bits(dtypeobj_out)
 
-    if kind_in != 'b' and kind_out == 'b':
+    if kind_in == 'f' and kind_out != 'f':
         has_loss = True
-    elif kind_in == 'f' and kind_out == 'f':
-        # float->float
-        if itemsize_out < itemsize_in:
-            has_loss = True
-    elif kind_in == 'f':
-        # float -> other (integer or bool)
+    elif significant_bits_in > significant_bits_out:
         has_loss = True
-    elif kind_out == 'f':
-        # signed/unsigned int -> float
-        if itemsize_in >= itemsize_out:
-            has_loss = True
-    elif ((kind_in == 'i' and kind_out == 'i') or
-            (kind_in == 'u' and kind_out == 'u')):
-        # signed/unsigned to same kind
-        if itemsize_out < itemsize_in:
-            has_loss = True
-    elif kind_in == 'u' and kind_out == 'i':
-        # usigned -> signed int
-        if itemsize_in >= itemsize_out:
-            has_loss = True
-    elif kind_in == 'i' and kind_out == 'u':
-        # signed int to unsigned
-        if itemsize_out <= itemsize_in:
-            has_loss = True
+    else:
+        has_loss = False
 
     if has_loss:
         warn("Possible precision loss when converting from {} to {}"
              .format(dtypeobj_in, dtypeobj_out))
+
     return has_loss
 
 
