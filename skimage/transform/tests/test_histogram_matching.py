@@ -32,8 +32,8 @@ class TestMatchHistogram:
         (image_rgb, template_rgb)
     ])
     def test_match_histograms(self, image, reference):
-        """Assert that pdf of matched image is close to the reference's pdf for all
-        channels and all values of matched"""
+        """Assert that pdf of matched image is close to the reference's pdf for
+        all channels and all values of matched"""
 
         # when
         matched = transform.match_histograms(image, reference)
@@ -47,9 +47,9 @@ class TestMatchHistogram:
             matched_values, matched_quantiles = matched_pdf[channel]
 
             for i, matched_value in enumerate(matched_values):
-                closest_idx = (np.abs(reference_values - matched_value)).argmin()
+                closest_id = (np.abs(reference_values - matched_value)).argmin()
                 assert_almost_equal(matched_quantiles[i],
-                                    reference_quantiles[closest_idx], decimal=1)
+                                    reference_quantiles[closest_id], decimal=1)
 
     @pytest.mark.parametrize('image, reference', [
         (image_rgb, template_rgb[:, :, 0]),
@@ -61,8 +61,8 @@ class TestMatchHistogram:
 
     @classmethod
     def _calculate_image_empirical_pdf(cls, image):
-        """Helper function for calculating empirical probability density function
-        of a given image for all channels"""
+        """Helper function for calculating empirical probability density
+        function of a given image for all channels"""
 
         if image.ndim > 2:
             image = image.transpose(2, 0, 1)
