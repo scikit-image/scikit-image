@@ -115,18 +115,6 @@ else:
     from .data import data_dir
 
 
-def lookfor(what):
-    """Do a keyword search on scikit-image docstrings.
-
-    Parameters
-    ----------
-    what : str
-        Words to look for.
-
-    """
-    import numpy as np
-    import sys
-    return np.lookfor(what, sys.modules[__name__])
-
+from .util.lookfor import lookfor
 
 del warnings, functools, imp, sys
