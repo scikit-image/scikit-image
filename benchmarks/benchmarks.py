@@ -11,8 +11,7 @@ class SegmentationSuite:
         self.image[300:, 300:, :] += 0.5
 
     def time_slic_basic(self):
-        result = segmentation.slic(self.image, enforce_connectivity=False)
+        segmentation.slic(self.image, enforce_connectivity=False)
 
     def mem_slic_basic(self):
-        result = segmentation.slic(self.image, enforce_connectivity=False)
-
+        return segmentation.slic(self.image, enforce_connectivity=False)
