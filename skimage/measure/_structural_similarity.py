@@ -1,11 +1,10 @@
-from __future__ import division
 
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-
+from .._shared.utils import warn
 
 __all__ = ['compare_ssim']
 
@@ -81,9 +80,6 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        DOI:10.1007/s10043-009-0119-z
 
     """
-    if not X.dtype == Y.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
 
@@ -148,6 +144,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         raise ValueError('Window size must be odd.')
 
     if data_range is None:
+        if X.dtype != Y.dtype:
+            warn("Inputs have mismatched dtype.  Setting data_range based on "
+                 "X.dtype.")
         dmin, dmax = dtype_range[X.dtype.type]
         data_range = dmax - dmin
 

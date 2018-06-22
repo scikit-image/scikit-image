@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 
 from ..color import rgb2gray
@@ -295,7 +294,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     image = np.clip(image, imin, imax)
 
     image = (image - imin) / float(imax - imin)
-    return dtype(image * (omax - omin) + omin)
+    return np.array(image * (omax - omin) + omin, dtype=dtype)
 
 
 def _assert_non_negative(image):

@@ -8,7 +8,8 @@ from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
 from skimage import data_dir
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose
+from skimage._shared.testing import (assert_equal, assert_allclose,
+                                     expected_warnings)
 from skimage._shared.utils import all_warnings
 
 
@@ -176,7 +177,8 @@ def test_save_with_alpha_channel():
 
     fd, filename = tempfile.mkstemp(suffix=".png")
     os.close(fd)
-    pic.save(filename)
+    with expected_warnings(['is a low contrast']):
+        pic.save(filename)
     os.unlink(filename)
 
 

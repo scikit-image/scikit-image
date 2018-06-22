@@ -1,5 +1,4 @@
 import os
-import six
 
 import numpy as np
 from skimage import data_dir
@@ -71,7 +70,7 @@ class TestMultiImage(TestCase):
             if isinstance(img, ImageCollection):
                 continue
 
-            assert isinstance(img.filename, six.string_types)
+            assert isinstance(img.filename, str)
 
             with testing.raises(AttributeError):
                 img.filename = "newfile"

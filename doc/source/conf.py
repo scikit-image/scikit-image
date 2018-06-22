@@ -43,7 +43,7 @@ autosummary_generate = True
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
-    'doc_module'        : 'skimage',
+    'doc_module'        : ('skimage',),
     # path to your examples scripts
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples

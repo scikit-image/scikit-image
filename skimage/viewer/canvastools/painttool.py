@@ -206,12 +206,21 @@ class CenteredWindow(object):
 
     def at(self, row, col):
         h, w = self.array_shape
-        r = self.radius
+        r = round(self.radius)
+        # Note: the int() cast is necessary because row and col are np.float64,
+        # which does not get cast by round(), unlike a normal Python float:
+        # >>> round(4.5)
+        # 4
+        # >>> round(np.float64(4.5))
+        # 4.0
+        # >>> int(round(np.float64(4.5)))
+        # 4
+        row, col = int(round(row)), int(round(col))
         xmin = max(0, col - r)
         xmax = min(w, col + r + 1)
         ymin = max(0, row - r)
         ymax = min(h, row + r + 1)
-        return [slice(ymin, ymax), slice(xmin, xmax)]
+        return (slice(ymin, ymax), slice(xmin, xmax))
 
 
 if __name__ == '__main__':  # pragma: no cover

@@ -224,7 +224,10 @@ def test_denoise_bilateral_multidimensional():
 
 def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
-    out = restoration.denoise_bilateral(img, multichannel=False)
+    # This is in fact an optional warning for our test suite.
+    # Python 3.5 will not trigger a warning.
+    with expected_warnings(['invalid|\A\Z']):
+        out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 
@@ -527,12 +530,6 @@ def test_wavelet_denoising_args():
                 restoration.denoise_wavelet(noisy, sigma=sigma,
                                             convert2ycbcr=convert2ycbcr,
                                             multichannel=multichannel)
-
-
-def test_multichannel_warnings():
-    img = data.astronaut()
-    assert_warns(UserWarning, restoration.denoise_bilateral, img)
-    assert_warns(UserWarning, restoration.denoise_nl_means, img)
 
 
 def test_cycle_spinning_multichannel():

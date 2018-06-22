@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -ev
 
 export PIP_DEFAULT_TIMEOUT=60
 
@@ -27,8 +27,9 @@ fi
 export WHEELHOUSE
 
 export DISPLAY=:99.0
-export PYTHONWARNINGS="d,all:::skimage"
-export TEST_ARGS="-v --doctest-modules"
+# This causes way too many internal warnings within python.
+# export PYTHONWARNINGS="d,all:::skimage"
+export TEST_ARGS="--doctest-modules"
 WHEELBINARIES="matplotlib scipy pillow cython"
 
 retry () {

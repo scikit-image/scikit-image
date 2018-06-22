@@ -52,7 +52,6 @@ References
 .. [4] http://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-from __future__ import division
 
 from warnings import warn
 import numpy as np
@@ -94,15 +93,16 @@ def guess_spatial_dimensions(image):
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
+    Valid color spaces are:
+        'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'
+
     Parameters
     ----------
     arr : array_like
         The image to convert.
-    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-                 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    fromspace : valid color space
         The color space to convert from. Can be specified in lower case.
-    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV',
-               'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'}
+    tospace : valid color space
         The color space to convert to. Can be specified in lower case.
 
     Returns
@@ -121,6 +121,7 @@ def convert_colorspace(arr, fromspace, tospace):
     >>> from skimage import data
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
+
     """
     fromdict = {'rgb': lambda im: im, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
                 'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
@@ -375,8 +376,8 @@ xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
 rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
 
 # construct matrices to and from rgb:
-rgbcie_from_rgb = np.dot(rgbcie_from_xyz, xyz_from_rgb)
-rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgbcie)
+rgbcie_from_rgb = rgbcie_from_xyz @ xyz_from_rgb
+rgb_from_rgbcie = rgb_from_xyz @ xyz_from_rgbcie
 
 
 gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
@@ -595,7 +596,7 @@ def _convert(matrix, arr):
     """
     arr = _prepare_colorarray(arr)
 
-    return np.dot(arr, matrix.T.copy())
+    return arr @ matrix.T.copy()
 
 
 def xyz2rgb(xyz):
@@ -800,12 +801,8 @@ def rgb2gray(rgb):
         return np.ascontiguousarray(rgb)
 
     rgb = _prepare_colorarray(rgb[..., :3])
-
-    gray = 0.2125 * rgb[..., 0]
-    gray[:] += 0.7154 * rgb[..., 1]
-    gray[:] += 0.0721 * rgb[..., 2]
-
-    return gray
+    coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
+    return rgb @ coeffs
 
 
 rgb2grey = rgb2gray
@@ -1135,14 +1132,14 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     eps = np.finfo(np.float).eps
 
     # compute y_r and L
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4 * xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / ([1, 15, 3] @ xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
@@ -1212,9 +1209,9 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     y *= xyz_ref_white[1]
 
     # reference white x,z
-    uv_weights = [1, 15, 3]
-    u0 = 4 * xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
+    uv_weights = np.array([1, 15, 3])
+    u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
     # compute intermediate values
     a = u0 + u / (13. * L + eps)
@@ -1412,7 +1409,7 @@ def separate_stains(rgb, conv_matrix):
     """
     rgb = dtype.img_as_float(rgb, force_copy=True)
     rgb += 2
-    stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
+    stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
     return np.reshape(stains, rgb.shape)
 
 
@@ -1472,8 +1469,8 @@ def combine_stains(stains, conv_matrix):
     from ..exposure import rescale_intensity
 
     stains = dtype.img_as_float(stains)
-    logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
-    rgb2 = np.exp(logrgb2)
+    logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
+    rgb2 = np.power(10, logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
                              in_range=(-1, 1))
 

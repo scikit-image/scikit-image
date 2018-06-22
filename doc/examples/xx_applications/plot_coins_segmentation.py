@@ -20,7 +20,7 @@ fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].axis('off')
 axes[1].plot(hist[1][:-1], hist[0], lw=2)
-axes[1].set_title('histogram of grey values')
+axes[1].set_title('histogram of gray values')
 
 ######################################################################
 #
@@ -28,7 +28,7 @@ axes[1].set_title('histogram of grey values')
 # ============
 #
 # A simple way to segment the coins is to choose a threshold based on the
-# histogram of grey values. Unfortunately, thresholding this image gives a
+# histogram of gray values. Unfortunately, thresholding this image gives a
 # binary image that either misses significant parts of the coins or merges
 # parts of the background with the coins:
 
@@ -110,7 +110,7 @@ ax.axis('off')
 
 ######################################################################
 # Next we find markers of the background and the coins based on the extreme
-# parts of the histogram of grey values.
+# parts of the histogram of gray values.
 
 markers = np.zeros_like(coins)
 markers[coins < 30] = 1

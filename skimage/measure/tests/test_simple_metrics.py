@@ -25,8 +25,19 @@ def test_PSNR_vs_IPOL():
 
 def test_PSNR_float():
     p_uint8 = compare_psnr(cam, cam_noisy)
-    p_float64 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
+    p_float64 = compare_psnr(cam / 255., cam_noisy / 255.,
+                             data_range=1)
     assert_almost_equal(p_uint8, p_float64, decimal=5)
+
+    # mixed precision inputs
+    p_mixed = compare_psnr(cam / 255., np.float32(cam_noisy / 255.),
+                           data_range=1)
+    assert_almost_equal(p_mixed, p_float64, decimal=5)
+
+    # mismatched dtype results in a warning if data_range is unspecified
+    with expected_warnings(['Inputs have mismatched dtype']):
+        p_mixed = compare_psnr(cam / 255., np.float32(cam_noisy / 255.))
+    assert_almost_equal(p_mixed, p_float64, decimal=5)
 
 
 def test_PSNR_dynamic_range_and_data_range():
@@ -41,8 +52,7 @@ def test_PSNR_dynamic_range_and_data_range():
 
 
 def test_PSNR_errors():
-    with testing.raises(ValueError):
-        compare_psnr(cam, cam.astype(np.float32))
+    # shape mismatch
     with testing.raises(ValueError):
         compare_psnr(cam, cam[:-1, :])
 
@@ -53,6 +63,10 @@ def test_NRMSE():
     assert_equal(compare_nrmse(y, x, 'mean'), 1/np.mean(y))
     assert_equal(compare_nrmse(y, x, 'Euclidean'), 1/np.sqrt(3))
     assert_equal(compare_nrmse(y, x, 'min-max'), 1/(y.max()-y.min()))
+
+    # mixed precision inputs are allowed
+    assert_almost_equal(compare_nrmse(y, np.float32(x), 'min-max'),
+                        1 / (y.max() - y.min()))
 
 
 def test_NRMSE_no_int_overflow():
@@ -66,8 +80,7 @@ def test_NRMSE_no_int_overflow():
 
 def test_NRMSE_errors():
     x = np.ones(4)
-    with testing.raises(ValueError):
-        compare_nrmse(x.astype(np.uint8), x.astype(np.float32))
+    # shape mismatch
     with testing.raises(ValueError):
         compare_nrmse(x[:-1], x)
     # invalid normalization name

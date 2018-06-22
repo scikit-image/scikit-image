@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from scipy.ndimage import gaussian_filter, gaussian_laplace
 import math

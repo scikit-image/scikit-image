@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from . import _hoghistogram
 from .._shared.utils import skimage_deprecation, warn
