@@ -39,12 +39,16 @@ from skimage.morphology import square
 # image with printed letters
 image = data.page()
 
-fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+fig, ax = plt.subplots(2, 3, figsize=(15, 5))
 
 # Original image
-ax[0].imshow(image, cmap='gray', aspect='equal')
-ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0,0].imshow(image, cmap='gray', aspect='equal')
+ax[0,0].set_title('Original')
+ax[0,0].axis('off')
+
+ax[1,0].imshow(image, cmap='gray', aspect='equal')
+ax[1,0].set_title('Original')
+ax[1,0].axis('off')
 
 # Diameter closing : we remove all dark structures with a maximal
 # extension of less than 23. I.e. in closed_attr, all local minima
@@ -54,9 +58,13 @@ closed_attr = diameter_closing(image, 23)
 # We then calculate the difference to the original image.
 tophat_attr = closed_attr - image
 
-ax[1].imshow(tophat_attr, cmap='gray', aspect='equal')
-ax[1].set_title('Diameter Closing')
-ax[1].axis('off')
+ax[0,1].imshow(closed_attr, cmap='gray', aspect='equal')
+ax[0,1].set_title('Diameter Closing')
+ax[0,1].axis('off')
+
+ax[0,2].imshow(tophat_attr, cmap='gray', aspect='equal')
+ax[0,2].set_title('Tophat (Difference)')
+ax[0,2].axis('off')
 
 # A morphological closing is removing all dark structures that cannot
 # contain a structuring element of a certain size.
@@ -65,9 +73,13 @@ closed = closing(image, square(12))
 # Again we calculate the difference to the original image.
 tophat = closed - image
 
-ax[2].imshow(tophat, cmap='gray', aspect='equal')
-ax[2].set_title('Morphological Closing')
-ax[2].axis('off')
+ax[1,1].imshow(closed, cmap='gray', aspect='equal')
+ax[1,1].set_title('Morphological Closing')
+ax[1,1].axis('off')
+
+ax[1,2].imshow(tophat, cmap='gray', aspect='equal')
+ax[1,2].set_title('Tophat (Difference)')
+ax[1,2].axis('off')
 
 plt.tight_layout()
 plt.show()

@@ -228,8 +228,9 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
     return
 
+
 # _local_maxima cacluates the local maxima from the max-tree representation
-# this is interesting if the max-tree representation has alreayd been
+# this is interesting if the max-tree representation has already been
 # calculated for other reasons. Otherwise, it is not the most efficient
 # method. If the parameter label is True, the minima are labeled.
 cpdef void _local_maxima(dtype_t[::1] image,
@@ -368,15 +369,15 @@ cpdef void _cut_first_filter(dtype_t[::1] image,
 
     return
 
-# _build_max_tree is the main function. It allows to construct a max
+# _max_tree is the main function. It allows to construct a max
 # tree representation of the image.
-cpdef void _build_max_tree(dtype_t[::1] image,
-                           DTYPE_BOOL_t[::1] mask,
-                           DTYPE_INT32_t[::1] structure,
-                           DTYPE_INT32_t[::1] shape,
-                           DTYPE_INT64_t[::1] parent,
-                           DTYPE_INT64_t[::1] sorted_indices
-                           ):
+cpdef void _max_tree(dtype_t[::1] image,
+                     DTYPE_BOOL_t[::1] mask,
+                     DTYPE_INT32_t[::1] structure,
+                     DTYPE_INT32_t[::1] shape,
+                     DTYPE_INT64_t[::1] parent,
+                     DTYPE_INT64_t[::1] sorted_indices
+                     ):
     """Builds a max-tree.
 
     Parameters

@@ -46,7 +46,7 @@ signed_float_types = [np.float16, np.float32, np.float64]
 
 
 # building the max tree.
-def build_max_tree(image, connectivity=2):
+def max_tree(image, connectivity=2):
     """Builds the max tree from an image
 
     Component trees represent the hierarchical structure of the connected
@@ -99,12 +99,12 @@ def build_max_tree(image, connectivity=2):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.max_tree import build_max_tree
+    >>> from skimage.max_tree import max_tree
 
     We create a small sample image (Figure 1 from [4]) and build the max-tree.
 
     >>> image = np.array([[15, 13, 16], [12, 12, 10], [16, 12, 14]])
-    >>> P, S = build_max_tree(image, connectivity=2)
+    >>> P, S = max_tree(image, connectivity=2)
 
     """
     # User defined masks are not allowed, as there might be more than one
@@ -130,10 +130,10 @@ def build_max_tree(image, connectivity=2):
                                 kind='quicksort').astype(np.int64)
 
     # call of cython function.
-    _max_tree._build_max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                              flat_neighborhood,
-                              np.array(image.shape, dtype=np.int32),
-                              parent.ravel(), tree_traverser)
+    _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),
+                        flat_neighborhood,
+                        np.array(image.shape, dtype=np.int32),
+                        parent.ravel(), tree_traverser)
 
     return parent, tree_traverser
 
@@ -185,7 +185,7 @@ def area_opening(image, area_threshold, connectivity=2,
     skimage.morphology.max_tree.area_closing
     skimage.morphology.max_tree.diameter_opening
     skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.build_max_tree
+    skimage.morphology.max_tree.max_tree
 
 
     References
@@ -231,7 +231,7 @@ def area_opening(image, area_threshold, connectivity=2,
     output = image.copy()
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image, connectivity)
+        parent, tree_traverser = max_tree(image, connectivity)
 
     area = _max_tree._compute_area(image.ravel(),
                                    parent.ravel(), tree_traverser)
@@ -284,7 +284,7 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
     skimage.morphology.max_tree.area_opening
     skimage.morphology.max_tree.area_closing
     skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.build_max_tree
+    skimage.morphology.max_tree.max_tree
 
     References
     ----------
@@ -322,7 +322,7 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
     output = image.copy()
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image, connectivity)
+        parent, tree_traverser = max_tree(image, connectivity)
 
     diam = _max_tree._compute_extension(image.ravel(),
                                         np.array(image.shape, dtype=np.int32),
@@ -380,7 +380,7 @@ def area_closing(image, area_threshold, connectivity=2,
     skimage.morphology.max_tree.area_opening
     skimage.morphology.max_tree.diameter_opening
     skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.build_max_tree
+    skimage.morphology.max_tree.max_tree
 
 
     References
@@ -434,7 +434,7 @@ def area_closing(image, area_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree.build_max_tree(invert(img))
+    >>> P, S = max_tree.max_tree(invert(img))
     >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
@@ -442,7 +442,7 @@ def area_closing(image, area_threshold, connectivity=2,
     output = image_inv.copy()
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image_inv, connectivity)
+        parent, tree_traverser = max_tree(image_inv, connectivity)
 
     area = _max_tree._compute_area(image_inv.ravel(),
                                    parent.ravel(), tree_traverser)
@@ -500,7 +500,7 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     skimage.morphology.max_tree.area_opening
     skimage.morphology.max_tree.area_closing
     skimage.morphology.max_tree.diameter_opening
-    skimage.morphology.max_tree.build_max_tree
+    skimage.morphology.max_tree.max_tree
 
     References
     ----------
@@ -541,7 +541,7 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree.build_max_tree(invert(img))
+    >>> P, S = max_tree.max_tree(invert(img))
     >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
@@ -549,7 +549,7 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     output = image_inv.copy()
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image_inv, connectivity)
+        parent, tree_traverser = max_tree(image_inv, connectivity)
 
     diam = _max_tree._compute_extension(image_inv.ravel(),
                                         np.array(image_inv.shape,
@@ -602,7 +602,7 @@ def local_maxima(image, label=False, connectivity=2,
     See also
     --------
     skimage.morphology.extrema.local_maxima
-    skimage.morphology.max_tree.build_max_tree
+    skimage.morphology.max_tree.max_tree
 
     References
     ----------
@@ -648,7 +648,7 @@ def local_maxima(image, label=False, connectivity=2,
     output = np.ones(image.shape, dtype=np.uint64)
 
     if parent is None or tree_traverser is None:
-        parent, tree_traverser = build_max_tree(image, connectivity)
+        parent, tree_traverser = max_tree(image, connectivity)
 
     _max_tree._local_maxima(image.ravel(), output.ravel(), label,
                             parent.ravel(), tree_traverser)
