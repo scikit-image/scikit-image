@@ -11,7 +11,7 @@ functions to characterize the tree components.
 import numpy as np
 
 from libc.stdlib cimport free, malloc, realloc
-from scipy.constants.constants import point
+from scipy.constants import point
 from cProfile import label
 
 cimport numpy as np
@@ -42,32 +42,43 @@ cdef inline DTYPE_UINT64_t uint64_max(DTYPE_UINT64_t a, DTYPE_UINT64_t b): retur
 cdef inline DTYPE_UINT64_t uint64_min(DTYPE_UINT64_t a, DTYPE_UINT64_t b): return a if a <= b else b
 
 
-# recursive function to get the root of the current tree. Importantly, the
-# function changes the tree (path compression), that reduces the complexity
-# from O(n*n) to O(n*log(n)).
 cdef DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
+    """recursive function to get the root of the current tree. Importantly, the
+    function changes the tree (path compression), that reduces the complexity
+    from O(n*n) to O(n*log(n)).
+    """
     if parent[index] != index:
         parent[index] = find_root(parent, parent[index])
     return parent[index]
 
-# canonicalize generates a max-tree for which every node's
-# parent is a canonical node. Namely, either the representative node of the
-# same level or the representative node at the level below.
+
 cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
                    DTYPE_INT64_t[::1] sorted_indices):
+    """generates a max-tree for which every node's parent is a canonical node.
+    The parent of a non-canonical pixel is a canonical pixel.
+    The parent of a canonical pixel is also a canonical pixel with a different
+    value. There is exactly one canonical pixel for each component in the
+    component tree.
+    """
     cdef DTYPE_INT64_t q = 0
     for p in sorted_indices:
         q = parent[p]
         if image[q] == image[parent[q]]:
             parent[p] = parent[q]
-    return
 
 
-# helper function: a list of offsets is transformed to a list of points,
-# which are stored in a numpy array: rows correspond to different points,
-# columns to the dimensions (typically 2 or 3, but there is no limitation).
-cdef np.ndarray[DTYPE_INT32_t, ndim = 2] offsets_to_points(DTYPE_INT32_t[::1] offsets,
-                                                           DTYPE_INT32_t[::1] shape):
+cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(DTYPE_INT32_t[::1] offsets,
+                                                         DTYPE_INT32_t[::1] shape):
+    """Unravels a list of offset indices. These offsets can be (and normally
+    are) negative. The function generates an array of shape
+    (number of offsets, image dimensions), where each row corresponds
+    to the coordinates of each point.
+    
+    See also
+    --------
+    unravel_index
+    """
+
     cdef DTYPE_INT32_t number_of_dimensions = len(shape)
     cdef DTYPE_INT32_t number_of_points = len(offsets)
     cdef np.ndarray[DTYPE_INT32_t, ndim = 2] points = np.zeros((number_of_points,
@@ -87,13 +98,15 @@ cdef np.ndarray[DTYPE_INT32_t, ndim = 2] offsets_to_points(DTYPE_INT32_t[::1] of
     return points
 
 
-# checks whether a neighbor of a given pixel is inside the image plane.
-# The pixel is given in form of an index of a raveled array, the offset
-# is given as a list of coordinates. This function is relatively time-consuming
-# and should only be applied to border-pixels (defined by mask).
-cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
-                                        DTYPE_INT32_t[::1] coordinates,
-                                        DTYPE_INT32_t[::1] shape):
+cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
+                                      DTYPE_INT32_t[::1] coordinates,
+                                      DTYPE_INT32_t[::1] shape):
+    """checks whether a neighbor of a given pixel is inside the image plane.
+    The pixel is given in form of an index in a raveled array, the neighbor
+    is given as a list of coordinates (offset). If the neighbor falls outside
+    the image, the function gives back 0, otherwise 1.
+    """
+
     cdef DTYPE_INT64_t number_of_dimensions = len(shape)
     cdef DTYPE_INT64_t res_coord = 0
     cdef int i = 0
@@ -113,11 +126,13 @@ cdef DTYPE_UINT8_t _is_valid_coordinate(DTYPE_INT64_t index,
     return 1
 
 
-# computes the area of all max-tree components
-# attribute to be used in area opening and closing
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
                                                           DTYPE_INT64_t[::1] parent,
                                                           DTYPE_INT64_t[::1] sorted_indices):
+    """computes the area of all max-tree components
+    attribute to be used in area opening and closing
+    """                                             
+           
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -133,12 +148,14 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
     return area
 
 
-# computes the bounding box extension of all max-tree components
-# attribute to be used in diameter opening and closing
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] image,
                                                                DTYPE_INT32_t[::1] shape,
                                                                DTYPE_INT64_t[::1] parent,
                                                                DTYPE_INT64_t[::1] sorted_indices):
+    """computes the bounding box extension of all max-tree components
+    attribute to be used in diameter opening and closing
+    """                                             
+                         
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -160,6 +177,73 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] imag
     return extension
 
 
+# _local_maxima cacluates the local maxima from the max-tree representation
+# this is interesting if the max-tree representation has already been
+# calculated for other reasons. Otherwise, it is not the most efficient
+# method. If the parameter label is True, the minima are labeled.
+cpdef void _max_tree_local_maxima(dtype_t[::1] image,
+                                  DTYPE_UINT64_t[::1] output,
+                                  DTYPE_INT64_t[::1] parent,
+                                  DTYPE_INT64_t[::1] sorted_indices
+                                  ):
+    """Finds the local maxima in image from the max-tree representation.
+
+    Parameters
+    ----------
+
+    image : array of arbitrary type
+        The flattened image pixels.
+    output : array of the same shape and type as image.
+        The output image must contain only ones.
+    parent : array of int
+        Image of the same shape as the input image. The value
+        at each pixel is the parent index of this pixel in the max-tree
+        reprentation.
+    sorted_indices : array of int
+        List of length = number of pixels. Each element
+        corresponds to one pixel index in the image. It encodes the order
+        of elements in the tree: a parent of a pixel always comes before
+        the element itself. More formally: i < j implies that j cannot be
+        the parent of i.
+    """
+
+    cdef DTYPE_INT64_t p_root = sorted_indices[0]
+    cdef DTYPE_INT64_t p, q
+    cdef DTYPE_UINT64_t number_of_pixels = len(image)
+    cdef DTYPE_UINT64_t label = 1
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+
+        # if p is canonical (parent has a different value)
+        if image[p] != image[q]:
+            output[q] = 0
+
+            # if output[p] was the parent of some other canonical
+            # pixel, it has been set to zero. Only the leaves
+            # (local maxima) are thus > 0.
+            if output[p] > 0:
+                output[p] = label
+                label += 1
+
+    for p in sorted_indices[::-1]:
+        if p == p_root:
+            continue
+
+        q = parent[p]
+
+        # if p is not canonical (parent has the same value)
+        if image[p] == image[q]:
+            # in this case we propagate the value
+            output[p] = output[q]
+            continue
+
+    return
+
+
 # direct filter (criteria based filter)
 cpdef void _direct_filter(dtype_t[::1] image,
                           dtype_t[::1] output,
@@ -170,7 +254,12 @@ cpdef void _direct_filter(dtype_t[::1] image,
                           ):
     """Direct filtering. Produces an image in which for all possible
     thresholds, each connected component has an
-    attribute >= attribute_threshold.
+    attribute >= attribute_threshold. This is the basic function
+    which is called by area_opening, diameter_opening, etc.
+    For area_opening for instance, the attribute has to be the area.
+    In this case, an image is produced for which all connected
+    components for all thresholds have at least an area (pixel count)
+    of the threshold given by the user.
 
     Parameters
     ----------
@@ -228,76 +317,6 @@ cpdef void _direct_filter(dtype_t[::1] image,
 
     return
 
-
-# _local_maxima cacluates the local maxima from the max-tree representation
-# this is interesting if the max-tree representation has already been
-# calculated for other reasons. Otherwise, it is not the most efficient
-# method. If the parameter label is True, the minima are labeled.
-cpdef void _local_maxima(dtype_t[::1] image,
-                         DTYPE_UINT64_t[::1] output,
-                         DTYPE_BOOL_t label_minima,
-                         DTYPE_INT64_t[::1] parent,
-                         DTYPE_INT64_t[::1] sorted_indices
-                         ):
-    """Finds the local maxima in image.
-
-    Parameters
-    ----------
-
-    image : array of arbitrary type
-        The flattened image pixels.
-    output : array of the same shape and type as image.
-        The output image must contain only ones.
-    label : bool.
-        Indicates whether the minima are to be labeled.
-    parent : array of int
-        Image of the same shape as the input image. The value
-        at each pixel is the parent index of this pixel in the max-tree
-        reprentation.
-    sorted_indices : array of int
-        List of length = number of pixels. Each element
-        corresponds to one pixel index in the image. It encodes the order
-        of elements in the tree: a parent of a pixel always comes before
-        the element itself. More formally: i < j implies that j cannot be
-        the parent of i.
-    """
-
-    cdef DTYPE_INT64_t p_root = sorted_indices[0]
-    cdef DTYPE_INT64_t p, q
-    cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef DTYPE_UINT64_t label = 1
-
-    for p in sorted_indices[::-1]:
-        if p == p_root:
-            continue
-
-        q = parent[p]
-
-        # if p is canonical (parent has a different value)
-        if image[p] != image[q]:
-            output[q] = 0
-            if label_minima:
-                # if output[p] was the parent of some other canonical
-                # pixel, it has been set to zero. Only the leaves
-                # (local maxima) are thus > 0.
-                if output[p] > 0:
-                    output[p] = label
-                    label += 1
-            continue
-
-    for p in sorted_indices[::-1]:
-        if p == p_root:
-            continue
-
-        q = parent[p]
-
-        # if p is not canonical (parent has the same value)
-        if image[p] == image[q]:
-            # in this case we propagate the value
-            output[p] = output[q]
-            continue
-
-    return
 
 # _cut_first_filter is similar to _direct_filter, but it stops the
 # reconstruction process when a criterion is fulfilled for the first time.
@@ -384,7 +403,7 @@ cpdef void _max_tree(dtype_t[::1] image,
     ----------
 
     image : array of arbitrary type
-            The flattened image pixels.
+        The flattened image pixels.
     mask : array of int
         An array of the same shape as `image` where each pixel contains a
         nonzero value if it is to be considered for the filtering.
@@ -405,6 +424,7 @@ cpdef void _max_tree(dtype_t[::1] image,
         the element itself. More formally: i < j implies that j cannot be
         the parent of i.
     """
+
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
     cdef DTYPE_UINT64_t number_of_dimensions = len(shape)
 
@@ -417,7 +437,7 @@ cpdef void _max_tree(dtype_t[::1] image,
 
     cdef DTYPE_INT64_t[::1] zpar = parent.copy()
 
-    cdef np.ndarray[DTYPE_INT32_t, ndim = 2] points = offsets_to_points(structure, shape)
+    cdef np.ndarray[DTYPE_INT32_t, ndim = 2] points = unravel_offsets(structure, shape)
 
     # initialization of the image parent.
     for i in range(number_of_pixels):
@@ -437,7 +457,7 @@ cpdef void _max_tree(dtype_t[::1] image,
             if not mask[p]:
                 # in this case, p is at the border of the image.
                 # some neighbor point is not valid.
-                if not _is_valid_coordinate(p, points[i], shape):
+                if not _is_valid_neighbor(p, points[i], shape):
                     # neighbor is not in the image.
                     continue
 

@@ -68,11 +68,6 @@ def plot_img(image, ax, title, plot_text,
     return
 
 # small example image
-#image = np.array([[5, 4, 4, 3, 3],
-#                  [5, 8, 8, 0, 0],
-#                  [2, 1, 2, 2, 1],
-#                  [4, 4, 4, 7, 5],
-#                  [5, 2, 3, 6, 6]], dtype=np.uint8)
 image = np.array([[20, 16, 15, 10, 9],
                   [19, 24, 25, 2, 1],
                   [8, 4, 7, 6, 3],
@@ -130,11 +125,6 @@ for i in range(P.shape[0]):
                        zorder=2,
                        head_width=0.2)
 
-        #if image[i, j] != image[y, x]:
-        #    # in this case it is a canonical pixel.
-        #    circle = plt.Circle((i, j), .4, color='r', fill=False)
-        #    ax[0, 3].add_artist(circle)
-
 for k in range(3, 9):
     ax[0, k].axis('off')
 
@@ -154,7 +144,7 @@ for k in range(9):
 plt.tight_layout()
 plt.show()
 
-###############################################################################
+# ############################################################################
 # In the second row, we see the results of a series of threshold operations
 # The results are binary images with one or several connected components.
 # The component tree is a tree representation of the connected components
@@ -166,9 +156,9 @@ plt.show()
 # {0, 5, 6, 7} -> {6, 7}
 # The resulting tree is called a component tree.
 
-###############################################################################
-# In the third row, we see a compacter representation, where we highlight for
-# every threshold those pixels that have been added to the segmentation
+# ############################################################################
+# In the third row, we see a more compact representation, where we highlight
+# for every threshold those pixels that have been added to the segmentation
 # result, i.e. that have exactly the value of threshold.
 # Here we would write:
 # {23, 24} -> {18}

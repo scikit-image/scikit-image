@@ -20,6 +20,7 @@ References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
+           DOI:10.1109/83.663500
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
@@ -27,9 +28,11 @@ References:
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
+           DOI:10.1109/TIP.2006.877518
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 """
 
 import numpy as np
@@ -61,12 +64,12 @@ def max_tree(image, connectivity=2):
 
     Parameters
     ----------
-    img: ndarray
+    image: ndarray
         The input image for which the max-tree is to be calculated.
         This image can be of any type.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 2.
 
     Returns
@@ -85,6 +88,7 @@ def max_tree(image, connectivity=2):
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
+           DOI:10.1109/83.663500
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
@@ -92,27 +96,27 @@ def max_tree(image, connectivity=2):
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
+           DOI:10.1109/TIP.2006.877518
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.max_tree import max_tree
-
     We create a small sample image (Figure 1 from [4]) and build the max-tree.
 
     >>> image = np.array([[15, 13, 16], [12, 12, 10], [16, 12, 14]])
     >>> P, S = max_tree(image, connectivity=2)
-
     """
     # User defined masks are not allowed, as there might be more than one
     # connected component in the mask (and therefore not a single tree that
     # represents the image). Mask here is an image that is 0 on the border
     # and 1 everywhere else.
-    mask_shrink = np.ones([x - 2 for x in image.shape], bool)
-    mask = np.pad(mask_shrink, 1, mode='constant')
+    mask = np.ones(image.shape)
+    for k in range(len(shape)):
+        np.moveaxis(mask, k, 0)[0] = 0
+        np.moveaxis(mask, k, 0)[-1] = 0
 
     neighbors, offset = _validate_connectivity(image.ndim, connectivity,
                                                offset=None)
@@ -153,19 +157,22 @@ def area_opening(image, area_threshold, connectivity=2,
     one, with surface = area_threshold. Consequently, the area_opening
     with area_threshold=1 is the identity.
 
+    In the binary case, area openings are equivalent to
+    remove_small_objects; this operator is thus extended to grey-level images.
+
     Technically, this operator is based on the max-tree representation of
     the image.
 
     Parameters
     ----------
-    img: ndarray
+    image: ndarray
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
     area_threshold: unsigned int
         The size parameter (number of pixels).
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the image. The
@@ -178,14 +185,16 @@ def area_opening(image, area_threshold, connectivity=2,
     Returns
     -------
     output: ndarray
-        Output image of the same shape and type as img.
+        Output image of the same shape and type as the input image.
 
     See also
     --------
-    skimage.morphology.max_tree.area_closing
-    skimage.morphology.max_tree.diameter_opening
-    skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.max_tree
+    skimage.morphology.area_closing
+    skimage.morphology.diameter_opening
+    skimage.morphology.diameter_closing
+    skimage.morphology.max_tree
+    skimage.morphology.remove_small_objects
+    skimage.morphology.remove_small_holes
 
 
     References
@@ -200,17 +209,18 @@ def area_opening(image, area_threshold, connectivity=2,
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
+           DOI:10.1109/83.663500
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
+           DOI:10.1109/TIP.2006.877518
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
 
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
@@ -224,7 +234,7 @@ def area_opening(image, area_threshold, connectivity=2,
 
     We can calculate the area opening:
 
-    >>> open = attribute.area_opening(f, 8, connectivity=1)
+    >>> open = area_opening(f, 8, connectivity=1)
 
     The peaks with a surface smaller than 8 are removed.
     """
@@ -257,14 +267,14 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
 
     Parameters
     ----------
-    img: ndarray
+    image: ndarray
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
     diameter_threshold: unsigned int
         The maximal extension parameter.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the image. The
@@ -277,14 +287,14 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
     Returns
     -------
     output: ndarray
-        Output image of the same shape and type as img.
+        Output image of the same shape and type as the input image.
 
     See also
     --------
-    skimage.morphology.max_tree.area_opening
-    skimage.morphology.max_tree.area_closing
-    skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.max_tree
+    skimage.morphology.area_opening
+    skimage.morphology.area_closing
+    skimage.morphology.diameter_closing
+    skimage.morphology.max_tree
 
     References
     ----------
@@ -296,12 +306,10 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
-
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
 
@@ -347,19 +355,22 @@ def area_closing(image, area_threshold, connectivity=2,
     they do not use a fixed structuring element, but rather a deformable
     one, with surface = area_threshold.
 
+    In the binary case, area closings are equivalent to
+    remove_small_holes; this operator is thus extended to grey-level images.
+
     Technically, this operator is based on the max-tree representation of
     the image.
 
     Parameters
     ----------
-    img: ndarray
+    image: ndarray
         The input image for which the area_closing is to be calculated.
         This image can be of any type.
     area_threshold: unsigned int
         The size parameter (number of pixels).
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the inverted image. The
@@ -373,15 +384,16 @@ def area_closing(image, area_threshold, connectivity=2,
     Returns
     -------
     output: ndarray
-        Output image of the same shape and type as img.
+        Output image of the same shape and type as input image.
 
     See also
     --------
-    skimage.morphology.max_tree.area_opening
-    skimage.morphology.max_tree.diameter_opening
-    skimage.morphology.max_tree.diameter_closing
-    skimage.morphology.max_tree.max_tree
-
+    skimage.morphology.area_opening
+    skimage.morphology.diameter_opening
+    skimage.morphology.diameter_closing
+    skimage.morphology.max_tree
+    skimage.morphology.remove_small_objects
+    skimage.morphology.remove_small_holes
 
     References
     ----------
@@ -395,22 +407,19 @@ def area_closing(image, area_threshold, connectivity=2,
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
+           DOI:10.1109/83.663500
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
+           DOI:10.1109/TIP.2006.877518
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
-
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
-
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
 
@@ -423,7 +432,7 @@ def area_closing(image, area_threshold, connectivity=2,
 
     We can calculate the area closing:
 
-    >>> closed = max_tree.area_closing(f, 8, connectivity=1)
+    >>> closed = area_closing(f, 8, connectivity=1)
 
     All small minima are removed, and the remaining minima have at least
     a size of 8.
@@ -434,8 +443,8 @@ def area_closing(image, area_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree.max_tree(invert(img))
-    >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
+    >>> P, S = max_tree(invert(img))
+    >>> closed = diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
@@ -472,35 +481,36 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
 
     Parameters
     ----------
-    img: ndarray
+    image: ndarray
         The input image for which the diameter_closing is to be calculated.
         This image can be of any type.
     diameter_threshold: unsigned int
         The maximal extension.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
-        Parent image representing the max tree of the inverted image. The
-        value of each pixel is the index of its parent in the ravelled array.
-        See Note for further details.
+        Precomputed parent image representing the max tree of the inverted
+        image. This function is fast, if precomputed parent and tree_traverser
+        are provided. See Note for further details.
     tree_traverser: 1D array, int64, optional
-        The ordered pixel indices (referring to the ravelled array). The pixels
-        are ordered such that every pixel is preceded by its parent (except for
-        the root which has no parent).
+        Precomputed traverser, where the pixels are ordered such that every
+        pixel is preceded by its parent (except for the root which has no
+        parent). This function is fast, if precomputed parent and
+        tree_traverser are provided. See Note for further details.
 
     Returns
     -------
     output: ndarray
-        Output image of the same shape and type as img.
+        Output image of the same shape and type as input image.
 
     See also
     --------
-    skimage.morphology.max_tree.area_opening
-    skimage.morphology.max_tree.area_closing
-    skimage.morphology.max_tree.diameter_opening
-    skimage.morphology.max_tree.max_tree
+    skimage.morphology.area_opening
+    skimage.morphology.area_closing
+    skimage.morphology.diameter_opening
+    skimage.morphology.max_tree
 
     References
     ----------
@@ -512,12 +522,10 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
-
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
 
@@ -530,7 +538,7 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
 
     We can calculate the diameter closing:
 
-    >>> closed = max_tree.diameter_closing(f, 3, connectivity=1)
+    >>> closed = diameter_closing(f, 3, connectivity=1)
 
     All small minima with a maximal extension of 2 or less are removed.
     The remaining minima have all a maximal extension of at least 3.
@@ -541,8 +549,8 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree.max_tree(invert(img))
-    >>> closed = max_tree.diameter_closing(img, 3, parent=P, tree_traverser=S)
+    >>> P, S = max_tree(invert(img))
+    >>> closed = diameter_closing(img, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
@@ -562,16 +570,18 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     return output
 
 
-def local_maxima(image, label=False, connectivity=2,
-                 parent=None, tree_traverser=None):
+def max_tree_local_maxima(image, connectivity=2,
+                          parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
     grey level strictly greater than the grey levels of all pixels in direct
-    neighborhood of the set. The function can also label the local maxima.
+    neighborhood of the set. The function labels the local maxima.
 
     Technically, the implementation is based on the max-tree representation
-    of an image.
+    of an image. The function is very efficient if the max-tree representation
+    has already been computed. Otherwise, it is preferable to use
+    the function local_maxima.
 
     Parameters
     ----------
@@ -581,7 +591,7 @@ def local_maxima(image, label=False, connectivity=2,
         If True, the local maxima are also labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
-        number of orthogonal steps to reach a neighbor. It is 1 for
+        number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         4-connectivity and 2 for 8-connectivity. Default value is 1.
     parent: ndarray, int64, optional
         The value of each pixel is the index of its parent in the ravelled
@@ -594,15 +604,12 @@ def local_maxima(image, label=False, connectivity=2,
     Returns
     -------
     local_max : ndarray, uint64
-       All local maxima of the image. If label is False, the result image is
-       a binary image, where pixels belonging to local maxima take value 1, the
-       other pixels take value 0. If label is True, the result image contains
-       the labeled maxima, pixels not belonging to local maxima take value 0.
+        Labeled local maxima of the image.
 
     See also
     --------
-    skimage.morphology.extrema.local_maxima
-    skimage.morphology.max_tree.max_tree
+    skimage.morphology.local_maxima
+    skimage.morphology.max_tree
 
     References
     ----------
@@ -616,18 +623,18 @@ def local_maxima(image, label=False, connectivity=2,
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
+           DOI:10.1109/83.663500
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
+           DOI:10.1109/TIP.2006.877518
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
+           DOI:10.1109/TIP.2014.2336551
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.morphology import max_tree
-
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
 
@@ -639,10 +646,9 @@ def local_maxima(image, label=False, connectivity=2,
 
     We can calculate all local maxima:
 
-    >>> maxima = max_tree.local_maxima(f)
+    >>> maxima = local_maxima(f)
 
-    The resulting image will be 1 for all pixels belonging to the 5
-    local maxima and 0 anywhere else.
+    The resulting image contains the labeled local maxima.
     """
 
     output = np.ones(image.shape, dtype=np.uint64)
