@@ -13,7 +13,7 @@ from ..util import img_as_float
 from .._shared.utils import warn
 
 
-def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
+def _felzenszwalb_cython(image,double scale=1, similarity='euclidean', sigma=0.8,
                          Py_ssize_t min_size=20):
     """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
@@ -54,16 +54,29 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
 
     # compute edge weights in 8 connectivity:
-    down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])
-    	*(image[1:, :, :] - image[:-1, :, :]), axis=-1))
-    right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :-1, :])
-    	*(image[:, 1:, :] - image[:, :-1, :]), axis=-1))
-    dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:-1, :-1, :])
-	*(image[1:, 1:, :] - image[:-1, :-1, :]), axis=-1))
-    uright_cost = np.sqrt(np.sum((image[1:, :-1, :] - image[:-1, 1:, :])
-    	*(image[1:, :-1, :] - image[:-1, 1:, :]), axis=-1))
+    if similarity == 'euclidean':
+        down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])
+            *(image[1:, :, :] - image[:-1, :, :]), axis=-1))
+        right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :-1, :])
+            *(image[:, 1:, :] - image[:, :-1, :]), axis=-1))
+        dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:-1, :-1, :])
+            *(image[1:, 1:, :] - image[:-1, :-1, :]), axis=-1))
+        uright_cost = np.sqrt(np.sum((image[1:, :-1, :] - image[:-1, 1:, :])
+            *(image[1:, :-1, :] - image[:-1, 1:, :]), axis=-1))
+    elif similarity == 'cosine':
+        down_cost = 1 - (np.einsum('ijk,ijk->ij', image[1:, :, :], image[:-1, :, :]) \
+                    / (np.linalg.norm(image[1:, :, :], axis=-1) *  np.linalg.norm(image[:-1, :, :], axis=-1)))
+        right_cost = 1 - (np.einsum('ijk,ijk->ij', image[:, 1:, :], image[:, :-1, :]) \
+                    / (np.linalg.norm(image[:, 1:, :], axis=-1) *  np.linalg.norm(image[:, :-1, :], axis=-1)))
+        dright_cost = 1 - (np.einsum('ijk,ijk->ij', image[1:, 1:, :],  image[:-1, :-1, :]) \
+                    / (np.linalg.norm(image[1:, 1:, :], axis=-1) *  np.linalg.norm(image[:-1, :-1, :], axis=-1)))
+        uright_cost = 1 - (np.einsum('ijk,ijk->ij', image[1:, :-1, :], image[:-1, 1:, :]) \
+                    / (np.linalg.norm(image[1:, :-1, :], axis=-1) * np.linalg.norm(image[:-1, 1:, :], axis=-1)))
+    else:
+        raise ValueError('\'similarity\' must be either \'euclidean\' or \'cosine\'')
+
     cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([
-    	right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
+        right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
 
     # compute edges between pixels:
