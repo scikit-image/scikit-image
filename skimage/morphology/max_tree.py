@@ -14,7 +14,8 @@ flexible structuring element that meets a certain criterion.
 This implementation provides functions for:
 1. max-tree generation
 2. area openings / closings
-3. local maxima
+3. diameter openings / closings
+4. local maxima
 
 References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
@@ -25,6 +26,7 @@ References:
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
            In International Conference on Image Processing (ICIP) (pp. 41-44).
+           DOI:10.1109/ICIP.2007.4379949
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
@@ -93,6 +95,7 @@ def max_tree(image, connectivity=2):
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
            In International Conference on Image Processing (ICIP) (pp. 41-44).
+           DOI:10.1109/ICIP.2007.4379949
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
@@ -130,8 +133,7 @@ def max_tree(image, connectivity=2):
                                            offset).astype(np.int32)
 
     # pixels need to be sorted according to their grey level.
-    tree_traverser = np.argsort(image.ravel(),
-                                kind='quicksort').astype(np.int64)
+    tree_traverser = np.argsort(image.ravel()).astype(np.int64)
 
     # call of cython function.
     _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),
@@ -206,6 +208,7 @@ def area_opening(image, area_threshold, connectivity=2,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+           DOI:10.1007/978-3-662-05088-0
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
@@ -303,6 +306,7 @@ def diameter_opening(image, diameter_threshold, connectivity=2,
            of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
            A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
            Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+           DOI:10.1007/3-540-36104-9_23
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
@@ -404,6 +408,7 @@ def area_closing(image, area_threshold, connectivity=2,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+           DOI:10.1007/978-3-662-05088-0
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
@@ -519,6 +524,7 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
            of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
            A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
            Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+           DOI:10.1007/3-540-36104-9_23
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
@@ -620,6 +626,7 @@ def max_tree_local_maxima(image, connectivity=2,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
+           DOI:10.1007/978-3-662-05088-0
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.

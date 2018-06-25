@@ -337,7 +337,7 @@ cpdef void _cut_first_filter(dtype_t[::1] image,
     ----------
 
     image : array of arbitrary type
-            The flattened image pixels.
+        The flattened image pixels.
     output : array of the same shape and type as image.
     parent : array of int
         Image of the same shape as the input image. The value
