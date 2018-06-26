@@ -1,4 +1,3 @@
-# coding: utf-8
 from math import sqrt, atan2, pi as PI
 import itertools
 from warnings import warn

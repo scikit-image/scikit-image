@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# deconvolution.py --- Image deconvolution
-
 """Implementations restoration functions"""
 
 

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """Standard test images.
 
 For more images, see
