@@ -3,6 +3,7 @@
 # cython: nonecheck=False
 # cython: wraparound=False
 import numpy as np
+from skimage import color
 cimport numpy as cnp
 
 
@@ -136,7 +137,39 @@ cdef void _remove_seam(cnp.double_t[:, :, ::1] img,
                 img[r, c, ch] = img[r, c_shift, ch]
 
 
-def _seam_carve_v(img, energy_map, iters, border):
+def forward_energy(img):
+    height = img.shape[0]
+    width = img.shape[1]
+    I = color.rgb2gray(img)
+
+    energy = np.zeros((height, width))
+    m = np.zeros((height, width))
+
+    U = np.roll(I, 1, axis=0)
+    L = np.roll(I, 1, axis=1)
+    R = np.roll(I, -1, axis=1)
+
+    cU = np.abs(R - L)
+    cL = np.abs(U - L) + cU
+    cR = np.abs(U - R) + cU
+
+    for i in range(1, height):
+        mU = m[i-1]
+        mL = np.roll(mU, 1)
+        mR = np.roll(mU, -1)
+
+        mULR = np.array([mU, mL, mR])
+        cULR = np.array([cU[i], cL[i], cR[i]])
+        mULR += cULR
+
+        argmins = np.argmin(mULR, axis=0)
+        m[i] = np.choose(argmins, mULR)
+        energy[i] = np.choose(argmins, cULR)
+
+    return energy
+
+
+def _seam_carve_v(img, iters, border):
     """ Carve vertical seams off an image.
 
     Carves out vertical seams from an image while using the given energy map to
@@ -187,6 +220,8 @@ def _seam_carve_v(img, energy_map, iters, border):
     cdef cnp.double_t[:, ::1] cumulative_img = np.zeros(img.shape[0:2],
                                                         dtype=np.float)
     cdef cnp.double_t[:, :, ::1] energy_img
+
+    energy_map = forward_energy(img)
 
     energy_map[:, 0:border] = DBL_MAX
     energy_map[:, cols-border:cols] = DBL_MAX
