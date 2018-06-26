@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Functions for converting between color spaces.
 
 The "central" color space in this module is RGB, more specifically the linear

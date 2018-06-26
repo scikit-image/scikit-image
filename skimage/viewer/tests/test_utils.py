@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from skimage.viewer import utils
 from skimage.viewer.utils import dialogs
 from skimage.viewer.qt import QtCore, QtWidgets, has_qt

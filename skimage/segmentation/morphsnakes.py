@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from itertools import cycle
 
 import numpy as np

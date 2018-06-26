@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# uft.py --- Unitary fourier transform
-
-"""Function of unitary fourier transform and utilities
+"""Function of unitary fourier transform (uft) and utilities
 
 This module implements the unitary fourier transform, also known as
 the ortho-normal transform. It is especially useful for convolution
