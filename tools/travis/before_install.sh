@@ -54,7 +54,9 @@ echo "cython>=0.23.4" >> requirements/default.txt
 echo "numpydoc>=0.6" >> requirements/default.txt
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
-    sed -i 's/>=/==/g' requirements/default.txt
+    for filename in requirements/*.txt; do
+        sed -i 's/>=/==/g' $filename
+    done
 fi
 
 python -m pip install --upgrade pip
