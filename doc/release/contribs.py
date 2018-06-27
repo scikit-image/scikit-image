@@ -2,12 +2,16 @@
 import subprocess
 import os
 import sys
+
 import string
 import shlex
 import json
+
 from datetime import datetime
 import math
 import time
+
+from warnings import warn
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
@@ -52,13 +56,17 @@ def request(url, query=None):
             response = response.decode('utf-8')
         return json.loads(response)
     except HTTPError as e:
-        if GH_TOKEN and e.hdrs.get('X-RateLimit-Remaining') == 0:
-            # wait until can try again
-            reset = datetime.fromtimestamp(e.hdrs['X-RateLimit-Reset'])
-            time_left = reset - datetime.today()
-            time_left = math.ceil(time_left.total_seconds())
-            time.sleep(time_left)
-            request(url, query=query)
+        if e.hdrs.get('X-RateLimit-Remaining') == 0:
+            if GH_TOKEN:
+                # wait until can try again
+                reset = datetime.fromtimestamp(e.hdrs['X-RateLimit-Reset'])
+                time_left = reset - datetime.today()
+                time_left = math.ceil(time_left.total_seconds())
+                time.sleep(time_left)
+                request(url, query=query)
+            else:
+                warn("API rate limit exceeded while no 'GH_TOKEN' set.")
+                sys.exit(0)
         else:
             raise Exception(e.info)
 
