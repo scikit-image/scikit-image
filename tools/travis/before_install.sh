@@ -34,6 +34,11 @@ fi
 
 python -m pip install --upgrade pip
 pip install --retries 3 -q $PIP_FLAGS -r requirements/build.txt
+# The line below isn't necessary if #3158 is accepted.
+# That said, `pip install .` also install runtime requirements before
+# the build process starts. This line helps with the strange lazy loading
+# necessary to build the sdist packages.
+pip install --retries 3 -q $PIP_FLAGS -r requirements/default.txt
 
 # Show what's installed
 pip list
