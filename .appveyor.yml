@@ -39,15 +39,16 @@ install:
   - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
 
   # Install the build and runtime dependencies of the project.
-  # The --pre flag is necessary to grab a SciPy wheel, which is in
-  # pre-release at the time of writing (03-10-2017)
-  - pip install --retries 3 --pre -r requirements.txt
   - pip install --retries 3 -r requirements/build.txt
+  # scipy, from default is required to build until #3158 is fixed.
+  - pip install --retries 3 -r requirements/default.txt
   - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
   # Install the generated wheel package to test it
-  - "pip install --pre --no-index --find-links dist/ scikit-image"
+  - "pip install --no-index --find-links dist/ scikit-image"
+  # Install the test dependencies
+  - pip install --retries 3 -r requirements/test.txt
 
 # Not a .NET project, we build scikit-image in the install step instead
 build: false
