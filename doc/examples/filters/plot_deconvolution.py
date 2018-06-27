@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 """
 =====================
 Image Deconvolution
@@ -52,6 +49,7 @@ the image, the noise power and the image frequency power.
        J. Opt. Soc. Am. A 27, 1593-1607 (2010),
        DOI:10.1364/JOSAA.27.001593
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
