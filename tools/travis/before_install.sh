@@ -59,7 +59,6 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
 fi
 
 python -m pip install --upgrade pip
-pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
 # install numpy from PyPI instead of our wheelhouse
 pip install --retries 3 -q wheel $(grep numpy requirements/build.txt)
 
