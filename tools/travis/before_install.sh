@@ -51,7 +51,6 @@ retry () {
 
 # add build dependencies
 echo "cython>=0.23.4" >> requirements/default.txt
-echo "numpydoc>=0.6" >> requirements/default.txt
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     for filename in requirements/*.txt; do
