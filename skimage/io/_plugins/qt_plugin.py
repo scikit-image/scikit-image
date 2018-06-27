@@ -2,14 +2,28 @@ import numpy as np
 from .util import prepare_for_display, window_manager
 from ..._shared.utils import warn
 
-from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
-                            QGridLayout)
-from qtpy.QtGui import QImage, QPixmap
-from qtpy import QtCore
-
 # We try to aquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
 window_manager.acquire('qt')
+
+try:
+    from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
+                                QGridLayout)
+    from qtpy.QtGui import QImage, QPixmap
+    from qtpy import QtCore
+except ImportError:
+    window_manager._release('qt')
+
+    raise ImportError("""\
+    This module requires some python bindings to Qt.
+
+    We recommend either PyQt5 (GPL licensed) or PySide2 (LGPL licensed).
+    More information can be found on their respective sites.
+
+    http://www.riverbankcomputing.co.uk/software/pyqt/intro
+
+    https://wiki.qt.io/Qt_for_Python
+    """)
 
 app = None
 

@@ -1,8 +1,20 @@
 # the module for the qt color_mixer plugin
-from qtpy import QtCore
-from qtpy.QtWidgets import (QWidget, QStackedWidget, QSlider, QGridLayout,
-                            QLabel, QFrame, QComboBox, QRadioButton,
-                            QPushButton)
+try:
+    from qtpy import QtCore
+    from qtpy.QtWidgets import (QWidget, QStackedWidget, QSlider, QGridLayout,
+                                QLabel, QFrame, QComboBox, QRadioButton,
+                                QPushButton)
+except ImportError:
+    raise ImportError("""\
+    This module requires some python bindings to Qt.
+
+    We recommend either PyQt5 (GPL licensed) or PySide2 (LGPL licensed).
+    More information can be found on their respective sites.
+
+    http://www.riverbankcomputing.co.uk/software/pyqt/intro
+
+    https://wiki.qt.io/Qt_for_Python
+    """)
 
 from .util import ColorMixer
 
