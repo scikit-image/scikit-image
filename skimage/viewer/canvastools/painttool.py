@@ -49,7 +49,7 @@ class PaintTool(CanvasToolBase):
 
     >>> img = camera() #doctest: +SKIP
 
-    >>> ax = plt.subplot(111) #doctest: +SKIP 
+    >>> ax = plt.subplot(111) #doctest: +SKIP
     >>> plt.imshow(img, cmap=plt.cm.gray) #doctest: +SKIP
     >>> p = PaintTool(ax,np.shape(img[:-1]),10,0.2) #doctest: +SKIP
     >>> plt.show() #doctest: +SKIP
@@ -134,7 +134,7 @@ class PaintTool(CanvasToolBase):
     @shape.setter
     def shape(self, shape):
         self._shape = shape
-        if not self._overlay_plot is None:
+        if self._overlay_plot is not None:
             self._overlay_plot.set_extent((-0.5, shape[1] + 0.5,
                                            shape[0] + 0.5, -0.5))
             self.radius = self._radius
@@ -159,13 +159,13 @@ class PaintTool(CanvasToolBase):
     def on_move(self, event):
         if not self.ax.in_axes(event):
             self._cursor.set_visible(False)
-            self.redraw() # make sure cursor is not visible
+            self.redraw()  # make sure cursor is not visible
             return
         self._cursor.set_visible(True)
 
         self.update_cursor(event.xdata, event.ydata)
         if event.button != 1:
-            self.redraw() # update cursor position
+            self.redraw()  # update cursor position
             return
         self.update_overlay(event.xdata, event.ydata)
         self.callback_on_move(self.geometry)

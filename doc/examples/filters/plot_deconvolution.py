@@ -38,7 +38,7 @@ fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
 plt.gray()
 
 for a in (ax[0], ax[1], ax[2]):
-       a.axis('off')
+    a.axis('off')
 
 ax[0].imshow(astro)
 ax[0].set_title('Original Data')

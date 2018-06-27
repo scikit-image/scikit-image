@@ -17,12 +17,12 @@ except ImportError:
 
         class QtCore_cls(object):
             class Qt(object):
-                 TopDockWidgetArea = None
-                 BottomDockWidgetArea = None
-                 LeftDockWidgetArea = None
-                 RightDockWidgetArea = None
+                TopDockWidgetArea = None
+                BottomDockWidgetArea = None
+                LeftDockWidgetArea = None
+                RightDockWidgetArea = None
 
-            def Signal(self, *args, **kwargs): 
+            def Signal(self, *args, **kwargs):
                 pass
 
         QtGui = QtWidgets = QtGui_cls()

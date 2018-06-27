@@ -112,4 +112,3 @@ class OverlayPlugin(Plugin):
         data : None
         """
         return (self.overlay, None)
-

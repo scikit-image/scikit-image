@@ -30,7 +30,7 @@ try:
             pass
     umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
-except:
+except:  # noqa
     UmfpackContext = None
 
 try:
