@@ -5,7 +5,6 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     echo "backend : Template" > $MPL_DIR/matplotlibrc
 fi
 
-echo ${QT}
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" = "PyQt5" ]]; then
     echo got here
@@ -21,7 +20,6 @@ else
 fi
 if [[ "${QT}" == "PyQt5" || "${QT}" == "PySide2" ]]; then
     # Is this correct for PySide2?
-    echo got there
     echo 'backend: Qt5Agg' > $MPL_DIR/matplotlibrc
     echo 'backend.qt5 : '$MPL_QT_API >> $MPL_DIR/matplotlibrc
 fi
