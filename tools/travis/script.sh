@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
-set -ev
+set -ex
 export PY=${TRAVIS_PYTHON_VERSION}
 
 section "Flake8.test"
@@ -11,7 +11,9 @@ section "Tests.pytest"
 
 # Show what's installed
 pip list
-pytest ${TEST_ARGS} --pyargs skimage
+pushd ..
+python -m pytest ${TEST_ARGS} --pyargs skimage
+popd
 section_end "Tests.pytest"
 
 
