@@ -1,8 +1,18 @@
 import numpy as np
+try:
+    from qtpy.QtGui import QPainter, QColor
+    from qtpy.QtWidgets import QWidget, QGridLayout, QFrame
+except ImportError:
+    raise ImportError("""\
+    This module requires some python bindings to Qt.
 
-from qtpy.QtGui import QPainter, QColor
-from qtpy.QtWidgets import QWidget, QGridLayout, QFrame
+    We recommend either PyQt5 (GPL licensed) or PySide2 (LGPL licensed).
+    More information can be found on their respective sites.
 
+    http://www.riverbankcomputing.co.uk/software/pyqt/intro
+
+    https://wiki.qt.io/Qt_for_Python
+    """)
 from .util import histograms
 
 
