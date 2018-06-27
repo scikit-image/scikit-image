@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 import subprocess
 import os
 import sys
@@ -10,13 +9,9 @@ from datetime import datetime
 import math
 import time
 
-if sys.version_info[0] < 3:
-    from urllib import urlopen, urlencode
-    from urllib2 import HTTPError
-else:
-    from urllib.request import urlopen
-    from urllib.parse import urlencode
-    from urllib.error import HTTPError
+from urllib.request import urlopen
+from urllib.parse import urlencode
+from urllib.error import HTTPError
 
 GH_USER = 'scikit-image'
 GH_REPO = 'scikit-image'
@@ -78,7 +73,8 @@ def get_user(login):
 def get_merged_pulls(user, repo, date, page=1, results=0):
     # See https://developer.github.com/v3/search/#search-issues
     # See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
-    query = 'repo:%s/%s merged:>%s sort:created-asc' % (user, repo, date)
+    query = 'repo:{user}/{repo} merged:>{date} sort:created-asc'
+    query = query.format(user=user, repo=repo, date=date)
     url = 'https://api.github.com/search/issues'
     merges = request(url, query=dict(q=query, page=page, per_page=100))
 
@@ -149,7 +145,7 @@ for pull in pulls:
             if reviewer not in users:
                 name = get_user(reviewer).get('name')
                 if name is None:
-                    name = handle
+                    name = reviewer
                 elif reviewer in committers:
                     committers.discard(reviewer)
                     committers.add(name)
