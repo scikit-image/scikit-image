@@ -69,7 +69,8 @@ before_install:
     - tools/check_sdist.py
 
 install:
-    - python setup.py develop
+    # build and install runtime dependencies
+    - python -m pip install .
     # Matplotlib settings - do not show figures during doc examples
     - |
       if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
@@ -82,13 +83,14 @@ install:
     # Install most of the optional packages
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+        pip install --retries 3 -q -r ./requirements/optional.txt
       fi
     - |
       if [[ "${WITH_PYAMG}" == "1" ]]; then
         pip install --retries 3 -q pyamg
       fi
     - tools/travis/install_qt.sh
+    - pip install --retries 3 -q -r ./requirements/test.txt
 
 script: tools/travis/script.sh
 

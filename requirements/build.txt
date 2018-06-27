@@ -1,3 +1,4 @@
 Cython>=0.23.4
 wheel
 numpy>=1.11
+numpydoc>=0.6
