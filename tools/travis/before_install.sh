@@ -62,7 +62,7 @@ fi
 python -m pip install --upgrade pip
 pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
 # install numpy from PyPI instead of our wheelhouse
-pip install --retries 3 -q wheel numpy
+pip install --retries 3 -q wheel $(grep numpy requirements/build.txt)
 
 # install wheels
 for requirement in $WHEELBINARIES; do
