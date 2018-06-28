@@ -3,16 +3,13 @@
 set -ev
 export PY=${TRAVIS_PYTHON_VERSION}
 
-# Matplotlib settings - do not show figures during doc examples
-if [[ $MINIMUM_REQUIREMENTS == 1 || $TRAVIS_OS_NAME == "osx" ]]; then
-    MPL_DIR=$HOME/.matplotlib
-else
-    MPL_DIR=$HOME/.config/matplotlib
-fi
+# Matplotlib directory location changes depending on OS and verison
+MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
 
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 
+# Matplotlib settings - do not show figures during doc examples
 if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
