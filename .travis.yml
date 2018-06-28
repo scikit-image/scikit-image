@@ -55,8 +55,12 @@ matrix:
       env: TRAVIS_PYTHON_VERSION=3.5
 
 before_install:
+    # libpng 1.6.32 has a bug in reading PNG
+    # that seems to be the default library that is installed
+    # https://github.com/ImageMagick/ImageMagick/issues/747#issuecomment-328521685
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
+        brew upgrade libpng;
       else
         virtualenv -p python ~/venv;
         source ~/venv/bin/activate;
