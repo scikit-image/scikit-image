@@ -22,6 +22,9 @@ flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
 section_end "Flake8.test"
 
 section "Test.with.min.requirements"
+# Show what's installed
+pip list
+tools/build_versions.py
 pytest skimage
 section_end "Test.with.min.requirements"
 
@@ -39,6 +42,7 @@ section_end "Install.optional.dependencies"
 section "Test.with.optional.requirements"
 # Show what's installed
 pip list
+tools/build_versions.py
 pytest --doctest-modules --cov=skimage skimage
 section_end "Test.with.optional.requirements"
 
