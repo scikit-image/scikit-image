@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ev
+set -ex
 
 export PIP_DEFAULT_TIMEOUT=60
 
@@ -30,7 +30,6 @@ export DISPLAY=:99.0
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
 export TEST_ARGS="--doctest-modules"
-WHEELBINARIES="matplotlib scipy pillow cython"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -49,26 +48,28 @@ retry () {
     return 0
 }
 
-# add build dependencies
-echo "cython>=0.23.4" >> requirements/default.txt
-echo "numpydoc>=0.6" >> requirements/default.txt
-
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
-    sed -i 's/>=/==/g' requirements/default.txt
+    for filename in requirements/*.txt; do
+        sed -i 's/>=/==/g' $filename
+    done
 fi
 
 python -m pip install --upgrade pip
-pip install --retries 3 -q wheel flake8 codecov pytest pytest-cov
-# install numpy from PyPI instead of our wheelhouse
-pip install --retries 3 -q wheel numpy
+pip install --retries 3 -q wheel
 
-# install wheels
-for requirement in $WHEELBINARIES; do
+# install specific wheels from wheelhouse
+for requirement in matplotlib scipy pillow; do
     WHEELS="$WHEELS $(grep $requirement requirements/default.txt)"
 done
+# cython is not in the default.txt requirements
+WHEELS="$WHEELS $(grep -i cython requirements/build.txt)"
 pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
-pip install --retries 3 -q $PIP_FLAGS -r requirements.txt
+# Install build time requirements
+pip install --retries 3 -q $PIP_FLAGS -r requirements/build.txt
+# Default requirements are necessary to build because of lazy importing
+# They can be moved after the build step if #3158 is accepted
+pip install --retries 3 -q $PIP_FLAGS -r requirements/default.txt
 
 # Show what's installed
 pip list
