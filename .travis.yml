@@ -41,13 +41,13 @@ matrix:
       env: BUILD_DOCS=1
     - os: linux
       python: 3.5
-      env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
+      env: MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 BUILD_DOCS=1 DEPLOY_DOCS=1
+      env: BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 PIP_FLAGS="--pre"
+      env: PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
@@ -79,13 +79,6 @@ install:
     - python setup.py develop
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
-    # Matplotlib settings - do not show figures during doc examples
-    - |
-      if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-        export MPL_DIR=${HOME}/.matplotlib
-      else
-        export MPL_DIR=${HOME}/.config/matplotlib
-      fi
 
 script: tools/travis/script.sh
 

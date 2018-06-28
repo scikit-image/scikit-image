@@ -4,7 +4,7 @@ set -ex
 export PY=${TRAVIS_PYTHON_VERSION}
 
 # Matplotlib directory location changes depending on OS and verison
-MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
+export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
 
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
@@ -55,12 +55,10 @@ if [[ "${BUILD_DOCS}" == "1" ]]; then
   make html
 else
   # These test are run by sphinx automatically
-  cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
   for f in doc/examples/*/*.py; do
     python "${f}"
   done
-  mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
 fi
 section_end "Tests.examples"
 
