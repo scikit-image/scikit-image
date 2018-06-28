@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
-set -ev
+set -ex
 export PY=${TRAVIS_PYTHON_VERSION}
 
 # Matplotlib directory location changes depending on OS and verison
@@ -64,4 +64,4 @@ else
 fi
 section_end "Tests.examples"
 
-set +ev
+set +ex
