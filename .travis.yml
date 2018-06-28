@@ -51,12 +51,10 @@ matrix:
     - os: osx
       osx_image: xcode9
       language: objective-c
-      # OS X has a hard time installing the docs dependencies
       env: TRAVIS_PYTHON_VERSION=3.5
     - os: osx
       osx_image: xcode9
       language: objective-c
-      # OS X has a hard time installing the docs dependencies
       env: TRAVIS_PYTHON_VERSION=3.6
 
 before_install:

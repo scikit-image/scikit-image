@@ -49,14 +49,9 @@ section_end "Test.with.optional.requirements"
 section "Tests.examples"
 # Run example applications
 echo Build or run examples
-# OSX on Travis can't install sphinx-gallery.
-# I think all it needs is scikit-learn from that requirements doc
-# to run the tests. See Issue #3084
-if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-  pip install --retries 3 -q scikit-learn
-else
-  pip install --retries 3 -q -r ./requirements/docs.txt
-fi
+pip install --retries 3 -q -r ./requirements/docs.txt
+pip list
+tools/build_versions.py
 
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   export SPHINXCACHE=${HOME}/.cache/sphinx
