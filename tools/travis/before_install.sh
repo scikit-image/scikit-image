@@ -29,7 +29,6 @@ export WHEELHOUSE
 export DISPLAY=:99.0
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
-export TEST_ARGS="--doctest-modules"
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804

@@ -38,16 +38,16 @@ matrix:
   include:
     - os: linux
       python: 3.5
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
+      env: BUILD_DOCS=1
     - os: linux
       python: 3.5
       env: QT=PyQt5 WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      env: QT=PyQt5 WITH_PYAMG=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
+      env: QT=PyQt5 WITH_PYAMG=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
@@ -88,18 +88,10 @@ install:
       else
         export MPL_DIR=${HOME}/.config/matplotlib
       fi
-    - mkdir -p ${MPL_DIR}
-    - touch ${MPL_DIR}/matplotlibrc
-    # Install most of the optional packages
-    - |
-      if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
-      fi
     - |
       if [[ "${WITH_PYAMG}" == "1" ]]; then
         pip install --retries 3 -q pyamg
       fi
-    - tools/travis/install_qt.sh
 
 script: tools/travis/script.sh
 

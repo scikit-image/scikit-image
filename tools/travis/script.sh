@@ -17,24 +17,30 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 
-section "Test.with.min.requirements"
-pytest $TEST_ARGS skimage
-section_end "Test.with.min.requirements"
-
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
 section_end "Flake8.test"
 
-section "Tests.pytest"
-# run tests. If running with optional dependencies, report coverage
-if [[ "$OPTIONAL_DEPS" == "1" ]]; then
-  export TEST_ARGS="${TEST_ARGS} --cov=skimage"
-fi
+section "Test.with.min.requirements"
+pytest skimage
+section_end "Test.with.min.requirements"
+
+# Install optional dependencies and pyqt
+section "Install.optional.dependencies"
+mkdir -p ${MPL_DIR}
+touch ${MPL_DIR}/matplotlibrc
+# matplotlib is one optional dependency that definitely needs to be installed
+# from the wheelhouse if we plan on testing linux 32 bit
+pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+
+tools/travis/install_qt.sh
+section_end "Install.optional.dependencies"
+
+section "Test.with.optional.requirements"
 # Show what's installed
 pip list
-pytest ${TEST_ARGS} skimage
-section_end "Tests.pytest"
-
+pytest --doctest-modules --cov=skimage skimage
+section_end "Test.with.optional.requirements"
 
 section "Tests.examples"
 # Run example applications
