@@ -24,7 +24,13 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml', './asv.conf.json',
-                './skimage/filters/rank/README.rst']
+                './skimage/filters/rank/README.rst',
+                './tools/check_sdist.py',
+                './tools/header.py',
+                './tools/mailmap.py',
+                './tools/rm_pyx_c_file.sh',
+                './tools/build_versions.py',
+                './tools/upload_wheels.sh']
 
 
 missing = []

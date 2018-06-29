@@ -39,16 +39,6 @@ For Python 2.7, please install the 0.14.x Long Term Support using:
     sys.stderr.write(error + "\n")
     sys.exit(1)
 
-import builtins
-
-# This is a bit (!) hackish: we are setting a global variable so that the main
-# skimage __init__ can detect if it is being loaded by the setup routine, to
-# avoid attempting to load components that aren't built yet:
-# the numpy distutils extensions that are used by scikit-image to recursively
-# build the compiled extensions in sub-packages is based on the Python import
-# machinery.
-builtins.__SKIMAGE_SETUP__ = True
-
 
 with open('skimage/__init__.py') as fid:
     for line in fid:
