@@ -7,12 +7,9 @@ export PY=${TRAVIS_PYTHON_VERSION}
 export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
 
 mkdir -p $MPL_DIR
-touch $MPL_DIR/matplotlibrc
-
-# Matplotlib settings - do not show figures during doc examples
-if [[ $TRAVIS_OS_NAME == "osx" ]]; then
-    echo 'backend : Template' > $MPL_DIR/matplotlibrc
-fi
+# by default, do not show figures
+# this may be overwritten by subsequent install script
+echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
