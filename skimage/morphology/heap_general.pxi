@@ -13,13 +13,16 @@ Original author: Lee Kamentsky
 from libc.stdlib cimport free, malloc, realloc
 
 
+# Store state of the heap
 cdef struct Heap:
     Py_ssize_t items
     Py_ssize_t space
     Heapitem *data
     Heapitem **ptrs
 
-cdef inline Heap *heap_from_numpy2():
+
+cdef inline Heap *heap_from_numpy2() nogil:
+    """Initialize heap and allocate internal memory."""
     cdef Py_ssize_t k
     cdef Heap *heap
     heap = <Heap *> malloc(sizeof (Heap))
@@ -31,24 +34,24 @@ cdef inline Heap *heap_from_numpy2():
         heap.ptrs[k] = heap.data + k
     return heap
 
-cdef inline void heap_done(Heap *heap):
-   free(heap.data)
-   free(heap.ptrs)
-   free(heap)
 
-cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h):
+cdef inline void heap_done(Heap *heap) nogil:
+    """Free / release allocated memory of the heap."""
+    free(heap.data)
+    free(heap.ptrs)
+    free(heap)
+
+
+cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h) nogil:
+    """Swap position of the items on the heap at the given indices."""
     h.ptrs[a], h.ptrs[b] = h.ptrs[b], h.ptrs[a]
 
 
-######################################################
-# heappop - inlined
-#
-# pop an element off the heap, maintaining heap invariant
-#
-# Note: heap ordering is the same as python heapq, i.e., smallest first.
-######################################################
-cdef inline void heappop(Heap *heap, Heapitem *dest):
+cdef inline void heappop(Heap *heap, Heapitem *dest) nogil:
+    """Pop an element off the heap, maintaining heap invariant.
 
+    Note: Heap ordering is the same as python heapq, i.e., smallest first.
+    """
     cdef Py_ssize_t i, smallest, l, r # heap indices
 
     #
@@ -93,15 +96,12 @@ cdef inline void heappop(Heap *heap, Heapitem *dest):
         swap(i, smallest, heap)
         i = smallest
 
-##################################################
-# heappush - inlined
-#
-# push the element onto the heap, maintaining the heap invariant
-#
-# Note: heap ordering is the same as python heapq, i.e., smallest first.
-##################################################
-cdef inline void heappush(Heap *heap, Heapitem *new_elem):
 
+cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
+    """Push the element onto the heap, maintaining the heap invariant.
+    
+    Note: Heap ordering is the same as python heapq, i.e., smallest first.
+    """
     cdef Py_ssize_t child = heap.items
     cdef Py_ssize_t parent
     cdef Py_ssize_t k

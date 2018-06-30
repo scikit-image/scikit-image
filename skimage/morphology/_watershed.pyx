@@ -1,3 +1,6 @@
+#cython: boundscheck=False
+#cython: wraparound=False
+
 """watershed.pyx - scithon implementation of guts of watershed
 
 Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
@@ -9,7 +12,7 @@ All rights reserved.
 
 Original author: Lee Kamentsky
 """
-import numpy as np
+
 from libc.math cimport sqrt
 
 cimport numpy as cnp
@@ -23,13 +26,11 @@ ctypedef cnp.int8_t DTYPE_BOOL_t
 include "heap_watershed.pxi"
 
 
-@cython.wraparound(False)
-@cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.overflowcheck(False)
 @cython.unraisable_tracebacks(False)
 cdef inline double _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
-                                cnp.intp_t[::1] strides):
+                                cnp.intp_t[::1] strides) nogil:
     """Return the Euclidean distance between raveled points pt0 and pt1."""
     cdef double result = 0
     cdef double curr = 0
@@ -41,14 +42,12 @@ cdef inline double _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
     return sqrt(result)
 
 
-@cython.wraparound(False)
-@cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.unraisable_tracebacks(False)
 cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
                                          cnp.intp_t[::1] structure,
                                          DTYPE_BOOL_t[::1] mask,
-                                         Py_ssize_t index):
+                                         Py_ssize_t index) nogil:
     """
     Return ``True`` and set ``mask[index]`` to ``False`` if the neighbors of
     ``index`` (as given by the offsets in ``structure``) have more than one
@@ -75,8 +74,7 @@ cdef inline DTYPE_BOOL_t _diff_neighbors(DTYPE_INT32_t[::1] output,
                     return True
     return False
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 def watershed_raveled(cnp.float64_t[::1] image,
                       cnp.intp_t[::1] marker_locations,
                       cnp.intp_t[::1] structure,
@@ -130,67 +128,68 @@ def watershed_raveled(cnp.float64_t[::1] image,
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
-    for i in range(marker_locations.shape[0]):
-        index = marker_locations[i]
-        elem.value = image[index]
-        elem.age = 0
-        elem.index = index
-        elem.source = index
-        heappush(hp, &elem)
+    with nogil:
+        for i in range(marker_locations.shape[0]):
+            index = marker_locations[i]
+            elem.value = image[index]
+            elem.age = 0
+            elem.index = index
+            elem.source = index
+            heappush(hp, &elem)
 
-    while hp.items > 0:
-        heappop(hp, &elem)
+        while hp.items > 0:
+            heappop(hp, &elem)
 
-        if compact or wsl:
-            # in the compact case, we need to label pixels as they come off
-            # the heap, because the same pixel can be pushed twice, *and* the
-            # later push can have lower cost because of the compactness.
-            #
-            # In the case of preserving watershed lines, a similar argument
-            # applies: we can only observe that all neighbors have been labeled
-            # as the pixel comes off the heap. Trying to do so at push time
-            # is a bug.
-            if output[elem.index] and elem.index != elem.source:
-                # non-marker, already visited from another neighbor
-                continue
-            if wsl:
-                # if the current element has different-labeled neighbors and we
-                # want to preserve watershed lines, we mask it and move on
-                if _diff_neighbors(output, structure, mask, elem.index):
+            if compact or wsl:
+                # in the compact case, we need to label pixels as they come off
+                # the heap, because the same pixel can be pushed twice, *and* the
+                # later push can have lower cost because of the compactness.
+                #
+                # In the case of preserving watershed lines, a similar argument
+                # applies: we can only observe that all neighbors have been labeled
+                # as the pixel comes off the heap. Trying to do so at push time
+                # is a bug.
+                if output[elem.index] and elem.index != elem.source:
+                    # non-marker, already visited from another neighbor
                     continue
-            output[elem.index] = output[elem.source]
+                if wsl:
+                    # if the current element has different-labeled neighbors and we
+                    # want to preserve watershed lines, we mask it and move on
+                    if _diff_neighbors(output, structure, mask, elem.index):
+                        continue
+                output[elem.index] = output[elem.source]
 
-        for i in range(nneighbors):
-            # get the flattened address of the neighbor
-            neighbor_index = structure[i] + elem.index
+            for i in range(nneighbors):
+                # get the flattened address of the neighbor
+                neighbor_index = structure[i] + elem.index
 
-            if not mask[neighbor_index]:
-                # this branch includes basin boundaries, aka watershed lines
-                # neighbor is not in mask
-                continue
+                if not mask[neighbor_index]:
+                    # this branch includes basin boundaries, aka watershed lines
+                    # neighbor is not in mask
+                    continue
 
-            if output[neighbor_index]:
-                # pre-labeled neighbor is not added to the queue.
-                continue
+                if output[neighbor_index]:
+                    # pre-labeled neighbor is not added to the queue.
+                    continue
 
-            age += 1
-            new_elem.value = image[neighbor_index]
-            if compact:
-                new_elem.value += (compactness *
-                                   _euclid_dist(neighbor_index, elem.source,
-                                                strides))
-            elif not wsl:
-                # in the simplest watershed case (no compactness and no
-                # watershed lines), we can label a pixel at the time that
-                # we push it onto the heap, because it can't be reached with
-                # lower cost later.
-                # This results in a very significant performance gain, see:
-                # https://github.com/scikit-image/scikit-image/issues/2636
-                output[neighbor_index] = output[elem.index]
-            new_elem.age = age
-            new_elem.index = neighbor_index
-            new_elem.source = elem.source
+                age += 1
+                new_elem.value = image[neighbor_index]
+                if compact:
+                    new_elem.value += (compactness *
+                                       _euclid_dist(neighbor_index, elem.source,
+                                                    strides))
+                elif not wsl:
+                    # in the simplest watershed case (no compactness and no
+                    # watershed lines), we can label a pixel at the time that
+                    # we push it onto the heap, because it can't be reached with
+                    # lower cost later.
+                    # This results in a very significant performance gain, see:
+                    # https://github.com/scikit-image/scikit-image/issues/2636
+                    output[neighbor_index] = output[elem.index]
+                new_elem.age = age
+                new_elem.index = neighbor_index
+                new_elem.source = elem.source
 
-            heappush(hp, &new_elem)
+                heappush(hp, &new_elem)
 
-    heap_done(hp)
+        heap_done(hp)

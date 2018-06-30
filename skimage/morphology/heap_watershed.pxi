@@ -19,7 +19,12 @@ cdef struct Heapitem:
     Py_ssize_t source
 
 
-cdef inline int smaller(Heapitem *a, Heapitem *b):
+cdef inline int smaller(Heapitem *a, Heapitem *b) nogil:
+    """Compare the values of the given heap items.
+    
+    If the value of `b` is larger than `a` return True, otherwise if they have
+    the same value compare their age (inertion time) instead.
+    """
     if a.value != b.value:
         return a.value < b.value
     return a.age < b.age

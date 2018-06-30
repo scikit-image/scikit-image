@@ -33,6 +33,8 @@ Improvements
 - Performance is now monitored by
   `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
   results will appear at https://pandas.pydata.org/speed/
+- `skimage.morphology.watershed` now releases the GIL where possible which
+  improves multi-threading for this function.
 
 
 API Changes
