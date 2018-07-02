@@ -3,6 +3,7 @@
 Image Deconvolution
 =====================
 <<<<<<< HEAD
+<<<<<<< HEAD
 In this example, we deconvolve an image using Richardson-Lucy
 deconvolution algorithm ([1]_, [2]_).
 
@@ -32,6 +33,19 @@ linear models that cannot restore sharp edges as much as non-linear
 methods (like TV restoration), but are faster.
 >>>>>>> Answering requests.
 
+=======
+
+In this example, Wiener, unsupervised Wiener, and Richardson-Lucy
+algorithms are used to deconvolve an image.
+
+Wiener and unsupervised Wiener filters
+--------------------------------------
+First, a noisy version of an image is deconvolved using Wiener
+and unsupervised Wiener algorithms. These algorithms are based on
+linear models that cannot restore sharp edges as much as non-linear
+methods (like TV restoration), but are faster.
+
+>>>>>>> c64eeb970c9a95088ec81227a32487ffd17e2e6f
 The Wiener deconvolution algorithm is an inverse filter based on an
 impulse response function (also called point-spread function, or PSF), a
 filter to penalize the restored image frequencies (regularization), and
@@ -105,11 +119,16 @@ astro = color.rgb2gray(data.astronaut())
 psf = np.ones((5, 5)) / 25
 astro = conv2(astro, psf, 'same')
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Add Noise to Image
 =======
 
 # Add noise to image.
 >>>>>>> Merging deconvolution examples.
+=======
+
+# Add noise to image.
+>>>>>>> c64eeb970c9a95088ec81227a32487ffd17e2e6f
 astro_noisy = astro.copy()
 astro_noisy += (np.random.poisson(lam=25, size=astro.shape) - 10) / 255.
 
