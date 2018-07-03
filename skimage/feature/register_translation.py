@@ -82,8 +82,6 @@ def _upsampled_dft(data, upsampled_region_size,
         im2pi = 1j * 2 * np.pi
 
         dim_kernels = []
-
-        dim_kernels = []
         for (n_items, ups_size, ax_offset) in zip(data.shape,
                                                   upsampled_region_size,
                                                   axis_offsets):
