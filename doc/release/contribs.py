@@ -2,6 +2,7 @@
 import subprocess
 import os
 import sys
+import argparse
 
 import string
 import shlex
@@ -17,21 +18,11 @@ from urllib.request import urlopen
 from urllib.parse import urlencode
 from urllib.error import HTTPError
 
+
 GH_USER = 'scikit-image'
 GH_REPO = 'scikit-image'
 
 GH_TOKEN = os.environ.get('GH_TOKEN')
-
-if len(sys.argv) != 2:
-    print("Usage: ./contribs.py [--latest|tag-of-previous-release]")
-    sys.exit(-1)
-
-tag = sys.argv[1]
-
-if GH_TOKEN is None:
-    print("It is recommended that the environment variable `GH_TOKEN` "
-          "be set to avoid running into problems with rate limiting. "
-          "One can be acquired at https://github.com/settings/tokens.\n\n")
 
 
 def call(cmd):
@@ -98,100 +89,115 @@ def get_merged_pulls(user, repo, date, page=1, results=0):
 
 def get_reviews(user, repo, pull):
     # See https://developer.github.com/v3/pulls/reviews/
-    url = 'https://api.github.com/repos/%s/%s/pulls/%s/reviews'
-    url %= user, repo, pull
+    url = ('https://api.github.com/repos/{}/{}/pulls/{}/reviews'
+           .format(user, repo, pull)
     reviews = request(url)
     return reviews
 
 
-if tag == '--latest':
-    tag = call('git tag -l v*.*.* --sort="-version:refname"')[0]
-    if tag == '':
-        tag = call('git rev-list HEAD')[-1]
-
-# See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
-tag_date = call("git log -n1 --format='%%cI' %s" % tag)[0]
-num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
-committers = call("git log --since='%s' --format=%%aN" % tag_date)
-committers = {c.strip() for c in committers if c.strip()}
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument('tag', nargs='?', default='latest',
+                   help='Tag of the previous release')
+    args = p.parse_args()
+    return args
 
 
-merges = get_merged_pulls(GH_USER, GH_REPO, tag_date)
-num_merges = merges['total_count']
+if __name__ == '__main__':
+    args = parse_args()
+    tag = args.tag
+    
+    if GH_TOKEN is None:
+        print("It is recommended that the environment variable `GH_TOKEN` "
+              "be set to avoid running into problems with rate limiting. "
+              "One can be acquired at https://github.com/settings/tokens.\n\n")
 
-reviewers = set()
-authors = set()
-users = dict()  # keep track of known usernames
+    if tag == 'latest':
+        tag = call('git tag -l v*.*.* --sort="-version:refname"')[0]
+        if tag == '':
+            tag = call('git rev-list HEAD')[-1]
 
-pulls = merges['items']
-for pull in pulls:
-    id = pull['number']
-    title = pull['title']
+    # See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
+    tag_date = call("git log -n1 --format='%cI' {}".format(tag))[0]
+    num_commits = call("git rev-list {}..HEAD --count".format(tag))[0]
+    committers = call("git log --since='{}' --format=%aN".format(tag_date))
+    committers = {c.strip() for c in committers if c.strip()}
 
-    try:
-        author = pull['user']['login']
-        if author not in users:
-            name = get_user(author).get('name')
-            if name is None:
-                name = author
-            elif author in committers:
-                committers.discard(author)
-                committers.add(name)
-            users[author] = name
-        else:
-            name = users[author]
-        authors.add(name)
-    except KeyError:
-        author = None
+    merges = get_merged_pulls(GH_USER, GH_REPO, tag_date)
+    num_merges = merges['total_count']
 
-    reviews = get_reviews(GH_USER, GH_REPO, id)
-    for review in reviews:
+    reviewers = set()
+    authors = set()
+    users = dict()  # keep track of known usernames
+
+    pulls = merges['items']
+    for pull in pulls:
+        id = pull['number']
+        title = pull['title']
+
         try:
-            reviewer = review['user']['login']
-            if author == reviewer:  # author reviewing own PR
-                continue
-            if reviewer not in users:
-                name = get_user(reviewer).get('name')
+            author = pull['user']['login']
+            if author not in users:
+                name = get_user(author).get('name')
                 if name is None:
-                    name = reviewer
-                elif reviewer in committers:
-                    committers.discard(reviewer)
+                    name = author
+                elif author in committers:
+                    committers.discard(author)
                     committers.add(name)
-                users[reviewer] = name
+                users[author] = name
             else:
-                name = users[reviewer]
-            reviewers.add(name)
+                name = users[author]
+            authors.add(name)
         except KeyError:
-            pass
+            author = None
 
+        reviews = get_reviews(GH_USER, GH_REPO, id)
+        for review in reviews:
+            try:
+                reviewer = review['user']['login']
+                if author == reviewer:  # author reviewing own PR
+                    continue
+                if reviewer not in users:
+                    name = get_user(reviewer).get('name')
+                    if name is None:
+                        name = reviewer
+                    elif reviewer in committers:
+                        committers.discard(reviewer)
+                        committers.add(name)
+                    users[reviewer] = name
+                else:
+                    name = users[reviewer]
+                reviewers.add(name)
+            except KeyError:
+                pass
 
-def key(name):
-    name = [v for v in name.split() if v[0] in string.ascii_letters]
-    if len(name) > 0:
-        return name[-1]
+    def key(name):
+        name = [v for v in name.split() if v[0] in string.ascii_letters]
+        if len(name) > 0:
+            return name[-1]
 
+    print('Release {} was on {}\n'.format(tag, tag_date))
+    print('A total of {} changes have been committed.\n'.format(num_commits))
 
-print('Release %s was on %s\n' % (tag, tag_date))
-print('A total of %s changes have been committed.\n' % num_commits)
+    print('Made by the following {} committers [alphabetical by last name]:'
+          .format(len(committers)))
+    for c in sorted(committers, key=key):
+        print('- {}'.format(c))
+    print()
 
-print('Made by the following %d committers [alphabetical by last name]:'
-      % len(committers))
-for c in sorted(committers, key=key):
-    print('- %s' % c)
-print()
+    print('It contained the following {} merged pull requests:'.format(num_merges))
+    for pull in pulls:
+        print('- {} (#{})'.format(pull['title'], pull['number']))
+    print()
 
-print('It contained the following %d merged pull requests:' % num_merges)
-for pull in pulls:
-    print('- %s (#%s)' % (pull['title'], pull['number']))
-print()
+    print('Created by the following {} authors [alphabetical by last name]:'
+          .format(len(authors)))
+    for a in sorted(authors, key=key):
+        print('- {}'.format(a))
+    print()
 
-print('Created by the following %d authors [alphabetical by last name]:'
-      % len(authors))
-for a in sorted(authors, key=key):
-    print('- %s' % a)
-print()
-
-print('Reviewed by the following %d reviewers [alphabetical by last name]:'
-      % len(reviewers))
-for r in sorted(reviewers, key=key):
-    print('- %s' % r)
+    print('Reviewed by the following {} reviewers [alphabetical by last name]:'
+          .format(len(reviewers)))
+    for r in sorted(reviewers, key=key):
+        print('- {}'.format(r))
+    print()
