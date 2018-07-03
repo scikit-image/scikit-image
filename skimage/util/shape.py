@@ -249,7 +249,7 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     arr_in = np.ascontiguousarray(arr_in)
 
-    slices = [slice(None, None, st) for st in step]
+    slices = tuple(slice(None, None, st) for st in step)
     window_strides = np.array(arr_in.strides)
 
     indexing_strides = arr_in[slices].strides

@@ -209,7 +209,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
                 slices_d[ax] = slice(1, None)
                 slices_p[ax+1] = slice(0, -1)
                 slices_p[0] = ax
-                d[slices_d] += p[slices_p]
+                d[tuple(slices_d)] += p[tuple(slices_p)]
                 slices_d[ax] = slice(None)
                 slices_p[ax+1] = slice(None)
             out = image + d
@@ -223,7 +223,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
         for ax in range(ndim):
             slices_g[ax+1] = slice(0, -1)
             slices_g[0] = ax
-            g[slices_g] = np.diff(out, axis=ax)
+            g[tuple(slices_g)] = np.diff(out, axis=ax)
             slices_g[ax+1] = slice(None)
 
         norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
@@ -435,7 +435,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
-    original_extent = [slice(s) for s in image.shape]
+    original_extent = tuple(slice(s) for s in image.shape)
 
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
