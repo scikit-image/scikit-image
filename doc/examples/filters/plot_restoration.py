@@ -1,9 +1,9 @@
 """
 =====================
-Image Deconvolution
+Image Restoration
 =====================
 
-In this example, we deconvolve a noisy version of an image using Wiener
+In this example, we restore a noisy version of an image using Wiener
 and unsupervised Wiener algorithms. This algorithms are based on
 linear models that can't restore sharp edge as much as non-linear
 methods (like TV restoration) but are much faster.
