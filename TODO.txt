@@ -37,3 +37,10 @@ Other
   once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
   ``skimage.feature.corner``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.
