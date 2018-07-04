@@ -1,4 +1,3 @@
-# coding: utf-8
 import numpy as np
 
 from .._shared._geometry import polygon_clip
