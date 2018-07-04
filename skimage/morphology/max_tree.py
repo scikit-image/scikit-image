@@ -40,7 +40,7 @@ References:
 import numpy as np
 
 from .watershed import _validate_connectivity
-from .watershed import _compute_neighbors
+from .watershed import _offsets_to_raveled_neighbors
 from ..util import invert
 
 from . import _max_tree
@@ -117,7 +117,7 @@ def max_tree(image, connectivity=2):
     # represents the image). Mask here is an image that is 0 on the border
     # and 1 everywhere else.
     mask = np.ones(image.shape)
-    for k in range(len(shape)):
+    for k in range(len(image.shape)):
         np.moveaxis(mask, k, 0)[0] = 0
         np.moveaxis(mask, k, 0)[-1] = 0
 
@@ -129,8 +129,8 @@ def max_tree(image, connectivity=2):
 
     # flat_neighborhood contains a list of offsets allowing one to find the
     # neighbors in the ravelled image.
-    flat_neighborhood = _compute_neighbors(image, neighbors,
-                                           offset).astype(np.int32)
+    flat_neighborhood = _offsets_to_raveled_neighbors(image, neighbors,
+                                                      offset).astype(np.int32)
 
     # pixels need to be sorted according to their grey level.
     tree_traverser = np.argsort(image.ravel()).astype(np.int64)

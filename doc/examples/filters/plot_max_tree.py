@@ -68,11 +68,11 @@ def plot_img(image, ax, title, plot_text,
     return
 
 # small example image
-image = np.array([[20, 16, 15, 10, 9],
-                  [19, 24, 25, 2, 1],
-                  [8, 4, 7, 6, 3],
-                  [14, 13, 12, 23, 17],
-                  [18, 5, 11, 22, 21]], dtype=np.uint8)
+#image = np.array([[20, 16, 15, 10, 9],
+#                  [19, 24, 25, 2, 1],
+#                  [8, 4, 7, 6, 3],
+#                  [14, 13, 12, 23, 17],
+#                  [18, 5, 11, 22, 21]], dtype=np.uint8)
 
 width, height = image.shape
 

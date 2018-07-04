@@ -82,7 +82,7 @@ class TestMaxtree(unittest.TestCase):
 
         for img_type in [np.uint8, np.uint16, np.uint32, np.uint64]:
             img = img.astype(img_type)
-            P, S = max_tree.build_max_tree(img)
+            P, S = max_tree(img)
             error = diff(P, P_exp)
             assert error < eps
             error = diff(S, S_exp)
@@ -91,7 +91,7 @@ class TestMaxtree(unittest.TestCase):
         for img_type in [np.int8, np.int16, np.int32, np.int64]:
             img = img.astype(img_type)
             img_shifted = img - 9
-            P, S = max_tree.build_max_tree(img_shifted)
+            P, S = max_tree(img_shifted)
             error = diff(P, P_exp)
             assert error < eps
             error = diff(S, S_exp)
@@ -101,7 +101,7 @@ class TestMaxtree(unittest.TestCase):
         img_float = (img_float - 8) / 2.0
         for img_type in [np.float32, np.float64]:
             img_float = img_float.astype(img_type)
-            P, S = max_tree.build_max_tree(img_float)
+            P, S = max_tree(img_float)
             error = diff(P, P_exp)
             assert error < eps
             error = diff(S, S_exp)
@@ -164,7 +164,7 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 2, expected_2, max_tree.area_closing)
         _full_type_test(img, 4, expected_4, max_tree.area_closing)
 
-        P, S = max_tree.build_max_tree(invert(img))
+        P, S = max_tree(invert(img))
         _full_type_test(img, 4, expected_4, max_tree.area_closing,
                         parent=P, tree_traverser=S)
 
@@ -244,7 +244,7 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 2, expected_2, max_tree.area_opening)
         _full_type_test(img, 4, expected_4, max_tree.area_opening)
 
-        P, S = max_tree.build_max_tree(img)
+        P, S = max_tree(img)
         _full_type_test(img, 4, expected_4, max_tree.area_opening,
                         parent=P, tree_traverser=S)
 
@@ -296,7 +296,7 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 2, ex2, max_tree.diameter_closing)
         _full_type_test(img, 4, ex4, max_tree.diameter_closing)
 
-        P, S = max_tree.build_max_tree(invert(img))
+        P, S = max_tree(invert(img))
         _full_type_test(img, 4, ex4, max_tree.diameter_opening,
                         parent=P, tree_traverser=S)
 
@@ -345,7 +345,7 @@ class TestMaxtree(unittest.TestCase):
         _full_type_test(img, 2, ex2, max_tree.diameter_opening)
         _full_type_test(img, 4, ex4, max_tree.diameter_opening)
 
-        P, S = max_tree.build_max_tree(img)
+        P, S = max_tree(img)
         _full_type_test(img, 4, ex4, max_tree.diameter_opening,
                         parent=P, tree_traverser=S)
 
@@ -382,7 +382,7 @@ class TestMaxtree(unittest.TestCase):
             assert error < eps
             assert out.dtype == expected_result.dtype
 
-            P, S = max_tree.build_max_tree(test_data)
+            P, S = max_tree(test_data)
             out = max_tree.local_maxima(test_data,
                                         parent=P, tree_traverser=S)
 
