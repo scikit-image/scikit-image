@@ -1,13 +1,13 @@
 """flood_fill.py - inplace flood fill algorithm
 
-This module provides a function to fill all equal (or within tolerance) values 
+This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
 """
 
 import numpy as np
 
 
-def flood_fill(image, seed_point, new_value, selem=None, connectivity=None, 
+def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
                indices=False, tolerance=None, inplace=False):
     """Perform flood filling on an image.
 
@@ -21,8 +21,8 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
     seed_point : tuple or int
         The index into `image` to start filling.
     new_value : `image` type
-        New value to set the entire fill.  This must be chosen in agreement with
-        the dtype of `image`.
+        New value to set the entire fill.  This must be chosen in agreement
+        with the dtype of `image`.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must contain only 1's and 0's, have the same number
@@ -38,21 +38,21 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
         maxima. If False, the output will be an array of 0's and 1's with the
         same shape as `image`.
     tolerance : ``selem`` type, optional
-        If None (default), adjacent values must be strictly equal to the initial
-        value of `image` at `seed_point`.  This is fastest.  If a value is 
-        given, a comparison will be done at every point and this tolerance on 
-        each side of the initial value will also be filled (inclusive).
+        If None (default), adjacent values must be strictly equal to the
+        initial value of `image` at `seed_point`.  This is fastest.  If a value
+        is given, a comparison will be done at every point and this tolerance
+        on each side of the initial value will also be filled (inclusive).
     inplace : bool, optional
         If True, flood filling is applied to `image` inplace and nothing is
-        returned.  If False, the flood filled result is returned without 
+        returned.  If False, the flood filled result is returned without
         modifying the input `image`.  Ignored if `indices` is True.
 
     Returns
     -------
     filled : ndarray or tuple[ndarray]
         If `indices` is false, an array with the same shape as `image` is
-        returned with values equal to (or within tolerance) of the seed point 
-        set to `new_value`.  If `indices` is true, a tuple of one-dimensional 
+        returned with values equal to (or within tolerance) of the seed point
+        set to `new_value`.  If `indices` is true, a tuple of one-dimensional
         arrays containing the coordinates (indices) of all found maxima.
 
     See Also
@@ -99,7 +99,7 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
 
     Fill with a tolerance.
 
-    >>> flood_fill(image, (0, 0), 5, tolerance=1) 
+    >>> flood_fill(image, (0, 0), 5, tolerance=1)
     array([[5, 5, 5, 5, 5, 5, 5],
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 2, 2, 5],
@@ -110,7 +110,7 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
     from ._flood_fill_cy import _flood_fill
 
     image = np.asarray(image, order='C')
-    
+
     # Shortcut for rank zero
     if image.size == 0:
         return np.array([], dtype=(np.intp if indices else np.uint8))

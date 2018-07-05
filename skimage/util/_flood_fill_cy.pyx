@@ -48,7 +48,7 @@ def _flood_fill(dtype_t[::1] image not None,
     """Find the region to be filled.
 
     Inner function to `flood_fill` that detects all connected points equal (or
-    within tolerance) of the initial seed point.  The result is stored inplace 
+    within tolerance) of the initial seed point.  The result is stored inplace
     inside `flags` as the value "FILL".
 
     Parameters
@@ -100,7 +100,7 @@ cdef inline void _flood_fill_do_equal(
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index, dtype_t seed_value) nogil:
     """Fill connected areas with 1, requiring strict equality.
-    
+
     Parameters
     ----------
     image : ndarray, one-dimensional
@@ -115,7 +115,7 @@ cdef inline void _flood_fill_do_equal(
         Pointer to initialized queue.
     start_index : int
         Start position for the flood-fill.
-    seed_value : 
+    seed_value :
         Value of `image[start_index]`.
     """
     cdef:
@@ -155,7 +155,7 @@ cdef inline void _flood_fill_do_tol(
         Py_ssize_t start_index, dtype_t seed_value, dtype_t high_tol,
         dtype_t low_tol) nogil:
     """Fill connected areas with 1, within a tolerance.
-    
+
     Parameters
     ----------
     image : ndarray, one-dimensional
@@ -170,7 +170,7 @@ cdef inline void _flood_fill_do_tol(
         Pointer to initialized queue.
     start_index : int
         Start position for the flood-fill.
-    seed_value : 
+    seed_value :
         Value of `image[start_index]`.
     high_tol :
         Upper limit for tolerance comparison.
@@ -196,8 +196,8 @@ cdef inline void _flood_fill_do_tol(
                 continue
             if neighbor >= image.shape[0]:
                 continue
-            
-            # Only do comparisons on points not (yet) part of fill 
+
+            # Only do comparisons on points not (yet) part of fill
             if flags[neighbor] == UNKNOWN:
                 if image[neighbor] <= high_tol:
                     if image[neighbor] >= low_tol:
