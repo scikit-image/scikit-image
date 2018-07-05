@@ -184,7 +184,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                               cross_correlation.shape)
-    midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
+    midpoints = np.asarray(shape, dtype=np.floating) // 2
 
     shifts = np.array(maxima, dtype=np.float64)
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
@@ -196,7 +196,6 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
-        shifts = np.round(shifts * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
