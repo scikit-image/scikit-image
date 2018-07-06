@@ -29,6 +29,8 @@ ctypedef fused dtype_t:
 
 # Definition of flag values used for `flags` in _local_maxima & _fill_plateau
 cdef:
+    # Border value - do not cross!
+    unsigned char BORDER = 2
     # Part of the flood fill
     unsigned char FILL = 1
     # Not checked yet
@@ -130,10 +132,6 @@ cdef inline void _flood_fill_do_equal(
         for i in range(neighbor_offsets.shape[0]):
             neighbor = current_index + neighbor_offsets[i]
 
-            # Indexing sanity check
-            if neighbor < 0 or neighbor >= image.shape[0]:
-                continue
-
             # Shortcut if neighbor is already part of fill
             if flags[neighbor] == UNKNOWN:
                 if image[neighbor] == seed_value:
@@ -183,10 +181,6 @@ cdef inline void _flood_fill_do_tol(
         # Look at all neighboring samples
         for i in range(neighbor_offsets.shape[0]):
             neighbor = current_index + neighbor_offsets[i]
-
-            # Indexing sanity check
-            if neighbor < 0 or neighbor >= image.shape[0]:
-                continue
 
             # Only do comparisons on points not (yet) part of fill
             if flags[neighbor] == UNKNOWN:

@@ -53,10 +53,10 @@ def test_inplace_int():
     flood_fill(image, (0, 0), 5, inplace=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
-                        [5, 1, 1, 5, 2, 2, 5],
-                        [5, 1, 1, 5, 2, 2, 5],
-                        [1, 5, 5, 5, 5, 5, 3],
-                        [5, 1, 1, 1, 3, 3, 4]])
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [1, 5, 5, 5, 5, 5, 3],
+                         [5, 1, 1, 1, 3, 3, 4]])
 
     np.testing.assert_array_equal(image, expected)
 
@@ -71,10 +71,10 @@ def test_inplace_float():
     flood_fill(image, (0, 0), 5, inplace=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
-                        [5, 1, 1, 5, 2, 2, 5],
-                        [5, 1, 1, 5, 2, 2, 5],
-                        [1, 5, 5, 5, 5, 5, 3],
-                        [5, 1, 1, 1, 3, 3, 4]])
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [5, 1, 1, 5, 2, 2, 5],
+                         [1, 5, 5, 5, 5, 5, 3],
+                         [5, 1, 1, 1, 3, 3, 4]])
 
     np.testing.assert_allclose(image, expected)
 
@@ -88,6 +88,43 @@ def test_1d():
 
     np.testing.assert_equal(output, expected)
     np.testing.assert_equal(output, output2)
+
+
+def test_wraparound():
+    # If the borders (or neighbors) aren't correctly accounted for, this fails,
+    # because the algorithm uses an ravelled array.
+    test = np.zeros((5, 7), dtype=np.float64)
+    test[:,3] = 100
+
+    expected = np.array([[-1., -1., -1., 100.,  0.,  0.,  0.],
+                         [-1., -1., -1., 100.,  0.,  0.,  0.],
+                         [-1., -1., -1., 100.,  0.,  0.,  0.],
+                         [-1., -1., -1., 100.,  0.,  0.,  0.],
+                         [-1., -1., -1., 100.,  0.,  0.,  0.]])
+
+    np.testing.assert_equal(flood_fill(test, (0, 0), -1), expected)
+
+
+def test_neighbors():
+    # This test will only pass if the neighbors are exactly correct
+    test = np.zeros((5, 7), dtype=np.float64)
+    test[:,3] = 100
+
+    expected = np.array([[0, 0, 0, 255, 0, 0, 0],
+                         [0, 0, 0, 255, 0, 0, 0],
+                         [0, 0, 0, 255, 0, 0, 0],
+                         [0, 0, 0, 255, 0, 0, 0],
+                         [0, 0, 0, 255, 0, 0, 0]])
+    output = flood_fill(test, (0, 3), 255)
+
+    np.testing.assert_equal(output, expected)
+
+    test[2] = 100
+    expected[2] = 255
+
+    output2 = flood_fill(test, (2, 3), 255)
+
+    np.testing.assert_equal(output2, expected)
 
 
 if __name__ == "__main__":

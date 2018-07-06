@@ -105,11 +105,13 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    from ..morphology.extrema import _resolve_neighborhood
+    from ..morphology.extrema import (_resolve_neighborhood,
+                                      _set_edge_values_inplace, _fast_pad)
     from ..morphology.watershed import _offsets_to_raveled_neighbors
     from ._flood_fill_cy import _flood_fill
 
     image = np.asarray(image, order='C')
+    seed_value = image[seed_point]
 
     # Shortcut for rank zero
     if image.size == 0:
@@ -122,26 +124,30 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
         seed_point = (seed_point,)
 
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
-    neighbor_offsets = _offsets_to_raveled_neighbors(
-        image.shape, selem, center=((1,) * image.ndim))
+
+    # Must annotate borders
+    working_image = _fast_pad(image, image.min())
 
     # Correct start point in ravelled image
-    ravelled_seed_idx = np.ravel_multi_index(seed_point, image.shape)
-    seed_value = image[seed_point]
+    ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
+                                             working_image.shape)
+    neighbor_offsets = _offsets_to_raveled_neighbors(
+        working_image.shape, selem, center=((1,) * image.ndim))
 
     # Use a set of flags; see _flood_fil.pyx for meanings
-    flags = np.zeros(image.shape, dtype=np.uint8)
+    flags = np.zeros(working_image.shape, dtype=np.uint8)
+    _set_edge_values_inplace(flags, value=2)
 
     # Inform the Cython function which path to take
     if tolerance is not None:
         do_tol = 1
         # Check if tolerance could create overflow problems
         try:
-            max_value = np.finfo(image.dtype).max
-            min_value = np.finfo(image.dtype).min
+            max_value = np.finfo(working_image.dtype).max
+            min_value = np.finfo(working_image.dtype).min
         except ValueError:
-            max_value = np.iinfo(image.dtype).max
-            min_value = np.iinfo(image.dtype).min
+            max_value = np.iinfo(working_image.dtype).max
+            min_value = np.iinfo(working_image.dtype).min
 
         high_tol = min(max_value, seed_value + tolerance)
         low_tol = max(min_value, seed_value - tolerance)
@@ -153,23 +159,24 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
 
     # Run flood fill
     try:
-        _flood_fill(image.ravel(), flags.ravel(), neighbor_offsets,
+        _flood_fill(working_image.ravel(), flags.ravel(), neighbor_offsets,
                     ravelled_seed_idx, seed_value, do_tol, high_tol, low_tol)
     except TypeError:
-        if image.dtype == np.float16:
+        if working_image.dtype == np.float16:
             # Provide the user with clearer error message
             raise TypeError("dtype of `image` is float16 which is not "
                             "supported, try upcasting to float32")
         else:
             raise
 
+    original_slice = tuple(slice(1, -1) for _ in range(image.ndim))
     if indices:
-        return np.nonzero(flags == 1)
+        return np.nonzero(flags[original_slice] == 1)
     else:
         if not inplace:
-            output = image.copy()
-            output[flags == 1] = new_value
+            output = working_image[original_slice]
+            output[flags[original_slice] == 1] = new_value
             return output
         else:
-            image[flags == 1] = new_value
+            image[flags[original_slice] == 1] = new_value
             return
