@@ -30,9 +30,7 @@ ctypedef fused dtype_t:
 # Definition of flag values used for `flags` in _local_maxima & _fill_plateau
 cdef:
     # Part of the flood fill
-    unsigned char FILL = 2
-    # Checked already, not part of fill
-    unsigned char NOT_FILL = 1
+    unsigned char FILL = 1
     # Not checked yet
     unsigned char UNKNOWN = 0
 
@@ -133,20 +131,15 @@ cdef inline void _flood_fill_do_equal(
             neighbor = current_index + neighbor_offsets[i]
 
             # Indexing sanity check
-            if neighbor < 0:
-                continue
-            if neighbor >= image.shape[0]:
+            if neighbor < 0 or neighbor >= image.shape[0]:
                 continue
 
             # Shortcut if neighbor is already part of fill
             if flags[neighbor] == UNKNOWN:
                 if image[neighbor] == seed_value:
-                # Neighbor is part of fill - but must check its neighbors too.
+                    # Neighbor is in fill; must check its neighbors too.
                     flags[neighbor] = FILL
                     queue_push(queue_ptr, &neighbor)
-                else:
-                    # Do not check this point again
-                    flags[neighbor] = NOT_FILL
 
 
 cdef inline void _flood_fill_do_tol(
@@ -192,21 +185,12 @@ cdef inline void _flood_fill_do_tol(
             neighbor = current_index + neighbor_offsets[i]
 
             # Indexing sanity check
-            if neighbor < 0:
-                continue
-            if neighbor >= image.shape[0]:
+            if neighbor < 0 or neighbor >= image.shape[0]:
                 continue
 
             # Only do comparisons on points not (yet) part of fill
             if flags[neighbor] == UNKNOWN:
-                if image[neighbor] <= high_tol:
-                    if image[neighbor] >= low_tol:
-                        # Neighbor is in fill; must check its neighbors too.
-                        flags[neighbor] = FILL
-                        queue_push(queue_ptr, &neighbor)
-                    else:
-                        # Do not check this point again
-                        flags[neighbor] = NOT_FILL
-                else:
-                    # Do not check this point again
-                    flags[neighbor] = NOT_FILL
+                if low_tol <= image[neighbor] <= high_tol:
+                    # Neighbor is in fill; must check its neighbors too.
+                    flags[neighbor] = FILL
+                    queue_push(queue_ptr, &neighbor)

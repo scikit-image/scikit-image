@@ -81,7 +81,7 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
            [0, 1, 1, 0, 2, 2, 0],
            [1, 0, 0, 0, 0, 0, 3]])
 
-    Fill all connected ones with 5, with full connectivity (diagonals included):
+    Fill connected ones with 5, with full connectivity (diagonals included):
 
     >>> flood_fill(image, (1, 1), 5)
     array([[0, 0, 0, 0, 0, 0, 0],
@@ -89,7 +89,7 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
            [0, 5, 5, 0, 2, 2, 0],
            [5, 0, 0, 0, 0, 0, 3]])
 
-    Fill all connected ones with 5, with only cardinal direction connectivity:
+    Fill connected ones with 5, with only cardinal direction connectivity:
 
     >>> flood_fill(image, (1, 1), 5, connectivity=1)
     array([[0, 0, 0, 0, 0, 0, 0],
@@ -97,7 +97,7 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
            [0, 5, 5, 0, 2, 2, 0],
            [1, 0, 0, 0, 0, 0, 3]])
 
-    Fill with a tolerance.
+    Fill with a tolerance:
 
     >>> flood_fill(image, (0, 0), 5, tolerance=1)
     array([[5, 5, 5, 5, 5, 5, 5],
@@ -143,15 +143,9 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
             max_value = np.iinfo(image.dtype).max
             min_value = np.iinfo(image.dtype).min
 
-        if seed_value + tolerance > max_value:
-            high_tol = max_value
-        else:
-            high_tol = seed_value + tolerance
+        high_tol = min(max_value, seed_value + tolerance)
+        low_tol = max(min_value, seed_value - tolerance)
 
-        if seed_value - tolerance < min_value:
-            low_tol = min_value
-        else:
-            low_tol = seed_value - tolerance
     else:
         do_tol = 0
         high_tol = seed_value
@@ -170,12 +164,12 @@ def flood_fill(image, seed_point, new_value, selem=None, connectivity=None,
             raise
 
     if indices:
-        return np.nonzero(flags == 2)
+        return np.nonzero(flags == 1)
     else:
         if not inplace:
             output = image.copy()
-            output[flags == 2] = new_value
+            output[flags == 1] = new_value
             return output
         else:
-            image[flags == 2] = new_value
+            image[flags == 1] = new_value
             return
