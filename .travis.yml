@@ -91,6 +91,7 @@ install:
         pip install --retries 3 -q pyamg
       fi
     - tools/travis/install_qt.sh
+    - pip list
 
 script: tools/travis/script.sh
 
