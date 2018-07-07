@@ -93,6 +93,7 @@ install:
     - tools/travis/install_qt.sh
     - pip list
     - echo "QT_API=${QT_API} QT=${QT}"
+    - cat ${MPL_DIR}/matplotlibrc
 
 script: tools/travis/script.sh
 
