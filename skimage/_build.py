@@ -1,6 +1,5 @@
 import sys
 import os
-import hashlib
 from distutils.version import LooseVersion
 
 CYTHON_VERSION = '0.23.4'
@@ -46,46 +45,11 @@ def cython(pyx_files, working_path=''):
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
 
-            # if the .pyx file stayed the same, we don't need to recompile
-            if not _changed(pyxfile):
-                continue
-
             if pyxfile.endswith('.pyx.in'):
                 process_tempita_pyx(pyxfile)
                 pyxfile = pyxfile.replace('.pyx.in', '.pyx')
 
             cythonize(pyxfile)
-
-
-def _md5sum(f):
-    m = hashlib.new('md5')
-    while True:
-        # Hash one 8096 byte block at a time
-        d = f.read(8096)
-        if not d:
-            break
-        m.update(d)
-    return m.hexdigest()
-
-
-def _changed(filename):
-    """Compare the hash of a Cython file to the cached hash value on disk.
-
-    """
-    filename_cache = filename + '.md5'
-
-    try:
-        md5_cached = open(filename_cache, 'rb').read()
-    except IOError:
-        md5_cached = '0'
-
-    with open(filename, 'rb') as f:
-        md5_new = _md5sum(f)
-
-        with open(filename_cache, 'wb') as cf:
-            cf.write(md5_new.encode('utf-8'))
-
-    return md5_cached != md5_new.encode('utf-8')
 
 
 def process_tempita_pyx(fromfile):
