@@ -92,6 +92,7 @@ install:
       fi
     - tools/travis/install_qt.sh
     - pip list
+    - echo "QT_API=${QT_API} QT=${QT}"
 
 script: tools/travis/script.sh
 
