@@ -1,6 +1,7 @@
 import sys
 import os
 from distutils.version import LooseVersion
+from multiprocessing import cpu_count
 
 CYTHON_VERSION = '0.23.4'
 
@@ -43,13 +44,15 @@ def cython(pyx_files, working_path=''):
         print("Cython >= %s not found; falling back to pre-built %s" \
               % (CYTHON_VERSION, " ".join(c_files)))
     else:
-        for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
-
+        pyx_files = [os.path.join(working_path, f) for f in pyx_files]
+        for i, pyxfile in enumerate(pyx_files):
             if pyxfile.endswith('.pyx.in'):
                 process_tempita_pyx(pyxfile)
-                pyxfile = pyxfile.replace('.pyx.in', '.pyx')
+                pyx_files[i] = pyxfile.replace('.pyx.in', '.pyx')
 
-            cythonize(pyxfile)
+        # Cython doesn't automatically choose a number of threads > 1
+        # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
+        cythonize(pyx_files, nthreads=cpu_count())
 
 
 def process_tempita_pyx(fromfile):
