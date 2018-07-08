@@ -12,7 +12,8 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
-                           try_all_threshold, apply_hysteresis_threshold)
+                           try_all_threshold, try_all_threshold_dict,
+                           apply_hysteresis_threshold)
 from . import rank
 from .rank import median
 from ._unsharp_mask import unsharp_mask
@@ -40,6 +41,7 @@ __all__ = ['inverse',
            'gabor_kernel',
            'gabor',
            'try_all_threshold',
+           'try_all_threshold_dict',
            'frangi',
            'hessian',
            'threshold_otsu',

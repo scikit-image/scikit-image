@@ -1,3 +1,7 @@
+Version 0.15
+------------
+- ``skimage.filters.try_all_threshold_dict`` has been added, and complements the existing function ``sckimage.filters.try_all_threshold``.
+
 Version 0.14
 ------------
 - ``skimage.filters.gaussian_filter`` has been removed. Use
