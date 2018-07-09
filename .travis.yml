@@ -76,7 +76,7 @@ before_install:
         virtualenv -p python ~/venv;
         source ~/venv/bin/activate;
       fi
-    - ccache -s
+    - ccache --zero-stats
     - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis/before_install.sh
     - which python; python --version
@@ -86,6 +86,7 @@ before_install:
 
 install:
     - python setup.py develop
+    - ccache --show-stats
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
