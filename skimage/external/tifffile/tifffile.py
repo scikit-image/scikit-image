@@ -250,7 +250,7 @@ Examples
 >>> data = numpy.random.rand(5, 301, 219)
 >>> imsave('temp.tif', data)  # doctest: +SKIP
 
->>> image = imread('temp.tif')
+>>> image = imread('temp.tif')  # doctest: +SKIP
 >>> numpy.testing.assert_array_equal(image, data)  # doctest: +SKIP
 
 >>> with TiffFile('temp.tif') as tif:
