@@ -18,7 +18,11 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 fi
 
 section "Test.with.min.requirements"
-pytest $TEST_ARGS skimage
+# Python 3.5 doesn't do ordered dictionaries.
+# we need to set the hashseed to be common between processes
+# so that pytest-xdist works correctly
+# see: https://github.com/pytest-dev/pytest-xdist/issues/63
+PYTHONHASHSEED=0 pytest -n 4 $TEST_ARGS skimage
 section_end "Test.with.min.requirements"
 
 section "Flake8.test"
@@ -32,7 +36,7 @@ if [[ "$OPTIONAL_DEPS" == "1" ]]; then
 fi
 # Show what's installed
 pip list
-pytest ${TEST_ARGS} skimage
+PYTHONHASHSEED=0 pytest -n 4 ${TEST_ARGS} skimage
 section_end "Tests.pytest"
 
 

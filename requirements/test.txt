@@ -1,4 +1,5 @@
 pytest
 pytest-cov
+pytest-xdist
 flake8
 codecov
