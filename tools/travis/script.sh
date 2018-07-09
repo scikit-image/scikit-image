@@ -58,12 +58,9 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   fi
   cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
-  for f in doc/examples/*/*.py; do
-    python "${f}"
-    if [ $? -ne 0 ]; then
-      exit 1
-    fi
-  done
+  # run these jobs in parallel,
+  # xargs will return failed if one job fails
+  ls -1 doc/examples/*/*.py | xargs -n 1 -P 4 python
   mv $MPL_DIR/matplotlibrc_backup $MPL_DIR/matplotlibrc
 fi
 section_end "Tests.examples"
