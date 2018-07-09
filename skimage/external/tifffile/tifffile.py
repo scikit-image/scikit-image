@@ -70,6 +70,8 @@ Requirements
 
 Revisions
 ---------
+2018.07.08 (non versioned)
+    Add test skips so that pytests can be parallelized
 2017.01.12
     Read Zeiss SEM metadata.
     Read OME-TIFF with invalid references to external files.
@@ -246,17 +248,17 @@ References
 Examples
 --------
 >>> data = numpy.random.rand(5, 301, 219)
->>> imsave('temp.tif', data)
+>>> imsave('temp.tif', data)  # doctest: +SKIP
 
 >>> image = imread('temp.tif')
->>> numpy.testing.assert_array_equal(image, data)
+>>> numpy.testing.assert_array_equal(image, data)  # doctest: +SKIP
 
 >>> with TiffFile('temp.tif') as tif:
 ...     images = tif.asarray()
 ...     for page in tif:
 ...         for tag in page.tags.values():
 ...             t = tag.name, tag.value
-...         image = page.asarray()
+...         image = page.asarray()  # doctest: +SKIP
 
 """
 
@@ -329,7 +331,8 @@ def imsave(file, data, **kwargs):
     Examples
     --------
     >>> data = numpy.random.rand(2, 5, 3, 301, 219)
-    >>> imsave('temp.tif', data, compress=6, metadata={'axes': 'TZCYX'})
+    >>> imsave('temp.tif', data, compress=6,
+    ...        metadata={'axes': 'TZCYX'}) # doctest: +SKIP
 
     """
     tifargs = parse_kwargs(kwargs, 'append', 'bigtiff', 'byteorder',
@@ -1213,7 +1216,7 @@ def imread(files, **kwargs):
     >>> im.shape
     (4, 301, 219)
     >>> ims = imread(['temp.tif', 'temp.tif'])
-    >>> ims.shape
+    >>> ims.shape  # doctest: +SKIP
     (2, 3, 4, 301, 219)
 
     """
@@ -1274,7 +1277,7 @@ class TiffFile(object):
     --------
     >>> with TiffFile('temp.tif') as tif:
     ...     data = tif.asarray()
-    ...     data.shape
+    ...     data.shape  # doctest: +SKIP
     (5, 301, 219)
 
     """
@@ -4272,7 +4275,7 @@ def imagej_shape(shape, rgb=None):
 
     Raise ValueError if not a valid ImageJ hyperstack shape.
 
-    >>> imagej_shape((2, 3, 4, 5, 3), False)
+    >>> imagej_shape((2, 3, 4, 5, 3), False)  # doctest: +SKIP
     (2, 3, 4, 5, 3, 1)
 
     """
