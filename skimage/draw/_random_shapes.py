@@ -344,9 +344,6 @@ def random_shapes(image_shape,
                     msg = 'Intensity range must lie within (0, 255) interval.'
                     raise ValueError(msg)
 
-    # if background is None:
-    #     #background = [255] * num_channels
-    #     background = [255] * num_channels
     background = np.ascontiguousarray(background, dtype=np.uint8)
     if len(background) == 1:
         background = np.repeat(background, num_channels)

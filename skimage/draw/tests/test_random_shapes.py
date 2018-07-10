@@ -4,7 +4,7 @@ from skimage.draw import random_shapes
 from skimage.draw._random_shapes import _generate_random_colors
 
 from skimage._shared import testing
-from skimage._shared.testing import expected_warnings
+from skimage._shared.testing import parametrize, expected_warnings
 
 
 def test_generates_color_images_with_correct_shape():
@@ -136,41 +136,33 @@ def test_random_shapes_is_reproducible_with_seed():
     assert all(other == labels[0] for other in labels[1:])
 
 
-def test_throws_when_intensity_range_255():
+@parametrize("intensity_range,num_channels,background",
+             [(((20, 20), (30, 30)), 2, (20, 30)),
+              ((25, 25), 1, 25)])
+def test_throws_when_intensity_range_equals_background(intensity_range,
+                                                       num_channels,
+                                                       background):
+
     with testing.raises(ValueError):
         random_shapes((128, 128), max_shapes=3,
-                      intensity_range=((255, 255),),
+                      intensity_range=intensity_range,
+                      num_channels=num_channels,
+                      background=background,
                       random_seed=42)
 
 
-def test_pick_random_colors_within_range():
+@parametrize("num_colors,num_channels,intensity_range,color_vals",
+             [(1, 1, (20, 20), 20),
+              (1, 2, ((20, 20), (25, 25)), (20, 25)),
+              (2, 2, ((20, 20), (25, 25)), (20, 25))])
+def test_pick_random_colors_within_range(num_colors, num_channels,
+                                         intensity_range, color_vals):
 
     random = np.random.RandomState(42)
-
-    num_colors = 1
-    num_channels = 1
-    intensity_range = (20, 20)
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random)
-    assert len(colors) == 1
-    assert (colors == 20).all()
-
-    num_colors = 1
-    num_channels = 2
-    intensity_range = ((20, 20), (25, 25))
-    colors = _generate_random_colors(num_colors, num_channels,
-                                     intensity_range, random)
-    assert len(colors) == 1
-    assert (colors == (20, 25)).all()
-
-    num_colors = 2
-    num_channels = 2
-    intensity_range = ((20, 20), (25, 25))
-    colors = _generate_random_colors(num_colors, num_channels,
-                                     intensity_range, random)
-    print(colors)
-    assert len(colors) == 2
-    assert (colors == (20, 25)).all()
+    assert len(colors) == num_colors
+    assert (colors == color_vals).all()
 
 
 def test_excludes_random_colors():
@@ -196,26 +188,6 @@ def test_excludes_random_colors():
     for color in colors:
         assert tuple(color) in [(20, 25), (20, 26), (21, 26)]
 
-def test_throws_when_intensity_range_equals_excluded_intensities():
-
-    random = np.random.RandomState(42)
-
-    num_colors = 1
-    num_channels = 2
-    intensity_range = ((20, 20), (30, 30))
-    with testing.raises(ValueError):
-        _generate_random_colors(num_colors, num_channels,
-                                intensity_range, random,
-                                exclude=(20, 30))
-
-    num_colors = 1
-    num_channels = 1
-    intensity_range = (25, 25)
-    with testing.raises(ValueError):
-        _generate_random_colors(num_colors, num_channels,
-                                intensity_range, random,
-                                exclude=25)
-
 
 def test_custom_background_color():
 
@@ -239,33 +211,23 @@ def test_custom_background_color():
     assert set(image[:, :, 1].flatten()) == {30, 31}
 
 
-def test_throws_when_backgound_out_of_range():
+@parametrize("num_channels,background",
+             [(1, 256),
+              (2, (256, 256))])
+def test_throws_when_backgound_out_of_range(num_channels, background):
 
-    # monochrome
     with testing.raises(ValueError):
         random_shapes((128, 128), max_shapes=1,
-                      multichannel=False,
-                      background=256,
-                      random_seed=42)
-    # multichannel
-    with testing.raises(ValueError):
-        random_shapes((128, 128), max_shapes=1,
-                      num_channels=2,
-                      background=(256, 256),
+                      num_channels=num_channels,
+                      background=background,
                       random_seed=42)
 
 
-def test_throws_when_background_not_match_nr_of_channels():
+@parametrize("num_channels", [1, 3])
+def test_throws_when_background_not_match_nr_of_channels(num_channels):
 
-    # monochrome
     with testing.raises(ValueError):
         random_shapes((128, 128), max_shapes=1,
-                      multichannel=False,
-                      background=(255, 255),
-                      random_seed=42)
-    # multichannel
-    with testing.raises(ValueError):
-        random_shapes((128, 128), max_shapes=1,
-                      num_channels=3,
+                      num_channels=num_channels,
                       background=(255, 255),
                       random_seed=42)
