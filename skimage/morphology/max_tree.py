@@ -661,7 +661,7 @@ def max_tree_local_maxima(image, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    _max_tree._local_maxima(image.ravel(), output.ravel(),
-                            parent.ravel(), tree_traverser)
+    _max_tree._max_tree_local_maxima(image.ravel(), output.ravel(),
+                                     parent.ravel(), tree_traverser)
 
     return output

@@ -2,7 +2,9 @@ import math
 import unittest
 
 import numpy as np
-from skimage.morphology import max_tree
+from skimage.morphology import max_tree, area_closing, area_opening
+from skimage.morphology import max_tree_local_maxima, diameter_opening
+from skimage.morphology import diameter_closing
 from skimage.util import invert
 
 eps = 1e-12
@@ -161,11 +163,11 @@ class TestMaxtree(unittest.TestCase):
             dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, expected_2, max_tree.area_closing)
-        _full_type_test(img, 4, expected_4, max_tree.area_closing)
+        _full_type_test(img, 2, expected_2, area_closing)
+        _full_type_test(img, 4, expected_4, area_closing)
 
         P, S = max_tree(invert(img))
-        _full_type_test(img, 4, expected_4, max_tree.area_closing,
+        _full_type_test(img, 4, expected_4, area_closing,
                         parent=P, tree_traverser=S)
 
     def test_area_opening(self):
@@ -241,11 +243,11 @@ class TestMaxtree(unittest.TestCase):
                               dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, expected_2, max_tree.area_opening)
-        _full_type_test(img, 4, expected_4, max_tree.area_opening)
+        _full_type_test(img, 2, expected_2, area_opening)
+        _full_type_test(img, 4, expected_4, area_opening)
 
         P, S = max_tree(img)
-        _full_type_test(img, 4, expected_4, max_tree.area_opening,
+        _full_type_test(img, 4, expected_4, area_opening,
                         parent=P, tree_traverser=S)
 
     def test_diameter_closing(self):
@@ -293,11 +295,11 @@ class TestMaxtree(unittest.TestCase):
                        dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, ex2, max_tree.diameter_closing)
-        _full_type_test(img, 4, ex4, max_tree.diameter_closing)
+        _full_type_test(img, 2, ex2, diameter_closing)
+        _full_type_test(img, 4, ex4, diameter_closing)
 
         P, S = max_tree(invert(img))
-        _full_type_test(img, 4, ex4, max_tree.diameter_opening,
+        _full_type_test(img, 4, ex4, diameter_opening,
                         parent=P, tree_traverser=S)
 
     def test_diameter_opening(self):
@@ -342,11 +344,11 @@ class TestMaxtree(unittest.TestCase):
                         [7, 10, 11, 13, 14, 14, 15, 14, 14, 13, 11, 10]])
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, ex2, max_tree.diameter_opening)
-        _full_type_test(img, 4, ex4, max_tree.diameter_opening)
+        _full_type_test(img, 2, ex2, diameter_opening)
+        _full_type_test(img, 4, ex4, diameter_opening)
 
         P, S = max_tree(img)
-        _full_type_test(img, 4, ex4, max_tree.diameter_opening,
+        _full_type_test(img, 4, ex4, diameter_opening,
                         parent=P, tree_traverser=S)
 
     def test_local_maxima(self):
@@ -376,19 +378,22 @@ class TestMaxtree(unittest.TestCase):
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
 
             test_data = data.astype(dtype)
-            out = max_tree.local_maxima(test_data)
-
-            error = diff(expected_result, out)
+            out = max_tree_local_maxima(test_data)
+            out_bin = out > 0
+            error = diff(expected_result, out_bin)
             assert error < eps
             assert out.dtype == expected_result.dtype
+            assert np.max(out) == 5
 
             P, S = max_tree(test_data)
-            out = max_tree.local_maxima(test_data,
-                                        parent=P, tree_traverser=S)
+            out = max_tree_local_maxima(test_data,
+                                                 parent=P,
+                                                 tree_traverser=S)
 
-            error = diff(expected_result, out)
+            error = diff(expected_result, out_bin)
             assert error < eps
             assert out.dtype == expected_result.dtype
+            assert np.max(out) == 5
 
     def test_extrema_float(self):
         "specific tests for float type"
@@ -427,9 +432,11 @@ class TestMaxtree(unittest.TestCase):
                                    dtype=np.uint8)
 
         # test for local maxima
-        out = max_tree.local_maxima(data)
-        error = diff(expected_result, out)
+        out = max_tree_local_maxima(data)
+        out_bin = out > 0
+        error = diff(expected_result, out_bin)
         assert error < eps
+        assert np.max(out) == 6
 
     def test_3d(self):
         """tests the detection of maxima in 3D."""
@@ -459,10 +466,11 @@ class TestMaxtree(unittest.TestCase):
         img[7, 7, 7] = 255
         local_maxima[7, 7, 7] = 1
 
-        out = max_tree.local_maxima(img, False, 1)
-        error = diff(local_maxima, out)
+        out = max_tree_local_maxima(img)
+        out_bin = out > 0
+        error = diff(local_maxima, out_bin)
         assert error < eps
-
+        assert np.max(out) == 5
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
