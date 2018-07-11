@@ -129,7 +129,7 @@ def max_tree(image, connectivity=2):
 
     # flat_neighborhood contains a list of offsets allowing one to find the
     # neighbors in the ravelled image.
-    flat_neighborhood = _offsets_to_raveled_neighbors(image, neighbors,
+    flat_neighborhood = _offsets_to_raveled_neighbors(image.shape, neighbors,
                                                       offset).astype(np.int32)
 
     # pixels need to be sorted according to their grey level.

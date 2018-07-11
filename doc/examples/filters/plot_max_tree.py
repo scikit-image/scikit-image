@@ -38,15 +38,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from skimage.morphology import max_tree
-import numpy.random as rd
-import pdb
+import networkx as nx
+from matplotlib.gridspec import GridSpec
 
 
+# plot_img is a helper function to plot the images and overlay the image
+# values or indices.
 def plot_img(image, ax, title, plot_text,
              image_values):
+
     ax.imshow(image, cmap='gray', aspect='equal', vmin=0, vmax=np.max(image))
-    ax.axis('off')
     ax.set_title(title)
+    ax.set_yticks([])
+    ax.set_xticks([])
 
     for x in np.arange(-0.5, image.shape[0], 1.0):
         ax.add_artist(Line2D((x, x), (-0.5, image.shape[0]-0.5),
@@ -67,100 +71,239 @@ def plot_img(image, ax, title, plot_text,
                 k += 1
     return
 
-# small example image
-#image = np.array([[20, 16, 15, 10, 9],
-#                  [19, 24, 25, 2, 1],
-#                  [8, 4, 7, 6, 3],
-#                  [14, 13, 12, 23, 17],
-#                  [18, 5, 11, 22, 21]], dtype=np.uint8)
 
-width, height = image.shape
+# prune transforms a canonical max-tree to a max-tree.
+def prune(G, node, res):
+    value = G.nodes[node]['value']
+    res[node] = str(node)
+    preds = [p for p in G.predecessors(node)]
+    for p in preds:
+        if (G.nodes[p]['value'] == value):
+            res[node] += ', %i' % p
+            G.remove_node(p)
+        else:
+            prune(G, p, res)
+    G.nodes[node]['label'] = res[node]
+    return
 
-# raveled indices of the example image
+
+# accumulate transforms a max-tree to a component tree.
+def accumulate(G, node, res):
+    total = G.nodes[node]['label']
+    parents = G.predecessors(node)
+    for p in parents:
+        total += ', ' + accumulate(G, p, res)
+    res[node] = total
+    return total
+
+
+# sets the positions of a max-tree. This is necessary, as we wanted to
+# visually distinguish between nodes at the same level and nodes at
+# different levels.
+def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
+    pos = {}
+    for node in reversed(list(nx.topological_sort(CMT))):
+        value = G.nodes[node]['value']
+        if CMT.out_degree(node) == 0:
+            # root
+            pos[node] = (root_x, value)
+
+        in_nodes = [y for y in CMT.predecessors(node)]
+
+        # place the nodes at the same level
+        level_nodes = [y for y in
+                       filter(lambda x: image_rav[x] == value, in_nodes)]
+        nb_level_nodes = len(level_nodes) + 1
+
+        c = nb_level_nodes // 2
+        i = - c
+        if (len(level_nodes) < 3):
+            hy = 0
+            m = 0
+        else:
+            hy = 0.25
+            m = hy / (c - 1)
+
+        for level_node in level_nodes:
+            if(i == 0):
+                i += 1
+            if (len(level_nodes) < 3):
+                pos[level_node] = (pos[node][0] + i * 0.6 * delta_x, value)
+            else:
+                pos[level_node] = (pos[node][0] + i * 0.6 * delta_x,
+                                   value + m * (2 * np.abs(i) - c - 1))
+            i += 1
+
+        # place the nodes at different levels
+        other_level_nodes = [y for y in
+                             filter(lambda x: image_rav[x] > value, in_nodes)]
+        if (len(other_level_nodes) == 1):
+            i = 0
+        else:
+            i = - len(other_level_nodes) // 2
+        for other_level_node in other_level_nodes:
+            if((len(other_level_nodes) % 2 == 0) and (i == 0)):
+                i += 1
+            pos[other_level_node] = (pos[node][0] + i * delta_x,
+                                     image_rav[other_level_node])
+            i += 1
+
+    return pos
+
+#####################################################################
+# First, we define a small test image.
+# For clarity, we choose an example image, where image values cannot be
+# confounded with indices (different range).
+image = np.array([[40, 40, 39, 39, 38],
+                  [40, 41, 39, 39, 39],
+                  [30, 30, 30, 32, 32],
+                  [33, 33, 30, 32, 35],
+                  [30, 30, 30, 33, 36]], dtype=np.uint8)
+
+# the raveled image (for display purpose)
+image_rav = image.ravel()
+
+# raveled indices of the example image (for display purpose)
 raveled_indices = np.arange(np.prod(image.shape))
 raveled_indices = raveled_indices.reshape(image.shape).astype(np.int)
 
-# building the max-tree
+# max-tree of the image
 P, S = max_tree(image)
 
-# plot (example image and all possible thresholds)
-fig, ax = plt.subplots(3, 9, figsize=(16, 6))
+P_rav = P.ravel()
 
-# top row: image (left: values printed on top,
-# right: raveled indices printed on top)
-plot_img(image, ax[0, 0], 'Image Values',
+
+# Now, we plot the image, all possible thresholds and the corresponding
+# trees (component tree and max-tree).
+fig = plt.figure(figsize=(18, 9))
+
+gs = GridSpec(3, 9,
+              left=0.05, right=0.95,
+              top=0.95, bottom=0.05,
+              height_ratios=[1.5, 1, 3])
+gs.update(wspace=0.05, hspace=0.2)
+
+#####################################################################
+# First row of the plot
+# Here we plot the image with the following overlays:
+# - the image values
+# - the raveled indices (serve as pixel identifiers)
+# - the output of the max_tree function
+ax1 = plt.subplot(gs[0, 0])
+ax2 = plt.subplot(gs[0, 1])
+ax3 = plt.subplot(gs[0, 2])
+ax4 = plt.subplot(gs[0, 3:])
+ax4.axis('off')
+
+plot_img(image - image.min(), ax1, 'Image Values',
          plot_text=True, image_values=image)
-plot_img(image, ax[0, 1], 'Raveled Indices',
+plot_img(image - image.min(), ax2, 'Raveled Indices',
          plot_text=True,
          image_values=raveled_indices)
-plot_img(P, ax[0, 2], 'Max-tree indices',
+plot_img(image - image.min(), ax3, 'Max-tree indices',
          plot_text=True,
          image_values=P)
-plot_img(image, ax[0, 3], 'Max-tree',
-         plot_text=False,
-         image_values=raveled_indices)
 
-# arrows corresponding to the max-tree
-eps = 0.5
-for i in range(P.shape[0]):
-    for j in range(P.shape[1]):
-        target_index = P[i, j]
-        y = target_index // width
-        x = target_index % width
 
-        dx = x - j
-        dy = y - i
-        r = np.sqrt(dx**2 + dy**2)
-        if r == 0:
-            # root of the tree
-            continue
-        dx = (r - eps) / r * dx
-        dy = (r - eps) / r * dy
-        delta = (i + j) % 3
-        ax[0, 3].arrow(j + delta / 10.0,
-                       i + delta / 10.0,
-                       dx,
-                       dy,
-                       color='red',
-                       zorder=2,
-                       head_width=0.2)
+#####################################################################
+# Second row of the plot
+# Here, we see the results of a series of threshold operations.
+# The component tree (and max-tree) is a representation of the inclusion
+# of the corresponding pixel sets.
 
-for k in range(3, 9):
-    ax[0, k].axis('off')
-
-# application of all possible thresholds
-for k in range(9):
-    threshold = 8 - k
+thresholds = np.unique(image)
+for k, threshold in enumerate(thresholds.tolist()):
     bin_img = image >= threshold
-    plot_img(bin_img, ax[1, k], 'Threhold : %i' % threshold,
+    ax = plt.subplot(gs[1, k])
+    plot_img(bin_img, ax, 'Threhold : %i' % threshold,
              plot_text=True, image_values=raveled_indices)
 
-    new_pixel_image = np.zeros(image.shape)
-    new_pixel_image[image > threshold] = 255
-    new_pixel_image[image == threshold] = 128
-    plot_img(new_pixel_image, ax[2, k], '',
-             plot_text=True, image_values=raveled_indices)
 
-plt.tight_layout()
+#####################################################################
+# Third row of the plot
+# Here, we plot the component and max-trees. A component tree relates
+# the different pixel sets resulting from all possible threshold operations
+# to each other. There is an arrow in the graph, if a component at one level
+# is included in the component of a lower level. The max-tree is just
+# a different encoding of the pixel sets.
+# 1. the component tree: pixel sets are explicitly written out. We see for
+#    instance that {6} (result of applying a threshold at 41) is the parent
+#    of {0, 1, 5, 6} (threshold at 40).
+# 2. the max-tree: only pixels that come into the set at this level
+#    are explicitly written out. We therefore will write
+#    {6} -> {0,1,5} instead of {6} -> {0, 1, 5, 6}
+# 3. the canonical max-treeL this is the representation which is given by
+#    our implementation. Here, every pixel is a node. Connected components
+#    are represented by one of the pixels. We thus replace
+#    {6} -> {0,1,5} by {6} -> {5}, {1} -> {5}, {0} -> {5}
+#    This allows us to represent the graph by an image (top row, third column).
+
+
+##############################
+# the canonical max-tree graph
+CMT = nx.DiGraph()
+CMT.add_nodes_from(S)
+for node in CMT.nodes():
+    CMT.nodes[node]['value'] = image_rav[node]
+CMT.add_edges_from([(n, P_rav[n]) for n in S[1:]])
+
+# max-tree from the canonical max-tree
+MT = nx.DiGraph(CMT)
+labels = {}
+prune(MT, S[0], labels)
+
+# component tree from the max-tree
+labels_ct = {}
+total = accumulate(MT, S[0], labels_ct)
+
+# positions of nodes : canonical max-tree (CMT)
+pos_cmt = position_nodes_for_max_tree(CMT, image_rav)
+
+# positions of nodes : max-tree (MT)
+pos_mt = dict(zip(MT.nodes, [pos_cmt[node] for node in MT.nodes]))
+
+# plot the trees with networkx and matplotlib
+ax1 = plt.subplot(gs[2, :3])
+ax2 = plt.subplot(gs[2, 3:6], sharey=ax1)
+ax3 = plt.subplot(gs[2, 6:], sharey=ax2)
+
+# component tree
+plt.sca(ax1)
+nx.draw_networkx(MT, pos=pos_mt,
+                 node_size=40, node_shape='s', node_color='white',
+                 font_size=6, labels=labels_ct)
+for v in range(image_rav.min(), image_rav.max() + 1):
+    plt.axhline(v - 0.5, linestyle=':')
+    plt.text(-3, v - 0.15, "value : %i" % v, fontsize=8)
+plt.axhline(v + 0.5, linestyle=':')
+plt.xlim(xmin=-3, xmax=10)
+plt.title('Component tree')
+plt.axis('off')
+
+# max-tree
+plt.sca(ax2)
+nx.draw_networkx(MT, pos=pos_mt,
+                 node_size=40, node_shape='s', node_color='white',
+                 font_size=8, labels=labels)
+for v in range(image_rav.min(), image_rav.max() + 1):
+    plt.axhline(v - 0.5, linestyle=':')
+    plt.text(0, v - 0.15, "value : %i" % v, fontsize=8)
+plt.axhline(v + 0.5, linestyle=':')
+plt.xlim(xmin=0)
+plt.title('Max tree')
+plt.axis('off')
+
+# canonical max-tree
+plt.sca(ax3)
+nx.draw_networkx(CMT, pos=pos_cmt,
+                 node_size=40, node_shape='s', node_color='white',
+                 font_size=8)
+for v in range(image_rav.min(), image_rav.max() + 1):
+    plt.axhline(v - 0.5, linestyle=':')
+    plt.text(0, v - 0.15, "value : %i" % v, fontsize=8)
+plt.axhline(v + 0.5, linestyle=':')
+plt.xlim(xmin=0)
+plt.title('Canonical max tree')
+plt.axis('off')
+
 plt.show()
-
-# ############################################################################
-# In the second row, we see the results of a series of threshold operations
-# The results are binary images with one or several connected components.
-# The component tree is a tree representation of the connected components
-# for the different thresholds.
-# A connected component A at threshold t is the parent of a connected
-# component B at threshold t-1 if B is a subset of A.
-# Here we have for instance:
-# {18, 23, 24} -> {18}, meaning that {18, 23, 24} is the parent of {18}
-# {0, 5, 6, 7} -> {6, 7}
-# The resulting tree is called a component tree.
-
-# ############################################################################
-# In the third row, we see a more compact representation, where we highlight
-# for every threshold those pixels that have been added to the segmentation
-# result, i.e. that have exactly the value of threshold.
-# Here we would write:
-# {23, 24} -> {18}
-# {0, 5} -> {6, 7}
-# This compact representation is called a max-tree.
