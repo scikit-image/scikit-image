@@ -1,3 +1,8 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+
 """_max_tree.pyx - building a max-tree from an image.
 
 This is an implementation of the max-tree, which is a morphological
@@ -37,9 +42,6 @@ ctypedef fused dtype_t:
     np.int64_t
     np.float32_t
     np.float64_t
-
-cdef inline DTYPE_UINT64_t uint64_max(DTYPE_UINT64_t a, DTYPE_UINT64_t b): return a if a >= b else b
-cdef inline DTYPE_UINT64_t uint64_min(DTYPE_UINT64_t a, DTYPE_UINT64_t b): return a if a <= b else b
 
 
 cdef DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):

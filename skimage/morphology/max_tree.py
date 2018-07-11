@@ -593,8 +593,6 @@ def max_tree_local_maxima(image, connectivity=2,
     ----------
     image : ndarray
         The input image for which the maxima are to be calculated.
-    label : boolean, optional
-        If True, the local maxima are also labeled.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
@@ -663,7 +661,7 @@ def max_tree_local_maxima(image, connectivity=2,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    _max_tree._local_maxima(image.ravel(), output.ravel(), label,
+    _max_tree._local_maxima(image.ravel(), output.ravel(),
                             parent.ravel(), tree_traverser)
 
     return output
