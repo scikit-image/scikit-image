@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Cython code used in extrema.py."""
+"""Cython code used in _flood_fill.py."""
 
 cimport numpy as cnp
 
@@ -27,7 +27,7 @@ ctypedef fused dtype_t:
     cnp.float64_t
 
 
-# Definition of flag values used for `flags` in _local_maxima & _fill_plateau
+# Definition of flag values used for `flags` in _flood_fill & _fill_plateau
 cdef:
     # Border value - do not cross!
     unsigned char BORDER = 2
@@ -76,26 +76,24 @@ def _flood_fill(dtype_t[::1] image not None,
     """
     cdef:
         QueueWithHistory queue
-        unsigned char last_dim_in_neighbors
 
     with nogil:
         # Initialize a buffer used to queue positions while evaluating each
         # potential maximum (flagged with 2)
-        queue_init(&queue, 64)
         try:
             # Conduct flood fill from this point - with or without tolerance
             if do_tol == 0:
-                _flood_fill_do_equal(image, flags, neighbor_offsets, &queue,
+                _flood_fill_equal(image, flags, neighbor_offsets, &queue,
                     ravelled_seed_idx, seed_value)
             else:
-                _flood_fill_do_tol(image, flags, neighbor_offsets, &queue,
+                _flood_fill_tolerance(image, flags, neighbor_offsets, &queue,
                     ravelled_seed_idx, seed_value, high_tol, low_tol)
         finally:
             # Ensure that memory is released again
             queue_exit(&queue)
 
 
-cdef inline void _flood_fill_do_equal(
+cdef inline void _flood_fill_equal(
         dtype_t[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index, dtype_t seed_value) nogil:
@@ -119,10 +117,11 @@ cdef inline void _flood_fill_do_equal(
         Value of `image[start_index]`.
     """
     cdef:
+        QueueWithHistory queue
         QueueItem current_index, neighbor
 
-    # Queue start position after clearing the buffer
-    queue_clear(queue_ptr)
+    # Initialize the queue and push start position
+    queue_init(&queue, 64)
     queue_push(queue_ptr, &start_index)
     flags[start_index] = FILL
 
@@ -140,7 +139,7 @@ cdef inline void _flood_fill_do_equal(
                     queue_push(queue_ptr, &neighbor)
 
 
-cdef inline void _flood_fill_do_tol(
+cdef inline void _flood_fill_tolerance(
         dtype_t[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index, dtype_t seed_value, dtype_t high_tol,
@@ -169,10 +168,11 @@ cdef inline void _flood_fill_do_tol(
         Lower limit for tolerance comparison.
     """
     cdef:
+        QueueWithHistory queue
         QueueItem current_index, neighbor
 
-    # Queue start position after clearing the buffer
-    queue_clear(queue_ptr)
+    # Initialize the queue and push start position
+    queue_init(&queue, 64)
     queue_push(queue_ptr, &start_index)
     flags[start_index] = FILL
 
