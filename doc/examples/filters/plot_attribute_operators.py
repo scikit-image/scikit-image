@@ -13,9 +13,11 @@ References
 .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
        Connected Operators for Image and Sequence Processing.
        IEEE Transactions on Image Processing, 7(4), 555-570.
+       DOI:10.1109/83.663500
 .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
        Component Tree Computation Algorithms. IEEE Transactions on Image
        Processing, 23(9), 3885-3895.
+       DOI:10.1109/TIP.2014.2336551
 .. [3] Vincent L., Proc. "Grayscale area openings and closings,
        their efficient implementation and applications",
        EURASIP Workshop on Mathematical Morphology and its
@@ -26,7 +28,7 @@ References
        of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
        A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
        Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-
+       DOI:10.1007/3-540-36104-9_23
 """
 
 import numpy as np
@@ -42,13 +44,13 @@ image = data.page()
 fig, ax = plt.subplots(2, 3, figsize=(15, 5))
 
 # Original image
-ax[0,0].imshow(image, cmap='gray', aspect='equal')
-ax[0,0].set_title('Original')
-ax[0,0].axis('off')
+ax[0, 0].imshow(image, cmap='gray', aspect='equal')
+ax[0, 0].set_title('Original')
+ax[0, 0].axis('off')
 
-ax[1,0].imshow(image, cmap='gray', aspect='equal')
-ax[1,0].set_title('Original')
-ax[1,0].axis('off')
+ax[1, 0].imshow(image, cmap='gray', aspect='equal')
+ax[1, 0].set_title('Original')
+ax[1, 0].axis('off')
 
 # Diameter closing : we remove all dark structures with a maximal
 # extension of less than 23. I.e. in closed_attr, all local minima
@@ -58,13 +60,13 @@ closed_attr = diameter_closing(image, 23)
 # We then calculate the difference to the original image.
 tophat_attr = closed_attr - image
 
-ax[0,1].imshow(closed_attr, cmap='gray', aspect='equal')
-ax[0,1].set_title('Diameter Closing')
-ax[0,1].axis('off')
+ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal')
+ax[0, 1].set_title('Diameter Closing')
+ax[0, 1].axis('off')
 
-ax[0,2].imshow(tophat_attr, cmap='gray', aspect='equal')
-ax[0,2].set_title('Tophat (Difference)')
-ax[0,2].axis('off')
+ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal')
+ax[0, 2].set_title('Tophat (Difference)')
+ax[0, 2].axis('off')
 
 # A morphological closing is removing all dark structures that cannot
 # contain a structuring element of a certain size.
@@ -73,13 +75,13 @@ closed = closing(image, square(12))
 # Again we calculate the difference to the original image.
 tophat = closed - image
 
-ax[1,1].imshow(closed, cmap='gray', aspect='equal')
-ax[1,1].set_title('Morphological Closing')
-ax[1,1].axis('off')
+ax[1, 1].imshow(closed, cmap='gray', aspect='equal')
+ax[1, 1].set_title('Morphological Closing')
+ax[1, 1].axis('off')
 
-ax[1,2].imshow(tophat, cmap='gray', aspect='equal')
-ax[1,2].set_title('Tophat (Difference)')
-ax[1,2].axis('off')
+ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
+ax[1, 2].set_title('Tophat (Difference)')
+ax[1, 2].axis('off')
 
 plt.tight_layout()
 plt.show()
