@@ -448,8 +448,8 @@ def area_closing(image, area_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree(invert(img))
-    >>> closed = diameter_closing(img, 3, parent=P, tree_traverser=S)
+    >>> P, S = max_tree(invert(f))
+    >>> closed = diameter_closing(f, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
@@ -555,8 +555,8 @@ def diameter_closing(image, diameter_threshold, connectivity=2,
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
-    >>> P, S = max_tree(invert(img))
-    >>> closed = diameter_closing(img, 3, parent=P, tree_traverser=S)
+    >>> P, S = max_tree(invert(f))
+    >>> closed = diameter_closing(f, 3, parent=P, tree_traverser=S)
     """
     # inversion of the input image
     image_inv = invert(image)
