@@ -44,13 +44,24 @@ ctypedef fused dtype_t:
     np.float64_t
 
 
-cdef DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
+cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
     """recursive function to get the root of the current tree. Importantly, the
     function changes the tree (path compression), that reduces the complexity
-    from O(n*n) to O(n*log(n)).
+    from O(n*n) to O(n*log(n)). Despite of path compression, our tests showed
+    that the non-recursive version seems to perform better.
     """
     if parent[index] != index:
-        parent[index] = find_root(parent, parent[index])
+        parent[index] = find_root_recursive(parent, parent[index])
+    return parent[index]
+
+
+cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
+    """function to get the root of the current tree. Here, we do without path
+    compression and accept the higher complexity, but the function is inline and
+    avoids some overhead induced by its recursive version.
+    """
+    while parent[index] != parent[parent[index]]:
+        parent[index] = parent[parent[index]]
     return parent[index]
 
 
@@ -179,10 +190,10 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] imag
     return extension
 
 
-# _local_maxima cacluates the local maxima from the max-tree representation
-# this is interesting if the max-tree representation has already been
-# calculated for other reasons. Otherwise, it is not the most efficient
-# method. If the parameter label is True, the minima are labeled.
+# _max_tree_local_maxima cacluates the local maxima from the max-tree
+# representation this is interesting if the max-tree representation has
+# already been calculated for other reasons. Otherwise, it is not the most
+# efficient method. If the parameter label is True, the minima are labeled.
 cpdef void _max_tree_local_maxima(dtype_t[::1] image,
                                   DTYPE_UINT64_t[::1] output,
                                   DTYPE_INT64_t[::1] parent,

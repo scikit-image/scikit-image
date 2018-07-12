@@ -651,7 +651,7 @@ def max_tree_local_maxima(image, connectivity=2,
 
     We can calculate all local maxima:
 
-    >>> maxima = local_maxima(f)
+    >>> maxima = max_tree_local_maxima(f)
 
     The resulting image contains the labeled local maxima.
     """
