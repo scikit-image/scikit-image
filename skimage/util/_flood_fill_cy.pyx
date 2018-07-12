@@ -37,12 +37,12 @@ cdef:
     unsigned char UNKNOWN = 0
 
 
-cpdef inline void _flood_fill_equal(dtype_t[::1] image, 
+cpdef inline void _flood_fill_equal(dtype_t[::1] image,
                                     unsigned char[::1] flags,
-                                    Py_ssize_t[::1] neighbor_offsets, 
-                                    Py_ssize_t start_index, 
+                                    Py_ssize_t[::1] neighbor_offsets,
+                                    Py_ssize_t start_index,
                                     dtype_t seed_value) nogil:
-    """Fill connected areas with 1, requiring strict equality.
+    """Find connected areas to fill, requiring strict equality.
 
     Parameters
     ----------
@@ -63,37 +63,37 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
         QueueWithHistory queue
         QueueItem current_index, neighbor
 
-    # Initialize the queue and push start position
-    queue_init(&queue, 64)
-    queue_push(&queue, &start_index)
-    flags[start_index] = FILL
+    with nogil:
+        # Initialize the queue
+        queue_init(&queue, 64)
+        try:
+            queue_push(&queue, &start_index)
+            flags[start_index] = FILL
+            # Break loop if all queued positions were evaluated
+            while queue_pop(&queue, &current_index):
+                # Look at all neighboring samples
+                for i in range(neighbor_offsets.shape[0]):
+                    neighbor = current_index + neighbor_offsets[i]
 
-    try:
-        # Break loop if all queued positions were evaluated
-        while queue_pop(&queue, &current_index):
-            # Look at all neighboring samples
-            for i in range(neighbor_offsets.shape[0]):
-                neighbor = current_index + neighbor_offsets[i]
-
-                # Shortcut if neighbor is already part of fill
-                if flags[neighbor] == UNKNOWN:
-                    if image[neighbor] == seed_value:
-                        # Neighbor is in fill; check its neighbors too.
-                        flags[neighbor] = FILL
-                        queue_push(&queue, &neighbor)
-    finally:
-        # Ensure memory released
-        queue_exit(&queue)
+                    # Shortcut if neighbor is already part of fill
+                    if flags[neighbor] == UNKNOWN:
+                        if image[neighbor] == seed_value:
+                            # Neighbor is in fill; check its neighbors too.
+                            flags[neighbor] = FILL
+                            queue_push(&queue, &neighbor)
+        finally:
+            # Ensure memory released
+            queue_exit(&queue)
 
 
-cpdef inline void _flood_fill_tolerance(dtype_t[::1] image, 
+cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
                                         unsigned char[::1] flags,
-                                        Py_ssize_t[::1] neighbor_offsets, 
-                                        Py_ssize_t start_index, 
-                                        dtype_t seed_value, 
+                                        Py_ssize_t[::1] neighbor_offsets,
+                                        Py_ssize_t start_index,
+                                        dtype_t seed_value,
                                         dtype_t low_tol,
                                         dtype_t high_tol) nogil:
-    """Fill connected areas with 1, within a tolerance.
+    """Find connected areas to fill, within a tolerance.
 
     Parameters
     ----------
@@ -120,24 +120,24 @@ cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
         QueueWithHistory queue
         QueueItem current_index, neighbor
 
-    # Initialize the queue and push start position
-    queue_init(&queue, 64)
-    queue_push(&queue, &start_index)
-    flags[start_index] = FILL
+    with nogil:
+        # Initialize the queue and push start position
+        queue_init(&queue, 64)
+        try:
+            queue_push(&queue, &start_index)
+            flags[start_index] = FILL
+            # Break loop if all queued positions were evaluated
+            while queue_pop(&queue, &current_index):
+                # Look at all neighboring samples
+                for i in range(neighbor_offsets.shape[0]):
+                    neighbor = current_index + neighbor_offsets[i]
 
-    try:
-        # Break loop if all queued positions were evaluated
-        while queue_pop(&queue, &current_index):
-            # Look at all neighboring samples
-            for i in range(neighbor_offsets.shape[0]):
-                neighbor = current_index + neighbor_offsets[i]
-
-                # Only do comparisons on points not (yet) part of fill
-                if flags[neighbor] == UNKNOWN:
-                    if low_tol <= image[neighbor] <= high_tol:
-                        # Neighbor is in fill; must check its neighbors too.
-                        flags[neighbor] = FILL
-                        queue_push(&queue, &neighbor)
-    finally:
-        # Ensure memory released
-        queue_exit(&queue)
+                    # Only do comparisons on points not (yet) part of fill
+                    if flags[neighbor] == UNKNOWN:
+                        if low_tol <= image[neighbor] <= high_tol:
+                            # Neighbor is in fill; check its neighbors too.
+                            flags[neighbor] = FILL
+                            queue_push(&queue, &neighbor)
+        finally:
+            # Ensure memory released
+            queue_exit(&queue)

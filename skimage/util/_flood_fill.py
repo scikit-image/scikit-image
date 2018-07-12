@@ -50,17 +50,12 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     Returns
     -------
     filled : ndarray or tuple[ndarray]
-        If `indices` is false, an array with the same shape as `image` is
-        returned with values equal to (or within tolerance) of the seed point
-        set to `new_value`.  If `indices` is true, a tuple of one-dimensional
-        arrays containing the coordinates (indices) of all found maxima.
-
-    See Also
-    --------
-    skimage.morphology.local_maxima
-    skimage.morphology.local_minima
-    skimage.morphology.h_maxima
-    skimage.morphology.h_minima
+        If `inplace` is True, the input `image` is modified inplace and nothing
+        is returned.  If `indices` is false, an array with the same shape as
+        `image` is returned with values equal to (or within tolerance) of the
+        seed point set to `new_value`.  If `indices` is true, a tuple of
+        one-dimensional arrays containing the coordinates (indices) of all
+        found maxima is returned.
 
     Notes
     -----
@@ -115,7 +110,11 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
 
     # Shortcut for rank zero
     if image.size == 0:
-        return np.array([], dtype=(np.intp if indices else np.uint8))
+        if not inplace:
+            return np.array([], dtype=(np.intp if indices else np.uint8))
+        else:
+            # No values to change inplace, but follow API convention
+            return
 
     # Convenience for 1d input
     try:
@@ -151,18 +150,18 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
             high_tol = min(max_value, seed_value + tolerance)
             low_tol = max(min_value, seed_value - tolerance)
 
-            _flood_fill_tolerance(working_image.ravel(), 
-                                  flags.ravel(), 
+            _flood_fill_tolerance(working_image.ravel(),
+                                  flags.ravel(),
                                   neighbor_offsets,
-                                  ravelled_seed_idx, 
-                                  seed_value, 
-                                  low_tol, 
+                                  ravelled_seed_idx,
+                                  seed_value,
+                                  low_tol,
                                   high_tol)
         else:
-            _flood_fill_equal(working_image.ravel(), 
-                              flags.ravel(), 
+            _flood_fill_equal(working_image.ravel(),
+                              flags.ravel(),
                               neighbor_offsets,
-                              ravelled_seed_idx, 
+                              ravelled_seed_idx,
                               seed_value)
     except TypeError:
         if working_image.dtype == np.float16:
