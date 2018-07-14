@@ -10,7 +10,6 @@ from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
-from ._flood_fill import flood_fill
 
 from .._shared.utils import copy_func
 
@@ -37,5 +36,4 @@ __all__ = ['img_as_float32',
            'apply_parallel',
            'invert',
            'unique_rows',
-           'flood_fill',
            ]

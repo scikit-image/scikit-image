@@ -7,9 +7,14 @@ connected to a given seed point with a different value.
 import numpy as np
 import warnings
 
+from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
+                      _fast_pad)
+from .watershed import _offsets_to_raveled_neighbors
+from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
+
 
 def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
-               indices=False, tolerance=None, inplace=False):
+               tolerance=None, inplace=False):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -34,10 +39,6 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         Adjacent pixels whose squared distance from the center is larger or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
-    indices : bool, optional
-        If True, the output will be an array representing indices of the flood
-        fill. If False (default), the output will be an n-dimensional array
-        with flood filling applied.
     tolerance : ``selem`` type, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
@@ -46,16 +47,13 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     inplace : bool, optional
         If True, flood filling is applied to `image` inplace.  If False, the
         flood filled result is returned without modifying the input `image`
-        (default).  Ignored if `indices` is True.
+        (default).
 
     Returns
     -------
-    filled : ndarray or tuple[ndarray]
-        If `indices` is false, an array with the same shape as `image` is
-        returned with values equal to (or within tolerance of) the seed point
-        set to `new_value`.  If `indices` is true, a tuple of one-dimensional
-        arrays containing the coordinates (indices) of all found maxima is
-        returned.
+    filled : ndarray
+        An array with the same shape as `image` is returned with values equal
+        to (or within tolerance of) the seed point set to `new_value`.
 
     Notes
     -----
@@ -64,7 +62,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
 
     Examples
     --------
-    >>> from skimage.util import flood_fill
+    >>> from skimage.morphology import flood_fill
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
     >>> image[3, 0] = 1
@@ -100,11 +98,125 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    from ..morphology.extrema import (_resolve_neighborhood,
-                                      _set_edge_values_inplace, _fast_pad)
-    from ..morphology.watershed import _offsets_to_raveled_neighbors
-    from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
+    # Correct start point in ravelled image - only copy if non-contiguous
+    image = np.asarray(image)
+    copied = False
 
+    if not image.flags.contiguous:
+        if inplace:
+            warnings.warn('Non-contiguous array passed as `image`; this will '
+                          'be converted to a contiguous array as a copy.')
+            # Flood fill requires some sort of contiguity - this makes a copy
+            image = np.ascontiguousarray(image)
+            copied = True
+
+    if not inplace:
+        if not copied:
+            output = image.copy()
+        else:
+            output = image
+        output[flood_fill_mask(image, seed_point, selem=selem,
+                               connectivity=connectivity,
+                               tolerance=tolerance)] = new_value
+        return output
+    else:  # inplace
+        image[flood_fill_mask(image, seed_point, selem=selem,
+                              connectivity=connectivity,
+                              tolerance=tolerance)] = new_value
+        return image
+
+
+
+def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
+                    tolerance=None):
+    """Find mask corresponding to a flood fill applied to an image.
+
+    Starting at a specific `seed_point`, connected points equal or within
+    `tolerance` of the seed value are found, returned as a mask.
+
+    Parameters
+    ----------
+    image : ndarray
+        An n-dimensional array.
+    seed_point : tuple or int
+        The index into `image` to start filling.
+    selem : ndarray, optional
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel. It must contain only 1's and 0's, have the same number
+        of dimensions as `image`. If not given, all adjacent pixels are
+        considered as part of the neighborhood (fully connected).
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is larger or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
+    tolerance : ``selem`` type, optional
+        If None (default), adjacent values must be strictly equal to the
+        initial value of `image` at `seed_point`.  This is fastest.  If a value
+        is given, a comparison will be done at every point and this tolerance
+        on each side of the initial value will also be filled (inclusive).
+
+    Returns
+    -------
+    mask : ndarray
+        A Boolean array with the same shape as `image` is returned, with values
+        equal to 1 for areas connected to and equal (or within tolerance of)
+        the seed point.  All other values are zero.
+
+    Notes
+    -----
+    The conceptual analogy of this operation is the 'paint bucket' tool in many
+    raster graphics programs.  This function returns just the mask
+    representing the fill.
+
+    If indices are desired rather than masks for memory reasons, the user can
+    simply run `numpy.nonzero` on the result, save the indices, and discard
+    this mask.
+
+    Examples
+    --------
+    >>> from skimage.morphology import flood_fill_mask
+    >>> image = np.zeros((4, 7), dtype=int)
+    >>> image[1:3, 1:3] = 1
+    >>> image[3, 0] = 1
+    >>> image[1:3, 4:6] = 2
+    >>> image[3, 6] = 3
+    >>> image
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 2, 2, 0],
+           [0, 1, 1, 0, 2, 2, 0],
+           [1, 0, 0, 0, 0, 0, 3]])
+
+    Fill connected ones with 5, with full connectivity (diagonals included):
+
+    >>> mask = flood_fill_mask(image, (1, 1))
+    >>> image[mask] = 5
+    >>> image
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 5, 5, 0, 2, 2, 0],
+           [0, 5, 5, 0, 2, 2, 0],
+           [5, 0, 0, 0, 0, 0, 3]])
+
+    Fill connected fives with 1, with only cardinal direction connectivity:
+
+    >>> mask = flood_fill_mask(image, (1, 1), connectivity=1)
+    >>> image[mask] = 1
+    >>> image
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 1, 0, 2, 2, 0],
+           [0, 1, 1, 0, 2, 2, 0],
+           [5, 0, 0, 0, 0, 0, 3]])
+
+    Fill with a tolerance:
+
+    >>> mask = flood_fill_mask(image, (0, 0), tolerance=1)
+    >>> image[mask] = 5
+    >>> image
+    array([[5, 5, 5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 2, 2, 5],
+           [5, 5, 5, 5, 2, 2, 5],
+           [5, 5, 5, 5, 5, 5, 3]])
+    """
     # Correct start point in ravelled image - only copy if non-contiguous
     image = np.asarray(image)
     if image.flags.f_contiguous == True:
@@ -121,7 +233,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
 
     # Shortcut for rank zero
     if image.size == 0:
-        return np.array([], dtype=(np.intp if indices else np.uint8))
+        return np.array([], dtype=np.uint8)
 
     # Convenience for 1d input
     try:
@@ -178,15 +290,5 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         else:
             raise
 
-    # Output what the user requested
-    original_slice = (slice(1, -1),) * image.ndim
-    if indices:
-        return np.nonzero(flags[original_slice] == 1)
-    else:
-        if not inplace:
-            output = working_image[original_slice]
-            output[flags[original_slice] == 1] = new_value
-            return output
-        else:
-            image[flags[original_slice] == 1] = new_value
-            return image
+    # Output what the user requested; view does not create a new copy.
+    return flags[(slice(1, -1),) * image.ndim].view(np.bool)

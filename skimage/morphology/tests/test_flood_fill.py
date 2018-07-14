@@ -1,7 +1,7 @@
 import numpy as np
 from pytest import raises
 
-from skimage.util import flood_fill
+from skimage.morphology import flood_fill
 
 eps = 1e-12
 
@@ -10,7 +10,7 @@ def test_empty_input():
     output = flood_fill(np.empty(0), (), 2)
     assert output.dtype == np.uint8
 
-    output = flood_fill(np.empty(0), (), 2, indices=True)
+    output = flood_fill(np.empty(0), (), 2)
     assert output.dtype == np.intp
 
 
