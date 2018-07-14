@@ -3,6 +3,7 @@ import numpy as np
 import skimage.future.detect as detect
 import skimage.data as data
 
+
 def test_detector_astrout():
 
     # Load the trained file from the module root.
