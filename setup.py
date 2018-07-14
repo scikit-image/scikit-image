@@ -63,6 +63,7 @@ link_flags = ['-fopenmp']
 code = """#include <omp.h>
 int main(int argc, char** argv) { return(0); }"""
 
+
 class ConditionalOpenMP(build_ext):
 
     def can_compile_link(self):
