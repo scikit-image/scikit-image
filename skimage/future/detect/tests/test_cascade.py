@@ -3,26 +3,20 @@ import numpy as np
 import skimage.future.detect as detect
 import skimage.data as data
 
+def test_detector_astrout():
 
-class TestCascade():
+    # Load the trained file from the module root.
+    trained_file = data.frontal_face_cascade_xml()
 
-    def test_detector_astrout(self):
+    # Initialize the detector cascade.
+    detector = detect.Cascade(trained_file)
 
-        # Load the trained file from the module root.
-        trained_file = data.detect.frontal_face_cascade_xml()
+    img = data.astronaut()
 
-        # Initialize the detector cascade.
-        detector = detect.Cascade(trained_file)
+    detected = detector.detect_multi_scale(img=img,
+                                           scale_factor=1.2,
+                                           step_ratio=1,
+                                           min_size=(60, 60),
+                                           max_size=(123, 123))
 
-        img = data.astronaut()
-
-        detected = detector.detect_multi_scale(img=img,
-                                               scale_factor=1.2,
-                                               step_ratio=1,
-                                               min_size=(60, 60),
-                                               max_size=(123, 123))
-
-        assert len(detected) == 1, 'One face should be detected.'
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+    assert len(detected) == 1, 'One face should be detected.'
