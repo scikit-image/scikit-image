@@ -12,7 +12,7 @@
 .. _git: http://git-scm.com/
 .. _github: http://github.com
 .. _github help: http://help.github.com
-.. _msysgit: http://code.google.com/p/msysgit/downloads/list
+.. _msysgit: https://git-for-windows.github.io/
 .. _git-osx-installer: http://code.google.com/p/git-osx-installer/downloads/list
 .. _subversion: http://subversion.tigris.org/
 .. _git cheat sheet: http://github.com/guides/git-cheat-sheet

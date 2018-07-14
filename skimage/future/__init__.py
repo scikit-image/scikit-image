@@ -6,5 +6,11 @@ production code that will depend on updated skimage versions.
 """
 
 from . import graph, detect
+from .manual_segmentation import manual_polygon_segmentation
+from .manual_segmentation import manual_lasso_segmentation
 
-__all__ = ['graph', 'detect']
+
+__all__ = ['detect',
+           'graph',
+           'manual_lasso_segmentation',
+           'manual_polygon_segmentation']

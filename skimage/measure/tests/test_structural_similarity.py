@@ -1,16 +1,16 @@
 import os
 import numpy as np
-import scipy.io
-from numpy.testing import (assert_equal, assert_raises, assert_almost_equal,
-                           assert_array_almost_equal)
 
-from skimage.measure import structural_similarity as ssim
-import skimage.data
-from skimage.io import imread
-from skimage import data_dir
+from skimage import data, data_dir
+from skimage.measure import compare_ssim as ssim
+
+from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_array_almost_equal)
 
 np.random.seed(5)
-cam = skimage.data.camera()
+cam = data.camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
@@ -39,7 +39,7 @@ def test_ssim_image():
     assert(S1 < 0.3)
 
     S2 = ssim(X, Y, win_size=11, gaussian_weights=True)
-    assert(S1 < 0.3)
+    assert(S2 < 0.3)
 
     mssim0, S3 = ssim(X, Y, full=True)
     assert_equal(S3.shape, X.shape)
@@ -56,14 +56,15 @@ def test_ssim_grad():
     X = np.random.rand(N, N) * 255
     Y = np.random.rand(N, N) * 255
 
-    f = ssim(X, Y, dynamic_range=255)
-    g = ssim(X, Y, dynamic_range=255, gradient=True)
+    f = ssim(X, Y, data_range=255)
+    g = ssim(X, Y, data_range=255, gradient=True)
 
     assert f < 0.05
+
     assert g[0] < 0.05
     assert np.all(g[1] < 0.05)
 
-    mssim, grad, s = ssim(X, Y, dynamic_range=255, gradient=True, full=True)
+    mssim, grad, s = ssim(X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
 
 
@@ -110,7 +111,8 @@ def test_ssim_multichannel():
     assert_equal(S3.shape, Xc.shape)
 
     # fail if win_size exceeds any non-channel dimension
-    assert_raises(ValueError, ssim, Xc, Yc, win_size=7, multichannel=False)
+    with testing.raises(ValueError):
+        ssim(Xc, Yc, win_size=7, multichannel=False)
 
 
 def test_ssim_nD():
@@ -127,7 +129,7 @@ def test_ssim_nD():
 
 def test_ssim_multichannel_chelsea():
     # color image example
-    Xc = skimage.data.chelsea()
+    Xc = data.chelsea()
     sigma = 15.0
     Yc = np.clip(Xc + sigma * np.random.randn(*Xc.shape), 0, 255)
     Yc = Yc.astype(Xc.dtype)
@@ -191,24 +193,30 @@ def test_mssim_vs_legacy():
     assert_almost_equal(mssim, mssim_skimage_0pt11)
 
 
+def test_mssim_mixed_dtype():
+    mssim = ssim(cam, cam_noisy)
+    with expected_warnings(['Inputs have mismatched dtype']):
+        mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
+    assert_almost_equal(mssim, mssim_mixed)
+
+    # no warning when user supplies data_range
+    mssim_mixed = ssim(cam, cam_noisy.astype(np.float32), data_range=255)
+    assert_almost_equal(mssim, mssim_mixed)
+
+
 def test_invalid_input():
-    X = np.zeros((3, 3), dtype=np.double)
-    Y = np.zeros((3, 3), dtype=np.int)
-    assert_raises(ValueError, ssim, X, Y)
-
-    Y = np.zeros((4, 4), dtype=np.double)
-    assert_raises(ValueError, ssim, X, Y)
-
-    assert_raises(ValueError, ssim, X, X, win_size=8)
-
-    # do not allow both image content weighting and gradient calculation
-    assert_raises(ValueError, ssim, X, X, image_content_weighting=True,
-                  gradient=True)
+    # size mismatch
+    X = np.zeros((9, 9), dtype=np.double)
+    Y = np.zeros((8, 8), dtype=np.double)
+    with testing.raises(ValueError):
+        ssim(X, Y)
+    # win_size exceeds image extent
+    with testing.raises(ValueError):
+        ssim(X, X, win_size=X.shape[0] + 1)
     # some kwarg inputs must be non-negative
-    assert_raises(ValueError, ssim, X, X, K1=-0.1)
-    assert_raises(ValueError, ssim, X, X, K2=-0.1)
-    assert_raises(ValueError, ssim, X, X, sigma=-1.0)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+    with testing.raises(ValueError):
+        ssim(X, X, K1=-0.1)
+    with testing.raises(ValueError):
+        ssim(X, X, K2=-0.1)
+    with testing.raises(ValueError):
+        ssim(X, X, sigma=-1.0)

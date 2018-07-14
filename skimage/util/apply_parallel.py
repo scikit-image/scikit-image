@@ -4,13 +4,21 @@ from multiprocessing import cpu_count
 __all__ = ['apply_parallel']
 
 
+try:
+    import dask.array as da
+    dask_available = True
+except ImportError:
+    dask_available = False
+
+
 def _get_chunks(shape, ncpu):
-    """
-    Split the array into equal sized chunks based on the number of
+    """Split the array into equal sized chunks based on the number of
     available processors. The last chunk in each dimension absorbs the
-    remainder array elements if the number of cpus does not divide evenly into
+    remainder array elements if the number of CPUs does not divide evenly into
     the number of array elements.
 
+    Examples
+    --------
     >>> _get_chunks((4, 4), 4)
     ((2, 2), (2, 2))
     >>> _get_chunks((4, 4), 2)
@@ -42,8 +50,15 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
+def _ensure_dask_array(array, chunks=None):
+    if isinstance(array, da.Array):
+        return array
+
+    return da.from_array(array, chunks=chunks)
+
+
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                 extra_arguments=(), extra_keywords={}):
+                   extra_arguments=(), extra_keywords={}, *, compute=True):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -54,7 +69,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     ----------
     function : function
         Function to be mapped which takes an array as an argument.
-    array : numpy array
+    array : numpy array or dask array
         Array which the function will be applied to.
     chunks : int, tuple, or tuple of tuples, optional
         A single integer is interpreted as the length of one side of a square
@@ -68,15 +83,35 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     depth : int, optional
         Integer equal to the depth of the added boundary cells. Defaults to
         zero.
-    mode : 'reflect', 'periodic', 'wrap', 'nearest', optional
-        type of external boundary padding
+    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
+        type of external boundary padding.
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
+    compute : bool, optional
+        Whether to compute right away (default) or
+        skip computing and return a dask Array.
+
+    Returns
+    -------
+    out : ndarray or dask Array
+        Returns the result of the applying the operation.
+        Type is dependent on the ``compute`` argument.
+
+    Notes
+    -----
+    Numpy edge modes 'symmetric', 'wrap', and 'edge' are converted to the
+    equivalent ``dask`` boundary modes 'reflect', 'periodic' and 'nearest',
+    respectively.
+    Setting ``compute=False`` can be useful for chaining later operations.
+    For example region selection to preview a result or storing large data
+    to disk instead of loading in memory.
 
     """
-    import dask.array as da
+    if not dask_available:
+        raise RuntimeError("Could not import 'dask'.  Please install "
+                           "using 'pip install dask'")
 
     if chunks is None:
         shape = array.shape
@@ -88,9 +123,18 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     if mode == 'wrap':
         mode = 'periodic'
+    elif mode == 'symmetric':
+        mode = 'reflect'
+    elif mode == 'edge':
+        mode = 'nearest'
 
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
 
-    darr = da.from_array(array, chunks=chunks)
-    return darr.map_overlap(wrapped_func, depth, boundary=mode).compute()
+    darr = _ensure_dask_array(array, chunks=chunks)
+
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    if compute:
+        res = res.compute()
+
+    return res

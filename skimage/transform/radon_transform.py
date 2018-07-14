@@ -1,31 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-radon.py - Radon and inverse radon transforms
-
-Based on code of Justin K. Romberg
-(http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
-J. Gillam and Chris Griffin.
-
-References:
-    -B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
-    the Discrete Radon Transform With Some Applications", Proceedings of
-    the Fourth IEEE Region 10 International Conference, TENCON '89, 1989.
-    -A. C. Kak, Malcolm Slaney, "Principles of Computerized Tomographic
-    Imaging", IEEE Press 1988.
-"""
-from __future__ import division
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
-from .. import util
+from warnings import warn
 
 
-__all__ = ["radon", "iradon", "iradon_sart"]
+__all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=False):
+def radon(image, theta=None, circle=True):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -49,11 +33,19 @@ def radon(image, theta=None, circle=False):
         at the pixel index ``radon_image.shape[0] // 2`` along the 0th
         dimension of ``radon_image``.
 
-    Raises
-    ------
-    ValueError
-        If called with ``circle=True`` and ``image != 0`` outside the inscribed
-        circle
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+    .. [2] B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
+           the Discrete Radon Transform With Some Applications", Proceedings of
+           the Fourth IEEE Region 10 International Conference, TENCON '89, 1989
+
+    Notes
+    -----
+    Based on code of Justin K. Romberg
+    (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
+
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
@@ -67,8 +59,8 @@ def radon(image, theta=None, circle=False):
                                  + (c1 - image.shape[1] // 2) ** 2)
         reconstruction_circle = reconstruction_circle <= radius ** 2
         if not np.all(reconstruction_circle | (image == 0)):
-            raise ValueError('Image must be zero outside the reconstruction'
-                             ' circle')
+            warn('Radon transform: image must be zero outside the '
+                 'reconstruction circle')
         # Crop image to make it square
         slices = []
         for d in (0, 1):
@@ -88,8 +80,8 @@ def radon(image, theta=None, circle=False):
         old_center = [s // 2 for s in image.shape]
         pad_before = [nc - oc for oc, nc in zip(old_center, new_center)]
         pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
-        padded_image = util.pad(image, pad_width, mode='constant',
-                                constant_values=0)
+        padded_image = np.pad(image, pad_width, mode='constant',
+                              constant_values=0)
     # padded_image is always square
     assert padded_image.shape[0] == padded_image.shape[1]
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
@@ -122,11 +114,11 @@ def _sinogram_circle_to_square(sinogram):
     new_center = diagonal // 2
     pad_before = new_center - old_center
     pad_width = ((pad_before, pad - pad_before), (0, 0))
-    return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
+    return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=False):
+           filter="ramp", interpolation="linear", circle=True):
     """
     Inverse radon transform.
 
@@ -165,6 +157,14 @@ def iradon(radon_image, theta=None, output_size=None,
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+    .. [2] B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
+           the Discrete Radon Transform With Some Applications", Proceedings of
+           the Fourth IEEE Region 10 International Conference, TENCON '89, 1989
+
     Notes
     -----
     It applies the Fourier slice theorem to reconstruct an image by
@@ -183,7 +183,7 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
     interpolation_types = ('linear', 'nearest', 'cubic')
-    if not interpolation in interpolation_types:
+    if interpolation not in interpolation_types:
         raise ValueError("Unknown interpolation: %s" % interpolation)
     if not output_size:
         # If output size not specified, estimate from input radon image
@@ -201,7 +201,7 @@ def iradon(radon_image, theta=None, output_size=None,
     projection_size_padded = \
         max(64, int(2 ** np.ceil(np.log2(2 * radon_image.shape[0]))))
     pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
-    img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
+    img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
     f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
@@ -408,7 +408,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         raise ValueError('Shape of projection_shifts (%s) does not match the '
                          'number of projections (%d)'
                          % (projection_shifts.shape, radon_image.shape[1]))
-    if not clip is None:
+    if clip is not None:
         if len(clip) != 2:
             raise ValueError('clip must be a length-2 sequence')
         clip = (float(clip[0]), float(clip[1]))
@@ -419,6 +419,6 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                                               radon_image[:, angle_index],
                                               projection_shifts[angle_index])
         image += relaxation * image_update
-        if not clip is None:
+        if clip is not None:
             image = np.clip(image, clip[0], clip[1])
     return image

@@ -21,8 +21,11 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                       local variance at each point of `image`
         - 'poisson'   Poisson-distributed noise generated from the data.
         - 'salt'      Replaces random pixels with 1.
-        - 'pepper'    Replaces random pixels with 0.
-        - 's&p'       Replaces random pixels with 0 or 1.
+        - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
+                      -1 (for signed images).
+        - 's&p'       Replaces random pixels with either 1 or `low_val`, where
+                      `low_val` is 0 for unsigned images or -1 for signed
+                      images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
                       n is uniform noise with specified mean & variance.
     seed : int
@@ -166,23 +169,16 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
-        # This mode makes no effort to avoid repeat sampling. Thus, the
-        # exact number of replaced pixels is only approximate.
         out = image.copy()
-
-        # Salt mode
-        num_salt = np.ceil(
-            kwargs['amount'] * image.size * kwargs['salt_vs_pepper'])
-        coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in image.shape]
-        out[coords] = 1
-
-        # Pepper mode
-        num_pepper = np.ceil(
-            kwargs['amount'] * image.size * (1. - kwargs['salt_vs_pepper']))
-        coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in image.shape]
-        out[coords] = low_clip
+        p = kwargs['amount']
+        q = kwargs['salt_vs_pepper']
+        flipped = np.random.choice([True, False], size=image.shape,
+                                   p=[p, 1 - p])
+        salted = np.random.choice([True, False], size=image.shape,
+                                  p=[q, 1 - q])
+        peppered = ~salted
+        out[flipped & salted] = 1
+        out[flipped & peppered] = low_clip
 
     elif mode == 'speckle':
         noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,

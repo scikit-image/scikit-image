@@ -4,10 +4,11 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from libc.math cimport log
+from libc.math cimport log, exp
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
+from ..._shared.interpolation cimport round 
 
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    Py_ssize_t* histo,
@@ -129,6 +130,25 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
         for i in range(max_bin):
             mean += histo[i] * i
         out[0] = <dtype_t_out>(mean / pop)
+    else:
+        out[0] = <dtype_t_out>0
+
+
+cdef inline void _kernel_geometric_mean(dtype_t_out* out, Py_ssize_t odepth,
+                                        Py_ssize_t* histo,
+                                        double pop, dtype_t g,
+                                        Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                        double p0, double p1,
+                                        Py_ssize_t s0, Py_ssize_t s1) nogil:
+
+    cdef Py_ssize_t i
+    cdef double mean = 0.
+
+    if pop:
+        for i in range(max_bin):
+            if histo[i]:
+                mean += (histo[i] * log(i+1))
+        out[0] = <dtype_t_out>round(exp(mean / pop)-1)
     else:
         out[0] = <dtype_t_out>0
 
@@ -357,7 +377,7 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
-    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b
+    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b, t
     cdef double mu = 0.
 
     # compute local mean
@@ -380,7 +400,8 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
         if new_q1 > 0:
             mu1 = (q1 * mu1 + i * P) / new_q1
             mu2 = (mu - new_q1 * mu1) / (1. - new_q1)
-            sigma_b = new_q1 * (1. - new_q1) * (mu1 - mu2) ** 2
+            t = mu1 - mu2
+            sigma_b = new_q1 * (1. - new_q1) * (t * t)
             if sigma_b > max_sigma_b:
                 max_sigma_b = sigma_b
                 max_i = i
@@ -464,6 +485,16 @@ def _mean(dtype_t[:, ::1] image,
           signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
+          shift_x, shift_y, 0, 0, 0, 0, max_bin)
+
+
+def _geometric_mean(dtype_t[:, ::1] image,
+                    char[:, ::1] selem,
+                    char[:, ::1] mask,
+                    dtype_t_out[:, :, ::1] out,
+                    signed char shift_x, signed char shift_y, Py_ssize_t max_bin):
+
+    _core(_kernel_geometric_mean[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
 
 

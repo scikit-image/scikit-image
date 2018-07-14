@@ -86,21 +86,16 @@
             <ul class="nav">
                 {% include 'navbar.html' %}
             </ul>
-            <form class="navbar-form pull-right" action="{{ pathto('search') }}" method="get">
-                <input type="text" class="search span3" name="q" placeholder="Search documentation ...">
-                <input type="hidden" name="check_keywords" value="yes" >
-                <input type="hidden" name="area" value="default" >
-            </form>
         </div>
     </div>
     <div class="row">
-        <div class="span9">
-            {% block body %}{% endblock %}
-        </div>
         <div class="span3">
             {%- for sidebartemplate in sidebars %}
                 {%- include sidebartemplate %}
             {%- endfor %}
+        </div>
+        <div class="span9">
+            {% block body %}{% endblock %}
         </div>
     </div>
     <div class="well footer">
@@ -111,3 +106,20 @@
     </div>
 </body>
 </html>
+
+
+<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//piwik.sciunto.org/piwik/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 2]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="//piwik.sciunto.org/piwik/piwik.php?idsite=2" style="border:0;" alt="" /></p></noscript>
+<!-- End Piwik Code -->

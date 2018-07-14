@@ -20,13 +20,42 @@ DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
 import os
 import sys
+import tempfile
+import shutil
 
 import setuptools
 from distutils.command.build_py import build_py
-from numpy.distutils.command.build_ext import build_ext
+from distutils.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
-import tempfile
-import shutil
+
+from numpy.distutils.command.build_ext import build_ext
+
+
+if sys.version_info < (3, 5):
+
+    error = """Python {py} detected.
+
+scikit-image 0.15+ support only Python 3.5 and above.
+
+For Python 2.7, please install the 0.14.x Long Term Support using:
+
+ $ pip install 'scikit-image<0.15'
+""".format(py='.'.join([str(v) for v in sys.version_info[:3]]))
+
+    sys.stderr.write(error + "\n")
+    sys.exit(1)
+
+import builtins
+
+# This is a bit (!) hackish: we are setting a global variable so that the main
+# skimage __init__ can detect if it is being loaded by the setup routine, to
+# avoid attempting to load components that aren't built yet:
+# the numpy distutils extensions that are used by scikit-image to recursively
+# build the compiled extensions in sub-packages is based on the Python import
+# machinery.
+builtins.__SKIMAGE_SETUP__ = True
+
+# Support for openmp
 
 compile_flags = ['-fopenmp']
 link_flags = ['-fopenmp']
@@ -82,7 +111,7 @@ with open('skimage/__init__.py') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-with open('requirements.txt') as fid:
+with open('requirements/default.txt') as fid:
     INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
 
 # requirements for those browsing PyPI
@@ -114,19 +143,29 @@ if __name__ == "__main__":
     try:
         from numpy.distutils.core import setup
         extra = {'configuration': configuration}
-        # do not risk updating numpy
-        INSTALL_REQUIRES = [r for r in INSTALL_REQUIRES if 'numpy' not in r]
+        # Do not try and upgrade larger dependencies
+        for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
+            try:
+                __import__(lib)
+                INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
+                                    if lib not in i]
+            except ImportError:
+                pass
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
-                                                   'egg_info', '--version',
-                                                   'clean')):
+                                                   '--version',
+                                                   'clean',
+                                                   'egg_info',
+                                                   'install_egg_info',
+                                                   'rotate')):
             # For these actions, NumPy is not required.
             #
             # They are required to succeed without Numpy for example when
             # pip is used to install scikit-image when Numpy is not yet
             # present in the system.
-            pass
+            from setuptools import setup
+            extra = {}
         else:
             print('To install scikit-image from source, you will need numpy.\n' +
                   'Install numpy with pip:\n' +
@@ -162,9 +201,8 @@ if __name__ == "__main__":
             'Operating System :: MacOS',
         ],
         install_requires=INSTALL_REQUIRES,
-        # install cython when running setup.py (source install)
-        setup_requires=['cython>=0.21'],
         requires=REQUIRES,
+        python_requires='>=3.5',
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
@@ -174,6 +212,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
-                  'build_ext': ConditionalOpenMP},
+                  'build_ext': ConditionalOpenMP,
+                  'sdist': sdist},
         **extra
     )

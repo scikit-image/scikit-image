@@ -29,10 +29,11 @@ def configuration(parent_package='', top_path=None):
 
     return config
 
+
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Image I/O Routines',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',

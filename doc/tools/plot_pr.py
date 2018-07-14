@@ -139,7 +139,6 @@ for version, date in releases.items():
 ax.set_title('Pull request activity').set_y(1.05)
 ax.set_xlabel('Date')
 ax.set_ylabel('PRs per month', color='blue')
-fig.subplots_adjust(top=0.875, bottom=0.225)
 
 cumulative = np.cumsum(n)
 cumulative += len(dates) - cumulative[-1]
@@ -148,6 +147,7 @@ ax2 = ax.twinx()
 ax2.plot(bins[1:], cumulative, color='black', linewidth=2)
 ax2.set_ylabel('Total PRs', color='black')
 
+plt.tight_layout()
 fig.savefig('PRs.png')
 
 plt.show()

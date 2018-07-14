@@ -48,7 +48,9 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         mask image. For dilation, each seed value must be less than or equal
         to the corresponding mask value; for erosion, the reverse is true.
     selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The neighborhood expressed as an n-D array of 1's and 0's.
+        Default is the ball of radius 1 according to the maximum norm
+        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
 
     Returns
     -------

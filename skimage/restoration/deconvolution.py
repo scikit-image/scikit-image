@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-# deconvolution.py --- Image deconvolution
-
 """Implementations restoration functions"""
 
-from __future__ import division
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import convolve2d
+from scipy.signal import fftconvolve, convolve
 
 from . import uft
 
@@ -78,10 +74,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
-       \Lambda_H^\dag F y
+       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \Lambda_H^\dagger F y
 
-    where :math:`F` and :math:`F^\dag` are the Fourier and inverse
+    where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
     Fourier transfroms respectively, :math:`\Lambda_H` the transfer
     function (or the Fourier transfrom of the PSF, see [Hunt] below)
     and :math:`\Lambda_D` the filter to penalize the restored image
@@ -186,12 +182,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
        samples, see Notes section). 1e-4 by default.
     burnin : int
        The number of sample to ignore to start computation of the
-       mean. 100 by default.
+       mean. 15 by default.
     min_iter : int
        The minimum number of iterations. 30 by default.
     max_iter : int
        The maximum number of iterations if ``threshold`` is not
-       satisfied. 150 by default.
+       satisfied. 200 by default.
     callback : callable (None by default)
        A user provided callable to which is passed, if the function
        exists, the current image sample for whatever purpose. The user
@@ -336,7 +332,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     Parameters
     ----------
     image : ndarray
-       Input degraded image.
+       Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
     iterations : int
@@ -365,13 +361,29 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
+    # compute the times for direct convolution and the fft method. The fft is of
+    # complexity O(N log(N)) for each dimension and the direct method does
+    # straight arithmetic (and is O(n*k) to add n elements k times)
+    direct_time = np.prod(image.shape + psf.shape)
+    fft_time =  np.sum([n*np.log(n) for n in image.shape + psf.shape])
+
+    # see whether the fourier transform convolution method or the direct
+    # convolution method is faster (discussed in scikit-image PR #1792)
+    time_ratio = 40.032 * fft_time / direct_time
+
+    if time_ratio <= 1 or len(image.shape) > 2:
+        convolve_method = fftconvolve
+    else:
+        convolve_method = convolve
+
     image = image.astype(np.float)
     psf = psf.astype(np.float)
     im_deconv = 0.5 * np.ones(image.shape)
     psf_mirror = psf[::-1, ::-1]
+
     for _ in range(iterations):
-        relative_blur = image / convolve2d(im_deconv, psf, 'same')
-        im_deconv *= convolve2d(relative_blur, psf_mirror, 'same')
+        relative_blur = image / convolve_method(im_deconv, psf, 'same')
+        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
     if clip:
         im_deconv[im_deconv > 1] = 1

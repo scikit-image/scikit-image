@@ -1,24 +1,24 @@
-import os.path
+import os
 import numpy as np
-from numpy.testing import (
-    assert_array_equal, assert_array_almost_equal, assert_raises,
-    assert_allclose, run_module_suite)
-
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 
-from ... import data_dir
+from ... import data_dir, img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
-from ..._shared.testing import mono_check, color_check
-from ..._shared._warnings import expected_warnings
-from ..._shared._tempfile import temporary_file
-
-from six import BytesIO
 
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import structural_similarity as ssim
+from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
+
+from skimage._shared import testing
+from skimage._shared.testing import (mono_check, color_check,
+                                     assert_equal, assert_array_equal,
+                                     assert_array_almost_equal,
+                                     assert_allclose)
+from skimage._shared._warnings import expected_warnings
+from skimage._shared._tempfile import temporary_file
 
 
 def setup():
@@ -40,12 +40,31 @@ def setup_module(self):
         pass
 
 
+def test_png_round_trip():
+    f = NamedTemporaryFile(suffix='.png')
+    fname = f.name
+    f.close()
+    I = np.eye(3)
+    with expected_warnings(['Possible precision loss']):
+        imsave(fname, I)
+    Ip = img_as_float(imread(fname))
+    os.remove(fname)
+    assert np.sum(np.abs(Ip-I)) < 1e-3
+
+
+def test_img_as_gray_flatten():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    with expected_warnings(['deprecated']):
+        img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    assert_array_equal(img, img_flat)
+
+
 def test_imread_flatten():
     # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
@@ -75,6 +94,28 @@ def test_imread_palette():
     assert img.ndim == 3
 
 
+def test_imread_index_png_with_alpha():
+    # The file `foo3x5x4indexed.png` was created with this array
+    # (3x5 is (height)x(width)):
+    data = np.array([[[127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255],
+                      [127, 0, 255, 255]],
+                     [[192, 192, 255, 0],
+                      [192, 192, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0],
+                      [0, 0, 255, 0]],
+                     [[0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255],
+                      [0, 31, 255, 255]]], dtype=np.uint8)
+    img = imread(os.path.join(data_dir, 'foo3x5x4indexed.png'))
+    assert_array_equal(img, data)
+
+
 def test_palette_is_gray():
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
     assert _palette_is_grayscale(gray)
@@ -98,8 +139,8 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    assert_raises((IOError, ValueError), imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    with testing.raises(IOError):
+        imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
 def test_jpg_quality_arg():
@@ -108,7 +149,7 @@ def test_jpg_quality_arg():
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
         sim = ssim(chessboard, im,
-                   dynamic_range=chessboard.max() - chessboard.min())
+                   data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -139,7 +180,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:
@@ -154,20 +195,47 @@ class TestSave:
         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
 
 
+def test_imsave_incorrect_dimension():
+    with temporary_file(suffix='.png') as fname:
+        with testing.raises(ValueError):
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 3, 1)))
+        with testing.raises(ValueError):
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 2)))
+
+
 def test_imsave_filelike():
     shape = (2, 2)
     image = np.zeros(shape)
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss|unclosed file',
+    with expected_warnings(['precision loss',
                             'is a low contrast image']):
         imsave(s, image)
 
     # read from file-like object
     s.seek(0)
     out = imread(s)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
+    assert_allclose(out, image)
+
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.eye(*shape, dtype=np.bool)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(
+            ['is a boolean image: setting True to 1 and False to 0']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert_equal(out.shape, shape)
     assert_allclose(out, image)
 
 
@@ -177,17 +245,19 @@ def test_imexport_imimport():
     with expected_warnings(['precision loss']):
         pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
 
 
 def test_all_color():
-    color_check('pil')
-    color_check('pil', 'bmp')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    mono_check('pil')
-    mono_check('pil', 'tiff')
+    with expected_warnings(['.* is a boolean image']):
+        mono_check('pil')
 
 
 def test_multi_page_gif():
@@ -222,38 +292,10 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
+        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 
-class TestSaveTIF:
-    def roundtrip(self, dtype, x, compress):
-        with temporary_file(suffix='.tif') as fname:
-            if dtype == np.bool:
-                expected = ['low contrast|unclosed file']
-            else:
-                expected = ['unclosed file|\A\Z']
-            with expected_warnings(expected):
-                if compress > 0:
-                    imsave(fname, x, compress=compress)
-                else:
-                    imsave(fname, x)
-            y = imread(fname)
-            assert_array_equal(x, y)
-
-    def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.int16, np.float32,
-                          np.float64, np.bool):
-                for compress in [0, 2]:
-                    x = np.random.rand(*shape)
-
-                    if not np.issubdtype(dtype, float) and \
-                                                        not dtype == np.bool:
-                        x = (x * np.iinfo(dtype).max).astype(dtype)
-                    else:
-                        x = x.astype(dtype)
-                    yield self.roundtrip, dtype, x, compress
-
-if __name__ == "__main__":
-    run_module_suite()
+def test_extreme_palette():
+    img = imread(os.path.join(data_dir, 'green_palette.png'))
+    assert_equal(img.ndim, 3)

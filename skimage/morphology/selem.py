@@ -1,11 +1,7 @@
-"""
-:author: Damian Eads, 2009
-:license: modified BSD
-"""
-
 import numpy as np
 from scipy import ndimage as ndi
 from .. import draw
+
 
 def square(width, dtype=np.uint8):
     """Generates a flat, square-shaped structuring element.
@@ -37,7 +33,7 @@ def rectangle(width, height, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
-    belongs to the neighboorhood.
+    belongs to the neighborhood.
 
     Parameters
     ----------
@@ -65,7 +61,7 @@ def diamond(radius, dtype=np.uint8):
     """Generates a flat, diamond-shaped structuring element.
 
     A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/manhattan distance between it and the center of
+    the city block/Manhattan distance between it and the center of
     the neighborhood is no greater than radius.
 
     Parameters
@@ -193,7 +189,7 @@ def octahedron(radius, dtype=np.uint8):
 
     This is the 3D equivalent of a diamond.
     A pixel is part of the neighborhood (i.e. labeled 1) if
-    the city block/manhattan distance between it and the center of
+    the city block/Manhattan distance between it and the center of
     the neighborhood is no greater than radius.
 
     Parameters

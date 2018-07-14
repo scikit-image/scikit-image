@@ -70,3 +70,36 @@ def regular_grid(ar_shape, n_points):
               start, step in zip(starts, stepsizes)]
     slices = [slices[i] for i in unsort_dim_idxs]
     return slices
+
+
+def regular_seeds(ar_shape, n_points, dtype=int):
+    """Return an image with ~`n_points` regularly-spaced nonzero pixels.
+
+    Parameters
+    ----------
+    ar_shape : tuple of int
+        The shape of the desired output image.
+    n_points : int
+        The desired number of nonzero points.
+    dtype : numpy data type, optional
+        The desired data type of the output.
+
+    Returns
+    -------
+    seed_img : array of int or bool
+        The desired image.
+
+    Examples
+    --------
+    >>> regular_seeds((5, 5), 4)
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 0, 2, 0],
+           [0, 0, 0, 0, 0],
+           [0, 3, 0, 4, 0],
+           [0, 0, 0, 0, 0]])
+    """
+    grid = regular_grid(ar_shape, n_points)
+    seed_img = np.zeros(ar_shape, dtype=dtype)
+    seed_img[grid] = 1 + np.reshape(np.arange(seed_img[grid].size),
+                                    seed_img[grid].shape)
+    return seed_img

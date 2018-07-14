@@ -8,7 +8,8 @@ except ImportError:
     try:
         import pyfits
     except ImportError:
-        raise ImportError("PyFITS could not be found. Please refer to\n"
+        raise ImportError(
+            "PyFITS could not be found. Please refer to\n"
             "http://www.stsci.edu/resources/software_hardware/pyfits\n"
             "for further instructions.")
 
@@ -27,10 +28,10 @@ def imread(fname, dtype=None):
     Returns
     -------
     img_array : ndarray
-        Unlike plugins such as PIL, where different colour bands/channels are
+        Unlike plugins such as PIL, where different color bands/channels are
         stored in the third dimension, FITS images are greyscale-only and can
         be N-dimensional, so an array of the native FITS dimensionality is
-        returned, without colour channels.
+        returned, without color channels.
 
         Currently if no image is found in the file, None will be returned
 
@@ -144,7 +145,7 @@ def FITSFactory(image_ext):
     hdulist.close()
 
     if data is None:
-        raise RuntimeError("Extension %d of %s has no data" %
-                  (extnum, filename))
+        raise RuntimeError(
+            "Extension %d of %s has no data" % (extnum, filename))
 
     return data

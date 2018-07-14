@@ -1,6 +1,7 @@
 import time
 import random
 import skimage.graph.heap as heap
+
 from skimage._shared.testing import test_parallel
 
 
@@ -47,7 +48,3 @@ def _test_heap(n, fast_update):
         assert(b[i] >= b[i - 1])
 
     return t1 - t0
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
