@@ -104,7 +104,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     from ..morphology.watershed import _offsets_to_raveled_neighbors
     from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
-    image = np.asarray(image, order='C')
+    image = np.asarray(image)
     seed_value = image[seed_point]
 
     # Shortcut for rank zero
