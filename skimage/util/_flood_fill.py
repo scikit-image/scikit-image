@@ -34,28 +34,27 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
-        If True, the output will be an array representing indices of local
-        maxima. If False, the output will be an array of 0's and 1's with the
-        same shape as `image`.
+        If True, the output will be an array representing indices of the flood
+        fill. If False (default), the output will be an n-dimensional array
+        with flood filling applied.
     tolerance : ``selem`` type, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
         is given, a comparison will be done at every point and this tolerance
         on each side of the initial value will also be filled (inclusive).
     inplace : bool, optional
-        If True, flood filling is applied to `image` inplace and nothing is
-        returned.  If False, the flood filled result is returned without
-        modifying the input `image`.  Ignored if `indices` is True.
+        If True, flood filling is applied to `image` inplace.  If False, the
+        flood filled result is returned without modifying the input `image`
+        (default).  Ignored if `indices` is True.
 
     Returns
     -------
     filled : ndarray or tuple[ndarray]
-        If `inplace` is True, the input `image` is modified inplace and nothing
-        is returned.  If `indices` is false, an array with the same shape as
-        `image` is returned with values equal to (or within tolerance) of the
-        seed point set to `new_value`.  If `indices` is true, a tuple of
-        one-dimensional arrays containing the coordinates (indices) of all
-        found maxima is returned.
+        If `indices` is false, an array with the same shape as `image` is
+        returned with values equal to (or within tolerance of) the seed point
+        set to `new_value`.  If `indices` is true, a tuple of one-dimensional
+        arrays containing the coordinates (indices) of all found maxima is
+        returned.
 
     Notes
     -----
@@ -110,11 +109,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
 
     # Shortcut for rank zero
     if image.size == 0:
-        if not inplace:
-            return np.array([], dtype=(np.intp if indices else np.uint8))
-        else:
-            # No values to change inplace, but follow API convention
-            return
+        return np.array([], dtype=(np.intp if indices else np.uint8))
 
     # Convenience for 1d input
     try:
@@ -182,4 +177,4 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
             return output
         else:
             image[flags[original_slice] == 1] = new_value
-            return
+            return image
