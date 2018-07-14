@@ -5,6 +5,7 @@ connected to a given seed point with a different value.
 """
 
 import numpy as np
+import warnings
 
 
 def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
@@ -104,7 +105,18 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     from ..morphology.watershed import _offsets_to_raveled_neighbors
     from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
+    # Correct start point in ravelled image - only copy if non-contiguous
     image = np.asarray(image)
+    if image.flags.f_contiguous == True:
+        order = 'F'
+    elif image.flags.c_contiguous == True:
+        order = 'C'
+    else:
+        warnings.warn('Non-contiguous array passed as `image`; this will be '
+                      'converted to a contiguous array as a copy.')
+        image = np.ascontiguousarray(image)
+        order = 'C'
+
     seed_value = image[seed_point]
 
     # Shortcut for rank zero
@@ -122,9 +134,9 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     # Must annotate borders
     working_image = _fast_pad(image, image.min())
 
-    # Correct start point in ravelled image
+    # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
-                                             working_image.shape)
+                                             working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
         working_image.shape, selem, center=((1,) * image.ndim))
 
