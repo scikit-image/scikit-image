@@ -244,17 +244,3 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     M = My_inverse @ Mx
 
     return M
-
-
-def compute_angular_rotation_matrix(thetas, axes=0, use_homogeneous_coords=False):
-    ndim = len(thetas) + 1
-
-    if not isinstance(axes, coll.Iterable):
-        axes = (axes,)
-    axes = np.append(axes, np.setdiff1d(range(ndim), axes))
-
-    base_axis = (1,) + (0,) * (ndim - 1)
-
-    return compute_rotation_matrix(base_axis,
-                                   convert_quasipolar_coords(1, thetas)[axes],
-                                   use_homogeneous_coords)

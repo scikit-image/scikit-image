@@ -1,10 +1,10 @@
 import numpy as np
+from numpy import pi, sin, cos
 from numpy.testing import (assert_equal, assert_almost_equal,
                            assert_array_almost_equal)
 
 from skimage.transform._orientation import (convert_quasipolar_coords,
                                             compute_rotation_matrix,
-                                            compute_angular_rotation_matrix,
                                             _normalize, _axis_0_rotation_matrix)
 
 
@@ -20,54 +20,48 @@ def test_axis_0_rotation_matrix():
 
 
 def test_convert_quasipolar_coords():
-    s = np.sin
-    c = np.cos
-
-    def p(n, d):
-        return n * np.pi / d
-
     # test polar case
-    y, x = convert_quasipolar_coords(2, (p(1, 4),))
+    y, x = convert_quasipolar_coords(2, [pi / 4])
     assert_almost_equal([x, y], [np.sqrt(2), np.sqrt(2)])
 
     # test spherical case
-    y, x, z = convert_quasipolar_coords(10, (p(1, 4), p(1, 2)))
-    assert_almost_equal([x, y, z], [10 * s(p(1, 2)) * c(p(1, 4)),
-                                    10 * s(p(1, 2)) * s(p(1, 4)),
-                                    10 * c(p(1, 2))])
+    y, x, z = convert_quasipolar_coords(10, [pi / 4, pi / 2])
+    assert_almost_equal([x, y, z], [10 * sin(pi / 2) * cos(pi / 4),
+                                    10 * sin(pi / 2) * sin(pi / 4),
+                                    10 * cos(pi / 2)])
 
     # test higher-dimensional case
-    coords = convert_quasipolar_coords(1, (p(1, 3),
-                                              p(5, 6),
-                                              p(3, 4),
-                                              p(1, 6),
-                                              p(1, 4)))
-    assert_almost_equal(coords, [s(p(1, 3))
-                                 * s(p(5, 6))
-                                 * s(p(3, 4))
-                                 * s(p(1, 6))
-                                 * s(p(1, 4)),
-                                 c(p(1, 3))
-                                 * s(p(5, 6))
-                                 * s(p(3, 4))
-                                 * s(p(1, 6))
-                                 * s(p(1, 4)),
-                                 c(p(5, 6))
-                                 * s(p(3, 4))
-                                 * s(p(1, 6))
-                                 * s(p(1, 4)),
-                                 c(p(3, 4))
-                                 * s(p(1, 6))
-                                 * s(p(1, 4)),
-                                 c(p(1, 6))
-                                 * s(p(1, 4)),
-                                 c(p(1, 4))])
+    coords = convert_quasipolar_coords(1, [pi / 3,
+                                           5 * pi / 6,
+                                           3 * pi / 4,
+                                           pi / 6,
+                                           pi / 4])
+    assert_almost_equal(coords, [sin(pi / 3)
+                                 * sin(5 * pi / 6)
+                                 * sin(3 * pi / 4)
+                                 * sin(pi / 6)
+                                 * sin(pi / 4),
+                                 cos(pi / 3)
+                                 * sin(5 * pi / 6)
+                                 * sin(3 * pi / 4)
+                                 * sin(pi / 6)
+                                 * sin(pi / 4),
+                                 cos(5 * pi / 6)
+                                 * sin(3 * pi / 4)
+                                 * sin(pi / 6)
+                                 * sin(pi / 4),
+                                 cos(3 * pi / 4)
+                                 * sin(pi / 6)
+                                 * sin(pi / 4),
+                                 cos(pi / 6)
+                                 * sin(pi / 4),
+                                 cos(pi / 4)])
 
 
 def test_compute_rotation_matrix():
     # trivial case
-    X = np.asarray([1, 0, 0])
-    Y = np.asarray([0, 0, 1])
+    X = [1, 0, 0]
+    Y = [0, 0, 1]
 
     M = compute_rotation_matrix(X, Y)
 
@@ -113,9 +107,27 @@ def test_compute_rotation_matrix_homogeneous():
     assert_equal(rotZ[-1], Z[-1])
 
 
-def test_compute_angular_rotation_matrix():
-    M = compute_angular_rotation_matrix((np.pi / 6,), axes=1)
+def test_compute_quasipolar_rotation_matrix():
+    # 2D case
+    theta = pi / 6
 
-    assert_almost_equal(M,
-                        [[np.cos(np.pi / 6), -np.sin(np.pi / 6)],
-                         [np.sin(np.pi / 6), np.cos(np.pi / 6)]])
+    R = [[ cos(theta), -sin(theta) ],
+         [ sin(theta),  cos(theta) ]]
+
+    y, x = convert_quasipolar_coords(1, [theta])
+    M = compute_rotation_matrix([1, 0], [x, y])
+
+    assert_almost_equal(M, R)
+
+    # 3D case
+    theta = pi / 3
+    phi = pi / 4
+
+    R = [[ cos(theta) * cos(phi), -sin(theta), cos(theta) * -sin(phi) ],
+         [ sin(theta) * cos(phi),  cos(theta), sin(theta) * -sin(phi) ],
+         [              sin(phi),           0,               cos(phi) ]]
+
+    y, x, z = convert_quasipolar_coords(1, [theta, phi])
+    M = compute_rotation_matrix([1, 0, 0], [x, y, z])
+
+    assert_almost_equal(M, R)
