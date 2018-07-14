@@ -16,7 +16,13 @@ def test_normalize():
 
 
 def test_axis_0_rotation_matrix():
-    pass
+    # trivial case
+    M = _axis_0_rotation_matrix([0, 1, 0])
+
+    # non-trivial case
+    M = _axis_0_rotation_matrix([0, .5, .5])
+    assert_almost_equal(M @ [0, .5, .5], [np.hypot(.5, .5), 0, 0])
+    assert_almost_equal(M @ [1, 0, 0], [0, -1, 0])
 
 
 def test_convert_quasipolar_coords():
@@ -69,7 +75,7 @@ def test_compute_rotation_matrix():
 
     assert_almost_equal(Z, Y)
 
-    # complex case
+    # non-trivial case
     X = np.arange(5)
     Y = np.arange(5, 10)
     uY = np.linalg.norm(X) / np.linalg.norm(Y) * Y
