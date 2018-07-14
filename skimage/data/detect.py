@@ -1,5 +1,5 @@
 import os as _os
-from .. import data_dir
+from . import data_dir
 
 
 def frontal_face_cascade_xml():

@@ -14,10 +14,10 @@ from ..io import imread, use_plugin
 from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
-from . import detect
 
 import os.path as osp
 data_dir = osp.abspath(osp.dirname(__file__))
+from . import detect
 
 __all__ = ['data_dir',
            'load',
@@ -341,8 +341,6 @@ def rocket():
     """
     return load("rocket.jpg")
 
-<<<<<<< HEAD
-=======
 
 def stereo_motorcycle():
     """Rectified stereo image pair with ground-truth disparities.
@@ -433,4 +431,3 @@ def lfw_subset():
 
     """
     return _np.load(_os.path.join(data_dir, 'lfw_subset.npy'))
->>>>>>> origin/master
