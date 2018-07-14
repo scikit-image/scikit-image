@@ -92,7 +92,7 @@ def _axis_0_rotation_matrix(u, indices=None):
                 x[i] = r
                 x[j] = 0
 
-        R = np.matmul(A, R)  # Multiply R by current matrix of stage A
+        R = A @ R  # Multiply R by current matrix of stage A
 
     return R
 
@@ -241,7 +241,7 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     My = _axis_0_rotation_matrix(Y, w)
 
     My_inverse = My.T  # since My is orthogonal its inverse is its transpose
-    M = np.matmul(My_inverse, Mx)
+    M = My_inverse @ Mx
 
     return M
 
