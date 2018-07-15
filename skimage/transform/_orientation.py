@@ -53,6 +53,13 @@ def _axis_0_rotation_matrix(u, indices=None):
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
     .. [2] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+
+
+    Examples
+    --------
+    >>> R = _axis_0_rotation_matrix([0, 1, 0])
+    >>> R @ [0, 1, 0]
+    array([ 1.,  0.,  0.])
     """
     ndim = len(u)
 
@@ -62,11 +69,11 @@ def _axis_0_rotation_matrix(u, indices=None):
     x = u
     w = indices
 
-    R = np.eye(ndim)  # Initial rotation matrix = Identity matrix
+    R = np.eye(ndim)
 
     # Loop to create matrices of stages
-    # These stages are 2D rotations around fixed axes that are combined
-    # together to form our nD matrix; see: [2]
+    # These stages are 2D rotations around fixed axes that are
+    # multiplied to form our nD matrix; see: [2]
     for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
         A = np.eye(ndim)
 
@@ -135,6 +142,10 @@ def convert_quasipolar_coords(r, thetas):
 
     Notes
     -----
+    This conversion is denoted "quasipolar" because it is similar to polar
+    coordinate conversion with a difference in the order that indices are
+    interpreted.
+
     In terms of polar coordinate conversion:
 
     .. math::
@@ -160,9 +171,9 @@ def convert_quasipolar_coords(r, thetas):
 
     Examples
     --------
-    >>> _convert_quasipolar_coords(1, [0])
+    >>> convert_quasipolar_coords(1, [0])
     array([ 0.,  1.])
-    >>> _convert_quasipolar_coords(10, [np.pi / 2, 0])
+    >>> convert_quasipolar_coords(10, [np.pi / 2, 0])
     array([  0.,   0.,  10.])
     """
     num_axes = len(thetas) + 1
@@ -190,8 +201,8 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
        between X and Y
     3. matrices Mx and My for the rotation of X and Y to the same axis are
        generated
-    4. the inverse of My is combined with Mx to form the rotation matrix M
-       that rotates vector X to the direction of vector Y
+    4. the inverse of My is mulitplied by Mx to form the rotation matrix M
+       which rotates vector X to the direction of vector Y
 
     Parameters
     ----------
@@ -218,9 +229,9 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     Examples
     --------
     >>> X = np.asarray([1, 0])
-    >>> Y = np.asarray([0.5, 0.5])
+    >>> Y = np.asarray([.5, .5])
 
-    >>> M = _compute_rotation_matrix(X, Y)
+    >>> M = compute_rotation_matrix(X, Y)
     >>> Z = M @ X
 
     >>> uY = Y / np.linalg.norm(Y)
@@ -240,7 +251,9 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     Mx = _axis_0_rotation_matrix(X, w)
     My = _axis_0_rotation_matrix(Y, w)
 
-    My_inverse = My.T  # since My is orthogonal its inverse is its transpose
-    M = My_inverse @ Mx
+    My_inverse = My.T    # since My is orthogonal its inverse is its transpose
+    M = My_inverse @ Mx  # by rotating both vectors to the same direction
+                         # and inverting one operation, a final
+                         # rotation matrix is created
 
     return M
