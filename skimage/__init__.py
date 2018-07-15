@@ -124,6 +124,8 @@ else:
         del geometry
     except ImportError as e:
         _raise_build_error(e)
+
+    # All skimage root imports go here
     from .util.dtype import (img_as_float32,
                              img_as_float64,
                              img_as_float,
@@ -133,8 +135,6 @@ else:
                              img_as_bool,
                              dtype_limits)
     from .data import data_dir
-
-
-from .util.lookfor import lookfor
+    from .util.lookfor import lookfor
 
 del warnings, functools, imp, sys
