@@ -62,14 +62,14 @@ using `OpenCV train cascade utility
 <http://docs.opencv.org/doc/user_guide/ug_traincascade.html>`_.
 """
 
-import skimage.data as data
-import skimage.future.detect as detect
+from skimage import data
+from skimage.future import detect
 
 from matplotlib import pyplot as plt
 from matplotlib import patches
 
 # Load the trained file from the module root.
-trained_file = data.detect.frontal_face_cascade_xml()
+trained_file = data.frontal_face_cascade_xml()
 
 # Initialize the detector cascade.
 detector = detect.Cascade(trained_file)
