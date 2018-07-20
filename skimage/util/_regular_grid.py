@@ -47,6 +47,18 @@ def regular_grid(ar_shape, n_points):
     >>> ar[g] = 1
     >>> ar.sum()
     8.0
+
+    Note
+    ----
+    In scikit-image 0.15 the return type was changed from a list to a tuple to
+    ensure compatibility with Numpy 1.15:
+    https://github.com/numpy/numpy/blob/master/doc/release/1.15.0-notes.rst#deprecations
+
+    If your code requires the returned result to be a list, you may convert the
+    output of this function to a list with:
+
+    >>> result = list(regular_grid(ar_shape=(3, 20, 40), n_points=8))
+
     """
     ar_shape = np.asanyarray(ar_shape)
     ndim = len(ar_shape)
