@@ -14,8 +14,8 @@ class ExposureSuite:
         self.image = rescale(self.image, 2.0, anti_aliasing=False)
 
     def time_equalize_hist(self):
-    	#running it 10 times to achieve significant performance time.
-    	for i in range(10):
-        	result = exposure.equalize_hist(self.image)
+        # Running it 10 times to achieve significant performance time.
+        for i in range(10):
+            result = exposure.equalize_hist(self.image)
 
 
