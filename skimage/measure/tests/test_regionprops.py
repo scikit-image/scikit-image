@@ -64,6 +64,8 @@ def test_ndim():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 10), dtype=np.int))
+    regionprops(np.zeros((1, 1), dtype=np.int))
+    regionprops(np.zeros((1, 1, 1), dtype=np.int))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
