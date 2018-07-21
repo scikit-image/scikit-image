@@ -546,8 +546,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     """
 
-    label_image = np.squeeze(label_image)
-
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
 
