@@ -159,38 +159,3 @@ def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
     image = -1 * np.ones((10, 10))
     assert_warns(UserWarning, label2rgb, labels, image)
-
-
-def test_bg_color_with_avg():
-    # label image
-    label_field = np.array([[0, 0, 0, 1],
-                            [0, 1, 1, 1],
-                            [1, 1, 1, 1]], dtype=np.uint8)
-
-    # color image
-    r = np.array([[1., 1., 0., 0.],
-                  [0., 0., 1., 1.],
-                  [0., 0., 0., 0.]])
-    g = np.array([[0., 0., 0., 1.],
-                  [1., 1., 1., 0.],
-                  [0., 0., 0., 0.]])
-    b = np.array([[0., 0., 0., 1.],
-                  [0., 1., 1., 1.],
-                  [0., 0., 1., 1.]])
-    image = np.dstack((r, g, b))
-
-    # reference label-colored image
-    rout = np.array([[1.0, 1.0, 1.0, 0.5],
-                     [1.0, 0.5, 0.5, 0.5],
-                     [0.0, 0.0, 0.0, 0.0]])
-    gout = np.array([[1.00, 1.00, 1.00, 0.75],
-                     [1.00, 0.75, 0.75, 0.75],
-                     [0.00, 0.00, 0.00, 0.00]])
-    bout = np.array([[1.0, 1.0, 1.0, 1.0],
-                     [1.0, 1.0, 1.0, 1.0],
-                     [0.5, 0.5, 0.5, 0.5]])
-    expected_out = np.dstack((rout, gout, bout))
-
-    # test standard averaging with bg color
-    out = label2rgb(label_field, image, bg_label=0, bg_color=1.0, kind="avg")
-    assert_array_almost_equal(out, expected_out)
