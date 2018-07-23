@@ -155,7 +155,7 @@ def equalize_hist(image, nbins=256, mask=None):
 
     References
     ----------
-    .. [1] http://www.janeriksolem.net/2009/06/histogram-equalization-with-python-and.html
+    .. [1] http://www.janeriksolem.net/histogram-equalization-with-python-and.html
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
