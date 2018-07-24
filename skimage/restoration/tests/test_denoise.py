@@ -532,6 +532,13 @@ def test_wavelet_denoising_args():
                                             multichannel=multichannel)
 
 
+def test_denoise_wavelet_biorthogonal():
+    """Biorthogonal wavelets should raise a warning during thresholding."""
+    img = astro_gray
+    assert_warns(UserWarning, restoration.denoise_wavelet, img,
+                 wavelet='bior2.2', multichannel=False)
+
+
 def test_cycle_spinning_multichannel():
     sigma = 0.1
     rstate = np.random.RandomState(1234)
