@@ -440,5 +440,5 @@ def laplacian(ndim, shape, is_real=True):
                               0.0,
                               -1.0]).reshape([-1 if i == dim else 1
                                               for i in range(ndim)])
-    impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
+    impr[(slice(1, 2), ) * ndim] = 2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr

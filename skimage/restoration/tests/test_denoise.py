@@ -408,7 +408,7 @@ def test_wavelet_denoising_nd():
                 img = 0.2*np.ones((128, )*ndim)
             else:
                 img = 0.2*np.ones((16, )*ndim)
-            img[[slice(5, 13), ] * ndim] = 0.8
+            img[(slice(5, 13), ) * ndim] = 0.8
 
             sigma = 0.1
             noisy = img + sigma * rstate.randn(*(img.shape))
@@ -433,7 +433,7 @@ def test_wavelet_denoising_levels():
     wavelet = 'db1'
     # Generate a very simple test image
     img = 0.2*np.ones((N, )*ndim)
-    img[[slice(5, 13), ] * ndim] = 0.8
+    img[(slice(5, 13), ) * ndim] = 0.8
 
     sigma = 0.1
     noisy = img + sigma * rstate.randn(*(img.shape))
@@ -481,7 +481,7 @@ def test_estimate_sigma_masked_image():
     rstate = np.random.RandomState(1234)
     # uniform image
     img = np.zeros((128, 128))
-    center_roi = [slice(32, 96), slice(32, 96)]
+    center_roi = (slice(32, 96), slice(32, 96))
     img[center_roi] = 0.8
     sigma = 0.1
 
