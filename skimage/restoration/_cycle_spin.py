@@ -3,7 +3,6 @@ from __future__ import division
 from itertools import product
 
 import numpy as np
-import warnings
 
 
 def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
