@@ -3,7 +3,6 @@ from __future__ import division
 from itertools import product
 
 import numpy as np
-import dask
 
 
 def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
@@ -145,6 +144,16 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
+    if num_workers != 1:
+        try:
+            import dask
+        except ImportError:
+            import warnings
+            warnings.warn(
+                "dask is required for parallel computation, but it is "
+                "not available.  Computation will be performed serially."
+            )
+            num_workers = 1
     # compute a running average across the cycle shifts
     if num_workers == 1:
         # serial processing
