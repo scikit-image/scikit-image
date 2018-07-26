@@ -33,3 +33,5 @@ doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
+
+save-demo.jpg

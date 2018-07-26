@@ -365,6 +365,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
     ----------
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
+
+        .. versionchanged:: 0.14.1
+            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
+            so any number of singleton dimensions was allowed. This resulted in
+            inconsistent handling of images with singleton dimensions. To
+            recover the old behaviour, use
+            ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
@@ -545,8 +552,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
     (22.729879860483141, 81.912285234465827)
 
     """
-
-    label_image = np.squeeze(label_image)
 
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')

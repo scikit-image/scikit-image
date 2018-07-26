@@ -509,7 +509,7 @@ def _solve_bf(lap_sparse, B, return_full_prob=False):
     """
     lap_sparse = lap_sparse.tocsc()
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-    X = np.array([solver(np.array((-B[i]).todense()).ravel())
+    X = np.array([solver(np.array((-B[i]).toarray()).ravel())
                   for i in range(len(B))])
     if not return_full_prob:
         X = np.argmax(X, axis=0)
@@ -525,7 +525,7 @@ def _solve_cg(lap_sparse, B, tol, return_full_prob=False):
     lap_sparse = lap_sparse.tocsc()
     X = []
     for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].todense(), tol=tol)[0]
+        x0 = cg(lap_sparse, -B[i].toarray(), tol=tol)[0]
         X.append(x0)
     if not return_full_prob:
         X = np.array(X)
@@ -544,7 +544,7 @@ def _solve_cg_mg(lap_sparse, B, tol, return_full_prob=False):
     ml = ruge_stuben_solver(lap_sparse)
     M = ml.aspreconditioner(cycle='V')
     for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].todense(), tol=tol, M=M, maxiter=30)[0]
+        x0 = cg(lap_sparse, -B[i].toarray(), tol=tol, M=M, maxiter=30)[0]
         X.append(x0)
     if not return_full_prob:
         X = np.array(X)

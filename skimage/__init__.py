@@ -112,10 +112,10 @@ else:
         del geometry
     except ImportError as e:
         _raise_build_error(e)
+
+    # All skimage root imports go here
     from .util.dtype import *
     from .data import data_dir
-
-
-from .util.lookfor import lookfor
+    from .util.lookfor import lookfor
 
 del warnings, functools, imp, sys
