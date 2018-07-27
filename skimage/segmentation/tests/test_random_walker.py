@@ -14,7 +14,8 @@ SCIPY_EXPECTED = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_EXPECTED_WARNING = r'pyamg|\A\Z'
 PYAMG_SCIPY_EXPECTED = SCIPY_EXPECTED + '|' + PYAMG_EXPECTED_WARNING
 
-if Version(np.__version__) >= '1.15' and Version(scipy.__version__) <= '1.1':
+if (Version(np.__version__) >= '1.15.0' and
+        Version(scipy.__version__) <= '1.1.0'):
     NUMPY_MATRIX_EXPECTED = 'matrix subclass'
 else:
     NUMPY_MATRIX_EXPECTED = None

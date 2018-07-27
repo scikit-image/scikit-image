@@ -10,7 +10,8 @@ from skimage.filters import LPIFilter2D, inverse, wiener
 from skimage._shared._warnings import expected_warnings
 
 
-if Version(np.__version__) >= '1.15' and Version(scipy.__version__) <= '1.1.0':
+if (Version(np.__version__) >= '1.15.0' and
+        Version(scipy.__version__) <= '1.1.0'):
     SCIPY_ND_INDEXING = 'non-tuple sequence for multidimensional'
 else:
     SCIPY_ND_INDEXING = None
