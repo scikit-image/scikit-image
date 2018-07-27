@@ -46,7 +46,7 @@ class TestImageCollection(TestCase):
     def test_getitem(self):
         num = len(self.images)
         for i in range(-num, num):
-            assert type(self.images[i]) is np.ndarray
+            assert isinstance(self.images[i], np.ndarray)
         assert_allclose(self.images[0],
                         self.images[-num])
 
