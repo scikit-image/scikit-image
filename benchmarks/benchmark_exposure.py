@@ -17,5 +17,3 @@ class ExposureSuite:
         # Running it 10 times to achieve significant performance time.
         for i in range(10):
             result = exposure.equalize_hist(self.image)
-
-
