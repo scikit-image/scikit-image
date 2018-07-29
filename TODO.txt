@@ -30,6 +30,7 @@ Version 0.16
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
   arguments.
 * In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+* Change default values in ``skimage.color.label2rgb``.
 
 Other
 -----
