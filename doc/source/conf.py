@@ -317,16 +317,16 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # intersphinx
 # -----------------------------------------------------------------------------
 _python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
-_python_doc_base = 'http://docs.python.org/' + _python_version_str
+_python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('http://docs.scipy.org/doc/numpy',
+    'numpy': ('https://docs.scipy.org/doc/numpy',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('http://scikit-learn.org/stable',
+    'sklearn': ('https://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
-    'matplotlib': ('http://matplotlib.org/',
+    'matplotlib': ('https://matplotlib.org/',
                    (None, 'http://matplotlib.org/objects.inv'))
 }
 
