@@ -142,6 +142,9 @@ def iradon_filter(filter_name, size):
            Imaging", IEEE Press 1988.
     """
     # Construct the Fourier filter
+
+    # The ramp filter is implemented based on eq. 61 on  p.72 of Kak and Slaney
+    # https://engineering.purdue.edu/~malcolm/pct/CTI_Ch03.pdf
     n1 = np.arange(0, size / 2 + 1, dtype=np.int)
     n2 = np.arange(size / 2 - 1, 0, -1, dtype=np.int)
     n = np.concatenate((n1, n2))

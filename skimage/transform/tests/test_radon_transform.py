@@ -45,9 +45,10 @@ def _rescale_intensity(x):
     return x
 
 
-def test_iradon_bias_circular_phantom():
+def test_iradon_rampfilter_bias_circular_phantom():
     """
-    test that a uniform circular phantom has a small reconstruction bias
+    test that a uniform circular phantom has a small reconstruction bias using
+    the ramp filter
     """
     pixels = 128
     xy = np.arange(-pixels / 2, pixels / 2) + 0.5
@@ -63,18 +64,6 @@ def test_iradon_bias_circular_phantom():
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
     assert( roi_err < tol )
-
-
-def test_iradon_filter_shepp_logan_peaks():
-    """
-
-    """
-    filter_name = 'shepp-logan'
-    size = 1024
-
-    fourier_filter = iradon_filter(filter_name, size)
-    import matplotlib.pyplot as plt
-    plt.plot(fourier_filter), plt.show()
 
 
 def check_radon_center(shape, circle):
