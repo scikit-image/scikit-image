@@ -1,5 +1,3 @@
-# coding: utf-8
-from __future__ import division
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _moments_cy

@@ -20,7 +20,6 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
-    - python-qt4
 
 env:
   global:
@@ -37,20 +36,12 @@ notifications:
 
 matrix:
   include:
-    # 2.7 build (until 0.14 is release)
-    - os: linux
-      python: 2.7
-      env: WITH_PYAMG=1 QT=PyQt4
-    - os: linux
-      python: 2.7
-      env: WITH_PYAMG=1 QT=PyQt4 PIP_FLAGS="--pre"
-    - os: linux
-      python: 2.7
-      env: MINIMUM_REQUIREMENTS=1
-    - os: linux
-      python: 3.4
     - os: linux
       python: 3.5
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
+    - os: linux
+      python: 3.5
+      env: QT=PyQt5 WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
@@ -79,6 +70,8 @@ before_install:
 
 install:
     - python setup.py develop
+    # Install testing requirements
+    - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
     - |
       if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
@@ -97,7 +90,7 @@ install:
       if [[ "${WITH_PYAMG}" == "1" ]]; then
         pip install --retries 3 -q pyamg
       fi
-    - source tools/travis/install_qt.sh
+    - tools/travis/install_qt.sh
 
 script: tools/travis/script.sh
 

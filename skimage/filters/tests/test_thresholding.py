@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -5,7 +6,6 @@ import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
-                                          threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
@@ -15,6 +15,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum,
+                                          try_all_threshold,
                                           _mean_std)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
@@ -27,6 +28,16 @@ class TestSimpleImage():
                                [1, 2, 5, 4, 1],
                                [2, 4, 5, 2, 1],
                                [4, 5, 1, 0, 0]], dtype=int)
+
+    def test_minimum(self):
+        with pytest.raises(RuntimeError):
+            threshold_minimum(self.image)
+
+    def test_try_all_threshold(self):
+        fig, ax = try_all_threshold(self.image)
+        all_texts = [axis.texts for axis in ax if axis.texts != []]
+        text_content = [text.get_text() for x in all_texts for text in x]
+        assert 'RuntimeError' in text_content
 
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
@@ -104,32 +115,6 @@ class TestSimpleImage():
         assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
-
-    def test_threshold_local_equals_adaptive(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        with expected_warnings(['deprecated', 'return value']):
-            thresholded_original = threshold_adaptive(self.image, 3,
-                                                      method='generic',
-                                                      param=func)
-        threshold_new = threshold_local(self.image, 3, method='generic',
-                                        param=func)
-        assert_equal(thresholded_original, self.image > threshold_new)
-
-    def test_threshold_adaptive_generic(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
-        )
-        with expected_warnings(['deprecated', 'return value']):
-            out = threshold_adaptive(self.image, 3, method='generic',
-                                     param=func)
-        assert_equal(ref, out)
 
     def test_threshold_local_gaussian(self):
         ref = np.array(
@@ -255,7 +240,7 @@ def test_yen_coins_image_as_float():
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
-def test_adaptive_even_block_size_error():
+def test_local_even_block_size_error():
     img = data.camera()
     with testing.raises(ValueError):
         threshold_local(img, block_size=4)

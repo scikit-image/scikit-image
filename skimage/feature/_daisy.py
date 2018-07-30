@@ -28,7 +28,7 @@ def daisy(image, step=4, radius=15, rings=3, histograms=8, orientations=8,
     Parameters
     ----------
     image : (M, N) array
-        Input image (greyscale).
+        Input image (grayscale).
     step : int, optional
         Distance between descriptor sampling points.
     radius : int, optional

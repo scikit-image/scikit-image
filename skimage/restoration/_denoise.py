@@ -1,17 +1,16 @@
-# coding: utf-8
 import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
 from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
-                      bins=10000, mode='constant', cval=0, multichannel=None):
+                      bins=10000, mode='constant', cval=0, multichannel=False):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving, denoising filter. It averages pixels based on
@@ -72,12 +71,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     >>> astro = astro[220:300, 220:320]
     >>> noisy = astro + 0.6 * astro.std() * np.random.random(astro.shape)
     >>> noisy = np.clip(noisy, 0, 1)
-    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15)
+    >>> denoised = denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
+    ...                              multichannel=True)
     """
-    if multichannel is None:
-        warn('denoise_bilateral will default to multichannel=False in v0.15')
-        multichannel = True
-
     if multichannel:
         if image.ndim != 3:
             if image.ndim == 2:
@@ -209,7 +205,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
                 slices_d[ax] = slice(1, None)
                 slices_p[ax+1] = slice(0, -1)
                 slices_p[0] = ax
-                d[slices_d] += p[slices_p]
+                d[tuple(slices_d)] += p[tuple(slices_p)]
                 slices_d[ax] = slice(None)
                 slices_p[ax+1] = slice(None)
             out = image + d
@@ -223,7 +219,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
         for ax in range(ndim):
             slices_g[ax+1] = slice(0, -1)
             slices_g[0] = ax
-            g[slices_g] = np.diff(out, axis=ax)
+            g[tuple(slices_g)] = np.diff(out, axis=ax)
             slices_g[ax+1] = slice(None)
 
         norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
@@ -432,10 +428,14 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
 
     """
     wavelet = pywt.Wavelet(wavelet)
+    if not wavelet.orthogonal:
+        warn(("Wavelet thresholding was designed for use with orthogonal "
+              "wavelets. For nonorthogonal wavelets such as {}, results are "
+              "likely to be suboptimal.").format(wavelet.name))
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
-    original_extent = [slice(s) for s in image.shape]
+    original_extent = tuple(slice(s) for s in image.shape)
 
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
@@ -549,15 +549,25 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
 
-    Many wavelet coefficient thresholding approaches have been proposed.  By
+    Many wavelet coefficient thresholding approaches have been proposed. By
     default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
     thresholding method that computes separate thresholds for each wavelet
     sub-band as described in [1]_.
 
     If ``method == "VisuShrink"``, a single "universal threshold" is applied to
-    all wavelet detail coefficients as described in [2]_.  This threshold
+    all wavelet detail coefficients as described in [2]_. This threshold
     is designed to remove all Gaussian noise at a given ``sigma`` with high
     probability, but tends to produce images that appear overly smooth.
+
+    Although any of the wavelets from ``PyWavelets`` can be selected, the
+    thresholding methods assume an orthogonal wavelet transform and may not
+    choose the threshold appropriately for biorthogonal wavelets. Orthogonal
+    wavelets are desirable because white noise in the input remains white noise
+    in the subbands. Biorthogonal wavelets lead to colored noise in the
+    subbands. Additionally, the orthogonal wavelets in PyWavelets are
+    orthonormal so that noise variance in the subbands remains identical to the
+    noise variance of the input. Example orthogonal wavelets are the Daubechies
+    (e.g. 'db2') or symmlet (e.g. 'sym2') families.
 
     References
     ----------

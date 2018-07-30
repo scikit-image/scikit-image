@@ -51,6 +51,7 @@ def profile_line(image, src, dst, linewidth=1,
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     For example:
+
     >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
     array([ 1.,  1.,  1.,  2.,  2.,  2.,  0.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row

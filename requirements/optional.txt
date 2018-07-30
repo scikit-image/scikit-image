@@ -3,4 +3,4 @@ imread
 SimpleITK
 astropy
 tifffile
-imageio
+qtpy

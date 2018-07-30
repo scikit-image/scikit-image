@@ -8,7 +8,7 @@ import pywt
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_warns, assert_)
-from skimage._shared._warnings import expected_warnings, warnings
+from skimage._shared._warnings import expected_warnings
 
 
 np.random.seed(1234)
@@ -223,11 +223,9 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
-    import sys
     img = np.full((50, 50), np.NaN)
-
-    # TODO: This warning is not optional in python3. This should be
-    # made a strict warning when we get to 0.15
+    # This is in fact an optional warning for our test suite.
+    # Python 3.5 will not trigger a warning.
     with expected_warnings(['invalid|\A\Z']):
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
@@ -410,7 +408,7 @@ def test_wavelet_denoising_nd():
                 img = 0.2*np.ones((128, )*ndim)
             else:
                 img = 0.2*np.ones((16, )*ndim)
-            img[[slice(5, 13), ] * ndim] = 0.8
+            img[(slice(5, 13), ) * ndim] = 0.8
 
             sigma = 0.1
             noisy = img + sigma * rstate.randn(*(img.shape))
@@ -435,7 +433,7 @@ def test_wavelet_denoising_levels():
     wavelet = 'db1'
     # Generate a very simple test image
     img = 0.2*np.ones((N, )*ndim)
-    img[[slice(5, 13), ] * ndim] = 0.8
+    img[(slice(5, 13), ) * ndim] = 0.8
 
     sigma = 0.1
     noisy = img + sigma * rstate.randn(*(img.shape))
@@ -483,7 +481,7 @@ def test_estimate_sigma_masked_image():
     rstate = np.random.RandomState(1234)
     # uniform image
     img = np.zeros((128, 128))
-    center_roi = [slice(32, 96), slice(32, 96)]
+    center_roi = (slice(32, 96), slice(32, 96))
     img[center_roi] = 0.8
     sigma = 0.1
 
@@ -534,10 +532,11 @@ def test_wavelet_denoising_args():
                                             multichannel=multichannel)
 
 
-def test_multichannel_warnings():
-    img = data.astronaut()
-    assert_warns(UserWarning, restoration.denoise_bilateral, img)
-    assert_warns(UserWarning, restoration.denoise_nl_means, img)
+def test_denoise_wavelet_biorthogonal():
+    """Biorthogonal wavelets should raise a warning during thresholding."""
+    img = astro_gray
+    assert_warns(UserWarning, restoration.denoise_wavelet, img,
+                 wavelet='bior2.2', multichannel=False)
 
 
 def test_cycle_spinning_multichannel():
