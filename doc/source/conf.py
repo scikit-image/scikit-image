@@ -324,7 +324,7 @@ intersphinx_mapping = {
               (None, './_intersphinx/numpy-objects.inv')),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
-    'sklearn': ('https://scikit-learn.org/stable',
+    'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
                    (None, 'http://matplotlib.org/objects.inv'))
