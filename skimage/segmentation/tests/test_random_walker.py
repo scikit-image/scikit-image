@@ -111,15 +111,16 @@ def test_2d_cg_mg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    expected = ['scipy.sparse.sparsetools|%s' % PYAMG_SCIPY_EXPECTED,
-                NUMPY_MATRIX_EXPECTED]
-    with expected_warnings(expected):
+    anticipated_warnings = [
+        'scipy.sparse.sparsetools|%s' % PYAMG_SCIPY_EXPECTED,
+        NUMPY_MATRIX_EXPECTED]
+    with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(expected):
+    with expected_warnings(anticipated_warnings):
         full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
-                              return_full_prob=True)
+                                  return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
