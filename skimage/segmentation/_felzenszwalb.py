@@ -42,7 +42,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     ----------
     .. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
            Huttenlocher, D.P.  International Journal of Computer Vision, 2004
-           
+
     Notes
     -----
         The `k` parameter used in the original paper renamed to `scale` here.
