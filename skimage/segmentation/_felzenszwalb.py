@@ -24,9 +24,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     image : (width, height, 3) or (width, height) ndarray
         Input image.
     scale : float
-        Free parameter. It is the constant used in threshold function
-        which makes small clusters more likely to be merged. Thus, Higher
-        scale means larger clusters.
+        Free parameter. Higher means larger clusters.
     sigma : float
         Width of Gaussian kernel used in preprocessing.
     min_size : int
@@ -44,6 +42,10 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     ----------
     .. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
            Huttenlocher, D.P.  International Journal of Computer Vision, 2004
+           
+    Notes
+    -----
+        The `k` parameter used in the original paper renamed to `scale` here.
 
     Examples
     --------
