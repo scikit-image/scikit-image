@@ -273,13 +273,14 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
+        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return sign * 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
