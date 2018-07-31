@@ -113,7 +113,7 @@ def test_avg():
     # label image
     label_field = np.array([[1, 1, 1, 2],
                             [1, 2, 2, 2],
-                            [3, 3, 3, 3]], dtype=np.uint8)
+                            [3, 3, 4, 4]], dtype=np.uint8)
 
     # color image
     r = np.array([[1., 1., 0., 0.],
@@ -136,7 +136,7 @@ def test_avg():
                      [0.  , 0.  , 0.  , 0.  ]])
     bout = np.array([[0. , 0. , 0. , 1. ],
                      [0. , 1. , 1. , 1. ],
-                     [0.5, 0.5, 0.5, 0.5]])
+                     [0.0, 0.0, 1.0, 1.0]])
     expected_out = np.dstack((rout, gout, bout))
 
     # test standard averaging
