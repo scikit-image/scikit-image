@@ -222,7 +222,8 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     bg = (labels == bg_label)
     if bg.any():
         labels = labels[labels != bg_label]
-        out[bg] = bg_color
+        mask = (label_field == bg_label).nonzero()
+        out[mask] = bg_color
     for label in labels:
         mask = (label_field == label).nonzero()
         color = image[mask].mean(axis=0)
