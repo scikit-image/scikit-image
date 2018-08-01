@@ -110,7 +110,7 @@ def expected_warnings(matching):
         # enter context
         yield w
         # exited user context, check the recorded warnings
-        # Allow uses to provide None
+        # Allow users to provide None
         while None in matching:
             matching.remove(None)
         remaining = [m for m in matching if '\A\Z' not in m.split('|')]
