@@ -12,9 +12,9 @@ from skimage._shared._warnings import expected_warnings
 
 if (Version(np.__version__) >= '1.15.0' and
         Version(scipy.__version__) <= '1.1.0'):
-    SCIPY_ND_INDEXING = 'non-tuple sequence for multidimensional'
+    SCIPY_ND_INDEXING_WARNING = 'non-tuple sequence for multidimensional'
 else:
-    SCIPY_ND_INDEXING = None
+    SCIPY_ND_INDEXING_WARNING = None
 
 
 class TestLPIFilter2D(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestLPIFilter2D(unittest.TestCase):
             yield (self.tst_shape, self.img[:, c_slice])
 
     def test_inverse(self):
-        with expected_warnings([SCIPY_ND_INDEXING]):
+        with expected_warnings([SCIPY_ND_INDEXING_WARNING]):
             F = self.f(self.img)
             g = inverse(F, predefined_filter=self.f)
             assert_equal(g.shape, self.img.shape)
@@ -55,7 +55,7 @@ class TestLPIFilter2D(unittest.TestCase):
             assert_((g - g1[::-1, ::-1]).sum() < 55)
 
     def test_wiener(self):
-        with expected_warnings([SCIPY_ND_INDEXING]):
+        with expected_warnings([SCIPY_ND_INDEXING_WARNING]):
             F = self.f(self.img)
             g = wiener(F, predefined_filter=self.f)
             assert_equal(g.shape, self.img.shape)
