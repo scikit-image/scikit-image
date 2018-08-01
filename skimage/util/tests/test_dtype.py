@@ -82,7 +82,7 @@ def test_range_extra_dtypes(dtype_in, dt):
 
 def test_downcast():
     x = np.arange(10).astype(np.uint64)
-    with expected_warnings('Downcasting'):
+    with expected_warnings(['Downcasting']):
         y = img_as_int(x)
     assert np.allclose(y, x.astype(np.int16))
     assert y.dtype == np.int16, y.dtype
