@@ -409,7 +409,8 @@ def test_wavelet_threshold():
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
-    with expected_warnings(["Thresholding method ", PYWAVELET_ND_INDEXING_WARNING]):
+    with expected_warnings(["Thresholding method ",
+                            PYWAVELET_ND_INDEXING_WARNING]):
         _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
                            threshold=sigma)
 
