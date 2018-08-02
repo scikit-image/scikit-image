@@ -28,7 +28,8 @@ Improvements
 API Changes
 -----------
 
-
+- ``rectangular_grid`` now returns a tuple instead of a list to improve
+  compatibility with NumPy 1.15.
 
 Deprecations
 ------------
