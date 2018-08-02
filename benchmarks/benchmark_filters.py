@@ -6,12 +6,19 @@ from skimage import filters
 
 class FiltersSuite:
     """Benchmark for filter routines in scikit-image."""
+    def _filt_func(self, r, c):
+        return np.exp(-np.hypot(r, c) / 1)
+
     def setup(self):
-        self.image = np.random.random((4000, 4000))
-        self.image[:2000, :2000] += 1
-        self.image[3000:, 3000] += 0.5
+        self.image = np.random.random((600, 600))
+        self.image[:250, :250] += 1
+        self.image[375:, 375] += 0.5
+        self.f = filters.LPIFilter2D(self._filt_func)
 
     def time_sobel(self):
-        result = filters.sobel(self.image)
+        # Running it 10 times to achieve significant performance time
+        for i in range(10):
+            result = filters.sobel(self.image)
 
-
+    def time_inverse(self):
+        result = filters.inverse(self.image, predefined_filter=self.f)
