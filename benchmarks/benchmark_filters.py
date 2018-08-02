@@ -22,3 +22,6 @@ class FiltersSuite:
 
     def time_inverse(self):
         result = filters.inverse(self.image, predefined_filter=self.f)
+
+    def time_wiener(self):
+        result = filters.wiener(self.image, predefined_filter=self.f)
