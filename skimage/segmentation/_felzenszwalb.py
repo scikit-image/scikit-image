@@ -35,7 +35,9 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, simi
     similarity : string optional (default: "euclidean")
         How to determine similarity between pixels. Using "euclidean" specifies
         an L2-norm between pixel intensity vectors and "cosine" refers
-        to the cosine distance between pixel intensity vectors.
+        to the cosine distance between pixel intensity vectors, the latter being
+        useful for segmentation of high-dimensional images (e.g.
+        hyperspectral imagery as in [2]).
 
     Returns
     -------
@@ -46,13 +48,19 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, simi
     ----------
     .. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
            Huttenlocher, D.P.  International Journal of Computer Vision, 2004
+    .. [2] Superpixel endmember detection. Thompson, David R., et al. IEEE
+           Transactions on Geoscience and Remote Sensing, 2010
 
     Examples
     --------
     >>> from skimage.segmentation import felzenszwalb
     >>> from skimage.data import coffee
     >>> img = coffee()
-    >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
+    >>> segments = felzenszwalb(img,
+                                scale=3.0,
+                                sigma=0.95,
+                                min_size=5,
+                                similarity='euclidean')
     """
 
     if not multichannel and image.ndim > 2:
