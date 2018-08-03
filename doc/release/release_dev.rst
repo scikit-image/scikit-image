@@ -35,9 +35,11 @@ Improvements
 
 API Changes
 -----------
+
+- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
+  removed. Use parameter ``data_range`` instead.
 - imageio is now the preferred plugin for reading and writing images.
 - imageio is now a dependency of scikit-image.
-
 - ``rectangular_grid`` now returns a tuple instead of a list for compatiblity
   with numpy 1.15
 - ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
