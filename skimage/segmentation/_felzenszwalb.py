@@ -3,7 +3,8 @@ import numpy as np
 from ._felzenszwalb_cy import _felzenszwalb_cython
 
 
-def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, similarity='euclidean'):
+def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True,
+                 similarity='euclidean'):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
@@ -35,8 +36,8 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True, simi
     similarity : string optional (default: "euclidean")
         How to determine similarity between pixels. Using "euclidean" specifies
         an L2-norm between pixel intensity vectors and "cosine" refers
-        to the cosine distance between pixel intensity vectors, the latter being
-        useful for segmentation of high-dimensional images (e.g.
+        to the cosine distance between pixel intensity vectors, the latter
+        being useful for segmentation of high-dimensional images (e.g.
         hyperspectral imagery as in [2]).
 
     Returns
