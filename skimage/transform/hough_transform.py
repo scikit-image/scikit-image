@@ -176,7 +176,8 @@ def hough_line(image, theta=None, bins=None):
         Defaults to a vector of 180 angles evenly spaced from -pi/2 to pi/2.
     bins : 1D ndarray of double, optional
         Distances at which to compute the transform, in pixels.
-        Defaults to a variable sized vector proportional to the shape of the image
+        Defaults to a variable sized vector proportional to the shape
+        of the image
 
     Returns
     -------
@@ -223,9 +224,12 @@ def hough_line(image, theta=None, bins=None):
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
 
     if bins is None:
-        max_distance = 2 * math.ceil(math.sqrt(image.shape[0] * image.shape[0] +
-                                     image.shape[1] * image.shape[1]))
-        bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
+        max_distance = 2 * math.ceil(math.sqrt(image.shape[0] *
+                                               image.shape[0] +
+                                               image.shape[1] *
+                                               image.shape[1]))
+        bins = np.linspace(-max_distance / 2.0,
+                           max_distance / 2.0, max_distance)
 
     return _hough_line(image, theta=theta, bins=bins)
 
@@ -271,7 +275,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
     if theta is None:
         theta = np.pi / 2 - np.arange(180) / 180.0 * np.pi
 
-    return _prob_hough_line(image, threshold=threshold, line_length=line_length,
+    return _prob_hough_line(image, threshold=threshold,
+                            line_length=line_length,
                             line_gap=line_gap, theta=theta, seed=seed)
 
 
