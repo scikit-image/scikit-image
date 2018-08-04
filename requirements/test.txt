@@ -1,3 +1,4 @@
 pytest
 pytest-cov
-requirements-parser
+flake8
+codecov

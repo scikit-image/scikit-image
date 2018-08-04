@@ -140,14 +140,14 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
             raise ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
     # Cross out the center of the selem
-    selem[[slice(d, d + 1) for d in offset]] = False
+    selem[tuple(slice(d, d + 1) for d in offset)] = False
 
     # Make padding for edges of reconstructed image so we can ignore boundaries
     padding = (np.array(selem.shape) / 2).astype(int)
     dims = np.zeros(seed.ndim + 1, dtype=int)
     dims[1:] = np.array(seed.shape) + 2 * padding
     dims[0] = 2
-    inside_slices = [slice(p, -p) for p in padding]
+    inside_slices = tuple(slice(p, -p) for p in padding)
     # Set padded region to minimum image intensity and mask along first axis so
     # we can interleave image and mask pixels when sorting.
     if method == 'dilation':
@@ -158,8 +158,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         raise ValueError("Reconstruction method can be one of 'erosion' "
                          "or 'dilation'. Got '%s'." % method)
     images = np.ones(dims) * pad_value
-    images[[0] + inside_slices] = seed
-    images[[1] + inside_slices] = mask
+    images[(0, *inside_slices)] = seed
+    images[(1, *inside_slices)] = mask
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array

@@ -139,7 +139,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
 
 
 def partition_by_cut(cut, rag):
-    """Compute resulting subgraphs from given bi-parition.
+    """Compute resulting subgraphs from given bi-partition.
 
     Parameters
     ----------

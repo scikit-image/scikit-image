@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi

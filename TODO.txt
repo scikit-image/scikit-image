@@ -24,6 +24,7 @@ Version 0.16
 * Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
+  * Remove the ``save-demo.jpg`` line from ``.gitignore``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
@@ -36,3 +37,13 @@ Other
   once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
   ``skimage.feature.corner``.
+* Monitor when ``matplotlib`` releases a version greater than 2.2.2 and test
+  to see if it becomes compatible with PyQt5.11. If it is compatible,
+  remove the version limiting logic in ``tools/travis/install_qt.sh``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.

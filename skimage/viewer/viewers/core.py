@@ -386,7 +386,7 @@ class CollectionViewer(ImageViewer):
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:
-                index = 0.1 * int(key - 48) * self.num_images
+                index = int(0.1 * (key - 48) * self.num_images)
                 self.update_index('', index)
                 event.accept()
             else:

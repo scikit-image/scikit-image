@@ -1,4 +1,3 @@
-# coding: utf-8
 import numpy as np
 from .._shared.utils import assert_nD
 from . import _moments_cy
