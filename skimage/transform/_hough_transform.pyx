@@ -243,7 +243,8 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4, double accuracy=1,
 
 
 def _hough_line(cnp.ndarray img,
-                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta):
+                cnp.ndarray[ndim=1, dtype=cnp.double_t] theta,
+                cnp.ndarray[ndim=1, dtype=cnp.double_t] bins):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -252,6 +253,8 @@ def _hough_line(cnp.ndarray img,
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
+    bins : 1D ndarray of double
+        Distances at which to compute the transform, in pixels.
 
     Returns
     -------
@@ -297,13 +300,10 @@ def _hough_line(cnp.ndarray img,
 
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint64_t] accum
-    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
-    cdef Py_ssize_t max_distance, offset
-
-    max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                             img.shape[1] * img.shape[1]))
+    cdef Py_ssize_t max_distance, offset, dist
+    
+    max_distance = bins.shape[0]
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
 
     # compute the nonzero indexes
@@ -311,18 +311,21 @@ def _hough_line(cnp.ndarray img,
     y_idxs, x_idxs = np.nonzero(img)
 
     # finally, run the transform
-    cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
+    cdef Py_ssize_t nidxs, nthetas, nbins, i, j, x, y, accum_idx
 
     with nogil:
         nidxs = y_idxs.shape[0]  # x and y are the same shape
         nthetas = theta.shape[0]
+        nbins = bins.shape[0]
         for i in range(nidxs):
             x = x_idxs[i]
             y = y_idxs[i]
             for j in range(nthetas):
-                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
-                accum[accum_idx, j] += 1
-
+                for k in range(nbins):
+                    dist = round((ctheta[j] * x + stheta[j] * y))
+                    accum_idx = dist + offset
+                    if round(bins[k]) == dist:
+                        accum[accum_idx, j] += 1
     return accum, theta, bins
 
 

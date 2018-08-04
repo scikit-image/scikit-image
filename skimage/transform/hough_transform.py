@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
@@ -163,7 +164,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
                           min_size=min_size, max_size=max_size)
 
 
-def hough_line(image, theta=None):
+def hough_line(image, theta=None, bins=None):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -173,6 +174,9 @@ def hough_line(image, theta=None):
     theta : 1D ndarray of double, optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced from -pi/2 to pi/2.
+    bins : 1D ndarray of double, optional
+        Distances at which to compute the transform, in pixels.
+        Defaults to a variable sized vector proportional to the shape of the image
 
     Returns
     -------
@@ -218,7 +222,12 @@ def hough_line(image, theta=None):
         # These values are approximations of pi/2
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180)
 
-    return _hough_line(image, theta=theta)
+    if bins is None:
+        max_distance = 2 * math.ceil(math.sqrt(image.shape[0] * image.shape[0] +
+                                     image.shape[1] * image.shape[1]))
+        bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
+
+    return _hough_line(image, theta=theta, bins=bins)
 
 
 def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
