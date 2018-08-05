@@ -37,6 +37,12 @@ def configuration(parent_package='', top_path=None):
     subdirs = [d for d in subdirs if rel_isdir(d)]
     for test_dir in subdirs:
         config.add_data_dir(test_dir)
+
+    # strip all the debug information to make smaller binaries
+    # https://github.com/cython/cython/issues/2102#issuecomment-401171477
+    for ext in config.ext_modules:
+        ext.extra_link_args.append('-Wl,--strip-all')
+
     return config
 
 if __name__ == "__main__":
