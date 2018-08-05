@@ -2,7 +2,7 @@
 
 import os
 
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,19 +20,24 @@ def configuration(parent_package='', top_path=None):
     cython(['_nl_means_denoising.pyx'], working_path=base_path)
 
     config.add_extension('_unwrap_1d', sources=['_unwrap_1d.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     unwrap_sources_2d = ['_unwrap_2d.c', 'unwrap_2d_ljmu.c']
     config.add_extension('_unwrap_2d', sources=unwrap_sources_2d,
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     unwrap_sources_3d = ['_unwrap_3d.c', 'unwrap_3d_ljmu.c']
     config.add_extension('_unwrap_3d', sources=unwrap_sources_3d,
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
-        include_dirs=[get_numpy_include_dirs(), '../_shared'])
+        include_dirs=[get_numpy_include_dirs(), '../_shared'],
+        extra_link_args=extra_link_args)
     config.add_extension('_nl_means_denoising',
                          sources=['_nl_means_denoising.c'],
                          include_dirs=[get_numpy_include_dirs(),
-                                       '../_shared'])
+                                       '../_shared'],
+                         extra_link_args=extra_link_args)
 
     return config
 

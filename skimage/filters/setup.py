@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,17 +20,22 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/bilateral_cy.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('rank.core_cy', sources=['rank/core_cy.c'],
-        include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('rank.generic_cy', sources=['rank/generic_cy.c'],
-        include_dirs=[get_numpy_include_dirs()])
+        include_dirs=[get_numpy_include_dirs()],
+        extra_link_args=extra_link_args)
     config.add_extension(
         'rank.percentile_cy', sources=['rank/percentile_cy.c'],
-        include_dirs=[get_numpy_include_dirs()])
+        include_dirs=[get_numpy_include_dirs()],
+        extra_link_args=extra_link_args)
     config.add_extension(
         'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
-        include_dirs=[get_numpy_include_dirs()])
+        include_dirs=[get_numpy_include_dirs()],
+        extra_link_args=extra_link_args)
 
     return config
 

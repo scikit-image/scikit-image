@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -15,7 +15,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_draw.pyx'], working_path=base_path)
 
     config.add_extension('_draw', sources=['_draw.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
+                         extra_link_args=extra_link_args)
 
     return config
 

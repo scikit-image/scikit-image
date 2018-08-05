@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 import os.path
 
 base_path = os.path.abspath(os.path.dirname(__file__))
@@ -19,11 +19,14 @@ def configuration(parent_package='', top_path=None):
     cython(['heap.pyx'], working_path=base_path)
 
     config.add_extension('_spath', sources=['_spath.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_mcp', sources=['_mcp.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('heap', sources=['heap.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     return config
 
 if __name__ == '__main__':

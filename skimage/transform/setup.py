@@ -2,7 +2,7 @@
 
 import os
 
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,17 +19,21 @@ def configuration(parent_package='', top_path=None):
     cython(['_seam_carving.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
 
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
+                         extra_link_args=extra_link_args)
 
     config.add_extension('_radon_transform',
                          sources=['_radon_transform.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
 
     config.add_extension('_seam_carving', sources=['_seam_carving.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     return config
 
 if __name__ == '__main__':

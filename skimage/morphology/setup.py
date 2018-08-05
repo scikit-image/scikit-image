@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,17 +20,23 @@ def configuration(parent_package='', top_path=None):
     cython(['_extrema_cy.pyx'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_skeletonize_cy', sources=['_skeletonize_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_greyreconstruct', sources=['_greyreconstruct.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     config.add_extension('_extrema_cy', sources=['_extrema_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
 
     return config
 

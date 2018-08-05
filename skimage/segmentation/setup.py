@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython
+from skimage._build import cython, extra_link_args
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,13 +13,16 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_felzenszwalb_cy.pyx'], working_path=base_path)
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     cython(['_quickshift_cy.pyx'], working_path=base_path)
     config.add_extension('_quickshift_cy', sources=['_quickshift_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
     cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs()],
+                         extra_link_args=extra_link_args)
 
     return config
 

@@ -12,6 +12,7 @@ except NameError:
     class WindowsError(Exception):
         pass
 
+extra_link_args = ['-Wl,--strip-all']
 
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
