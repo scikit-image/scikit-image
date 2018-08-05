@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from skimage._build import cython, extra_link_args
+from skimage._build import cython
 import os.path
 
 base_path = os.path.abspath(os.path.dirname(__file__))
@@ -16,8 +16,7 @@ def configuration(parent_package='', top_path=None):
     # it fails, try to build with pre-generated .c files.
     cython(['_ncut_cy.pyx'], working_path=base_path)
     config.add_extension('_ncut_cy', sources=['_ncut_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     return config
 
 if __name__ == '__main__':

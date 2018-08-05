@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from skimage._build import cython, extra_link_args
+from skimage._build import cython
 
 import os.path
 
@@ -21,13 +21,11 @@ def configuration(parent_package='', top_path=None):
 
     config.add_extension('_plugins._colormixer',
                          sources=['_plugins/_colormixer.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_plugins._histograms',
                          sources=['_plugins/_histograms.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 

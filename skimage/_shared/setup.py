@@ -2,7 +2,7 @@
 
 import os
 
-from skimage._build import cython, extra_link_args
+from skimage._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -17,13 +17,10 @@ def configuration(parent_package='', top_path=None):
     cython(['transform.pyx'], working_path=base_path)
     cython(['interpolation.pyx'], working_path=base_path)
 
-    config.add_extension('geometry', sources=['geometry.c'],
-                         extra_link_args=extra_link_args)
+    config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
-    config.add_extension('interpolation', sources=['interpolation.c'],
-                          extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('interpolation', sources=['interpolation.c'])
     return config
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from skimage._build import cython, extra_link_args
+from skimage._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,30 +22,22 @@ def configuration(parent_package='', top_path=None):
     cython(['_haar.pyx'], working_path=base_path)
 
     config.add_extension('corner_cy', sources=['corner_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('censure_cy', sources=['censure_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('orb_cy', sources=['orb_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('brief_cy', sources=['brief_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
-                         include_dirs=[get_numpy_include_dirs()],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
-                         extra_link_args=extra_link_args)
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_haar', sources=['_haar.cpp'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'],
-                         language="c++",
-                         extra_link_args=extra_link_args)
+                         language="c++")
 
     return config
 
