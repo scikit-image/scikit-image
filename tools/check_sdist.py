@@ -24,8 +24,13 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml', './asv.conf.json',
-                './skimage/filters/rank/README.rst',
-                './temp.tif', './save-demo.jpg']
+                './skimage/filters/rank/README.rst']
+
+# These docstring artifacts are hard to avoid without adding noise to the
+# docstrings. They typically show up if you run the whole test suite in the
+# build directory.
+docstring_artifacts = ['./temp.tif', './save-demo.jpg']
+ignore_files = ignore_files + docstring_artifacts
 
 
 missing = []
