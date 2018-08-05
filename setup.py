@@ -148,7 +148,7 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         python_requires='>=3.5',
-        packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
+        packages=setuptools.find_packages('skimage', include=['skimage'], exclude=[]),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
 
