@@ -49,8 +49,22 @@ retry () {
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     for filename in requirements/*.txt; do
-        sed -i 's/>=/==/g' $filename
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+            # sed command for OSX is different than unix
+            # https://stackoverflow.com/a/2420579/2321145
+            sed -i '' -e 's/>=/==/g' $filename
+        else
+            sed -i 's/>=/==/g' $filename
+        fi
     done
+fi
+
+
+# PYAMG is having trouble being installed on OSX
+if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    # sed command for OSX is different than unix
+    # https://stackoverflow.com/a/2420579/2321145
+    sed -i '' -e "/pyamg/d" ./requirements/optional.txt
 fi
 
 python -m pip install --upgrade pip
