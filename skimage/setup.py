@@ -1,4 +1,5 @@
 import os
+import sys
 
 
 def configuration(parent_package='', top_path=None):
@@ -40,8 +41,15 @@ def configuration(parent_package='', top_path=None):
 
     # strip all the debug information to make smaller binaries
     # https://github.com/cython/cython/issues/2102#issuecomment-401171477
+    # This should be a check for llvm vs gcc/msvc compiler.
+    # The LLVM compiler requires different flags...
+    if sys.platform.startswith('darwin'):
+        # https://releases.llvm.org/2.1/docs/CommandGuide/html/llvm-ld.html
+        extra_linker_args = '-W,-strip-all'
+    else:
+        extra_linker_args = '-Wl,--strip-all'
     for ext in config.ext_modules:
-        ext.extra_link_args.append('-Wl,--strip-all')
+        ext.extra_link_args.append(extra_linker_args)
 
     return config
 
