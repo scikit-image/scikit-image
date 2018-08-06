@@ -24,6 +24,7 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml', './asv.conf.json',
+                './.codecov.yml',
                 './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
 
 # These docstring artifacts are hard to avoid without adding noise to the
