@@ -1,6 +1,7 @@
 .PHONY: all clean test
 PYTHON=python
 PYTESTS=pytest
+BENCHMARK=benchmark
 
 all:
 	$(PYTHON) setup.py build_ext --inplace
@@ -16,8 +17,13 @@ doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
 coverage:
-	$(PYTESTS) skimage --cov=skimage
+ifeq ($(suite),$(BENCHMARK))
+	$(PYTESTS) benchmarks --cov=skimage
+else
+	$(PYTESTS) -o python_functions=test_* skimage --cov=skimage
+endif
 
 html:
 	pip install -q sphinx pytest-runner sphinx-gallery
 	export SPHINXOPTS=-W; make -C doc html
+
