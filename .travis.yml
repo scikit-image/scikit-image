@@ -34,19 +34,33 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
 
+
+# DEFAULT VALUES:
+# RUN_EXAMPLES != 0  (runs all the files in the examples)
+# BUILD_DOCS != 1  (runs make html in docs)
+# RUN_TESTS != 0  (runs pytest [twice] and flake8)
+# MINIMUM_REQUIREMENTS != 1  (pins the requirements.txt files)
 matrix:
   include:
     - os: linux
       python: 3.5
+      env: RUN_EXAMPLES=0
     - os: linux
       python: 3.5
-      env: MINIMUM_REQUIREMENTS=1
+      env: MINIMUM_REQUIREMENTS=1 RUN_EXAMPLES=0
     - os: linux
       python: 3.6
-      env: BUILD_DOCS=1 DEPLOY_DOCS=1
+      env: RUN_EXAMPLES=0
+    # Linux seems to finish in 40 minutes (max is 45)
+    # Therefore run the long examples in a seperate build
+    - os: linux
+      python: 3.5
+      env: RUN_TESTS=0 RUN_EXAMPLES=1
     - os: linux
       python: 3.6
-      env: PIP_FLAGS="--pre"
+      env: RUN_TESTS=0 BUILD_DOCS=1 DEPLOY_DOCS=1
+    # OSX seems to finish in under 30 minutes, therefore we can
+    # run the tests and examples in the build
     - os: osx
       osx_image: xcode9
       language: objective-c
@@ -55,6 +69,10 @@ matrix:
       osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.6
+    # Includea  --pre build to catch errors
+    - os: linux
+      python: 3.6
+      env: PIP_FLAGS="--pre" RUN_EXAMPLES=0
 
 before_install:
     # libpng 1.6.32 has a bug in reading PNG

@@ -11,16 +11,18 @@ mkdir -p $MPL_DIR
 # this may be overwritten by subsequent install script
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 
-section "Flake8.test"
-flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
-section_end "Flake8.test"
+if [[ "${RUN_TESTS}" != "0" ]]; then
+  section "Flake8.test"
+  flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
+  section_end "Flake8.test"
 
-section "Test.with.min.requirements"
-# Show what's installed
-pip list
-tools/build_versions.py
-pytest skimage
-section_end "Test.with.min.requirements"
+  section "Test.with.min.requirements"
+  # Show what's installed
+  pip list
+  tools/build_versions.py
+  pytest skimage
+  section_end "Test.with.min.requirements"
+fi
 
 # Install optional dependencies and pyqt
 section "Install.optional.dependencies"
@@ -33,30 +35,36 @@ pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
 tools/travis/install_qt.sh
 section_end "Install.optional.dependencies"
 
-section "Test.with.optional.requirements"
-# Show what's installed
-pip list
-tools/build_versions.py
-pytest --doctest-modules --cov=skimage skimage
-section_end "Test.with.optional.requirements"
+if [[ "${RUN_TESTS}" != "0" ]]; then
+  section "Test.with.optional.requirements"
+  # Show what's installed
+  pip list
+  tools/build_versions.py
+  pytest --doctest-modules --cov=skimage skimage
+  section_end "Test.with.optional.requirements"
+fi
 
-section "Tests.examples"
 # Run example applications
 echo Build or run examples
-pip install --retries 3 -q -r ./requirements/docs.txt
-pip list
-tools/build_versions.py
-
 if [[ "${BUILD_DOCS}" == "1" ]]; then
+  section "build.docs"
+  pip install --retries 3 -q -r ./requirements/docs.txt
+  pip list
+  tools/build_versions.py
   export SPHINXCACHE=${HOME}/.cache/sphinx
   make html
-else
+  section_end "build.docs"
+elif [[ "${RUN_EXAMPLES}" != "0" ]]; then
+  section "Tests.examples"
+  pip install --retries 3 -q -r ./requirements/docs.txt
+  pip list
+  tools/build_versions.py
   # These test are run by sphinx automatically
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
   for f in doc/examples/*/*.py; do
     python "${f}"
   done
+  section_end "Tests.examples"
 fi
-section_end "Tests.examples"
 
 set +ex
