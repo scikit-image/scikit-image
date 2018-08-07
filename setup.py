@@ -90,21 +90,28 @@ def configuration(parent_package='', top_path=None):
 # https://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
-        # So hard to test this, lets just see what happens
-        compiler = self.compiler.compiler[0]
+        import numpy.distutils
+
         # strip all the debug information to make smaller binaries
         # https://github.com/cython/cython/issues/2102#issuecomment-401171477
         # This should be a check for llvm vs gcc/msvc compiler.
-        if compiler in ['gcc', 'msvc']:
+        if isinstance(self.compiler,
+                      numpy.distutils.msvccompiler.MSVCCompiler):
             extra_link_args = '-Wl,--strip-all'
-        elif compiler in ['llvm']:
-            # https://releases.llvm.org/2.1/docs/CommandGuide/html/llvm-ld.html
-            extra_link_args = '-W,-strip-all'
         else:
-            raise RuntimeError('Unknown compiler selected')
-            warnings.warn('Unknown compiler selected. '
-                          'Please file a bug report with scikit-image')
-            extra_link_args = ''
+            # So hard to test this, lets just see what happens
+            compiler = self.compiler.compiler[0]
+            if compiler in ['gcc']:
+                extra_link_args = '-Wl,--strip-all'
+            elif compiler in ['llvm']:
+                # https://releases.llvm.org/2.1/docs/CommandGuide/html/llvm-ld.html
+                extra_link_args = '-W,-strip-all'
+            else:
+                raise RuntimeError('Unknown compiler selected = {}'
+                                   ''.format(compiler))
+                warnings.warn('Unknown compiler selected. '
+                              'Please file a bug report with scikit-image')
+                extra_link_args = ''
 
         for ext in self.extensions:
             ext.extra_link_args.append(extra_link_args)
