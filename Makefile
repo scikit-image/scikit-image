@@ -16,12 +16,11 @@ test:
 doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
-coverage:
-ifeq ($(suite),$(BENCHMARK))
+benchmark_coverage:
 	$(PYTESTS) benchmarks --cov=skimage
-else
+
+test_coverage:
 	$(PYTESTS) -o python_functions=test_* skimage --cov=skimage
-endif
 
 html:
 	pip install -q sphinx pytest-runner sphinx-gallery
