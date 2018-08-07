@@ -18,12 +18,15 @@ URL = 'http://scikit-image.org'
 LICENSE = 'Modified BSD'
 DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
+import builtins
 import os
 import sys
-
-import setuptools
+import warnings
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
+
+import setuptools
+from numpy.distutils.command.build_ext import build_ext
 
 if sys.version_info < (3, 5):
 
@@ -39,7 +42,6 @@ For Python 2.7, please install the 0.14.x Long Term Support using:
     sys.stderr.write(error + "\n")
     sys.exit(1)
 
-import builtins
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
@@ -82,6 +84,31 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('skimage/data')
 
     return config
+
+
+# No real way to detect the true compiler until the actual compilation step
+# https://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
+class build_ext_compiler_check(build_ext):
+    def build_extensions(self):
+        # So hard to test this, lets just see what happens
+        compiler = self.compiler.compiler[0]
+        # strip all the debug information to make smaller binaries
+        # https://github.com/cython/cython/issues/2102#issuecomment-401171477
+        # This should be a check for llvm vs gcc/msvc compiler.
+        if compiler in ['gcc', 'msvc']:
+            extra_link_args = '-Wl,--strip-all'
+        elif compiler in ['llvm']:
+            # https://releases.llvm.org/2.1/docs/CommandGuide/html/llvm-ld.html
+            extra_link_args = '-W,-strip-all'
+        else:
+            raise RuntimeError('Unknown compiler selected')
+            warnings.warn('Unknown compiler selected. '
+                          'Please file a bug report with scikit-image')
+            extra_link_args = ''
+
+        for ext in self.extensions:
+            ext.extra_link_args.append(extra_link_args)
+        super().build_extensions()
 
 
 if __name__ == "__main__":
@@ -157,6 +184,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
-                  'sdist': sdist},
+                  'sdist': sdist,
+                  'build_ext': build_ext_compiler_check},
         **extra
     )
