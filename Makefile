@@ -19,6 +19,8 @@ doctest:
 benchmark_coverage:
 	$(PYTESTS) benchmarks --cov=skimage
 
+coverage: test_coverage
+
 test_coverage:
 	$(PYTESTS) -o python_functions=test_* skimage --cov=skimage
 
