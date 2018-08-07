@@ -90,13 +90,12 @@ def configuration(parent_package='', top_path=None):
 # https://stackoverflow.com/questions/30985862/how-to-identify-compiler-before-defining-cython-extensions
 class build_ext_compiler_check(build_ext):
     def build_extensions(self):
-        import numpy.distutils
+        from numpy.distutils.msvccompiler import MSVCCompiler
 
         # strip all the debug information to make smaller binaries
         # https://github.com/cython/cython/issues/2102#issuecomment-401171477
         # This should be a check for llvm vs gcc/msvc compiler.
-        if isinstance(self.compiler,
-                      numpy.distutils.msvccompiler.MSVCCompiler):
+        if isinstance(self.compiler, MSVCCompiler):
             extra_link_args = '-Wl,--strip-all'
         else:
             # So hard to test this, lets just see what happens
