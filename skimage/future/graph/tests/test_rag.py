@@ -3,6 +3,7 @@ from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
 from skimage import segmentation
 from skimage._shared import testing
+from skimage import data
 
 
 def max_edge(g, src, dst, n):
@@ -51,7 +52,6 @@ def test_rag_merge():
 @testing.skipif(not is_installed('networkx'),
                 reason="networkx not installed")
 def test_threshold_cut():
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -77,7 +77,6 @@ def test_threshold_cut():
 @testing.skipif(not is_installed('networkx'),
                 reason="networkx not installed")
 def test_cut_normalized():
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -104,6 +103,29 @@ def test_cut_normalized():
 
 @testing.skipif(not is_installed('networkx'),
                 reason="networkx not installed")
+def test_cut_normalized_gen():
+    img = data.coffee()
+    labels = segmentation.slic(img, compactness=30, n_segments=400)
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    new_label_gen = graph.cut_normalized_gen(labels, rag, init_thresh=0,
+                                             in_place=False)
+    next(new_label_gen)
+
+    # Test labels reset correctly when returning to a previous labeling
+    new_labels1 = new_label_gen.send(1e-8)
+    new_labels1, _, _ = segmentation.relabel_sequential(new_labels1)
+
+    new_labels2 = new_label_gen.send(1e-5)
+    new_labels2, _, _ = segmentation.relabel_sequential(new_labels2)
+
+    new_labels3 = new_label_gen.send(1e-8)
+    new_labels3, _, _ = segmentation.relabel_sequential(new_labels3)
+    assert (new_labels3 == new_labels1).all()
+
+
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
 def test_rag_error():
     img = np.zeros((10, 10, 3), dtype='uint8')
     labels = np.zeros((10, 10), dtype='uint8')
@@ -111,7 +133,7 @@ def test_rag_error():
     labels[5:, :] = 1
     with testing.raises(ValueError):
         graph.rag_mean_color(img, labels,
-                             2, 'non existant mode')
+                             2, 'non existent mode')
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -164,6 +186,25 @@ def test_rag_hierarchical():
 
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
+
+
+@testing.skipif(not is_installed('networkx'),
+                reason="networkx not installed")
+def test_ncut_gen_stable_subgraph():
+    """ Test to catch an error thrown when subgraph has all equal edges. """
+
+    img = np.zeros((100, 100, 3), dtype='uint8')
+
+    labels = np.zeros((100, 100), dtype='uint8')
+    labels[:50, :50] = 1
+    labels[:50, 50:] = 2
+
+    rag = graph.rag_mean_color(img, labels, mode='similarity')
+    new_label_gen = graph.cut_normalized_gen(labels, rag, in_place=False)
+    new_labels = next(new_label_gen)
+    new_labels, _, _ = segmentation.relabel_sequential(new_labels)
+
+    assert new_labels.max() == 0
 
 
 @testing.skipif(not is_installed('networkx'),
