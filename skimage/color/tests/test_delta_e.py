@@ -1,5 +1,5 @@
 """Test for correctness of color distance functions"""
-from os.path import abspath, dirname, join as pjoin
+from os.path import join as pjoin
 
 import numpy as np
 from skimage._shared.testing import assert_allclose
@@ -8,6 +8,7 @@ from skimage.color import (deltaE_cie76,
                            deltaE_ciede94,
                            deltaE_ciede2000,
                            deltaE_cmc)
+from skimage.data import data_dir
 
 
 def test_ciede2000_dE():
@@ -55,7 +56,7 @@ def load_ciede2000_data():
              ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = pjoin(dirname(abspath(__file__)), 'ciede2000_test_data.txt')
+    path = pjoin(data_dir, 'tests', 'ciede2000_test_data.txt')
     return np.loadtxt(path, dtype=dtype)
 
 
