@@ -1,7 +1,6 @@
 from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
-from ._mnxc import mnxc
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
@@ -17,6 +16,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      shape_index)
 from .template import match_template
 from .register_translation import register_translation
+from .masked_register_translation import masked_register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
