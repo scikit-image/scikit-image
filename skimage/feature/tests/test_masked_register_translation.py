@@ -4,63 +4,80 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_equal
 from skimage.data import camera
 from skimage.feature.register_translation import register_translation
-from skimage.feature.masked_register_translation import (masked_register_translation,
-                                                         mnxc)
+from skimage.feature.masked_register_translation import (
+    masked_register_translation, mnxc)
 
-### Masked translation registration tests #####################################
 
 def test_masked_registration_vs_register_translation():
-    """masked_register_translation should give the same results as register_translation in the case of trivial masks."""
+    """masked_register_translation should give the same results as
+    register_translation in the case of trivial masks."""
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(np.fft.fft2(reference_image), shift)))
+    shifted = np.real(np.fft.ifft2(fourier_shift(
+        np.fft.fft2(reference_image), shift)))
     trivial_mask = np.ones_like(reference_image)
 
     nonmasked_result, *_ = register_translation(reference_image, shifted)
-    masked_result = masked_register_translation(reference_image, shifted, trivial_mask, overlap_ratio=1/10)
+    masked_result = masked_register_translation(
+        reference_image, shifted, trivial_mask, overlap_ratio=1 / 10)
 
     assert_equal(nonmasked_result, masked_result)
 
+
 def test_masked_registration_random_masks():
-    """masked_register_translation should be able to register translations between images even with random masks."""
+    """masked_register_translation should be able to register translations
+    between images even with random masks."""
     # See random number generator for reproducible results
     np.random.seed(23)
 
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(np.fft.fft2(reference_image), shift)))
+    shifted = np.real(np.fft.ifft2(fourier_shift(
+        np.fft.fft2(reference_image), shift)))
 
     # Random masks with 75% of pixels being valid
-    ref_mask = np.random.choice([True, False], reference_image.shape, p=[3/4, 1/4])
-    shifted_mask = np.random.choice([True, False], shifted.shape, p=[3/4, 1/4])
+    ref_mask = np.random.choice(
+        [True, False], reference_image.shape, p=[3 / 4, 1 / 4])
+    shifted_mask = np.random.choice(
+        [True, False], shifted.shape, p=[3 / 4, 1 / 4])
 
-    measured_shift = masked_register_translation(reference_image, shifted, ref_mask, shifted_mask)
+    measured_shift = masked_register_translation(
+        reference_image, shifted, ref_mask, shifted_mask)
     assert_equal(measured_shift, -np.array(shift))
 
+
 def test_masked_registration_random_masks_non_equal_sizes():
-    """masked_register_translation should be able to register translations between images that 
-    are not the same size even with random masks."""
+    """masked_register_translation should be able to register
+    translations between images that are not the same size even
+    with random masks."""
     # See random number generator for reproducible results
     np.random.seed(23)
 
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(np.fft.fft2(reference_image), shift)))
+    shifted = np.real(np.fft.ifft2(fourier_shift(
+        np.fft.fft2(reference_image), shift)))
 
     # Crop the shifted image
     shifted = shifted[64:-64, 64:-64]
 
     # Random masks with 75% of pixels being valid
-    ref_mask = np.random.choice([True, False], reference_image.shape, p=[3/4, 1/4])
-    shifted_mask = np.random.choice([True, False], shifted.shape, p=[3/4, 1/4])
+    ref_mask = np.random.choice(
+        [True, False], reference_image.shape, p=[3 / 4, 1 / 4])
+    shifted_mask = np.random.choice(
+        [True, False], shifted.shape, p=[3 / 4, 1 / 4])
 
-    measured_shift = masked_register_translation(reference_image, shifted, np.ones_like(ref_mask), np.ones_like(shifted_mask))
+    measured_shift = masked_register_translation(
+        reference_image,
+        shifted,
+        np.ones_like(ref_mask),
+        np.ones_like(shifted_mask))
     assert_equal(measured_shift, -np.array(shift))
 
-### Masked normalized correlation tests #######################################
 
 def test_mnxc_output_shape():
-    """Masked normalized cross-correlation should return a shape of N + M + 1 for each transform axis."""
+    """Masked normalized cross-correlation should return a shape
+    of N + M + 1 for each transform axis."""
     shape1 = (15, 4, 5)
     shape2 = (6, 12, 7)
     expected_full_shape = tuple(np.array(shape1) + np.array(shape2) - 1)
@@ -78,8 +95,10 @@ def test_mnxc_output_shape():
     same_xcorr = mnxc(arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
     assert_equal(same_xcorr.shape, expected_same_shape)
 
+
 def test_mnxc_test_against_mismatched_dimensions():
-    """Masked normalized cross-correlation should raise an error if array dimensions along non-transformation axes are mismatched."""
+    """Masked normalized cross-correlation should raise an error if array
+    dimensions along non-transformation axes are mismatched."""
     shape1 = (23, 1, 1)
     shape2 = (6, 2, 2)
 
@@ -93,18 +112,21 @@ def test_mnxc_test_against_mismatched_dimensions():
     with testing.raises(ValueError):
         mnxc(arr1, arr2, m1, m2, axes=(1, 2))
 
+
 def test_mnxc_output_range():
     """Masked normalized cross-correlation should return between 1 and -1."""
     # See random number generator for reproducible results
     np.random.seed(23)
 
-    # Array dimensions must match along non-transformation axes, in this case axis 0
+    # Array dimensions must match along non-transformation axes, in
+    # this case
+    # axis 0
     shape1 = (15, 4, 5)
     shape2 = (15, 12, 7)
 
     # Initial array ranges between -5 and 5
-    arr1 = 10*np.random.random(shape1) - 5
-    arr2 = 10*np.random.random(shape2) - 5
+    arr1 = 10 * np.random.random(shape1) - 5
+    arr2 = 10 * np.random.random(shape2) - 5
 
     # random masks
     m1 = np.random.choice([True, False], arr1.shape)
@@ -117,6 +139,7 @@ def test_mnxc_output_range():
     eps = np.finfo(np.float).eps
     testing.assert_array_less(xcorr, 1 + eps)
     testing.assert_array_less(-xcorr, 1 + eps)
+
 
 def test_mnxc_side_effects():
     """Masked normalized cross-correlation should not modify the inputs."""
@@ -132,11 +155,13 @@ def test_mnxc_side_effects():
 
     for arr in (arr1, arr2, m1, m2):
         arr.setflags(write=False)
-    
+
     mnxc(arr1, arr2, m1, m2)
 
+
 def test_mnxc_over_axes():
-    """Masked normalized cross-correlation over axes should be equivalent to a loop over non-transform axes."""
+    """Masked normalized cross-correlation over axes should be
+    equivalent to a loop over non-transform axes."""
     # See random number generator for reproducible results
     np.random.seed(23)
 
@@ -149,26 +174,32 @@ def test_mnxc_over_axes():
     # Loop over last axis
     with_loop = np.empty_like(arr1, dtype=np.complex)
     for index in range(arr1.shape[-1]):
-        with_loop[:,:,index] = mnxc(arr1[:,:,index], arr2[:,:,index], 
-                                    m1[:,:,index], m2[:,:,index], axes=(0, 1), mode='same')
-    
+        with_loop[:, :, index] = mnxc(arr1[:, :, index],
+                                      arr2[:, :, index],
+                                      m1[:, :, index],
+                                      m2[:, :, index],
+                                      axes=(0, 1), mode='same')
+
     over_axes = mnxc(arr1, arr2, m1, m2, axes=(0, 1), mode='same')
 
     testing.assert_array_almost_equal(with_loop, over_axes)
 
+
 def test_mnxc_autocorrelation_trivial_masks():
-    """Masked normalized cross-correlation between identical arrays should reduce to an autocorrelation even with random masks."""
+    """Masked normalized cross-correlation between identical arrays
+    should reduce to an autocorrelation even with random masks."""
     # See random number generator for reproducible results
     np.random.seed(23)
 
     arr1 = camera()
     arr2 = camera()
-    
-    # Random masks with 75% of pixels being valid
-    m1 = np.random.choice([True, False], arr1.shape, p=[3/4, 1/4])
-    m2 = np.random.choice([True, False], arr2.shape, p=[3/4, 1/4])
 
-    xcorr = mnxc(arr1, arr1, m1, m1, axes=(0, 1), mode='same', overlap_ratio=0).real
+    # Random masks with 75% of pixels being valid
+    m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
+    m2 = np.random.choice([True, False], arr2.shape, p=[3 / 4, 1 / 4])
+
+    xcorr = mnxc(arr1, arr1, m1, m1, axes=(0, 1),
+                 mode='same', overlap_ratio=0).real
     max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
 
     # Autocorrelation should have maximum in center of array
