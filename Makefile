@@ -1,7 +1,6 @@
 .PHONY: all clean test
 PYTHON=python
 PYTESTS=pytest
-BENCHMARK=benchmark
 
 all:
 	$(PYTHON) setup.py build_ext --inplace
@@ -17,7 +16,7 @@ doctest:
 	$(PYTHON) -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
 
 benchmark_coverage:
-	$(PYTESTS) benchmarks --cov=skimage
+	$(PYTESTS) benchmarks --cov=skimage --cov-config=setup.cfg
 
 coverage: test_coverage
 
