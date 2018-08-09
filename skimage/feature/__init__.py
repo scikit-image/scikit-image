@@ -1,6 +1,7 @@
 from ._canny import canny
 from ._daisy import daisy
 from ._hog import hog
+from ._mnxc import mnxc
 from .texture import (greycomatrix, greycoprops,
                       local_binary_pattern,
                       multiblock_lbp,
