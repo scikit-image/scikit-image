@@ -45,8 +45,11 @@ def mnxc(arr1, arr2, m1, m2, mode = 'full', axes = (-2, -1), overlap_ratio = 3/1
 	Returns
 	-------
 	out : ndarray
-		Masked, normalized cross-correlation. If images are real-valued, then `out` will be
-		real-valued. For complex input, `out` will be complex as well.
+		Masked normalized cross-correlation.
+	
+	Raises
+	------
+	ValueError : if correlation `mode` is not valid, or array dimensions along non-transformation axes are not equal.
 		
 	References
 	----------
