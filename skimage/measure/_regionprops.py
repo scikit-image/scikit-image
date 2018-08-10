@@ -273,13 +273,14 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
+        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return sign * 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -468,9 +469,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        Angle between the X-axis and the major axis of the ellipse that has
-        the same second-moments as the region. Ranging from `-pi/2` to
-        `pi/2` in counter-clockwise direction.
+        In 'rc' coordinates, angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+
+        In `xy` coordinates, as above but the angle is now measured from the
+        "x" or horizontal axis.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.

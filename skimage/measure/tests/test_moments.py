@@ -1,9 +1,11 @@
 from __future__ import division
 import numpy as np
+from scipy import ndimage as ndi
 from skimage import draw
 from skimage.measure import (moments, moments_central, moments_coords,
                              moments_coords_central, moments_normalized,
-                             moments_hu, centroid)
+                             moments_hu, centroid, inertia_tensor,
+                             inertia_tensor_eigvals)
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
@@ -151,3 +153,37 @@ def test_centroid():
     image[15, 14:16] = 1/3
     image_centroid = centroid(image)
     assert_allclose(image_centroid, (14.25, 14.5))
+
+
+def test_inertia_tensor_2d():
+    image = np.zeros((40, 40))
+    image[15:25, 5:35] = 1  # big horizontal rectangle (aligned with axis 1)
+    T = inertia_tensor(image)
+    assert T[0, 0] > T[1, 1]
+    np.testing.assert_allclose(T[0, 1], 0)
+    v0, v1 = inertia_tensor_eigvals(image, T=T)
+    np.testing.assert_allclose(np.sqrt(v0/v1), 3, rtol=0.01, atol=0.05)
+
+
+def test_inertia_tensor_3d():
+    image = draw.ellipsoid(10, 5, 3)
+    T0 = inertia_tensor(image)
+    eig0, V0 = np.linalg.eig(T0)
+    # principal axis of ellipse = eigenvector of smallest eigenvalue
+    v0 = V0[:, np.argmin(eig0)]
+
+    assert np.allclose(v0, [1, 0, 0]) or np.allclose(-v0, [1, 0, 0])
+
+    imrot = ndi.rotate(image.astype(float), 30, axes=(0, 1), order=1)
+    Tr = inertia_tensor(imrot)
+    eigr, Vr = np.linalg.eig(Tr)
+    vr = Vr[:, np.argmin(eigr)]
+
+    # Check that axis has rotated by expected amount
+    pi, cos, sin = np.pi, np.cos, np.sin
+    R = np.array([[ cos(pi/6), -sin(pi/6), 0],
+                  [ sin(pi/6),  cos(pi/6), 0],
+                  [         0,          0, 1]])
+    expected_vr = R @ v0
+    assert (np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or
+            np.allclose(-vr, expected_vr, atol=1e-3, rtol=0.01))
