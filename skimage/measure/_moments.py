@@ -410,7 +410,7 @@ def inertia_tensor(image, mu=None):
            Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
-        mu = moments_central(image)
+        mu = moments_central(image, order=2)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim))
 
