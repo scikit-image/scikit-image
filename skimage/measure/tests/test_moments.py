@@ -184,6 +184,6 @@ def test_inertia_tensor_3d():
     R = np.array([[ cos(pi/6), -sin(pi/6), 0],
                   [ sin(pi/6),  cos(pi/6), 0],
                   [         0,          0, 1]])
-    expected_vr = R @ v0
+    expected_vr = R.dot(v0)
     assert (np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or
             np.allclose(-vr, expected_vr, atol=1e-3, rtol=0.01))
