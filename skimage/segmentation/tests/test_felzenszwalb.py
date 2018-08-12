@@ -61,14 +61,16 @@ def test_color():
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
+    img[:10, 10:, :] = [-1, -1, -1]  # vector with negative dot product with standard basis
     img[10:, 10:, 2] = 1
-    seg = felzenszwalb(img, sigma=0)
-    # we expect 4 segments:
-    assert_equal(len(np.unique(seg)), 4)
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 2)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 3)
+    for similarity in ['euclidean', 'cosine']:
+        seg = felzenszwalb(img, sigma=0, similarity=similarity)
+        # we expect 4 segments:
+        assert_equal(len(np.unique(seg)), 4)
+        assert_array_equal(seg[:10, :10], 0)
+        assert_array_equal(seg[10:, :10], 2)
+        assert_array_equal(seg[:10, 10:], 1)
+        assert_array_equal(seg[10:, 10:], 3)
 
 
 def test_merging():
