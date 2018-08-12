@@ -1,6 +1,8 @@
 import itertools
 
 import numpy as np
+from scipy.ndimage import measurements
+from scipy.ndimage import find_objects
 
 from .._shared.utils import warn
 from ..util import img_as_float
@@ -110,7 +112,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha)
     else:
-        return _label2rgb_avg(label, image, bg_label, bg_color)
+        return _label2mean(label, image, bg_label=bg_label, bg_color=bg_color)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
@@ -195,6 +197,90 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     return result
 
 
+def _apply_2d_func_to_image(func, image):
+    """
+    Apply a function to each channel of an image.
+
+    Parameters
+    ----------
+    func : callable
+        A function that takes an array to another array of the same shape.
+    image : array
+        A multichannel image
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+    """
+    if len(image.shape) == 2:
+        return func(image)
+    elif len(image.shape) == 3:
+        out = np.zeros(image.shape)
+        n = image.shape[2]
+        for k in range(n):
+            out[..., k] = func(image[..., k])
+        return out
+    else:
+        raise ValueError('Image must be 2d or 3d array.')
+
+
+def _label2mean_2d(label_field, band):
+    """
+    Aggregates with respect to label array means for a single channel image
+
+    Parameters
+    ----------
+    band : 2d array, shape ``label_field.shape``
+        A multichannel image of the same spatial shape as `label_field`.
+    bg_label : int, optional
+        A value in `label_field` to be treated as background.
+    bg_color : int, optional
+        The color for the background label (default = 0)
+
+    Returns
+    -------
+    out : array, same shape and type as `band`
+    """
+    out = np.zeros(band.shape)
+    labels_ = label_field + 1  # scipy wants labels to begin at 1 and transforms to 1, 2, ..., n+1
+    labels_unique = np.unique(labels_)
+    means = measurements.mean(band, labels=labels_, index=labels_unique)
+    indices = find_objects(labels_)
+    for label, mean in zip(labels_unique, means):
+        out[indices[label-1]][labels_[indices[label-1]] == label] = mean
+    return out
+
+
+def _label2mean(label_field, image, bg_label=None, bg_color=None):
+    """Visualise each segment in `label_field` with its mean color in `image`.
+
+    Parameters
+    ----------
+    label_field : array of (nonnegative) int
+        A segmentation of an image.
+    image : array, shape ``label_field.shape + (n,)``
+        A multichannel image of the same spatial shape as `label_field`.
+    bg_label : int, optional
+        A value in `label_field` to be treated as background.
+    bg_color : n-tuple of ints, optional
+        The color for the background label
+
+    Returns
+    -------
+    out : array, same shape and type as `image`
+        The output visualization.
+    """
+    def _label2mean_2d_partial(image):
+        return _label2mean_2d(label_field, image)
+
+    out = _apply_2d_func_to_image(_label2mean_2d_partial, image)
+
+    if bg_label is not None:
+        bg_color = bg_color or 0
+        out[label_field == bg_label] = bg_color
+    return out
+
+
 def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     """Visualise each segment in `label_field` with its mean color in `image`.
 
@@ -214,15 +300,4 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     out : array, same shape and type as `image`
         The output visualization.
     """
-    out = np.zeros_like(image)
-    labels = np.unique(label_field)
-    bg = (labels == bg_label)
-    if bg.any():
-        labels = labels[labels != bg_label]
-        mask = (label_field == bg_label).nonzero()
-        out[mask] = bg_color
-    for label in labels:
-        mask = (label_field == label).nonzero()
-        color = image[mask].mean(axis=0)
-        out[mask] = color
-    return out
+    return _label2mean(label_field, image, bg_label=bg_label, bg_color=bg_color)
