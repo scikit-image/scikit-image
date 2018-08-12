@@ -242,12 +242,14 @@ def _label2mean_2d(label_field, band):
     out : array, same shape and type as `band`
     """
     out = np.zeros(band.shape)
-    labels_ = label_field + 1  # scipy wants labels to begin at 1 and transforms to 1, 2, ..., n+1
+    # scipy wants labels to begin at 1 and transforms to 1, 2, ..., n+1
+    labels_ = label_field + 1
     labels_unique = np.unique(labels_)
     means = measurements.mean(band, labels=labels_, index=labels_unique)
     indices = find_objects(labels_)
     for label, mean in zip(labels_unique, means):
-        out[indices[label-1]][labels_[indices[label-1]] == label] = mean
+        indices_temp = indices[label - 1]
+        out[indices_temp][labels_[indices_temp] == label] = mean
     return out
 
 
@@ -279,25 +281,3 @@ def _label2mean(label_field, image, bg_label=None, bg_color=None):
         bg_color = bg_color or 0
         out[label_field == bg_label] = bg_color
     return out
-
-
-def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
-    """Visualise each segment in `label_field` with its mean color in `image`.
-
-    Parameters
-    ----------
-    label_field : array of int
-        A segmentation of an image.
-    image : array, shape ``label_field.shape + (3,)``
-        A color image of the same spatial shape as `label_field`.
-    bg_label : int, optional
-        A value in `label_field` to be treated as background.
-    bg_color : 3-tuple of int, optional
-        The color for the background label
-
-    Returns
-    -------
-    out : array, same shape and type as `image`
-        The output visualization.
-    """
-    return _label2mean(label_field, image, bg_label=bg_label, bg_color=bg_color)
