@@ -85,7 +85,7 @@ def pyramid_reduce(image, *, downscale=2, sigma=None, order=1,
 
 
 @kwonly_change('1.0')
-def pyramid_expand(image, upscale=2, sigma=None, order=1,
+def pyramid_expand(image, *, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
                    preserve_range=False):
     """Upsample and then smooth image.
