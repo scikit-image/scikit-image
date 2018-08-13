@@ -298,7 +298,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         False.
     center : iterable of length 2
         The rotation center. If ``center=None``, the image is rotated around
-        its center, i.e. ``center=(rows / 2 - 0.5, cols / 2 - 0.5)``.
+        its center, i.e. ``center=(cols / 2 - 0.5, rows / 2 - 0.5)``.  Please
+        note that this parameter is (cols, rows), contrary to normal skimage
+        ordering.
 
     Returns
     -------
