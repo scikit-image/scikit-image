@@ -21,7 +21,6 @@ doc/build
 source/api
 build
 dist
-skimage/version.py
 *.swp
 .coverage
 doc/source/auto_examples/**/*

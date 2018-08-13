@@ -24,7 +24,10 @@ def _check_factor(factor):
         raise ValueError('scale factor must be greater than 1')
 
 
-def pyramid_reduce(image, downscale=2, sigma=None, order=1,
+from .._shared._deprecators import kwonly_change
+
+@kwonly_change('1.0')
+def pyramid_reduce(image, *, downscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=None):
     """Smooth and then downsample image.
 
@@ -82,6 +85,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     return out
 
 
+@kwonly_change('1.0')
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=None):
     """Upsample and then smooth image.
@@ -141,8 +145,12 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     return out
 
 
-def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=None):
+@kwonly_change('1.0', previous_arg_order=['image', 'max_layer', 'downscale',
+                                          'sigma', 'order',
+                                          'mode', 'cval', 'multichannel'])
+def pyramid_gaussian(image, *, downscale=2, sigma=None, order=1,
+                     mode='reflect', cval=0, max_layer=-1,
+                     multichannel=None):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
