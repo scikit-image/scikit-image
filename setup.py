@@ -107,7 +107,7 @@ def openmp_build_ext():
     return ConditionalOpenMP
 
 
-with open('skimage/__init__.py') as fid:
+with open('skimage/version.py') as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.strip().split()[-1][1:-1]
