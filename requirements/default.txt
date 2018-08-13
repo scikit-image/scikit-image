@@ -7,4 +7,4 @@ imageio>=2.0.1
 PyWavelets>=0.4.0
 dask[array]>=0.9.0
 cloudpickle>=0.2.1
-deprecation_factory>=0.2.3
+deprecation_factory>=0.2.4
