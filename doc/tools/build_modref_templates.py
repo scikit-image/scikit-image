@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     installed_version = V(module.__version__)
 
-    source_lines = open('../skimage/__init__.py').readlines()
+    source_lines = open('../skimage/version.py').readlines()
     version = 'vUndefined'
     for l in source_lines:
         if l.startswith('__version__'):
