@@ -3,6 +3,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from ..transform import resize
 from .._shared.utils import convert_to_float
+from .._shared._deprecators import kwonly_change
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
@@ -22,7 +23,8 @@ def _check_factor(factor):
         raise ValueError('scale factor must be greater than 1')
 
 
-def pyramid_reduce(image, downscale=2, sigma=None, order=1,
+@kwonly_change('1.0')
+def pyramid_reduce(image, *, downscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
                    preserve_range=False):
     """Smooth and then downsample image.
@@ -82,6 +84,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     return out
 
 
+@kwonly_change('1.0')
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0, multichannel=False,
                    preserve_range=False):
@@ -142,9 +145,12 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     return out
 
 
-def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=False,
-                     preserve_range=False):
+@kwonly_change('1.0', previous_arg_order=['image', 'max_layer', 'downscale',
+                                          'sigma', 'order',
+                                          'mode', 'cval', 'multichannel'])
+def pyramid_gaussian(image, *, downscale=2, sigma=None, order=1,
+                     mode='reflect', cval=0, max_layer=-1,
+                     multichannel=None, preserve_range=False):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
