@@ -27,7 +27,7 @@ def _find_boundaries_subpixel(label_img):
 
     label_img_expanded = np.zeros([(2 * s - 1) for s in label_img.shape],
                                   label_img.dtype)
-    pixels = [slice(None, None, 2)] * ndim
+    pixels = (slice(None, None, 2), ) * ndim
     label_img_expanded[pixels] = label_img
 
     edges = np.ones(label_img_expanded.shape, dtype=bool)

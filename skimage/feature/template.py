@@ -177,4 +177,4 @@ def match_template(image, template, pad_input=False, mode='constant',
             d1 = d0 + image_shape[i] - template.shape[i] + 1
         slices.append(slice(d0, d1))
 
-    return response[slices]
+    return response[tuple(slices)]
