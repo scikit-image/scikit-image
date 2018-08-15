@@ -55,9 +55,6 @@ Other
   once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
   ``skimage.feature.corner``.
-* Monitor when ``matplotlib`` releases a version greater than 2.2.2 and test
-  to see if it becomes compatible with PyQt5.11. If it is compatible,
-  remove the version limiting logic in ``tools/travis/install_qt.sh``.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
