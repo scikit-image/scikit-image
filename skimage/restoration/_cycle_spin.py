@@ -165,5 +165,5 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         # multithreaded via dask
         futures = [dask.delayed(_run_one_shift)(s) for s in all_shifts]
         mean = sum(futures) / len(futures)
-        mean = mean.compute(get=dask.threaded.get, num_workers=num_workers)
+        mean = mean.compute(num_workers=num_workers)
     return mean
