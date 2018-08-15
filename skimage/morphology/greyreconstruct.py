@@ -158,8 +158,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         raise ValueError("Reconstruction method can be one of 'erosion' "
                          "or 'dilation'. Got '%s'." % method)
     images = np.ones(dims) * pad_value
-    images[(0, *inside_slices)] = seed
-    images[(1, *inside_slices)] = mask
+    images[(0, ) + inside_slices] = seed
+    images[(1, ) + inside_slices] = mask
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array

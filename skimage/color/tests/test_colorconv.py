@@ -193,7 +193,8 @@ class TestColorconv(TestCase):
         img_rgb = self.img_rgb
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
                               rgb_from_hdx)
-        assert_equal(img_as_ubyte(conv), img_rgb)
+        with expected_warnings(['precision loss']):
+            assert_equal(img_as_ubyte(conv), img_rgb)
 
     # RGB<->HDX roundtrip with ubyte image
     def test_hdx_rgb_roundtrip(self):

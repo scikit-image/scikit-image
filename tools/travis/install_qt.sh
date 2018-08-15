@@ -27,6 +27,7 @@ elif [[ "${QT}" == "PySide" ]]; then
     python ~/venv/bin/pyside_postinstall.py -install
     MPL_QT_API=PySide
     export QT_API=pyside
+# Now configure Matplotlib to use Qt5
 elif [[ "${QT}" == "PyQt5" ]]; then
     pip install --retries 3 -q $PIP_FLAGS pyqt5
     MPL_QT_API=PyQt5
