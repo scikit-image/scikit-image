@@ -215,7 +215,7 @@ class Picture(object):
     Load an image from a URL (the URL must start with ``http(s)://`` or
     ``ftp(s)://``):
 
-    >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
+    >>> picture = novice.open('https://scikit-image.org/_static/img/logo.png')  # doctest: +SKIP
 
     Create a blank 100 pixel wide, 200 pixel tall white image:
 
