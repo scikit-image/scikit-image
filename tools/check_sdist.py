@@ -24,7 +24,7 @@ ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
                 './.pep8speaks.yml', './asv.conf.json',
-                './skimage/filters/rank/README.rst']
+                './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
