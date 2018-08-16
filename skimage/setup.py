@@ -1,4 +1,5 @@
 import os
+import sys
 
 
 def configuration(parent_package='', top_path=None):
@@ -37,6 +38,7 @@ def configuration(parent_package='', top_path=None):
     subdirs = [d for d in subdirs if rel_isdir(d)]
     for test_dir in subdirs:
         config.add_data_dir(test_dir)
+
     return config
 
 if __name__ == "__main__":
