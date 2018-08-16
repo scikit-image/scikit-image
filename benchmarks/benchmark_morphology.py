@@ -1,7 +1,10 @@
 """Benchmarks for `skimage.morphology`."""
 
 
+from multiprocessing.pool import ThreadPool
+
 import numpy as np
+
 from skimage import data, filters, morphology
 from skimage.util import invert
 
@@ -37,6 +40,17 @@ class Watershed(object):
     def peakmem_watershed(self, seed_count, connectivity, compactness):
         morphology.watershed(self.image, seed_count, connectivity,
                              compactness=compactness)
+
+
+class WatershedParallel(object):
+
+    def setup(self):
+        image = filters.sobel(data.coins())
+        self.images = ((image, 100) for _ in range(4))
+
+    def time_watershed_parallel(self):
+        with ThreadPool(4) as pool:
+            pool.starmap(morphology.watershed, self.images)
 
 
 class Skeletonize3d(object):
