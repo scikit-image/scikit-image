@@ -14,6 +14,4 @@ class TransformSuite:
         self.image[idx, idx] = 255
 
     def time_hough_line(self):
-        # Running it 10 times to achieve significant performance time.
-        for i in range(10):
-            result1, result2, result3 = transform.hough_line(self.image)
+        result1, result2, result3 = transform.hough_line(self.image)
