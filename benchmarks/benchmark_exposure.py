@@ -16,17 +16,11 @@ class ExposureSuite:
         self.p2, self.p98 = np.percentile(self.image, (2, 98))
 
     def time_equalize_hist(self):
-        # Running it 10 times to achieve significant performance time.
-        for i in range(10):
-            result = exposure.equalize_hist(self.image)
+        result = exposure.equalize_hist(self.image)
 
     def time_equalize_adapthist(self):
-        # Running it 3 times to achieve significant performance time.
-        for i in range(3):
-            result = exposure.equalize_adapthist(self.image, clip_limit=0.03)
+        result = exposure.equalize_adapthist(self.image, clip_limit=0.03)
 
     def time_rescale_intensity(self):
-        # Running it 10 times to achieve significant performance time.
-        for i in range(10):
-            result = exposure.rescale_intensity(self.image,
-                                                in_range=(self.p2, self.p98))
+        result = exposure.rescale_intensity(self.image,
+                                            in_range=(self.p2, self.p98))
