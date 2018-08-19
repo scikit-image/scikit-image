@@ -55,13 +55,21 @@ matrix:
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
+      python: 3.7
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1
+    - os: linux
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
-      # OS X has a hard time installing the docs dependencies
       env: TRAVIS_PYTHON_VERSION=3.5
+    - os: osx
+      osx_image: xcode9
+      language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.7
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
