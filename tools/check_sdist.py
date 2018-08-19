@@ -24,8 +24,8 @@ ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
-                './.pep8speaks.yml',
-                './skimage/filters/rank/README.rst']
+                './.pep8speaks.yml', './asv.conf.json',
+                './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
 
 
 missing = []
