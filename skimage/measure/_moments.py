@@ -412,7 +412,7 @@ def inertia_tensor(image, mu=None):
            Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
-        mu = moments_central(image)
+        mu = moments_central(image, order=2)  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim))
 
@@ -421,7 +421,12 @@ def inertia_tensor(image, mu=None):
     corners2 = tuple(2 * np.eye(image.ndim, dtype=int))
     d = np.diag(result)
     d.flags.writeable = True
-    d[:] = mu[corners2] / mu0
+    # See https://ocw.mit.edu/courses/aeronautics-and-astronautics/
+    #             16-07-dynamics-fall-2009/lecture-notes/MIT16_07F09_Lec26.pdf
+    # Iii is the sum of second-order moments of every axis *except* i, not the
+    # second order moment of axis i.
+    # See also https://github.com/scikit-image/scikit-image/issues/3229
+    d[:] = (np.sum(mu[corners2]) - mu[corners2]) / mu0
 
     for dims in itertools.combinations(range(image.ndim), 2):
         mu_index = np.zeros(image.ndim, dtype=int)
