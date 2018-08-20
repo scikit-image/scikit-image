@@ -26,7 +26,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, multichannel=True):
     scale : float
         Free parameter. Higher means larger clusters.
     sigma : float
-        Width of Gaussian kernel used in preprocessing.
+        Width (standard deviation) of Gaussian kernel used in preprocessing.
     min_size : int
         Minimum component size. Enforced using postprocessing.
     multichannel : bool, optional (default: True)
