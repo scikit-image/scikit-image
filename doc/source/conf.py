@@ -30,6 +30,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'numpydoc',
+              'doi_role',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
@@ -37,6 +38,7 @@ extensions = ['sphinx.ext.autodoc',
               ]
 
 autosummary_generate = True
+
 
 #------------------------------------------------------------------------
 # Sphinx-gallery configuration
