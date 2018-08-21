@@ -129,8 +129,24 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
 
+        # Translate modes used by np.pad to those used by ndi.gaussian_filter
+        if mode == "constant":
+            gf_mode = "constant"
+        elif mode == "edge":
+            gf_mode = "nearest"
+        elif mode == "symmetric":
+            gf_mode = "reflect"
+        elif mode == "reflect":
+            gf_mode = "mirror"
+        elif mode == "wrap":
+            gf_mode = "wrap"
+        else:
+            raise ValueError("Unknown mode, or cannot translate mode. The "
+                             "mode should be one of 'constant', 'edge', "
+                             "'symmetric', 'reflect', or 'wrap'.")
+
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
-                                    cval=cval, mode=mode)
+                                    cval=cval, mode=gf_mode)
 
     # 2-dimensional interpolation
     if len(output_shape) == 2 or (len(output_shape) == 3 and
