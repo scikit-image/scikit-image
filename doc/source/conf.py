@@ -39,7 +39,6 @@ extensions = ['sphinx.ext.autodoc',
 
 autosummary_generate = True
 
-
 #------------------------------------------------------------------------
 # Sphinx-gallery configuration
 #------------------------------------------------------------------------
