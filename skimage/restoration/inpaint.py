@@ -101,7 +101,7 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     .. [2]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
             Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
             28 (2010), 104-113,
-            DOI: 10.1016/j.acha.2009.04.004
+            :DOI:`10.1016/j.acha.2009.04.004`
 
     Examples
     --------

@@ -247,12 +247,12 @@ cpdef haar_like_feature_wrapper(
            In Computer Vision and Pattern Recognition, 1997. Proceedings.,
            1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
            http://tinyurl.com/y6ulxfta
-           DOI: 10.1109/CVPR.1997.609319
+           :DOI:`10.1109/CVPR.1997.609319`
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
            http://www.merl.com/publications/docs/TR2004-043.pdf
-           DOI: 10.1109/CVPR.2001.990517
+           :DOI:`10.1109/CVPR.2001.990517`
 
     """
     cdef:
