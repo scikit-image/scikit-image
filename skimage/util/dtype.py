@@ -48,12 +48,6 @@ def _check_precision_loss(dtypeobj_in, dtypeobj_out):
         dtype of the input image.
     dtypeobj_out: np.dtype
         dtype of the output image.
-    output_warning: bool, optional
-        Outputs a warning using `warn` if operation will incur loss of
-        precision.
-    int_same_size_ok: bool, optional
-        Should conversion between integers of the same same (and signedness)
-        be considered lossy.
 
     """
     def n_significant_bits(t):
