@@ -97,7 +97,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
-def compare_psnr(im_true, im_test, data_range=None, dynamic_range=None):
+def compare_psnr(im_true, im_test, data_range=None):
     """ Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
@@ -122,11 +122,6 @@ def compare_psnr(im_true, im_test, data_range=None, dynamic_range=None):
 
     """
     _assert_compatible(im_true, im_test)
-    if dynamic_range is not None:
-        warn('`dynamic_range` has been deprecated in favor of '
-             '`data_range`. The `dynamic_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-        data_range = dynamic_range
 
     if data_range is None:
         if im_true.dtype != im_test.dtype:

@@ -30,6 +30,9 @@ API Changes
 
 - ``rectangular_grid`` now returns a tuple instead of a list to improve
   compatibility with NumPy 1.15.
+- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
+  removed. Use parameter ``data_range`` instead.
+
 
 Deprecations
 ------------
