@@ -87,7 +87,7 @@ def _check_precision_loss(dtypeobj_in, dtypeobj_out):
     return has_loss
 
 
-def dtype_limits(image, clip_negative=None):
+def dtype_limits(image, clip_negative=False):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
