@@ -76,7 +76,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
-       http://arxiv.org/abs/0901.0065,
+       :arXiv:`0901.0065`
        :DOI:`10.1007/s10043-009-0119-z`
 
     """

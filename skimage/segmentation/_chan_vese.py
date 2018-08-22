@@ -291,8 +291,8 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     .. [2] Chan-Vese Segmentation, Pascal Getreuer Image Processing On
            Line, 2 (2012), pp. 214-224,
            :DOI:`10.5201/ipol.2012.g-cv`
-    .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
-           http://arxiv.org/abs/1107.2782, 2011
+    .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen, 2011
+           :arXiv:`1107.2782`
     """
     if len(image.shape) != 2:
         raise ValueError("Input image should be a 2D array.")
