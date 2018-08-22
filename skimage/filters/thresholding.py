@@ -910,7 +910,7 @@ def apply_hysteresis_threshold(image, low, high):
     .. [1] J. Canny. A computational approach to edge detection.
            IEEE Transactions on Pattern Analysis and Machine Intelligence.
            1986; vol. 8, pp.679-698.
-           :DOI:` 10.1109/TPAMI.1986.4767851`
+           :DOI:`10.1109/TPAMI.1986.4767851`
     """
     low = np.clip(low, a_min=None, a_max=high)  # ensure low always below high
     mask_low = image > low

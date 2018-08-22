@@ -12,7 +12,7 @@ arbitrary subpixel precision [1]_.
 
 .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
        "Efficient subpixel image registration algorithms," Optics Letters 33,
-       156-158 (2008). DOI:10.1364/OL.33.000156
+       156-158 (2008). :DOI:`10.1364/OL.33.000156`
 
 """
 import numpy as np

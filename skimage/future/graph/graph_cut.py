@@ -48,7 +48,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+           :DOI:`10.1109/83.841950`
 
     """
     if not in_place:
