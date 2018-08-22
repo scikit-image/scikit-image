@@ -402,6 +402,23 @@ def test_downsize_anti_aliasing():
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
 
+    sigma = 0.125
+    out_size = (5, 5)
+    resize(x, out_size, order=1, mode='constant',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='edge',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='symmetric',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='reflect',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='wrap',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+
+    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
+        resize(x, out_size, order=1, mode='non-existent',
+               anti_aliasing=True, anti_aliasing_sigma=sigma)
+
 
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
@@ -435,23 +452,6 @@ def test_downscale_anti_aliasing():
     assert np.all(scaled[:3, :3] > 0)
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
-
-    sigma = 0.12499999  # The filter will be three pixels wide
-    out_size = (5, 5)
-    resize(x, out_size, order=1, mode='constant',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='edge',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='symmetric',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='reflect',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-    resize(x, out_size, order=1, mode='wrap',
-           anti_aliasing=True, anti_aliasing_sigma=sigma)
-
-    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
-        resize(x, out_size, order=1, mode='non-existent',
-               anti_aliasing=True, anti_aliasing_sigma=sigma)
 
 
 def test_downscale_local_mean():
