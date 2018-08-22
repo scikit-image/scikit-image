@@ -75,7 +75,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            and Magic.
     .. [2] Briechle and Hanebeck, "Template Matching using Fast Normalized
            Cross Correlation", Proceedings of the SPIE (2001).
-           DOI:10.1117/12.421129
+           :DOI:`10.1117/12.421129`
 
     Examples
     --------

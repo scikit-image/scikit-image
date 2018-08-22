@@ -362,7 +362,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
     """
     # Consider regions with detail coefficients exactly zero to be masked out
     detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
@@ -421,10 +421,10 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     """
     wavelet = pywt.Wavelet(wavelet)
@@ -574,10 +574,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------
@@ -665,7 +665,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------
