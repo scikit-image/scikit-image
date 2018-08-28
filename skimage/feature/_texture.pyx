@@ -48,7 +48,8 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
     """
 
     cdef:
-        Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
+        Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col, start_row,\
+                   end_row, start_col, end_col, offset_row, offset_col
         any_int i, j
         cnp.float64_t angle, distance
 
@@ -60,22 +61,21 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
             angle = angles[a_idx]
             for d_idx in range(distances.shape[0]):
                 distance = distances[d_idx]
-                for r in range(rows):
-                    for c in range(cols):
+                offset_row = <int>round(sin(angle) * distance)
+                offset_col = <int>round(cos(angle) * distance)
+                start_row = max(0, -offset_row)
+                end_row = min(rows, rows - offset_row)
+                start_col = max(0, -offset_col)
+                end_col = min(cols, cols - offset_col)
+                for r in range(start_row, end_row):
+                    for c in range(start_col, end_col):
                         i = image[r, c]
-
                         # compute the location of the offset pixel
-                        row = r + <int>round(sin(angle) * distance)
-                        col = c + <int>round(cos(angle) * distance)
-
-                        # make sure the offset is within bounds
-                        if row >= 0 and row < rows and \
-                           col >= 0 and col < cols:
-                            j = image[row, col]
-
-                            if i >= 0 and i < levels and \
-                               j >= 0 and j < levels:
-                                out[i, j, d_idx, a_idx] += 1
+                        row = r + offset_row
+                        col = c + offset_col
+                        j = image[row, col]
+                        if 0 <= i < levels and 0 <= j < levels:
+                            out[i, j, d_idx, a_idx] += 1
 
 
 cdef inline int _bit_rotate_right(int value, int length) nogil:
