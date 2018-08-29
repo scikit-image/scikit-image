@@ -135,7 +135,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
 
 def threshold_local(image, block_size, method='gaussian', offset=0,
-                    mode='reflect', param=None):
+                    mode='reflect', param=None, cval=0):
     """Compute a threshold mask image based on local pixel neighborhood.
 
     Also known as adaptive or dynamic thresholding. The threshold value is
@@ -173,6 +173,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         'generic' method. This functions takes the flat array of local
         neighbourhood as a single argument and returns the calculated
         threshold for the centre pixel.
+    cval : float, optional
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
@@ -200,22 +202,28 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
-                           output=thresh_image, mode=mode)
+                           output=thresh_image, mode=mode, cval=cval)
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
         else:
             sigma = param
-        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode)
+        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
+                            cval=cval)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution
-        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode)
-        ndi.convolve1d(thresh_image, mask, axis=1,
-                       output=thresh_image, mode=mode)
+        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode,
+                       cval=cval)
+        ndi.convolve1d(thresh_image, mask, axis=1, output=thresh_image,
+                       mode=mode, cval=cval)
     elif method == 'median':
-        ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
+        ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
+                          cval=cval)
+    else:
+        raise ValueError("Invalid method specified. Please use `generic`, "
+                         "`gaussian`, `mean`, or `median`.")
 
     return thresh_image - offset
 
