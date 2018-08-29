@@ -150,7 +150,7 @@ def compare_split_variation_of_information(im_true, im_test):
     --------
     vi
     """
-    _, _, _ , hxgy, hygx, _, _ = _vi_tables(im_true, im_test)
+    hxgy, hygx = _vi_tables(im_true, im_test)
     # false merges, false splits
     return np.array([hygx.sum(), hxgy.sum()])
 
@@ -282,35 +282,43 @@ def _vi_tables(im_true, im_test):
     -------
     pxy : sparse.csc_matrix of float
         The normalized contingency table.
-    px, py, hxgy, hygx, lpygx, lpxgy : ndarray of float
-        The proportions of each label in `im_true` and `im_test` (`px`, `py`), the
-        per-segment conditional entropies of `im_true` given `im_test` and vice-versa, the
-        per-segment conditional probability p log p.
+    hxgy, hygx : ndarray of float
+        the per-segment conditional entropies of `im_true`
+         given `im_test` and vice-versa
     """
-    cont = im_true
-    total = float(cont.sum())
     # normalize, since it is an identity op if already done
-    pxy = cont / total
+    pxy = sparse.coo_matrix((np.full(im_true.size, 1/im_true.size), 
+                            (im_true.ravel(), im_test.ravel())),
+                            dtype=float).tocsr()
 
-    # Calculate probabilities
-    px = np.array(pxy.sum(axis=1)).ravel()
-    py = np.array(pxy.sum(axis=0)).ravel()
-    # Remove zero rows/cols
-    nzx = px.nonzero()[0]
-    nzy = py.nonzero()[0]
-    nzpx = px[nzx]
-    nzpy = py[nzy]
-    nzpxy = pxy[nzx, :][:, nzy]
+    # compute marginal probabilities, converting to 1D array
+    px = np.ravel(pxy.sum(axis=1))
+    py = np.ravel(pxy.sum(axis=0))
 
-    # Calculate log conditional probabilities and entropies
-    lpygx = np.zeros(np.shape(px))
-    lpygx[nzx] = _xlogx(_divide_rows(nzpxy, nzpx)).sum(axis=1).ravel()
-                        # \sum_x{p_{y|x} \log{p_{y|x}}}
-    hygx = -(px*lpygx) # \sum_x{p_x H(Y|X=x)} = H(Y|X)
+    # use sparse matrix linear algebra to compute VI
+    # first, compute the inverse diagonal matrices
+    px_inv = sparse.diags(_invert_nonzero(px))
+    py_inv = sparse.diags(_invert_nonzero(py))
 
-    lpxgy = np.zeros(np.shape(py))
-    lpxgy[nzy] = _xlogx(_divide_columns(nzpxy, nzpy)).sum(axis=0).ravel()
-    hxgy = -(py*lpxgy)
+    # then, compute the entropies
+    hygx = px @ _xlogx(px_inv @ pxy).sum(axis=1)
+    hxgy = _xlogx(pxy @ py_inv).sum(axis=0) @ py
 
-    return [pxy] + list(map(np.asarray, [px, py, hxgy, hygx, lpygx, lpxgy]))
- 
+    return list(map(np.asarray, [hxgy, hygx]))
+
+def _invert_nonzero(arr):
+    """Returns the inverse of the non-zero elements of arr
+
+    Parameters
+    ----------
+    arr : ndarray
+
+    Returns
+    -------
+    arr_inv : ndarray
+         the inverse of the non-zero elements of arr
+    """
+    arr_inv = arr.copy()
+    nz = np.nonzero(arr)
+    arr_inv[nz] = 1 / arr[nz]
+    return arr_inv
