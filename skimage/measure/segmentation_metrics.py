@@ -116,7 +116,7 @@ def compare_split_variation_of_information(im_true, im_test):
 
     See Also
     --------
-    vi
+    compare_variation_of_information
     """
     hxgy, hygx = _vi_tables(im_true, im_test)
     # false merges, false splits
