@@ -16,9 +16,9 @@ def compare_raw_edit_distance(im_true, im_test, size_threshold=1000):
 
     Parameters
     ----------
-    im_true : ndarray
-        Ground-truth image.
-    im_test : ndarray
+    im_true : ndarray of int
+        Ground-truth label image.
+    im_test : ndarray of int
         Test image.
     size_threshold : int or float, optional
         Ignore splits or merges smaller than this number of voxels.
@@ -50,9 +50,9 @@ def compare_adapted_rand_error(im_true, im_test):
 
     Parameters
     ----------
-    im_true : ndarray
-        Ground-truth image.
-    im_test : ndarray
+    im_true : ndarray of int
+        Ground-truth label image.
+    im_test : ndarray of int
         Test image.
 
     Returns
@@ -101,7 +101,7 @@ def compare_adapted_rand_error(im_true, im_test):
 
     return (are, precision, recall)
 
-def compare_variation_of_information(im1, im2, weights=np.ones(2)):
+def compare_variation_of_information(im_true, im_test, *, weights=np.ones(2)):
     """Return the variation of information metric. [1]
 
     VI(X, Y) = H(X | Y) + H(Y | X), where H(.|.) denotes the conditional
@@ -109,25 +109,25 @@ def compare_variation_of_information(im1, im2, weights=np.ones(2)):
 
     Parameters
     ----------
-    im1, im2 : ndarray
+    im_true, im_test : ndarray of int
         Image.  Any dimensionality.
     weights : ndarray of float, shape (2,), optional
-        The weights of the conditional entropies of `im1` and `im2`. Equal weights
+        The weights of the conditional entropies of `im_true` and `im_test`. Equal weights
         are the default.
 
     Returns
     -------
     v : float
-        The variation of information between `im1` and `im2`.
+        The variation of information between `im_true` and `im_test`.
 
     References
     ----------
     [1] Meila, M. (2007). Comparing clusterings - an information based
     distance. Journal of Multivariate Analysis 98, 873-895.
     """
-    return np.dot(weights, compare_split_variation_of_information(im1, im2))
+    return weights @ compare_split_variation_of_information(im_true, im_test)
 
-def compare_split_variation_of_information(im1, im2):
+def compare_split_variation_of_information(im_true, im_test):
     """Return the symmetric conditional entropies associated with the VI.
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
@@ -138,19 +138,19 @@ def compare_split_variation_of_information(im1, im2):
 
     Parameters
     ----------
-    im1, im2 : ndarray
+    im_true, im_test : ndarray of int
         Image.  Any dimensionality.
 
     Returns
     -------
     sv : ndarray of float, shape (2,)
-        The conditional entropies of im2|im1 and im1|im2.
+        The conditional entropies of im_test|im_true and im_true|im_test.
 
     See Also
     --------
     vi
     """
-    _, _, _ , hxgy, hygx, _, _ = _vi_tables(im1, im2)
+    _, _, _ , hxgy, hygx, _, _ = _vi_tables(im_true, im_test)
     # false merges, false splits
     return np.array([hygx.sum(), hxgy.sum()])
 
@@ -159,9 +159,9 @@ def _contingency_table(im_true, im_test):
 
     Parameters
     ----------
-    im_true : ndarray
-        Ground-truth image.
-    im_test : ndarray
+    im_true : ndarray of int
+        Ground-truth label image.
+    im_test : ndarray of int
         Test image.
 
     Returns
@@ -270,12 +270,12 @@ def _divide_columns(matrix, row):
         out /= row[np.newaxis, :]
     return out
 
-def _vi_tables(im1, im2):
+def _vi_tables(im_true, im_test):
     """Return probability tables used for calculating VI.
 
     Parameters
     ----------
-    im1, im2 : ndarray
+    im_true, im_test : ndarray of int
         Image.  Any dimensionality.
 
     Returns
@@ -283,11 +283,11 @@ def _vi_tables(im1, im2):
     pxy : sparse.csc_matrix of float
         The normalized contingency table.
     px, py, hxgy, hygx, lpygx, lpxgy : ndarray of float
-        The proportions of each label in `im1` and `im2` (`px`, `py`), the
-        per-segment conditional entropies of `im1` given `im2` and vice-versa, the
+        The proportions of each label in `im_true` and `im_test` (`px`, `py`), the
+        per-segment conditional entropies of `im_true` given `im_test` and vice-versa, the
         per-segment conditional probability p log p.
     """
-    cont = im1
+    cont = im_true
     total = float(cont.sum())
     # normalize, since it is an identity op if already done
     pxy = cont / total
@@ -313,3 +313,4 @@ def _vi_tables(im1, im2):
     hxgy = -(py*lpxgy)
 
     return [pxy] + list(map(np.asarray, [px, py, hxgy, hygx, lpygx, lpxgy]))
+ 
