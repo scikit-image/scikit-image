@@ -6,7 +6,6 @@ from ._marching_cubes_classic import (marching_cubes_classic,
 from ._regionprops import regionprops, perimeter
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from .segmentation_metrics import (compare_adapted_rand_error,
-                                   compare_raw_edit_distance,
                                    compare_split_variation_of_information,
                                    compare_variation_of_information)
 from ._structural_similarity import compare_ssim
@@ -51,7 +50,6 @@ __all__ = ['find_contours',
            'compare_nrmse',
            'compare_psnr',
            'compare_adapted_rand_error',
-           'compare_raw_edit_distance',
            'compare_split_variation_of_information',
            'compare_variation_of_information',
            'shannon_entropy',

@@ -3,43 +3,11 @@ import multiprocessing
 from .simple_metrics import _assert_compatible
 import scipy.sparse as sparse
 from scipy.ndimage.measurements import label
-from ..segmentation import relabel_sequential
 
 __all__ = [ 'compare_adapted_rand_error',
-            'compare_raw_edit_distance',
             'compare_split_variation_of_information',
             'compare_variation_of_information',
           ]
-
-def compare_raw_edit_distance(im_true, im_test, size_threshold=1000):
-    """Compute the edit distance between two segmentations.
-
-    Parameters
-    ----------
-    im_true : ndarray of int
-        Ground-truth label image.
-    im_test : ndarray of int
-        Test image.
-    size_threshold : int or float, optional
-        Ignore splits or merges smaller than this number of voxels.
-
-    Returns
-    -------
-    (false_merges, false_splits) : float
-        The number of splits and merges required to convert aseg to gt.
-    """
-    _assert_compatible(im_true, im_test)
-
-    im_test = relabel_sequential(im_test)[0]
-    im_true = relabel_sequential(im_true)[0]
-    r = _contingency_table(im_true, im_test)
-    r.data[r.data <= size_threshold] = 0
-    # make each segment overlap count for 1, since it will be one
-    # operation to fix (split or merge)
-    r.data[r.data.nonzero()] /= r.data[r.data.nonzero()]
-    false_splits = (r.sum(axis=0)-1)[1:].sum()
-    false_merges = (r.sum(axis=1)-1)[1:].sum()
-    return (false_merges, false_splits)
 
 def compare_adapted_rand_error(im_true, im_test):
     """Compute Adapted Rand error as defined by the SNEMI3D contest [1]
