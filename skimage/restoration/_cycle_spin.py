@@ -119,7 +119,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     .. [1] R.R. Coifman and D.L. Donoho.  "Translation-Invariant De-Noising".
            Wavelets and Statistics, Lecture Notes in Statistics, vol.103.
            Springer, New York, 1995, pp.125-150.
-           DOI:10.1007/978-1-4612-2544-7_9
+           :DOI:`10.1007/978-1-4612-2544-7_9`
 
     Examples
     --------

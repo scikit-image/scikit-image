@@ -6,10 +6,7 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
 fi
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" == "PyQt5" ]]; then
-    # Matplotlib 2.2.2 doesn't support pyqt5 5.11 until this commit
-    # https://github.com/matplotlib/matplotlib/commit/260e6d611afae9adaac528c28a4879097c357b74#diff-025508b6963efcfa97ba27389f2d2b86
-    # becomes released
-    pip install --retries 3 -q $PIP_FLAGS 'pyqt5<5.11'
+    pip install --retries 3 -q $PIP_FLAGS pyqt5
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then

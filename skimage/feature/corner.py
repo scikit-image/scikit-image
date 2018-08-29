@@ -399,7 +399,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     .. [1] Koenderink, J. J. & van Doorn, A. J.,
            "Surface shape and curvature scales",
            Image and Vision Computing, 1992, 10, 557-564.
-           DOI:10.1016/0262-8856(92)90076-F
+           :DOI:`10.1016/0262-8856(92)90076-F`
 
     Examples
     --------
