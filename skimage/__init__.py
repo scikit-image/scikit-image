@@ -173,7 +173,6 @@ else:
                              img_as_bool,
                              dtype_limits)
 
-
     from .util.lookfor import lookfor
     from .data import data_dir
 
