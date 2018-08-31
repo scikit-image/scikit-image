@@ -1,16 +1,16 @@
 import numpy as np
 
-import skimage.future.detect as detect
 import skimage.data as data
+from skimage.feature import Cascade
 
 
-def test_detector_astrout():
+def test_detector_astronaut():
 
     # Load the trained file from the module root.
     trained_file = data.frontal_face_cascade_xml()
 
     # Initialize the detector cascade.
-    detector = detect.Cascade(trained_file)
+    detector = Cascade(trained_file)
 
     img = data.astronaut()
 
