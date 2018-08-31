@@ -19,7 +19,7 @@ from cython.parallel import prange
 from skimage.color import rgb2gray
 from skimage.transform import integral_image
 import xml.etree.ElementTree as ET
-from ...feature._texture cimport _multiblock_lbp
+from ._texture cimport _multiblock_lbp
 import math
 
 
