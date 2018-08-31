@@ -1,4 +1,5 @@
 from ._canny import canny
+from ._cascade import Cascade
 from ._daisy import daisy
 from ._hog import hog
 from .texture import (greycomatrix, greycoprops,
@@ -27,6 +28,7 @@ from .haar import (haar_like_feature, haar_like_feature_coord,
 
 
 __all__ = ['canny',
+           'Cascade',
            'daisy',
            'hog',
            'greycomatrix',
