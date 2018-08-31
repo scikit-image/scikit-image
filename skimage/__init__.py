@@ -47,12 +47,24 @@ Utility Functions
 -----------------
 img_as_float
     Convert an image to floating point format, with values in [0, 1].
+    Is similar to `img_as_float64`, but will not convert lower-precision
+    floating point arrays to `float64`.
+img_as_float32
+    Convert an image to single-precision (32-bit) floating point format,
+    with values in [0, 1].
+img_as_float64
+    Convert an image to double-precision (64-bit) floating point format,
+    with values in [0, 1].
 img_as_uint
     Convert an image to unsigned integer format, with values in [0, 65535].
 img_as_int
     Convert an image to signed integer format, with values in [-32768, 32767].
 img_as_ubyte
     Convert an image to unsigned byte format, with values in [0, 255].
+img_as_bool
+    Convert an image to boolean format, with values either True or False.
+dtype_limits
+    Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
 """
 
@@ -114,7 +126,14 @@ else:
         _raise_build_error(e)
 
     # All skimage root imports go here
-    from .util.dtype import *
+    from .util.dtype import (img_as_float32,
+                             img_as_float64,
+                             img_as_float,
+                             img_as_int,
+                             img_as_uint,
+                             img_as_ubyte,
+                             img_as_bool,
+                             dtype_limits)
     from .data import data_dir
     from .util.lookfor import lookfor
 

@@ -89,7 +89,7 @@ def _umeyama(src, dst, estimate_scale):
     References
     ----------
     .. [1] "Least-squares estimation of transformation parameters between two
-            point patterns", Shinji Umeyama, PAMI 1991, DOI: 10.1109/34.88573
+            point patterns", Shinji Umeyama, PAMI 1991, :DOI:`10.1109/34.88573`
 
     """
 

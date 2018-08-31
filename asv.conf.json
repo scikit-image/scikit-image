@@ -55,7 +55,8 @@
          "cython": ["0.27", "0.28"],
          "numpy": ["1.13", "1.14"],
          "scipy": ["1.0", "1.1"],
-         "matplotlib": ["2.2"]
+         "matplotlib": ["2.2"],
+         "six": ["1.10"]
     },
 
     // Combinations of libraries/python versions can be excluded/included
@@ -79,10 +80,10 @@
     //     Platform, as in sys.platform. Possible values for the common
     //     cases: 'linux2', 'win32', 'cygwin', 'darwin'.
     //
-    // "exclude": [
+    "exclude": [
     //     {"python": "3.2", "sys_platform": "win32"}, // skip py3.2 on windows
-    //     {"environment_type": "conda", "six": null}, // don't run without six on conda
-    // ],
+         {"environment_type": "conda", "six": null}, // don't run without six on conda
+    ],
     //
     // "include": [
     //     // additional env for python2.7

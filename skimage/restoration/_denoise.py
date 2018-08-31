@@ -362,7 +362,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
     """
     # Consider regions with detail coefficients exactly zero to be masked out
     detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
@@ -421,13 +421,17 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     """
     wavelet = pywt.Wavelet(wavelet)
+    if not wavelet.orthogonal:
+        warn(("Wavelet thresholding was designed for use with orthogonal "
+              "wavelets. For nonorthogonal wavelets such as {}, results are "
+              "likely to be suboptimal.").format(wavelet.name))
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
@@ -545,25 +549,35 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
 
-    Many wavelet coefficient thresholding approaches have been proposed.  By
+    Many wavelet coefficient thresholding approaches have been proposed. By
     default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
     thresholding method that computes separate thresholds for each wavelet
     sub-band as described in [1]_.
 
     If ``method == "VisuShrink"``, a single "universal threshold" is applied to
-    all wavelet detail coefficients as described in [2]_.  This threshold
+    all wavelet detail coefficients as described in [2]_. This threshold
     is designed to remove all Gaussian noise at a given ``sigma`` with high
     probability, but tends to produce images that appear overly smooth.
+
+    Although any of the wavelets from ``PyWavelets`` can be selected, the
+    thresholding methods assume an orthogonal wavelet transform and may not
+    choose the threshold appropriately for biorthogonal wavelets. Orthogonal
+    wavelets are desirable because white noise in the input remains white noise
+    in the subbands. Biorthogonal wavelets lead to colored noise in the
+    subbands. Additionally, the orthogonal wavelets in PyWavelets are
+    orthonormal so that noise variance in the subbands remains identical to the
+    noise variance of the input. Example orthogonal wavelets are the Daubechies
+    (e.g. 'db2') or symmlet (e.g. 'sym2') families.
 
     References
     ----------
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------
@@ -651,7 +665,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------

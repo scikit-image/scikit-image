@@ -153,6 +153,16 @@ class TestSimpleImage():
         out = threshold_local(self.image, 3, method='median')
         assert_equal(ref, self.image > out)
 
+    def test_threshold_local_median_constant_mode(self):
+        out = threshold_local(self.image, 3, method='median',
+                              mode='constant', cval=20)
+        expected = np.array([[20.,  1.,  3.,  4., 20.],
+                            [ 1.,  1.,  3.,  4.,  4.],
+                            [ 2.,  2.,  4.,  4.,  4.],
+                            [ 4.,  4.,  4.,  1.,  2.],
+                            [20.,  5.,  5.,  2., 20.]])
+        assert_equal(expected, out)
+
     def test_threshold_niblack(self):
         ref = np.array(
             [[False, False, False, True, True],
