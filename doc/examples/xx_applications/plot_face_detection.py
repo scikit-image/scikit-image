@@ -63,7 +63,7 @@ using `OpenCV train cascade utility
 """
 
 from skimage import data
-from skimage.future import detect
+from skimage.feature import Cascade
 
 from matplotlib import pyplot as plt
 from matplotlib import patches
@@ -72,7 +72,7 @@ from matplotlib import patches
 trained_file = data.frontal_face_cascade_xml()
 
 # Initialize the detector cascade.
-detector = detect.Cascade(trained_file)
+detector = Cascade(trained_file)
 
 img = data.astronaut()
 
