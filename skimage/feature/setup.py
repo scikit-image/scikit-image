@@ -22,7 +22,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_hoghistogram.pyx'], working_path=base_path)
     cython(['_haar.pyx'], working_path=base_path)
 
-    config.add_extension('cascade', sources=['cascade.cpp'],
+    config.add_extension('_cascade', sources=['_cascade.cpp'],
                          include_dirs=[get_numpy_include_dirs()],
                          language="c++")
     config.add_extension('corner_cy', sources=['corner_cy.c'],
