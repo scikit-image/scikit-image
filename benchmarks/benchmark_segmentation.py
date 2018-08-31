@@ -13,6 +13,12 @@ class SegmentationSuite:
     def time_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False)
 
+    def time_slic_basic_2jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=2)
+
+    def time_slic_basic_4jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=4)
+
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
 
@@ -32,3 +38,9 @@ class SegmentationSuite:
 
     def peakmem_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False)
+
+    def peakmem_slic_basic_2jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=2)
+
+    def peakmem_slic_basic_4jobs(self):
+        segmentation.slic(self.image, enforce_connectivity=False, n_jobs=4)
