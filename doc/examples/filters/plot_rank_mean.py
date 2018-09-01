@@ -41,7 +41,6 @@ imgs = [image, percentile_result, bilateral_result, normal_result]
 for n in range(0, len(imgs)):
     ax[n].imshow(imgs[n], cmap=plt.cm.gray)
     ax[n].set_title(titles[n])
-    ax[n].set_adjustable('box-forced')
     ax[n].axis('off')
 
 plt.tight_layout()

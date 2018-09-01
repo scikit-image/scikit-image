@@ -1,10 +1,8 @@
-
 import numpy as np
 from scipy.ndimage import gaussian_filter, gaussian_laplace
-import itertools as itt
 import math
-from math import sqrt, hypot, log
-from numpy import arccos
+from math import sqrt, log
+from scipy import spatial
 from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
@@ -17,6 +15,72 @@ from .._shared.utils import assert_nD
 # Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
 
 
+def _compute_disk_overlap(d, r1, r2):
+    """
+    Compute surface overlap between two disks of radii ``r1`` and ``r2``,
+    with centers separated by a distance ``d``.
+
+    Parameters
+    ----------
+    d : float
+        Distance between centers.
+    r1 : float
+        Radius of the first disk.
+    r2 : float
+        Radius of the second disk.
+
+    Returns
+    -------
+    vol: float
+        Volume of the overlap between the two disks.
+    """
+
+    ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
+    ratio1 = np.clip(ratio1, -1, 1)
+    acos1 = math.acos(ratio1)
+
+    ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
+    ratio2 = np.clip(ratio2, -1, 1)
+    acos2 = math.acos(ratio2)
+
+    a = -d + r2 + r1
+    b = d - r2 + r1
+    c = d + r2 - r1
+    d = d + r2 + r1
+    area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
+            0.5 * sqrt(abs(a * b * c * d)))
+    return area / (math.pi * (min(r1, r2) ** 2))
+
+
+def _compute_sphere_overlap(d, r1, r2):
+    """
+    Compute volume overlap between two spheres of radii ``r1`` and ``r2``,
+    with centers separated by a distance ``d``.
+
+    Parameters
+    ----------
+    d : float
+        Distance between centers.
+    r1 : float
+        Radius of the first sphere.
+    r2 : float
+        Radius of the second sphere.
+
+    Returns
+    -------
+    vol: float
+        Volume of the overlap between the two spheres.
+
+    Notes
+    -----
+    See for example http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+    for more details.
+    """
+    vol = (math.pi / (12 * d) * (r1 + r2 - d)**2 *
+           (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2))
+    return vol / (4./3 * math.pi * min(r1, r2) ** 3)
+
+
 def _blob_overlap(blob1, blob2):
     """Finds the overlapping area fraction between two blobs.
 
@@ -24,28 +88,30 @@ def _blob_overlap(blob1, blob2):
 
     Parameters
     ----------
-    blob1 : sequence
-        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob
-        and sigma is the standard deviation of the Gaussian kernel which
-        detected the blob.
-    blob2 : sequence
-        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob
-        and sigma is the standard deviation of the Gaussian kernel which
-        detected the blob.
+    blob1 : sequence of arrays
+        A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
+        where ``row, col`` (or ``(pln, row, col)``) are coordinates
+        of blob and ``sigma`` is the standard deviation of the Gaussian kernel
+        which detected the blob.
+    blob2 : sequence of arrays
+        A sequence of ``(row, col, sigma)`` or ``(pln, row, col, sigma)``,
+        where ``row, col`` (or ``(pln, row, col)``) are coordinates
+        of blob and ``sigma`` is the standard deviation of the Gaussian kernel
+        which detected the blob.
 
     Returns
     -------
     f : float
-        Fraction of overlapped area.
+        Fraction of overlapped area (or volume in 3D).
     """
-    root2 = sqrt(2)
+    n_dim = len(blob1) - 1
+    root_ndim = sqrt(n_dim)
 
     # extent of the blob is given by sqrt(2)*scale
-    r1 = blob1[2] * root2
-    r2 = blob2[2] * root2
+    r1 = blob1[-1] * root_ndim
+    r2 = blob2[-1] * root_ndim
 
-    d = hypot(blob1[0] - blob2[0], blob1[1] - blob2[1])
-
+    d = sqrt(np.sum((blob1[:-1] - blob2[:-1])**2))
     if d > r1 + r2:
         return 0
 
@@ -53,21 +119,11 @@ def _blob_overlap(blob1, blob2):
     if d <= abs(r1 - r2):
         return 1
 
-    ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
-    ratio1 = np.clip(ratio1, -1, 1)
-    acos1 = arccos(ratio1)
+    if n_dim == 2:
+        return _compute_disk_overlap(d, r1, r2)
 
-    ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
-    ratio2 = np.clip(ratio2, -1, 1)
-    acos2 = arccos(ratio2)
-
-    a = -d + r2 + r1
-    b = d - r2 + r1
-    c = d + r2 - r1
-    d = d + r2 + r1
-    area = r1 ** 2 * acos1 + r2 ** 2 * acos2 - 0.5 * sqrt(abs(a * b * c * d))
-
-    return area / (math.pi * (min(r1, r2) ** 2))
+    else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+        return _compute_sphere_overlap(d, r1, r2)
 
 
 def _prune_blobs(blobs_array, overlap):
@@ -76,9 +132,12 @@ def _prune_blobs(blobs_array, overlap):
     Parameters
     ----------
     blobs_array : ndarray
-        A 2d array with each row representing 3 values, ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
-        standard deviation of the Gaussian kernel which detected the blob.
+        A 2d array with each row representing 3 (or 4) values,
+        ``(row, col, sigma)`` or ``(pln, row, col, sigma)`` in 3D,
+        where ``(row, col)`` (``(pln, row, col)``) are coordinates of the blob
+        and ``sigma`` is the standard deviation of the Gaussian kernel which
+        detected the blob.
+        This array must not have a dimension of size 0.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
@@ -88,18 +147,22 @@ def _prune_blobs(blobs_array, overlap):
     A : ndarray
         `array` with overlapping blobs removed.
     """
+    sigma = blobs_array[:, -1].max()
+    distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
+    tree = spatial.cKDTree(blobs_array[:, :-1])
+    pairs = np.array(list(tree.query_pairs(distance)))
+    if len(pairs) == 0:
+        return blobs_array
+    else:
+        for (i, j) in pairs:
+            blob1, blob2 = blobs_array[i], blobs_array[j]
+            if _blob_overlap(blob1, blob2) > overlap:
+                if blob1[-1] > blob2[-1]:
+                    blob2[-1] = 0
+                else:
+                    blob1[-1] = 0
 
-    # iterating again might eliminate more blobs, but one iteration suffices
-    # for most cases
-    for blob1, blob2 in itt.combinations(blobs_array, 2):
-        if _blob_overlap(blob1, blob2) > overlap:
-            if blob1[2] > blob2[2]:
-                blob2[2] = -1
-            else:
-                blob1[2] = -1
-
-    # return blobs_array[blobs_array[:, 2] > 0]
-    return np.array([b for b in blobs_array if b[2] > 0])
+    return np.array([b for b in blobs_array if b[-1] > 0])
 
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
@@ -112,7 +175,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     Parameters
     ----------
-    image : ndarray
+    image : 2D or 3D ndarray
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : float, optional
@@ -134,10 +197,12 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     Returns
     -------
-    A : (n, 3) ndarray
-        A 2d array with each row representing 3 values, ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
-        standard deviation of the Gaussian kernel which detected the blob.
+    A : (n, image.ndim + 1) ndarray
+        A 2d array with each row representing 3 values for a 2D image,
+        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(p, r, c, sigma)``
+        where ``(r, c)`` or ``(p, r, c)`` are coordinates of the blob and
+        ``sigma`` is the standard deviation of the Gaussian kernel which
+        detected the blob.
 
     References
     ----------
@@ -174,10 +239,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     Notes
     -----
-    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
+    The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
+    a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    assert_nD(image, 2)
-
     image = img_as_float(image)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
@@ -193,22 +257,22 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # multiplying with standard deviation provides scale invariance
     dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
                   * sigma_list[i] for i in range(k)]
-    image_cube = np.dstack(dog_images)
+
+    image_cube = np.stack(dog_images, axis=-1)
 
     # local_maxima = get_local_maxima(image_cube, threshold)
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3, 3, 3)),
+                                  footprint=np.ones((3,) * (image.ndim + 1)),
                                   threshold_rel=0.0,
                                   exclude_border=False)
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:, 2] = sigma_list[local_maxima[:, 2]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    lm[:, -1] = sigma_list[local_maxima[:, -1]]
+    return _prune_blobs(lm, overlap)
 
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
@@ -221,7 +285,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     Parameters
     ----------
-    image : ndarray
+    image : 2D or 3D ndarray
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : float, optional
@@ -247,10 +311,12 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     Returns
     -------
-    A : (n, 3) ndarray
-        A 2d array with each row representing 3 values, ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
-        standard deviation of the Gaussian kernel which detected the blob.
+    A : (n, image.ndim + 1) ndarray
+        A 2d array with each row representing 3 values for a 2D image,
+        and 4 values for a 3D image: ``(r, c, sigma)`` or ``(p, r, c, sigma)``
+        where ``(r, c)`` or ``(p, r, c)`` are coordinates of the blob and
+        ``sigma`` is the standard deviation of the Gaussian kernel which
+        detected the blob.
 
     References
     ----------
@@ -282,11 +348,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     Notes
     -----
-    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
+    The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
+    a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-
-    assert_nD(image, 2)
-
     image = img_as_float(image)
 
     if log_scale:
@@ -298,22 +362,22 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # computing gaussian laplace
     # s**2 provides scale invariance
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
-    image_cube = np.dstack(gl_images)
+
+    image_cube = np.stack(gl_images, axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3, 3, 3)),
+                                  footprint=np.ones((3,) * (image.ndim + 1)),
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:, 2] = sigma_list[local_maxima[:, 2]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    lm[:, -1] = sigma_list[local_maxima[:, -1]]
+    return _prune_blobs(lm, overlap)
 
 
 def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
@@ -327,7 +391,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
 
     Parameters
     ----------
-    image : ndarray
+    image : 2D ndarray
         Input grayscale image.Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
@@ -398,7 +462,6 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
-
     assert_nD(image, 2)
 
     image = img_as_float(image)
@@ -414,16 +477,15 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     image_cube = np.dstack(hessian_images)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3, 3, 3)),
+                                  footprint=np.ones((3,) * image_cube.ndim),
                                   threshold_rel=0.0,
                                   exclude_border=False)
 
     # Catch no peaks
     if local_maxima.size == 0:
-        return np.empty((0,3))
+        return np.empty((0, 3))
     # Convert local_maxima to float64
     lm = local_maxima.astype(np.float64)
     # Convert the last index to its corresponding scale value
-    lm[:, 2] = sigma_list[local_maxima[:, 2]]
-    local_maxima = lm
-    return _prune_blobs(local_maxima, overlap)
+    lm[:, -1] = sigma_list[local_maxima[:, -1]]
+    return _prune_blobs(lm, overlap)

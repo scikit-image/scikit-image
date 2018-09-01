@@ -12,43 +12,74 @@ For more information, examples, and documentation, please visit our website:
 http://scikit-image.org
 
 
+
 New Features
 ------------
-- manual segmentation with matplotlib (#2584)
-- hysteresis thresholding in filters (#2665)
-- lookfor function (#2713)
-- montage function (#2626)
-- 2D and 3D segmentation with morphological snakes (#2791)
-- nD support for image moments (#2603)
-- inertia tensor and its eigenvalues can now be computed outside of
-  regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
-- cycle-spinning function for approximating shift-invariance by averaging
-  results from a series of spatial shifts (#2647)
+
+- unsharp mask filtering (#2772)
+- New options ``connectivity``, ``indices`` and ``allow_borders`` for
+  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
 
 
 Improvements
 ------------
-- VisuShrink method for wavelet denoising (#2470)
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
-  ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
-  images (#2802)
-- Support for multichannel images for ``skimage.feature.hog`` (#2870)
+
+- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
+  improved with a new Cython-based implementation. #3022
+- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
+  new optional dependency).
+- Performance is now monitored by
+  `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
+  results will appear at https://pandas.pydata.org/speed/
 
 
 API Changes
 -----------
-- ``skimage.util.montage.montage2d`` is now available as
-  ``skimage.util.montage2d``.
+
+- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
+  removed. Use parameter ``data_range`` instead.
+- imageio is now the preferred plugin for reading and writing images.
+- imageio is now a dependency of scikit-image.
+- ``rectangular_grid`` now returns a tuple instead of a list for compatiblity
+  with numpy 1.15
+- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
+  base10 instead of the natural logarithm as discussed in issue #2995.
+- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
+  has been set to ``False``.
+- Default value of ``circle`` parameter in ``skimage.transform.radon``
+  has been set to ``True``.
+- Default value of ``circle`` parameter in ``skimage.transform.iradon``
+  has been set to ``True``.
+- Default value of ``mode`` parameter in ``skimage.transform.swirl``
+  has been set to ``reflect``.
+- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
+  Use ``skimage.filters.threshold_local`` instead.
+- Default value of ``multichannel`` parameter in
+  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
+- Default value of ``multichannel`` parameter in
+  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
+- Default value of ``mode`` parameter in ``skimage.transform.resize``
+  and ``skimage.transform.rescale`` has been set to ``reflect``.
+- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
+  and ``skimage.transform.rescale`` has been set to ``True``.
+- Removed the ``skimage.test`` function. This functionality can be achieved
+  by calling ``pytest`` directly.
+
+
+Bugfixes
+--------
+
 
 
 Deprecations
 ------------
-- ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
-  Use ``skimage.util.montage`` instead.
+
+- Python 2 support has been dropped in the development version. Users of the
+  development version should have Python >= 3.5.
+- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
-  ``anti_aliasing`` option that avoids aliasing artifacts when down-sampling
-  images. This option will be enabled by default in 0.15.
+- ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
+  ``anti_aliasing`` has been enabled by default.
 - ``regionprops`` will use row-column coordinates in 0.16. You can start
   using them now with ``regionprops(..., coordinates='rc')``. You can silence
   warning messages, and retain the old behavior, with
@@ -57,6 +88,8 @@ Deprecations
   Specifically, the "orientation" region property will measure the
   anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
   row-column coordinates.
+- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
+  and will be removed in 0.16. Use ``area_threshold`` instead.
 
 
 Contributors to this release

@@ -20,7 +20,7 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
-    - python-qt4
+
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
@@ -37,25 +37,30 @@ notifications:
 matrix:
   include:
     - os: linux
-      python: 2.7
-      env: PIP_FLAGS="--pre"
-    - os: linux
-      python: 2.7
-      env: WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1 WITH_QT=1
-    - os: linux
-      python: 3.4
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      python: 3.5
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
     - os: linux
       python: 3.5
-    - os: linux
-      python: 3.5
-      env: PIP_FLAGS="--pre"
+      env: QT=PyQt5 WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
+      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+    - os: linux
+      python: 3.7
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1
+    - os: linux
+      python: 3.6
+      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
+    - os: osx
+      osx_image: xcode9
+      language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.7
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -72,12 +77,33 @@ before_install:
     - tools/check_sdist.py
 
 install:
-    - section build
     - python setup.py develop
-    - section_end build
+    # Install testing requirements
+    - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
+    # Matplotlib settings - do not show figures during doc examples
+    - |
+      if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+        export MPL_DIR=${HOME}/.matplotlib
+      else
+        export MPL_DIR=${HOME}/.config/matplotlib
+      fi
+    - mkdir -p ${MPL_DIR}
+    - touch ${MPL_DIR}/matplotlibrc
+    # Install most of the optional packages
+    - |
+      if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+      fi
+    - |
+      if [[ "${WITH_PYAMG}" == "1" ]]; then
+        pip install --retries 3 -q pyamg
+      fi
+    - tools/travis/install_qt.sh
 
 script: tools/travis/script.sh
 
 after_success:
     - codecov
+    # Prepare.release
+    - doc/release/contribs.py HEAD~10
     - bash tools/travis/deploy_docs.sh

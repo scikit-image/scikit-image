@@ -30,6 +30,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'numpydoc',
+              'doi_role',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
@@ -43,7 +44,7 @@ autosummary_generate = True
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
-    'doc_module'        : 'skimage',
+    'doc_module'        : ('skimage',),
     # path to your examples scripts
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples

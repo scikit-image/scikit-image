@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
@@ -76,7 +75,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            and Magic.
     .. [2] Briechle and Hanebeck, "Template Matching using Fast Normalized
            Cross Correlation", Proceedings of the SPIE (2001).
-           DOI:10.1117/12.421129
+           :DOI:`10.1117/12.421129`
 
     Examples
     --------
@@ -177,4 +176,4 @@ def match_template(image, template, pad_input=False, mode='constant',
             d1 = d0 + image_shape[i] - template.shape[i] + 1
         slices.append(slice(d0, d1))
 
-    return response[slices]
+    return response[tuple(slices)]

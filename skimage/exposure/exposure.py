@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 
 from ..color import rgb2gray
@@ -156,7 +155,7 @@ def equalize_hist(image, nbins=256, mask=None):
 
     References
     ----------
-    .. [1] http://www.janeriksolem.net/2009/06/histogram-equalization-with-python-and.html
+    .. [1] http://www.janeriksolem.net/histogram-equalization-with-python-and.html
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
@@ -295,7 +294,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     image = np.clip(image, imin, imax)
 
     image = (image - imin) / float(imax - imin)
-    return dtype(image * (omax - omin) + omin)
+    return np.array(image * (omax - omin) + omin, dtype=dtype)
 
 
 def _assert_non_negative(image):

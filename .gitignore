@@ -1,3 +1,5 @@
+.cache
+__pycache__
 *.pyc
 *~
 *#
@@ -7,9 +9,13 @@
 *.pyd
 *.bak
 *.c
+skimage/feature/_haar.cpp
 *.new
 *.md5
 *.old
+.pytest_cache
+temp.tif
+.ropeproject
 doc/source/api
 doc/build
 source/api
@@ -26,3 +32,6 @@ doc/release/_release_notes_for_docs.txt
 doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
+.asv
+
+save-demo.jpg

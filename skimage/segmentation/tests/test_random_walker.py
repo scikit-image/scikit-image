@@ -3,12 +3,22 @@ from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
+import scipy
+import numpy as np
+from distutils.version import LooseVersion as Version
+
 
 # older versions of scipy raise a warning with new NumPy because they use
 # numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.
-SCIPY_EXPECTED = 'numpy.linalg.matrix_rank|\A\Z'
-PYAMG_EXPECTED_WARNING = 'pyamg|\A\Z'
-PYAMG_SCIPY_EXPECTED = SCIPY_EXPECTED + '|' + PYAMG_EXPECTED_WARNING
+SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
+PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
+PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
+
+if (Version(np.__version__) >= '1.15.0' and
+        Version(scipy.__version__) <= '1.1.0'):
+    NUMPY_MATRIX_WARNING = 'matrix subclass'
+else:
+    NUMPY_MATRIX_WARNING = None
 
 
 def make_2d_syntheticdata(lx, ly=None):
@@ -82,11 +92,13 @@ def test_2d_cg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         full_prob = random_walker(data, labels, beta=90, mode='cg',
                                   return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
@@ -99,14 +111,16 @@ def test_2d_cg_mg():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    expected = 'scipy.sparse.sparsetools|%s' % PYAMG_SCIPY_EXPECTED
-    with expected_warnings([expected]):
+    anticipated_warnings = [
+        'scipy.sparse.sparsetools|%s' % PYAMG_OR_SCIPY_WARNING,
+        NUMPY_MATRIX_WARNING]
+    with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings([expected]):
+    with expected_warnings(anticipated_warnings):
         full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
-                              return_full_prob=True)
+                                  return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
@@ -119,7 +133,7 @@ def test_types():
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    with expected_warnings([PYAMG_SCIPY_EXPECTED]):
+    with expected_warnings([PYAMG_OR_SCIPY_WARNING, NUMPY_MATRIX_WARNING]):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
@@ -153,7 +167,8 @@ def test_3d():
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -167,7 +182,8 @@ def test_3d_inactive():
     old_labels = np.copy(labels)
     labels[5:25, 26:29, 26:29] = -1
     after_labels = np.copy(labels)
-    with expected_warnings(['"cg" mode|CObject type' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode|CObject type' + '|'
+                            + SCIPY_RANK_WARNING, NUMPY_MATRIX_WARNING]):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -178,11 +194,13 @@ def test_multispectral_2d():
     lx, ly = 70, 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         multi_labels = random_walker(data, labels, mode='cg',
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
@@ -194,11 +212,13 @@ def test_multispectral_3d():
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         multi_labels = random_walker(data, labels, mode='cg',
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
@@ -214,7 +234,9 @@ def test_spacing_0():
     # Rescale `data` along Z axis
     data_aniso = np.zeros((n, n, n // 2))
     for i, yz in enumerate(data):
-        data_aniso[i, :, :] = resize(yz, (n, n // 2))
+        data_aniso[i, :, :] = resize(yz, (n, n // 2),
+                                     mode='constant',
+                                     anti_aliasing=False)
 
     # Generate new labels
     small_l = int(lx // 5)
@@ -225,9 +247,10 @@ def test_spacing_0():
                  lz // 4 - small_l // 8] = 2
 
     # Test with `spacing` kwarg
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
-                                 spacing=(1., 1., 0.5))
+                                     spacing=(1., 1., 0.5))
 
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
@@ -241,7 +264,9 @@ def test_spacing_1():
     # `resize` is not yet 3D capable, so this must be done by looping in 2D.
     data_aniso = np.zeros((n, n * 2, n))
     for i, yz in enumerate(data):
-        data_aniso[i, :, :] = resize(yz, (n * 2, n))
+        data_aniso[i, :, :] = resize(yz, (n * 2, n),
+                                     mode='constant',
+                                     anti_aliasing=False)
 
     # Generate new labels
     small_l = int(lx // 5)
@@ -253,7 +278,8 @@ def test_spacing_1():
 
     # Test with `spacing` kwarg
     # First, anisotropic along Y
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                      spacing=(1., 2., 1.))
     assert (labels_aniso[13:17, 26:34, 13:17] == 2).all()
@@ -262,7 +288,9 @@ def test_spacing_1():
     # `resize` is not yet 3D capable, so this must be done by looping in 2D.
     data_aniso = np.zeros((n, n * 2, n))
     for i in range(data.shape[1]):
-        data_aniso[i, :, :] = resize(data[:, 1, :], (n * 2, n))
+        data_aniso[i, :, :] = resize(data[:, 1, :], (n * 2, n),
+                                     mode='constant',
+                                     anti_aliasing=False)
 
     # Generate new labels
     small_l = int(lx // 5)
@@ -273,7 +301,8 @@ def test_spacing_1():
                   lz // 2 - small_l // 4] = 2
 
     # Anisotropic along X
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
+                            NUMPY_MATRIX_WARNING]):
         labels_aniso2 = random_walker(data_aniso,
                                       labels_aniso2,
                                       mode='cg', spacing=(2., 1., 1.))
@@ -340,3 +369,23 @@ def test_bad_inputs():
     labels = np.zeros((10, 10))
     with testing.raises(ValueError):
         random_walker(img, labels, mode='bad')
+
+
+def test_isolated_seeds():
+    np.random.seed(0)
+    a = np.random.random((7, 7))
+    mask = - np.ones(a.shape)
+    # This pixel is an isolated seed
+    mask[1, 1] = 1
+    # Unlabeled pixels
+    mask[3:, 3:] = 0
+    # Seeds connected to unlabeled pixels
+    mask[4, 4] = 2
+    mask[6, 6] = 1
+
+    # Test that no error is raised, and that labels of isolated seeds are OK
+    res = random_walker(a, mask)
+    assert res[1, 1] == 1
+    res = random_walker(a, mask, return_full_prob=True)
+    assert res[0, 1, 1] == 1
+    assert res[1, 1, 1] == 0

@@ -94,3 +94,8 @@ def test_binary_blobs():
     other_realization = data.binary_blobs(length=32, volume_fraction=0.25,
                                           n_dim=3)
     assert not np.all(blobs == other_realization)
+
+
+def test_lfw_subset():
+    """ Test that "lfw_subset" can be loaded."""
+    data.lfw_subset()

@@ -1,4 +1,3 @@
-from __future__ import division
 
 import numpy as np
 from scipy import sparse
@@ -98,11 +97,11 @@ def inpaint_biharmonic(image, mask, multichannel=False):
     ----------
     .. [1]  N.S.Hoang, S.B.Damelin, "On surface completion and image inpainting
             by biharmonic functions: numerical aspects",
-            https://arxiv.org/abs/1707.06567
+            :arXiv:`1707.06567`
     .. [2]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
             Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
             28 (2010), 104-113,
-            DOI: 10.1016/j.acha.2009.04.004
+            :DOI:`10.1016/j.acha.2009.04.004`
 
     Examples
     --------

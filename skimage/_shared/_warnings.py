@@ -61,8 +61,6 @@ def all_warnings():
     del frame
 
     for mod_name, mod in list(sys.modules.items()):
-        if 'six.moves' in mod_name:
-            continue
         try:
             mod.__warningregistry__.clear()
         except AttributeError:
@@ -105,10 +103,16 @@ def expected_warnings(matching):
     Finally, you can use `|\A\Z` in a pattern to signify it as optional.
 
     """
+    if isinstance(matching, str):
+        raise ValueError('``matching`` should be a list of strings and not '
+                         'a string itself.')
     with all_warnings() as w:
         # enter context
         yield w
         # exited user context, check the recorded warnings
+        # Allow users to provide None
+        while None in matching:
+            matching.remove(None)
         remaining = [m for m in matching if '\A\Z' not in m.split('|')]
         for warn in w:
             found = False

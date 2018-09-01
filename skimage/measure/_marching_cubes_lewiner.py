@@ -110,7 +110,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
            Tavares. Efficient implementation of Marching Cubes' cases with
            topological guarantees. Journal of Graphics Tools 8(2)
            pp. 1-15 (december 2003).
-           DOI: 10.1080/10867651.2003.10487582
+           :DOI:`10.1080/10867651.2003.10487582`
 
     See Also
     --------
@@ -165,7 +165,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     elif not gradient_direction == 'ascent':
         raise ValueError("Incorrect input %s in `gradient_direction`, see "
                          "docstring." % (gradient_direction))
-    if spacing != (1, 1, 1):
+    if not np.array_equal(spacing, (1, 1, 1)):
         vertices = vertices * np.r_[spacing]
 
     if allow_degenerate:

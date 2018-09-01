@@ -20,30 +20,40 @@ def regular_grid(ar_shape, n_points):
 
     Returns
     -------
-    slices : list of slice objects
+    slices : tuple of slice objects
         A slice along each dimension of `ar_shape`, such that the intersection
         of all the slices give the coordinates of regularly spaced points.
+
+        .. versionchanged:: 0.14.1
+            In scikit-image 0.14.1 and 0.15, the return type was changed from a
+            list to a tuple to ensure `compatibility with Numpy 1.15`_ and
+            higher. If your code requires the returned result to be a list, you
+            may convert the output of this function to a list with:
+
+            >>> result = list(regular_grid(ar_shape=(3, 20, 40), n_points=8))
+
+            .. _compatibility with NumPy 1.15: https://github.com/numpy/numpy/blob/master/doc/release/1.15.0-notes.rst#deprecations
 
     Examples
     --------
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    [slice(5, None, 10), slice(5, None, 10)]
+    (slice(5, None, 10), slice(5, None, 10))
     >>> ar[g] = 1
     >>> ar.sum()
     8.0
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 32)
     >>> g
-    [slice(2, None, 5), slice(2, None, 5)]
+    (slice(2, None, 5), slice(2, None, 5))
     >>> ar[g] = 1
     >>> ar.sum()
     32.0
     >>> ar = np.zeros((3, 20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    [slice(1, None, 3), slice(5, None, 10), slice(5, None, 10)]
+    (slice(1, None, 3), slice(5, None, 10), slice(5, None, 10))
     >>> ar[g] = 1
     >>> ar.sum()
     8.0
@@ -54,7 +64,7 @@ def regular_grid(ar_shape, n_points):
     sorted_dims = np.sort(ar_shape)
     space_size = float(np.prod(ar_shape))
     if space_size <= n_points:
-        return [slice(None)] * ndim
+        return (slice(None), ) * ndim
     stepsizes = (space_size / n_points) ** (1.0 / ndim) * np.ones(ndim)
     if (sorted_dims < stepsizes).any():
         for dim in range(ndim):
@@ -68,7 +78,7 @@ def regular_grid(ar_shape, n_points):
     stepsizes = np.round(stepsizes).astype(int)
     slices = [slice(start, None, step) for
               start, step in zip(starts, stepsizes)]
-    slices = [slices[i] for i in unsort_dim_idxs]
+    slices = tuple(slices[i] for i in unsort_dim_idxs)
     return slices
 
 
