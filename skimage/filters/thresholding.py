@@ -748,20 +748,15 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     max_sigma : float
         Maximum sigma value achieved on the classes.
 
-    Notes
-    -----
-        The current implementation takes some time to calculate the
-        thresholds for five classes. 
-
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
-    multilevel thresholding", Journal of Information Science and
-    Engineering 17 (5): 713-727, 2001. Available at:
-    http://www.iis.sinica.edu.tw/page/jise/2001/200109_01.html
+           multilevel thresholding", Journal of Information Science and
+           Engineering 17 (5): 713-727, 2001. Available at:
+           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
-    Available at:
-    http://imagej.net/plugins/download/Multi_OtsuThreshold.java
+           Available at:
+           <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
 
     Examples
     --------
