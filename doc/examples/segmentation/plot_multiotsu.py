@@ -12,18 +12,18 @@ classes. The default number of classes is 3: for obtaining three classes, the
 algorithm returns two threshold values. They are represented by a red line in
 the histogram below.
 
-.. [1] Liao, P-S. and Chung, P-C., "A fast algorithm for multilevel
+.. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for multilevel
 thresholding", Journal of Information Science and Engineering 17 (5):
-713-727, 2001.
+713-727, 2001. Available at:
+<http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>.
 """
-
-from skimage import data
-from skimage.filters import threshold_multiotsu
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from skimage import data
+from skimage.filters import threshold_multiotsu
 
 # Stablishing the font size for all plots.
 matplotlib.rcParams['font.size'] = 9
@@ -52,7 +52,7 @@ ax[1].set_title('Histogram')
 for i in range(len(thresh)):
     ax[1].axvline(thresh[i], color='r')
 
-# Plotting the three resulting regions.
+# Plotting the Multi Otsu result.
 ax[2].imshow(regions, cmap='Accent')
 ax[2].set_title('Multi-Otsu result')
 ax[2].axis('off')

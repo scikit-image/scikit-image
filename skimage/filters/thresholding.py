@@ -757,6 +757,7 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     Available at:
     http://imagej.net/plugins/download/Multi_OtsuThreshold.java
 
+    >>> from skimage import data
     >>> image = data.camera()
     >>> thresh = threshold_multiotsu(image)
     >>> region1 = image <= thresh[0]
