@@ -12,8 +12,8 @@ from PIL import Image
 from ..external.tifffile import TiffFile
 
 
-__all__ = ['MultiImage', 'ImageCollection',
-           'concatenate_images', 'imread_collection_wrapper']
+__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
+           'imread_collection_wrapper']
 
 
 def concatenate_images(ic):
@@ -237,7 +237,7 @@ class ImageCollection(object):
 
     def _find_files(self, load_pattern):
         """Expand given pattern to list of files, if possible."""
-        if isinstance(load_pattern, six.string_types):
+        if isinstance(load_pattern, str):
             load_pattern = load_pattern.split(os.pathsep)
             files = []
             for pattern in load_pattern:
@@ -349,20 +349,53 @@ class MultiImage(ImageCollection):
     Notes
     -----
     If ``conserve_memory=True`` the memory footprint can be reduced, however
+        """Return an `ImageCollection` from files matching the given pattern.
+
+        Note that files are always stored in alphabetical order. Also note that
+        slicing returns a new ImageCollection, *not* a view into the data.
+
+        See `skimage.io.ImageCollection` for details.
+
+        Parameters
+        ----------
+        load_pattern : str or list
+            Pattern glob or filenames to load. The path can be absolute or
+            relative.  Multiple patterns should be separated by a colon,
+            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            implementation notes below.
+        conserve_memory : bool, optional
+            If True, never keep more than one in memory at a specific
+            time.  Otherwise, images will be cached once they are loaded.
+
+        """
+        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
+                               load_func=imread)
+    return imread_collection
+
+
+class MultiImage(ImageCollection):
+
+    """A class containing a single multi-frame image.
+
+    Parameters
+    ----------
+    filename : str
+        The complete path to the image file.
+    conserve_memory : bool, optional
+        Whether to conserve memory by only caching a single frame. Default is
+        True.
+
+    Notes
+    -----
+    If ``conserve_memory=True`` the memory footprint can be reduced, however
     the performance can be affected because frames have to be read from file
     more often.
 
     The last accessed frame is cached, all other frames will have to be read
     from file.
 
-    By default, MultiImage builds a list of frames in each image, and calls
-    ``imread(filename, img_num=n)`` for each n to read the n:th frame in
-    filename. If ``load_func`` is specified, it should accept the ``img_num``
-    keyword argument.
-
-    For finding the frames, the current implementation makes use of
-    ``tifffile`` for Tiff files and PIL otherwise, and will only list frames
-    from files supported by them.
+    The current implementation makes use of ``tifffile`` for Tiff files and
+    PIL otherwise.
 
     Examples
     --------
@@ -378,55 +411,19 @@ class MultiImage(ImageCollection):
 
     """
 
-    def __init__(self, load_pattern, conserve_memory=True,
-                 load_func=None, **load_func_kwargs):
-        """Load multi-images as a collection of frames."""
+    def __init__(self, filename, conserve_memory=True, dtype=None,
+                 **imread_kwargs):
+        """Load a multi-img."""
+        from ._io import imread
 
-        self._filename = load_pattern
-        self._searched_files = super(MultiImage, self)._find_files(
-            load_pattern
-        )
+        def load_func(fname, **kwargs):
+            kwargs.setdefault('dtype', dtype)
+            return imread(fname, **kwargs)
 
-        if load_func is None:
-            from ._io import imread
-            load_func = imread
-
-        def load_frame(frame_idx, **kwargs):
-            fname, img_num = frame_idx
-            if img_num is not None:
-                kwargs['img_num'] = img_num
-            return load_func(fname, **kwargs)
-
-        super(MultiImage, self).__init__(self._find_frames(),
-                                         conserve_memory,
-                                         load_func=load_frame,
-                                         **load_func_kwargs)
+        self._filename = filename
+        super(MultiImage, self).__init__(filename, conserve_memory,
+                                         load_func=load_func, **imread_kwargs)
 
     @property
     def filename(self):
         return self._filename
-
-    def _find_frames(self):
-        index = []
-        for fname in self._searched_files:
-            if fname.lower().endswith(('.tiff', '.tif')):
-                with open(fname, 'rb') as f:
-                    img = TiffFile(f)
-                    index += [(fname, i) for i in range(len(img.pages))]
-            else:
-                try:
-                    im = Image.open(fname)
-                    im.seek(0)
-                except (IOError, OSError):
-                    continue
-                i = 0
-                while True:
-                    try:
-                        im.seek(i)
-                    except EOFError:
-                        break
-                    index.append((fname, i))
-                    i += 1
-                if hasattr(im, 'fp') and im.fp:
-                    im.fp.close()
-        return index
