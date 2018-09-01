@@ -5,27 +5,8 @@ Version 0.15
 ------------
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
-* In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
-* In ``skimage.restoration.denoise_bilateral``, set default behavior of
-  `multichannel` to False
-* In ``skimage.restoration.denoise_nl_means``, set default behavior of
-  `multichannel` to False
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
-* Remove deprecated function ``threshold_adaptive`` in
-  ``skimage/filters/thresholding.py``.
-* In ``skimage.transform.resize``, set default value of ``mode`` to
-  ``'reflect'``.
-* In ``skimage.transform.rescale``, set default value of ``mode`` to
-  ``'reflect'``.
-* Remove deprecated ``skimage.util.montage2d`` and corresponding tests.
-* In ``skimage.transform.resize`` change default argument from
-  ``anti_aliasing=None`` to ``anti_aliasing=True``.
-* In ``skimage/restoration/tests/test_denoise.py``, there is an optional
-  warning that needs to be made mandatory when we move on from python 2.7
 
 Version 0.16
 ------------
@@ -43,6 +24,7 @@ Version 0.16
 * Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
+  * Remove the ``save-demo.jpg`` line from ``.gitignore``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
@@ -55,3 +37,13 @@ Other
   once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
   ``skimage.feature.corner``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.
+* Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
+  Remove version restriction in requirements file when appropriate.
+  `https://github.com/SimpleITK/SimpleITK/issues/551`

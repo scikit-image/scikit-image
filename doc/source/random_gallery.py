@@ -49,8 +49,6 @@ javascript = javascript.replace('{{IMAGES}}', str(images))
 javascript = javascript.replace('{{LINKS}}', str(links))
 javascript = javascript.replace('{{GALLERY_DIV}}', ''.join(gallery_div.split('\n')))
 
-print(images)
-
 f = open(js_fn, 'w')
 f.write(javascript)
 f.close()

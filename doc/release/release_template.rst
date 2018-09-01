@@ -17,16 +17,18 @@ New Features
 
 
 
-
 Improvements
 ------------
-
 
 
 
 API Changes
 -----------
 
+
+
+Bugfixes
+--------
 
 
 

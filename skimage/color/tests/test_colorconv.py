@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for color conversion functions.
 
 Authors
@@ -192,10 +189,11 @@ class TestColorconv(TestCase):
         img_rgb = self.img_rgb
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
                               rgb_from_hdx)
-        assert_equal(img_as_ubyte(conv), img_rgb)
+        with expected_warnings(['precision loss']):
+            assert_equal(img_as_ubyte(conv), img_rgb)
 
-    # RGB<->HDX roundtrip with ubyte image
-    def test_hdx_rgb_roundtrip(self):
+    # RGB<->HDX roundtrip with float image
+    def test_hdx_rgb_roundtrip_float(self):
         from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
         img_rgb = img_as_float(self.img_rgb)
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),

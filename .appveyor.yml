@@ -6,6 +6,8 @@ environment:
     - PYTHON: C:\Python35-x64
     - PYTHON: C:\Python36
     - PYTHON: C:\Python36-x64
+    - PYTHON: C:\Python37
+    - PYTHON: C:\Python37-x64
 
 matrix:
   fast_finish: true
@@ -65,9 +67,9 @@ test_script:
   # Run unit tests with pytest
   - pytest -v --pyargs skimage
 
-artifacts:
-  # Archive the generated wheel package in the ci.appveyor.com build report.
-  - path: dist\*
+#artifacts:
+#  # Archive the generated wheel package in the ci.appveyor.com build report.
+#  - path: dist\*
 
 #on_success:
 #  - TODO: upload the content of dist/*.whl to a public wheelhouse

@@ -1,4 +1,3 @@
-# coding: utf-8
 from math import sqrt, atan2, pi as PI
 import itertools
 from warnings import warn
@@ -274,13 +273,14 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
+        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return sign * 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -366,6 +366,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
     ----------
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
+
+        .. versionchanged:: 0.14.1
+            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
+            so any number of singleton dimensions was allowed. This resulted in
+            inconsistent handling of images with singleton dimensions. To
+            recover the old behaviour, use
+            ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
@@ -469,9 +476,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        Angle between the X-axis and the major axis of the ellipse that has
-        the same second-moments as the region. Ranging from `-pi/2` to
-        `pi/2` in counter-clockwise direction.
+        In 'rc' coordinates, angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+
+        In `xy` coordinates, as above but the angle is now measured from the
+        "x" or horizontal axis.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
@@ -546,8 +556,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
     (22.729879860483141, 81.912285234465827)
 
     """
-
-    label_image = np.squeeze(label_image)
 
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')

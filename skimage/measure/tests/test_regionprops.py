@@ -63,8 +63,9 @@ def test_dtype():
 def test_ndim():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
-    regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 10), dtype=np.int))
+    regionprops(np.zeros((1, 1), dtype=np.int))
+    regionprops(np.zeros((1, 1, 1), dtype=np.int))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
@@ -304,15 +305,15 @@ def test_moments_normalized():
 
 
 def test_orientation():
-    orientation = regionprops(SAMPLE.T)[0].orientation
+    orientation = regionprops(SAMPLE, coordinates='xy')[0].orientation
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
     # test correct quadrant determination
-    orientation2 = regionprops(SAMPLE)[0].orientation
-    assert_almost_equal(orientation2, math.pi / 2 - orientation)
+    orientation2 = regionprops(SAMPLE, coordinates='rc')[0].orientation
+    assert_almost_equal(orientation2, -math.pi / 2 + orientation)
     # test diagonal regions
     diag = np.eye(10, dtype=int)
-    orientation_diag = regionprops(diag)[0].orientation
+    orientation_diag = regionprops(diag, coordinates='xy')[0].orientation
     assert_almost_equal(orientation_diag, -math.pi / 4)
     orientation_diag = regionprops(np.flipud(diag))[0].orientation
     assert_almost_equal(orientation_diag, math.pi / 4)

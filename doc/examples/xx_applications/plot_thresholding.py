@@ -28,7 +28,6 @@ mechanisms.
    Presentation on
    :ref:`sphx_glr_auto_examples_xx_applications_plot_rank_filters.py`.
 """
-import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -164,8 +163,8 @@ global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh
 
 block_size = 35
-adaptive_thresh = threshold_local(image, block_size, offset=10)
-binary_adaptive = image > adaptive_thresh
+local_thresh = threshold_local(image, block_size, offset=10)
+binary_local = image > local_thresh
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
 ax = axes.ravel()
@@ -177,8 +176,8 @@ ax[0].set_title('Original')
 ax[1].imshow(binary_global)
 ax[1].set_title('Global thresholding')
 
-ax[2].imshow(binary_adaptive)
-ax[2].set_title('Adaptive thresholding')
+ax[2].imshow(binary_local)
+ax[2].set_title('Local thresholding')
 
 for a in ax:
     a.axis('off')
