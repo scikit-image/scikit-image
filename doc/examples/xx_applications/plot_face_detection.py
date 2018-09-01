@@ -69,7 +69,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 
 # Load the trained file from the module root.
-trained_file = data.frontal_face_cascade_xml()
+trained_file = data.lbp_frontal_face_cascade_filename()
 
 # Initialize the detector cascade.
 detector = Cascade(trained_file)
