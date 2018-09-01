@@ -757,6 +757,8 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     Available at:
     http://imagej.net/plugins/download/Multi_OtsuThreshold.java
 
+    Examples
+    --------
     >>> from skimage.color import label2rgb
     >>> from skimage import data
     >>> image = data.camera()
