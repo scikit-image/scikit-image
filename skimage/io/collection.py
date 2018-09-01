@@ -1,6 +1,5 @@
 """Data structures to hold collections of images, with optional caching."""
 
-from __future__ import with_statement
 
 import os
 from glob import glob
@@ -8,7 +7,6 @@ import re
 from copy import copy
 
 import numpy as np
-import six
 from PIL import Image
 
 from ..external.tifffile import TiffFile
@@ -152,7 +150,6 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-
         self._files = self._find_files(load_pattern)
         self._numframes = len(self._files)
 

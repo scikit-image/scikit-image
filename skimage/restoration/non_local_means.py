@@ -1,5 +1,4 @@
 import numpy as np
-from .._shared.utils import warn
 from ._nl_means_denoising import (
     _nl_means_denoising_2d,
     _nl_means_denoising_3d,
@@ -8,7 +7,7 @@ from ._nl_means_denoising import (
 
 
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
-                     multichannel=None, fast_mode=True, sigma=0.):
+                     multichannel=False, fast_mode=True, sigma=0.):
     """
     Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
@@ -30,7 +29,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         sigma of slightly less.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. Set to ``False`` for 3-D images.
+        channels or another spatial dimension.
     fast_mode : bool, optional
         If True (default value), a fast version of the non-local means
         algorithm is used. If False, the original version of non-local means is
@@ -42,7 +41,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
 
     Returns
     -------
-
     result : ndarray
         Denoised image, of same shape as `image`.
 
@@ -105,21 +103,21 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     ----------
     .. [1] A. Buades, B. Coll, & J-M. Morel. A non-local algorithm for image
            denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
-           DOI: 10.1109/CVPR.2005.38
+           :DOI:`10.1109/CVPR.2005.38`
 
     .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
            nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
            International Symposium on Biomedical Imaging: From Nano to Macro,
            2008, pp. 1331-1334.
-           DOI: 10.1109/ISBI.2008.4541250
+           :DOI:`10.1109/ISBI.2008.4541250`
 
     .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
-           DOI: 10.5201/ipol.2014.120
+           :DOI:`10.5201/ipol.2014.120`
 
     .. [4] A. Buades, B. Coll, & J-M. Morel. Non-Local Means Denoising.
            Image Processing On Line, 2011, vol. 1, pp. 208-212.
-           DOI: 10.5201/ipol.2011.bcm_nlm
+           :DOI:`10.5201/ipol.2011.bcm_nlm`
 
     Examples
     --------
@@ -128,10 +126,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     >>> a += 0.3 * np.random.randn(*a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
     """
-    if multichannel is None:
-        warn('denoise_nl_means will default to multichannel=False in v0.15')
-        multichannel = True
-
     if image.ndim == 2:
         image = image[..., np.newaxis]
         multichannel = True

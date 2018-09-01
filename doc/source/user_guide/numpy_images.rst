@@ -91,7 +91,7 @@ Boolean arithmetic can be used to define more complex masks: ::
     >>> lower_half = row > cnt_row
     >>> lower_half_disk = np.logical_and(lower_half, outer_disk_mask)
     >>> camera = data.camera()
-    >>> camera[lower_half_disk] = 0 
+    >>> camera[lower_half_disk] = 0
 
 
 Color images
@@ -209,11 +209,11 @@ in a different order, even if the number of operations is the same:
     >>> def in_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[0])):
     ...         arr[plane, :, :] *= scalar
-    ... 
+    ...
     >>> def out_of_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[2])):
     ...         arr[:, :, plane] *= scalar
-    ... 
+    ...
     >>> import time
     >>> im3d = np.random.rand(100, 1024, 1024)
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
@@ -229,12 +229,13 @@ in a different order, even if the number of operations is the same:
     Speedup: 8.6x
 
 
-When the dimension you are iterating over is even larger, the
-speedup is even more dramatic. It is worth thinking about this
+When the last/rightmost dimension becomes even larger, the
+speedup is even more dramatic. It is worth thinking about
 *data locality* when writing algorithms. In particular, know that
-scikit-image uses C-contiguous arrays unless otherwise specified, so
-one should iterate along the last/rightmost dimension in the
-innermost loop of the computation.
+scikit-image uses C-contiguous arrays unless otherwise specified.
+When using nested loops, the last/rightmost dimension of the array
+should be in the innermost loop of the computation. In the example
+above, the ``*=`` numpy operator iterates over all remaining dimensions.
 
 A note on time
 --------------

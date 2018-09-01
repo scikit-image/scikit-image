@@ -40,17 +40,6 @@ def test_PSNR_float():
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
 
-def test_PSNR_dynamic_range_and_data_range():
-    # Tests deprecation of "dynamic_range" in favor of "data_range"
-    out1 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
-    with expected_warnings(
-            '`dynamic_range` has been deprecated in favor of '
-            '`data_range`. The `dynamic_range` keyword argument '
-            'will be removed in v0.14'):
-        out2 = compare_psnr(cam/255., cam_noisy/255., dynamic_range=1)
-    assert_equal(out1, out2)
-
-
 def test_PSNR_errors():
     # shape mismatch
     with testing.raises(ValueError):

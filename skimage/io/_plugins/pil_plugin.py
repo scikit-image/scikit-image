@@ -1,7 +1,6 @@
 __all__ = ['imread', 'imsave']
 
 import numpy as np
-from six import string_types
 from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
@@ -31,7 +30,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     ----------
     .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
-    if isinstance(fname, string_types):
+    if isinstance(fname, str):
         with open(fname, 'rb') as f:
             im = Image.open(f)
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
@@ -237,10 +236,10 @@ def imsave(fname, arr, format_str=None, **kwargs):
     .. [1] http://pillow.readthedocs.org/en/latest/handbook/image-file-formats.html
     """
     # default to PNG if file-like object
-    if not isinstance(fname, string_types) and format_str is None:
+    if not isinstance(fname, str) and format_str is None:
         format_str = "PNG"
     # Check for png in filename
-    if (isinstance(fname, string_types)
+    if (isinstance(fname, str)
             and fname.lower().endswith(".png")):
         format_str = "PNG"
 

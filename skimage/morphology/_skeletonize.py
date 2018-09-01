@@ -2,7 +2,6 @@
 Algorithms for computing the skeleton of a binary image
 """
 
-from six.moves import range
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -219,11 +218,11 @@ def thin(image, max_iter=None):
     ----------
     .. [1] Z. Guo and R. W. Hall, "Parallel thinning with
            two-subiteration algorithms," Comm. ACM, vol. 32, no. 3,
-           pp. 359-373, 1989. DOI:10.1145/62065.62074
+           pp. 359-373, 1989. :DOI:`10.1145/62065.62074`
     .. [2] Lam, L., Seong-Whan Lee, and Ching Y. Suen, "Thinning
            Methodologies-A Comprehensive Survey," IEEE Transactions on
            Pattern Analysis and Machine Intelligence, Vol 14, No. 9,
-           p. 879, 1992. DOI:10.1109/34.161346
+           p. 879, 1992. :DOI:`10.1109/34.161346`
 
     Examples
     --------

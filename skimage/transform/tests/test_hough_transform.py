@@ -79,7 +79,7 @@ def test_probabilistic_hough_seed():
     lines = transform.probabilistic_hough_line(image, threshold=50,
                                                line_length=50, line_gap=1,
                                                seed=1234)
-    assert len(lines) == 64
+    assert len(lines) == 65
 
 
 def test_probabilistic_hough_bad_input():

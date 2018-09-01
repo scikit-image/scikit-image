@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from . import _hoghistogram
 from .._shared.utils import skimage_deprecation, warn
@@ -116,12 +115,12 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
            Human Detection, IEEE Computer Society Conference on Computer
            Vision and Pattern Recognition 2005 San Diego, CA, USA,
            https://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf,
-           DOI:10.1109/CVPR.2005.177
+           :DOI:`10.1109/CVPR.2005.177`
 
     .. [3] Lowe, D.G., Distinctive image features from scale-invatiant
            keypoints, International Journal of Computer Vision (2004) 60: 91,
            http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf,
-           DOI:10.1023/B:VISI.0000029664.99615.94
+           :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
     .. [4] Dalal, N, Finding People in Images and Videos,
            Human-Computer Interaction [cs.HC], Institut National Polytechnique

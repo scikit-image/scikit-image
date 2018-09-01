@@ -17,7 +17,7 @@ markers of the two phases from the extreme tails of the histogram of gray
 values, and use the random walker for the segmentation.
 
 .. [1] *Random walks for image segmentation*, Leo Grady, IEEE Trans. Pattern
-       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 DOI:10.1109/TPAMI.2006.233
+       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 :DOI:`10.1109/TPAMI.2006.233`
 
 """
 import numpy as np

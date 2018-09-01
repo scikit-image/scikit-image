@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# uft.py --- Unitary fourier transform
-
-"""Function of unitary fourier transform and utilities
+"""Function of unitary fourier transform (uft) and utilities
 
 This module implements the unitary fourier transform, also known as
 the ortho-normal transform. It is especially useful for convolution
@@ -22,7 +19,6 @@ References
 
 """
 
-from __future__ import division, print_function
 
 import numpy as np
 
@@ -444,5 +440,5 @@ def laplacian(ndim, shape, is_real=True):
                               0.0,
                               -1.0]).reshape([-1 if i == dim else 1
                                               for i in range(ndim)])
-    impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
+    impr[(slice(1, 2), ) * ndim] = 2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr

@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
-import numpy as np
-import scipy as sp
-import matplotlib as mpl
-import six
-from PIL import Image
-import Cython
-import networkx
+from pathlib import Path
+import requirements
+import pkg_resources
 
 
-for m in (np, sp, mpl, six, Image, networkx, Cython):
-    if m is Image:
-        version = m.VERSION
-    else:
-        version = m.__version__
-    print(m.__name__.rjust(10), ' ', version)
+def main():
+    requirements_dir = Path(__file__).parent / '..' / 'requirements'
+
+    for requirement_file in requirements_dir.glob('*.txt'):
+        print(requirement_file.name)
+        with open(str(requirement_file), 'r') as fd:
+            for req in requirements.parse(fd):
+                try:
+                    version = pkg_resources.get_distribution(req.name).version
+                    print(req.name.rjust(20), version)
+                except pkg_resources.DistributionNotFound:
+                    print(req.name.rjust(20), 'is not installed')
+
+
+if __name__ == '__main__':
+    main()

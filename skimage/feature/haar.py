@@ -1,9 +1,7 @@
-from __future__ import division
 
 from itertools import chain
 from operator import add
 
-import six
 import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
@@ -23,7 +21,7 @@ def _validate_feature_type(feature_type):
     if feature_type is None:
         feature_type_ = FEATURE_TYPE
     else:
-        if isinstance(feature_type, six.string_types):
+        if isinstance(feature_type, str):
             feature_type_ = [feature_type]
         else:
             feature_type_ = feature_type
@@ -186,12 +184,12 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
            In Computer Vision and Pattern Recognition, 1997. Proceedings.,
            1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
            http://tinyurl.com/y6ulxfta
-           DOI: 10.1109/CVPR.1997.609319
+           :DOI:`10.1109/CVPR.1997.609319`
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
            http://www.merl.com/publications/docs/TR2004-043.pdf
-           DOI: 10.1109/CVPR.2001.990517
+           :DOI:`10.1109/CVPR.2001.990517`
 
     """
     if feature_coord is None:

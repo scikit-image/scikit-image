@@ -1,8 +1,7 @@
 import numpy as np
-import six
 
 from ..io.manage_plugins import call_plugin
-from ..color import rgb2grey
+from ..color import rgb2gray
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
 from .._shared.utils import warn
@@ -25,7 +24,7 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
         Images that are already in gray-scale format are not converted.
     plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
 
@@ -40,7 +39,7 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
     -------
     img_array : ndarray
         The different color bands/channels are stored in the
-        third dimension, such that a grey-image is MxN, an
+        third dimension, such that a gray-image is MxN, an
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
@@ -70,7 +69,7 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
             img = np.swapaxes(img, -2, -3)
 
         if as_gray:
-            img = rgb2grey(img)
+            img = rgb2gray(img)
 
     return img
 
@@ -116,7 +115,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Image data.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
 
@@ -152,7 +151,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Image data or name of image file.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
+        tried (starting with imageio) until a suitable
         candidate is found.
 
     Other parameters
@@ -161,7 +160,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    if isinstance(arr, six.string_types):
+    if isinstance(arr, str):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 

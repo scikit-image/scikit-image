@@ -6,7 +6,8 @@ from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal, TestCase
+from skimage._shared.testing import (assert_array_almost_equal, TestCase,
+                                     expected_warnings)
 
 
 try:
@@ -29,11 +30,13 @@ def teardown():
 
 @testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_flatten():
-    # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    # a color image is flattened (as_gray in .16)
+    with expected_warnings(['`flatten` has been deprecated']):
+        img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
+    with expected_warnings(['`flatten` has been deprecated']):
+        img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 

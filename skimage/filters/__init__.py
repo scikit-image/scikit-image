@@ -8,14 +8,15 @@ from .edges import (sobel, sobel_h, sobel_v,
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from ._frangi import frangi, hessian
-from .thresholding import (threshold_local,
-                           threshold_adaptive, threshold_otsu, threshold_yen,
+from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold, apply_hysteresis_threshold)
 from . import rank
 from .rank import median
+from ._unsharp_mask import unsharp_mask
+
 
 __all__ = ['inverse',
            'wiener',
@@ -41,15 +42,16 @@ __all__ = ['inverse',
            'try_all_threshold',
            'frangi',
            'hessian',
-           'threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
            'threshold_li',
+           'threshold_local',
            'threshold_minimum',
            'threshold_mean',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
            'apply_hysteresis_threshold',
-           'rank']
+           'rank',
+           'unsharp_mask']

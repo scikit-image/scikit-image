@@ -12,13 +12,10 @@ cimport numpy as cnp
 DTYPE = np.intp
 BG_NODE_NULL = -999
 
-# Short int - could be more graceful to the CPU cache
-ctypedef cnp.int32_t INTS_t
-
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef int (* fun_ravel)(int, int, int, shape_info *)
+ctypedef long (* fun_ravel)(long, long, long, shape_info *)
 
 
 # For having stuff concerning background in one place
@@ -68,24 +65,24 @@ cdef enum:
     D_COUNT
 
 
-# Structure for centralised access to shape data
+# Structure for centralized access to shape data
 # Contains information related to the shape of the input array
 cdef struct s_shpinfo:
-    INTS_t x
-    INTS_t y
-    INTS_t z
+    DTYPE_t x
+    DTYPE_t y
+    DTYPE_t z
 
     # Number of elements
     DTYPE_t numels
-    # Number of of the input array
-    INTS_t ndim
+    # Dimensions of of the input array
+    DTYPE_t ndim
 
     # Offsets between elements recalculated to linear index increments
     # DEX[D_ea] is offset between E and A (i.e. to the point to upper left)
     # The name DEX is supposed to evoke DE., where . = A, B, C, D, F etc.
-    INTS_t DEX[D_COUNT]
+    DTYPE_t DEX[D_COUNT]
 
-    # Function pointer to a function that recalculates multiindex to linear
+    # Function pointer to a function that recalculates multi-index to linear
     # index. Heavily depends on dimensions of the input array.
     fun_ravel ravel_index
 
@@ -165,31 +162,31 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
 
 
 cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
-                                    DTYPE_t rindex, INTS_t idxdiff):
+                                    DTYPE_t rindex, DTYPE_t idxdiff):
     if data_p[rindex] == data_p[rindex + idxdiff]:
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef int ravel_index1D(int x, int y, int z, shape_info *shapeinfo):
+cdef long ravel_index1D(long x, long y, long z, shape_info *shapeinfo):
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef int ravel_index2D(int x, int y, int z, shape_info *shapeinfo):
+cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo):
     """
     Ravel index of a 2D array. z is ignored
     """
-    cdef int ret = x + y * shapeinfo.x
+    cdef long ret = x + y * shapeinfo.x
     return ret
 
 
-cdef int ravel_index3D(int x, int y, int z, shape_info *shapeinfo):
+cdef long ravel_index3D(long x, long y, long z, shape_info *shapeinfo):
     """
     Ravel index of a 3D array
     """
-    cdef int ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
+    cdef long ret = x + y * shapeinfo.x + z * shapeinfo.y * shapeinfo.x
     return ret
 
 
@@ -494,7 +491,7 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     """
     # Initialize the first row
     cdef DTYPE_t x, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     rindex = shapeinfo.ravel_index(0, y, z, shapeinfo)
 
     for x in range(1, shapeinfo.x):
@@ -513,7 +510,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
     Perform forward scan on a 2D array.
     """
     cdef DTYPE_t x, y, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     scan1D(data_p, forest_p, shapeinfo, bg, connectivity, 0, z)
     for y in range(1, shapeinfo.y):
         # BEGINNING of x = 0
@@ -561,11 +558,11 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
                  bginfo *bg, DTYPE_t connectivity):
     """
-    Perform forward scan on a 2D array.
+    Perform forward scan on a 3D array.
 
     """
     cdef DTYPE_t x, y, z, rindex, bgval = bg.background_val
-    cdef INTS_t *DEX = shapeinfo.DEX
+    cdef DTYPE_t *DEX = shapeinfo.DEX
     # Handle first plane
     scan2D(data_p, forest_p, shapeinfo, bg, connectivity, 0)
     for z in range(1, shapeinfo.z):

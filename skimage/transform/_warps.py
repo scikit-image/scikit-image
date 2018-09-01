@@ -1,4 +1,3 @@
-import six
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -31,8 +30,8 @@ def _multichannel_default(multichannel, ndim):
             return False
 
 
-def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
-           preserve_range=False, anti_aliasing=None, anti_aliasing_sigma=None):
+def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
+           preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
     Performs interpolation to up-size or down-size images. Note that anti-
@@ -62,8 +61,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -74,6 +72,7 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+        Also see http://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
@@ -96,20 +95,10 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import resize
     >>> image = data.camera()
-    >>> resize(image, (100, 100), mode='reflect').shape
+    >>> resize(image, (100, 100)).shape
     (100, 100)
 
     """
-    if mode is None:
-        mode = 'constant'
-        warn("The default mode, 'constant', will be changed to 'reflect' in "
-             "skimage 0.15.")
-
-    if anti_aliasing is None:
-        anti_aliasing = False
-        warn("Anti-aliasing will be enabled by default in skimage 0.15 to "
-             "avoid aliasing artifacts when down-sampling images.")
-
     output_shape = tuple(output_shape)
     output_ndim = len(output_shape)
     input_shape = image.shape
@@ -164,6 +153,11 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
             tform = AffineTransform()
             tform.estimate(src_corners, dst_corners)
 
+        # Make sure the transform is exactly metric, to ensure fast warping.
+        tform.params[2] = (0, 0, 1)
+        tform.params[0, 1] = 0
+        tform.params[1, 0] = 0
+
         out = warp(image, tform, output_shape=output_shape, order=order,
                    mode=mode, cval=cval, clip=clip,
                    preserve_range=preserve_range)
@@ -187,9 +181,9 @@ def resize(image, output_shape, order=1, mode=None, cval=0, clip=True,
     return out
 
 
-def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
+def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
             preserve_range=False, multichannel=None,
-            anti_aliasing=None, anti_aliasing_sigma=None):
+            anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
     Performs interpolation to up-scale or down-scale images. Note that anti-
@@ -217,8 +211,7 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
         be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode.  Modes match the behaviour of `numpy.pad`.  The
-        default mode is 'constant'.
+        to the given mode.  Modes match the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -229,6 +222,8 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+        Also see
+        http://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. By default, is set to True for
@@ -256,9 +251,9 @@ def rescale(image, scale, order=1, mode=None, cval=0, clip=True,
     >>> from skimage import data
     >>> from skimage.transform import rescale
     >>> image = data.camera()
-    >>> rescale(image, 0.1, mode='reflect').shape
+    >>> rescale(image, 0.1).shape
     (51, 51)
-    >>> rescale(image, 0.5, mode='reflect').shape
+    >>> rescale(image, 0.5).shape
     (256, 256)
 
     """
@@ -298,7 +293,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         False.
     center : iterable of length 2
         The rotation center. If ``center=None``, the image is rotated around
-        its center, i.e. ``center=(rows / 2 - 0.5, cols / 2 - 0.5)``.
+        its center, i.e. ``center=(cols / 2 - 0.5, rows / 2 - 0.5)``.  Please
+        note that this parameter is (cols, rows), contrary to normal skimage
+        ordering.
 
     Returns
     -------
@@ -323,6 +320,8 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+        Also see
+        http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Notes
     -----
@@ -380,6 +379,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         translation = (minc, minr)
         tform4 = SimilarityTransform(translation=translation)
         tform = tform4 + tform
+
+    # Make sure the transform is exactly affine, to ensure fast warping.
+    tform.params[2] = (0, 0, 1)
 
     return warp(image, tform, output_shape=output_shape, order=order,
                 mode=mode, cval=cval, clip=clip, preserve_range=preserve_range)
@@ -446,7 +448,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
 
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
-          output_shape=None, order=1, mode=None, cval=0, clip=True,
+          output_shape=None, order=1, mode='reflect', cval=0, clip=True,
           preserve_range=False):
     """Perform a swirl transformation.
 
@@ -491,13 +493,10 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+        Also see
+        http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     """
-    if mode is None:
-        warn('The default of `mode` in `skimage.transform.swirl` '
-             'will change to `reflect` in version 0.15.')
-        mode = 'constant'
-
     if center is None:
         center = np.array(image.shape)[:2][::-1] / 2
 
@@ -725,6 +724,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
+        Also see
+        http://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -834,7 +835,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
               inverse_map.__name__ == 'inverse' and
               get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS):
             # inverse_map is the inverse of a homography
-            matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
+            matrix = np.linalg.inv(inverse_map.__self__.params)
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
