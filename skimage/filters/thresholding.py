@@ -757,12 +757,12 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     Available at:
     http://imagej.net/plugins/download/Multi_OtsuThreshold.java
 
+    >>> from skimage.color import label2rgb
     >>> from skimage import data
     >>> image = data.camera()
-    >>> thresh = threshold_multiotsu(image)
-    >>> region1 = image <= thresh[0]
-    >>> region2 = (image > thresh[0]) & (image <= thresh[1])
-    >>> region3 = image > thresh[1]
+    >>> thresh, _ = threshold_multiotsu(image)
+    >>> regions = np.digitize(image, bins=thresh)
+    >>> sep_regions = label2rgb(regions)
     """
     if image.shape[-1] in (3, 4):
         raise TypeError("The input image seems to be RGB (shape: {0}. Please"
