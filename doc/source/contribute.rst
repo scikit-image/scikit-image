@@ -1,2 +1,8 @@
-.. include:: ../../TASKS.txt
-.. include:: ../../.github/CONTRIBUTING.txt
+.. toctree:: 
+   :hidden: 
+ 
+   gitwash/index 
+   gsoc2011 
+   cell_profiler 
+
+.. include:: ../../CONTRIBUTING.txt

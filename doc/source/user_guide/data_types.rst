@@ -124,6 +124,49 @@ may write::
    >>> plt.imshow(out)
 
 
+Working with OpenCV
+===================
+
+It is possible that you may need to use an image created using ``skimage`` with
+OpenCV_ or vice versa. OpenCV image data can be accessed (without copying) in
+NumPy (and, thus, in scikit-image).
+OpenCV uses BGR (instead of scikit-image's RGB) for color images, and its
+dtype is uint8 by default (See `Image data types and what they mean`_). BGR stands
+for Blue Green Red.
+
+Converting BGR to RGB or vice versa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
+color. RGB and BGR use the same color space, except the order of colors is reversed.
+
+Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead
+of width and height (see :ref:`numpy-images-coordinate-conventions`).
+
+The following instruction effectively reverses the order of the colors, leaving
+the rows and columns unaffected.
+
+    >>> image = image[:, :, ::-1]
+
+Using an image from OpenCV with ``skimage``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
+default. If you prefer working with floating point images, :func:`img_as_float`
+can be used to convert the image::
+
+    >>> from skimage import img_as_float
+    >>> image = img_as_float(any_opencv_image)
+
+Using an image from ``skimage`` with OpenCV
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The reverse can be achieved with :func:`img_as_ubyte`::
+
+    >>> from skimage import img_as_ubyte
+    >>> cv_image = img_as_ubyte(any_skimage_image)
+
+
 Image processing pipeline
 =========================
 
@@ -200,4 +243,4 @@ References
 
 .. _numpy: http://docs.scipy.org/doc/numpy/user/
 .. [1] http://docs.scipy.org/doc/numpy/user/basics.types.html
-
+.. _OpenCV: http://opencv.org/

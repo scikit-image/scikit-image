@@ -190,7 +190,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
 
 def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
-                                       Py_ssize_t n_segments,
                                        Py_ssize_t min_size,
                                        Py_ssize_t max_size):
     """ Helper function to remove small disconnected regions from the labels
@@ -199,8 +198,6 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     ----------
     segments : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
-    n_segments: int
-        Number of specified segments
     min_size: int
         Minimum size of the segment
     max_size: int

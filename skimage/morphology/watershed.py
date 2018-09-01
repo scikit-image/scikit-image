@@ -59,10 +59,10 @@ def _validate_inputs(image, markers, mask):
         # not array-like, assume int
         markers = regular_seeds(image.shape, markers)
     elif markers.shape != image.shape:
-        raise ValueError("Markers (shape %s) must have same shape "
-                         "as image (shape %s)" % (markers.ndim, image.ndim))
+        raise ValueError("`markers` (shape {}) must have same shape "
+                         "as `image` (shape {})".format(markers.shape, image.shape))
     if mask is not None and mask.shape != image.shape:
-        raise ValueError("mask must have same shape as image")
+        raise ValueError("`mask` must have same shape as `image`")
     if mask is None:
         # Use a complete `True` mask if none is provided
         mask = np.ones(image.shape, bool)
@@ -132,12 +132,11 @@ def _compute_neighbors(image, structure, offset):
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
-              compactness=0):
+              compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
     ----------
-
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
     markers: int, or ndarray of int, same shape as `image`
@@ -156,6 +155,9 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
+    watershed_line : bool, optional
+        If watershed_line is True, a one-pixel wide line separates the regions
+        obtained by the watershed algorithm. The line has the label 0.
 
     Returns
     -------
@@ -164,7 +166,6 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     See also
     --------
-
     skimage.segmentation.random_walker: random walker segmentation
         A segmentation algorithm based on anisotropic diffusion, usually
         slower than the watershed but with good results on noisy data and
@@ -255,7 +256,8 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
                                  mask, image_strides, compactness,
-                                 output.ravel())
+                                 output.ravel(),
+                                 watershed_line)
 
     output = crop(output, pad_width, copy=True)
 

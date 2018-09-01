@@ -50,16 +50,28 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
         return value2
 
 
-def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
+def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
                       double sigma_spatial, Py_ssize_t bins,
                       mode, double cval):
-    image = np.atleast_3d(img_as_float(image))
+    cdef:
+        double min_value, max_value
+
+    min_value = image.min()
+    max_value = image.max()
+
+    if min_value == max_value:
+        return image
 
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
-    if image.min() < 0.0:
+    if min_value < 0.0:
         raise ValueError("Image must contain only positive values")
+
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    image = np.atleast_3d(img_as_float(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -68,8 +80,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         Py_ssize_t window_ext = (win_size - 1) / 2
         Py_ssize_t max_color_lut_bin = bins - 1
 
-        double max_value
-
         double[:, :, ::1] cimage
         double[:, :, ::1] out
 
@@ -77,22 +87,17 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         double[:] range_lut
 
         Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
-        double value, weight, dist, total_weight, csigma_range, color_weight, \
+        double value, weight, dist, total_weight, csigma_color, color_weight, \
                range_weight
         double dist_scale
         double[:] values
         double[:] centres
         double[:] total_values
 
-    if sigma_range is None:
-        csigma_range = image.std()
+    if sigma_color is None:
+        csigma_color = image.std()
     else:
-        csigma_range = sigma_range
-
-    max_value = image.max()
-
-    if max_value == 0.0:
-        raise ValueError("The maximum value found in the image was 0.")
+        csigma_color = sigma_color
 
     if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
@@ -102,7 +107,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     cimage = np.ascontiguousarray(image)
 
     out = np.zeros((rows, cols, dims), dtype=np.double)
-    color_lut = _compute_color_lut(bins, csigma_range, max_value)
+    color_lut = _compute_color_lut(bins, csigma_color, max_value)
     range_lut = _compute_range_lut(win_size, sigma_spatial)
     dist_scale = bins / dims / max_value
     values = np.empty(dims, dtype=np.double)

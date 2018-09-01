@@ -11,7 +11,8 @@ from ..feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
-
+from .corner_cy import _corner_moravec, _corner_orientations
+from warnings import warn
 
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
@@ -101,13 +102,13 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
 
-        H = [Hxx Hxy]
-            [Hxy Hyy]
+        H = [Hrr Hrc]
+            [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
     of the Gaussian kernel in the respective x- and y-directions.
@@ -124,14 +125,19 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    order : {'xy', 'rc'}, optional
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'xy' indicates the usage
+        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
+        the use of the first axis initially (Hrr, Hrc, Hcc).
 
     Returns
     -------
-    Hxx : ndarray
+    Hrr : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
+    Hrc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
+    Hcc : ndarray
         Element of the Hessian matrix for each pixel in the input image.
 
     Examples
@@ -139,8 +145,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    >>> Hxy
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
+    >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
@@ -153,17 +159,28 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
 
+    if order is None:
+        if image.ndim == 2:
+            # The legacy 2D code followed (x, y) convention, so we swap the axis
+            # order to maintain compatibility with old code
+            warn('deprecation warning: the default order of the hessian matrix values '
+                 'will be "row-column" instead of "xy" starting in skimage version 0.15. '
+                 'Use order="rc" or order="xy" to set this explicitly')
+            order = 'xy'
+        else:
+            order = 'rc'
+
+
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
+
+    if order == 'rc':
+        axes = reversed(axes)
+
     H_elems = [np.gradient(gradients[ax0], axis=ax1)
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
 
-    if image.ndim == 2:
-        # The legacy 2D code followed (x, y) convention, so we swap the axis
-        # order to maintain compatibility with old code
-        H_elems.reverse()
     return H_elems
-
 
 def hessian_matrix_det(image, sigma=1):
     """Computes the approximate Hessian Determinant over an image.
@@ -248,7 +265,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
 
 
 def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
-    """Compute Eigen values of Hessian matrix.
+    """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
@@ -271,7 +288,7 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
     >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
@@ -282,6 +299,78 @@ def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
     """
 
     return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
+
+
+def shape_index(image, sigma=1, mode='constant', cval=0):
+    """Compute the shape index.
+
+    The shape index, as defined by Koenderink & van Doorn [1]_, is a
+    single valued measure of local curvature, assuming the image as a 3D plane
+    with intensities representing heights.
+
+    It is derived from the eigen values of the Hessian, and its
+    value ranges from -1 to 1 (and is undefined (=NaN) in *flat* regions),
+    with following ranges representing following shapes:
+
+    .. table:: Ranges of the shape index and corresponding shapes.
+
+      ===================  =============
+      Interval (s in ...)  Shape
+      ===================  =============
+      [  -1, -7/8)         Spherical cup
+      [-7/8, -5/8)         Through
+      [-5/8, -3/8)         Rut
+      [-3/8, -1/8)         Saddle rut
+      [-1/8, +1/8)         Saddle
+      [+1/8, +3/8)         Saddle ridge
+      [+3/8, +5/8)         Ridge
+      [+5/8, +7/8)         Dome
+      [+7/8,   +1]         Spherical cap
+      ===================  =============
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float, optional
+        Standard deviation used for the Gaussian kernel, which is used for
+        smoothing the input data before Hessian eigen value calculation.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    s : ndarray
+        Shape index
+
+    References
+    ----------
+    .. [1] Koenderink, J. J. & van Doorn, A. J.,
+           "Surface shape and curvature scales",
+           Image and Vision Computing, 1992, 10, 557-564.
+           DOI:10.1016/0262-8856(92)90076-F
+
+    Examples
+    --------
+    >>> from skimage.feature import shape_index
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 4
+    >>> s = shape_index(square, sigma=0.1)
+    >>> s
+    array([[ nan,  nan, -0.5,  nan,  nan],
+           [ nan, -0. ,  nan, -0. ,  nan],
+           [-0.5,  nan, -1. ,  nan, -0.5],
+           [ nan, -0. ,  nan, -0. ,  nan],
+           [ nan,  nan, -0.5,  nan,  nan]])
+    """
+
+    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
+    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+
+    return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
 
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
@@ -814,10 +903,10 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
     >>> peak_local_max(response)
-    array([[2, 2],
-           [2, 3],
+    array([[3, 3],
            [3, 2],
-           [3, 3]])
+           [2, 3],
+           [2, 2]])
     >>> corner_peaks(response)
     array([[2, 2]])
 
@@ -841,3 +930,117 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
         return np.transpose(peaks.nonzero())
     else:
         return peaks
+
+
+def corner_moravec(image, window_size=1):
+    """Compute Moravec corner measure response image.
+
+    This is one of the simplest corner detectors and is comparatively fast but
+    has several limitations (e.g. not rotation invariant).
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    window_size : int, optional
+        Window size.
+
+    Returns
+    -------
+    response : ndarray
+        Moravec response image.
+
+    References
+    ----------
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+
+    Examples
+    --------
+    >>> from skimage.feature import corner_moravec
+    >>> square = np.zeros([7, 7])
+    >>> square[3, 3] = 1
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0]])
+    >>> corner_moravec(square).astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 0, 0],
+           [0, 0, 1, 2, 1, 0, 0],
+           [0, 0, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0]])
+    """
+    return _corner_moravec(image, window_size)
+
+
+def corner_orientations(image, corners, mask):
+    """Compute the orientation of corners.
+
+    The orientation of corners is computed using the first order central moment
+    i.e. the center of mass approach. The corner orientation is the angle of
+    the vector from the corner coordinate to the intensity centroid in the
+    local neighborhood around the corner calculated using first order central
+    moment.
+
+    Parameters
+    ----------
+    image : 2D array
+        Input grayscale image.
+    corners : (N, 2) array
+        Corner coordinates as ``(row, col)``.
+    mask : 2D array
+        Mask defining the local neighborhood of the corner used for the
+        calculation of the central moment.
+
+    Returns
+    -------
+    orientations : (N, 1) array
+        Orientations of corners in the range [-pi, pi].
+
+    References
+    ----------
+    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+          "ORB : An efficient alternative to SIFT and SURF"
+          http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+    .. [2] Paul L. Rosin, "Measuring Corner Properties"
+          http://users.cs.cf.ac.uk/Paul.Rosin/corner2.pdf
+
+    Examples
+    --------
+    >>> from skimage.morphology import octagon
+    >>> from skimage.feature import (corner_fast, corner_peaks,
+    ...                              corner_orientations)
+    >>> square = np.zeros((12, 12))
+    >>> square[3:9, 3:9] = 1
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners
+    array([[3, 3],
+           [3, 8],
+           [8, 3],
+           [8, 8]])
+    >>> orientations = corner_orientations(square, corners, octagon(3, 2))
+    >>> np.rad2deg(orientations)
+    array([  45.,  135.,  -45., -135.])
+
+    """
+    return _corner_orientations(image, corners, mask)

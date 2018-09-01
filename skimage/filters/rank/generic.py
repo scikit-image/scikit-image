@@ -3,8 +3,8 @@
 General Description
 -------------------
 
-These filters compute the local histogram at each pixel, using a sliding window 
-similar to the method described in [1]_. A histogram is built using a moving 
+These filters compute the local histogram at each pixel, using a sliding window
+similar to the method described in [1]_. A histogram is built using a moving
 window in order to limit redundant computation. The moving window follows a
 snake-like path:
 
@@ -641,7 +641,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
         structuring element).
 
     Returns
-        Output image.
+    -------
     out : 2-D array (same dtype as input image)
         The result of the local enhance_contrast.
 
@@ -1040,7 +1040,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
     """
 
     if n_bins is None:
-        n_bins = image.max() + 1
+        n_bins = int(image.max()) + 1
 
     return _apply_vector_per_pixel(generic_cy._windowed_hist, image, selem,
                                    out=out, mask=mask,

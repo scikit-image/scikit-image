@@ -1,7 +1,8 @@
 import numpy as np
-from numpy.testing import assert_array_equal
 from skimage import dtype_limits
 from skimage.util import invert
+
+from skimage._shared.testing import assert_array_equal
 
 
 def test_invert_bool():
@@ -46,7 +47,3 @@ def test_invert_float64():
     expected[1, :] = 0
     result = invert(image)
     assert_array_equal(expected, result)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

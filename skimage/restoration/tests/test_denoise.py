@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_raises, assert_equal,
-                           assert_almost_equal, assert_warns, assert_)
 
 from skimage import restoration, data, color, img_as_float, measure
-from skimage._shared._warnings import expected_warnings
 from skimage.measure import compare_psnr
 from skimage.restoration._denoise import _wavelet_threshold
-
 import pywt
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_equal, assert_almost_equal,
+                                     assert_warns, assert_)
+from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(1234)
 
@@ -157,7 +159,7 @@ def test_denoise_tv_bregman_3d():
 
 
 def test_denoise_bilateral_2d():
-    img = checkerboard_gray.copy()[:50,:50]
+    img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
@@ -172,6 +174,16 @@ def test_denoise_bilateral_2d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
+def test_denoise_bilateral_zeros():
+    img = np.zeros((10, 10))
+    assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))
+
+
+def test_denoise_bilateral_constant():
+    img = np.ones((10, 10)) * 5
+    assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))
+
+
 def test_denoise_bilateral_color():
     img = checkerboard.copy()[:50, :50]
     # add some random noise
@@ -179,9 +191,9 @@ def test_denoise_bilateral_color():
     img = np.clip(img, 0, 1)
 
     out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=10)
+                                         sigma_spatial=10, multichannel=True)
     out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
-                                         sigma_spatial=20)
+                                         sigma_spatial=20, multichannel=True)
 
     # make sure noise is reduced in the checkerboard cells
     assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
@@ -190,74 +202,42 @@ def test_denoise_bilateral_color():
 
 def test_denoise_bilateral_3d_grayscale():
     img = np.ones((50, 50, 3))
-    assert_raises(ValueError, restoration.denoise_bilateral, img,
-                  multichannel=False)
+    with testing.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=False)
 
 
 def test_denoise_bilateral_3d_multichannel():
     img = np.ones((50, 50, 50))
     with expected_warnings(["grayscale"]):
-        result = restoration.denoise_bilateral(img)
+        result = restoration.denoise_bilateral(img, multichannel=True)
 
-    expected = np.empty_like(img)
-    expected.fill(np.nan)
-
-    assert_equal(result, expected)
+    assert_equal(result, img)
 
 
 def test_denoise_bilateral_multidimensional():
     img = np.ones((10, 10, 10, 10))
-    assert_raises(ValueError, restoration.denoise_bilateral, img)
-    assert_raises(ValueError, restoration.denoise_bilateral, img,
-                  multichannel=True)
+    with testing.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=False)
+    with testing.raises(ValueError):
+        restoration.denoise_bilateral(img, multichannel=True)
 
 
 def test_denoise_bilateral_nan():
-    img = np.NaN + np.empty((50, 50))
+    img = np.full((50, 50), np.NaN)
     out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
 
-def test_denoise_sigma_range():
-    img = checkerboard_gray.copy()[:50, :50]
-    # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
-    img = np.clip(img, 0, 1)
-    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=10, multichannel=False)
-    with expected_warnings(
-            '`sigma_range` has been deprecated in favor of `sigma_color`. '
-            'The `sigma_range` keyword argument will be removed in v0.14'):
-        out2 = restoration.denoise_bilateral(img, sigma_range=0.1,
-                                             sigma_spatial=10,
-                                             multichannel=False)
-    assert_equal(out1, out2)
-
-
-def test_denoise_sigma_range_and_sigma_color():
-    img = checkerboard_gray.copy()[:50, :50]
-    # add some random noise
-    img += 0.5 * img.std() * np.random.rand(*img.shape)
-    img = np.clip(img, 0, 1)
-    out1 = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                         sigma_spatial=10, multichannel=False)
-    with expected_warnings(
-            '`sigma_range` has been deprecated in favor of `sigma_color`. '
-            'The `sigma_range` keyword argument will be removed in v0.14'):
-        out2 = restoration.denoise_bilateral(img, sigma_color=0.2,
-                                             sigma_range=0.1, sigma_spatial=10,
-                                             multichannel=False)
-    assert_equal(out1, out2)
-
-
-def test_nl_means_denoising_2d():
+def test_denoise_nl_means_2d():
     img = np.zeros((40, 40))
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=True,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.2, fast_mode=False,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
 
@@ -268,10 +248,12 @@ def test_denoise_nl_means_2drgb():
     # add some random noise
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
-    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=True,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
-    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 9, 0.3, fast_mode=False,
+                                            multichannel=True)
     # make sure noise is reduced
     assert_(img.std() > denoised.std())
 
@@ -307,7 +289,8 @@ def test_denoise_nl_means_multichannel():
 
 def test_denoise_nl_means_wrong_dimension():
     img = np.zeros((5, 5, 5, 5))
-    assert_raises(NotImplementedError, restoration.denoise_nl_means, img)
+    with testing.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=True)
 
 
 def test_no_denoising_for_small_h():
@@ -315,32 +298,53 @@ def test_no_denoising_for_small_h():
     img[10:-10, 10:-10] = 1.
     img += 0.3*np.random.randn(*img.shape)
     # very small h should result in no averaging with other patches
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=True)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=True,
+                                            multichannel=True)
     assert_(np.allclose(denoised, img))
-    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=False)
+    denoised = restoration.denoise_nl_means(img, 7, 5, 0.01, fast_mode=False,
+                                            multichannel=True)
     assert_(np.allclose(denoised, img))
 
 
 def test_wavelet_denoising():
     rstate = np.random.RandomState(1234)
-    for img, multichannel in [(astro_gray, False), (astro, True)]:
+
+    # version with one odd-sized dimension
+    astro_gray_odd = astro_gray[:, :-1]
+    astro_odd = astro[:, :-1]
+
+    for img, multichannel, convert2ycbcr in [(astro_gray, False, False),
+                                             (astro_gray_odd, False, False),
+                                             (astro_odd, True, False),
+                                             (astro_odd, True, True)]:
         sigma = 0.1
         noisy = img + sigma * rstate.randn(*(img.shape))
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved when true sigma is used
         denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                               multichannel=multichannel)
+                                               multichannel=multichannel,
+                                               convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
 
         # Verify that SNR is improved with internally estimated sigma
         denoised = restoration.denoise_wavelet(noisy,
-                                               multichannel=multichannel)
+                                               multichannel=multichannel,
+                                               convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
+
+        # SNR is improved less with 1 wavelet level than with the default.
+        denoised_1 = restoration.denoise_wavelet(noisy,
+                                                 multichannel=multichannel,
+                                                 wavelet_levels=1,
+                                                 convert2ycbcr=convert2ycbcr)
+        psnr_denoised_1 = compare_psnr(img, denoised_1)
+        assert_(psnr_denoised > psnr_denoised_1)
+        assert_(psnr_denoised_1 > psnr_noisy)
 
         # Test changing noise_std (higher threshold, so less energy in signal)
         res1 = restoration.denoise_wavelet(noisy, sigma=2*sigma,
@@ -358,29 +362,48 @@ def test_wavelet_threshold():
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
-    # employ a single, uniform threshold instead of BayesShrink sigmas
-    denoised = _wavelet_threshold(noisy, wavelet='db1', threshold=sigma)
+    # employ a single, user-specified threshold instead of BayesShrink sigmas
+    denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
+                                  threshold=sigma)
     psnr_noisy = compare_psnr(img, noisy)
     psnr_denoised = compare_psnr(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
+    # either method or threshold must be defined
+    with testing.raises(ValueError):
+        _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
+
+    # warns if a threshold is provided in a case where it would be ignored
+    with expected_warnings(["Thresholding method "]):
+        _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
+                           threshold=sigma)
+
 
 def test_wavelet_denoising_nd():
     rstate = np.random.RandomState(1234)
-    for ndim in range(1, 5):
-        # Generate a very simple test image
-        img = 0.2*np.ones((16, )*ndim)
-        img[[slice(5, 13), ] * ndim] = 0.8
+    for method in ['VisuShrink', 'BayesShrink']:
+        for ndim in range(1, 5):
+            # Generate a very simple test image
+            if ndim < 3:
+                img = 0.2*np.ones((128, )*ndim)
+            else:
+                img = 0.2*np.ones((16, )*ndim)
+            img[[slice(5, 13), ] * ndim] = 0.8
 
-        sigma = 0.1
-        noisy = img + sigma * rstate.randn(*(img.shape))
-        noisy = np.clip(noisy, 0, 1)
+            sigma = 0.1
+            noisy = img + sigma * rstate.randn(*(img.shape))
+            noisy = np.clip(noisy, 0, 1)
 
-        # Verify that SNR is improved with internally estimated sigma
-        denoised = restoration.denoise_wavelet(noisy)
-        psnr_noisy = compare_psnr(img, noisy)
-        psnr_denoised = compare_psnr(img, denoised)
-        assert_(psnr_denoised > psnr_noisy)
+            # Verify that SNR is improved with internally estimated sigma
+            denoised = restoration.denoise_wavelet(noisy, method=method)
+            psnr_noisy = compare_psnr(img, noisy)
+            psnr_denoised = compare_psnr(img, denoised)
+            assert_(psnr_denoised > psnr_noisy)
+
+
+def test_wavelet_invalid_method():
+    with testing.raises(ValueError):
+        restoration.denoise_wavelet(np.ones(16), method='Unimplemented')
 
 
 def test_wavelet_denoising_levels():
@@ -409,10 +432,14 @@ def test_wavelet_denoising_levels():
     # invalid number of wavelet levels results in a ValueError
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
-                  wavelet=wavelet, wavelet_levels=max_level+1)
-    assert_raises(ValueError, restoration.denoise_wavelet, noisy,
-                  wavelet=wavelet, wavelet_levels=-1)
+    with testing.raises(ValueError):
+        restoration.denoise_wavelet(
+            noisy,
+            wavelet=wavelet, wavelet_levels=max_level+1)
+    with testing.raises(ValueError):
+        restoration.denoise_wavelet(
+            noisy,
+            wavelet=wavelet, wavelet_levels=-1)
 
 
 def test_estimate_sigma_gray():
@@ -465,5 +492,119 @@ def test_estimate_sigma_color():
     assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 
+def test_wavelet_denoising_args():
+    """
+    Some of the functions inside wavelet denoising throw an error the wrong
+    arguments are passed. This protects against that and verifies that all
+    arguments can be passed.
+    """
+    img = astro
+    noisy = img.copy() + 0.1 * np.random.randn(*(img.shape))
+
+    for convert2ycbcr in [True, False]:
+        for multichannel in [True, False]:
+            for sigma in [0.1, [0.1, 0.1, 0.1], None]:
+                if (not multichannel and not convert2ycbcr) or \
+                        (isinstance(sigma, list) and not multichannel):
+                    continue
+                restoration.denoise_wavelet(noisy, sigma=sigma,
+                                            convert2ycbcr=convert2ycbcr,
+                                            multichannel=multichannel)
+
+
+def test_multichannel_warnings():
+    img = data.astronaut()
+    assert_warns(UserWarning, restoration.denoise_bilateral, img)
+    assert_warns(UserWarning, restoration.denoise_nl_means, img)
+
+
+def test_cycle_spinning_multichannel():
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+
+    for multichannel in True, False:
+        if multichannel:
+            img = astro
+            # can either omit or be 0 along the channels axis
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1), (1, 1, 0)]
+            # can either omit or be 1 on channels axis.
+            valid_steps = [1, 2, (1, 2), (1, 2, 1)]
+            # too few or too many shifts or non-zero shift on channels
+            invalid_shifts = [(1, 1, 2), (1, ), (1, 1, 0, 1)]
+            # too few or too many shifts or any shifts <= 0
+            invalid_steps = [(1, ), (1, 1, 1, 1), (0, 1), (-1, -1)]
+        else:
+            img = astro_gray
+            valid_shifts = [1, (0, 1), (1, 0), (1, 1)]
+            valid_steps = [1, 2, (1, 2)]
+            invalid_shifts = [(1, 1, 2), (1, )]
+            invalid_steps = [(1, ), (1, 1, 1), (0, 1), (-1, -1)]
+
+        noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+        denoise_func = restoration.denoise_wavelet
+        func_kw = dict(sigma=sigma, multichannel=multichannel)
+
+        # max_shifts=0 is equivalent to just calling denoise_func
+        dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+                                       func_kw=func_kw,
+                                       multichannel=multichannel)
+        dn = denoise_func(noisy, **func_kw)
+        assert_equal(dn, dn_cc)
+
+        # denoising with cycle spinning will give better PSNR than without
+        for max_shifts in valid_shifts:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=max_shifts,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for shift_steps in valid_steps:
+            dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                           max_shifts=2,
+                                           shift_steps=shift_steps,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+
+        for max_shifts in invalid_shifts:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=max_shifts,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+        for shift_steps in invalid_steps:
+            with testing.raises(ValueError):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=2,
+                                               shift_steps=shift_steps,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
+
+
+def test_cycle_spinning_num_workers():
+    img = astro_gray
+    sigma = 0.1
+    rstate = np.random.RandomState(1234)
+    noisy = img.copy() + 0.1 * rstate.randn(*(img.shape))
+
+    denoise_func = restoration.denoise_wavelet
+    func_kw = dict(sigma=sigma, multichannel=True)
+
+    # same result whether using 1 worker or multiple workers
+    dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=1)
+    dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=4)
+    dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=None)
+    assert_almost_equal(dn_cc1, dn_cc2)
+    assert_almost_equal(dn_cc1, dn_cc3)
+
+
 if __name__ == "__main__":
-    run_module_suite()
+    testing.run_module_suite()

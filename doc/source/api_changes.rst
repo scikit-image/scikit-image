@@ -1,3 +1,31 @@
+Version 0.14
+------------
+- ``skimage.filters.gaussian_filter`` has been removed. Use
+  ``skimage.filters.gaussian`` instead.
+- ``skimage.filters.gabor_filter`` has been removed. Use
+  ``skimage.filters.gabor`` instead.
+- The old syntax support for ``skimage.transform.integrate`` has been removed.
+- The ``normalise`` parameter of ``skimage.feature.hog`` was removed due to
+  incorrect behavior: it only applied a square root instead of a true
+  normalization. If you wish to duplicate the old behavior, set
+  ``transform_sqrt=True``.
+- ``skimage.measure.structural_similarity`` has been removed. Use
+  ``skimage.measure.compare_ssim`` instead.
+- In ``skimage.measure.compare_ssim``, the `dynamic_range` has been removed in
+  favor of '`data_range`.
+- In ``skimage.restoration.denoise_bilateral``, the `sigma_range` kwarg has
+  been removed in favor of `sigma_color`.
+- ``skimage.measure.marching_cubes`` has been removed in favor of
+  ``skimage.measure.marching_cubes_lewiner``.
+- ``ntiles_*`` parameters have been removed from
+  ``skimage.exposure.equalize_adapthist``. Use ``kernel_size`` instead.
+- ``skimage.restoration.nl_means_denoising`` has been removed in
+  favor of ``skimage.restoration.denoise_nl_means``.
+- ``skimage.measure.LineModel`` has been removed in favor of
+  ``skimage.measure.LineModelND``.
+- In ``skimage.feature.hog`` visualise has been changed to visualize.
+- `freeimage` plugin of ``skimage.io`` has been removed.
+
 Version 0.13
 ------------
 - `skimage.filter` has been removed. Use `skimage.filters` instead.
@@ -15,6 +43,10 @@ Version 0.13
 - The `circle` parameter of `skimage.transform.radon` and `skimage.transform.iradon`
   are now set to `None` by default, equivalent to `False`, the former value. In version
   0.15, will be set to `True`.
+- Parameters ``ntiles_x``, ``ntiles_y`` have been removed from
+  ``skimage.exposure.equalize_adapthist``.
+- The ``freeimage`` io plugin is no longer supported, and will use ``imageio``
+  instead.  We will completely remove the ``freeimage`` plugin in Version 0.14.
 
 Version 0.12
 ------------

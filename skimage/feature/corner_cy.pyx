@@ -13,7 +13,7 @@ from ..color import rgb2grey
 from .util import _prepare_grayscale_input_2D
 
 
-def corner_moravec(image, Py_ssize_t window_size=1):
+def _corner_moravec(image, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
@@ -175,7 +175,7 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
     return np.asarray(corner_response)
 
 
-def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
+def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     """Compute the orientation of corners.
 
     The orientation of corners is computed using the first order central moment

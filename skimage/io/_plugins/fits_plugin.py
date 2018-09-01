@@ -28,10 +28,10 @@ def imread(fname, dtype=None):
     Returns
     -------
     img_array : ndarray
-        Unlike plugins such as PIL, where different colour bands/channels are
+        Unlike plugins such as PIL, where different color bands/channels are
         stored in the third dimension, FITS images are greyscale-only and can
         be N-dimensional, so an array of the native FITS dimensionality is
-        returned, without colour channels.
+        returned, without color channels.
 
         Currently if no image is found in the file, None will be returned
 

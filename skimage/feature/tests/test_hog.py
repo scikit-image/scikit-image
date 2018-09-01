@@ -1,18 +1,16 @@
 import os
 import numpy as np
 from scipy import ndimage as ndi
-import skimage as si
 from skimage import color
-from skimage import data
+from skimage import data, data_dir
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
-from numpy.testing import (assert_raises,
-                           assert_almost_equal,
-                           )
+from skimage._shared.testing import assert_almost_equal
+from skimage._shared import testing
 
 
-def test_histogram_of_oriented_gradients_output_size():
+def test_hog_output_size():
     img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
@@ -21,14 +19,27 @@ def test_histogram_of_oriented_gradients_output_size():
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
 
-def test_histogram_of_oriented_gradients_output_correctness():
+def test_hog_output_correctness_l1_norm():
     img = color.rgb2gray(data.astronaut())
-    correct_output = np.load(os.path.join(si.data_dir, 'astronaut_GRAY_hog.npy'))
+    correct_output = np.load(
+        os.path.join(data_dir, 'astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
-                         cells_per_block=(3, 3), feature_vector=True,
-                         transform_sqrt=False, visualise=False)
+                         cells_per_block=(3, 3), block_norm='L1',
+                         feature_vector=True, transform_sqrt=False,
+                         visualize=False)
+    assert_almost_equal(output, correct_output)
 
+
+def test_hog_output_correctness_l2hys_norm():
+    img = color.rgb2gray(data.astronaut())
+    correct_output = np.load(
+        os.path.join(data_dir, 'astronaut_GRAY_hog_L2-Hys.npy'))
+
+    output = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
+                         cells_per_block=(3, 3), block_norm='L2-Hys',
+                         feature_vector=True, transform_sqrt=False,
+                         visualize=False)
     assert_almost_equal(output, correct_output)
 
 
@@ -37,11 +48,6 @@ def test_hog_image_size_cell_size_mismatch():
     fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
-
-
-def test_hog_color_image_unsupported_error():
-    image = np.zeros((20, 20, 3))
-    assert_raises(ValueError, feature.hog, image)
 
 
 def test_hog_basic_orientations_and_data_types():
@@ -70,16 +76,16 @@ def test_hog_basic_orientations_and_data_types():
 
         (hog_float, hog_img_float) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
         (hog_uint8, hog_img_uint8) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
         (hog_float_norm, hog_img_float_norm) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
         (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -113,8 +119,9 @@ def test_hog_basic_orientations_and_data_types():
         assert_almost_equal(hog_float, hog_uint8)
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
-        # resulting features should be almost equal when 'transform_sqrt' is enabled
-        #  or disabled (for current simple testing image)
+        # resulting features should be almost equal
+        # when 'transform_sqrt' is enabled
+        # or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
 
@@ -156,7 +163,7 @@ def test_hog_orientations_circle():
     for orientations in range(2, 15):
         (hog, hog_img) = feature.hog(image, orientations=orientations,
                                      pixels_per_cell=(8, 8),
-                                     cells_per_block=(1, 1), visualise=True,
+                                     cells_per_block=(1, 1), visualize=True,
                                      transform_sqrt=False)
 
         # set to True to enable manual debugging with graphical output,
@@ -188,9 +195,57 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
-def test_hog_normalise_none_error_raised():
-    img = np.array([1, 2, 3])
-    assert_raises(ValueError, feature.hog, img, normalise=True)
+def test_hog_visualization_orientation():
+    """Test that the visualization produces a line with correct orientation
 
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+    The hog visualization is expected to draw line segments perpendicular to
+    the midpoints of orientation bins.  This example verifies that when
+    orientations=3 and the gradient is entirely in the middle bin (bisected
+    by the y-axis), the line segment drawn by the visualization is horizontal.
+    """
+
+    width = height = 11
+
+    image = np.zeros((height, width), dtype='float')
+    image[height // 2:] = 1
+
+    _, hog_image = feature.hog(
+        image,
+        orientations=3,
+        pixels_per_cell=(width, height),
+        cells_per_block=(1, 1),
+        visualize=True
+    )
+
+    middle_index = height // 2
+    indices_excluding_middle = [x for x in range(height) if x != middle_index]
+
+    assert (hog_image[indices_excluding_middle, :] == 0).all()
+    assert (hog_image[middle_index, 1:-1] > 0).all()
+
+
+def test_hog_block_normalization_incorrect_error():
+    img = np.eye(4)
+    with testing.raises(ValueError):
+        feature.hog(img, block_norm='Linf')
+
+
+@testing.parametrize("shape,multichannel", [
+    ((3, 3, 3), False),
+    ((3, 3), True),
+    ((3, 3, 3, 3), True),
+])
+def test_hog_incorrect_dimensions(shape, multichannel):
+    img = np.zeros(shape)
+    with testing.raises(ValueError):
+        feature.hog(img, multichannel=multichannel)
+
+
+def test_hog_output_equivariance_multichannel():
+    img = data.astronaut()
+    img[:, :, (1, 2)] = 0
+    hog_ref = feature.hog(img, multichannel=True)
+
+    for n in (1, 2):
+        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True)
+        assert_almost_equal(hog_ref, hog_fact)

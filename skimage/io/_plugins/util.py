@@ -157,12 +157,13 @@ def prepare_for_display(npy_img):
     return out
 
 
-def histograms(img, nbins):
+def histograms(image, nbins):
     '''Calculate the channel histograms of the current image.
 
     Parameters
     ----------
-    img : ndarray, ndim=3, dtype=np.uint8
+    image : ndarray, ndim=3, dtype=np.uint8
+        Input image.
     nbins : int
         The number of bins.
 
@@ -175,7 +176,7 @@ def histograms(img, nbins):
 
     '''
 
-    return _histograms.histograms(img, nbins)
+    return _histograms.histograms(image, nbins)
 
 
 class ImgThread(threading.Thread):

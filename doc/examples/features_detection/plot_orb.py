@@ -7,7 +7,7 @@ This example demonstrates the ORB feature detection and binary description
 algorithm. It uses an oriented FAST detection method and the rotated BRIEF
 descriptors.
 
-Unlike BRIEF, ORB is comparatively scale- and rotation-invariant while still
+Unlike BRIEF, ORB is comparatively scale and rotation invariant while still
 employing the very efficient Hamming distance metric for matching. As such, it
 is preferred for real-time applications.
 
@@ -49,8 +49,11 @@ plt.gray()
 
 plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
 ax[0].axis('off')
+ax[0].set_title("Original Image vs. Transformed Image")
 
 plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
 ax[1].axis('off')
+ax[1].set_title("Original Image vs. Transformed Image")
+
 
 plt.show()

@@ -163,7 +163,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
-    fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')
+
+    def fsmooth(x):
+        return gaussian_filter(x, sigma, mode='constant')
+
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)

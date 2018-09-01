@@ -6,13 +6,14 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
 from .._shared.utils import deprecated
+from .._shared.utils import skimage_deprecation, warn
 
 __all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
-                 dynamic_range=None, multichannel=False,
-                 gaussian_weights=False, full=False, **kwargs):
+                 data_range=None, multichannel=False, gaussian_weights=False,
+                 full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -23,21 +24,21 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         The side-length of the sliding window used in comparison.  Must be an
         odd value.  If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
-    gradient : bool
+    gradient : bool, optional
         If True, also return the gradient.
-    dynamic_range : int
-        The dynamic range of the input image (distance between minimum and
+    data_range : int, optional
+        The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
-    multichannel : int or None
+    multichannel : bool, optional
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
-    gaussian_weights : bool
+    gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
-    full : bool
+    full : bool, optional
         If True, return the full structural similarity image instead of the
-        mean value
+        mean value.
 
     Other Parameters
     ----------------
@@ -72,11 +73,13 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        (2004). Image quality assessment: From error visibility to
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
-       https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf
+       https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf,
+       DOI:10.1.1.11.2477
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
-       http://arxiv.org/abs/0901.0065
+       http://arxiv.org/abs/0901.0065,
+       DOI:10.1007/s10043-009-0119-z
 
     """
     if not X.dtype == Y.dtype:
@@ -89,7 +92,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         # loop over channels
         args = dict(win_size=win_size,
                     gradient=gradient,
-                    dynamic_range=dynamic_range,
+                    data_range=data_range,
                     multichannel=False,
                     gaussian_weights=gaussian_weights,
                     full=full)
@@ -145,9 +148,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
 
-    if dynamic_range is None:
+    if data_range is None:
         dmin, dmax = dtype_range[X.dtype.type]
-        dynamic_range = dmax - dmin
+        data_range = dmax - dmin
 
     ndim = X.ndim
 
@@ -185,7 +188,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     vy = cov_norm * (uyy - uy * uy)
     vxy = cov_norm * (uxy - ux * uy)
 
-    R = dynamic_range
+    R = data_range
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
@@ -219,14 +222,3 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
             return mssim, S
         else:
             return mssim
-
-
-@deprecated('compare_ssim')
-def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
-    """""" + compare_ssim.__doc__
-    return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
-                        dynamic_range=dynamic_range,
-                        multichannel=multichannel,
-                        gaussian_weights=gaussian_weights, full=full, **kwargs)

@@ -1,8 +1,8 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
-from nose.tools import assert_true
-from skimage._shared.testing import assert_greater, test_parallel
 from skimage.segmentation import quickshift
+
+from skimage._shared.testing import (assert_greater, test_parallel,
+                                     assert_equal, assert_array_equal)
 
 
 @test_parallel()
@@ -45,10 +45,5 @@ def test_color():
     # very oversegmented:
     assert_equal(len(np.unique(seg2)), 7)
     # still don't cross lines
-    assert_true((seg2[9, :] != seg2[10, :]).all())
-    assert_true((seg2[:, 9] != seg2[:, 10]).all())
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    assert (seg2[9, :] != seg2[10, :]).all()
+    assert (seg2[:, 9] != seg2[:, 10]).all()

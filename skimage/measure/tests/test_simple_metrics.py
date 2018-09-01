@@ -1,9 +1,12 @@
 import numpy as np
-from numpy.testing import (run_module_suite, assert_equal, assert_raises,
-                           assert_almost_equal)
 
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse
 import skimage.data
+from skimage.measure import compare_psnr, compare_nrmse, compare_mse
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared._warnings import expected_warnings
+
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -22,13 +25,26 @@ def test_PSNR_vs_IPOL():
 
 def test_PSNR_float():
     p_uint8 = compare_psnr(cam, cam_noisy)
-    p_float64 = compare_psnr(cam/255., cam_noisy/255., dynamic_range=1)
+    p_float64 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
     assert_almost_equal(p_uint8, p_float64, decimal=5)
 
 
+def test_PSNR_dynamic_range_and_data_range():
+    # Tests deprecation of "dynamic_range" in favor of "data_range"
+    out1 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
+    with expected_warnings(
+            '`dynamic_range` has been deprecated in favor of '
+            '`data_range`. The `dynamic_range` keyword argument '
+            'will be removed in v0.14'):
+        out2 = compare_psnr(cam/255., cam_noisy/255., dynamic_range=1)
+    assert_equal(out1, out2)
+
+
 def test_PSNR_errors():
-    assert_raises(ValueError, compare_psnr, cam, cam.astype(np.float32))
-    assert_raises(ValueError, compare_psnr, cam, cam[:-1, :])
+    with testing.raises(ValueError):
+        compare_psnr(cam, cam.astype(np.float32))
+    with testing.raises(ValueError):
+        compare_psnr(cam, cam[:-1, :])
 
 
 def test_NRMSE():
@@ -50,12 +66,10 @@ def test_NRMSE_no_int_overflow():
 
 def test_NRMSE_errors():
     x = np.ones(4)
-    assert_raises(ValueError, compare_nrmse,
-                  x.astype(np.uint8), x.astype(np.float32))
-    assert_raises(ValueError, compare_nrmse, x[:-1], x)
+    with testing.raises(ValueError):
+        compare_nrmse(x.astype(np.uint8), x.astype(np.float32))
+    with testing.raises(ValueError):
+        compare_nrmse(x[:-1], x)
     # invalid normalization name
-    assert_raises(ValueError, compare_nrmse, x, x, 'foo')
-
-
-if __name__ == "__main__":
-    run_module_suite()
+    with testing.raises(ValueError):
+        compare_nrmse(x, x, 'foo')

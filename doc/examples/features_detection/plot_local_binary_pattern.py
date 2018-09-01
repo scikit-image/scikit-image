@@ -107,7 +107,7 @@ lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 
 def hist(ax, lbp):
-    n_bins = lbp.max() + 1
+    n_bins = int(lbp.max() + 1)
     return ax.hist(lbp.ravel(), normed=True, bins=n_bins, range=(0, n_bins),
                    facecolor='0.5')
 
@@ -166,7 +166,7 @@ def match(refs, img):
     best_score = 10
     best_name = None
     lbp = local_binary_pattern(img, n_points, radius, METHOD)
-    n_bins = lbp.max() + 1
+    n_bins = int(lbp.max() + 1)
     hist, _ = np.histogram(lbp, normed=True, bins=n_bins, range=(0, n_bins))
     for name, ref in refs.items():
         ref_hist, _ = np.histogram(ref, normed=True, bins=n_bins,

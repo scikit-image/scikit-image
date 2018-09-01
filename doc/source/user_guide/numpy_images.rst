@@ -139,13 +139,13 @@ Coordinate conventions
 Because we represent images with numpy arrays, our coordinates must
 match accordingly. Two-dimensional (2D) grayscale images (such as
 `camera` above) are indexed by row and columns (abbreviated to either
-``row, col`` or ``r, c``), with the lowest element (0, 0) at the top-
--left corner. In various parts of the library, you will
+``(row, col)`` or ``(r, c)``), with the lowest element ``(0, 0)`` at
+the top-left corner. In various parts of the library, you will
 also see ``rr`` and ``cc`` refer to lists of row and column
-coordinates. We distinguish this from (x, y), which commonly denote
-standard Cartesian coordinates, where x is the horizontal coordinate,
-y the vertical, and the origin is on the bottom right. (Matplotlib, for
-example, uses this convention.)
+coordinates. We distinguish this from ``(x, y)``, which commonly denote
+standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
+``y`` the vertical, and the origin is on the bottom left.
+(Matplotlib, for example, uses this convention.)
 
 In the case of color (or multichannel) images, the last dimension
 contains the color information and is denoted ``channel`` or ``ch``.

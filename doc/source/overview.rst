@@ -20,7 +20,7 @@ http://github.com/scikit-image/scikit-image
 
 Mailing List
 ------------
-http://groups.google.com/group/scikit-image
+https://mail.python.org/mailman/listinfo/scikit-image
 
 Contact
 -------

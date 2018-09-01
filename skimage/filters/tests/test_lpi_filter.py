@@ -1,17 +1,19 @@
 import numpy as np
-from numpy.testing import (assert_raises, assert_, assert_equal,
-                           run_module_suite)
+from numpy.testing import assert_, assert_equal
+from skimage._shared import testing
+import unittest
 
 from skimage import data
 from skimage.filters import LPIFilter2D, inverse, wiener
 
 
-class TestLPIFilter2D(object):
+class TestLPIFilter2D(unittest.TestCase):
     img = data.camera()[:50, :50]
 
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)
 
+    @testing.fixture(autouse=True)
     def setUp(self):
         self.f = LPIFilter2D(self.filt_func)
 
@@ -53,8 +55,5 @@ class TestLPIFilter2D(object):
         assert_((g - g1[::-1, ::-1]).sum() < 1)
 
     def test_non_callable(self):
-        assert_raises(ValueError, LPIFilter2D, None)
-
-
-if __name__ == "__main__":
-    run_module_suite()
+        with testing.raises(ValueError):
+            LPIFilter2D(None)

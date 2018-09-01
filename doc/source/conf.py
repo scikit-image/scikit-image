@@ -28,7 +28,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.imgmath',
+              'sphinx.ext.mathjax',
               'numpydoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.intersphinx',
@@ -48,12 +48,9 @@ sphinx_gallery_conf = {
     'examples_dirs' : '../examples',
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples',
-    'mod_example_dir': 'api',
+    'backreferences_dir': 'api',
     'reference_url'     : {
-            'skimage': None,
-            'matplotlib': 'http://matplotlib.org',
-            'numpy': 'http://docs.scipy.org/doc/numpy-1.6.0',
-            'scipy': 'http://docs.scipy.org/doc/scipy-0.11.0/reference',}
+            'skimage': None,}
     }
 
 # Determine if the matplotlib has a recent enough version of the
@@ -249,7 +246,8 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r'''
+latex_elements = {}
+latex_elements['preamble'] = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -274,7 +272,7 @@ latex_preamble = r'''
 #latex_appendices = []
 
 # If false, no module index is generated.
-latex_use_modindex = False
+latex_domain_indices = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
@@ -387,5 +385,3 @@ def linkcode_resolve(domain, info):
     else:
         return ("http://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))
-
-

@@ -23,6 +23,7 @@ import sys
 
 import setuptools
 from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
 
 if sys.version_info[0] < 3:
     import __builtin__ as builtins
@@ -44,7 +45,7 @@ with open('skimage/__init__.py') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-with open('requirements.txt') as fid:
+with open('requirements/default.txt') as fid:
     INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
 
 # requirements for those browsing PyPI
@@ -134,8 +135,6 @@ if __name__ == "__main__":
             'Operating System :: MacOS',
         ],
         install_requires=INSTALL_REQUIRES,
-        # install cython when running setup.py (source install)
-        setup_requires=['cython>=0.21'],
         requires=REQUIRES,
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
@@ -145,6 +144,7 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass={'build_py': build_py},
+        cmdclass={'build_py': build_py,
+                  'sdist': sdist},
         **extra
     )

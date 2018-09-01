@@ -1,12 +1,12 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal)
-
+from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import assert_almost_equal, assert_warns
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -14,7 +14,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
-                             hessian_matrix_det)
+                             hessian_matrix_det, shape_index)
 
 
 def test_structure_tensor():
@@ -41,30 +41,33 @@ def test_structure_tensor():
 def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    assert_almost_equal(Hxx, np.array([[0, 0,  0, 0, 0],
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [2, 0, -2, 0, 2],
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0]]))
 
-    assert_almost_equal(Hxy, np.array([[0,  0, 0,  0, 0],
+    assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
                                        [0,  1, 0, -1, 0],
                                        [0,  0, 0,  0, 0],
                                        [0, -1, 0,  1, 0],
                                        [0,  0, 0,  0, 0]]))
 
-    assert_almost_equal(Hyy, np.array([[0, 0,  2, 0, 0],
+    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [0, 0, -2, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  2, 0, 0]]))
 
+    matrix2d = np.random.rand(3, 3)
+    assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
+
 
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
     cube[2, 2, 2] = 4
-    Hs = hessian_matrix(cube, sigma=0.1)
+    Hs = hessian_matrix(cube, sigma=0.1, order='rc')
     assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
                           len(Hs))
     assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
@@ -94,8 +97,8 @@ def test_structure_tensor_eigvals():
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
     assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
                                       [0, 1,  0, 1, 0],
                                       [2, 0, -2, 0, 2],
@@ -113,7 +116,20 @@ def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    assert_almost_equal(det, 0, decimal = 3)
+    assert_almost_equal(det, 0, decimal=3)
+
+
+def test_shape_index():
+    square = np.zeros((5, 5))
+    square[2, 2] = 4
+    s = shape_index(square, sigma=0.1)
+    assert_almost_equal(
+        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
+    )
 
 
 @test_parallel()
@@ -316,7 +332,8 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast, img)
+    with testing.raises(ValueError):
+        corner_fast(img)
 
 
 @test_parallel()
@@ -366,14 +383,18 @@ def test_corner_fast_astronaut():
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((3, 3)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((4, 4)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
 @test_parallel()
@@ -407,8 +428,3 @@ def test_corner_orientations_square():
     expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

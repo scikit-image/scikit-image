@@ -44,11 +44,12 @@ Original author: Lee Kamentsky
 
 import math
 import unittest
-
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
 
 from skimage.morphology.watershed import watershed
+from skimage.measure import label
 
 eps = 1e-12
 
@@ -424,6 +425,32 @@ class TestWatershed(unittest.TestCase):
         self.assertTrue(np.all(d[i, j, out[i, j]-1] == dmin))
 
 
+    def test_watershed12(self):
+        "The watershed line"
+        data = np.array([[203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153, 153],
+                         [203, 255, 203, 153, 153, 153, 102, 102, 102, 102, 102, 102, 153, 153, 153, 153],
+                         [203, 255, 203, 203, 153, 153, 102, 102,  77,   0, 102, 102, 153, 153, 203, 203],
+                         [203, 255, 255, 203, 153, 153, 153, 102, 102, 102, 102, 153, 153, 203, 203, 255],
+                         [203, 203, 255, 203, 203, 203, 153, 153, 153, 153, 153, 153, 203, 203, 255, 255],
+                         [153, 203, 255, 255, 255, 203, 203, 203, 203, 203, 203, 203, 203, 255, 255, 203],
+                         [153, 203, 203, 203, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 203, 203],
+                         [153, 153, 153, 203, 203, 203, 203, 203, 255, 203, 203, 203, 203, 203, 203, 153],
+                         [102, 102, 153, 153, 153, 153, 203, 203, 255, 203, 203, 255, 203, 153, 153, 153],
+                         [102, 102, 102, 102, 102, 153, 203, 255, 255, 203, 203, 203, 203, 153, 102, 153],
+                         [102,  51,  51, 102, 102, 153, 203, 255, 203, 203, 153, 153, 153, 153, 102, 153],
+                         [ 77,  51,  51, 102, 153, 153, 203, 255, 203, 203, 203, 153, 102, 102, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 203, 255, 203, 255, 203, 153, 102,  51, 102, 153],
+                         [ 77,   0,  51, 102, 153, 203, 255, 255, 203, 203, 203, 153, 102,   0, 102, 153],
+                         [102,   0,  51, 102, 153, 203, 255, 203, 203, 153, 153, 153, 102, 102, 102, 153],
+                         [102, 102, 102, 102, 153, 203, 255, 203, 153, 153, 153, 153, 153, 153, 153, 153]])
+        markerbin = (data==0)
+        marker = label(markerbin)
+        ws = watershed(data, marker, connectivity=2, watershed_line=True)
+        for lab, area in zip(range(4), [34,74,74,74]):
+            self.assertTrue(np.sum(ws == lab) == area)
+
+
+
 def test_compact_watershed():
     image = np.zeros((5, 6))
     image[:, 3:] = 1
@@ -455,6 +482,12 @@ def test_numeric_seed_watershed():
                          [1, 1, 1, 1, 2, 2]], dtype=np.int32)
     np.testing.assert_equal(compact, expected)
 
+
+def test_incorrect_markers_shape():
+    with pytest.raises(ValueError):
+        image = np.ones((5, 6))
+        markers = np.ones((5, 7))
+        output = watershed(image, markers)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()

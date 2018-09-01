@@ -29,8 +29,8 @@ def _shift_selem(selem, shift_x, shift_y):
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
         The shifted structuring element.
     """
-    if selem.ndim > 2:
-        # do nothing for 3D or higher structuring elements
+    if selem.ndim != 2:
+        # do nothing for 1D or 3D or higher structuring elements
         return selem
     m, n = selem.shape
     if m % 2 == 0:

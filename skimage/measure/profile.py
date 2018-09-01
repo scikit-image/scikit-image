@@ -2,20 +2,20 @@ import numpy as np
 from scipy import ndimage as ndi
 
 
-def profile_line(img, src, dst, linewidth=1,
+def profile_line(image, src, dst, linewidth=1,
                  order=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    img : numeric array, shape (M, N[, C])
+    image : numeric array, shape (M, N[, C])
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line. The destination point is *included* 
+        The end point of the scan line. The destination point is *included*
         in the profile, in constrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
@@ -50,20 +50,20 @@ def profile_line(img, src, dst, linewidth=1,
 
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
-    For example: 
+    For example:
     >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
     array([ 1.,  1.,  1.,  2.,  2.,  2.,  0.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
     array([ 1.,  1.,  1.,  2.,  2.,  2.])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-    if img.ndim == 3:
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines,
+    if image.ndim == 3:
+        pixels = [ndi.map_coordinates(image[..., i], perp_lines,
                                       order=order, mode=mode, cval=cval)
-                  for i in range(img.shape[2])]
+                  for i in range(image.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = ndi.map_coordinates(img, perp_lines,
+        pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
     intensities = pixels.mean(axis=1)
 

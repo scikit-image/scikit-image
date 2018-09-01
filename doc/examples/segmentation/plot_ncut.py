@@ -4,7 +4,7 @@ Normalized Cut
 ==============
 
 This example constructs a Region Adjacency Graph (RAG) and recursively performs
-a Normalized Cut on it.
+a Normalized Cut on it [1]_.
 
 References
 ----------

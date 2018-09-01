@@ -1,13 +1,15 @@
+import numpy as np
 from skimage.io._plugins.util import prepare_for_display, WindowManager
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, TestCase
 from skimage._shared._warnings import expected_warnings
 
-from numpy.testing import *
-import numpy as np
 
 np.random.seed(0)
 
 
-class TestPrepareForDisplay:
+class TestPrepareForDisplay(TestCase):
     def test_basic(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10))
@@ -25,7 +27,7 @@ class TestPrepareForDisplay:
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255
 
-    def test_colour(self):
+    def test_color(self):
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10, 3))
 
@@ -33,20 +35,21 @@ class TestPrepareForDisplay:
         with expected_warnings(['precision loss']):
             prepare_for_display(np.random.rand(10, 10, 4))
 
-    @raises(ValueError)
     def test_wrong_dimensionality(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 1, 1))
+        with testing.raises(ValueError):
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 1, 1))
 
-    @raises(ValueError)
     def test_wrong_depth(self):
-        with expected_warnings(['precision loss']):
-            prepare_for_display(np.random.rand(10, 10, 5))
+        with testing.raises(ValueError):
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 5))
 
 
-class TestWindowManager:
+class TestWindowManager(TestCase):
     callback_called = False
 
+    @testing.fixture(autouse=True)
     def setup(self):
         self.wm = WindowManager()
         self.wm.acquire('test')
@@ -71,6 +74,3 @@ class TestWindowManager:
 
     def teardown(self):
         self.wm._release('test')
-
-if __name__ == "__main__":
-    run_module_suite()

@@ -45,7 +45,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['pil', 'matplotlib', 'qt', 'freeimage'],
+    'all': ['pil', 'matplotlib', 'qt'],
     'imshow': ['matplotlib'],
     'imshow_collection': ['matplotlib']
 }
@@ -62,6 +62,8 @@ def _clear_plugins():
                     'imread_collection': [],
                     'imshow_collection': [],
                     '_app_show': []}
+
+
 _clear_plugins()
 
 
@@ -122,7 +124,7 @@ def _scan_plugins():
         valid_provides = [p for p in provides if p in plugin_store]
 
         for p in provides:
-            if not p in plugin_store:
+            if p not in plugin_store:
                 print("Plugin `%s` wants to provide non-existent `%s`."
                       " Ignoring." % (name, p))
 
@@ -135,6 +137,7 @@ def _scan_plugins():
         plugin_provides[name] = valid_provides
 
         plugin_module_name[name] = os.path.basename(filename)[:-4]
+
 
 _scan_plugins()
 
@@ -186,7 +189,7 @@ def call_plugin(kind, *args, **kwargs):
         Passed to the plugin function.
 
     """
-    if not kind in plugin_store:
+    if kind not in plugin_store:
         raise ValueError('Invalid function (%s) requested.' % kind)
 
     plugin_funcs = plugin_store[kind]
@@ -243,7 +246,7 @@ def use_plugin(name, kind=None):
     if kind is None:
         kind = plugin_store.keys()
     else:
-        if not kind in plugin_provides[name]:
+        if kind not in plugin_provides[name]:
             raise RuntimeError("Plugin %s does not support `%s`." %
                                (name, kind))
 
@@ -255,7 +258,7 @@ def use_plugin(name, kind=None):
     _load(name)
 
     for k in kind:
-        if not k in plugin_store:
+        if k not in plugin_store:
             raise RuntimeError("'%s' is not a known plugin function." % k)
 
         funcs = plugin_store[k]
@@ -291,7 +294,7 @@ def _load(plugin):
     """
     if plugin in find_available_plugins(loaded=True):
         return
-    if not plugin in plugin_module_name:
+    if plugin not in plugin_module_name:
         raise ValueError("Plugin %s not found." % plugin)
     else:
         modname = plugin_module_name[plugin]

@@ -1,5 +1,5 @@
-
 import os
+
 from skimage import data, img_as_float, io, img_as_uint
 
 from skimage.viewer import ImageViewer
@@ -8,9 +8,9 @@ from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
 from skimage.viewer.plugins.base import Plugin
 
-from numpy.testing import assert_almost_equal, assert_equal
-from numpy.testing.decorators import skipif
 from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
+from skimage._shared.testing import assert_almost_equal, assert_equal
 
 
 def get_image_viewer():
@@ -20,7 +20,7 @@ def get_image_viewer():
     return viewer
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_check_box():
     viewer = get_image_viewer()
     cb = CheckBox('hello', value=True, alignment='left')
@@ -35,7 +35,7 @@ def test_check_box():
     assert_equal(cb.val, False)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_combo_box():
     viewer = get_image_viewer()
     cb = ComboBox('hello', ('a', 'b', 'c'))
@@ -48,7 +48,7 @@ def test_combo_box():
     assert_equal(cb.index, 2)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_text_widget():
     viewer = get_image_viewer()
     txt = Text('hello', 'hello, world!')
@@ -59,7 +59,7 @@ def test_text_widget():
     assert_equal(str(txt.text), 'goodbye, world!')
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_slider_int():
     viewer = get_image_viewer()
     sld = Slider('radius', 2, 10, value_type='int')
@@ -73,7 +73,7 @@ def test_slider_int():
     assert_equal(sld.val, 5)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_slider_float():
     viewer = get_image_viewer()
     sld = Slider('alpha', 2.1, 3.1, value=2.1, value_type='float',
@@ -88,7 +88,7 @@ def test_slider_float():
     assert_almost_equal(sld.val, 2.5, 2)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_save_buttons():
     viewer = get_image_viewer()
     sv = SaveButtons()
@@ -121,7 +121,7 @@ def test_save_buttons():
     os.remove(filename)
 
 
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_ok_buttons():
     viewer = get_image_viewer()
     ok = OKCancelButtons()

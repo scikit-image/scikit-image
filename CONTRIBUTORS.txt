@@ -1,4 +1,4 @@
-- Stefan van der Walt
+﻿- Stefan van der Walt
   Project coordination
 
 - Nicolas Pinto
@@ -242,5 +242,14 @@
 - Abdeali Kothari
   Alpha blending to convert from rgba to rgb
 
+- Jeyson Molina
+  Niblack and Sauvola Local thresholding
+
 - Scott Sievert
   Wavelet denoising
+
+- Gleb Goussarov
+  Chan-Vese Segmentation
+
+- Kevin Mader
+  Montage improvements

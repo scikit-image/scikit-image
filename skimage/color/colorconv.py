@@ -98,25 +98,21 @@ def convert_colorspace(arr, fromspace, tospace):
     ----------
     arr : array_like
         The image to convert.
-    fromspace : str
-        The color space to convert from. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
-        lower case.
-    tospace : str
-        The color space to convert to. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ']``. Value may also be specified as
-        lower case.
+    fromspace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr'}
+        The color space to convert from. Can be specified in lower case.
+    tospace : {'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr'}
+        The color space to convert to. Can be specified in lower case.
 
     Returns
     -------
-    newarr : ndarray
+    out : ndarray
         The converted image.
 
     Notes
     -----
-    Conversion occurs through the "central" RGB color space, i.e. conversion
-    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of
-    directly.
+    Conversion is performed through the "central" RGB color space,
+    i.e. conversion from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV``
+    instead of directly.
 
     Examples
     --------
@@ -124,19 +120,21 @@ def convert_colorspace(arr, fromspace, tospace):
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
-    fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
-                'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb,
-                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb }
-    todict = {'RGB': lambda im: im, 'HSV': rgb2hsv, 'RGB CIE': rgb2rgbcie,
-              'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq,
-              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr }
+    fromdict = {'rgb': lambda im: im, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
+                'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
+                'ypbpr': ypbpr2rgb, 'ycbcr': ycbcr2rgb}
+    todict = {'rgb': lambda im: im, 'hsv': rgb2hsv, 'rgb cie': rgb2rgbcie,
+              'xyz': rgb2xyz, 'yuv': rgb2yuv, 'yiq': rgb2yiq,
+              'ypbpr': rgb2ypbpr, 'ycbcr': rgb2ycbcr}
 
-    fromspace = fromspace.upper()
-    tospace = tospace.upper()
-    if fromspace not in fromdict.keys():
-        raise ValueError('fromspace needs to be one of %s' % fromdict.keys())
-    if tospace not in todict.keys():
-        raise ValueError('tospace needs to be one of %s' % todict.keys())
+    fromspace = fromspace.lower()
+    tospace = tospace.lower()
+    if fromspace not in fromdict:
+        msg = '`fromspace` has to be one of {}'.format(fromdict.keys())
+        raise ValueError(msg)
+    if tospace not in todict:
+        msg = '`tospace` has to be one of {}'.format(todict.keys())
+        raise ValueError(msg)
 
     return todict[tospace](fromdict[fromspace](arr))
 
@@ -240,9 +238,6 @@ def rgb2hsv(rgb):
 
     Notes
     -----
-    The conversion assumes an input data range of [0, 1] for all
-    color components.
-
     Conversion between RGB and HSV color spaces results in some loss of
     precision, due to integer arithmetic and rounding [1]_.
 
@@ -318,9 +313,6 @@ def hsv2rgb(hsv):
 
     Notes
     -----
-    The conversion assumes an input data range of ``[0, 1]`` for all
-    color components.
-
     Conversion between RGB and HSV color spaces results in some loss of
     precision, due to integer arithmetic and rounding [1]_.
 
@@ -816,7 +808,7 @@ def gray2rgb(image, alpha=None):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, N [, P])``.
+        Input image of shape ``(M[, N][, P])``.
     alpha : bool, optional
         Ensure that the output image has an alpha layer.  If None,
         alpha layers are passed through but not created.
@@ -824,13 +816,17 @@ def gray2rgb(image, alpha=None):
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M, N, [, P], 3)``.
+        RGB image of shape ``(M[, N][, P], 3)``.
 
     Raises
     ------
     ValueError
-        If the input is not a 2- or 3-dimensional image.
+        If the input is not a 1-, 2- or 3-dimensional image.
 
+    Notes
+    -----
+    If the input is a 1-dimensional image of shape ``(M, )``, the output
+    will be shape ``(M, 3)``.
     """
     is_rgb = False
     is_alpha = False
@@ -844,17 +840,17 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
-        if alpha == False:
+        if alpha is False:
             image = image[..., :3]
 
-        elif alpha == True and not is_alpha:
+        elif alpha is True and is_alpha is False:
             alpha_layer = (np.ones_like(image[..., 0, np.newaxis]) *
                            dtype_limits(image, clip_negative=False)[1])
             image = np.concatenate((image, alpha_layer), axis=2)
 
         return image
 
-    elif image.ndim != 1 and dims in (1, 2, 3):
+    elif dims in (1, 2, 3):
         image = image[..., np.newaxis]
 
         if alpha:
@@ -867,6 +863,7 @@ def gray2rgb(image, alpha=None):
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 grey2rgb = gray2rgb
+
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
     """XYZ to CIE-LAB color space conversion.
@@ -1001,7 +998,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     return out
 
 
-def rgb2lab(rgb):
+def rgb2lab(rgb, illuminant="D65", observer="2"):
     """RGB to lab color space conversion.
 
     Parameters
@@ -1009,6 +1006,10 @@ def rgb2lab(rgb):
     rgb : array_like
         The image in RGB format, in a 3- or 4-D array of shape
         ``(.., ..,[ ..,] 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -1021,20 +1022,31 @@ def rgb2lab(rgb):
     ValueError
         If `rgb` is not a 3- or 4-D array of shape ``(.., ..,[ ..,] 3)``.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+
     Notes
     -----
     This function uses rgb2xyz and xyz2lab.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
-    return xyz2lab(rgb2xyz(rgb))
+    return xyz2lab(rgb2xyz(rgb), illuminant, observer)
 
 
-def lab2rgb(lab):
+def lab2rgb(lab, illuminant="D65", observer="2"):
     """Lab to RGB color space conversion.
 
     Parameters
     ----------
     lab : array_like
         The image in Lab format, in a 3-D array of shape ``(.., .., 3)``.
+    illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
+        The name of the illuminant (the function is NOT case sensitive).
+    observer : {"2", "10"}, optional
+        The aperture angle of the observer.
 
     Returns
     -------
@@ -1046,11 +1058,18 @@ def lab2rgb(lab):
     ValueError
         If `lab` is not a 3-D array of shape ``(.., .., 3)``.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+
     Notes
     -----
     This function uses lab2xyz and xyz2rgb.
+    By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
+    x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
+    a list of supported illuminants.
     """
-    return xyz2rgb(lab2xyz(lab))
+    return xyz2rgb(lab2xyz(lab, illuminant, observer))
 
 
 def xyz2luv(xyz, illuminant="D65", observer="2"):
@@ -1222,6 +1241,13 @@ def rgb2luv(rgb):
     Notes
     -----
     This function uses rgb2xyz and xyz2luv.
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
+    .. [3] http://en.wikipedia.org/wiki/CIELUV
+
     """
     return xyz2luv(rgb2xyz(rgb))
 
@@ -1569,6 +1595,11 @@ def rgb2yuv(rgb):
     -----
     Y is between 0 and 1.  Use YCbCr instead of YUV for the color space which
     is commonly used by video codecs (where Y ranges from 16 to 235)
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YUV
+
     """
     return _convert(yuv_from_rgb, rgb)
 
@@ -1597,7 +1628,7 @@ def rgb2yiq(rgb):
 
 
 def rgb2ypbpr(rgb):
-    """RGB to YIQ color space conversion.
+    """RGB to YPbPr color space conversion.
 
     Parameters
     ----------
@@ -1608,13 +1639,18 @@ def rgb2ypbpr(rgb):
     Returns
     -------
     out : ndarray
-        The image in YIQ format, in a 3- or 4-D array of shape
+        The image in YPbPr format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
         If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YPbPr
+
     """
     return _convert(ypbpr_from_rgb, rgb)
 
@@ -1643,6 +1679,11 @@ def rgb2ycbcr(rgb):
     -----
     Y is between 16 and 235.  This is the color space which is commonly used
     by video codecs, it is sometimes incorrectly called "YUV"
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YCbCr
+
     """
     arr = _convert(ycbcr_from_rgb, rgb)
     arr[..., 0] += 16
@@ -1652,24 +1693,29 @@ def rgb2ycbcr(rgb):
 
 
 def yuv2rgb(yuv):
-    """RGB to YIQ color space conversion.
+    """YUV to RGB color space conversion.
 
     Parameters
     ----------
-    rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
+    yuv : array_like
+        The image in YUV format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Returns
     -------
     out : ndarray
-        The image in YIQ format, in a 3- or 4-D array of shape
+        The image in RGB format, in a 3- or 4-D array of shape
         ``(M, N, [P,] 3)``.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `yuv` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YUV
+
     """
     return _convert(rgb_from_yuv, yuv)
 
@@ -1716,6 +1762,11 @@ def ypbpr2rgb(ypbpr):
     ------
     ValueError
         If `ypbpr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YPbPr
+
     """
     return _convert(rgb_from_ypbpr, ypbpr)
 
@@ -1744,6 +1795,11 @@ def ycbcr2rgb(ycbcr):
     -----
     Y is between 16 and 235.  This is the color space which is commonly used
     by video codecs, it is sometimes incorrectly called "YUV"
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YCbCr
+
     """
     arr = ycbcr.copy()
     arr[..., 0] -= 16

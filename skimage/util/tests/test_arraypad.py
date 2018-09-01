@@ -1,12 +1,11 @@
-"""Tests for the array padding functions.
-
-"""
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises, assert_allclose,
-                           TestCase)
 from skimage.util import pad
+
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal, assert_allclose,
+                                     TestCase)
 
 
 class TestConditionalShortcuts(TestCase):
@@ -958,22 +957,22 @@ class ValueError1(TestCase):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(3, ))
-        assert_raises(ValueError, pad, arr, ((2, 3), (3, 2), (4, 5)),
-                      **kwargs)
+        with testing.raises(ValueError):
+            pad(arr, ((2, 3), (3, 2), (4, 5)), **kwargs)
 
     def test_check_negative_stat_length(self):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(-3, ))
-        assert_raises(ValueError, pad, arr, ((2, 3), (3, 2)),
-                      **kwargs)
+        with testing.raises(ValueError):
+            pad(arr, ((2, 3), (3, 2)), **kwargs)
 
     def test_check_negative_pad_width(self):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(3, ))
-        assert_raises(ValueError, pad, arr, ((-2, 3), (3, 2)),
-                      **kwargs)
+        with testing.raises(ValueError):
+            pad(arr, ((-2, 3), (3, 2)), **kwargs)
 
 
 class ValueError2(TestCase):
@@ -981,67 +980,72 @@ class ValueError2(TestCase):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(3, ))
-        assert_raises(ValueError, pad, arr, ((-2, 3), (3, 2)),
-                      **kwargs)
+        with testing.raises(ValueError):
+            pad(arr, ((-2, 3), (3, 2)), **kwargs)
 
 
 class ValueError3(TestCase):
     def test_check_kwarg_not_allowed(self):
         arr = np.arange(30).reshape(5, 6)
-        assert_raises(ValueError, pad, arr, 4, mode='mean',
-                      reflect_type='odd')
+        with testing.raises(ValueError):
+            pad(arr, 4, mode='mean', reflect_type='odd')
 
     def test_mode_not_set(self):
         arr = np.arange(30).reshape(5, 6)
-        assert_raises((ValueError, TypeError), pad, arr, 4)
+        with testing.raises(TypeError):
+            pad(arr, 4)
 
     def test_malformed_pad_amount(self):
         arr = np.arange(30).reshape(5, 6)
-        assert_raises(ValueError, pad, arr, (4, 5, 6, 7), mode='constant')
+        with testing.raises(ValueError):
+            pad(arr, (4, 5, 6, 7), mode='constant')
 
     def test_malformed_pad_amount2(self):
         arr = np.arange(30).reshape(5, 6)
-        assert_raises(ValueError, pad, arr, ((3, 4, 5), (0, 1, 2)),
-                      mode='constant')
+        with testing.raises(ValueError):
+            pad(arr, ((3, 4, 5), (0, 1, 2)), mode='constant')
 
     def test_pad_too_many_axes(self):
         arr = np.arange(30).reshape(5, 6)
 
         # Attempt to pad using a 3D array equivalent
         bad_shape = (((3,), (4,), (5,)), ((0,), (1,), (2,)))
-        assert_raises(ValueError, pad, arr, bad_shape,
-                      mode='constant')
+        with testing.raises(ValueError):
+            pad(arr, bad_shape, mode='constant')
 
 
 class TypeError1(TestCase):
     def test_float(self):
         arr = np.arange(30)
-        assert_raises(TypeError, pad, arr, ((-2.1, 3), (3, 2)))
-        assert_raises(TypeError, pad, arr, np.array(((-2.1, 3), (3, 2))))
+        with testing.raises(TypeError):
+            pad(arr, ((-2.1, 3), (3, 2)))
+        with testing.raises(TypeError):
+            pad(arr, np.array(((-2.1, 3), (3, 2))))
 
     def test_str(self):
         arr = np.arange(30)
-        assert_raises(TypeError, pad, arr, 'foo')
-        assert_raises(TypeError, pad, arr, np.array('foo'))
+        with testing.raises(TypeError):
+            pad(arr, 'foo')
+        with testing.raises(TypeError):
+            pad(arr, np.array('foo'))
 
     def test_object(self):
         class FooBar(object):
             pass
         arr = np.arange(30)
-        assert_raises(TypeError, pad, arr, FooBar())
+        with testing.raises(TypeError):
+            pad(arr, FooBar())
 
     def test_complex(self):
         arr = np.arange(30)
-        assert_raises(TypeError, pad, arr, complex(1, -1))
-        assert_raises(TypeError, pad, arr, np.array(complex(1, -1)))
+        with testing.raises(TypeError):
+            pad(arr, complex(1, -1))
+        with testing.raises(TypeError):
+            pad(arr, np.array(complex(1, -1)))
 
     def test_check_wrong_pad_amount(self):
         arr = np.arange(30)
         arr = np.reshape(arr, (6, 5))
         kwargs = dict(mode='mean', stat_length=(3, ))
-        assert_raises(TypeError, pad, arr, ((2, 3, 4), (3, 2)),
-                      **kwargs)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+        with testing.raises(TypeError):
+            pad(arr, ((2, 3, 4), (3, 2)), **kwargs)

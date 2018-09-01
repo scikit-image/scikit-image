@@ -34,7 +34,7 @@ from skimage.filters import rank
 matplotlib.rcParams['font.size'] = 9
 
 
-def plot_img_and_hist(img, axes, bins=256):
+def plot_img_and_hist(image, axes, bins=256):
     """Plot an image along with its histogram and cumulative histogram.
 
     """
@@ -42,19 +42,19 @@ def plot_img_and_hist(img, axes, bins=256):
     ax_cdf = ax_hist.twinx()
 
     # Display image
-    ax_img.imshow(img, cmap=plt.cm.gray)
+    ax_img.imshow(image, cmap=plt.cm.gray)
     ax_img.set_axis_off()
 
     # Display histogram
-    ax_hist.hist(img.ravel(), bins=bins)
+    ax_hist.hist(image.ravel(), bins=bins)
     ax_hist.ticklabel_format(axis='y', style='scientific', scilimits=(0, 0))
     ax_hist.set_xlabel('Pixel intensity')
 
-    xmin, xmax = dtype_range[img.dtype.type]
+    xmin, xmax = dtype_range[image.dtype.type]
     ax_hist.set_xlim(xmin, xmax)
 
     # Display cumulative distribution
-    img_cdf, bins = exposure.cumulative_distribution(img, bins)
+    img_cdf, bins = exposure.cumulative_distribution(image, bins)
     ax_cdf.plot(bins, img_cdf, 'r')
 
     return ax_img, ax_hist, ax_cdf

@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 
 
 def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
-                      max_distance=np.inf, cross_check=True):
+                      max_distance=np.inf, cross_check=True, max_ratio=1.0):
     """Brute-force matching of descriptors.
 
     For each descriptor in the first set this matcher finds the closest
@@ -32,6 +32,14 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         matched pair (keypoint1, keypoint2) is returned if keypoint2 is the
         best match for keypoint1 in second image and keypoint1 is the best
         match for keypoint2 in first image.
+    max_ratio : float
+        Maximum ratio of distances between first and second closest descriptor
+        in the second set of descriptors. This threshold is useful to filter
+        ambiguous matches between the two descriptor sets. The choice of this
+        value depends on the statistics of the chosen descriptor, e.g.,
+        for SIFT descriptors a value of 0.8 is usually chosen, see
+        D.G. Lowe, "Distinctive Image Features from Scale-Invariant Keypoints",
+        International Journal of Computer Vision, 2004.
 
     Returns
     -------
@@ -62,9 +70,23 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         indices1 = indices1[mask]
         indices2 = indices2[mask]
 
-    matches = np.column_stack((indices1, indices2))
-
     if max_distance < np.inf:
-        matches = matches[distances[indices1, indices2] < max_distance]
+        mask = distances[indices1, indices2] < max_distance
+        indices1 = indices1[mask]
+        indices2 = indices2[mask]
+
+    if max_ratio < 1.0:
+        best_distances = distances[indices1, indices2]
+        distances[indices1, indices2] = np.inf
+        second_best_indices2 = np.argmin(distances[indices1], axis=1)
+        second_best_distances = distances[indices1, second_best_indices2]
+        second_best_distances[second_best_distances == 0] \
+            = np.finfo(np.double).eps
+        ratio = best_distances / second_best_distances
+        mask = ratio < max_ratio
+        indices1 = indices1[mask]
+        indices2 = indices2[mask]
+
+    matches = np.column_stack((indices1, indices2))
 
     return matches

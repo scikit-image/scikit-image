@@ -1,24 +1,24 @@
-import os.path
+import os
 import numpy as np
-from numpy.testing import (
-    assert_array_equal, assert_array_almost_equal, assert_raises,
-    assert_allclose, run_module_suite)
-
+from six import BytesIO
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
 from .. import imread, imsave, use_plugin, reset_plugins
-from ..._shared.testing import mono_check, color_check
-from ..._shared._warnings import expected_warnings
-from ..._shared._tempfile import temporary_file
-
-from six import BytesIO
 
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
 from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
+
+from skimage._shared import testing
+from skimage._shared.testing import (mono_check, color_check,
+                                     assert_equal, assert_array_equal,
+                                     assert_array_almost_equal,
+                                     assert_allclose)
+from skimage._shared._warnings import expected_warnings
+from skimage._shared._tempfile import temporary_file
 
 
 def setup():
@@ -39,6 +39,7 @@ def setup_module(self):
     except ImportError:
         pass
 
+
 def test_png_round_trip():
     f = NamedTemporaryFile(suffix='.png')
     fname = f.name
@@ -48,6 +49,7 @@ def test_png_round_trip():
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
+
 
 def test_imread_flatten():
     # a color image is flattened
@@ -129,8 +131,8 @@ def test_imread_uint16():
 
 
 def test_imread_truncated_jpg():
-    assert_raises((IOError, ValueError), imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+    with testing.raises(IOError):
+        imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
 def test_jpg_quality_arg():
@@ -139,7 +141,7 @@ def test_jpg_quality_arg():
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
         sim = ssim(chessboard, im,
-                   dynamic_range=chessboard.max() - chessboard.min())
+                   data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -183,6 +185,14 @@ class TestSave:
 
     def test_imsave_roundtrip_pil_image(self):
         self.verify_imsave_roundtrip(self.roundtrip_pil_image)
+
+
+def test_imsave_incorrect_dimension():
+    with temporary_file(suffix='.png') as fname:
+        with testing.raises(ValueError):
+            imsave(fname, np.zeros((2, 3, 3, 1)))
+        with testing.raises(ValueError):
+            imsave(fname, np.zeros((2, 3, 2)))
 
 
 def test_imsave_filelike():
@@ -252,8 +262,10 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, dynamic_range=refi.max() - refi.min())
+        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
 
-if __name__ == "__main__":
-    run_module_suite()
+
+def test_extreme_palette():
+    img = imread(os.path.join(data_dir, 'green_palette.png'))
+    assert_equal(img.ndim, 3)

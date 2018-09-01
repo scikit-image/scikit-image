@@ -1,8 +1,8 @@
 import numpy as np
 from skimage.draw import circle
 from skimage.feature import blob_dog, blob_log, blob_doh
+from skimage._shared import testing
 import math
-from numpy.testing import assert_raises
 
 
 def test_blob_dog():
@@ -39,7 +39,12 @@ def test_blob_dog():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 45) <= thresh
 
-    assert_raises(ValueError, blob_dog, img3)
+    with testing.raises(ValueError):
+        blob_dog(img3)
+
+    # Testing no peaks
+    img_empty = np.zeros((100,100))
+    assert blob_dog(img_empty).size == 0
 
 
 def test_blob_log():
@@ -113,7 +118,12 @@ def test_blob_log():
     assert abs(b[1] - 175) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    assert_raises(ValueError, blob_log, img3)
+    with testing.raises(ValueError):
+        blob_log(img3)
+
+    # Testing no peaks
+    img_empty = np.zeros((100,100))
+    assert blob_log(img_empty).size == 0
 
 
 def test_blob_doh():
@@ -192,7 +202,12 @@ def test_blob_doh():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 50) <= thresh
 
-    assert_raises(ValueError, blob_doh, img3)
+    with testing.raises(ValueError):
+        blob_doh(img3)
+
+    # Testing no peaks
+    img_empty = np.zeros((100,100))
+    assert blob_doh(img_empty).size == 0
 
 
 def test_blob_overlap():

@@ -1,9 +1,10 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal, assert_raises
+from skimage._shared.testing import assert_almost_equal, assert_equal
 
 from skimage import data, img_as_float
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
+from skimage._shared import testing
 
 
 def test_template():
@@ -32,7 +33,7 @@ def test_template():
     positions = positions[np.argsort(positions[:, 0])]
 
     for xy_target, xy in zip(target_positions, positions):
-        yield assert_almost_equal, xy, xy_target
+        assert_almost_equal(xy, xy_target)
 
 
 def test_normalization():
@@ -89,7 +90,8 @@ def test_no_nans():
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
 
 def test_pad_input():
@@ -160,15 +162,18 @@ def test_padding_reflect():
 def test_wrong_input():
     image = np.ones((5, 5, 1))
     template = np.ones((3, 3))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
     image = np.ones((5, 5, 3, 3))
     template = np.ones((3, 3, 2))
-    assert_raises(ValueError, match_template, template, image)
+    with testing.raises(ValueError):
+        match_template(template, image)
 
 
 def test_bounding_values():
@@ -179,8 +184,3 @@ def test_bounding_values():
     print(result.max())
     assert result.max() < 1 + 1e-7
     assert result.min() > -1 - 1e-7
-
-
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
