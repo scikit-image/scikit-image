@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
+from skimage.color import rgb2gray
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_adaptive,
                                           threshold_otsu,
@@ -13,11 +14,14 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_niblack,
                                           threshold_sauvola,
                                           threshold_mean,
+                                          threshold_multiotsu,
                                           threshold_triangle,
                                           threshold_minimum,
                                           _mean_std)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
 
 
 class TestSimpleImage():
@@ -421,3 +425,11 @@ def test_mean_std_3d():
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
                                     mode='mirror')
     np.testing.assert_allclose(s, expected_s)
+
+
+def test_bimodal_multiotsu_hist():
+    image = data.camera()
+    thr_otsu = threshold_otsu(image)
+    thr_multi, _ = threshold_multiotsu(image, nclass=2)
+
+    assert thr_otsu == thr_multi
