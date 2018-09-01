@@ -443,23 +443,12 @@ def test_bimodal_multiotsu_hist():
 
 
 def test_check_multiotsu_results():
-    image = rgb2gray(data.astronaut())
-    if image.min() != image.max():
-        for idx in range(3, 6):
-            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
-                                               nclass=idx)
-            assert len(thr_multi) == idx-1
+    image = 0.25 * np.array([[0, 1, 2, 3, 4],
+                             [0, 1, 2, 3, 4],
+                             [0, 1, 2, 3, 4],
+                             [0, 1, 2, 3, 4]])
 
-    image = data.camera()
-    if image.min() != image.max():
-        for idx in range(3, 6):
-            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
-                                               nclass=idx)
-            assert len(thr_multi) == idx-1
-
-    image = data.checkerboard()
-    if image.min() != image.max():
-        for idx in range(3, 6):
-            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
-                                               nclass=idx)
-            assert len(thr_multi) == idx-1
+    for idx in range(3, 6):
+        thr_multi, _ = threshold_multiotsu(image,
+                                           nclass=idx)
+        assert len(thr_multi) == idx-1

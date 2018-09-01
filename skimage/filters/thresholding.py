@@ -747,6 +747,11 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     max_sigma : float
         Maximum sigma value achieved on the classes.
 
+    Notes
+    -----
+        The current implementation takes some time to calculate the
+        thresholds for five classes. 
+
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
