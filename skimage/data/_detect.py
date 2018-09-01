@@ -2,10 +2,11 @@ import os as _os
 data_dir = _os.path.abspath(_os.path.dirname(__file__))
 
 
-def frontal_face_cascade_xml():
+def lbp_frontal_face_cascade_filename():
     """
-    Returns the file's path to the trained xml file for frontal face detection
-    that was taken from OpenCV repository [1]_.
+    Returns the path to the XML file containing information about the weak
+    classifiers of a cascade classifier trained using LBP features. It is part
+    of the OpenCV repository [1]_.
 
     References
     ----------

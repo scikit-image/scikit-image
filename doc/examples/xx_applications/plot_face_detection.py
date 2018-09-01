@@ -3,8 +3,8 @@
 Face detection using a cascade classifier
 =========================================
 
-This example shows how to detect faces on an image using object detection
-framework.
+This computer vision example shows how to detect faces on an image using object
+detection framework based on machine learning.
 
 First, you will need an xml file, from which the trained data can be read.  The
 framework works with files, trained using Multi-block Local Binary Patterns
@@ -65,7 +65,7 @@ using `OpenCV train cascade utility
 from skimage import data
 from skimage.feature import Cascade
 
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from matplotlib import patches
 
 # Load the trained file from the module root.
@@ -100,7 +100,3 @@ for patch in detected:
     )
 
 plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-"""
