@@ -23,8 +23,7 @@ skeleton = skeletonize(image)
 
 # display results
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4),
-                         sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+                         sharex=True, sharey=True)
 
 ax = axes.ravel()
 
@@ -81,8 +80,7 @@ data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 skeleton = skeletonize(data)
 skeleton3d = skeletonize_3d(data)
 
-fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
@@ -135,8 +133,7 @@ dist_on_skel = distance * skel
 
 from skimage.util.colormap import magma
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
@@ -179,8 +176,7 @@ skeleton = skeletonize(image)
 thinned = thin(image)
 thinned_partial = thin(image, max_iter=25)
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')

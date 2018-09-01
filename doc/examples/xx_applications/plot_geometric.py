@@ -7,7 +7,6 @@ In this example, we will see how to use geometric transformations in the context
 of image processing.
 """
 
-from __future__ import print_function
 
 import math
 import numpy as np
@@ -113,3 +112,5 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
+
+plt.show()

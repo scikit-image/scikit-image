@@ -7,9 +7,6 @@ from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
 
-import six
-from six.moves import zip
-
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
 
@@ -18,8 +15,8 @@ DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
                   'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
 
 
-color_dict = dict((k, v) for k, v in six.iteritems(rgb_colors.__dict__)
-                  if isinstance(v, tuple))
+color_dict = {k: v for k, v in rgb_colors.__dict__.items()
+              if isinstance(v, tuple)}
 
 
 def _rgb_vector(color):
@@ -33,7 +30,7 @@ def _rgb_vector(color):
     color : str or array
         Color name in `color_dict` or RGB float values between [0, 1].
     """
-    if isinstance(color, six.string_types):
+    if isinstance(color, str):
         color = color_dict[color]
     # Slice to handle RGBA colors.
     return np.array(color[:3])
@@ -222,7 +219,8 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     bg = (labels == bg_label)
     if bg.any():
         labels = labels[labels != bg_label]
-        out[bg] = bg_color
+        mask = (label_field == bg_label).nonzero()
+        out[mask] = bg_color
     for label in labels:
         mask = (label_field == label).nonzero()
         color = image[mask].mean(axis=0)

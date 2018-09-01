@@ -11,71 +11,92 @@ make a PR to update these notes after you are done with the release. ;-)
   you will make your changes gearing up for release, and cherry-pick them as
   appropriate to master.
 
-- In the master branch, update the version number in ``skimage/__init__.py``
-  to the next ``-dev`` version, commit, and push.
-
-- Back on the release branch, update the release notes:
+- On the release branch, update the release notes:
 
   1. Review and cleanup ``doc/release/release_dev.txt``.
 
-  2. Make a list of merges and contributors by running
+  2. Make a list of merges, contributors, and reviewers by running
      ``doc/release/contribs.py <tag of previous release>``.
 
-  3. Paste this list at the end of the ``release_dev.txt``. Scan the PR titles
-     for highlights, deprecations, and API changes, and mention these in the
-     relevant sections of the notes.
+  3. Paste this list at the end of the ``release_dev.txt``.
 
-  4. Rename to ``doc/release/release_<major>.<minor>.txt``
+  4. Scan the PR titles for highlights, deprecations, API changes,
+     and bugfixes, and mention these in the relevant sections of the notes.
+     Try to present the information in an expressive way by mentioning
+     the affected functions, elaborating on the changes and their
+     consequences. If possible, organize semantically close PRs in groups.
 
-  5. Copy ``doc/release/release_template.txt`` to
+  5. Rename the file to ``doc/release/release_<major>.<minor>.txt``
+
+  6. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
-  6. Copy relevant deprecations from ``release_<major>_<minor>.txt``
+  7. Copy relevant deprecations from ``release_<major>_<minor>.txt``
      to ``release_dev.txt``.
 
-- Update the version number in ``skimage/__init__.py`` and commit.
+- Submit the release notes for review by other project maintainers:
+
+  - Create a PR from v<major>.<minor>.x branch to master (at this point,
+    the difference should show the full contents of the release notes).
+  - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
+  - Once the consensus is found, ask the project maintainers to merge the PR.
+
+- In the master branch, update the version number in ``skimage/__init__.py``
+  to the next ``.dev0`` version, commit, and push. This should follow PEP440
+  meaning that the appropriate version number would look something like
+  ``0.20.dev0`` with the period beteween ``20`` and ``dev`` and a trailing
+  ``0`` immediately after ``dev``. 
+
+- Back on the release branch, update the version number to stable in
+  ``skimage/__init__.py``, commit, and push.
 
 - Update the docs:
 
   - Edit ``doc/source/_static/docversions.js`` and commit
   - Build a clean version of the docs.  Run ``python setup.py install`` in the
-    root dir, then ``rm -rf build; make html`` in the docs.
+    root dir, then ``rm -rf build; make html`` in the ``doc`` dir.
   - Build using ``make gh-pages``.
   - Update the symlink to ``stable``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Add the version number as a tag in git::
 
-   git tag -s [-u <key-id>] v<major>.<minor>.0
+   git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-  (If you do not have a gpg key, use -m instead; it is important for
-  Debian packaging that the tags are annotated)
+  (If you do not have a GPG key, follow the tutorial to set it up:
+   https://help.github.com/articles/signing-commits-with-gpg/)
 
-- Push the new meta-data to github::
+- Push the new tag to GitHub::
 
-   git push --tags upstream master
+   git push upstream v<major>.<minor>.0
 
   (where ``upstream`` is the name of the
    ``github.com:scikit-image/scikit-image`` repository.)
+
+- Make sure you have all the required write permissions (if not, you will need
+  to ask Stéfan or Juan to grant you the access), specifically, to:
+
+  - https://github.com/scikit-image/scikit-image-wheels
+  - https://pypi.org/project/scikit-image/
+  - https://github.com/scikit-image/scikit-image-web
 
 - Build the package wheels (pre-compiled binaries) for various platforms:
 
   - Clone https://github.com/scikit-image/scikit-image-wheels.
   - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
-    release tag (e.g. ``v0.13.0``).
+    release tag (e.g. ``v0.14.0``).
   - Commit and push.
   - Wait until the corresponding wheels appear at
     http://wheels.scikit-image.org (about 15 minutes).
 
-- Download the wheels and upload them to PyPI (you may need to ask Stéfan or
-  Juan to give you push access to the scikit-image package on PyPI).
+- Upload the wheels to PyPI:
 
   - Make sure ``twine`` is available. You can install it with
     ``pip install twine``.
   - Download ``wheel-uploader`` [1]_ and place it on your PATH.
   - Run ``tools/upload_wheels.sh``.
 
-.. [1] https://github.com/MacPython/terryfy/master/wheel-uploader
+.. [1] https://github.com/MacPython/terryfy/blob/master/wheel-uploader
 
 - Publish the source distribution on PyPi::
 
@@ -88,13 +109,11 @@ make a PR to update these notes after you are done with the release. ;-)
   - Sync your branch with the remote repo: ``git pull``.
     If you try to ``make gh-pages`` when your branch is out of sync, it
     creates headaches.
-  - Add release date to ``index.rst`` under "Announcements".
+  - Add release date to ``index.rst`` under "News".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
   - Build using ``make gh-pages``.
   - Push upstream: ``git push origin master`` in ``gh-pages``.
-
-- Update the development docs for the new version ``0.Xdev`` just like above
 
 - Post release notes on mailing lists, blog, Twitter, etc.
 
@@ -102,7 +121,7 @@ make a PR to update these notes after you are done with the release. ;-)
   - scipy-user@python.org
   - scikit-learn@python.org
 
-- Update the version and the release date on wikipedia
+- Update the version and the release date on Wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
 
 Conda-forge
@@ -125,8 +144,8 @@ point to the most recent release. You can do this by following these steps:
 - Edit the file ``recipe/meta.yaml``:
 
   - Update the version number on the first line.
-  - Update the SHA256 value on line 10.
-  - If necessary, reset the build number to 0. (line 13)
+  - Update the SHA256 value on line 9.
+  - If necessary, reset the build number to 0. (line 12)
   - Update any requirements in the appropriate sections (build or run).
     Note: don't remove ``numpy x.x``. This tells conda-smithy, conda-forge's
     build system, that the library must be linked against NumPy at build time.

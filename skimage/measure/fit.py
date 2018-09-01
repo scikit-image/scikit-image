@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from numpy.linalg import inv, pinv
 from scipy import optimize
 from .._shared.utils import check_random_state
 
@@ -123,9 +124,9 @@ class LineModelND(BaseModel):
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
-        origin, direction = self.params
+        origin, direction = params
         res = (data - origin) - \
-              np.dot(data - origin, direction)[..., np.newaxis] * direction
+              ((data - origin) @ direction)[..., np.newaxis] * direction
         return _norm_along_axis(res, axis=1)
 
     def predict(self, x, axis=0, params=None):
@@ -281,7 +282,7 @@ class CircleModel(BaseModel):
         m2 = np.array([[np.sum(x * x2y2),
                         np.sum(y * x2y2),
                         np.sum(x2y2)]]).T
-        a, b, c = np.linalg.pinv(m1).dot(m2)
+        a, b, c = pinv(m1) @ m2
         a, b, c = a[0], b[0], c[0]
         xc = a / 2
         yc = b / 2
@@ -420,17 +421,16 @@ class EllipseModel(BaseModel):
         D2 = np.vstack([x, y, np.ones(len(x))]).T
 
         # forming scatter matrix [eqn. 17] from [1]
-        S1 = np.dot(D1.T, D1)
-        S2 = np.dot(D1.T, D2)
-        S3 = np.dot(D2.T, D2)
+        S1 = D1.T @ D1
+        S2 = D1.T @ D2
+        S3 = D2.T @ D2
 
         # Constraint matrix [eqn. 18]
         C1 = np.array([[0., 0., 2.], [0., -1., 0.], [2., 0., 0.]])
 
         try:
             # Reduced scatter matrix [eqn. 29]
-            M = np.linalg.inv(C1).dot(
-                S1 - np.dot(S2, np.linalg.inv(S3)).dot(S2.T))
+            M = inv(C1) @ (S1 - S2 @ inv(S3) @ S2.T)
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
             return False
 
@@ -448,7 +448,7 @@ class EllipseModel(BaseModel):
         a, b, c = a1.ravel()
 
         # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
-        a2 = np.dot(-np.linalg.inv(S3), S2.T).dot(a1)
+        a2 = -inv(S3) @ S2.T @ a1
         d, f, g = a2.ravel()
 
         # eigenvectors are the coefficients of an ellipse in general form

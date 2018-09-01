@@ -102,33 +102,55 @@ def _validate_connectivity(image_dim, connectivity, offset):
     """
     if connectivity is None:
         connectivity = 1
+
     if np.isscalar(connectivity):
         c_connectivity = ndi.generate_binary_structure(image_dim, connectivity)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image_dim:
             raise ValueError("Connectivity dimension must be same as image")
+
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
                              "center")
+
         offset = np.array(c_connectivity.shape) // 2
+
     return c_connectivity, offset
 
 
-def _compute_neighbors(image, structure, offset):
-    """Compute neighborhood as an array of linear offsets into the image.
+def _offsets_to_raveled_neighbors(image_shape, structure, center):
+    """Compute offsets to a samples neighbors if the image would be raveled.
 
-    These are sorted according to Euclidean distance from the center (given
-    by `offset`), ensuring that immediate neighbors are visited first.
+    Parameters
+    ----------
+    image_shape : tuple
+        The shape of the image for which the offsets are computed.
+    structure : ndarray
+        A structuring element determining the neighborhood expressed as an
+        n-D array of 1's and 0's.
+    center : sequence
+        Tuple of indices specifying the center of `selem`.
+
+    Returns
+    -------
+    offsets : ndarray
+        Linear offsets to a samples neighbors in the raveled image, sorted by
+        their Euclidean distance from the center.
+
+    Examples
+    --------
+    >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
+    array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
-    structure[tuple(offset)] = 0  # ignore the center; it's not a neighbor
-    locations = np.transpose(np.nonzero(structure))
-    sqdistances = np.sum((locations - offset)**2, axis=1)
-    neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
-                    np.ravel_multi_index(offset, image.shape)).astype(np.int32)
-    sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
-    return sorted_neighborhood
+    structure = structure.copy()  # Don't modify original input
+    structure[tuple(center)] = 0  # Ignore the center; it's not a neighbor
+    connection_indices = np.transpose(np.nonzero(structure))
+    offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
+               np.ravel_multi_index(center, image_shape))
+    squared_distances = np.sum((connection_indices - center) ** 2, axis=1)
+    return offsets[np.argsort(squared_distances)]
 
 
 def watershed(image, markers, connectivity=1, offset=None, mask=None,
@@ -204,7 +226,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     .. [3] Peer Neubert & Peter Protzel (2014). Compact Watershed and
            Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
-           Algorithms. ICPR 2014, pp 996-1001. DOI:10.1109/ICPR.2014.181
+           Algorithms. ICPR 2014, pp 996-1001. :DOI:`10.1109/ICPR.2014.181`
            https://www.tu-chemnitz.de/etit/proaut/forschung/rsrc/cws_pSLIC_ICPR.pdf
 
     Examples
@@ -249,9 +271,10 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     mask = np.pad(mask, pad_width, mode='constant').ravel()
     output = np.pad(markers, pad_width, mode='constant')
 
-    flat_neighborhood = _compute_neighbors(image, connectivity, offset)
-    marker_locations = np.flatnonzero(output).astype(np.int32)
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    flat_neighborhood = _offsets_to_raveled_neighbors(
+        image.shape, connectivity, center=offset)
+    marker_locations = np.flatnonzero(output)
+    image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,

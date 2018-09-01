@@ -1,4 +1,3 @@
-from __future__ import division, print_function, absolute_import
 
 import os
 import warnings
@@ -13,7 +12,7 @@ from skimage.morphology import skeletonize_3d
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_, parametrize
-
+from skimage._shared._warnings import expected_warnings
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
@@ -71,24 +70,33 @@ def test_dtype_conv():
     img[img < 0.5] = 0
 
     orig = img.copy()
-
-    with warnings.catch_warnings():
-        # UserWarning for possible precision loss, expected
-        warnings.simplefilter('ignore', UserWarning)
+    with expected_warnings(['precision']):
         res = skeletonize_3d(img)
+    with expected_warnings(['precision']):
+        img_max = img_as_ubyte(img).max()
 
     assert_equal(res.dtype, np.uint8)
     assert_equal(img, orig)  # operation does not clobber the original
-    assert_equal(res.max(),
-                 img_as_ubyte(img).max())    # the intensity range is preserved
+    assert_equal(res.max(), img_max)    # the intensity range is preserved
 
 
 @parametrize("img", [
-    np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float),
+    np.ones((8, 8), dtype=float), np.ones((4, 8, 8), dtype=float)
+])
+def test_input_with_warning(img):
+    # check that the input is not clobbered
+    # for 2D and 3D images of varying dtypes
+    # Skeletonize changes it to uint8. Therefore, for images of type float,
+    # we can expect a warning.
+    with expected_warnings(['precision']):
+        check_input(img)
+
+
+@parametrize("img", [
     np.ones((8, 8), dtype=np.uint8), np.ones((4, 8, 8), dtype=np.uint8),
     np.ones((8, 8), dtype=bool), np.ones((4, 8, 8), dtype=bool)
 ])
-def test_input(img):
+def test_input_without_warning(img):
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
     check_input(img)
@@ -96,10 +104,7 @@ def test_input(img):
 
 def check_input(img):
     orig = img.copy()
-    with warnings.catch_warnings():
-        # UserWarning for possible precision loss, expected
-        warnings.simplefilter('ignore', UserWarning)
-        skeletonize_3d(img)
+    skeletonize_3d(img)
     assert_equal(img, orig)
 
 
@@ -126,7 +131,8 @@ def test_skeletonize_num_neighbours():
     circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
     image[circle1] = 1
     image[circle2] = 0
-    result = skeletonize_3d(image)
+    with expected_warnings(['precision']):
+        result = skeletonize_3d(image)
 
     # there should never be a 2x2 block of foreground pixels in a skeleton
     mask = np.array([[1,  1],

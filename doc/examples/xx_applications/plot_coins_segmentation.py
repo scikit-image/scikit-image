@@ -20,7 +20,7 @@ fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].axis('off')
 axes[1].plot(hist[1][:-1], hist[0], lw=2)
-axes[1].set_title('histogram of grey values')
+axes[1].set_title('histogram of gray values')
 
 ######################################################################
 #
@@ -28,7 +28,7 @@ axes[1].set_title('histogram of grey values')
 # ============
 #
 # A simple way to segment the coins is to choose a threshold based on the
-# histogram of grey values. Unfortunately, thresholding this image gives a
+# histogram of gray values. Unfortunately, thresholding this image gives a
 # binary image that either misses significant parts of the coins or merges
 # parts of the background with the coins:
 
@@ -42,7 +42,6 @@ axes[1].set_title('coins > 150')
 
 for a in axes:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -62,7 +61,6 @@ fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray, interpolation='nearest')
 ax.set_title('Canny detector')
 ax.axis('off')
-ax.set_adjustable('box-forced')
 
 ######################################################################
 # These contours are then filled using mathematical morphology.
@@ -89,7 +87,6 @@ fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray, interpolation='nearest')
 ax.set_title('removing small objects')
 ax.axis('off')
-ax.set_adjustable('box-forced')
 
 ######################################################################
 # However, this method is not very robust, since contours that are not
@@ -110,21 +107,19 @@ fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.gray, interpolation='nearest')
 ax.set_title('elevation map')
 ax.axis('off')
-ax.set_adjustable('box-forced')
 
 ######################################################################
 # Next we find markers of the background and the coins based on the extreme
-# parts of the histogram of grey values.
+# parts of the histogram of gray values.
 
 markers = np.zeros_like(coins)
 markers[coins < 30] = 1
 markers[coins > 150] = 2
 
 fig, ax = plt.subplots(figsize=(4, 3))
-ax.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
+ax.imshow(markers, cmap=plt.cm.nipy_spectral, interpolation='nearest')
 ax.set_title('markers')
 ax.axis('off')
-ax.set_adjustable('box-forced')
 
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
@@ -136,7 +131,6 @@ fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation, cmap=plt.cm.gray, interpolation='nearest')
 ax.set_title('segmentation')
 ax.axis('off')
-ax.set_adjustable('box-forced')
 
 ######################################################################
 # This last method works even better, and the coins can be segmented and
@@ -155,6 +149,7 @@ axes[1].imshow(image_label_overlay, interpolation='nearest')
 
 for a in axes:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
+
+plt.show()

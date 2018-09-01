@@ -57,7 +57,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     Parameters
     -----------
     image : 2D array
-        Greyscale input image to detect edges on; can be of any dtype.
+        Grayscale input image to detect edges on; can be of any dtype.
     sigma : float
         Standard deviation of the Gaussian filter.
     low_threshold : float
@@ -109,7 +109,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
     .. [2] William Green's Canny tutorial
-           http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+           http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
     Examples
     --------

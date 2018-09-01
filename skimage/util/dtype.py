@@ -1,32 +1,38 @@
-from __future__ import division
 import numpy as np
 from warnings import warn
+
 
 __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
            'img_as_int', 'img_as_uint', 'img_as_ubyte',
            'img_as_bool', 'dtype_limits']
 
+# For integers Numpy uses `_integer_types` basis internally, and builds a leaky
+# `np.XintYY` abstraction on top of it. This leads to situations when, for
+# example, there are two np.Xint64 dtypes with the same attributes but
+# different object references. In order to avoid any potential issues,
+# we use the basis dtypes here. For more information, see:
+# - https://github.com/scikit-image/scikit-image/issues/3043
+# For convenience, for these dtypes we indicate also the possible bit depths
+# (some of them are platform specific). For the details, see:
+# http://www.unix.org/whitepapers/64bit.html
+_integer_types = (np.byte, np.ubyte,          # 8 bits
+                  np.short, np.ushort,        # 16 bits
+                  np.intc, np.uintc,          # 16 or 32 or 64 bits
+                  np.int_, np.uint,           # 32 or 64 bits
+                  np.longlong, np.ulonglong)  # 64 bits
+_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
+                   for t in _integer_types}
 dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
-               np.uint8: (0, 255),
-               np.uint16: (0, 65535),
-               np.uint32: (0, 2**32 - 1),
-               np.uint64: (0, 2**64 - 1),
-               np.int8: (-128, 127),
-               np.int16: (-32768, 32767),
-               np.int32: (-2**31, 2**31 - 1),
-               np.int64: (-2**63, 2**63 - 1),
                np.float16: (-1, 1),
                np.float32: (-1, 1),
                np.float64: (-1, 1)}
+dtype_range.update(_integer_ranges)
 
-_supported_types = (np.bool_, np.bool8,
-                    np.uint8, np.uint16, np.uint32, np.uint64,
-                    np.int8, np.int16, np.int32, np.int64,
-                    np.float16, np.float32, np.float64)
+_supported_types = list(dtype_range.keys())
 
 
-def dtype_limits(image, clip_negative=None):
+def dtype_limits(image, clip_negative=False):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
@@ -36,17 +42,12 @@ def dtype_limits(image, clip_negative=None):
     clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
-        The default behavior (None) is equivalent to True.
 
     Returns
     -------
     imin, imax : tuple
         Lower and upper intensity limits.
     """
-    if clip_negative is None:
-        clip_negative = True
-        warn('The default of `clip_negative` in `skimage.util.dtype_limits` '
-             'will change to `False` in version 0.15.')
     imin, imax = dtype_range[image.dtype.type]
     if clip_negative:
         imin = 0
@@ -104,7 +105,18 @@ def convert(image, dtype, force_copy=False, uniform=False):
     itemsize_in = dtypeobj_in.itemsize
     itemsize_out = dtypeobj_out.itemsize
 
-    if dtype_in == dtype_out:
+    # Below, we do an `issubdtype` check.  Its purpose is to find out
+    # whether we can get away without doing any image conversion.  This happens
+    # when:
+    #
+    # - the output and input dtypes are the same or
+    # - when the output is specified as a type, and the input dtype
+    #   is a subclass of that type (e.g. `np.floating` will allow
+    #   `float32` and `float64` arrays through)
+
+    type_out = dtype if isinstance(dtype, type) else dtypeobj_out
+
+    if np.issubdtype(dtypeobj_in, type_out):
         if force_copy:
             image = image.copy()
         return image
@@ -244,42 +256,51 @@ def convert(image, dtype, force_copy=False, uniform=False):
         # floating point -> integer
         prec_loss()
         # use float type that can represent output integer type
-        image = image.astype(_dtype_itemsize(itemsize_out, dtype_in,
-                                             np.float32, np.float64))
+        computation_type = _dtype_itemsize(itemsize_out, dtype_in,
+                                           np.float32, np.float64)
+
         if not uniform:
             if kind_out == 'u':
-                image *= imax_out
+                image_out = np.multiply(image, imax_out,
+                                        dtype=computation_type)
             else:
-                image *= imax_out - imin_out
-                image -= 1.0
-                image /= 2.0
-            np.rint(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
+                image_out = np.multiply(image, (imax_out - imin_out) / 2,
+                                        dtype=computation_type)
+                image_out -= 1.0 / 2.
+            np.rint(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            image *= imax_out + 1
-            np.clip(image, 0, imax_out, out=image)
+            image_out = np.multiply(image, imax_out + 1,
+                                    dtype=computation_type)
+            np.clip(image_out, 0, imax_out, out=image_out)
         else:
-            image *= (imax_out - imin_out + 1.0) / 2.0
-            np.floor(image, out=image)
-            np.clip(image, imin_out, imax_out, out=image)
-        return image.astype(dtype_out)
+            image_out = np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
+                                    dtype=computation_type)
+            np.floor(image_out, out=image_out)
+            np.clip(image_out, imin_out, imax_out, out=image_out)
+        return image_out.astype(dtype_out)
 
     # signed/unsigned int -> float
     if kind_out == 'f':
         if itemsize_in >= itemsize_out:
             prec_loss()
+
         # use float type that can exactly represent input integers
-        image = image.astype(_dtype_itemsize(itemsize_in, dtype_out,
-                                             np.float32, np.float64))
+        computation_type = _dtype_itemsize(itemsize_in, dtype_out,
+                                           np.float32, np.float64)
+
         if kind_in == 'u':
-            image /= imax_in
+            # using np.divide or np.multiply doesn't copy the data
+            # until the computation time
+            image = np.multiply(image, 1. / imax_in,
+                                dtype=computation_type)
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
         else:
-            image *= 2.0
-            image += 1.0
-            image /= imax_in - imin_in
+            image = np.add(image, 0.5, dtype=computation_type)
+            image *= 2 / (imax_in - imin_in)
+
         return np.asarray(image, dtype_out)
 
     # unsigned int -> signed/unsigned int
@@ -363,7 +384,33 @@ def img_as_float64(image, force_copy=False):
     return convert(image, np.float64, force_copy)
 
 
-img_as_float = img_as_float64
+def img_as_float(image, force_copy=False):
+    """Convert an image to floating point format.
+
+    This function is similar to `img_as_float64`, but will not convert
+    lower-precision floating point arrays to `float64`.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return convert(image, np.floating, force_copy)
 
 
 def img_as_uint(image, force_copy=False):

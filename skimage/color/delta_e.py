@@ -17,7 +17,6 @@ Reference
 http://en.wikipedia.org/wiki/Color_difference
 
 """
-from __future__ import division
 
 import numpy as np
 
@@ -154,7 +153,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
-           (doi:10.1364/AO.33.008069)
+           :DOI:`10.1364/AO.33.008069`
     .. [3] M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent
            color metrics tested with an accurate color-difference tolerance
            dataset," Appl. Opt. 33, 8069-8077 (1994).

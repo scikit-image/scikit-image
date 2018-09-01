@@ -6,6 +6,7 @@ include *.rst
 recursive-include requirements *.txt
 include requirements/README.md
 include Makefile
+include pyproject.toml
 include skimage/scripts/skivi
 recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in *.cpp *.md
 recursive-include skimage/data *

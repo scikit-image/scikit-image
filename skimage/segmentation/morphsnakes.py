@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from itertools import cycle
 
 import numpy as np
@@ -280,7 +278,7 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
            Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
            Transactions on Pattern Analysis and Machine Intelligence (PAMI),
-           2014, DOI 10.1109/TPAMI.2013.106
+           2014, :DOI:`10.1109/TPAMI.2013.106`
     """
 
     init_level_set = _init_level_set(init_level_set, image.shape)
@@ -394,7 +392,7 @@ def morphological_geodesic_active_contour(gimage, iterations,
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
            Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
            Transactions on Pattern Analysis and Machine Intelligence (PAMI),
-           2014, DOI 10.1109/TPAMI.2013.106
+           2014, :DOI:`10.1109/TPAMI.2013.106`
     """
 
     image = gimage

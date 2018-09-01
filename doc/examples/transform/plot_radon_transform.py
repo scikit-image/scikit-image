@@ -58,7 +58,6 @@ provided by the projections), and we follow that rule here. Below is the
 original image and its Radon transform, often known as its *sinogram*:
 """
 
-from __future__ import print_function, division
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -67,7 +66,7 @@ from skimage.io import imread
 from skimage import data_dir
 from skimage.transform import radon, rescale
 
-image = imread(data_dir + "/phantom.png", as_grey=True)
+image = imread(data_dir + "/phantom.png", as_gray=True)
 image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
@@ -109,8 +108,7 @@ print('FBP rms reconstruction error: %.3g' % np.sqrt(np.mean(error**2)))
 
 imkwargs = dict(vmin=-0.2, vmax=0.2)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5),
-                               sharex=True, sharey=True,
-                               subplot_kw={'adjustable': 'box-forced'})
+                               sharex=True, sharey=True)
 ax1.set_title("Reconstruction\nFiltered back projection")
 ax1.imshow(reconstruction_fbp, cmap=plt.cm.Greys_r)
 ax2.set_title("Reconstruction error\nFiltered back projection")
@@ -158,8 +156,7 @@ error = reconstruction_sart - image
 print('SART (1 iteration) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(2, 2, figsize=(8, 8.5), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].set_title("Reconstruction\nSART")

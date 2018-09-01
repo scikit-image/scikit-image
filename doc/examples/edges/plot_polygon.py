@@ -7,7 +7,6 @@ This example shows how to approximate (Douglas-Peucker algorithm) and subdivide
 (B-Splines) polygonal chains.
 
 """
-from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt

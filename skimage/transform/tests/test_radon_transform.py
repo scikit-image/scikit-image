@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import os
 import itertools
 
@@ -14,8 +12,9 @@ from skimage._shared._warnings import expected_warnings
 
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                 as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
+                 as_gray=True)[::2, ::2]
+PHANTOM = rescale(PHANTOM, 0.5, order=1,
+                  mode='constant', anti_aliasing=False, multichannel=False)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -133,7 +132,7 @@ def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
     reconstructed = iradon(radon(image, circle=False), filter=filter_type,
-                           interpolation=interpolation_type)
+                           interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
     if debug:
@@ -360,7 +359,8 @@ def test_order_angles_golden_ratio():
 def test_iradon_sart():
     debug = False
 
-    image = rescale(PHANTOM, 0.8, mode='reflect')
+    image = rescale(PHANTOM, 0.8, mode='reflect',
+                    multichannel=False, anti_aliasing=False)
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),

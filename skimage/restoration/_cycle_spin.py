@@ -1,5 +1,3 @@
-from __future__ import division
-
 from itertools import product
 
 import numpy as np
@@ -121,7 +119,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     .. [1] R.R. Coifman and D.L. Donoho.  "Translation-Invariant De-Noising".
            Wavelets and Statistics, Lecture Notes in Statistics, vol.103.
            Springer, New York, 1995, pp.125-150.
-           DOI:10.1007/978-1-4612-2544-7_9
+           :DOI:`10.1007/978-1-4612-2544-7_9`
 
     Examples
     --------
@@ -156,5 +154,5 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         # multithreaded via dask
         futures = [dask.delayed(_run_one_shift)(s) for s in all_shifts]
         mean = sum(futures) / len(futures)
-        mean = mean.compute(get=dask.threaded.get, num_workers=num_workers)
+        mean = mean.compute(num_workers=num_workers)
     return mean
