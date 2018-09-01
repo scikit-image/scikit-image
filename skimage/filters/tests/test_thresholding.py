@@ -425,9 +425,41 @@ def test_mean_std_3d():
     np.testing.assert_allclose(s, expected_s)
 
 
+def test_niblack_sauvola_pathological_image():
+    # For certain values, floating point error can cause
+    # E(X^2) - (E(X))^2 to be negative, and taking the square root of this
+    # resulted in NaNs. Here we check that these are safely caught.
+    # see https://github.com/scikit-image/scikit-image/issues/3007
+    value = 0.03082192 + 2.19178082e-09
+    src_img = np.full((4, 4), value).astype(np.float64)
+    assert not np.any(np.isnan(threshold_niblack(src_img)))
+
+
 def test_bimodal_multiotsu_hist():
     image = data.camera()
     thr_otsu = threshold_otsu(image)
     thr_multi, _ = threshold_multiotsu(image, nclass=2)
-
     assert thr_otsu == thr_multi
+
+
+def test_check_multiotsu_results():
+    image = rgb2gray(data.astronaut())
+    if image.min() != image.max():
+        for idx in range(3, 6):
+            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
+                                               nclass=idx)
+            assert len(thr_multi) == idx-1
+
+    image = data.camera()
+    if image.min() != image.max():
+        for idx in range(3, 6):
+            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
+                                               nclass=idx)
+            assert len(thr_multi) == idx-1
+
+    image = data.checkerboard()
+    if image.min() != image.max():
+        for idx in range(3, 6):
+            thr_multi, _ = threshold_multiotsu(image[0:5, 0:5],
+                                               nclass=idx)
+            assert len(thr_multi) == idx-1
