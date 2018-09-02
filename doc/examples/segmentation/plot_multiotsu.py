@@ -13,9 +13,9 @@ algorithm returns two threshold values. They are represented by a red line in
 the histogram below.
 
 .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for multilevel
-thresholding", Journal of Information Science and Engineering 17 (5):
-713-727, 2001. Available at:
-<http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>.
+       thresholding", Journal of Information Science and Engineering 17 (5):
+       713-727, 2001. Available at:
+       <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>.
 """
 
 import matplotlib
