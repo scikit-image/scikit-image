@@ -16,6 +16,7 @@ images = ('hubble_deep_field',
         )
 
 fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)),
+                         sharex=False, sharey=False)
 ax = axes.ravel()
 
 for i, image in enumerate(images):
