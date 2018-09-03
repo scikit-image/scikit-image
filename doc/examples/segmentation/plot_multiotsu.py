@@ -3,8 +3,8 @@
 Multi-Otsu Thresholding
 =======================
 
-Multi-Otsu threshold is used to separate the pixels of an input image
-into three different classes, each one obtained according to the
+Multi-Otsu threshold [1]_ is used to separate the pixels of an input
+image into three different classes, each one obtained according to the
 intensity of the gray levels within the image.
 
 Multi-Otsu calculates several thresholds, determined by the number of desired
