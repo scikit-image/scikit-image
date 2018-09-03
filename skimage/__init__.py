@@ -68,16 +68,13 @@ dtype_limits
 
 """
 
-import os.path as osp
 import imp
 import functools
 import warnings
 import sys
 
-pkg_dir = osp.abspath(osp.dirname(__file__))
-data_dir = osp.join(pkg_dir, 'data')
-
 __version__ = '0.14.0'
+
 
 try:
     imp.find_module('pytest')
@@ -176,19 +173,8 @@ else:
                              img_as_bool,
                              dtype_limits)
 
-
-def lookfor(what):
-    """Do a keyword search on scikit-image docstrings.
-
-    Parameters
-    ----------
-    what : str
-        Words to look for.
-
-    """
-    import numpy as np
-    import sys
-    return np.lookfor(what, sys.modules[__name__])
+    from .util.lookfor import lookfor
+    from .data import data_dir
 
 
-del warnings, functools, osp, imp, sys
+del warnings, functools, imp, sys
