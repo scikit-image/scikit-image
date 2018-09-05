@@ -3,7 +3,7 @@ A crash course on NumPy for images
 ==================================
 
 Images manipulated by ``scikit-image`` are simply NumPy arrays. Hence, a
-large fraction of operations on images will just consist in using NumPy::
+large fraction of operations on images will just consist of using NumPy::
 
     >>> from skimage import data
     >>> camera = data.camera()
@@ -24,7 +24,7 @@ Retrieving statistical information about gray values: ::
     >>> camera.mean()
     118.31400299072266
 
-NumPy arrays representing images can be of different integer of float
+NumPy arrays representing images can be of different integer or float
 numerical types. See :ref:`data_types` for more information about these
 types and how scikit-image treats them.
 
@@ -32,7 +32,7 @@ types and how scikit-image treats them.
 NumPy indexing
 --------------
 
-NumPy indexing can be used both for looking at pixel values, and to
+NumPy indexing can be used both for looking at pixel values and to
 modify pixel values: ::
 
     >>> # Get the value of the pixel on the 10th row and 20th column
@@ -43,13 +43,13 @@ modify pixel values: ::
 
 Be careful: in NumPy indexing, the first dimension (``camera.shape[0]``)
 corresponds to rows, while the second (``camera.shape[1]``) corresponds
-to columns, with the origin (``camera[0, 0]``) on the top-left corner.
+to columns, with the origin (``camera[0, 0]``) at the top-left corner.
 This matches matrix/linear algebra notation, but is in contrast to
 Cartesian (x, y) coordinates. See `Coordinate conventions`_ below for
 more details.
 
-Beyond individual pixels, it is possible to access / modify values of
-whole sets of pixels, using the different indexing possibilities of
+Beyond individual pixels, it is possible to access/modify values of
+whole sets of pixels using the different indexing possibilities of
 NumPy.
 
 Slicing::
@@ -69,9 +69,9 @@ Fancy indexing (indexing with sets of indices) ::
     >>> inds_c = 4 * inds_r % len(camera)
     >>> camera[inds_r, inds_c] = 0
 
-Using masks, especially, is very useful to select a set of pixels on
+Using masks is very useful to select a set of pixels on
 which to perform further manipulations. The mask can be any boolean array
-of same shape as the image (or a shape broadcastable to the image shape).
+of the same shape as the image (or a shape broadcastable to the image shape).
 This can be useful to define a region of interest, such as a
 disk: ::
 
@@ -97,7 +97,7 @@ Boolean arithmetic can be used to define more complex masks: ::
 Color images
 ------------
 
-All of the above is true of color images, too: a color image is a
+All of the above is true of color images too: a color image is a
 NumPy array, with an additional trailing dimension for the channels:
 
     >>> cat = data.chelsea()
@@ -144,7 +144,7 @@ the top-left corner. In various parts of the library, you will
 also see ``rr`` and ``cc`` refer to lists of row and column
 coordinates. We distinguish this from ``(x, y)``, which commonly denote
 standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
-``y`` the vertical, and the origin is on the bottom left.
+``y`` the vertical, and the origin is at the bottom left.
 (Matplotlib, for example, uses this convention.)
 
 In the case of color (or multichannel) images, the last dimension
@@ -199,9 +199,9 @@ Notes on array order
 --------------------
 
 Although the labeling of the axes seems arbitrary, it can have a
-significant effect on speed of operations. This is because modern
+significant effect on the speed of operations. This is because modern
 processors never retrieve just one item from memory, but rather a
-whole chunk of adjacent items. (This is called prefetching.)
+whole chunk of adjacent items (called prefetching).
 Therefore, processing elements that are
 next to each other in memory is faster than processing them
 in a different order, even if the number of operations is the same:
