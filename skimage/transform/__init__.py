@@ -12,6 +12,7 @@ from ._geometric import (estimate_transform,
                          ProjectiveTransform, FundamentalMatrixTransform,
                          EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
+from .registration import register
 from ._warps import (swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords)
 from .pyramids import (pyramid_reduce, pyramid_expand,
@@ -48,6 +49,7 @@ __all__ = ['match_histograms',
            'swirl',
            'resize',
            'rotate',
+           'register',
            'rescale',
            'downscale_local_mean',
            'pyramid_reduce',

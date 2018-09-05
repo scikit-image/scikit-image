@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from scipy import ndimage as ndi
-from ..transform import resize
+from ._warps import resize
 from ..util import img_as_float
 
 
