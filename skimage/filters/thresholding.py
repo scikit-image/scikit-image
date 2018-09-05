@@ -727,26 +727,24 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def threshold_multiotsu(image, nclass=3, nbins=255):
-    """Generates multiple thresholds for an input image. Based on the
-    Multi-Otsu approach by Liao, Chen and Chung.
+def threshold_multiotsu(image, classes=3, bins=255):
+    """Generates multiple thresholds for an input image.
+    Based on the Multi-Otsu approach by Liao, Chen and Chung.
 
     Parameters
     ----------
     image : (N, M) ndarray
         Grayscale input image.
-    nclass : int, optional
+    classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
         regions. Accepts an integer from 2 to 5. Default is 3.
-    nbins : int, optional
+    bins : int, optional
         Number of bins used to calculate the histogram. Default is 255.
 
     Returns
     -------
-    idx_thresh : (nclass) array
+    idx_thresh : array
         Array containing the threshold values for the desired classes.
-    max_sigma : float
-        Maximum sigma value achieved on the classes.
 
     References
     ----------
@@ -763,111 +761,98 @@ def threshold_multiotsu(image, nclass=3, nbins=255):
     >>> from skimage.color import label2rgb
     >>> from skimage import data
     >>> image = data.camera()
-    >>> thresh, _ = threshold_multiotsu(image)
+    >>> thresh = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresh)
-    >>> sep_regions = label2rgb(regions)
+    >>> regions_colorized = label2rgb(regions)
     """
-    if image.shape[-1] in (3, 4):
-        raise TypeError("The input image seems to be RGB (shape: {0}. Please"
-                        "use a grayscale image.".format(image.shape))
-
-    if image.min() == image.max():
-        raise TypeError("The input image seems to have only one color: {0}."
-                        "Please use a grayscale image.".format(image.min()))
-
-    # check if nclass is between 2 and 5.
-    if nclass not in np.array((2, 3, 4, 5)):
-        raise ValueError("Please choose a number of classes between "
-                         "2 and 5.")
-
     # receiving minimum and maximum values for the image type.
     type_min, type_max = dtype_limits(image)
 
     # calculating the histogram and the probability of each gray level.
-    hist, _ = np.histogram(image.ravel(), bins=nbins,
+    hist, _ = np.histogram(image.ravel(), bins=bins,
                            range=(type_min, type_max))
     prob = hist / image.size
 
     max_sigma = 0
-    momP, momS, var_btwcls = [np.zeros((nbins, nbins)) for n in range(3)]
+    momP, momS, var_btwcls = [np.zeros((bins, bins)) for n in range(3)]
 
     # building the lookup tables.
     # step 1: calculating the diagonal.
-    for u in range(1, nbins):
+    for u in range(1, bins):
         momP[u, u] = prob[u]
         momS[u, u] = u * prob[u]
 
     # step 2: calculating the first row.
-    for u in range(1, nbins-1):
+    for u in range(1, bins-1):
         momP[1, u+1] = momP[1, u] + prob[u+1]
         momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
 
     # step 3: calculating the other rows recursively.
-    for u in range(2, nbins):
-        for v in range(u+1, nbins):
+    for u in range(2, bins):
+        for v in range(u+1, bins):
             momP[u, v] = momP[1, v] - momP[1, u-1]
             momS[u, v] = momS[1, v] - momS[1, u-1]
 
     # step 4: calculating the between class variance.
-    for u in range(1, nbins):
-        for v in range(u+1, nbins):
+    for u in range(1, bins):
+        for v in range(u+1, bins):
             if (momP[u, v] != 0):
                 var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
             else:
                 var_btwcls[u, v] = 0
 
-    # finding max threshold candidates, depending on nclass.
+    # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.
-    if nclass == 2:
-        for idx in range(1, nbins - nclass):
-            part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, nbins-1]
+    if classes == 2:
+        for idx in range(1, bins - classes):
+            part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, bins-1]
             if max_sigma < part_sigma:
                 aux_thresh = idx
                 max_sigma = part_sigma
 
-    elif nclass == 3:
-        for idx1 in range(1, nbins - nclass):
-            for idx2 in range(idx1+1, nbins - nclass+1):
+    elif classes == 3:
+        for idx1 in range(1, bins - classes):
+            for idx2 in range(idx1+1, bins - classes+1):
                 part_sigma = var_btwcls[1, idx1] + \
                             var_btwcls[idx1+1, idx2] + \
-                            var_btwcls[idx2+1, nbins-1]
+                            var_btwcls[idx2+1, bins-1]
 
                 if max_sigma < part_sigma:
                     aux_thresh = idx1, idx2
                     max_sigma = part_sigma
 
-    elif nclass == 4:
-        for idx1 in range(1, nbins - nclass):
-            for idx2 in range(idx1+1, nbins - nclass+1):
-                for idx3 in range(idx2+1, nbins - nclass+2):
+    elif classes == 4:
+        for idx1 in range(1, bins - classes):
+            for idx2 in range(idx1+1, bins - classes+1):
+                for idx3 in range(idx2+1, bins - classes+2):
                     part_sigma = var_btwcls[1, idx1] + \
                                 var_btwcls[idx1+1, idx2] + \
                                 var_btwcls[idx2+1, idx3] + \
-                                var_btwcls[idx3+1, nbins-1]
+                                var_btwcls[idx3+1, bins-1]
 
                     if max_sigma < part_sigma:
                         aux_thresh = idx1, idx2, idx3
                         max_sigma = part_sigma
 
-    elif nclass == 5:
-        for idx1 in range(1, nbins - nclass):
-            for idx2 in range(idx1+1, nbins - nclass+1):
-                for idx3 in range(idx2+1, nbins - nclass+2):
-                    for idx4 in range(idx3+1, nbins - nclass+3):
+    elif classes == 5:
+        for idx1 in range(1, bins - classes):
+            for idx2 in range(idx1+1, bins - classes+1):
+                for idx3 in range(idx2+1, bins - classes+2):
+                    for idx4 in range(idx3+1, bins - classes+3):
                         part_sigma = var_btwcls[1, idx1] + \
                             var_btwcls[idx1+1, idx2] + \
                             var_btwcls[idx2+1, idx3] + \
                             var_btwcls[idx3+1, idx4] + \
-                            var_btwcls[idx4+1, nbins-1]
+                            var_btwcls[idx4+1, bins-1]
 
                         if max_sigma < part_sigma:
                             aux_thresh = idx1, idx2, idx3, idx4
                             max_sigma = part_sigma
 
     # correcting values according to minimum and maximum values.
-    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / nbins
+    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / bins
 
-    return idx_thresh, max_sigma
+    return idx_thresh
 
 
 def _mean_std(image, w):
