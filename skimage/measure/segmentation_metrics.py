@@ -269,8 +269,8 @@ def _vi_tables(im_true, im_test):
     py_inv = sparse.diags(_invert_nonzero(py))
 
     # then, compute the entropies
-    hygx = px @ _xlogx(px_inv @ pxy).sum(axis=1)
-    hxgy = _xlogx(pxy @ py_inv).sum(axis=0) @ py
+    hygx = -px @ _xlogx(px_inv @ pxy).sum(axis=1)
+    hxgy = -_xlogx(pxy @ py_inv).sum(axis=0) @ py
 
     return list(map(np.asarray, [hxgy, hygx]))
 
