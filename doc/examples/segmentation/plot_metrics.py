@@ -25,13 +25,13 @@ from skimage.util import img_as_float
 
 img = coffee()
 
-segments_slic = slic(img, n_segments=2, compactness=10, sigma=1)
+segments_slic = slic(img, n_segments=100, compactness=10, sigma=1)
 gradient = sobel(rgb2gray(img))
 segments_watershed = watershed(gradient, markers=2, compactness=0.001)
 
 print('Adapated rand error: {}'.format(compare_adapted_rand_error(segments_slic, segments_watershed)))
-print('Split variation of information: {}'.format(compare_split_variation_of_information(segments_watershed[1], segments_slic[1])))
-print('Variation of information: {}'.format(compare_variation_of_information(segments_watershed[1], segments_slic[1], weights=np.array([1, 2]))))
+print('Split variation of information: {}'.format(compare_split_variation_of_information(segments_watershed, segments_slic)))
+print('Variation of information: {}'.format(compare_variation_of_information(segments_watershed, segments_slic, weights=np.array([1, 2]))))
 
 fig, ax = plt.subplots(1, 2, figsize=(10, 10), sharex=True, sharey=True)
 
