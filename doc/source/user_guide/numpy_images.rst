@@ -240,7 +240,7 @@ above, the ``*=`` numpy operator iterates over all remaining dimensions.
 A note on time
 --------------
 
-Although scikit-image does not currently (0.11) provide functions to
+Although scikit-image does not currently (0.14) provide functions to
 work specifically with time-varying 3D data, our compatibility with
 numpy arrays allows us to work quite naturally with a 5D array of the
 shape (t, pln, row, col, ch):
