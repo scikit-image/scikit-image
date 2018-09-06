@@ -20,10 +20,16 @@ DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
 
 import os
 import sys
+import tempfile
+import shutil
 
 import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
+from distutils.errors import CompileError, LinkError
+
+from numpy.distutils.command.build_ext import build_ext
+
 
 if sys.version_info < (3, 5):
 
@@ -48,6 +54,56 @@ import builtins
 # build the compiled extensions in sub-packages is based on the Python import
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
+
+# Support for openmp
+
+compile_flags = ['-fopenmp']
+link_flags = ['-fopenmp']
+
+code = """#include <omp.h>
+int main(int argc, char** argv) { return(0); }"""
+
+
+class ConditionalOpenMP(build_ext):
+
+    def can_compile_link(self):
+
+        cc = self.compiler
+        fname = 'test.c'
+        cwd = os.getcwd()
+        tmpdir = tempfile.mkdtemp()
+
+        try:
+            os.chdir(tmpdir)
+            with open(fname, 'wt') as fobj:
+                fobj.write(code)
+            try:
+                objects = cc.compile([fname],
+                                     extra_postargs=compile_flags)
+            except CompileError:
+                return False
+            try:
+                # Link shared lib rather then executable to avoid
+                # http://bugs.python.org/issue4431 with MSVC 10+
+                cc.link_shared_lib(objects, "testlib",
+                                   extra_postargs=link_flags)
+            except (LinkError, TypeError):
+                return False
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(tmpdir)
+        return True
+
+    def build_extensions(self):
+        """ Hook into extension building to check compiler flags """
+
+        if self.can_compile_link():
+
+            for ext in self.extensions:
+                ext.extra_compile_args += compile_flags
+                ext.extra_link_args += link_flags
+
+        build_ext.build_extensions(self)
 
 
 with open('skimage/__init__.py') as fid:
@@ -157,6 +213,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
+                  'build_ext': ConditionalOpenMP,
                   'sdist': sdist},
         **extra
     )
