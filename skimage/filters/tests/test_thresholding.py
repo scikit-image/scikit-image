@@ -433,7 +433,7 @@ def test_niblack_sauvola_pathological_image():
 def test_bimodal_multiotsu_hist():
     image = data.camera()
     thr_otsu = threshold_otsu(image)
-    thr_multi, _ = threshold_multiotsu(image, classes=2)
+    thr_multi = threshold_multiotsu(image, classes=2)
     assert thr_otsu == thr_multi
 
 
