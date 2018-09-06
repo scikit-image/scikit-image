@@ -2,8 +2,9 @@
 A crash course on NumPy for images
 ==================================
 
-Images manipulated by ``scikit-image`` are simply NumPy arrays. Hence, a
-large fraction of operations on images will just consist of using NumPy::
+Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many 
+common operations can be achieved using normal NumPy methods for 
+manipulating arrays.::
 
     >>> from skimage import data
     >>> camera = data.camera()
@@ -201,7 +202,7 @@ Notes on array order
 Although the labeling of the axes seems arbitrary, it can have a
 significant effect on the speed of operations. This is because modern
 processors never retrieve just one item from memory, but rather a
-whole chunk of adjacent items (called prefetching).
+whole chunk of adjacent items (an operation called prefetching).
 Therefore, processing elements that are
 next to each other in memory is faster than processing them
 in a different order, even if the number of operations is the same:
@@ -240,7 +241,7 @@ above, the ``*=`` numpy operator iterates over all remaining dimensions.
 A note on time
 --------------
 
-Although scikit-image does not currently (0.14) provide functions to
+Although scikit-image does not currently provide functions to
 work specifically with time-varying 3D data, our compatibility with
 numpy arrays allows us to work quite naturally with a 5D array of the
 shape (t, pln, row, col, ch):
