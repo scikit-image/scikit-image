@@ -22,6 +22,12 @@ from libc.math cimport ceil, floor
 cdef inline Py_ssize_t round(double r) nogil:
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
+cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) nogil:
+    return one if one > two else two
+
+cdef inline Py_ssize_t fmin(Py_ssize_t one, Py_ssize_t two) nogil:
+    return one if one < two else two
+
 
 cdef inline double nearest_neighbour_interpolation(double* image,
                                                    Py_ssize_t rows,
