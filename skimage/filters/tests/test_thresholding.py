@@ -444,6 +444,6 @@ def test_check_multiotsu_results():
                              [0, 1, 2, 3, 4]])
 
     for idx in range(3, 6):
-        thr_multi, _ = threshold_multiotsu(image,
-                                           classes=idx)
+        thr_multi = threshold_multiotsu(image,
+                                        classes=idx)
         assert len(thr_multi) == idx-1
