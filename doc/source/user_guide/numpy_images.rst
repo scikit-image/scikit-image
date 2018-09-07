@@ -4,21 +4,21 @@ A crash course on NumPy for images
 
 Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many 
 common operations can be achieved using standard NumPy methods for 
-manipulating arrays:
+manipulating arrays::
 
     >>> from skimage import data
     >>> camera = data.camera()
     >>> type(camera)
     <type 'numpy.ndarray'>
 
-Retrieving the geometry of the image and the number of pixels:
+Retrieving the geometry of the image and the number of pixels::
 
     >>> camera.shape
     (512, 512)
     >>> camera.size
     262144
 
-Retrieving statistical information about image intensity values:
+Retrieving statistical information about image intensity values::
 
     >>> camera.min(), camera.max()
     (0, 255)
@@ -34,12 +34,12 @@ NumPy indexing
 --------------
 
 NumPy indexing can be used both for looking at the pixel values and to
-modify them:
+modify them::
 
-    >>> # Get the value of the pixel in the (10th row, 20th column)
+    >>> # Get the value of the pixel at the 10th row and 20th column
     >>> camera[10, 20]
     153
-    >>> # Set to black the pixel in the (3rd row, 10th column)
+    >>> # Set to black the pixel at the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
 Be careful! In NumPy indexing, the first dimension (``camera.shape[0]``)
@@ -52,18 +52,18 @@ more details.
 Beyond individual pixels, it is possible to access/modify values of
 whole sets of pixels using the different indexing capabilities of NumPy.
 
-Slicing:
+Slicing::
 
     >>> # Set to "black" (0) the first ten lines
     >>> camera[:10] = 0
 
-Masking (indexing with masks of booleans):
+Masking (indexing with masks of booleans)::
 
     >>> mask = camera < 87
     >>> # Set to "white" (255) the pixels where mask is True
     >>> camera[mask] = 255
 
-Fancy indexing (indexing with sets of indices):
+Fancy indexing (indexing with sets of indices)::
 
     >>> inds_r = np.arange(len(camera))
     >>> inds_c = 4 * inds_r % len(camera)
@@ -72,7 +72,7 @@ Fancy indexing (indexing with sets of indices):
 Masks are very useful when you need to select a set of pixels on which
 to perform the manipulations. The mask can be any boolean array
 of the same shape as the image (or a shape broadcastable to the image shape).
-This can be used to define a region of interest, for example, a disk-shaped:
+This can be used to define a region of interest, for example, a disk-shaped::
 
     >>> nrows, ncols = camera.shape
     >>> row, col = np.ogrid[:nrows, :ncols]
@@ -85,7 +85,7 @@ This can be used to define a region of interest, for example, a disk-shaped:
     :width: 45%
     :target: ../auto_examples/numpy_operations/plot_camera_numpy.html
 
-Boolean operations from NumPy can be used to define even more complex masks:
+Boolean operations from NumPy can be used to define even more complex masks::
 
     >>> lower_half = row > cnt_row
     >>> lower_half_disk = np.logical_and(lower_half, outer_disk_mask)
@@ -97,7 +97,7 @@ Color images
 ------------
 
 All of the above is true for color images too: a color image is a
-NumPy array with an additional trailing dimension for the channels:
+NumPy array with an additional trailing dimension for the channels::
 
     >>> cat = data.chelsea()
     >>> type(cat)
@@ -106,8 +106,7 @@ NumPy array with an additional trailing dimension for the channels:
     (300, 451, 3)
 
 This shows that ``cat`` is a 300-by-451 pixel image with three channels
-(in this case, red, green, and blue). As before, we can get and set
-the pixel values:
+(red, green, and blue). As before, we can get and set the pixel values::
 
     >>> cat[10, 20]
     array([151, 129, 115], dtype=uint8)
@@ -117,7 +116,7 @@ the pixel values:
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
 We can also use 2D boolean masks for 2D multichannel images, as we did with
-the grayscale image above:
+the grayscale image above::
 
 .. plot::
 
@@ -140,7 +139,7 @@ coordinate conventions must match. Two-dimensional (2D) grayscale images
 (such as `camera` above) are indexed by rows and columns (abbreviated to
 either ``(row, col)`` or ``(r, c)``), with the lowest element ``(0, 0)``
 at the top-left corner. In various parts of the library, you will
-also see ``rr`` and ``cc`` referring to lists of row and column
+also see ``rr`` and ``cc`` refer to lists of row and column
 coordinates. We distinguish this convention from ``(x, y)``, which commonly
 denote standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
 ``y`` - the vertical one, and the origin is at the bottom left
@@ -167,7 +166,7 @@ These conventions are summarized below:
   =========================   ========================================
 
 
-Many functions in ``scikit-image`` can operate on 3D images directly:
+Many functions in ``scikit-image`` can operate on 3D images directly::
 
     >>> im3d = np.random.rand(100, 1000, 1000)
     >>> from skimage import morphology
@@ -177,15 +176,14 @@ Many functions in ``scikit-image`` can operate on 3D images directly:
 
 In many cases, however, the third spatial dimension has lower resolution
 than the other two. Some ``scikit-image`` functions provide a ``spacing``
-keyword argument to help handling this situation:
+keyword argument to help handle this kind of data::
 
     >>> from skimage import segmentation
     >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], multichannel=False)
 
-Other functions may be lacking support for any non-2D images, and have to be used
-for processing of such data in plane-wise manner. When planes are stacked
+Other times, the processing must be done plane-wise. When planes are stacked
 along the leading dimension (in agreement with our convention), the following
-syntax can be used:
+syntax can be used::
 
     >>> from skimage import filters
     >>> edges = np.empty_like(im3d)
@@ -197,13 +195,13 @@ syntax can be used:
 Notes on the order of array dimensions
 --------------------------------------
 
-Although the labeling of the axes might seems arbitrary, it can have a
-significant effect on the speed of operations. To put it simply, this
-is related to the fact that the modern processors never retrieve just
-one item from memory, but rather a whole chunk of adjacent items
-(an operation called prefetching). Therefore, processing of elements
-that are next to each other in memory is faster than processing them
-when they are scattered, even if the number of operations is the same:
+Although the labeling of the axes might seem arbitrary, it can have a
+significant effect on the speed of operations. This is because the modern
+processors never retrieve just one item from memory, but rather a whole
+chunk of adjacent items (an operation called prefetching). Therefore,
+processing of elements that are next to each other in memory is faster
+than processing them when they are scattered, even if the number of operations
+is the same::
 
     >>> def in_order_multiply(arr, scalar):
     ...     for plane in list(range(arr.shape[0])):
@@ -230,20 +228,20 @@ when they are scattered, even if the number of operations is the same:
 
 When the last/rightmost dimension becomes even larger the speedup is
 even more dramatic. It is worth thinking about *data locality* when
-you are developing algorithms. In particular, you should know that
-``scikit-image`` uses C-contiguous arrays unless otherwise specified.
+developing algorithms. In particular, ``scikit-image`` uses C-contiguous
+arrays by default.
 When using nested loops, the last/rightmost dimension of the array
 should be in the innermost loop of the computation. In the example
 above, the ``*=`` numpy operator iterates over all remaining dimensions.
 
 
-A note on time dimension
-------------------------
+A note on the time dimension
+----------------------------
 
 Although ``scikit-image`` does not currently provide functions to
 work specifically with time-varying 3D data, its compatibility with
 NumPy arrays allows us to work quite naturally with a 5D array of the
-shape (t, pln, row, col, ch):
+shape (t, pln, row, col, ch)::
 
     >>> for timepoint in image5d:  # doctest: +SKIP
     ...     # Each timepoint is a 3D multichannel image
