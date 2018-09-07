@@ -68,9 +68,6 @@ dtype_limits
 
 """
 
-import imp
-import functools
-import warnings
 import sys
 
 
@@ -106,6 +103,7 @@ def _raise_build_error(e):
 It seems that scikit-image has not been built correctly.
 %s""" % (e, msg))
 
+
 try:
     # This variable is injected in the __builtins__ by the build
     # process. It used to enable importing subpackages of skimage when
@@ -137,4 +135,4 @@ else:
     from .data import data_dir
     from .util.lookfor import lookfor
 
-del warnings, functools, imp, sys
+del sys
