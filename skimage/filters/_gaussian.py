@@ -110,7 +110,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     """
 
-    spatial_dims = guess_spatial_dimensions(image)
+    spatial_dims = None
+    try:
+        guess_spatial_dimensions(image)
+    except ValueError:
+        pass
     if spatial_dims is None and multichannel is None:
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
                "by default. Use `multichannel=False` to interpret as "
