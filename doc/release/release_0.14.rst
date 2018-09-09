@@ -21,12 +21,13 @@ Bug fixes
 - ``CollectionViewer`` now indexes correctly (it had been broken by an update
   to NumPy indexing) (#3288)
 - Handle deprecated indexing-by-list and NumPy ``matrix`` from NumPy 1.15
-  (#3238, 3242)
+  (#3238, #3242, #3292)
 - Fix incorrect inertia tensor calculation (#3303) (Special thanks to JP Cornil
   for reporting this bug and for their patient help with this fix)
 - Fix import of ``moments_coord_central`` in ``measure`` package, which meant
   that neither it nor ``moments_normalized`` could be correctly imported from
   the ``measure`` namespace (#3374)
+- Fix background color in ``label2rgb(..., kind='avg')`` (#3280)
 
 Enhancements
 ------------
@@ -56,6 +57,7 @@ Documentation
 - Update broken link for Canny filter documentation (#3276)
 - Fix incorrect documentation for the ``center`` parameter of
   ``skimage.transform.rotate`` (#3341)
+- Fix incorrect formatting of docstring in ``measure.profile_line`` (#3236)
 
 Build process / development
 ---------------------------
@@ -69,6 +71,7 @@ Build process / development
 - Add license file to the binary distribution (#3322)
 - ``lookfor`` is no longer defined in ``__init__.py`` but rather imported to it
   (#3162)
+- Add ``pyproject.toml`` to ensure Cython is present before building (#3295)
 
 Credits
 -------
@@ -80,10 +83,12 @@ Made with commits from (alphabetical by last name):
 - Sean Budd
 - Matthias Bussonnier
 - Sarkis Dallakian
+- François-Michel De Rainville
 - Emmanuelle Gouillart
 - Yaroslav Halchenko
 - Mark Harfouche
 - Jonathan Helmus
+- Matt McCormick
 - Juan Nunez-Iglesias
 - Egor Panfilov
 - Jesse Pangburn
