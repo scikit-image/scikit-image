@@ -15,8 +15,7 @@ images = ('hubble_deep_field',
         'moon',
         )
 
-fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)),
-                         sharex=False, sharey=False)
+fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)))
 ax = axes.ravel()
 
 for i, image in enumerate(images):

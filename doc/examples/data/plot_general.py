@@ -1,6 +1,6 @@
 """
 ======================
-General purpose images
+General-purpose images
 ======================
 
 """
@@ -26,11 +26,7 @@ images = (
            'rocket',
            )
 
-#'stereo_motorcycle'
-#'lfw_subset',
-
-fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)),
-                         sharex=False, sharey=False)
+fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)))
 ax = axes.ravel()
 
 for i, image in enumerate(images):
