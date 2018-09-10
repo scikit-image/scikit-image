@@ -24,9 +24,9 @@ Bug fixes
   (#3238, #3242, #3292)
 - Fix incorrect inertia tensor calculation (#3303) (Special thanks to JP Cornil
   for reporting this bug and for their patient help with this fix)
-- Fix import of ``moments_coord_central`` in ``measure`` package, which meant
-  that neither it nor ``moments_normalized`` could be correctly imported from
-  the ``measure`` namespace (#3374)
+- Fix missing comma in ``__all__`` listing of ``moments_coord_central``, so it
+  and ``moments_normalized`` can now be correctly imported from the ``measure``
+  namespace (#3374)
 - Fix background color in ``label2rgb(..., kind='avg')`` (#3280)
 
 Enhancements
