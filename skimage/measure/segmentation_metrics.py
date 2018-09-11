@@ -119,7 +119,7 @@ def compare_split_variation_of_information(im_true, im_test):
     compare_variation_of_information
     """
     hxgy, hygx = _vi_tables(im_true, im_test)
-    # false merges, false splits
+    # false splits, false merges
     return np.array([hygx.sum(), hxgy.sum()])
 
 def _contingency_table(im_true, im_test):
