@@ -3,36 +3,40 @@
 General-purpose images
 ======================
 
+The title of each image indicates the name of the function.
+
 """
-import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
 
 
-images = (
-           'astronaut',
-           'binary_blobs',
-           'camera',
-           'checkerboard',
-           'chelsea',
-           'clock',
-           'coffee',
-           'coins',
-           'horse',
-           'logo',
-           'page',
-           'text',
-           'rocket',
-           )
+images = ('astronaut',
+          'binary_blobs',
+          'camera',
+          'checkerboard',
+          'chelsea',
+          'clock',
+          'coffee',
+          'coins',
+          'horse',
+          'logo',
+          'page',
+          'text',
+          'rocket',
+          )
 
 fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)))
 ax = axes.ravel()
 
-for i, image in enumerate(images):
-    caller = getattr(data, image)
-    ax[i].imshow(caller())
-    ax[i].set_title(image)
+for i, name in enumerate(images):
+    caller = getattr(data, name)
+    image = caller()
+    ax[i].set_title(name)
+    if image.ndim == 2:
+        ax[i].imshow(image, cmap=plt.cm.gray)
+    else:
+        ax[i].imshow(image)
 
 fig.tight_layout()
 plt.show()
