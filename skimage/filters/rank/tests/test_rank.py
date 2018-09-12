@@ -9,7 +9,7 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, xfail arch32
+from skimage._shared.testing import test_parallel, xfail, arch32
 
 
 class TestRank():
@@ -21,7 +21,8 @@ class TestRank():
         # Set again the seed for the other tests.
         np.random.seed(0)
 
-    @xfail(condition=arch32)
+    @xfail(condition=arch32,
+           reason='https://github.com/scikit-image/scikit-image/issues/3091')
     def test_all(self):
         @test_parallel()
         def check_all():

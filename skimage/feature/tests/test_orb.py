@@ -69,7 +69,8 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
-@xfail(condition=arch32)
+@xfail(condition=arch32,
+       reason='https://github.com/scikit-image/scikit-image/issues/3091')
 def test_descriptor_orb():
     detector_extractor = ORB(fast_n=12, fast_threshold=0.20)
 

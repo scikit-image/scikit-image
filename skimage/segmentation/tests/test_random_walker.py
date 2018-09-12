@@ -256,7 +256,8 @@ def test_spacing_0():
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
 
-@xfail(condition=arch32)
+@xfail(condition=arch32,
+       reason='https://github.com/scikit-image/scikit-image/issues/3092')
 def test_spacing_1():
     n = 30
     lx, ly, lz = n, n, n
