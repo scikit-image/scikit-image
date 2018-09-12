@@ -26,17 +26,15 @@ images = ('astronaut',
           'rocket',
           )
 
-fig, axes = plt.subplots(len(images), 1, figsize=(8, 4 * len(images)))
-ax = axes.ravel()
 
-for i, name in enumerate(images):
+for name in images:
     caller = getattr(data, name)
     image = caller()
-    ax[i].set_title(name)
+    plt.figure()
+    plt.title(name)
     if image.ndim == 2:
-        ax[i].imshow(image, cmap=plt.cm.gray)
+        plt.imshow(image, cmap=plt.cm.gray)
     else:
-        ax[i].imshow(image)
+        plt.imshow(image)
 
-fig.tight_layout()
 plt.show()
