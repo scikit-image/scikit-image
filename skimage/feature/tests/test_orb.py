@@ -3,7 +3,7 @@ from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage.feature import ORB
 from skimage._shared import testing
 from skimage import data
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import test_parallel, xfail, arch32
 
 
 img = data.coins()
@@ -69,6 +69,7 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
+@xfail(condition=arch32)
 def test_descriptor_orb():
     detector_extractor = ORB(fast_n=12, fast_threshold=0.20)
 
