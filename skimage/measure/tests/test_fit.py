@@ -5,7 +5,7 @@ from skimage.measure.fit import _dynamic_max_trials
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_less)
+                                     assert_array_less, xfail, arch32)
 
 
 def test_line_model_invalid_input():
@@ -220,6 +220,8 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.abs(model.params[:4]), np.array([2e3] * 4))
 
 
+@xfail(condition=arch32,
+       reason='https://github.com/scikit-image/scikit-image/issues/3091')
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
