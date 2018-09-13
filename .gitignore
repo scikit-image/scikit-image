@@ -9,7 +9,7 @@ __pycache__
 *.pyd
 *.bak
 *.c
-skimage/feature/_haar.cpp
+*.cpp
 *.new
 *.md5
 *.old

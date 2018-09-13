@@ -110,7 +110,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     ----------
     .. [1]  Maria Petrou, Costas Petrou
             "Image Processing: The Fundamentals", (2010), ed ii., page 357,
-            ISBN 13: 9781119994398  DOI: 10.1002/9781119994398
+            ISBN 13: 9781119994398  :DOI:`10.1002/9781119994398`
     .. [2]  Wikipedia. Unsharp masking
             https://en.wikipedia.org/wiki/Unsharp_masking
 
