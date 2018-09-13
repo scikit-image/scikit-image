@@ -468,7 +468,7 @@ def _cross_entropy(image, threshold, bins=np.arange(-0.5, 255.51, 1)):
         The input array of values.
     threshold : float
         The value dividing the foreground and background in ``image``.
-    bins : int or array of float
+    bins : int or array of float, optional
         The number of bins or the bin edges. (Any valid value to the ``bins``
         argument of ``np.histogram`` will work here.) For an exact calculation,
         each unique value should have its own bin. The default value for bins
@@ -515,7 +515,7 @@ def threshold_li(image, *, tolerance=None):
     image : ndarray
         Input image.
 
-    tolerance : float
+    tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
         is less than this value. By default, this is half of the range of the
         input image, divided by 256.
