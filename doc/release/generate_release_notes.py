@@ -220,7 +220,7 @@ For more information, examples, and documentation, please visit our website:
 http://scikit-image.org
 
 This release contains {num_changes} changes.
-""".format(version=version, num_changes=num_commits,
+""".format(version=version, num_changes=len(pulls),
            python27_warning="""
 This is the last major release with official support for Python 2.7. Future
 releases will be developed using Python 3-only syntax.
@@ -264,7 +264,7 @@ and backported features deemed important (by community demand) until January
 
     reviewer_str = (
         '{} reviewers conttributed to this release [alphabetical by last name]'
-        .format(len(authors))
+        .format(len(reviewers))
     )
     print(reviewer_str)
     print('-'*len(reviewer_str))
