@@ -22,7 +22,10 @@ class TestRank():
         np.random.seed(0)
 
     @xfail(condition=arch32,
-           reason='https://github.com/scikit-image/scikit-image/issues/3091')
+           reason=('Known test failure on 32-bit platforms. See links for '
+                   'details: '
+                   'https://github.com/scikit-image/scikit-image/issues/3091 '
+                   'https://github.com/scikit-image/scikit-image/issues/2528'))
     def test_all(self):
         @test_parallel()
         def check_all():
