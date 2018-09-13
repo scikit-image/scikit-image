@@ -65,9 +65,9 @@ test_script:
   # Run unit tests with pytest
   - pytest -v --pyargs skimage
 
-#artifacts:
-#  # Archive the generated wheel package in the ci.appveyor.com build report.
-#  - path: dist\*
+artifacts:
+  # Archive the generated wheel package in the ci.appveyor.com build report.
+  - path: dist\*
 
 #on_success:
 #  - TODO: upload the content of dist/*.whl to a public wheelhouse
