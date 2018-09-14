@@ -3,6 +3,7 @@ from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
+from skimage._shared.testing import xfail, arch32
 import scipy
 import numpy as np
 from distutils.version import LooseVersion as Version
@@ -255,6 +256,11 @@ def test_spacing_0():
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
 
+@xfail(condition=arch32,
+       reason=('Known test failure on 32-bit platforms. See links for '
+               'details: '
+               'https://github.com/scikit-image/scikit-image/issues/3091 '
+               'https://github.com/scikit-image/scikit-image/issues/3092'))
 def test_spacing_1():
     n = 30
     lx, ly, lz = n, n, n
