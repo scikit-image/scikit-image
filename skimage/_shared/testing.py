@@ -34,7 +34,7 @@ fixture = pytest.fixture
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
-# https://docs.python.org/2/library/struct.html
+# https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
 
 
