@@ -1,8 +1,7 @@
 import itertools
 
 import numpy as np
-from scipy.ndimage import measurements
-from scipy.ndimage import find_objects
+import scipy.ndimage as ndi
 
 from .._shared.utils import warn
 from ..util import img_as_float
@@ -112,7 +111,12 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha)
     else:
-        return _label2mean(label, image, bg_label=bg_label, bg_color=bg_color)
+        # _label2mean converts arrays to floats so have to round and convert to
+        # to 0 to 255 scale
+        return np.rint(_label2mean(label, image,
+                                   bg_label=bg_label,
+                                   bg_color=bg_color,
+                                   multichannel=True)).astype(int)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
@@ -197,7 +201,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     return result
 
 
-def _apply_2d_func_to_image(func, image):
+def _apply_channel_by_channel(func, image):
     """
     Apply a function to each channel of an image.
 
@@ -206,54 +210,61 @@ def _apply_2d_func_to_image(func, image):
     func : callable
         A function that takes an array to another array of the same shape.
     image : array
-        A multichannel image
+        A single or multichannel image.
 
     Returns
     -------
     out : array, same shape and type as `image`
     """
+    if len(image.shape) not in [2, 3]:
+        raise ValueError('Image must be 2d or 3d array')
     if len(image.shape) == 2:
         return func(image)
-    elif len(image.shape) == 3:
+    else:
         out = np.zeros(image.shape)
         n = image.shape[2]
         for k in range(n):
             out[..., k] = func(image[..., k])
         return out
-    else:
-        raise ValueError('Image must be 2d or 3d array.')
 
 
-def _label2mean_2d(label_field, band):
+def _get_means_from_contiguous_regions(label_field, image):
     """
-    Aggregates with respect to label array means for a single channel image
+    Aggregates pixel values with respect to
+    labels for an image assuming that label_field
+    has the same shape as image. In particular,
+    labels will be averaged over all axes.
 
     Parameters
     ----------
-    band : 2d array, shape ``label_field.shape``
-        A multichannel image of the same spatial shape as `label_field`.
-    bg_label : int, optional
-        A value in `label_field` to be treated as background.
-    bg_color : int, optional
-        The color for the background label (default = 0)
+    label_field : array
+        2d or 3d array of labels (0, 1, ..., n) that indicate contiguous
+        regions to average
+    image : 2d or 3d array with shape `label_field.shape`
 
     Returns
     -------
-    out : array, same shape and type as `band`
+    out : array
+        An array with the same shape and type as `band`
     """
-    out = np.zeros(band.shape)
-    # scipy wants labels to begin at 1 and transforms to 1, 2, ..., n+1
+    if label_field.shape != image.shape:
+        raise ValueError('label_field and image must have the same shape as image')
+
+    # scipy wants labels to begin at 1 and transforms labels to 1, 2, ..., n + 1
     labels_ = label_field + 1
     labels_unique = np.unique(labels_)
-    means = measurements.mean(band, labels=labels_, index=labels_unique)
-    indices = find_objects(labels_)
+
+    out = np.zeros(image.shape)
+    indices = ndi.find_objects(labels_)
+
+    means = ndi.measurements.mean(image, labels=labels_, index=labels_unique)
     for label, mean in zip(labels_unique, means):
         indices_temp = indices[label - 1]
         out[indices_temp][labels_[indices_temp] == label] = mean
     return out
 
 
-def _label2mean(label_field, image, bg_label=None, bg_color=None):
+def _label2mean(label_field, image, bg_label=None, bg_color=None, multichannel=True):
     """Visualise each segment in `label_field` with its mean color in `image`.
 
     Parameters
@@ -266,16 +277,32 @@ def _label2mean(label_field, image, bg_label=None, bg_color=None):
         A value in `label_field` to be treated as background.
     bg_color : n-tuple of ints, optional
         The color for the background label
+    multichannel : bool, optional
+        Determines how labels are aggregated.
+
+        If `multichannel` is `True` (default),
+        then label_field aggregates for each channel
+        `image[..., k]` for `k = 0, 1, ... image.shape[2] -1`.
+        In this case, `image.shape[:2]` should
+        be the same size as `label_field.shape`.
+
+        Otherwise, labels
+        are aggregated across array and so
+        `label_field.shape` should be the same as `image.shape`.
 
     Returns
     -------
     out : array, same shape and type as `image`
         The output visualization.
     """
-    def _label2mean_2d_partial(image):
-        return _label2mean_2d(label_field, image)
+    if multichannel:
 
-    out = _apply_2d_func_to_image(_label2mean_2d_partial, image)
+        def _get_means_from_contiguous_regions_partial(image):
+            return _get_means_from_contiguous_regions(label_field, image)
+        out = _apply_channel_by_channel(_get_means_from_contiguous_regions_partial, image)
+
+    else:
+        _get_means_from_contiguous_regions(label_field, image)
 
     if bg_label is not None:
         bg_color = bg_color or 0
