@@ -475,13 +475,22 @@ def test_wavelet_denoising_levels():
     # multi-level case should outperform single level case
     assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
 
-    # invalid number of wavelet levels results in a ValueError
+    # invalid number of wavelet levels results in a ValueError or UserWarning
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    with testing.raises(ValueError):
-        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+    if Version(pywt.__version__) < '1.0.0':
+        # exceeding max_level raises a ValueError in PyWavelets 0.4-0.5.2
+        with testing.raises(ValueError):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+                restoration.denoise_wavelet(
+                    noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+    else:
+        # exceeding max_level raises a UserWarning in PyWavelets >= 1.0.0
+        with expected_warnings([
+                'all coefficients will experience boundary effects']):
             restoration.denoise_wavelet(
                 noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+
     with testing.raises(ValueError):
         with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
             restoration.denoise_wavelet(
