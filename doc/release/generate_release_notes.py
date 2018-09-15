@@ -4,7 +4,15 @@ from collections import OrderedDict
 import string
 
 from github import Github
-from tqdm import tqdm
+try:
+    from tqdm import tqdm
+except ImportError:
+    from warnings import warn
+    warn('tqdm not installed. This script takes approximately 5 minutes '
+         'to run. To view live progressbars, please install tqdm. '
+         'Otherwise, be patient.')
+    def tqdm(i, **kwargs):
+        return i
 
 
 GH_USER = 'scikit-image'
@@ -15,7 +23,7 @@ if GH_TOKEN is None:
         "It is necessary that the environment variable `GH_TOKEN` "
         "be set to avoid running into problems with rate limiting. "
         "One can be acquired at https://github.com/settings/tokens.")
-    
+
 g = Github(GH_TOKEN)
 repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
 
