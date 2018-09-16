@@ -61,3 +61,10 @@ def test_multichannel():
 def test_preserve_range():
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
     gaussian(img, 1, preserve_range=True)
+
+
+def test_4d_ok():
+    img = np.zeros((5,) * 4)
+    img[2, 2, 2, 2] = 1
+    res = gaussian(img, 1, mode='reflect')
+    assert np.allclose(res.sum(), 1)

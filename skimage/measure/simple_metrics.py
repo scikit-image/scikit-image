@@ -1,4 +1,3 @@
-from __future__ import division
 
 import numpy as np
 from ..util.dtype import dtype_range
@@ -12,8 +11,6 @@ __all__ = ['compare_mse',
 
 def _assert_compatible(im1, im2):
     """Raise an error if the shape and dtype do not match."""
-    if not im1.dtype == im2.dtype:
-        raise ValueError('Input images must have the same dtype.')
     if not im1.shape == im2.shape:
         raise ValueError('Input images must have the same dimensions.')
     return
@@ -22,10 +19,8 @@ def _assert_compatible(im1, im2):
 def _as_floats(im1, im2):
     """Promote im1, im2 to nearest appropriate floating point precision."""
     float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
-    if im1.dtype != float_type:
-        im1 = im1.astype(float_type)
-    if im2.dtype != float_type:
-        im2 = im2.astype(float_type)
+    im1 = np.asarray(im1, dtype=float_type)
+    im2 = np.asarray(im2, dtype=float_type)
     return im1, im2
 
 
@@ -101,7 +96,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
-def compare_psnr(im_true, im_test, data_range=None, dynamic_range=None):
+def compare_psnr(im_true, im_test, data_range=None):
     """ Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
@@ -126,13 +121,11 @@ def compare_psnr(im_true, im_test, data_range=None, dynamic_range=None):
 
     """
     _assert_compatible(im_true, im_test)
-    if dynamic_range is not None:
-        warn('`dynamic_range` has been deprecated in favor of '
-             '`data_range`. The `dynamic_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-        data_range = dynamic_range
 
     if data_range is None:
+        if im_true.dtype != im_test.dtype:
+            warn("Inputs have mismatched dtype.  Setting data_range based on "
+                 "im_true.")
         dmin, dmax = dtype_range[im_true.dtype.type]
         true_min, true_max = np.min(im_true), np.max(im_true)
         if true_max > dmax or true_min < dmin:

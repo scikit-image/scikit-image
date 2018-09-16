@@ -1,5 +1,3 @@
-# coding: utf-8
-from __future__ import division
 from math import sqrt, atan2, pi as PI
 import itertools
 from warnings import warn
@@ -58,6 +56,7 @@ PROPS = {
     'Perimeter': 'perimeter',
     # 'PixelIdxList',
     # 'PixelList',
+    'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
     'WeightedCentralMoments': 'weighted_moments_central',
@@ -110,6 +109,7 @@ class _RegionProperties(object):
         self.label = label
 
         self._slice = slice
+        self.slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
 
@@ -143,8 +143,8 @@ class _RegionProperties(object):
         A tuple of the bounding box's start coordinates for each dimension,
         followed by the end coordinates for each dimension
         """
-        return tuple([self._slice[i].start for i in range(self._ndim)] +
-                     [self._slice[i].stop for i in range(self._ndim)])
+        return tuple([self.slice[i].start for i in range(self._ndim)] +
+                     [self.slice[i].stop for i in range(self._ndim)])
 
     def bbox_area(self):
         return self.image.size
@@ -163,7 +163,7 @@ class _RegionProperties(object):
 
     def coords(self):
         indices = np.nonzero(self.image)
-        return np.vstack([indices[i] + self._slice[i].start
+        return np.vstack([indices[i] + self.slice[i].start
                           for i in range(self._ndim)]).T
 
     @only2d
@@ -198,7 +198,7 @@ class _RegionProperties(object):
 
     @_cached
     def image(self):
-        return self._label_image[self._slice] == self.label
+        return self._label_image[self.slice] == self.label
 
     @_cached
     def inertia_tensor(self):
@@ -214,7 +214,7 @@ class _RegionProperties(object):
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
-        return self._intensity_image[self._slice] * self.image
+        return self._intensity_image[self.slice] * self.image
 
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
@@ -273,13 +273,14 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
+        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return sign * 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -291,7 +292,7 @@ class _RegionProperties(object):
     def weighted_centroid(self):
         ctr = self.weighted_local_centroid
         return tuple(idx + slc.start
-                     for idx, slc in zip(ctr, self._slice))
+                     for idx, slc in zip(ctr, self.slice))
 
     def weighted_local_centroid(self):
         M = self.weighted_moments
@@ -365,6 +366,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
     ----------
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
+
+        .. versionchanged:: 0.14.1
+            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
+            so any number of singleton dimensions was allowed. This resulted in
+            inconsistent handling of images with singleton dimensions. To
+            recover the old behaviour, use
+            ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
@@ -468,12 +476,17 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        Angle between the X-axis and the major axis of the ellipse that has
-        the same second-moments as the region. Ranging from `-pi/2` to
-        `pi/2` in counter-clockwise direction.
+        In 'rc' coordinates, angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+
+        In `xy` coordinates, as above but the angle is now measured from the
+        "x" or horizontal axis.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **slice** : tuple of slices
+        A slice to extract the object from the source image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
     **weighted_centroid** : array
@@ -544,8 +557,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     """
 
-    label_image = np.squeeze(label_image)
-
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
 
@@ -612,7 +623,7 @@ def perimeter(image, neighbourhood=4):
     # but that was measured as taking much longer than bincount + np.dot (5x
     # as much time)
     perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
+    total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
 
@@ -633,12 +644,7 @@ def _install_properties_docs():
 
     for p in [member for member in dir(_RegionProperties)
               if not member.startswith('_')]:
-        try:
-            getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        except AttributeError:
-            # For Python 2.x
-            getattr(_RegionProperties, p).im_func.__doc__ = prop_doc[p]
-
+        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 

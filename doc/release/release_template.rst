@@ -17,10 +17,8 @@ New Features
 
 
 
-
 Improvements
 ------------
-
 
 
 
@@ -29,11 +27,16 @@ API Changes
 
 
 
+Bugfixes
+--------
+
+
 
 Deprecations
 ------------
 
-- Python 2.6 support has been dropped. Minimal required Python version is 2.7.
+- Python 2.x support has been dropped. The minimal required Python version
+  is 3.5
 
 
 Contributors to this release

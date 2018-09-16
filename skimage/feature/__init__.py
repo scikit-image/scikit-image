@@ -1,4 +1,5 @@
 from ._canny import canny
+from ._cascade import Cascade
 from ._daisy import daisy
 from ._hog import hog
 from .texture import (greycomatrix, greycoprops,
@@ -22,9 +23,12 @@ from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
+from .haar import (haar_like_feature, haar_like_feature_coord,
+                   draw_haar_like_feature)
 
 
 __all__ = ['canny',
+           'Cascade',
            'daisy',
            'hog',
            'greycomatrix',
@@ -57,4 +61,7 @@ __all__ = ['canny',
            'plot_matches',
            'blob_dog',
            'blob_doh',
-           'blob_log']
+           'blob_log',
+           'haar_like_feature',
+           'haar_like_feature_coord',
+           'draw_haar_like_feature']

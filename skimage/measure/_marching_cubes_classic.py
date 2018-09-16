@@ -91,7 +91,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     .. [1] Lorensen, William and Harvey E. Cline. Marching Cubes: A High
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
-           DOI: 10.1145/37401.37422
+           :DOI:`10.1145/37401.37422`
 
     See Also
     --------

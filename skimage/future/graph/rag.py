@@ -108,7 +108,7 @@ class RAG(nx.Graph):
 
     """
     The Region Adjacency Graph (RAG) of an image, subclasses
-    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes.graph.html>`_
+    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes/graph.html>`_
 
     Parameters
     ----------
@@ -350,8 +350,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
-
+           :DOI:`10.1109/83.841950`
     """
     graph = RAG(labels, connectivity=connectivity)
 

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """Standard test images.
 
 For more images, see
@@ -12,14 +10,19 @@ import os as _os
 
 import numpy as _np
 
-from .. import data_dir
 from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings
+from .._shared._warnings import expected_warnings, warn
+from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
-from .. import img_as_bool
+from ._detect import lbp_frontal_face_cascade_filename
 
-__all__ = ['load',
+import os.path as osp
+data_dir = osp.abspath(osp.dirname(__file__))
+
+__all__ = ['data_dir',
+           'load',
            'astronaut',
+           'binary_blobs',
            'camera',
            'checkerboard',
            'chelsea',
@@ -29,6 +32,8 @@ __all__ = ['load',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
+           'lbp_frontal_face_cascade_filename',
+           'lfw_subset',
            'logo',
            'moon',
            'page',
@@ -37,23 +42,32 @@ __all__ = ['load',
            'stereo_motorcycle']
 
 
-def load(f, as_grey=False):
+def load(f, as_gray=False, as_grey=None):
     """Load an image file located in the data directory.
 
     Parameters
     ----------
     f : string
         File name.
-    as_grey : bool, optional
-        Convert to greyscale.
+    as_gray : bool, optional
+        Convert to grayscale.
+    as_grey : bool or None, optional
+        Deprecated keyword argument. Use `as_gray` instead.
+        If None, `as_gray` is used.
+        Convert to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
+    if as_grey is not None:
+        as_gray = as_grey
+        warn('`as_grey` has been deprecated in favor of `as_gray`'
+             ' and will be removed in v0.16.')
+
     use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_grey=as_grey)
+    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
 
 
 def camera():
@@ -138,7 +152,7 @@ def coins():
     -----
     This image was downloaded from the
     `Brooklyn Museum Collection
-    <http://www.brooklynmuseum.org/opencollection/archives/image/33814>`__.
+    <https://www.brooklynmuseum.org/opencollection/archives/image/51611>`__.
 
     No known copyright restrictions.
 
@@ -204,7 +218,7 @@ def horse():
         Horse image.
     """
     with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_grey=True))
+        return img_as_bool(load("horse.png", as_gray=True))
 
 
 def clock():
@@ -331,15 +345,15 @@ def rocket():
 def stereo_motorcycle():
     """Rectified stereo image pair with ground-truth disparities.
 
-    The two images are rectified such that every pixel in the left image has its
-    corresponding pixel on the same scanline in the right image. That means that
-    both images are warped such that they have the same orientation but a
+    The two images are rectified such that every pixel in the left image has
+    its corresponding pixel on the same scanline in the right image. That means
+    that both images are warped such that they have the same orientation but a
     horizontal spatial offset (baseline). The ground-truth pixel offset in
     column direction is specified by the included disparity map.
 
-    The two images are part of the Middlebury 2014 stereo benchmark. The dataset
-    was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima, Greg
-    Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
+    The two images are part of the Middlebury 2014 stereo benchmark. The
+    dataset was created by Nera Nesic, Porter Westling, Xi Wang, York Kitajima,
+    Greg Krathwohl, and Daniel Scharstein at Middlebury College. A detailed
     description of the acquisition process can be found in [1]_.
 
     The images included here are down-sampled versions of the default exposure
@@ -369,14 +383,15 @@ def stereo_motorcycle():
 
     Notes
     -----
-    The original resolution images, images with different exposure and lighting,
-    and ground-truth depth maps can be found at the Middlebury website [2]_.
+    The original resolution images, images with different exposure and
+    lighting, and ground-truth depth maps can be found at the Middlebury
+    website [2]_.
 
     References
     ----------
-    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N. Nesic,
-           X. Wang, and P. Westling. High-resolution stereo datasets with
-           subpixel-accurate ground truth. In German Conference on Pattern
+    .. [1] D. Scharstein, H. Hirschmueller, Y. Kitajima, G. Krathwohl, N.
+           Nesic, X. Wang, and P. Westling. High-resolution stereo datasets
+           with subpixel-accurate ground truth. In German Conference on Pattern
            Recognition (GCPR 2014), Muenster, Germany, September 2014.
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 
@@ -384,3 +399,35 @@ def stereo_motorcycle():
     return (load("motorcycle_left.png"),
             load("motorcycle_right.png"),
             _np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
+
+
+def lfw_subset():
+    """Subset of data from the LFW dataset.
+
+    This database is a subset of the LFW database containing:
+
+    * 100 faces
+    * 100 non-faces
+
+    The full dataset is available at [2]_.
+
+    Returns
+    -------
+    images : (200, 25, 25) uint8 ndarray
+        100 first images are faces and subsequent 100 are non-faces.
+
+    Notes
+    -----
+    The faces were randomly selected from the LFW dataset and the non-faces
+    were extracted from the background of the same dataset. The cropped ROIs
+    have been resized to a 25 x 25 pixels.
+
+    References
+    ----------
+    .. [1] Huang, G., Mattar, M., Lee, H., & Learned-Miller, E. G. (2012).
+           Learning to align from scratch. In Advances in Neural Information
+           Processing Systems (pp. 764-772).
+    .. [2] http://vis-www.cs.umass.edu/lfw/
+
+    """
+    return _np.load(_os.path.join(data_dir, 'lfw_subset.npy'))

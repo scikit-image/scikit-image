@@ -60,7 +60,7 @@ class TestSkeletonize():
         assert_array_equal(result, im)
 
     def test_skeletonize_output(self):
-        im = imread(os.path.join(data_dir, "bw_text.png"), as_grey=True)
+        im = imread(os.path.join(data_dir, "bw_text.png"), as_gray=True)
 
         # make black the foreground
         im = (im == 0)

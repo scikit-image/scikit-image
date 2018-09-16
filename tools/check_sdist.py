@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 
 import os
 import subprocess
@@ -18,14 +17,20 @@ data = [l for l in data if l.startswith('hard linking')]
 data = [l.replace('hard linking ', '') for l in data]
 data = ['./' + l.split(' ->')[0] for l in data]
 
-ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore']
-ignore_dirs = ['./dist', './tools', './doc', './viewer_examples',
-               './downloads', './scikit_image.egg-info']
+ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
+ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
+               './downloads', './scikit_image.egg-info', './benchmarks']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './.appveyor.yml',
-                './.pep8speaks.yml',
-                './skimage/filters/rank/README.rst']
+                './.pep8speaks.yml', './asv.conf.json',
+                './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
+
+# These docstring artifacts are hard to avoid without adding noise to the
+# docstrings. They typically show up if you run the whole test suite in the
+# build directory.
+docstring_artifacts = ['./temp.tif', './save-demo.jpg']
+ignore_files = ignore_files + docstring_artifacts
 
 
 missing = []

@@ -6,7 +6,7 @@ import numpy as np
 from ... import io, img_as_float
 from ...util.dtype import dtype_range
 from ...exposure import rescale_intensity
-from ..qt import QtWidgets, Qt, Signal
+from ..qt import QtWidgets, QtGui, Qt, Signal
 from ..widgets import Slider
 from ..utils import (dialogs, init_qtapp, figimage, start_qtapp,
                      update_axes_image)
@@ -93,7 +93,7 @@ class ImageViewer(QtWidgets.QMainWindow):
         init_qtapp()
         super(ImageViewer, self).__init__()
 
-        #TODO: Add ImageViewer to skimage.io window manager
+        # TODO: Add ImageViewer to skimage.io window manager
 
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
@@ -361,7 +361,7 @@ class CollectionViewer(ImageViewer):
         self.slider = Slider('frame', **slider_kws)
         self.layout.addWidget(self.slider)
 
-        #TODO: Adjust height to accomodate slider; the following doesn't work
+        # TODO: Adjust height to accomodate slider; the following doesn't work
         # s_size = self.slider.sizeHint()
         # cs_size = self.canvas.sizeHint()
         # self.resize(cs_size.width(), cs_size.height() + s_size.height())
@@ -382,11 +382,11 @@ class CollectionViewer(ImageViewer):
         self.update_image(self.image_collection[index])
 
     def keyPressEvent(self, event):
-        if type(event) == QtWidgets.QKeyEvent:
+        if type(event) == QtGui.QKeyEvent:
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:
-                index = 0.1 * int(key - 48) * self.num_images
+                index = int(0.1 * (key - 48) * self.num_images)
                 self.update_index('', index)
                 event.accept()
             else:

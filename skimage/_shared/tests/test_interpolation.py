@@ -18,6 +18,10 @@ def test_coord_map():
     expected_reflect = [0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1]
     assert_array_equal(reflect, expected_reflect)
 
+    reflect = [coord_map_py(1, n, 'R') for n in range(-6, 6)]
+    expected_reflect = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    assert_array_equal(reflect, expected_reflect)
+
     other = [coord_map_py(4, n, 'undefined') for n in range(-6, 6)]
     expected_other = list(range(-6, 6))
     assert_array_equal(other, expected_other)

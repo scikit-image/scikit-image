@@ -14,6 +14,7 @@ from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
+
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
@@ -182,11 +183,36 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     return H_elems
 
-def hessian_matrix_det(image, sigma=1):
-    """Computes the approximate Hessian Determinant over an image.
 
-    This method uses box filters over integral images to compute the
-    approximate Hessian Determinant as described in [1]_.
+def _hessian_matrix_image(H_elems):
+    """Convert the upper-diagonal elements of the Hessian matrix to a matrix.
+
+    Parameters
+    ----------
+    H_elems : list of array
+        The upper-diagonal elements of the Hessian matrix, as returned by
+        `hessian_matrix`.
+
+    Returns
+    -------
+    hessian_image : array
+        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
+        containing the Hessian matrix corresponding to each coordinate.
+    """
+    image = H_elems[0]
+    hessian_image = np.zeros(image.shape + (image.ndim, image.ndim))
+    for idx, (row, col) in \
+            enumerate(combinations_with_replacement(range(image.ndim), 2)):
+        hessian_image[..., row, col] = H_elems[idx]
+        hessian_image[..., col, row] = H_elems[idx]
+    return hessian_image
+
+
+def hessian_matrix_det(image, sigma=1, approximate=True):
+    """Compute the approximate Hessian Determinant over an image.
+
+    The 2D approximate method uses box filters over integral images to
+    compute the approximate Hessian Determinant, as described in [1]_.
 
     Parameters
     ----------
@@ -195,6 +221,9 @@ def hessian_matrix_det(image, sigma=1):
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix.
+    approximate : bool, optional
+        If ``True`` and the image is 2D, use a much faster approximate
+        computation. This argument has no effect on 3D and higher images.
 
     Returns
     -------
@@ -209,16 +238,19 @@ def hessian_matrix_det(image, sigma=1):
 
     Notes
     -----
-    The running time of this method only depends on size of the image. It is
-    independent of `sigma` as one would expect. The downside is that the
-    result for `sigma` less than `3` is not accurate, i.e., not similar to
-    the result obtained if someone computed the Hessian and took it's
-    determinant.
+    For 2D images when ``approximate=True``, the running time of this method
+    only depends on size of the image. It is independent of `sigma` as one
+    would expect. The downside is that the result for `sigma` less than `3`
+    is not accurate, i.e., not similar to the result obtained if someone
+    computed the Hessian and took its determinant.
     """
-
     image = img_as_float(image)
-    image = integral_image(image)
-    return np.array(_hessian_matrix_det(image, sigma))
+    if image.ndim == 2 and approximate:
+        integral = integral_image(image)
+        return np.array(_hessian_matrix_det(integral, sigma))
+    else:  # slower brute-force implementation for nD images
+        hessian_mat_array = _hessian_matrix_image(hessian_matrix(image, sigma))
+        return np.linalg.det(hessian_mat_array)
 
 
 def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
@@ -264,41 +296,57 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
-def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
+def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
-    Hxx : ndarray
+    H_elems : list of ndarray
+        The upper-diagonal elements of the Hessian matrix, as returned
+        by `hessian_matrix`.
+    Hxy : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
+    Hyy : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
+    Hxx : ndarray, deprecated
         Element of the Hessian matrix for each pixel in the input image.
 
     Returns
     -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
+    eigs : ndarray
+        The eigenvalues of the Hessian matrix, in decreasing order. The
+        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
+        contains the ith-largest eigenvalue at position (j, k).
 
     Examples
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
-    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
+    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> hessian_matrix_eigvals(H_elems)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 2.,  0., -2.,  0.,  2.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
-
     """
-
-    return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
+    if Hxy is not None:
+        if Hxx is None:
+            Hxx = H_elems
+        H_elems = [Hxx, Hxy, Hyy]
+        warn('The API of `hessian_matrix_eigvals` has changed. Use a list of '
+             'elements instead of separate arguments. The old version of the '
+             'API will be removed in version 0.16.')
+    if len(H_elems) == 3:  # Use fast Cython code for 2D
+        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
+    else:
+        matrices = _hessian_matrix_image(H_elems)
+        # eigvalsh returns eigenvalues in increasing order. We want decreasing
+        eigvals = np.linalg.eigvalsh(matrices)[..., ::-1]
+        leading_axes = tuple(range(eigvals.ndim - 1))
+        eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
+    return eigvals
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
@@ -351,7 +399,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     .. [1] Koenderink, J. J. & van Doorn, A. J.,
            "Surface shape and curvature scales",
            Image and Vision Computing, 1992, 10, 557-564.
-           DOI:10.1016/0262-8856(92)90076-F
+           :DOI:`10.1016/0262-8856(92)90076-F`
 
     Examples
     --------
@@ -367,8 +415,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+    H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
+    l1, l2 = hessian_matrix_eigvals(H)
 
     return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 

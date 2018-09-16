@@ -55,9 +55,9 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False):
     for d in range(image.ndim):
         slicedim = list(slices)
         slicedim[d] = slstart
-        borders[slicedim] = True
+        borders[tuple(slicedim)] = True
         slicedim[d] = slend
-        borders[slicedim] = True
+        borders[tuple(slicedim)] = True
 
     # Re-label, in case we are dealing with a binary image
     # and to get consistent labeling

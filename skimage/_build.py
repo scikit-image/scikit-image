@@ -3,7 +3,7 @@ import os
 import hashlib
 from distutils.version import LooseVersion
 
-CYTHON_VERSION = '0.23'
+CYTHON_VERSION = '0.23.4'
 
 # WindowsError is not defined on unix systems
 try:

@@ -11,7 +11,6 @@ whether the surrounding points are greater than or less than the central point
 Before trying out LBP on an image, it helps to look at a schematic of LBPs.
 The below code is just used to plot the schematic.
 """
-from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -108,7 +107,7 @@ lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 def hist(ax, lbp):
     n_bins = int(lbp.max() + 1)
-    return ax.hist(lbp.ravel(), normed=True, bins=n_bins, range=(0, n_bins),
+    return ax.hist(lbp.ravel(), density=True, bins=n_bins, range=(0, n_bins),
                    facecolor='0.5')
 
 
@@ -167,9 +166,9 @@ def match(refs, img):
     best_name = None
     lbp = local_binary_pattern(img, n_points, radius, METHOD)
     n_bins = int(lbp.max() + 1)
-    hist, _ = np.histogram(lbp, normed=True, bins=n_bins, range=(0, n_bins))
+    hist, _ = np.histogram(lbp, density=True, bins=n_bins, range=(0, n_bins))
     for name, ref in refs.items():
-        ref_hist, _ = np.histogram(ref, normed=True, bins=n_bins,
+        ref_hist, _ = np.histogram(ref, density=True, bins=n_bins,
                                    range=(0, n_bins))
         score = kullback_leibler_divergence(hist, ref_hist)
         if score < best_score:

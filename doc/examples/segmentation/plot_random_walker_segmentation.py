@@ -17,7 +17,7 @@ markers of the two phases from the extreme tails of the histogram of gray
 values, and use the random walker for the segmentation.
 
 .. [1] *Random walks for image segmentation*, Leo Grady, IEEE Trans. Pattern
-       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 DOI:10.1109/TPAMI.2006.233
+       Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 :DOI:`10.1109/TPAMI.2006.233`
 
 """
 import numpy as np
@@ -49,15 +49,12 @@ fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2),
                                     sharex=True, sharey=True)
 ax1.imshow(data, cmap='gray', interpolation='nearest')
 ax1.axis('off')
-ax1.set_adjustable('box-forced')
 ax1.set_title('Noisy data')
 ax2.imshow(markers, cmap='magma', interpolation='nearest')
 ax2.axis('off')
-ax2.set_adjustable('box-forced')
 ax2.set_title('Markers')
 ax3.imshow(labels, cmap='gray', interpolation='nearest')
 ax3.axis('off')
-ax3.set_adjustable('box-forced')
 ax3.set_title('Segmentation')
 
 fig.tight_layout()

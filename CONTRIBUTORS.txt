@@ -253,3 +253,9 @@
 
 - Kevin Mader
   Montage improvements
+
+- David Volgyes
+  Unsharp masking
+
+- Lars Grüter
+  Flood-fill based local maxima detection

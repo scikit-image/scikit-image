@@ -2,7 +2,6 @@
 The arraycrop module contains functions to crop values from the edges of an
 n-dimensional array.
 """
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 from numpy.lib.arraypad import _validate_lengths
@@ -170,7 +169,8 @@ def crop(ar, crop_width, copy=False, order='K'):
     """
     ar = np.array(ar, copy=False)
     crops = _validate_lengths(ar, crop_width)
-    slices = [slice(a, ar.shape[i] - b) for i, (a, b) in enumerate(crops)]
+    slices = tuple(slice(a, ar.shape[i] - b)
+                   for i, (a, b) in enumerate(crops))
     if copy:
         cropped = np.array(ar[slices], order=order, copy=True)
     else:
