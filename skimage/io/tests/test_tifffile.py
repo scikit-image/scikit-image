@@ -38,6 +38,14 @@ def test_imread_multipage_rgb_tif():
     assert img.shape == (2, 10, 10, 3), img.shape
 
 
+def test_imread_handle():
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    with open(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'), 'rb') as fh:
+        img = imread(fh)
+    assert img.dtype == np.uint16
+    assert_array_almost_equal(img, expected)
+
+
 class TestSave:
     def roundtrip(self, dtype, x):
         f = NamedTemporaryFile(suffix='.tif')
