@@ -93,7 +93,11 @@ def _upsampled_dft(data, upsampled_region_size,
 
             # To compute the upsampled DFT across all spatial dimensions,
             # a tensor product is computed with einsum
-        return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels)
+        try:
+            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels,
+                         optimize=True)
+        except TypeError:
+            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels)
 
     else:
         raise NotImplementedError("Upsampled registration for images of more"
