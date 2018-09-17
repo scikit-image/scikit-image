@@ -1,6 +1,6 @@
 numpy>=1.11
 scipy>=0.17.0
-matplotlib>=2.2.0
+matplotlib>=2.2.3
 networkx>=2.0
 pillow>=4.3.0
 imageio>=2.0.1
