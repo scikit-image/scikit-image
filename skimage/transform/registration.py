@@ -1,47 +1,86 @@
 import numpy as np
-from scipy.ndimage import shift as image_shift
+from matplotlib import pyplot as plt
+from scipy.optimize import basinhopping, minimize
 
 from .pyramids import pyramid_reduce
+from ._warps import warp, SimilarityTransform
 
-__all__ = ['register']
-
-
-def _error(img1, img2):
-    return np.square(np.subtract(img1, img2)).sum()/(255*len(img1)*len(img1[0]))
+__all__ = ['register', 'p_to_matrix', 'matrix_to_p']
 
 
-def register(img1, img2, exp=1.2):
-    shift = [0, 0]
-    loop = min(len(img1), len(img1[0]))
+def _draw_setup(img):
+    fig, ax = plt.subplots()
+    axim = ax.imshow(img)
+    plt.show(block=False)
+    return fig, ax, axim
 
-    while loop > 1:
-        current = pyramid_reduce(img1, loop)
 
-        val = 1
-        loc = (0, 0)
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                err = _error(pyramid_reduce(image_shift(
-                    img2, (shift[0]+i*loop, shift[1]+j*loop)), loop), current)
-                if val > err:
-                    val = err
-                    loc = (i*loop, j*loop)
+def _action(package, img, p):
+    fig, ax, axim = package
+    matrix = p_to_matrix(p)
+    img = warp(img, matrix)
 
-        shift[0] += loc[0]
-        shift[1] += loc[1]
+    plt.imshow(img)
+    fig.canvas.draw()
+    return fig, ax, axim
 
-        loop = loop//exp
 
-    val = 1
-    loc = (0, 0)
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            err = _error(image_shift(img2, (shift[0]+i, shift[1]+j)), img1)
-            if val > err:
-                val = err
-                loc = (i, j)
+def _gaussian_pyramid(image, levels=6):
+    pyramid = levels*[None]
+    pyramid[-1] = image
 
-    shift[0] += loc[0]
-    shift[1] += loc[1]
+    for level in range(levels-2, -1, -1):
+        image = pyramid_reduce(image, sigma=2/3)
+        pyramid[level] = (image)
 
-    return image_shift(img2, shift), shift
+    return pyramid
+
+
+def _mse(img1, img2):
+    return ((img1-img2)**2).sum()
+
+
+def _cost_mse(param, reference_image, target_image):
+    transformation = p_to_matrix(param)
+    transformed = warp(target_image, transformation, order=3)
+    return _mse(reference_image, transformed)
+
+
+def p_to_matrix(param):
+    r, tc, tr = param
+    return SimilarityTransform(rotation=r, translation=(tc, tr))
+
+
+def matrix_to_p(matrix):
+    m = matrix.params
+    return (np.arccos(m[0][0])*180/np.pi, m[0][2], m[1][2])
+
+
+def register(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', draw=False):
+    assert method in ['Powell', 'BH']
+    pyramid_ref = _gaussian_pyramid(reference, levels=nlevels)
+    pyramid_tgt = _gaussian_pyramid(target, levels=nlevels)
+    levels = range(nlevels, 0, -1)
+    image_pairs = zip(pyramid_ref, pyramid_tgt)
+    p = np.zeros(3)
+
+    if draw:
+        drawing_package = _draw_setup(reference)
+
+    for n, (ref, tgt) in zip(levels, image_pairs):
+        p[1] *= 2
+        p[2] *= 2
+        if method.upper() == 'BH':
+            res = basinhopping(cost, p,
+                               minimizer_kwargs={'args': (ref, tgt)})
+            if n <= 4:  # avoid basin-hopping in lower levels
+                method = 'Powell'
+        else:
+            res = minimize(cost, p, args=(ref, tgt), method='Powell')
+        p = res.x
+        if draw:
+            _action(drawing_package, tgt, p)
+
+    matrix = p_to_matrix(p)
+
+    return matrix
