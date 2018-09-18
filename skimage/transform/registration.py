@@ -1,28 +1,10 @@
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.optimize import basinhopping, minimize
 
 from .pyramids import pyramid_reduce
 from ._warps import warp, SimilarityTransform
 
 __all__ = ['register', 'p_to_matrix', 'matrix_to_p']
-
-
-def _draw_setup(img):
-    fig, ax = plt.subplots()
-    axim = ax.imshow(img)
-    plt.show(block=False)
-    return fig, ax, axim
-
-
-def _action(package, img, p):
-    fig, ax, axim = package
-    matrix = p_to_matrix(p)
-    img = warp(img, matrix)
-
-    plt.imshow(img)
-    fig.canvas.draw()
-    return fig, ax, axim
 
 
 def _gaussian_pyramid(image, levels=6):
@@ -56,16 +38,13 @@ def matrix_to_p(matrix):
     return (np.arccos(m[0][0])*180/np.pi, m[0][2], m[1][2])
 
 
-def register(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', draw=False):
+def register(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', iter_callback=lambda img, p: None):
     assert method in ['Powell', 'BH']
     pyramid_ref = _gaussian_pyramid(reference, levels=nlevels)
     pyramid_tgt = _gaussian_pyramid(target, levels=nlevels)
     levels = range(nlevels, 0, -1)
     image_pairs = zip(pyramid_ref, pyramid_tgt)
     p = np.zeros(3)
-
-    if draw:
-        drawing_package = _draw_setup(reference)
 
     for n, (ref, tgt) in zip(levels, image_pairs):
         p[1] *= 2
@@ -78,8 +57,7 @@ def register(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', d
         else:
             res = minimize(cost, p, args=(ref, tgt), method='Powell')
         p = res.x
-        if draw:
-            _action(drawing_package, tgt, p)
+        iter_callback(tgt, p)
 
     matrix = p_to_matrix(p)
 
