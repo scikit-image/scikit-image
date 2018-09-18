@@ -54,7 +54,7 @@ whole sets of pixels using the different indexing capabilities of NumPy.
 
 Slicing::
 
-    >>> # Set to "black" (0) the first ten lines
+    >>> # Set the first ten lines to "black" (0)
     >>> camera[:10] = 0
 
 Masking (indexing with masks of booleans)::
@@ -72,7 +72,7 @@ Fancy indexing (indexing with sets of indices)::
 Masks are very useful when you need to select a set of pixels on which
 to perform the manipulations. The mask can be any boolean array
 of the same shape as the image (or a shape broadcastable to the image shape).
-This can be used to define a region of interest, for example, a disk-shaped::
+This can be used to define a region of interest, for example, a disk::
 
     >>> nrows, ncols = camera.shape
     >>> row, col = np.ogrid[:nrows, :ncols]
@@ -96,7 +96,7 @@ Boolean operations from NumPy can be used to define even more complex masks::
 Color images
 ------------
 
-All of the above is true for color images too: a color image is a
+All of the above remains true for color images. A color image is a
 NumPy array with an additional trailing dimension for the channels::
 
     >>> cat = data.chelsea()
@@ -143,7 +143,7 @@ also see ``rr`` and ``cc`` refer to lists of row and column
 coordinates. We distinguish this convention from ``(x, y)``, which commonly
 denote standard Cartesian coordinates, where ``x`` is the horizontal coordinate,
 ``y`` - the vertical one, and the origin is at the bottom left
-(Matplotlib, for example, uses this convention).
+(Matplotlib axes, for example, use this convention).
 
 In the case of multichannel images, the last dimension is used for color channels
 and is denoted by ``channel`` or ``ch``.
@@ -196,7 +196,7 @@ Notes on the order of array dimensions
 --------------------------------------
 
 Although the labeling of the axes might seem arbitrary, it can have a
-significant effect on the speed of operations. This is because the modern
+significant effect on the speed of operations. This is because modern
 processors never retrieve just one item from memory, but rather a whole
 chunk of adjacent items (an operation called prefetching). Therefore,
 processing of elements that are next to each other in memory is faster
