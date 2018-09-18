@@ -95,6 +95,7 @@ for i, txt in enumerate(['Compact', 'Edge', 'GAC']):
 ax[1].set_xlabel('Adapted Rand precision')
 ax[1].set_ylabel('Adapted Rand recall')
 ax[1].set_title("Precision vs. Recall")
+ax[1].axis([0, 1, 0, 1])
 
 ax[2].imshow(mark_boundaries(image, im_true))
 ax[2].set_title('True Segmentation')
