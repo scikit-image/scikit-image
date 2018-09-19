@@ -8,6 +8,22 @@ __all__ = ['register', 'p_to_matrix', 'matrix_to_p']
 
 
 def _gaussian_pyramid(image, levels=6):
+    """
+    Creates a gaussian pyramid for an image
+    
+    Parameters
+    ----------
+    image : (M, N) ndarray
+        Input image with is used as a base for the pyramid.
+    levels : int, optional (default 6)
+        Int equals to the amount of times the image is blurred and reduced
+    
+    Returns
+    -------
+    pyramid: array
+        Ordered array of images of size level starting with the most blurred
+        
+    """
     pyramid = levels*[None]
     pyramid[-1] = image
 
@@ -19,23 +35,84 @@ def _gaussian_pyramid(image, levels=6):
 
 
 def _mse(img1, img2):
+    """
+    Finds the error between the overlapping area of two images
+    
+    Parameters
+    ----------
+    img1 : (M, N) ndarray
+        Input image used for reference
+    img2 : (M, N) ndarray
+        Input image which is compared to img1
+    
+    Returns
+    -------
+    err: int
+        Error in the form of the squared difference between pixels
+    """
     dim0 = min(img1.shape[0],img2.shape[0])
     dim1 = min(img1.shape[1],img2.shape[1])
     return ((img1[:dim0,:dim1]-img2[:dim0,:dim1])**2).sum()
 
 
 def _cost_mse(param, reference_image, target_image):
+    """
+    Finds the error between the overlapping area of two images after transformations are done to one of them
+    
+    Parameters
+    ----------
+    param : array
+        Input array giving the translation and rotation the target image will undergo
+    reference_image : (M, N) ndarray
+        Input image used for reference
+    target_image : (M, N) ndarray
+        Input image which is modified and then compared to reference_image
+    
+    Returns
+    -------
+    err: int
+        Error in the form of the squared difference between pixels
+    """
     transformation = p_to_matrix(param)
     transformed = warp(target_image, transformation, order=3)
     return _mse(reference_image, transformed)
 
 
 def p_to_matrix(param):
+    """
+    Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
+    
+    Parameters
+    ----------
+    param : array
+        Input array giving the translation and rotation of an image
+    
+    Returns
+    -------
+    matrix : (3, 3) array
+        A transformation matrix used to obtain a new image
+    """
+    
     r, tc, tr = param
     return SimilarityTransform(rotation=r, translation=(tc, tr))
 
 
 def matrix_to_p(matrix):
+    """
+    Converts a 3x3 transformation matrix into a transformation in form of (r, tc, tr)
+    
+    Parameters
+    ----------
+    matrix : (3, 3) array
+        A transformation matrix used to obtain a new image
+    
+    Returns
+    -------
+    param : array
+        Input array giving the translation and rotation of an image
+    
+    """
+    
     m = matrix.params
     return (np.arccos(m[0][0])*180/np.pi, m[0][2], m[1][2])
 
