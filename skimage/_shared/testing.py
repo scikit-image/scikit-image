@@ -4,6 +4,7 @@ Testing utilities.
 
 import os
 import re
+import struct
 import threading
 import functools
 from tempfile import NamedTemporaryFile
@@ -26,9 +27,15 @@ import pytest
 SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 skipif = pytest.mark.skipif
+xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
+
+# true if python is running in 32bit mode
+# Calculate the size of a void * pointer in bits
+# https://docs.python.org/3/library/struct.html
+arch32 = struct.calcsize("P") * 8 == 32
 
 
 def assert_less(a, b, msg=None):
