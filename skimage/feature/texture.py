@@ -130,10 +130,10 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
-    # count co-occurences
+    # count co-occurrences
     if normed:
         P = np.zeros((levels, levels, len(distances), len(angles)),
-                           dtype=np.float64, order='C')
+                     dtype=np.float64, order='C')
         _glcm_loop_float(image, distances, angles, levels, P, symmetric)
         # normalize each GLMC
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
