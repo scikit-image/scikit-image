@@ -7,6 +7,7 @@ from .._shared.utils import assert_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
+                       _glcm_loop_float,
                        _local_binary_pattern,
                        _multiblock_lbp)
 
@@ -129,23 +130,20 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
-    P = np.zeros((levels, levels, len(distances), len(angles)),
-                 dtype=np.uint32, order='C')
-
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
-
-    # make each GLMC symmetric
-    if symmetric:
-        Pt = np.transpose(P, (1, 0, 2, 3))
-        P = P + Pt
-
-    # normalize each GLMC
     if normed:
-        P = P.astype(np.float64)
+        P = np.zeros((levels, levels, len(distances), len(angles)),
+                           dtype=np.float64, order='C')
+        _glcm_loop_float(image, distances, angles, levels, P, symmetric)
+        # normalize each GLMC
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
         glcm_sums[glcm_sums == 0] = 1
         P /= glcm_sums
+
+    else:
+        P = np.zeros((levels, levels, len(distances), len(angles)),
+                     dtype=np.uint32, order='C')
+        _glcm_loop(image, distances, angles, levels, P, symmetric)
 
     return P
 
