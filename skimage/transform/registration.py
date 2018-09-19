@@ -19,7 +19,9 @@ def _gaussian_pyramid(image, levels=6):
 
 
 def _mse(img1, img2):
-    return ((img1-img2)**2).sum()
+    dim0 = min(img1.shape[0],img2.shape[0])
+    dim1 = min(img1.shape[1],img2.shape[1])
+    return ((img1[:dim0,:dim1]-img2[:dim0,:dim1])**2).sum()
 
 
 def _cost_mse(param, reference_image, target_image):
