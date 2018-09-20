@@ -135,7 +135,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
                      dtype=np.float64, order='C')
         _glcm_loop(image, distances, angles, levels, P, symmetric)
         # normalize each GLMC
-        glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+        glcm_sums = np.sum(P, axis=(-2, -1), keepdims=True)
         glcm_sums[glcm_sums == 0] = 1
         P /= glcm_sums
 
