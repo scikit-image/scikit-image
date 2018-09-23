@@ -4,7 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-
+import warnings
 
 def _upsampled_dft(data, upsampled_region_size,
                    upsample_factor=1, axis_offsets=None):
@@ -97,6 +97,8 @@ def _upsampled_dft(data, upsampled_region_size,
             return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels,
                          optimize=True)
         except TypeError:
+            warnings.warn("Subpixel registration of 3D images will be very slow"
+                          " if your numpy version is earlier than 1.12")
             return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels)
 
     else:
