@@ -60,7 +60,7 @@ def test_ssim_grad(seed):
     #       seeds that are known to work.
     #       The likely cause of this failure is that we are setting a hard
     #       threshold on the value of the gradient. Often the computed gradient
-    #       is only slightly larger than what whas measured.
+    #       is only slightly larger than what was measured.
     # X = np.random.rand(N, N) * 255
     # Y = np.random.rand(N, N) * 255
     rnd = np.random.RandomState(seed)
