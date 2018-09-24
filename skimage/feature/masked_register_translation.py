@@ -51,9 +51,10 @@ def masked_register_translation(
         as ``target_image``. If ``None``, ``src_mask`` will be used.
     overlap_ratio : float, optional
         Maximum allowed overlap ratio between masks. The correlation at pixels
-        with overlap ratio higher than this threshold will be zeroed.
-        TODO: specify effect of smaller vs larger overlap_ratio
-
+        with an overlap ratio higher than this threshold will be zeroed. A 
+        larger percentage leads to greater robustness to spurious matches, for 
+        example due to noise. A smaller percentage leads to greater 
+        registration range.
 
     Returns
     -------
