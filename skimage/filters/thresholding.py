@@ -459,7 +459,10 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds[0]
 
 
-def _cross_entropy(image, threshold, bins=np.arange(-0.5, 255.51, 1)):
+_DEFAULT_ENTROPY_BINS = tuple(np.arange(-0.5, 255.51, 1))
+
+
+def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     """Compute cross-entropy between distributions above and below a threshold.
 
     Parameters
