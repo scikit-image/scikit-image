@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.feature import masked_register_translation
-from scipy import ndimage
+from scipy import ndimage as ndi
 
 image = data.camera()
 shift = (-22, 13)
@@ -38,7 +38,7 @@ corrupted_pixels = np.random.choice([False, True],
                                     p = [0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
-offset_image = ndimage.shift(image, shift)
+offset_image = ndi.shift(image, shift)
 offset_image *= corrupted_pixels
 print("Known offset (y, x): {}".format(shift))
 
