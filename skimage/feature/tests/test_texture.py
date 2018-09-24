@@ -142,21 +142,26 @@ class TestGLCM():
                               normed=True, symmetric=True)
         result = np.round(result, 3)
         contrast = greycoprops(result, 'contrast')
-        np.testing.assert_almost_equal(contrast[0, 0], 0.586)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.585, decimal=3)
 
     def test_dissimilarity(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=True, symmetric=True)
         result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity')
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
 
     def test_dissimilarity_2(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
         result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity')[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.664)
+        np.testing.assert_almost_equal(dissimilarity, 0.665, decimal=3)
+
+    def test_non_normalized_glcm(self):
+        img = (np.random.random((100, 100)) * 8).astype(np.uint8)
+        p = greycomatrix(img, [1, 2, 4, 5], [0, 0.25, 1, 1.5], levels=8)
+        np.testing.assert_(np.max(greycoprops(p, 'correlation')) < 1.0)
 
     def test_invalid_property(self):
         result = greycomatrix(self.image, [1], [0], 4)
