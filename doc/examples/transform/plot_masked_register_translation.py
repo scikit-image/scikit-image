@@ -22,26 +22,30 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.feature import masked_register_translation
-from scipy.ndimage import fourier_shift
+from scipy import ndimage
 
 image = data.camera()
 shift = (-22, 13)
 
-# Define areas of the image which are invalid
-# Probability of an invalid pixel is 25%
+#############################################
+# Define areas of the image which are invalid.
+# Probability of an invalid pixel is 25%.
 # This could be due to a faulty detector, or edges that
-# are not affected by translation (e.g. moving object in a window)
+# are not affected by translation (e.g. moving object in a window).
 # See reference paper for more examples
-corruped_pixels = np.random.choice([False, True], size = image.shape, p = [0.25, 0.75])
+corrupted_pixels = np.random.choice([False, True], 
+                                    size = image.shape, 
+                                    p = [0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
-offset_image = fourier_shift(np.fft.fftn(image), shift)
-offset_image = np.fft.ifftn(offset_image)
-offset_image *= corruped_pixels
+offset_image = ndimage.shift(image, shift)
+offset_image *= corrupted_pixels
 print("Known offset (y, x): {}".format(shift))
 
 # Determine what the mask is based on which pixels are invalid
-mask = np.logical_not(np.isclose(offset_image, 0))
+# In this case, we know what the mask should be since we corrupted 
+# the pixels ourselves
+mask = corrupted_pixels
 
 shift = masked_register_translation(image, offset_image, mask)
 
