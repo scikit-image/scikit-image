@@ -48,19 +48,19 @@ def test_45deg_right_downward_interpolated():
     assert_almost_equal(prof, expected_prof)
 
 
-def test_45deg_right_upward():
+def test_45deg_right_upward_interpolated():
     prof = profile_line(image, (8, 2), (2, 8), order=1)
     expected_prof = np.arange(82, 27, -6)
     assert_almost_equal(prof, expected_prof)
 
 
-def test_45deg_left_upward():
+def test_45deg_left_upward_interpolated():
     prof = profile_line(image, (8, 8), (2, 2), order=1)
     expected_prof = np.arange(88, 21, -22. / 3)
     assert_almost_equal(prof, expected_prof)
 
 
-def test_45deg_left_downward():
+def test_45deg_left_downward_interpolated():
     prof = profile_line(image, (2, 8), (8, 2), order=1)
     expected_prof = np.arange(28, 83, 6)
     assert_almost_equal(prof, expected_prof)
@@ -129,6 +129,12 @@ def test_3d_vertical_downward_through_center_linewidth():
     assert_equal(prof, expected_prof)
 
 
+def test_3d_vertical_downward_through_center_linewidth_interpolated():
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False)
+    expected_prof = np.array([0, 0, 0])
+    assert_equal(prof, expected_prof)
+
+
 def test_3d_diagonal():
     prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=0, multichannel=False)
     expected_prof = np.array([1, 0, 0, 1, 1])
@@ -141,7 +147,7 @@ def test_3d_diagonal_interpolated():
     assert_equal(prof, expected_prof)
 
 
-def test_3d_through_center_linewidth():
-    prof = profile_line(image3d, (1, 1, 0), (1, 1, 2), order=1, linewidth=3, multichannel=False)
-    expected_prof = np.repeat(0.850761583277, 3)
-    assert_almost_equal(prof, expected_prof)
+def test_3d_diagonal_interpolated_interpolated():
+    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=1, linewidth=3, multichannel=False)
+    expected_prof = np.array([0, 0, 0])
+    assert_equal(prof, expected_prof)
