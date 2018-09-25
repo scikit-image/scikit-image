@@ -195,6 +195,7 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX',
