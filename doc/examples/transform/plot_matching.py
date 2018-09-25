@@ -20,7 +20,6 @@ sufficient. Therefore, the RANSAC algorithm is used on top of the normal model
 to robustly estimate the parameter set by detecting outliers.
 
 """
-from __future__ import print_function
 
 import numpy as np
 from matplotlib import pyplot as plt

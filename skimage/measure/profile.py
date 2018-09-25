@@ -1,21 +1,22 @@
 import numpy as np
-from scipy import ndimage as ndi, constants
+from scipy import ndimage as ndi
 
 
-def profile_line(img, src, dst, linewidth=1,
-                 order=1, mode='constant', cval=0.0, multichannel=True):
+def profile_line(image, src, dst, linewidth=1,
+                 order=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    img : numeric array, shape (M, N[, C])
-        The image, either grayscale (2D array or 3d array) or multichannel
-        (3D array, for a RBG 2d image where the final axis contains the channel
+    image : numeric array, shape (M, N[, C])
+        The image, either grayscale (2D array) or multichannel
+        (3D array, where the final axis contains the channel
         information).
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line.
+        The end point of the scan line. The destination point is *included*
+        in the profile, in constrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -25,9 +26,7 @@ def profile_line(img, src, dst, linewidth=1,
         How to compute any values falling outside of the image.
     cval : float, optional
         If `mode` is 'constant', what constant value to use outside the image.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
+
     Returns
     -------
     return_value : array
@@ -46,36 +45,29 @@ def profile_line(img, src, dst, linewidth=1,
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 4))
     array([ 1.,  1.,  2.,  2.])
+    >>> profile_line(img, (1, 0), (1, 6), cval=4)
+    array([ 1.,  1.,  1.,  2.,  2.,  2.,  4.])
 
-    Notes
-    -----
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
-    """
-    if img.ndim == 4 and multichannel:
-        # 3D RGB
-        perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
-                                      mode=mode, cval=cval) for i in range(img.shape[3])]
-        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
-    elif img.ndim == 3 and not multichannel:
-        # 3D intensity
-        perp_lines = _line_profile_coordinates3d(src, dst, linewidth=linewidth)
-        pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
-    elif img.ndim == 3 and multichannel:
-        # 2D RGB
-        perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines, order=order,
-                                      mode=mode, cval=cval) for i in range(img.shape[2])]
-        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
-    elif img.ndim == 2:
-        # 2D intensity
-        perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
-        pixels = ndi.map_coordinates(img, perp_lines, order=order, mode=mode, cval=cval)
-    else:
-        raise ValueError('profile_line is not implemented for images of dimension {0}'.format(img.shape))
+    For example:
 
+    >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
+    array([ 1.,  1.,  1.,  2.,  2.,  2.,  0.])
+    >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
+    array([ 1.,  1.,  1.,  2.,  2.,  2.])
+    """
+    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
+    if image.ndim == 3:
+        pixels = [ndi.map_coordinates(image[..., i], perp_lines,
+                                      order=order, mode=mode, cval=cval)
+                  for i in range(image.shape[2])]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
+    else:
+        pixels = ndi.map_coordinates(image, perp_lines,
+                                     order=order, mode=mode, cval=cval)
     intensities = pixels.mean(axis=1)
+
     return intensities
 
 
@@ -124,229 +116,3 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
     return np.array([perp_rows, perp_cols])
-
-
-def _line_profile_coordinates3d(src, dst, linewidth=1):
-    """Return the coordinates of the profile of an image along a scan line.
-
-    Parameters
-    ----------
-    src : 3-tuple of numeric scalar (float or int)
-        The start point of the scan line.
-    dst : 3-tuple of numeric scalar (float or int)
-        The end point of the scan line.
-    linewidth : int, optional
-        Width of the scan, perpendicular to the line,
-        since the line is 3d, this value is the diameter
-        of a 3d cylinder following the scan line.
-
-    Returns
-    -------
-    perp_array : array, shape (3, M, N), float
-        The coordinates of the profile along the scan line. The length of the
-        profile, M, is the ceil of the computed length of the scan line.
-        The line width, N, is the number of sample points taken at each unit of the scan line.
-
-    Notes
-    -----
-    This is a utility method meant to be used internally by skimage functions.
-    The destination point is included in the profile, in contrast to
-    standard numpy indexing.
-    """
-    src_pln, src_row, src_col = src = np.asarray(src, dtype=float)
-    dst_pln, dst_row, dst_col = dst = np.asarray(dst, dtype=float)
-    d_pln, d_row, d_col = dst - src
-
-    # Get one unit vector perpendicular to direction vector to find a point
-    # that is one unit distance away from the destination vector
-    # (ex: ix + jy + kz = 0, then we can use x = y = 1)
-    # Try with z first if it is not 0, then the same for x, otherwise pick y
-    # We subtract 1 from linewidth to change from pixel-counting
-    # (make this line 3 pixels wide) to point distances (the
-    # distance between pixel centers)
-    if d_pln != 0:
-        # try finding the solution to ix + jy + kz = 0 for x = 1 and y = 1
-        dim_z = - (d_row + d_col) / d_pln
-        length_vector = np.sqrt(2 + dim_z ** 2)
-        col_width = row_width = (linewidth - 1) / (2 * length_vector)
-        slice_width = (linewidth - 1) * (dim_z / 2 * length_vector)
-    elif d_row != 0:
-        # try finding the solution to ix + jy + kz = 0 for y = 1 and z = 1
-        dim_x = - (d_pln + d_col) / d_row
-        length_vector = np.sqrt(2 + dim_x ** 2)
-        col_width = slice_width = (linewidth - 1) / (2 * length_vector)
-        row_width = (linewidth - 1) * (dim_x / length_vector) / 2
-    else:
-        # try finding the solution to ix + jy + kz = 0 for x = 1 and z = 1
-        dim_y = - (d_row + d_pln) / d_col
-        length_vector = np.sqrt(2 + dim_y ** 2)
-        row_width = slice_width = (linewidth - 1) / (2 * length_vector)
-        col_width = (linewidth - 1) * (dim_y / length_vector) / 2
-
-    # we add one above because we include the last point in the profile
-    # (in contrast to standard numpy indexing)
-    length = np.ceil(np.linalg.norm([d_pln, d_row, d_col]) + 1)
-
-    line_col = np.linspace(src_col, dst_col, length)
-    line_row = np.linspace(src_row, dst_row, length)
-    line_pln = np.linspace(src_pln, dst_pln, length)
-
-    # find divisor to get only first half of array and center point if odd
-    first_half_index = np.int(np.ceil(np.float(linewidth)/2))
-    if first_half_index < 1:
-        first_half_index = 1
-
-    perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
-                                      linewidth)[:first_half_index] for row_i in line_row])
-    perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
-                                      linewidth)[:first_half_index] for col_i in line_col])
-    perp_pln = np.array([np.linspace(slice_i - slice_width, slice_i + slice_width,
-                                       linewidth)[:first_half_index] for slice_i in line_pln])
-
-    perp_array = np.array([perp_pln, perp_rows, perp_cols])
-
-    # rotate all sample points around the direction axis if linewidth is > 1
-    if linewidth > 1:
-        perp_array = rotate_sample_points(linewidth, perp_array, src, dst)
-
-    return perp_array
-
-
-def rotate_sample_points(linewidth, perp_array, src, dst):
-    """Return the evenly rotated coordinates of the sample points along a scan line in 3d
-
-    Parameters
-    ----------
-    linewidth : int
-        Width of the scan, perpendicular to the line,
-        since the line is 3d, this value is the diameter
-        of a 3d cylinder following the scan line.
-    perp_array, shape (3, M, N), float
-        The coordinates of the profile along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-        The coordinates are 180 degrees apart.
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-
-    Returns
-    -------
-    sampling_array : array, shape (3, M, N), float
-        The coordinates of the 3d sample points along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-    """
-    line_vector = np.subtract(dst, src)
-    length_vector = np.linalg.norm(line_vector)
-    unit_direction_vector = np.divide(line_vector, length_vector)
-
-    # Rotate the points around the axis a number of times depending on the distance of the point
-    # from the direction axis to simulate sampling of points around the axis
-    sampling_array = []
-    for perp_points in perp_array.T:
-        rotation_angles = _rotation_angles_by_distance(dst, src, perp_points[0])
-        for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
-            points_array = []
-            for point in perp_points:  # the number of unit points on displacement vector
-                if angle == 0:
-                    points_array.append(point)
-                else:
-                    rotated_point = _rotate_point_around_line(point, src, unit_direction_vector, angle)
-                    points_array.append(rotated_point)
-
-            sampling_array.append(points_array)
-
-    # Return transposed array for ndi.map_coordinates
-    return np.array(sampling_array, dtype=float).T
-
-
-def _rotation_angles_by_distance(dst, src, point):
-    """Return an array of angles that will be used to rotate a point 360 degrees around a line.
-    The number of angles is dependent on the distance between the point and the line.
-    The farther the point from the line, the smaller the angle incrementation.
-
-    Parameters
-    ----------
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-    point : 3-tuple of numeric scalar (float or int)
-        The point to find the distance.
-
-    Returns
-    -------
-    angles : tuple, float
-        The angles that will be used to rotate the sample point to create more sample points around the line.
-    """
-    distance_point_line = _distance_point_line_3d(point, src, dst)
-    if distance_point_line == 0:
-        rotation_angles = np.array([0])
-    else:
-        rotation_angles = np.linspace(0, 2 * constants.pi, 2 * distance_point_line + 3)
-        rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
-    return rotation_angles
-
-
-def _distance_point_line_3d(point, src, dst):
-    """Return the distance between a line and a point in 3d.
-
-    Parameters
-    ----------
-    point : 3-tuple of numeric scalar (float or int)
-        The point to find the distance.
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-
-    Returns
-    -------
-    point : float
-        The distance between the point and the line in units
-    """
-    line_vector = np.subtract(dst, src)
-    length_vector = np.linalg.norm(line_vector)
-    vector1 = np.subtract(point, dst)
-    vector2 = np.subtract(point, src)
-    distance = np.linalg.norm(np.cross(vector1, vector2) / length_vector)
-    return np.abs(distance)
-
-
-def _rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vector, angle_in_radians):
-    """Return a 3d point that is rotated at an angle of theta around a line
-    passing through a selected point.
-
-    Parameters
-    ----------
-    point_to_rotate : 3-tuple of numeric scalar (float or int)
-        The point to rotate.
-    point_on_line : 3-tuple of numeric scalar (float or int)
-        A point where the line is passing through
-    unit_direction_vector : 3-tuple of numeric scalar (float or int)
-        The unit direction vector of the line
-    angle_in_radians : float or int
-        The angle of rotation in radians
-
-    Returns
-    -------
-    return_value : array, shape (3), float
-        The coordinates of the rotated point around the line
-    """
-    c, b, a = point_on_line
-    z, y, x = point_to_rotate
-    w, v, u = unit_direction_vector
-
-    p1 = (a * (v ** 2 + w ** 2) - u * (b * v + c * w - u * x - v * y - w * z)) * \
-        (1 - np.cos(angle_in_radians)) + x * np.cos(angle_in_radians) \
-        + (-c * v + b * w - w * y + v * z) * np.sin(angle_in_radians)
-
-    p2 = (b * (u ** 2 + w ** 2) - v * (a * u + c * w - u * x - v * y - w * z)) * (
-        1 - np.cos(angle_in_radians)) + y * np.cos(angle_in_radians) \
-        + (-c * u - a * w + w * x - u * z) * np.sin(angle_in_radians)
-
-    p3 = (c * (u ** 2 + v ** 2) - w * (a * u + b * v - u * x - v * y - w * z)) * (
-        1 - np.cos(angle_in_radians)) + z * np.cos(angle_in_radians) \
-        + (-b * u + a * v - v * x + u * y) * np.sin(angle_in_radians)
-
-    return np.array([p3, p2, p1])

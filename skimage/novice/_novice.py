@@ -1,4 +1,5 @@
 import os
+from io import BytesIO
 import imghdr
 from collections import namedtuple
 
@@ -7,15 +8,14 @@ from .. import io, img_as_ubyte
 from ..transform import resize
 from ..color import color_dict
 from ..io.util import file_or_url_context, is_url
+from ..io.collection import ImageCollection
 
-import six
-from six.moves.urllib import request
-urlopen = request.urlopen
+from urllib.request import urlopen
 
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
 color_dict = dict((name, tuple(int(255 * c + 0.5) for c in rgb))
-                  for name, rgb in six.iteritems(color_dict))
+                  for name, rgb in color_dict.items())
 colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 
@@ -214,7 +214,7 @@ class Picture(object):
     Load an image from a URL (the URL must start with ``http(s)://`` or
     ``ftp(s)://``):
 
-    >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
+    >>> picture = novice.open('https://scikit-image.org/_static/img/logo.png')  # doctest: +SKIP
 
     Create a blank 100 pixel wide, 200 pixel tall white image:
 
@@ -284,7 +284,7 @@ class Picture(object):
             RGB or RGBA tuple with the fill color for the picture [0-255] or
             a valid key in `color_dict`.
         """
-        if isinstance(color, six.string_types):
+        if isinstance(color, str):
             color = color_dict[color]
         rgb_size = tuple(size) + (len(color),)
         color = np.array(color, dtype=np.uint8)
@@ -303,8 +303,9 @@ class Picture(object):
 
     @array.setter
     def array(self, array):
-        self._array = array
-        self._xy_array = array_to_xy_origin(array)
+        self._array = array.astype(np.uint8)
+        self._xy_array = array_to_xy_origin(self._array)
+        self._array_backup = self._array.copy()
 
     @property
     def xy_array(self):
@@ -324,10 +325,19 @@ class Picture(object):
         path : str
             Path (with file extension) where the picture is saved.
         """
+        if (self.array.ndim == 3 and self.array.shape[-1] == 4 and
+                os.path.splitext(path)[-1].lower() in ['.jpg', '.jpeg']):
+            self.array = self.array[..., :-1]
         io.imsave(path, self.array)
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
+
+    def reset(self):
+        """Reset image to its original state, removing modifications.
+
+        """
+        self.array = self._array_backup
 
     @property
     def path(self):
@@ -360,7 +370,8 @@ class Picture(object):
             # skimage dimensions are flipped: y, x
             new_size = (int(value[1]), int(value[0]))
             new_array = resize(self.array, new_size, order=0,
-                               preserve_range=True)
+                               preserve_range=True, mode='constant',
+                               anti_aliasing=False)
             self.array = new_array.astype(np.uint8)
 
             self._array_modified()
@@ -386,6 +397,13 @@ class Picture(object):
     def show(self):
         """Display the image."""
         io.imshow(self.array)
+        io.show()
+
+    def compare(self):
+        """Compare the image to its unmodified version."""
+        images = [self._array_backup, self.array]
+        ic = ImageCollection([0, 1], load_func=lambda x: images[x])
+        io.imshow_collection(images)
         io.show()
 
     def _makepixel(self, x, y):
@@ -494,7 +512,7 @@ class Picture(object):
         return self._repr_image_format('jpeg')
 
     def _repr_image_format(self, format_str):
-        str_buffer = six.BytesIO()
+        str_buffer = BytesIO()
         io.imsave(str_buffer, self.array, format_str=format_str)
         return_str = str_buffer.getvalue()
         str_buffer.close()

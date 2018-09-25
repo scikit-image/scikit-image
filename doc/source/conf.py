@@ -28,13 +28,31 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.pngmath',
+              'sphinx.ext.mathjax',
               'numpydoc',
+              'doi_role',
               'sphinx.ext.autosummary',
-              'plot2rst',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
+              'sphinx_gallery.gen_gallery'
               ]
+
+autosummary_generate = True
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+sphinx_gallery_conf = {
+    'doc_module'        : ('skimage',),
+    # path to your examples scripts
+    'examples_dirs' : '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    'backreferences_dir': 'api',
+    'reference_url'     : {
+            'skimage': None,}
+    }
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -57,7 +75,7 @@ else:
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.txt'
+source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -165,7 +183,8 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-   '**': ['navigation.html',
+   '**': ['searchbox.html',
+          'navigation.html',
           'localtoc.html',
           'versions.html'],
 }
@@ -228,7 +247,8 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r'''
+latex_elements = {}
+latex_elements['preamble'] = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -253,7 +273,7 @@ latex_preamble = r'''
 #latex_appendices = []
 
 # If false, no module index is generated.
-latex_use_modindex = False
+latex_domain_indices = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
@@ -298,15 +318,17 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # intersphinx
 # -----------------------------------------------------------------------------
 _python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
-_python_doc_base = 'http://docs.python.org/' + _python_version_str
+_python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('http://docs.scipy.org/doc/numpy',
+    'numpy': ('https://docs.scipy.org/doc/numpy',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
+    'matplotlib': ('https://matplotlib.org/',
+                   (None, 'http://matplotlib.org/objects.inv'))
 }
 
 # ----------------------------------------------------------------------------

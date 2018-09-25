@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 =====================
 Image Deconvolution
@@ -20,8 +19,8 @@ Unsupervised Wiener
 -------------------
 This algorithm has a self-tuned regularisation parameters based on
 data learning. This is not common and based on the following
-publication. The algorithm is based on a iterative Gibbs sampler that
-draw alternatively samples of posterior conditionnal law of the image,
+publication [1]_. The algorithm is based on a iterative Gibbs sampler that
+draw alternatively samples of posterior conditional law of the image,
 the noise power and the image frequency power.
 
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
@@ -43,8 +42,7 @@ astro += 0.1 * astro.std() * np.random.standard_normal(astro.shape)
 deconvolved, _ = restoration.unsupervised_wiener(astro, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5),
-                       sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
+                       sharex=True, sharey=True)
 
 plt.gray()
 

@@ -21,8 +21,8 @@ compute the corresponding image value.
 Performing a reverse mapping
 ----------------------------
 To perform a geometric warp in ``skimage``, you simply need to provide the
-reverse mapping to the ``skimage.transform.warp`` function.  E.g., consider the
-case where we would like to shift an image 50 pixels to the left.  The reverse
+reverse mapping to the :py:func:`skimage.transform.warp` function. E.g., consider
+the case where we would like to shift an image 50 pixels to the left. The reverse
 mapping for such a shift would be::
 
     def shift_left(xy):
@@ -72,9 +72,10 @@ from skimage.transform import swirl
 
 
 image = data.checkerboard()
-swirled = swirl(image, rotation=0, strength=10, radius=120, order=2)
+swirled = swirl(image, rotation=0, strength=10, radius=120)
 
-fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 3), sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3),
+                               sharex=True, sharey=True)
 
 ax0.imshow(image, cmap=plt.cm.gray, interpolation='none')
 ax0.axis('off')

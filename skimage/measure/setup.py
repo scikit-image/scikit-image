@@ -15,7 +15,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_ccomp.pyx'], working_path=base_path)
     cython(['_find_contours_cy.pyx'], working_path=base_path)
     cython(['_moments_cy.pyx'], working_path=base_path)
-    cython(['_marching_cubes_cy.pyx'], working_path=base_path)
+    cython(['_marching_cubes_classic_cy.pyx'], working_path=base_path)
+    cython(['_marching_cubes_lewiner_cy.pyx'], working_path=base_path)
     cython(['_pnpoly.pyx'], working_path=base_path)
 
     config.add_extension('_ccomp', sources=['_ccomp.c'],
@@ -24,8 +25,11 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments_cy', sources=['_moments_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_marching_cubes_cy',
-                         sources=['_marching_cubes_cy.c'],
+    config.add_extension('_marching_cubes_classic_cy',
+                         sources=['_marching_cubes_classic_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_marching_cubes_lewiner_cy',
+                         sources=['_marching_cubes_lewiner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_pnpoly', sources=['_pnpoly.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
@@ -35,7 +39,7 @@ def configuration(parent_package='', top_path=None):
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Graph-based Image-processing Algorithms',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',
