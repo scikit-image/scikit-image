@@ -112,8 +112,20 @@ image3d[:, 1:-1, 1:-1] = 0
 
 
 def test_3d_vertical_downward():
-    prof = profile_line(image3d, (0, 0, 0), (0, 2, 0), order=0, multichannel=False)
+    prof = profile_line(image3d, (0, 0, 0), (2, 0, 0), order=0, multichannel=False)
     expected_prof = np.array([1, 1, 1])
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_vertical_downward_through_center():
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, multichannel=False)
+    expected_prof = np.array([0, 0, 0])
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_vertical_downward_through_center_linewidth():
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False)
+    expected_prof = np.array([0, 0, 0])
     assert_equal(prof, expected_prof)
 
 

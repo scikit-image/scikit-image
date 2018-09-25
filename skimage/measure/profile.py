@@ -289,10 +289,10 @@ def _rotation_angles_by_distance(dst, src, point):
     """
     dst = distance_point_line(point, src, dst)
     if dst == 0:
-        rotation_angles = np.array([0])
+        rotation_angles = np.zeros(1)
     else:
         rotation_angles = np.linspace(0, 2 * constants.pi, 2 * dst + 3)
-        rotation_angles = np.delete(rotation_angles, len(rotation_angles) - 1)
+        rotation_angles = rotation_angles[:-1]
     return rotation_angles
 
 
