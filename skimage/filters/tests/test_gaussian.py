@@ -1,22 +1,31 @@
 import numpy as np
-from numpy.testing import assert_raises
 from skimage.filters._gaussian import gaussian
+from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    assert_raises(ValueError, gaussian, a, sigma=-1.0)
-    assert_raises(ValueError, gaussian, a, sigma=[-1.0, 1.0])
-    assert_raises(ValueError, gaussian, a,
-                  sigma=np.asarray([-1.0, 1.0]))
+    with testing.raises(ValueError):
+        gaussian(a, sigma=-1.0)
+    with testing.raises(ValueError):
+        gaussian(a, sigma=[-1.0, 1.0])
+    with testing.raises(ValueError):
+        gaussian(a,
+                 sigma=np.asarray([-1.0, 1.0]))
 
 
 def test_null_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
     assert np.all(gaussian(a, 0) == a)
+
+
+def test_default_sigma():
+    a = np.zeros((3, 3))
+    a[1, 1] = 1.
+    assert np.all(gaussian(a) == gaussian(a, sigma=1))
 
 
 def test_energy_decrease():
@@ -49,6 +58,13 @@ def test_multichannel():
                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
 
 
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
+def test_preserve_range():
+    img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
+    gaussian(img, 1, preserve_range=True)
+
+
+def test_4d_ok():
+    img = np.zeros((5,) * 4)
+    img[2, 2, 2, 2] = 1
+    res = gaussian(img, 1, mode='reflect')
+    assert np.allclose(res.sum(), 1)

@@ -11,8 +11,8 @@ from .._shared.interpolation cimport get_pixel3d
 from ..util import img_as_float
 
 
-cdef inline double _gaussian_weight(double sigma, double value):
-    return exp(-0.5 * (value / sigma)**2)
+cdef inline double _gaussian_weight(double sigma_sqr, double value):
+    return exp(-0.5 * value * value / sigma_sqr)
 
 
 cdef double[:] _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
@@ -21,8 +21,11 @@ cdef double[:] _compute_color_lut(Py_ssize_t bins, double sigma, double max_valu
         double[:] color_lut = np.empty(bins, dtype=np.double)
         Py_ssize_t b
 
+    sigma *= sigma
+    max_value /= bins
+
     for b in range(bins):
-        color_lut[b] = _gaussian_weight(sigma, b * max_value / bins)
+        color_lut[b] = _gaussian_weight(sigma, b * max_value)
 
     return color_lut
 
@@ -30,14 +33,18 @@ cdef double[:] _compute_color_lut(Py_ssize_t bins, double sigma, double max_valu
 cdef double[:] _compute_range_lut(Py_ssize_t win_size, double sigma):
 
     cdef:
-        double[:] range_lut = np.empty(win_size**2, dtype=np.double)
-        Py_ssize_t kr, kc
+        double[:] range_lut = np.empty(win_size*win_size, dtype=np.double)
+        Py_ssize_t kr, kc, dr, dc
         Py_ssize_t window_ext = (win_size - 1) / 2
         double dist
 
+    sigma *= sigma
+
     for kr in range(win_size):
         for kc in range(win_size):
-            dist = sqrt((kr - window_ext)**2 + (kc - window_ext)**2)
+            dr = kr - window_ext
+            dc = kc - window_ext
+            dist = sqrt(dr * dr + dc * dc)
             range_lut[kr * win_size + kc] = _gaussian_weight(sigma, dist)
 
     return range_lut
@@ -50,16 +57,28 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
         return value2
 
 
-def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
+def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
                       double sigma_spatial, Py_ssize_t bins,
                       mode, double cval):
-    image = np.atleast_3d(img_as_float(image))
+    cdef:
+        double min_value, max_value
+
+    min_value = image.min()
+    max_value = image.max()
+
+    if min_value == max_value:
+        return image
 
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
-    if image.min() < 0.0:
+    if min_value < 0.0:
         raise ValueError("Image must contain only positive values")
+
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    image = np.atleast_3d(img_as_float(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -68,8 +87,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         Py_ssize_t window_ext = (win_size - 1) / 2
         Py_ssize_t max_color_lut_bin = bins - 1
 
-        double max_value
-
         double[:, :, ::1] cimage
         double[:, :, ::1] out
 
@@ -77,22 +94,17 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
         double[:] range_lut
 
         Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
-        double value, weight, dist, total_weight, csigma_range, color_weight, \
-               range_weight
+        double value, weight, dist, total_weight, csigma_color, color_weight, \
+               range_weight, t
         double dist_scale
         double[:] values
         double[:] centres
         double[:] total_values
 
-    if sigma_range is None:
-        csigma_range = image.std()
+    if sigma_color is None:
+        csigma_color = image.std()
     else:
-        csigma_range = sigma_range
-
-    max_value = image.max()
-
-    if max_value == 0.0:
-        raise ValueError("The maximum value found in the image was 0.")
+        csigma_color = sigma_color
 
     if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
@@ -102,7 +114,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
     cimage = np.ascontiguousarray(image)
 
     out = np.zeros((rows, cols, dims), dtype=np.double)
-    color_lut = _compute_color_lut(bins, csigma_range, max_value)
+    color_lut = _compute_color_lut(bins, csigma_color, max_value)
     range_lut = _compute_range_lut(win_size, sigma_spatial)
     dist_scale = bins / dims / max_value
     values = np.empty(dims, dtype=np.double)
@@ -129,7 +141,8 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_range,
                         value = get_pixel3d(&cimage[0, 0, 0], rows, cols, dims,
                                             rr, cc, d, cmode, cval)
                         values[d] = value
-                        dist += (centres[d] - value)**2
+                        t = centres[d] - value
+                        dist += t * t
                     dist = sqrt(dist)
 
                     range_weight = range_lut[kr * win_size + kc]
@@ -174,7 +187,7 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
         double[:, :, ::1] bx = np.zeros(shape_ext, dtype=np.double)
         double[:, :, ::1] by = np.zeros(shape_ext, dtype=np.double)
 
-        double ux, uy, uprev, unew, bxx, byy, dxx, dyy, s
+        double ux, uy, uprev, unew, bxx, byy, dxx, dyy, s, tx, ty
         int i = 0
         double lam = 2 * weight
         double rmse = DBL_MAX
@@ -224,16 +237,19 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
                     cu[r, c, k] = unew
 
                     # update root mean square error
-                    rmse += (unew - uprev)**2
+                    tx = unew - uprev
+                    rmse += tx * tx
 
                     bxx = bx[r, c, k]
                     byy = by[r, c, k]
 
                     # d_subproblem after reference [4]
                     if isotropic:
-                        s = sqrt((ux + bxx)**2 + (uy + byy)**2)
-                        dxx = s * lam * (ux + bxx) / (s * lam + 1)
-                        dyy = s * lam * (uy + byy) / (s * lam + 1)
+                        tx = ux + bxx
+                        ty = uy + byy
+                        s = sqrt(tx * tx + ty * ty)
+                        dxx = s * lam * tx / (s * lam + 1)
+                        dyy = s * lam * ty / (s * lam + 1)
 
                     else:
                         s = ux + bxx

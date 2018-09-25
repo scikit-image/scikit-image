@@ -1,52 +1,49 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
 
-
-Version 0.14
+Version 0.15
 ------------
-* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
-* Remove deprecated ``skimage.restoration.nl_means_denoising``.
-* Remove deprecated ``skimage.filters.gaussian_filter``.
-* Remove deprecated ``skimage.filters.gabor_filter``.
-* Remove deprecated ``skimage.measure.LineModel`` and
-  add an alias LineModel = LineModelND. While the deprecated LineModel has for
-  parameters `(dist, theta)`, LineModelND has the more general parameters
-  `(origin, direction)`.
-* Remove deprecated old syntax support for ``skimage.transform.integrate``.
-* Remove deprecated ``skimage.data.lena`` and corresponding data files.
+* Finalize ``skimage.future.graph`` API.
+* Finalize ``skimage.future.manual_segmentation`` API.
+* Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
+  update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
 
-
-Version 0.13
+Version 0.16
 ------------
-* Require Python 2.7+, remove warning in `__init__.py` and 2.6 hack in
-  `doc/release/contribs.py`.
-* Remove deprecated `None` defaults for `skimage.exposure.rescale_intensity`
-* Remove deprecated `skimage.filters.canny` import in `filters/__init__.py`
-  file (canny is now in `skimage.feature.canny`).
-    * Don't forget to complete api_changes.txt.
-     (`GitHub discuss <https://github.com/scikit-image/scikit-image/pull/1113>`__ )
-* Remove deprecated ``skimage.filter`` module.
-* Remove deprecated edge filters `hsobel`, `vsobel`, `hscharr`, `vscharr`,
-  `hprewitt`, `vprewitt`, `roberts_positive_diagonal`,
-  `roberts_negative_diagonal` in `skimage/filters/edges.py`
-* Remove supported for renamed edge mode, 'nearest' (it is now 'edge').  This
-  involves removing the function _mode_deprecations from skimage._shared.utils
-  as well as any uses of _mode_deprecations from restoration/_denoise.py,
-  _shared/interpolation.pyx, transform/_geometric.py, and transform/_warps.py
+* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``,
+  ``skimage.transform.pyramid_expandset``, set default value of
+  ``multichannel`` to False
+* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
+  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
+* Remove checks for the ``multichannel`` deprecation warnings in several tests
+  in ``skimage.transform.tests.test_pyramids.py`` and
+  ``skimage.transform.tests.test_warps.py``.
+* Remove `flatten` for `imread` in ``skimage.io._io.py``.
+* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
+* Remove deprecated argument ``visualise`` from function skimage.feature.hog
+* Remove deprecated module ``skimage.novice``
+  * Remove the ``save-demo.jpg`` line from ``.gitignore``
+* In ``skimage.measure._regionprops``, remove all references to
+  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
+* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
+  arguments.
+* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
 
-
-Version 0.12
-------------
-* Change `label` to mark background as 0, not -1, which is consistent with
-  SciPy's labelling.
-* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-* Change deprecated `enforce_connectivity=False` on skimage.segmentation.slic
-  and set it to True as default
-* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
-* Remove deprecated `skimage.measure.fit.BaseModel._params`,
-  `skimage.transform.ProjectiveTransform._matrix`,
-  `skimage.transform.PolynomialTransform._params`,
-  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
-* Remove deprecated functions `skimage.filters.denoise_*`
-* Add 3D phantom in `skimage.data`
-* Add 3D test case of `skimage.feature.phase_correlate`
+Other
+-----
+* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
+  once minimal required ``numpy`` is set to >= 1.14.0.
+* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
+  ``skimage.feature.corner``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.
+* Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
+  Remove version restriction in requirements file when appropriate.
+  `https://github.com/SimpleITK/SimpleITK/issues/551`

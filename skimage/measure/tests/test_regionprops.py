@@ -1,10 +1,15 @@
-from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal, assert_raises, assert_equal
-import numpy as np
 import math
+import functools
 
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs)
+import numpy as np
+from skimage.measure._regionprops import (regionprops as regionprops_default,
+                                          PROPS, perimeter, _parse_docs)
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
+                                     assert_array_almost_equal, assert_equal)
+
+
+regionprops = functools.partial(regionprops_default, coordinates='rc')
 
 
 SAMPLE = np.array(
@@ -24,13 +29,17 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 
 SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
 SAMPLE_3D[1:3, 1:3, 1:3] = 1
-SAMPLE_3D[3, 2, 2] = 1 
+SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
+
 
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+        try:
+            assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+        except TypeError:  # the `slice` property causes this
+            pass
 
 
 def test_all_props_3d():
@@ -38,24 +47,27 @@ def test_all_props_3d():
     for prop in PROPS:
         try:
             assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
-        except NotImplementedError:
+        except (NotImplementedError, TypeError):
             pass
+
 
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises((TypeError), regionprops,
-                  np.zeros((10, 10), dtype=np.float))
-    assert_raises((TypeError), regionprops,
-                  np.zeros((10, 10), dtype=np.double))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.float))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10, 1), dtype=np.int))
-    regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
     regionprops(np.zeros((10, 10, 10), dtype=np.int))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10, 10, 2), dtype=np.int))
+    regionprops(np.zeros((1, 1), dtype=np.int))
+    regionprops(np.zeros((1, 1, 1), dtype=np.int))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
 
 def test_area():
@@ -78,23 +90,35 @@ def test_bbox():
     assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 
+def test_bbox_area():
+    padded = np.pad(SAMPLE, 5, mode='constant')
+    bbox_area = regionprops(padded)[0].bbox_area
+    assert_array_almost_equal(bbox_area, SAMPLE.size)
+
+
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
-    assert_almost_equal(mu[0,2], 436.00000000000045)
+    assert_almost_equal(mu[2, 0], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
-    assert_almost_equal(mu[0,3], -737.333333333333)
-    assert_almost_equal(mu[1,1], -87.33333333333303)
-    assert_almost_equal(mu[1,2], -127.5555555555593)
-    assert_almost_equal(mu[2,0], 1259.7777777777774)
-    assert_almost_equal(mu[2,1], 2000.296296296291)
-    assert_almost_equal(mu[3,0], -760.0246913580195)
+    assert_almost_equal(mu[3, 0], -737.333333333333)
+    assert_almost_equal(mu[1, 1], -87.33333333333303)
+    assert_almost_equal(mu[2, 1], -127.5555555555593)
+    assert_almost_equal(mu[0, 2], 1259.7777777777774)
+    assert_almost_equal(mu[1, 2], 2000.296296296291)
+    assert_almost_equal(mu[0, 3], -760.0246913580195)
 
 
 def test_centroid():
     centroid = regionprops(SAMPLE)[0].centroid
     # determined with MATLAB
     assert_array_almost_equal(centroid, (5.66666666666666, 9.444444444444444))
+
+
+def test_centroid_3d():
+    centroid = regionprops(SAMPLE_3D)[0].centroid
+    # determined by mean along axis 1 of SAMPLE_3D.nonzero()
+    assert_array_almost_equal(centroid, (1.66666667, 1.55555556, 1.55555556))
 
 
 def test_convex_area():
@@ -133,6 +157,15 @@ def test_coordinates():
     sample[coords[:, 0], coords[:, 1], coords[:, 2]] = 1
     prop_coords = regionprops(sample)[0].coords
     assert_array_equal(prop_coords, coords)
+
+
+def test_slice():
+    padded = np.pad(SAMPLE, ((2, 4), (5, 2)), mode='constant')
+    nrow, ncol = SAMPLE.shape
+    result = regionprops(padded)[0].slice
+    expected = (slice(2, 2+nrow), slice(5, 5+ncol))
+    assert_equal(result, expected)
+
 
 def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
@@ -173,8 +206,8 @@ def test_moments_hu():
          2.35390060e-02,
          1.23151193e-03,
          1.38882330e-06,
-        -2.72586158e-05,
-         6.48350653e-06
+         -2.72586158e-05,
+         -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -244,41 +277,43 @@ def test_minor_axis_length():
 
 
 def test_moments():
-    m = regionprops(SAMPLE)[0].moments
+    m = regionprops(SAMPLE)[0].moments.T  # test was written with x/y coords
     # determined with OpenCV
-    assert_almost_equal(m[0,0], 72.0)
-    assert_almost_equal(m[0,1], 408.0)
-    assert_almost_equal(m[0,2], 2748.0)
-    assert_almost_equal(m[0,3], 19776.0)
-    assert_almost_equal(m[1,0], 680.0)
-    assert_almost_equal(m[1,1], 3766.0)
-    assert_almost_equal(m[1,2], 24836.0)
-    assert_almost_equal(m[2,0], 7682.0)
-    assert_almost_equal(m[2,1], 43882.0)
-    assert_almost_equal(m[3,0], 95588.0)
+    assert_almost_equal(m[0, 0], 72.0)
+    assert_almost_equal(m[0, 1], 408.0)
+    assert_almost_equal(m[0, 2], 2748.0)
+    assert_almost_equal(m[0, 3], 19776.0)
+    assert_almost_equal(m[1, 0], 680.0)
+    assert_almost_equal(m[1, 1], 3766.0)
+    assert_almost_equal(m[1, 2], 24836.0)
+    assert_almost_equal(m[2, 0], 7682.0)
+    assert_almost_equal(m[2, 1], 43882.0)
+    assert_almost_equal(m[3, 0], 95588.0)
 
 
 def test_moments_normalized():
-    nu = regionprops(SAMPLE)[0].moments_normalized
+    # test was written with x/y coords
+    nu = regionprops(SAMPLE)[0].moments_normalized.T
+    
     # determined with OpenCV
-    assert_almost_equal(nu[0,2], 0.08410493827160502)
-    assert_almost_equal(nu[1,1], -0.016846707818929982)
-    assert_almost_equal(nu[1,2], -0.002899800614433943)
-    assert_almost_equal(nu[2,0], 0.24301268861454037)
-    assert_almost_equal(nu[2,1], 0.045473992910668816)
-    assert_almost_equal(nu[3,0], -0.017278118992041805)
+    assert_almost_equal(nu[0, 2], 0.08410493827160502)
+    assert_almost_equal(nu[1, 1], -0.016846707818929982)
+    assert_almost_equal(nu[1, 2], -0.002899800614433943)
+    assert_almost_equal(nu[2, 0], 0.24301268861454037)
+    assert_almost_equal(nu[2, 1], 0.045473992910668816)
+    assert_almost_equal(nu[3, 0], -0.017278118992041805)
 
 
 def test_orientation():
-    orientation = regionprops(SAMPLE)[0].orientation
+    orientation = regionprops(SAMPLE, coordinates='xy')[0].orientation
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
     # test correct quadrant determination
-    orientation2 = regionprops(SAMPLE.T)[0].orientation
-    assert_almost_equal(orientation2, math.pi / 2 - orientation)
+    orientation2 = regionprops(SAMPLE, coordinates='rc')[0].orientation
+    assert_almost_equal(orientation2, -math.pi / 2 + orientation)
     # test diagonal regions
     diag = np.eye(10, dtype=int)
-    orientation_diag = regionprops(diag)[0].orientation
+    orientation_diag = regionprops(diag, coordinates='xy')[0].orientation
     assert_almost_equal(orientation_diag, -math.pi / 4)
     orientation_diag = regionprops(np.flipud(diag))[0].orientation
     assert_almost_equal(orientation_diag, math.pi / 4)
@@ -304,7 +339,7 @@ def test_solidity():
 
 def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_central
+                      )[0].weighted_moments_central.T  # test used x/y coords
     ref = np.array(
         [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
             -7.5943608473e+02],
@@ -335,14 +370,14 @@ def test_weighted_moments_hu():
         1.2565683360e-03,
         8.3014209421e-07,
         -3.5073773473e-05,
-        6.7936409056e-06
+        -6.7936409056e-06
     ])
     assert_array_almost_equal(whu, ref)
 
 
 def test_weighted_moments():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                     )[0].weighted_moments
+                     )[0].weighted_moments.T  # test used x/y coords
     ref = np.array(
         [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
             1.9778000000e+04],
@@ -358,7 +393,7 @@ def test_weighted_moments():
 
 def test_weighted_moments_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_normalized
+                      )[0].weighted_moments_normalized.T  # test used x/y coord
     ref = np.array(
         [[       np.nan,        np.nan,  0.0873590903, -0.0161217406],
          [       np.nan, -0.0160405109, -0.0031421072, -0.0031376984],
@@ -388,12 +423,14 @@ def test_invalid():
     def get_intensity_image():
         ps[0].intensity_image
 
-    assert_raises(AttributeError, get_intensity_image)
+    with testing.raises(AttributeError):
+        get_intensity_image()
 
 
 def test_invalid_size():
     wrong_intensity_sample = np.array([[1], [1]])
-    assert_raises(ValueError, regionprops, SAMPLE, wrong_intensity_sample)
+    with testing.raises(ValueError):
+        regionprops(SAMPLE, wrong_intensity_sample)
 
 
 def test_equals():
@@ -453,6 +490,6 @@ def test_docstrings_and_props():
     assert len(ds.split('\n')) > 3
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_incorrect_coordinate_convention():
+    with testing.raises(ValueError):
+        regionprops_default(SAMPLE, coordinates='xyz')[0]

@@ -4,7 +4,6 @@ from ...util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
 
-import six
 from ..._shared.version_requirements import is_installed
 
 
@@ -77,7 +76,7 @@ class OverlayPlugin(Plugin):
     @color.setter
     def color(self, index):
         # Update colormap whenever color is changed.
-        if isinstance(index, six.string_types) and \
+        if isinstance(index, str) and \
            index not in self.color_names:
             raise ValueError("%s not defined in OverlayPlugin.colors" % index)
         else:

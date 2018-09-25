@@ -28,32 +28,28 @@ image = color.gray2rgb(grayscale_image)
 red_multiplier = [1, 0, 0]
 yellow_multiplier = [1, 1, 0]
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4),
+                               sharex=True, sharey=True)
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
-ax1.set_adjustable('box-forced')
-ax2.set_adjustable('box-forced')
 
-"""
-.. image:: PLOT2RST.current_figure
-
-In many cases, dealing with RGB values may not be ideal. Because of that, there
-are many other `color spaces`_ in which you can represent a color image. One
-popular color space is called HSV, which represents hue (~the color),
-saturation (~colorfulness), and value (~brightness). For example, a color
-(hue) might be green, but its saturation is how intense that green is---where
-olive is on the low end and neon on the high end.
-
-In some implementations, the hue in HSV goes from 0 to 360, since hues wrap
-around in a circle. In scikit-image, however, hues are float values from 0 to
-1, so that hue, saturation, and value all share the same scale.
-
-.. _color spaces:
-    http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
-
-Below, we plot a linear gradient in the hue, with the saturation and value
-turned all the way up:
-"""
+######################################################################
+# In many cases, dealing with RGB values may not be ideal. Because of that,
+# there are many other `color spaces`_ in which you can represent a color
+# image. One popular color space is called HSV, which represents hue (~the
+# color), saturation (~colorfulness), and value (~brightness). For example, a
+# color (hue) might be green, but its saturation is how intense that green is
+# ---where olive is on the low end and neon on the high end.
+#
+# In some implementations, the hue in HSV goes from 0 to 360, since hues wrap
+# around in a circle. In scikit-image, however, hues are float values from 0
+# to 1, so that hue, saturation, and value all share the same scale.
+#
+# .. _color spaces:
+#     http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
+#
+# Below, we plot a linear gradient in the hue, with the saturation and value
+# turned all the way up:
 import numpy as np
 
 hue_gradient = np.linspace(0, 1)
@@ -67,22 +63,17 @@ fig, ax = plt.subplots(figsize=(5, 2))
 ax.imshow(all_hues, extent=(0, 1, 0, 0.2))
 ax.set_axis_off()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-Notice how the colors at the far left and far right are the same. That reflects
-the fact that the hues wrap around like the color wheel (see HSV_ for more
-info).
-
-.. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
-
-Now, let's create a little utility function to take an RGB image and:
-
-1. Transform the RGB image to HSV
-2. Set the hue and saturation
-3. Transform the HSV image back to RGB
-
-"""
+######################################################################
+# Notice how the colors at the far left and far right are the same. That
+# reflects the fact that the hues wrap around like the color wheel (see HSV_
+# for more info).
+#
+# .. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
+#
+# Now, let's create a little utility function to take an RGB image and:
+#
+# 1. Transform the RGB image to HSV 2. Set the hue and saturation 3.
+# Transform the HSV image back to RGB
 
 
 def colorize(image, hue, saturation=1):
@@ -96,13 +87,13 @@ def colorize(image, hue, saturation=1):
     return color.hsv2rgb(hsv)
 
 
-"""
-Notice that we need to bump up the saturation; images with zero saturation are
-grayscale, so we need to a non-zero value to actually see the color we've set.
-
-Using the function above, we plot six images with a linear gradient in the hue
-and a non-zero saturation:
-"""
+######################################################################
+# Notice that we need to bump up the saturation; images with zero saturation
+# are grayscale, so we need to a non-zero value to actually see the color
+# we've set.
+#
+# Using the function above, we plot six images with a linear gradient in the
+# hue and a non-zero saturation:
 
 hue_rotations = np.linspace(0, 1, 6)
 
@@ -113,18 +104,14 @@ for ax, hue in zip(axes.flat, hue_rotations):
     tinted_image = colorize(image, hue, saturation=0.3)
     ax.imshow(tinted_image, vmin=0, vmax=1)
     ax.set_axis_off()
-    ax.set_adjustable('box-forced')
 fig.tight_layout()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-You can combine this tinting effect with numpy slicing and fancy-indexing to
-selectively tint your images. In the example below, we set the hue of some
-rectangles using slicing and scale the RGB values of some pixels found by
-thresholding. In practice, you might want to define a region for tinting based
-on segmentation results or blob detection methods.
-"""
+######################################################################
+# You can combine this tinting effect with numpy slicing and fancy-indexing
+# to selectively tint your images. In the example below, we set the hue of
+# some rectangles using slicing and scale the RGB values of some pixels found
+# by thresholding. In practice, you might want to define a region for tinting
+# based on segmentation results or blob detection methods.
 
 from skimage.filters import rank
 
@@ -145,19 +132,14 @@ textured_regions = noisy > 4
 masked_image = image.copy()
 masked_image[textured_regions, :] *= red_multiplier
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
+                               sharex=True, sharey=True)
 ax1.imshow(sliced_image)
 ax2.imshow(masked_image)
-ax1.set_adjustable('box-forced')
-ax2.set_adjustable('box-forced')
 
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
-
-For coloring multiple regions, you may also be interested in
-`skimage.color.label2rgb
-<http://scikit-image.org/docs/0.9.x/api/skimage.color.html#label2rgb>`_.
-
-"""
+######################################################################
+# For coloring multiple regions, you may also be interested in
+# `skimage.color.label2rgb <http://scikit-
+# image.org/docs/0.9.x/api/skimage.color.html#label2rgb>`_.

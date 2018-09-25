@@ -5,7 +5,6 @@ from ..utils import RequiredAttr
 __all__ = ['BaseWidget', 'Slider', 'ComboBox', 'CheckBox', 'Text', 'Button']
 
 
-
 class BaseWidget(QtWidgets.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
@@ -75,6 +74,7 @@ class Slider(BaseWidget):
     update_on : {'release' | 'move'}, optional
         Control when callback function is called: on slider move or release.
     """
+
     def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
                  ptype='kwarg', callback=None, max_edit_width=60,
                  orientation='horizontal', update_on='release'):
@@ -84,7 +84,7 @@ class Slider(BaseWidget):
             value = (high - low) / 2.
 
         # Set widget orientation
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if orientation == 'vertical':
             self.slider = QtWidgets.QSlider(Qt.Vertical)
             alignment = QtCore.Qt.AlignHCenter
@@ -100,10 +100,10 @@ class Slider(BaseWidget):
         else:
             msg = "Unexpected value %s for 'orientation'"
             raise ValueError(msg % orientation)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         # Set slider behavior for float and int values.
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if value_type == 'float':
             # divide slider into 1000 discrete values
             slider_max = 1000
@@ -116,7 +116,7 @@ class Slider(BaseWidget):
         else:
             msg = "Expected `value_type` to be 'float' or 'int'; received: %s"
             raise ValueError(msg % value_type)
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.value_type = value_type
         self._low = low
@@ -299,10 +299,11 @@ class Button(BaseWidget):
     callback : callable f()
         Function to call when button is clicked.
     """
+
     def __init__(self, name, callback):
         super(Button, self).__init__(self)
-        self._button = QtGui.QPushButton(name)
+        self._button = QtWidgets.QPushButton(name)
         self._button.clicked.connect(callback)
 
-        self.layout = QtGui.QHBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.addWidget(self._button)

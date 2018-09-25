@@ -1,17 +1,17 @@
-from __future__ import division
-
-__all__ = ['structural_similarity']
 
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
-from ..util.arraypad import crop
+from ..util.arraycrop import crop
+from .._shared.utils import warn
+
+__all__ = ['compare_ssim']
 
 
-def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
+def compare_ssim(X, Y, win_size=None, gradient=False,
+                 data_range=None, multichannel=False, gaussian_weights=False,
+                 full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -22,21 +22,21 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         The side-length of the sliding window used in comparison.  Must be an
         odd value.  If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
-    gradient : bool
-        If True, also return the gradient.
-    dynamic_range : int
-        The dynamic range of the input image (distance between minimum and
+    gradient : bool, optional
+        If True, also return the gradient with respect to Y.
+    data_range : float, optional
+        The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
-    multichannel : int or None
+    multichannel : bool, optional
         If True, treat the last dimension of the array as channels. Similarity
         calculations are done independently for each channel then averaged.
-    gaussian_weights : bool
+    gaussian_weights : bool, optional
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
-    full : bool
+    full : bool, optional
         If True, return the full structural similarity image instead of the
-        mean value
+        mean value.
 
     Other Parameters
     ----------------
@@ -52,7 +52,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
 
     Returns
     -------
-    mssim : float or ndarray
+    mssim : float
         The mean structural similarity over the image.
     grad : ndarray
         The gradient of the structural similarity index between X and Y [2]_.
@@ -71,16 +71,15 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
        (2004). Image quality assessment: From error visibility to
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
-       https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf
+       https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf,
+       :DOI:`10.1109/TIP.2003.819861`
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
-       http://arxiv.org/abs/0901.0065
+       :arXiv:`0901.0065`
+       :DOI:`10.1007/s10043-009-0119-z`
 
     """
-    if not X.dtype == Y.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
 
@@ -88,7 +87,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         # loop over channels
         args = dict(win_size=win_size,
                     gradient=gradient,
-                    dynamic_range=dynamic_range,
+                    data_range=data_range,
                     multichannel=False,
                     gaussian_weights=gaussian_weights,
                     full=full)
@@ -100,7 +99,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
         if full:
             S = np.empty(X.shape)
         for ch in range(nch):
-            ch_result = structural_similarity(X[..., ch], Y[..., ch], **args)
+            ch_result = compare_ssim(X[..., ch], Y[..., ch], **args)
             if gradient and full:
                 mssim[..., ch], G[..., ch], S[..., ch] = ch_result
             elif gradient:
@@ -137,14 +136,19 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
             win_size = 7   # backwards compatibility
 
     if np.any((np.asarray(X.shape) - win_size) < 0):
-        raise ValueError("win_size exceeds image extent")
+        raise ValueError(
+            "win_size exceeds image extent.  If the input is a multichannel "
+            "(color) image, set multichannel=True.")
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
 
-    if dynamic_range is None:
+    if data_range is None:
+        if X.dtype != Y.dtype:
+            warn("Inputs have mismatched dtype.  Setting data_range based on "
+                 "X.dtype.")
         dmin, dmax = dtype_range[X.dtype.type]
-        dynamic_range = dmax - dmin
+        data_range = dmax - dmin
 
     ndim = X.ndim
 
@@ -182,7 +186,7 @@ def structural_similarity(X, Y, win_size=None, gradient=False,
     vy = cov_norm * (uyy - uy * uy)
     vxy = cov_norm * (uxy - ux * uy)
 
-    R = dynamic_range
+    R = data_range
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 

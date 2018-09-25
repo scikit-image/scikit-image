@@ -1,17 +1,11 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
-from numpy.testing.decorators import skipif
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
-try:
-    import scipy.spatial
-    scipy_spatial = True
-except ImportError:
-    scipy_spatial = False
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, expected_warnings
 
 
-@skipif(not scipy_spatial)
 def test_basic():
     image = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -31,12 +25,13 @@ def test_basic():
 
     assert_array_equal(convex_hull_image(image), expected)
 
-    # Test that an error is raised on passing a 3D image:
-    image3d = np.empty((5, 5, 5))
-    assert_raises(ValueError, convex_hull_image, image3d)
+
+def test_empty_image():
+    image = np.zeros((6, 6), dtype=bool)
+    with expected_warnings(['entirely zero']):
+        assert_array_equal(convex_hull_image(image), image)
 
 
-@skipif(not scipy_spatial)
 def test_qhull_offset_example():
     nonzeros = (([1367, 1368, 1368, 1368, 1369, 1369, 1369, 1369, 1369, 1370,
                   1370, 1370, 1370, 1370, 1370, 1370, 1371, 1371, 1371, 1371,
@@ -55,7 +50,6 @@ def test_qhull_offset_example():
     assert_array_equal(convex_hull_image(image), expected)
 
 
-@skipif(not scipy_spatial)
 def test_pathological_qhull_example():
     image = np.array(
                 [[0, 0, 0, 0, 1, 0, 0],
@@ -68,7 +62,6 @@ def test_pathological_qhull_example():
     assert_array_equal(convex_hull_image(image), expected)
 
 
-@skipif(not scipy_spatial)
 def test_possible_hull():
     image = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -102,7 +95,6 @@ def test_possible_hull():
     assert_array_equal(ph, expected)
 
 
-@skipif(not scipy_spatial)
 def test_object():
     image = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -141,11 +133,20 @@ def test_object():
 
     assert_array_equal(convex_hull_object(image, 8), expected8)
 
-    assert_raises(ValueError, convex_hull_object, image, 7)
+    with testing.raises(ValueError):
+        convex_hull_object(image, 7)
 
-    # Test that an error is raised on passing a 3D image:
-    image3d = np.empty((5, 5, 5))
-    assert_raises(ValueError, convex_hull_object, image3d)
 
-if __name__ == "__main__":
-    np.testing.run_module_suite()
+@testing.fixture
+def images2d3d():
+    from ...measure.tests.test_regionprops import SAMPLE as image
+    image3d = np.stack((image, image, image))
+    return image, image3d
+
+
+def test_consistent_2d_3d_hulls(images2d3d):
+    image, image3d = images2d3d
+    chimage = convex_hull_image(image)
+    chimage[8, 0] = True  # correct for single point exactly on hull edge
+    chimage3d = convex_hull_image(image3d)
+    assert_array_equal(chimage3d[1], chimage)

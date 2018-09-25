@@ -12,7 +12,6 @@ kernels. The mean and variance of the filtered images are then used as features
 for classification, which is based on the least squared error for simplicity.
 
 """
-from __future__ import print_function
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -1,9 +1,11 @@
-from numpy.testing import assert_equal, assert_almost_equal
 import numpy as np
-
 from skimage.measure import profile_line
 
-image = np.arange(100, dtype=np.float).reshape((10, 10))
+from skimage._shared.testing import assert_equal, assert_almost_equal
+
+
+image = np.arange(100).reshape((10, 10)).astype(np.float)
+
 
 def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
@@ -75,6 +77,7 @@ def test_pythagorean_triangle_right_downward_interpolated():
     expected_prof = np.linspace(11, 79, 11)
     assert_almost_equal(prof, expected_prof)
 
+
 pyth_image = np.zeros((6, 7), np.float)
 line = ((1, 2, 2, 3, 3, 4), (1, 2, 3, 3, 4, 5))
 below = ((2, 2, 3, 4, 4, 5), (0, 1, 2, 3, 4, 4))
@@ -85,8 +88,7 @@ pyth_image[above] = 0.6
 
 
 def test_pythagorean_triangle_right_downward_linewidth():
-    prof = profile_line(pyth_image, (1, 1), (4, 5),
-                        linewidth=3, order=0)
+    prof = profile_line(pyth_image, (1, 1), (4, 5), linewidth=3, order=0)
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
 
@@ -103,39 +105,3 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
                         linewidth=3, order=0)
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
-
-
-slice1 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-slice2 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-slice3 = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.float)
-image3d = np.dstack((slice1, slice2, slice3))
-
-
-def test_3d_vertical_downward():
-    prof = profile_line(image3d, (0, 0, 0), (0, 1, 0), order=0, multichannel=False)
-    expected_prof = np.array([1, 1])
-    assert_equal(prof, expected_prof)
-
-
-def test_3d_diagonal():
-    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=0, multichannel=False)
-    expected_prof = np.array([1, 0, 0, 1, 1])
-    assert_equal(prof, expected_prof)
-
-
-def test_3d_diagonal_interpolated():
-    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=1, multichannel=False)
-    expected_prof = np.array([1, 0.75, 0, 0.75, 1])
-    assert_equal(prof, expected_prof)
-s
-
-def test_3d_through_center_linewidth():
-    prof = profile_line(image3d, (1, 1, 0), (1, 1, 2), order=1, linewidth=3, multichannel=False)
-    expected_prof = np.repeat(0.850761583277, 3)
-    assert_almost_equal(prof, expected_prof)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
-

@@ -23,8 +23,9 @@ import numpy as np
 def max_edge(g, src, dst, n):
     """Callback to handle merging nodes by choosing maximum weight.
 
-    Returns either the weight between (`src`, `n`) or (`dst`, `n`)
-    in `g` or the maximum of the two when both exist.
+    Returns a dictionary with `"weight"` set as either the weight between
+    (`src`, `n`) or (`dst`, `n`) in `g` or the maximum of the two when
+    both exist.
 
     Parameters
     ----------
@@ -37,15 +38,15 @@ def max_edge(g, src, dst, n):
 
     Returns
     -------
-    weight : float
-        The weight between (`src`, `n`) or (`dst`, `n`) in `g` or the
-        maximum of the two when both exist.
-
+    data : dict
+        A dict with the "weight" attribute set the weight between
+        (`src`, `n`) or (`dst`, `n`) in `g` or the maximum of the two when
+        both exist.
     """
 
     w1 = g[n].get(src, {'weight': -np.inf})['weight']
     w2 = g[n].get(dst, {'weight': -np.inf})['weight']
-    return max(w1, w2)
+    return {'weight': max(w1, w2)}
 
 
 def display(g, title):

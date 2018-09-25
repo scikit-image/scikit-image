@@ -1,13 +1,15 @@
 from collections import namedtuple
 
 import numpy as np
-from numpy.testing import assert_equal
-from numpy.testing.decorators import skipif
 from skimage import data
 from skimage.viewer import ImageViewer, has_qt
 from skimage.viewer.canvastools import (
     LineTool, ThickLineTool, RectangleTool, PaintTool)
 from skimage.viewer.canvastools.base import CanvasToolBase
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal
+
 try:
     from matplotlib.testing.decorators import cleanup
 except ImportError:
@@ -78,7 +80,7 @@ def do_event(viewer, etype, button=1, xdata=0, ydata=0, key=None):
 
 
 @cleanup
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -104,7 +106,7 @@ def test_line_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_thick_line_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -128,7 +130,7 @@ def test_thick_line_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_rect_tool():
     img = data.camera()
     viewer = ImageViewer(img)
@@ -147,7 +149,7 @@ def test_rect_tool():
     do_event(viewer, 'mouse_press', xdata=100, ydata=100)
     do_event(viewer, 'move', xdata=120, ydata=120)
     do_event(viewer, 'mouse_release')
-    #assert_equal(tool.geometry, [120, 150, 120, 150])
+    # assert_equal(tool.geometry, [120, 150, 120, 150])
 
     # create a new line
     do_event(viewer, 'mouse_press', xdata=10, ydata=10)
@@ -157,7 +159,7 @@ def test_rect_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_paint_tool():
     img = data.moon()
     viewer = ImageViewer(img)
@@ -191,7 +193,7 @@ def test_paint_tool():
 
 
 @cleanup
-@skipif(not has_qt)
+@testing.skipif(not has_qt, reason="Qt not installed")
 def test_base_tool():
     img = data.moon()
     viewer = ImageViewer(img)

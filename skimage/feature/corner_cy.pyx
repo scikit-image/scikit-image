@@ -7,13 +7,13 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
-from ..util import img_as_float, pad
+from ..util import img_as_float
 from ..color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
 
 
-def corner_moravec(image, Py_ssize_t window_size=1):
+def _corner_moravec(image, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
@@ -65,7 +65,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
     cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float(image))
     cdef double[:, ::1] out = np.zeros(image.shape, dtype=np.double)
 
-    cdef double msum, min_msum
+    cdef double msum, min_msum, t
     cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
 
     with nogil:
@@ -78,8 +78,8 @@ def corner_moravec(image, Py_ssize_t window_size=1):
                             msum = 0
                             for mr in range(- window_size, window_size + 1):
                                 for mc in range(- window_size, window_size + 1):
-                                    msum += (cimage[r + mr, c + mc]
-                                             - cimage[br + mr, bc + mc]) ** 2
+                                    t = cimage[r + mr, c + mc] - cimage[br + mr, bc + mc]
+                                    msum += t * t
                             min_msum = min(msum, min_msum)
 
                 out[r, c] = min_msum
@@ -175,7 +175,7 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
     return np.asarray(corner_response)
 
 
-def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
+def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     """Compute the orientation of corners.
 
     The orientation of corners is computed using the first order central moment
@@ -252,8 +252,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     cdef Py_ssize_t mcols = mask.shape[1]
     cdef Py_ssize_t mrows2 = (mrows - 1) / 2
     cdef Py_ssize_t mcols2 = (mcols - 1) / 2
-    cdef double[:, :] cimage = pad(image, (mrows2, mcols2), mode='constant',
-                                   constant_values=0)
+    cdef double[:, :] cimage = np.pad(image, (mrows2, mcols2), mode='constant',
+                                      constant_values=0)
     cdef double[:] orientations = np.zeros(corners.shape[0], dtype=np.double)
     cdef double curr_pixel
     cdef double m01, m10, m01_tmp

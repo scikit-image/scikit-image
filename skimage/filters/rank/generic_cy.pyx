@@ -377,7 +377,7 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
-    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b
+    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b, t
     cdef double mu = 0.
 
     # compute local mean
@@ -400,7 +400,8 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
         if new_q1 > 0:
             mu1 = (q1 * mu1 + i * P) / new_q1
             mu2 = (mu - new_q1 * mu1) / (1. - new_q1)
-            sigma_b = new_q1 * (1. - new_q1) * (mu1 - mu2) ** 2
+            t = mu1 - mu2
+            sigma_b = new_q1 * (1. - new_q1) * (t * t)
             if sigma_b > max_sigma_b:
                 max_sigma_b = sigma_b
                 max_i = i
