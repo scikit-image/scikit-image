@@ -459,6 +459,9 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds[0]
 
 
+# Computing a histogram using np.histogram on a uint8 image with bins=256
+# doesn't work and results in aliasing problems. We use a fully specified set
+# of bins to ensure that each uint8 value false into its own bin.
 _DEFAULT_ENTROPY_BINS = tuple(np.arange(-0.5, 255.51, 1))
 
 
@@ -475,7 +478,8 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
         The number of bins or the bin edges. (Any valid value to the ``bins``
         argument of ``np.histogram`` will work here.) For an exact calculation,
         each unique value should have its own bin. The default value for bins
-        ensures exact handling of uint8 images.
+        ensures exact handling of uint8 images: ``bins=256`` results in
+        aliasing problems due to bin width not being equal to 1.
 
     Returns
     -------
