@@ -90,7 +90,7 @@ def get_merged_pulls(user, repo, date, page=1, results=0):
 def get_reviews(user, repo, pull):
     # See https://developer.github.com/v3/pulls/reviews/
     url = ('https://api.github.com/repos/{}/{}/pulls/{}/reviews'
-           .format(user, repo, pull)
+           .format(user, repo, pull))
     reviews = request(url)
     return reviews
 
