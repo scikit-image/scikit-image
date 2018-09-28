@@ -55,6 +55,7 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   cp $MPL_DIR/matplotlibrc $MPL_DIR/matplotlibrc_backup
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
   for f in doc/examples/*/*.py; do
+    echo Testing example ${f}
     python "${f}"
     if [ $? -ne 0 ]; then
       exit 1
