@@ -111,12 +111,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha)
     else:
-        # _label2mean converts arrays to floats so have to round and convert to
-        # to 0 to 255 scale
-        return np.rint(_label2mean(label, image,
-                                   bg_label=bg_label,
-                                   bg_color=bg_color,
-                                   multichannel=True)).astype(int)
+        return _label2mean(label, image, bg_label=bg_label, bg_color=bg_color, multichannel=True)
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
@@ -245,7 +240,7 @@ def _get_means_from_contiguous_regions(label_field, image):
     Returns
     -------
     out : array
-        An array with the same shape and type as `band`
+        An array with the same shape and type as `image` and `label_field`
     """
     if label_field.shape != image.shape:
         raise ValueError('label_field and image must have the same shape as image')
