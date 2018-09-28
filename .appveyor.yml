@@ -8,6 +8,8 @@ environment:
     - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37
     - PYTHON: C:\Python37-x64
+    - PYTHON: C:\Python37-x64
+      PIP_FLAGS: --pre
 
 matrix:
   fast_finish: true
@@ -39,16 +41,15 @@ install:
   - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
 
   # Install the build and runtime dependencies of the project.
-  - pip install --retries 3 -r requirements/build.txt
-  # scipy, from default is required to build until #3158 is fixed.
-  - pip install --retries 3 -r requirements/default.txt
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
   - python setup.py bdist_wheel bdist_wininst
   - ps: "ls dist"
 
-  # Install the generated wheel package to test it
-  - "pip install --no-index --find-links dist/ scikit-image"
+  # Install the generated wheel package to test it.
+  - pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
   # Install the test dependencies
-  - pip install --retries 3 -r requirements/test.txt
+  - pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
 
 # Not a .NET project, we build scikit-image in the install step instead
 build: false
