@@ -6,7 +6,11 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
 fi
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" == "PyQt5" ]]; then
-    pip install --retries 3 -q $PIP_FLAGS pyqt5
+    if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
+        pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.11"
+    else
+        pip install --retries 3 -q $PIP_FLAGS pyqt5
+    fi
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then
