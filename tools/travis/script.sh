@@ -3,13 +3,6 @@
 set -ev
 export PY=${TRAVIS_PYTHON_VERSION}
 
-# Matplotlib settings - do not show figures during doc examples
-if [[ $MINIMUM_REQUIREMENTS == 1 || $TRAVIS_OS_NAME == "osx" ]]; then
-    MPL_DIR=$HOME/.matplotlib
-else
-    MPL_DIR=$HOME/.config/matplotlib
-fi
-
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 
