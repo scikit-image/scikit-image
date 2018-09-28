@@ -17,7 +17,7 @@ References
        detection." International journal of computer vision 57.2
        (2004): 137-154.
        http://www.merl.com/publications/docs/TR2004-043.pdf
-       DOI: 10.1109/CVPR.2001.990517
+       :DOI:`10.1109/CVPR.2001.990517`
 
 """
 

@@ -103,21 +103,21 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     ----------
     .. [1] A. Buades, B. Coll, & J-M. Morel. A non-local algorithm for image
            denoising. In CVPR 2005, Vol. 2, pp. 60-65, IEEE.
-           DOI: 10.1109/CVPR.2005.38
+           :DOI:`10.1109/CVPR.2005.38`
 
     .. [2] J. Darbon, A. Cunha, T.F. Chan, S. Osher, and G.J. Jensen, Fast
            nonlocal filtering applied to electron cryomicroscopy, in 5th IEEE
            International Symposium on Biomedical Imaging: From Nano to Macro,
            2008, pp. 1331-1334.
-           DOI: 10.1109/ISBI.2008.4541250
+           :DOI:`10.1109/ISBI.2008.4541250`
 
     .. [3] Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
            Denoising. Image Processing On Line, 2014, vol. 4, pp. 300-326.
-           DOI: 10.5201/ipol.2014.120
+           :DOI:`10.5201/ipol.2014.120`
 
     .. [4] A. Buades, B. Coll, & J-M. Morel. Non-Local Means Denoising.
            Image Processing On Line, 2011, vol. 1, pp. 208-212.
-           DOI: 10.5201/ipol.2011.bcm_nlm
+           :DOI:`10.5201/ipol.2011.bcm_nlm`
 
     Examples
     --------

@@ -31,7 +31,7 @@ __all__ = ['find_contours',
            'moments',
            'moments_central',
            'moments_coords',
-           'moments_coords_central'
+           'moments_coords_central',
            'moments_normalized',
            'moments_hu',
            'marching_cubes_lewiner',

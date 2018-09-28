@@ -97,6 +97,11 @@ def test_float_out_of_range():
         img_as_int(too_low)
 
 
+def test_float_float_all_ranges():
+    arr_in = np.array([[-10., 10., 1e20]], dtype=np.float32)
+    np.testing.assert_array_equal(img_as_float(arr_in), arr_in)
+
+
 def test_copy():
     x = np.array([1], dtype=np.float64)
     y = img_as_float(x)
