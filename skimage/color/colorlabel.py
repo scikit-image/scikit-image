@@ -196,7 +196,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     return result
 
 
-def _apply_channel_by_channel(func, image):
+def _apply_per_channel(func, image):
     """
     Apply a function to each channel of an image.
 
@@ -294,7 +294,7 @@ def _label2mean(label_field, image, bg_label=None, bg_color=None, multichannel=T
 
         def _get_means_from_contiguous_regions_partial(image):
             return _get_means_from_contiguous_regions(label_field, image)
-        out = _apply_channel_by_channel(_get_means_from_contiguous_regions_partial, image)
+        out = _apply_per_channel(_get_means_from_contiguous_regions_partial, image)
 
     else:
         _get_means_from_contiguous_regions(label_field, image)
