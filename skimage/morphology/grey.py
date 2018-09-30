@@ -404,7 +404,7 @@ def white_tophat(image, selem=None, out=None):
         return out
     elif out is None:
         out = np.empty_like(image)
-    # work-around for NumPy deprecation warning for arithmetic 
+    # work-around for NumPy deprecation warning for arithmetic
     # operations on bool arrays
     if isinstance(image, np.ndarray) and image.dtype == np.bool:
         image_ = image.view(dtype=np.uint8)
