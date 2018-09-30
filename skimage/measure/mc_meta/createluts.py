@@ -129,7 +129,8 @@ def search_line(lines, refline, start=0):
 def getLutNames(prefix):
     aa = []
     for a in dir(luts):
-        if a.startswith(prefix): aa.append(a)
+        if a.startswith(prefix):
+            aa.append(a)
 
     def sortkey(x):
         fullnr = x.split(prefix)[1]
