@@ -148,7 +148,7 @@ def require(name, version=None):
             else:
                 msg = '"%s" in "%s" requires "%s'
                 msg = msg % (obj, obj.__module__, name)
-                if not version is None:
+                if version is not None:
                     msg += " %s" % version
                 raise ImportError(msg + '"')
         return func_wrapped

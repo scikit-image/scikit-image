@@ -50,7 +50,7 @@ class LineProfile(PlotPlugin):
         else:
             raise ValueError("Unrecognized `limits`: %s" % self._limit_type)
 
-        if not self._limit_type is None:
+        if self._limit_type is not None:
             self.ax.set_ylim(self.limits)
 
         h, w = image.shape[0:2]

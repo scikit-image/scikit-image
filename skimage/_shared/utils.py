@@ -178,7 +178,7 @@ def check_nD(array, ndim, arg_name='image'):
         ndim = [ndim]
     if array.size == 0:
         raise ValueError(msg_empty_array % (arg_name))
-    if not array.ndim in ndim:
+    if array.ndim not in ndim:
         raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
