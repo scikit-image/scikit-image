@@ -19,12 +19,12 @@ class FeatureSuite:
         self.image_ubyte = util.img_as_ubyte(np.clip(self.image, 0, 1))
 
     def time_canny(self):
-        result = feature.canny(self.image)
+        feature.canny(self.image)
 
     def time_glcm(self):
         pi = np.pi
-        result = feature.greycomatrix(self.image_ubyte, distances=[1, 2],
-                                      angles=[0, pi/4, pi/2, 3*pi/4])
+        feature.greycomatrix(self.image_ubyte, distances=[1, 2],
+                             angles=[0, pi/4, pi/2, 3*pi/4])
 
 
 class RegisterTranslation:
