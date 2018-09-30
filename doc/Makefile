@@ -129,7 +129,7 @@ gh-pages:
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
-	--project-url=http://scikit-image.org \
+	--project-url=https://scikit-image.org \
 	--project-ml-url=https://mail.python.org/mailman/listinfo/scikit-image \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \

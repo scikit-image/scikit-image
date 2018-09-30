@@ -482,7 +482,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
 
     References
     ----------
-    .. [1] http://scikit-image.org/docs/dev/user_guide/data_types.html
+    .. [1] https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Examples
     --------

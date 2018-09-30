@@ -80,7 +80,7 @@ Here's the long and short of it:
 
 For a more detailed discussion, read these :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image``
-(`<http://scikit-image.org/docs/dev/gitwash/index.html>`_).
+(`<https://scikit-image.org/docs/dev/gitwash/index.html>`_).
 
 4. Review process:
 
@@ -167,7 +167,7 @@ Once you've fixed all merge conflicts, do::
 .. note::
 
    Advanced Git users are encouraged to `rebase instead of merge
-   <http://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
    but we squash and merge most PRs either way.
 
 Guidelines

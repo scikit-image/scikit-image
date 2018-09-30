@@ -17,7 +17,7 @@ XY_TO_RC_DEPRECATION_MESSAGE = (
     'regionprops and image moments (including moments, normalized moments, '
     'central moments, and inertia tensor) of 2D images will change from xy '
     'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
     'for details on how to avoid this message.'
 )
 STREL_4 = np.array([[0, 1, 0],
