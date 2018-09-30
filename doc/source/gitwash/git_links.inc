@@ -54,7 +54,7 @@
 .. _ipython git workflow: http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
 
 .. other stuff
-.. _python: http://www.python.org
+.. _python: https://www.python.org
 
 .. |emdash| unicode:: U+02014
 

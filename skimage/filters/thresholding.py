@@ -184,7 +184,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     References
     ----------
-    .. [1] http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
+    .. [1] https://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
 
     Examples
     --------

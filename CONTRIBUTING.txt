@@ -98,7 +98,7 @@ For a more detailed discussion, read these :doc:`detailed documents
      and commit. As soon as those changes are pushed up (to the same branch as
      before) the pull request will update automatically.
 
-   * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service,
+   * `Travis-CI <https://travis-ci.org/>`__, a continuous integration service,
      is triggered after each Pull Request update to build the code, run unit
      tests, measure code coverage and check coding style (PEP8) of your
      branch. The Travis tests must pass before your PR can be merged. If
@@ -188,7 +188,7 @@ Stylistic Guidelines
 --------------------
 
 * Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <http://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+  <https://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
 
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
@@ -296,7 +296,7 @@ Travis-CI checks all unittests in the project to prevent breakage.
 Before sending a pull request, you may want to check that Travis-CI
 successfully passes all tests. To do so,
 
-* Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at
+* Go to `Travis-CI <https://travis-ci.org/>`__ and follow the Sign In link at
   the top
 
 * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on
@@ -378,7 +378,7 @@ scikit-image/tools/deploy-docs.sh
 -  The decrypted GH\_TOKEN env var will be available for travis scripts
 
 https://help.github.com/articles/creating-an-access-token-for-command-line-use/
-http://docs.travis-ci.com/user/encryption-keys/
+https://docs.travis-ci.com/user/encryption-keys/
 
 Deprecation cycle
 -----------------
