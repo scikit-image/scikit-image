@@ -273,7 +273,7 @@ Tests for a module should ideally cover all code in that module,
 i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
-`pytest-cov <http://pytest-cov.readthedocs.io/en/latest/>`__
+`pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
 (using ``easy_install pytest-cov``) and then run::
 
   $ make coverage
@@ -303,14 +303,14 @@ successfully passes all tests. To do so,
   your scikit-image fork
 
 It corresponds to steps one and two in
-`Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__
+`Travis-CI documentation <https://about.travis-ci.org/docs/user/getting-started/>`__
 (Step three is already done in scikit-image).
 
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
 and you will receive an email notification when the process is done.
 
 Every time Travis is triggered, it also calls on `Codecov
-<http://codecov.io>`_ to inspect the current test overage.
+<https://codecov.io>`_ to inspect the current test overage.
 
 
 Building docs
@@ -339,9 +339,9 @@ the documentation.
 
 **LaTeX Mac:**
 
-Install the full `MacTex <http://www.tug.org/mactex/>`__ installation or
+Install the full `MacTex <https://www.tug.org/mactex/>`__ installation or
 install the smaller
-`BasicTex <http://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
+`BasicTex <https://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
 and *dvipng* packages:
 
 .. code:: sh
