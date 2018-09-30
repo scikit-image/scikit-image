@@ -3,10 +3,7 @@
 set -ev
 export PY=${TRAVIS_PYTHON_VERSION}
 
-mkdir -p $MPL_DIR
-touch $MPL_DIR/matplotlibrc
-
-if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+if [[ $TRAVIS_OS_NAME == "osx" && "${OPTIONAL_DEPS}" == "1" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 
@@ -32,6 +29,9 @@ echo Build or run examples
 pip install --retries 3 -q -r ./requirements/docs.txt
 pip list
 tools/build_versions.py
+# MPL_DIR is not a default requirement, therefore we need to ensure
+# MPL_DIR is defined here
+MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   export SPHINXCACHE=${HOME}/.cache/sphinx; make html

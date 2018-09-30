@@ -37,8 +37,12 @@ export WHEELHOUSE
 
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
-
-export TEST_ARGS="--doctest-modules --cov=skimage"
+if [[ "$OPTIONAL_DEPS" == "1" ]]; then
+  # We must run doctests with the optional deps since
+  # it seems to crawl through the code base. if it cannot find
+  # matplotlib, it causes an error when it gathers the tests
+  export TEST_ARGS="--doctest-modules --cov=skimage"
+fi
 
 retry () {
     # https://gist.github.com/fungusakafungus/1026804
@@ -67,7 +71,7 @@ python -m pip install --upgrade pip
 pip install --retries 3 -q wheel
 
 # install specific wheels from wheelhouse
-for requirement in matplotlib scipy pillow; do
+for requirement in scipy pillow; do
     WHEELS="$WHEELS $(grep $requirement requirements/default.txt)"
 done
 # cython is not in the default.txt requirements
