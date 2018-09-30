@@ -5,3 +5,5 @@ ignore:
   - "setup.py"
   - "**/setup.py"
 
+# Disable PR comment
+comment: off
