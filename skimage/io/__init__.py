@@ -4,7 +4,9 @@ The following plug-ins are available:
 
 """
 
-from .manage_plugins import *
+from .manage_plugins import (use_plugin, call_plugin, plugin_info,
+                             plugin_order, reset_plugins,
+                             find_available_plugins, available_plugins)
 from .sift import *
 from .collection import *
 
