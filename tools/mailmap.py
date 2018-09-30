@@ -19,7 +19,7 @@ def call(cmd):
 
 
 def _clean_email(email):
-    if not '@' in email:
+    if '@' not in email:
         return
 
     name, domain = email.split('@')
