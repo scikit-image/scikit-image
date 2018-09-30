@@ -328,7 +328,7 @@ intersphinx_mapping = {
     'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
-                   (None, 'http://matplotlib.org/objects.inv'))
+                   (None, 'https://matplotlib.org/objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
