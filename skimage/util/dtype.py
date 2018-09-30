@@ -86,7 +86,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     References
     ----------
     .. [1] DirectX data conversion rules.
-           http://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
+           https://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
     .. [2] Data Conversions. In "OpenGL ES 2.0 Specification v2.0.25",
            pp 7-8. Khronos Group, 2010.
     .. [3] Proper treatment of pixels as integers. A.W. Paeth.

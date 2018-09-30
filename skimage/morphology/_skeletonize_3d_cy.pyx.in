@@ -1,17 +1,17 @@
 """
 This is an implementation of the 2D/3D thinning algorithm
-of [Lee94]_ of binary images, based on [IAC15]_. 
+of [Lee94]_ of binary images, based on [IAC15]_.
 
 The original Java code [IAC15]_ carries the following message:
 
  * This work is an implementation by Ignacio Arganda-Carreras of the
- * 3D thinning algorithm from Lee et al. "Building skeleton models via 3-D 
- * medial surface/axis thinning algorithms. Computer Vision, Graphics, and 
+ * 3D thinning algorithm from Lee et al. "Building skeleton models via 3-D
+ * medial surface/axis thinning algorithms. Computer Vision, Graphics, and
  * Image Processing, 56(6):462-478, 1994." Based on the ITK version from
  * Hanno Homann <a href="http://hdl.handle.net/1926/1292"> http://hdl.handle.net/1926/1292</a>
  * <p>
  *  More information at Skeletonize3D homepage:
- *  http://fiji.sc/Skeletonize3D
+ *  https://imagej.net/Skeletonize3D
  *
  * @version 1.0 11/13/2015 (unique BSD licensed version for scikit-image)
  * @author Ignacio Arganda-Carreras (iargandacarreras at gmail.com)
@@ -23,7 +23,7 @@ References
        Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
 
 .. [IAC15] Ignacio Arganda-Carreras, 2015. Skeletonize3D plugin for ImageJ(C).
-           http://fiji.sc/Skeletonize3D
+           https://imagej.net/Skeletonize3D
 
 """
 
@@ -133,7 +133,7 @@ cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
         int[::1] Euler_LUT = LUT
 
     # loop through the image
-    # NB: each loop is from 1 to size-1: img is padded from all sides 
+    # NB: each loop is from 1 to size-1: img is padded from all sides
     for p in range(1, img.shape[0] - 1):
         for r in range(1, img.shape[1] - 1):
             for c in range(1, img.shape[2] - 1):
@@ -154,7 +154,7 @@ cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
 
                 get_neighborhood(img, p, r, c, neighborhood)
 
-                # check if (p, r, c) can be deleted: 
+                # check if (p, r, c) can be deleted:
                 # * it must not be an endpoint;
                 # * it must be Euler invariant (condition 1 in [Lee94]_); and
                 # * it must be simple (i.e., its deletion does not change
@@ -178,7 +178,7 @@ cdef void get_neighborhood(pixel_type[:, :, ::1] img,
                            pixel_type neighborhood[]):
     """Get the neighborhood of a pixel.
 
-    Assume zero boundary conditions. 
+    Assume zero boundary conditions.
     Image is already padded, so no out-of-bounds checking.
 
     For the numbering of points see Fig. 1a. of [Lee94]_, where the numbers
@@ -402,7 +402,7 @@ cdef void octree_labeling(int octant, int label, pixel_type cube[]):
     ----------
     octant : int
         octant index
-    label : int 
+    label : int
         the current label of the center point
     cube : uint8 C array, shape(26,)
         local neighborhood of the point

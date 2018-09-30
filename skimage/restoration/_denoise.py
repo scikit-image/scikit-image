@@ -62,7 +62,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     References
     ----------
-    .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+    .. [1] https://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
     Examples
     --------
@@ -153,8 +153,8 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
            ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
-           http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
-    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+           https://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)

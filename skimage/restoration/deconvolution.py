@@ -104,7 +104,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
-           http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+           https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
 
@@ -226,7 +226,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
-           http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+           https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
            http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
     """

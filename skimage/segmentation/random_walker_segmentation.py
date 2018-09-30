@@ -18,7 +18,7 @@ from .._shared.utils import warn
 # needed to speed up a few cases.
 # See discussions at:
 # https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
-# http://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
+# https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
     from scipy.sparse.linalg.dsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__

@@ -44,7 +44,7 @@ def radon(image, theta=None, circle=True):
     Notes
     -----
     Based on code of Justin K. Romberg
-    (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
+    (https://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
 
     """
     if image.ndim != 2:
