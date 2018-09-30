@@ -44,7 +44,7 @@ def radon(image, theta=None, circle=True):
     Notes
     -----
     Based on code of Justin K. Romberg
-    (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
+    (https://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
 
     """
     if image.ndim != 2:
@@ -385,7 +385,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
            reconstruction based on the golden section." Nuclear Science
            Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
     .. [5] Kaczmarz' method, Wikipedia,
-           http://en.wikipedia.org/wiki/Kaczmarz_method
+           https://en.wikipedia.org/wiki/Kaczmarz_method
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')

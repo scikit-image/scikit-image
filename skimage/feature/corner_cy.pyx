@@ -34,7 +34,7 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
     References
     ----------
     .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------

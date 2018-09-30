@@ -6,7 +6,7 @@ Image processing algorithms for SciPy, including IO, morphology, filtering,
 warping, color manipulation, object detection, etc.
 
 Please refer to the online documentation at
-http://scikit-image.org/
+https://scikit-image.org/
 """
 
 DISTNAME = 'scikit-image'
@@ -14,9 +14,9 @@ DESCRIPTION = 'Image processing routines for SciPy'
 LONG_DESCRIPTION = descr
 MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
-URL = 'http://scikit-image.org'
+URL = 'https://scikit-image.org'
 LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
+DOWNLOAD_URL = 'https://github.com/scikit-image/scikit-image'
 
 import os
 import sys
@@ -172,7 +172,7 @@ if __name__ == "__main__":
                   'Install numpy with pip:\n' +
                   'pip install numpy\n'
                   'Or use your operating system package manager. For more\n' +
-                  'details, see http://scikit-image.org/docs/stable/install.html')
+                  'details, see https://scikit-image.org/docs/stable/install.html')
             sys.exit(1)
 
     setup(

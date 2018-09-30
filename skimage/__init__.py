@@ -87,7 +87,7 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-http://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):

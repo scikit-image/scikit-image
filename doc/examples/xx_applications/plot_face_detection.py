@@ -59,7 +59,7 @@ leaves the clusters that have a same or bigger number of detections in them.
 You should also take into account that false detections are inevitable and if
 you want to have a really precise detector, you will have to train it yourself
 using `OpenCV train cascade utility
-<http://docs.opencv.org/doc/user_guide/ug_traincascade.html>`_.
+<https://docs.opencv.org/doc/user_guide/ug_traincascade.html>`_.
 """
 
 from skimage import data

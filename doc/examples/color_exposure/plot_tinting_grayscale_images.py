@@ -46,7 +46,7 @@ ax2.imshow(yellow_multiplier * image)
 # to 1, so that hue, saturation, and value all share the same scale.
 #
 # .. _color spaces:
-#     http://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
+#     https://en.wikipedia.org/wiki/List_of_color_spaces_and_their_uses
 #
 # Below, we plot a linear gradient in the hue, with the saturation and value
 # turned all the way up:
@@ -68,7 +68,7 @@ ax.set_axis_off()
 # reflects the fact that the hues wrap around like the color wheel (see HSV_
 # for more info).
 #
-# .. _HSV: http://en.wikipedia.org/wiki/HSL_and_HSV
+# .. _HSV: https://en.wikipedia.org/wiki/HSL_and_HSV
 #
 # Now, let's create a little utility function to take an RGB image and:
 #

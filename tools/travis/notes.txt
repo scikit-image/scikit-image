@@ -1,5 +1,5 @@
-- Use http://yaml-online-parser.appspot.com/ to make sure the yaml file is valid.
-  http://lint.travis-ci.org/ is recommended elsewhere but does not give helpful
+- Use https://yaml-online-parser.appspot.com/ to make sure the yaml file is valid.
+  https://lint.travis-ci.org/ is recommended elsewhere but does not give helpful
   error reports.
 - Make sure all of your "-" lines start on the same column
 - Use bash scripts for `before_install` and `script` or any part that

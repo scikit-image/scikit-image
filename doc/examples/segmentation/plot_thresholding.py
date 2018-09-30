@@ -20,7 +20,7 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 # which are separated by the threshold. Equivalently, this threshold minimizes
 # the intra-class variance.
 #
-# .. [2] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
 
 import matplotlib.pyplot as plt

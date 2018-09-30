@@ -15,8 +15,8 @@ graylevel variations.
 
 References
 ----------
-.. [1] http://en.wikipedia.org/wiki/Histogram_equalization
-.. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+.. [1] https://en.wikipedia.org/wiki/Histogram_equalization
+.. [2] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 """
 import numpy as np

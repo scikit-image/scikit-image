@@ -172,8 +172,8 @@ plt.tight_layout()
 # function for each pixel neighborhood. The local version [3]_ of the
 # histogram equalization emphasizes every local gray-level variations.
 #
-# .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
-# .. [3] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+# .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
+# .. [3] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 from skimage import exposure
 from skimage.filters import rank
@@ -361,7 +361,7 @@ plt.tight_layout()
 #     Otsu thresholding can be found in :
 #     :py:func:`skimage.filters.threshold_otsu`.
 #
-# .. [4] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [4] https://en.wikipedia.org/wiki/Otsu's_method
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu

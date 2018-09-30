@@ -63,7 +63,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
     .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [3] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples

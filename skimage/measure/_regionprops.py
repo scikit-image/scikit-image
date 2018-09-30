@@ -17,7 +17,7 @@ XY_TO_RC_DEPRECATION_MESSAGE = (
     'regionprops and image moments (including moments, normalized moments, '
     'central moments, and inertia tensor) of 2D images will change from xy '
     'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
     'for details on how to avoid this message.'
 )
 STREL_4 = np.array([[0, 1, 0],
@@ -539,7 +539,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
