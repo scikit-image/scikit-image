@@ -1,4 +1,6 @@
 from skimage._shared._geometry import polygon_clip, polygon_area
+from skimage._shared.version_requirements import is_installed
+from skimage._shared import testing
 
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal

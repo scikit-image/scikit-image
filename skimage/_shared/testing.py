@@ -31,6 +31,7 @@ xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
+importorskip = pytest.importorskip
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits

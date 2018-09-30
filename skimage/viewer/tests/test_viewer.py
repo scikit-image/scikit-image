@@ -3,6 +3,10 @@ from skimage.transform import pyramid_gaussian
 from skimage.filters import sobel
 
 from skimage.viewer.qt import QtGui, QtCore, has_qt
+
+from skimage._shared.testing import importorskip
+matplotlib = importorskip('matplotlib')
+
 from skimage.viewer import ImageViewer, CollectionViewer
 from skimage.viewer.plugins import OverlayPlugin
 

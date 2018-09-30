@@ -11,6 +11,9 @@ from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
                           rectangle_perimeter)
 from skimage.measure import regionprops
 
+from skimage._shared.version_requirements import is_installed
+from skimage._shared import testing
+
 
 def test_set_color():
     img = np.zeros((10, 10))

@@ -1,3 +1,6 @@
+from skimage._shared import testing
+matplotlib = testing.importorskip('matplotlib')
+
 from skimage.viewer import utils
 from skimage.viewer.utils import dialogs
 from skimage.viewer.qt import QtCore, QtWidgets, has_qt

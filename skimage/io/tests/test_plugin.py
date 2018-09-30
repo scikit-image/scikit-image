@@ -5,6 +5,7 @@ from skimage.io import manage_plugins
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal
+from skimage._shared.version_requirements import is_installed
 
 
 io.use_plugin('pil')
@@ -35,13 +36,16 @@ def test_use_priority():
     plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, priority_plugin)
 
-    manage_plugins.use_plugin('matplotlib')
-    plug, func = manage_plugins.plugin_store['imread'][0]
-    assert_equal(plug, 'matplotlib')
+    if is_installed('matplotlib'):
+        manage_plugins.use_plugin('matplotlib')
+        plug, func = manage_plugins.plugin_store['imread'][0]
+        assert_equal(plug, 'matplotlib')
 
 
 def test_load_preferred_plugins_all():
-    from skimage.io._plugins import pil_plugin, matplotlib_plugin
+    from skimage.io._plugins import pil_plugin
+    if is_installed('matplotlib'):
+        from skimage.io._plugins import matplotlib_plugin
 
     with protect_preferred_plugins():
         manage_plugins.preferred_plugins = {'all': ['pil'],
@@ -51,12 +55,17 @@ def test_load_preferred_plugins_all():
         for plugin_type in ('imread', 'imsave'):
             plug, func = manage_plugins.plugin_store[plugin_type][0]
             assert func == getattr(pil_plugin, plugin_type)
-        plug, func = manage_plugins.plugin_store['imshow'][0]
-        assert func == getattr(matplotlib_plugin, 'imshow')
+        if is_installed('matplotlib'):
+            plug, func = manage_plugins.plugin_store['imshow'][0]
+            assert func == getattr(matplotlib_plugin, 'imshow')
+        else:
+            assert len(manage_plugins.plugin_store['imshow']) == 0
 
 
 def test_load_preferred_plugins_imread():
-    from skimage.io._plugins import pil_plugin, matplotlib_plugin
+    from skimage.io._plugins import pil_plugin
+    if is_installed('matplotlib'):
+        from skimage.io._plugins import matplotlib_plugin
 
     with protect_preferred_plugins():
         manage_plugins.preferred_plugins['imread'] = ['pil']
@@ -64,5 +73,8 @@ def test_load_preferred_plugins_imread():
 
         plug, func = manage_plugins.plugin_store['imread'][0]
         assert func == pil_plugin.imread
-        plug, func = manage_plugins.plugin_store['imshow'][0]
-        assert func == matplotlib_plugin.imshow, func.__module__
+        if is_installed('matplotlib'):
+            plug, func = manage_plugins.plugin_store['imshow'][0]
+            assert func == matplotlib_plugin.imshow
+        else:
+            assert len(manage_plugins.plugin_store['imshow']) == 0

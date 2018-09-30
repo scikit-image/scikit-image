@@ -3,17 +3,20 @@ import skimage
 import skimage.data as data
 from skimage.filters.rank import median
 from skimage.morphology import disk
+
+from skimage._shared.testing import (assert_equal, assert_allclose,
+                                     assert_almost_equal)
+from skimage._shared._warnings import expected_warnings
+
+from skimage._shared import testing
+matplotlib = testing.importorskip('matplotlib')
+
 from skimage.viewer import ImageViewer, has_qt
 from skimage.viewer.plugins.base import Plugin
 from skimage.viewer.widgets import Slider
 from skimage.viewer.plugins import (
     LineProfile, Measure, CannyPlugin, LabelPainter, Crop, ColorHistogram,
     PlotPlugin)
-
-from skimage._shared import testing
-from skimage._shared.testing import (assert_equal, assert_allclose,
-                                     assert_almost_equal)
-from skimage._shared._warnings import expected_warnings
 
 
 def setup_line_profile(image, limits='image'):

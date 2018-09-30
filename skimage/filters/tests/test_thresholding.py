@@ -20,6 +20,7 @@ from skimage.filters.thresholding import (threshold_local,
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_equal
+from skimage._shared.version_requirements import is_installed
 
 
 class TestSimpleImage():
@@ -34,6 +35,8 @@ class TestSimpleImage():
         with pytest.raises(RuntimeError):
             threshold_minimum(self.image)
 
+    @testing.skipif(not is_installed('matplotlib'),
+                    reason='try_all returns a matplotlib figure.')
     def test_try_all_threshold(self):
         fig, ax = try_all_threshold(self.image)
         all_texts = [axis.texts for axis in ax if axis.texts != []]

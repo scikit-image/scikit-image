@@ -2,6 +2,9 @@
 import numpy as np
 from skimage import io
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import importorskip
+matplotlib = importorskip('matplotlib')
+
 import matplotlib.pyplot as plt
 
 
