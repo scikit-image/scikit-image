@@ -17,7 +17,7 @@ if [[ "${QT}" == "PyQt5" ]]; then
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then
-    pip install--retries 3 -q $PIP_FLAGS pyside2
+    pip install --retries 3 -q $PIP_FLAGS pyside2
     MPL_QT_API=PySide2
     export QT_API=pyside2
 else
