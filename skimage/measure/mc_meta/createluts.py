@@ -126,7 +126,7 @@ def search_line(lines, refline, start=0):
 
 
 
-def getLutNames(prefix):
+def getLutNames(prefix, luts):
     aa = []
     for a in dir(luts):
         if a.startswith(prefix):
