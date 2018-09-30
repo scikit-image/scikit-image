@@ -359,7 +359,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
     # compute the times for direct convolution and the fft method. The fft is of
     # complexity O(N log(N)) for each dimension and the direct method does

@@ -252,7 +252,7 @@ def threshold_otsu(image, nbins=256):
 
     References
     ----------
-    .. [1] Wikipedia, http://en.wikipedia.org/wiki/Otsu's_Method
+    .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
 
     Examples
     --------

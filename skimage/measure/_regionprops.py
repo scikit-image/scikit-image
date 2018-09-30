@@ -539,7 +539,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------

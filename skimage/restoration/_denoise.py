@@ -147,7 +147,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Total_variation_denoising
+    .. [1] https://en.wikipedia.org/wiki/Total_variation_denoising
     .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
            Regularized Problems",
            ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
@@ -278,7 +278,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     Make sure to set the multichannel parameter appropriately for color images.
 
     The principle of total variation denoising is explained in
-    http://en.wikipedia.org/wiki/Total_variation_denoising
+    https://en.wikipedia.org/wiki/Total_variation_denoising
 
     The principle of total variation denoising is to minimize the
     total variation of the image, which can be roughly described as
