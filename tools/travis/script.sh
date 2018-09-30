@@ -10,6 +10,11 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 
+section "list.installed.dependencies"
+pip list
+tools/build_versions.py
+section_end "list.installed.dependencies"
+
 section "Test"
 pytest $TEST_ARGS skimage
 section_end "Test"
@@ -22,6 +27,8 @@ section "Tests.examples"
 # Run example applications
 echo Build or run examples
 pip install --retries 3 -q -r ./requirements/docs.txt
+pip list
+tools/build_versions.py
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   export SPHINXCACHE=${HOME}/.cache/sphinx; make html
