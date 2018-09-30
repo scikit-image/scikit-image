@@ -60,6 +60,10 @@ matrix:
     - os: osx
       osx_image: xcode9
       language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1
+    - os: osx
+      osx_image: xcode9
+      language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
 
 before_install:
