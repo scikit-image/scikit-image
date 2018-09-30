@@ -20,6 +20,8 @@ def _draw_polygon(ax, vertices, alpha=0.4):
     from matplotlib.patches import Polygon
     from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
 
     polygon = Polygon(vertices, closed=True)
     p = PatchCollection([polygon], match_original=True, alpha=alpha)
