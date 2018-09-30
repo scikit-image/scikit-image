@@ -381,8 +381,8 @@ def linkcode_resolve(domain, info):
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "master/skimage/%s%s" % (fn, linespec))
     else:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

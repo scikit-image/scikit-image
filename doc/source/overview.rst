@@ -16,7 +16,7 @@ https://scikit-image.org
 
 Source, bugs and patches
 ------------------------
-http://github.com/scikit-image/scikit-image
+https://github.com/scikit-image/scikit-image
 
 Mailing List
 ------------

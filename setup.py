@@ -16,7 +16,7 @@ MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
 URL = 'https://scikit-image.org'
 LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
+DOWNLOAD_URL = 'https://github.com/scikit-image/scikit-image'
 
 import os
 import sys

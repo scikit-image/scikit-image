@@ -128,10 +128,10 @@ Conda-forge
 -----------
 
 A scikit-image build recipe resides at
-http://github.com/conda-forge/scikit-image-feedstock. You should update it to
+https://github.com/conda-forge/scikit-image-feedstock. You should update it to
 point to the most recent release. You can do this by following these steps:
 
-- Fork the repository at http://github.com/conda-forge/scikit-image-feedstock,
+- Fork the repository at https://github.com/conda-forge/scikit-image-feedstock,
   and clone it to your machine.
 - Sprout a new branch, e.g. ``v<major>.<minor>``.
 - Find out the SHA256 hash of the source distribution. You can find this at

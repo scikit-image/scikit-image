@@ -150,7 +150,7 @@ Ask for your changes to be reviewed or merged
 When you are ready to ask for someone to review your code and consider a merge:
 
 #. Go to the URL of your forked repo, say
-   ``http://github.com/your-user-name/scikit-image``.
+   ``https://github.com/your-user-name/scikit-image``.
 #. Use the 'Switch Branches' dropdown menu near the top left of the page to
    select the branch with your changes:
 
@@ -183,7 +183,7 @@ Delete a branch on github
    git push origin :my-unwanted-branch
 
 (Note the colon ``:`` before ``test-branch``.  See also:
-http://github.com/guides/remove-a-remote-branch
+https://github.com/guides/remove-a-remote-branch
 
 Several people sharing a single repository
 ------------------------------------------
@@ -195,7 +195,7 @@ share it via github.
 First fork scikit-image into your account, as from :ref:`forking`.
 
 Then, go to your forked repository github page, say
-``http://github.com/your-user-name/scikit-image``
+``https://github.com/your-user-name/scikit-image``
 
 Click on the 'Admin' button, and add anyone else to the repo as a
 collaborator:

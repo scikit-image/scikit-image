@@ -10,16 +10,16 @@
 
 .. git stuff
 .. _git: http://git-scm.com/
-.. _github: http://github.com
+.. _github: https://github.com
 .. _github help: http://help.github.com
 .. _msysgit: https://git-for-windows.github.io/
 .. _git-osx-installer: http://code.google.com/p/git-osx-installer/downloads/list
 .. _subversion: http://subversion.tigris.org/
-.. _git cheat sheet: http://github.com/guides/git-cheat-sheet
+.. _git cheat sheet: https://github.com/guides/git-cheat-sheet
 .. _pro git book: http://progit.org/
 .. _git svn crash course: http://git-scm.com/course/svn.html
 .. _learn.github: http://learn.github.com/
-.. _network graph visualizer: http://github.com/blog/39-say-hello-to-the-network-graph-visualizer
+.. _network graph visualizer: https://github.com/blog/39-say-hello-to-the-network-graph-visualizer
 .. _git user manual: http://schacon.github.com/git/user-manual.html
 .. _git tutorial: http://schacon.github.com/git/gittutorial.html
 .. _git community book: http://book.git-scm.com/

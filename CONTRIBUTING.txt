@@ -26,7 +26,7 @@ Here's the long and short of it:
 1. If you are a first-time contributor:
 
    * Go to `https://github.com/scikit-image/scikit-image
-     <http://github.com/scikit-image/scikit-image>`_ and click the
+     <https://github.com/scikit-image/scikit-image>`_ and click the
      "fork" button to create your own copy of the project.
 
    * Clone the project to your local computer::
