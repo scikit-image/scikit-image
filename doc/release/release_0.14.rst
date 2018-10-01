@@ -34,7 +34,7 @@ Bug fixes
 Enhancements
 ------------
 - "Reflect" mode in transforms now works fine when an image dimension has size
-  1 (#3179)
+  1 (#3174)
 - ``img_as_float`` now allows single-precision (32-bit) float arrays to pass
   through unmodified, rather than being up-converted to 64-bit (#3110, #3052,
   #3391)
@@ -45,11 +45,11 @@ Enhancements
 - scikit-image's ``io`` module will no longer inadvertently set the matplotlib
   backend when imported (#3243)
 - Fix deprecated ``get`` keyword from dask in favor of ``scheduler`` (#3366)
-- Add missing ``cval`` parameter to threshold_local (#3382)
+- Add missing ``cval`` parameter to threshold_local (#3370)
 
 API changes
 -----------
-- Remove deprecated ``dynamic_range`` in ``measure.compare_psnr`` (#3314)
+- Remove deprecated ``dynamic_range`` in ``measure.compare_psnr`` (#3313)
 
 Documentation
 -------------
@@ -67,7 +67,8 @@ Build process / development
 - Fix skimage.test (#3152)
 - Don't upload artifacts to AppVeyor (there is no way to delete them) (#3315)
 - Remove ``import *`` from the scikit-image package root (#3265)
-- Allow named non-core contributors to issue MeeseeksDev commands (#3358)
+- Allow named non-core contributors to issue MeeseeksDev commands (#3357,
+  #3358)
 - Add testing in Python 3.7 (#3359)
 - Add license file to the binary distribution (#3322)
 - ``lookfor`` is no longer defined in ``__init__.py`` but rather imported to it
@@ -75,9 +76,9 @@ Build process / development
 - Add ``pyproject.toml`` to ensure Cython is present before building (#3295)
 - Add explicit Python version Trove classifiers for PyPI (#3417)
 - Ignore known test failures in 32-bit releases, allowing 32-bit wheel builds
-  (#3435)
+  (#3434)
 - Ignore failure to raise floating point warnings on certain ARM platforms
-  (#3416)
+  (#3337)
 
 Credits
 -------
