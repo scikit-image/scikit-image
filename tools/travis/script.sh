@@ -16,7 +16,13 @@ tools/build_versions.py
 section_end "List.installed.dependencies"
 
 section "Test"
-pytest $TEST_ARGS skimage
+if [[ "$INSTALL_FROM_SDIST" == "1" ]]; then
+    pushd ..
+    pytest $TEST_ARGS --pyargs skimage
+    popd
+else
+    pytest $TEST_ARGS skimage
+fi
 section_end "Test"
 
 section "Flake8.test"

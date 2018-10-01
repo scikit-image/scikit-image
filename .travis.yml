@@ -38,7 +38,7 @@ matrix:
   include:
     - os: linux
       python: 3.5
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1
     - os: linux
       python: 3.5
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
@@ -87,8 +87,14 @@ before_install:
     - tools/check_sdist.py $SDIST_NAME
 
 install:
-    - python setup.py develop
     - ccache --show-stats
+    # Test installing without cython using the sdist
+    - if [[ "$INSTALL_FROM_SDIST" == "1" ]]; then
+        pip uninstall cython -y ;
+        pip install dist/scikit-image-*.tar.gz ;
+      else
+        python setup.py develop ;
+      fi
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
