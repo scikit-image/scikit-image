@@ -84,12 +84,12 @@ Credits
 -------
 Made with commits from (alphabetical by last name):
 
-- Christoph Deil
 - François Boulogne
 - Genevieve Buckley
 - Sean Budd
 - Matthias Bussonnier
 - Sarkis Dallakian
+- Christoph Deil
 - François-Michel De Rainville
 - Emmanuelle Gouillart
 - Yaroslav Halchenko
