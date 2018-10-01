@@ -95,6 +95,7 @@ Made with commits from (alphabetical by last name):
 - Yaroslav Halchenko
 - Mark Harfouche
 - Jonathan Helmus
+- @Legodev
 - Matt McCormick
 - Juan Nunez-Iglesias
 - Egor Panfilov
