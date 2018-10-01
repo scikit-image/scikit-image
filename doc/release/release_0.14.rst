@@ -28,6 +28,8 @@ Bug fixes
   and ``moments_normalized`` can now be correctly imported from the ``measure``
   namespace (#3374)
 - Fix background color in ``label2rgb(..., kind='avg')`` (#3280)
+- Fix an UnboundLocalVariable error when an image consisting of all NaNs was
+  passed to ``filters.threshold_li`` (#3402)
 
 Enhancements
 ------------
@@ -44,7 +46,6 @@ Enhancements
   backend when imported (#3243)
 - Fix deprecated ``get`` keyword from dask in favor of ``scheduler`` (#3366)
 - Add missing ``cval`` parameter to threshold_local (#3382)
-
 
 API changes
 -----------
@@ -72,6 +73,11 @@ Build process / development
 - ``lookfor`` is no longer defined in ``__init__.py`` but rather imported to it
   (#3162)
 - Add ``pyproject.toml`` to ensure Cython is present before building (#3295)
+- Add explicit Python version Trove classifiers for PyPI (#3417)
+- Ignore known test failures in 32-bit releases, allowing 32-bit wheel builds
+  (#3435)
+- Ignore failure to raise floating point warnings on certain ARM platforms
+  (#3416)
 
 Credits
 -------
@@ -94,6 +100,7 @@ Made with commits from (alphabetical by last name):
 - Jesse Pangburn
 - Johannes Schönberger
 - Stefan van der Walt
+- Hugo VK
 
 Reviewed by (alphabetical by last name):
 
