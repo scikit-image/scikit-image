@@ -6,11 +6,8 @@ from ...util import img_as_ubyte
 
 # utilities to make life easier for plugin writers.
 
-try:
-    import multiprocessing
-    CPU_COUNT = multiprocessing.cpu_count()
-except:
-    CPU_COUNT = 2
+import multiprocessing
+CPU_COUNT = multiprocessing.cpu_count()
 
 
 class GuiLockError(Exception):
