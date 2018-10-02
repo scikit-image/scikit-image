@@ -2,7 +2,7 @@ import numpy as np
 from skimage.measure import profile_line
 
 from skimage._shared.testing import assert_equal, assert_almost_equal
-
+#from skimage.measure.profile import _rotation_angles_by_distance_from_line
 
 image = np.arange(100, dtype=np.float).reshape((10, 10))
 
@@ -11,7 +11,10 @@ def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
     expected_prof = np.arange(2, 9)
     assert_equal(prof, expected_prof)
-
+def test_horizontal_rightward_del():
+    prof = profile_line(image, (2, 2), (2, 8), linewidth=2, order=0)
+    expected_prof = np.arange(2, 9)
+    assert_equal(prof, expected_prof)
 
 def test_horizontal_leftward():
     prof = profile_line(image, (0, 8), (0, 2), order=0)

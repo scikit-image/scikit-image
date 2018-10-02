@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import constants
 
 
 def distance_point_line(point, line_1, line_2):
@@ -82,73 +81,14 @@ def rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vect
     return np.array([p3, p2, p1])
 
 
-def rotation_angles_by_distance_from_line(dst, src, point):
-    """Return an array of angles that will be used to rotate a point 360 degrees around a line.
-    The number of angles is dependent on the distance between the point and the line.
-    The farther the point from the line, the smaller the angle incrementation.
+def get_any_perpendicular_vector(v):
+    if not np.any(v):
+        raise ValueError('All values are zero')
+    if v[0] == 0 and v[1] == 0:
+        return [0, 1, 0]
+    elif v[0] == 0 and v[2] == 0:
+        return [1, 0, 0]
+    elif v[1] == 0 and v[2] == 0:
+        return [0, 0, 1]
 
-    Parameters
-    ----------
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-    point : 3-tuple of numeric scalar (float or int)
-        The point to find the distance.
-
-    Returns
-    -------
-    angles : tuple, float
-        The angles that will be used to rotate the sample point to create more sample points around the line.
-    """
-    dst = distance_point_line(point, src, dst)
-    if dst == 0:
-        rotation_angles = np.zeros(1)
-    else:
-        rotation_angles = np.linspace(0, 2 * constants.pi, 2 * dst + 3)  # todo, what is the 3??
-        rotation_angles = rotation_angles[:-1]
-    return rotation_angles
-
-
-def rotate_sample_points(perp_array, src, dst):
-    """Return the evenly rotated coordinates of the sample points along a scan line in 3d
-
-    Parameters
-    ----------
-    perp_array, shape (3, M, N), float
-        The coordinates of the profile along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-        The coordinates are 180 degrees apart.
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-
-    Returns
-    -------
-    sampling_array : array, shape (3, M, N), float
-        The coordinates of the 3d sample points along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-    """
-    line_vector = np.subtract(dst, src)
-    length_vector = np.linalg.norm(line_vector)
-    unit_direction_vector = np.divide(line_vector, length_vector)
-
-    # Rotate the points around the axis a number of times depending on the distance of the point
-    # from the direction axis to simulate sampling of points around the axis
-    sampling_array = []
-    for perp_points in np.transpose(perp_array):
-        rotation_angles = rotation_angles_by_distance_from_line(dst, src, perp_points[0])
-        for angle in rotation_angles:  # the number of angles to use as rotation angles for the samping points
-            points_array = []
-            for point in perp_points:  # the number of unit points on displacement vector
-                if angle == 0:
-                    points_array.append(point)
-                else:
-                    rotated_point = rotate_point_around_line(point, src, unit_direction_vector, angle)
-                    points_array.append(rotated_point)
-
-            sampling_array.append(points_array)
-
-    # Return transposed array for ndi.map_coordinates
-    return np.transpose(np.array(sampling_array, dtype=float))
+    return [-v[0], v[1], 0]
