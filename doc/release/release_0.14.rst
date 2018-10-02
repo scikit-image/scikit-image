@@ -79,6 +79,7 @@ Build process / development
   (#3434)
 - Ignore failure to raise floating point warnings on certain ARM platforms
   (#3337)
+- Fix tests to be compatible with PyWavelets 1.0 (#3406)
 
 Credits
 -------
@@ -95,6 +96,7 @@ Made with commits from (alphabetical by last name):
 - Yaroslav Halchenko
 - Mark Harfouche
 - Jonathan Helmus
+- Gregory Lee
 - @Legodev
 - Matt McCormick
 - Juan Nunez-Iglesias
