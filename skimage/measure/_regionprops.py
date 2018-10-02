@@ -1,11 +1,10 @@
 from math import sqrt, atan2, pi as PI
-import itertools
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
+from .._shared.utils import warn
 
 
 from functools import wraps

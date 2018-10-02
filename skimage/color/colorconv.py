@@ -50,7 +50,7 @@ References
 """
 
 
-from warnings import warn
+from .._shared.utils import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype, dtype_limits

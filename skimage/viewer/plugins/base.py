@@ -1,7 +1,7 @@
 """
 Base class for Plugins that interact with ImageViewer.
 """
-from warnings import warn
+from ..._shared.utils import warn
 
 import numpy as np
 from ..qt import QtWidgets, QtCore, Signal

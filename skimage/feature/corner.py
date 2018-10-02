@@ -12,7 +12,7 @@ from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
-from warnings import warn
+from .._shared.utils import warn
 
 
 def _compute_derivatives(image, mode='constant', cval=0):

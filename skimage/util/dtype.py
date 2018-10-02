@@ -1,5 +1,5 @@
 import numpy as np
-from warnings import warn
+from .._shared.utils import warn
 
 
 __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
@@ -132,7 +132,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     def prec_loss():
         warn("Possible precision loss when converting from {} to {}"
-             .format(dtypeobj_in, dtypeobj_out))
+             .format(dtypeobj_in, dtypeobj_out), stacklevel=3)
 
     def _dtype_itemsize(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`
@@ -181,7 +181,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
                 dtype = "uint{}".format(mnew)
             n = int(np.ceil(n / 2) * 2)
             warn("Downcasting {} to {} without scaling because max "
-                 "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype))
+                 "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
+                 stacklevel=3)
             return a.astype(_dtype_bits(kind, m))
         elif n == m:
             return a.copy() if copy else a

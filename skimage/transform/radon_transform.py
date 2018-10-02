@@ -3,7 +3,7 @@ from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
-from warnings import warn
+from .._shared.utils import warn
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']

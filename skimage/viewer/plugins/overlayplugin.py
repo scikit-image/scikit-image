@@ -1,4 +1,4 @@
-from warnings import warn
+from ..._shared.utils import warn
 
 from ...util.dtype import dtype_range
 from .base import Plugin
@@ -116,4 +116,3 @@ class OverlayPlugin(Plugin):
         data : None
         """
         return (self.overlay, None)
-

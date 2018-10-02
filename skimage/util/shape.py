@@ -1,7 +1,7 @@
 import numbers
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-from warnings import warn
+from .._shared.utils import warn
 
 __all__ = ['view_as_blocks', 'view_as_windows']
 

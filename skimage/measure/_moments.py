@@ -2,7 +2,7 @@ import numpy as np
 from .._shared.utils import assert_nD
 from . import _moments_cy
 import itertools
-from warnings import warn
+from .._shared.utils import warn
 
 
 def moments_coords(coords, order=3):
