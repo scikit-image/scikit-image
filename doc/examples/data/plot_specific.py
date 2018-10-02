@@ -6,8 +6,11 @@ Specific images
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 
 from skimage import data
+
+matplotlib.rcParams['font.size'] = 18
 
 ######################################################################
 #

@@ -7,9 +7,11 @@ The title of each image indicates the name of the function.
 
 """
 import matplotlib.pyplot as plt
+import matplotlib
 
 from skimage import data
 
+matplotlib.rcParams['font.size'] = 18
 
 images = ('astronaut',
           'binary_blobs',
