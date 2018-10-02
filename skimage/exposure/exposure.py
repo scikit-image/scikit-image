@@ -112,7 +112,7 @@ def cumulative_distribution(image, nbins=256):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Cumulative_distribution_function
+    .. [1] https://en.wikipedia.org/wiki/Cumulative_distribution_function
 
     Examples
     --------
@@ -156,7 +156,7 @@ def equalize_hist(image, nbins=256, mask=None):
     References
     ----------
     .. [1] http://www.janeriksolem.net/histogram-equalization-with-python-and.html
-    .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
+    .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
 
     """
     if mask is not None:
@@ -340,7 +340,7 @@ def adjust_gamma(image, gamma=1, gain=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Gamma_correction
+    .. [1] https://en.wikipedia.org/wiki/Gamma_correction
 
     Examples
     --------
@@ -482,7 +482,7 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
 
     References
     ----------
-    .. [1] http://scikit-image.org/docs/dev/user_guide/data_types.html
+    .. [1] https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Examples
     --------

@@ -44,7 +44,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
     preserve_range: bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        Also see http://scikit-image.org/docs/dev/user_guide/data_types.html
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------

@@ -4,7 +4,7 @@ Circular and Elliptical Hough Transforms
 ========================================
 
 The Hough transform in its simplest form is a `method to detect
-straight lines <http://en.wikipedia.org/wiki/Hough_transform>`__
+straight lines <https://en.wikipedia.org/wiki/Hough_transform>`__
 but it can also be used to detect circles or ellipses.
 The algorithm assumes that the edge is detected and it is robust against
 noise or missing points.

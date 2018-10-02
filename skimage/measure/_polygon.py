@@ -26,7 +26,7 @@ def approximate_polygon(coords, tolerance):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+    .. [1] https://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
     """
     if tolerance <= 0:
         return coords

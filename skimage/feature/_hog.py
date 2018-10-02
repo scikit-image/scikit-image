@@ -109,7 +109,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [1] https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
 
     .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
            Human Detection, IEEE Computer Society Conference on Computer
