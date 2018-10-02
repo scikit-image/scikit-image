@@ -3,17 +3,13 @@ import sys
 import warnings
 import inspect
 import re
+import functools
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
 
-
-def warn(message, category=None, stacklevel=2):
-    """A version of `warnings.warn` with a default stacklevel of 2.
-    """
-    if category is not None:
-        warnings.warn(message, category=category, stacklevel=stacklevel)
-    else:
-        warnings.warn(message, stacklevel=stacklevel)
+# Setting the stacklevel to 2 will point to the user's code in most cases
+# rather than to the line where the warning was generated.
+warn = functools.partial(warnings.warn, stacklevel=2)
 
 
 @contextmanager
