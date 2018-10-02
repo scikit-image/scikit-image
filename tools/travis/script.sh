@@ -21,10 +21,6 @@ section "Test"
 (cd .. && pytest $TEST_ARGS --pyargs skimage)
 section_end "Test"
 
-section "Flake8.test"
-flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
-section_end "Flake8.test"
-
 section "Tests.examples"
 # Run example applications
 echo Build or run examples
