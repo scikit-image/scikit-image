@@ -136,6 +136,11 @@ make a PR to update these notes after you are done with the release. ;-)
 - Update the version and the release date on Wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
 
+- Make a PR to scikit-image with any updates you might have to these notes
+
+- If making a patch release (v<major>.<minor>.<patch>), forward-port the
+  release notes to the master branch and make a PR.
+
 Conda-forge
 -----------
 
