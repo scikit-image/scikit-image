@@ -50,15 +50,6 @@ make a PR to update these notes after you are done with the release. ;-)
 - Back on the release branch, update the version number to stable in
   ``skimage/__init__.py``, commit, and push.
 
-- Update the docs:
-
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs. In the root directory, run
-    ``python setup.py install``, then ``make html``.
-  - In the ``doc/`` directory, build using ``make gh-pages``.
-  - Update the symlink to ``stable``.
-  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
-
 - Add the version number as a tag in git::
 
    git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
@@ -88,6 +79,15 @@ make a PR to update these notes after you are done with the release. ;-)
   - Commit and push.
   - Wait until the corresponding wheels appear at
     http://wheels.scikit-image.org (about 15 minutes).
+
+- Update the docs:
+
+  - Edit ``doc/source/_static/docversions.js`` and commit
+  - Build a clean version of the docs. In the root directory, run
+    ``python setup.py install``, then ``make html``.
+  - In the ``doc/`` directory, build using ``make gh-pages``.
+  - Update the symlink to ``stable``.
+  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Upload the wheels to PyPI:
 
