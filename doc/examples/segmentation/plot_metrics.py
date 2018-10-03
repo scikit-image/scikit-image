@@ -76,7 +76,7 @@ for im_test in [im_test1, im_test2, im_test3]:
     print('False Splits: %f' % splits)
     print('False Merges: %f' % merges)
 
-fig, axes = plt.subplots(2, 3, figsize=(10, 10), constrained_layout=True)
+fig, axes = plt.subplots(3, 2, figsize=(4, 6), constrained_layout=True)
 ax = axes.ravel()
 
 ax[0].scatter(merge_list, split_list)
