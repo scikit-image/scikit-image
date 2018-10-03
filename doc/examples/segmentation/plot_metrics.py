@@ -1,6 +1,6 @@
 """
 ====================================================
-Comparison of segments
+Evaluating segmentations
 ====================================================
 
 In this example we will:
