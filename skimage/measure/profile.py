@@ -2,12 +2,12 @@ import math
 import numpy as np
 from scipy import ndimage as ndi, constants
 
-from ._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector
+from ._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector_3d, rotation_matrix
 
 
 def profile_line(image, src, dst, linewidth=1,
                  order=1, mode='constant', cval=0.0, multichannel=True,
-                 endpoint=True):
+                 endpoint=True, num_sample_points=4):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -36,6 +36,8 @@ def profile_line(image, src, dst, linewidth=1,
     endpoint : bool, optional
         If True, returns the intensity value at dst. Otherwise, it is not included.
         Default is True.
+    num_sample_points : int, optional
+        The number of sample points for 3d profile lines. generates angles afters.
 
     Returns
     -------
@@ -84,7 +86,7 @@ def profile_line(image, src, dst, linewidth=1,
     return intensities
 
 
-def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True):
+def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_points=4):
     """Return the coordinates of the profile of an image along a scan line.
 
     Parameters
@@ -135,30 +137,8 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True):
         line_row = np.linspace(src[1], dst[1], num, endpoint=endpoint)
         line_col = np.linspace(src[2], dst[2], num, endpoint=endpoint)
         d_pln, d_row, d_col = (dst - src) / length
-        perp_vector = np.asarray(get_any_perpendicular_vector([d_pln, d_row, d_col]))
+        perp_vector = np.asarray(get_any_perpendicular_vector_3d([d_pln, d_row, d_col]))
         pln_width, row_width, col_width,  = (linewidth - 1) * perp_vector / 2
-        #row_width, col_width, pln_width = perp_vector
-        #return v2[0], v2[1], v2[2]
-
-        #col_width, row_width, pln_width = get_abc(d_pln, d_row, d_col, linewidth)
-        # row_width = (linewidth - 1) * (d_col / length) / 2
-        # col_width = (linewidth - 1) * -(d_row / length) / 2
-        # pln_width = (linewidth - 1) * (d_pln / length) / 2
-
-        # find divisor to get only first half of array and center point if odd
-        # first_half_index = np.int(np.ceil(linewidth/2))
-        # if first_half_index < 1:
-        #     first_half_index = 1
-        #
-        # perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth)[:first_half_index] for row_i in line_row]
-        # perp_cols = [np.linspace(col_i - col_width, col_i + col_width, linewidth)[:first_half_index] for col_i in line_col]
-        # perp_pln = [np.linspace(pln_i - slice_width, pln_i + slice_width, linewidth)[:first_half_index] for pln_i in line_pln]
-
-
-        if linewidth > 1:
-            # create a rotated array of sample points around the direction axis to make the line width 3D
-            perp_array = _rotate_sample_points(linewidth, perp_array, src, dst)
-
 
         perp_pln = [np.linspace(pln_i - pln_width, pln_i + pln_width, linewidth) for pln_i in line_pln]
         perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth) for row_i in line_row]
@@ -166,57 +146,19 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True):
 
         perp_array = np.array([perp_pln, perp_rows, perp_cols])
 
-        # if linewidth > 1:
-        #     # create a rotated array of sample points around the direction axis to make the line width 3D
-        #     perp_array = _rotate_sample_points(linewidth, perp_array, src, dst)
+        if linewidth > 1:
+            # create a rotated array of sample points around the direction axis
+            direction = dst - src
+            points = perp_array.T.reshape(-1, 3)
+            # split number of samples into even angles to cover 360 degrees
+            # without using the last one (same as first one)
+            rot_angles = np.linspace(0, 2 * constants.pi, num_sample_points, endpoint=False)[1:]
+            # rot_angles = [constants.pi / 2]  # one rot angle for now
+            for angle in rot_angles:
+                rot_matrix = rotation_matrix(angle, direction, dst)
+                rot_points = np.dot(rot_matrix[:-1, :-1], points.T).T
+                # put back in shape of perp_array
+                rot_points = rot_points.reshape(linewidth, length + 1, 3).T
+                perp_array = np.dstack([perp_array, rot_points])
 
         return perp_array
-
-
-def _rotate_sample_points(perp_array, src, dst, number_of_sample_points=180):
-    """Return the evenly rotated coordinates of the sample points along a scan line in 3d
-
-    Parameters
-    ----------
-    perp_array, shape (3, M, N), float
-        The coordinates of the profile along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-        The coordinates are 180 degrees apart.
-    src : 3-tuple of numeric scalar (float or int)
-        A first point where the line is passing through
-    dst : 3-tuple of numeric scalar (float or int)
-        A second point where the line is passing through
-
-    Returns
-    -------
-    sampling_array : array, shape (3, M, N), float
-        The coordinates of the 3d sample points along the scan line. The length of the
-        profile is the ceil of the computed length of the scan line.
-    """
-    unit_direction_vector = np.divide(np.subtract(dst, src), np.linalg.norm(line_vector))
-
-    # Rotate the points around the axis a number of times depending on the distance of the point
-    # from the direction axis to simulate sampling of points around the axis
-    sampling_array = []
-    for perp_points in np.transpose(perp_array):
-        #rotation_angles = _rotation_angles_by_distance_from_line(dst, src, perp_points[0])
-        #distance = distance_point_line(point, src, dst)
-        # if distance == 0:
-        #     # the point is on the line
-        #     pass
-        # Return an array of angles that will be used to rotate a point 360 degrees around a line
-        rotation_angles = np.linspace(0, 2 * constants.pi, number_of_angles, endpoint=False)
-
-        for angle in rotation_angles:  # the number of angles to use as rotation angles for the sampling points
-            points_array = []
-            for point in perp_points:  # the number of unit points on displacement vector
-                if angle == 0:
-                    points_array.append(point)
-                else:
-                    rotated_point = rotate_point_around_line(point, src, unit_direction_vector, angle)
-                    points_array.append(rotated_point)
-
-            sampling_array.append(points_array)
-
-    # Return transposed array for ndi.map_coordinates
-    return np.transpose(np.array(sampling_array, dtype=float))

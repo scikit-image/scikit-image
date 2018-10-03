@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -25,63 +27,60 @@ def distance_point_line(point, line_1, line_2):
     return np.abs(distance)
 
 
-def rotation_matrix(axis, theta):
-    from scipy.linalg import expm
+def rotation_matrix(angle, direction, point=None):
+    """Return matrix to rotate about axis defined by point and direction.
 
-    # def M(axis, theta):
-    return expm(np.cross(np.eye(3), axis / np.linalg.norm(axis) * theta))
+    >>> R = rotation_matrix(math.pi/2, [0, 0, 1], [1, 0, 0])
+    >>> numpy.allclose(numpy.dot(R, [0, 0, 0, 1]), [1, -1, 0, 1])
+    True
+    >>> angle = (random.random() - 0.5) * (2*math.pi)
+    >>> direc = numpy.random.random(3) - 0.5
+    >>> point = numpy.random.random(3) - 0.5
+    >>> R0 = rotation_matrix(angle, direc, point)
+    >>> R1 = rotation_matrix(angle-2*math.pi, direc, point)
+    >>> is_same_transform(R0, R1)
+    True
+    >>> R0 = rotation_matrix(angle, direc, point)
+    >>> R1 = rotation_matrix(-angle, -direc, point)
+    >>> is_same_transform(R0, R1)
+    True
+    >>> I = numpy.identity(4, numpy.float64)
+    >>> numpy.allclose(I, rotation_matrix(math.pi*2, direc))
+    True
+    >>> numpy.allclose(2, numpy.trace(rotation_matrix(math.pi/2,
+    ...                                               direc, point)))
+    True
 
-
-def rotate_point_around_line(point_to_rotate, point_on_line, unit_direction_vector, angle_in_radians):
-    """Return a 3d point that is rotated at an angle of theta around a line
-    passing through a selected point.
-
-    Parameters
-    ----------
-    point_to_rotate : 3-tuple of numeric scalar (float or int)
-        The point to rotate.
-    point_on_line : 3-tuple of numeric scalar (float or int)
-        A point where the line is passing through
-    unit_direction_vector : 3-tuple of numeric scalar (float or int)
-        The unit direction vector of the line
-    angle_in_radians : float or int
-        The angle of rotation in radians
-
-    Returns
-    -------
-    return_value : array, shape (3), float
-        The coordinates of the rotated point around the line
     """
-    c, b, a = point_on_line
-    r, q, p = point_to_rotate
-    w, v, u = unit_direction_vector
+    sina = math.sin(angle)
+    cosa = math.cos(angle)
+    #direction = unit_vector(direction[:3])
+    # unit direction vector
+    direction = direction[:3] / np.linalg.norm(direction[:3])
 
-    p1 = (a * (v ** 2 + w ** 2) - u * (b * v + c * w - u * p - v * q - w * r)) * \
-         (1 - np.cos(angle_in_radians)) + p * np.cos(angle_in_radians) + \
-         (-c * v + b * w - w * q + v * r) * np.sin(angle_in_radians)
+    # rotation matrix around unit vector
+    R = np.diag([cosa, cosa, cosa])
+    R += np.outer(direction, direction) * (1.0 - cosa)
+    direction *= sina
+    R += np.array([[ 0.0,         -direction[2],  direction[1]],
+                  [ direction[2], 0.0,          -direction[0]],
+                  [-direction[1], direction[0],  0.0]])
 
-    p2 = (b * (u ** 2 + w ** 2) - v * (a * u + c * w - u * p - v * q - w * r)) * \
-         (1 - np.cos(angle_in_radians)) + q * np.cos(angle_in_radians) + \
-         (-c * u - a * w + w * p - u * r) * np.sin(angle_in_radians)
-
-    p3 = (c * (u ** 2 + v ** 2) - w * (a * u + b * v - u * p - v * q - w * r)) * \
-         (1 - np.cos(angle_in_radians)) + r * np.cos(angle_in_radians) + \
-         (-b * u + a * v - v * p + u * q) * np.sin(angle_in_radians)
-
-    from scipy.linalg import expm
-
-    def M(axis, theta):
-        return expm(np.cross(np.eye(3), axis / np.linalg.norm(axis) * theta))
-
-    v, axis, theta = [3, 5, 0], [4, 4, 1], 1.2
-    M0 = M(axis, theta)
-    x = np.dot(M0, v)
-    #print(np.dot(M0, v))
-
-    return np.array([p3, p2, p1])
+    M = np.identity(4)
+    M[:3, :3] = R
+    if point is not None:
+        # rotation not around origin
+        point = np.array(point[:3], dtype=np.float64, copy=False)
+        M[:3, 3] = point - np.dot(R, point)
+    return M
 
 
-def get_any_perpendicular_vector(v):
+def get_any_perpendicular_vector_3d(v):
+    """
+
+    :param v:
+    :return:
+    """
     if not np.any(v):
         raise ValueError('All values are zero')
     if v[0] == 0 and v[1] == 0:

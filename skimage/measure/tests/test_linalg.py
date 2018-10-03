@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import constants
-from skimage.measure._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector
+from skimage.measure._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector_3d
 from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
@@ -102,5 +102,5 @@ def test_rotate_point_on_line():
 
 def test_get_any_perpendicular_vector():
     v1 = [1, 1, 1]
-    v2 = get_any_perpendicular_vector(v1)
+    v2 = get_any_perpendicular_vector_3d(v1)
     assert_equal(np.dot(v1, v2), 0)
