@@ -77,10 +77,9 @@ for im_test in [im_test1, im_test2, im_test3]:
     print('False Splits: %f' % splits)
     print('False Merges: %f' % merges)
 
-fig, axes = plt.subplots(2, 3, figsize=(10, 10))
+fig, axes = plt.subplots(2, 3, figsize=(10, 10), constrained_layout=True)
 ax = axes.ravel()
 
-ax[0] = plt.subplot(2, 3, 1)
 ax[0].scatter(merge_list, split_list)
 for i, txt in enumerate(['Compact', 'Edge', 'GAC']):
     ax[0].annotate(txt, (merge_list[i], split_list[i]))
@@ -88,14 +87,14 @@ ax[0].set_xlabel('False Merges')
 ax[0].set_ylabel('False Splits')
 ax[0].set_title("Split Variation of Information")
 
-ax[1] = plt.subplot(2, 3, 2)
 ax[1].scatter(precision_list, recall_list)
 for i, txt in enumerate(['Compact', 'Edge', 'GAC']):
     ax[1].annotate(txt, (precision_list[i], recall_list[i]))
 ax[1].set_xlabel('Adapted Rand precision')
 ax[1].set_ylabel('Adapted Rand recall')
 ax[1].set_title("Precision vs. Recall")
-ax[1].axis([0, 1, 0, 1])
+ax[1].set_xlim(0, 1)
+ax[1].set_ylim(0, 1)
 
 ax[2].imshow(mark_boundaries(image, im_true))
 ax[2].set_title('True Segmentation')
@@ -113,5 +112,4 @@ ax[5].imshow(mark_boundaries(image, im_test3))
 ax[5].set_title('Morphological GAC')
 ax[5].set_axis_off()
 
-plt.tight_layout()
 plt.show()
