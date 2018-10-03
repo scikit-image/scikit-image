@@ -12,7 +12,7 @@ In this example we will:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage import binary_fill_holes
+from scipy import ndimage as ndi
 
 from skimage import data
 from skimage.measure import (compare_adapted_rand_error,
@@ -21,6 +21,7 @@ from skimage.measure import (compare_adapted_rand_error,
 from skimage.color import rgb2gray
 from skimage.filters import sobel
 from skimage.segmentation import watershed
+from skimage.measure import label
 from skimage.util import img_as_float, regular_grid
 from skimage.feature import canny
 from skimage.morphology import remove_small_objects
@@ -31,25 +32,22 @@ from skimage.segmentation import (morphological_geodesic_active_contour,
 
 image = data.coins()
 
-#Region based
+# These parameters are hardcoded to get a perfect result on the coins image
 elevation_map = sobel(image)
 markers = np.zeros_like(image)
 markers[image < 30] = 1
 markers[image > 150] = 2
 im_true = watershed(elevation_map, markers)
-im_true = binary_fill_holes(im_true - 1)
+im_true = ndi.label(ndi.binary_fill_holes(im_true - 1))[0]
 
 # Compact watershed
 edges = sobel(image)
-grid = regular_grid(image.shape, n_points=468)
-seeds = np.zeros(image.shape, dtype=int)
-seeds[grid] = np.arange(seeds[grid].size).reshape(seeds[grid].shape) + 1
-im_test1 = watershed(edges, seeds, compactness=0.00001)
+im_test1 = watershed(edges, markers=468, compactness=0.001)
 
 # Edge based
 edges = canny(image)
-fill_coins = binary_fill_holes(edges)
-im_test2 = remove_small_objects(fill_coins, 21)
+fill_coins = ndi.binary_fill_holes(edges)
+im_test2 = ndi.label(remove_small_objects(fill_coins, 21))[0]
 
 # Morphological GAC
 image = img_as_float(image)
@@ -59,6 +57,7 @@ init_ls[10:-10, 10:-10] = 1
 im_test3 = morphological_geodesic_active_contour(gimage, 100, init_ls,
                                            smoothing=1, balloon=-1,
                                            threshold=0.69)
+im_test3 = label(im_test3)
 
 precision_list = []
 recall_list = []
