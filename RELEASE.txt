@@ -79,8 +79,16 @@ make a PR to update these notes after you are done with the release. ;-)
   - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
     this release tag.
   - Commit and push.
-  - Wait until the corresponding wheels appear at
-    http://wheels.scikit-image.org (about 15 minutes).
+  - Monitor the builds at
+    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
+    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
+  - When all is green, spot-check a couple of builds to make sure that the
+    wheels have correctly uploaded. You should see a message like:
+    ``python -m wheelhouse_uploader upload --local-folder``, with output:
+    ``Wheelhouse successfully published at:
+    http://[crazyrandomstring].rackcdn.com``
+  - Open that URL and check for the wheels as
+    ``scikit_image-<versiontag>-<platforminfo>.whl``
 
 - Update the docs:
 
