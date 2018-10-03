@@ -157,7 +157,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
                          "or 'dilation'. Got '%s'." % method)
-    images = np.full(dims, pad_value)
+    images = np.full(dims, pad_value, dtype='float64')
     images[(0, *inside_slices)] = seed
     images[(1, *inside_slices)] = mask
 

@@ -187,7 +187,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             keypoints_list.append(keypoints * self.downscale ** octave)
             orientations_list.append(orientations)
             scales_list.append(np.full(
-                keypoints.shape[0], self.downscale ** octave, dtype=np.intp))
+                keypoints.shape[0], self.downscale ** octave, dtype='float64'))
             responses_list.append(responses)
 
         keypoints = np.vstack(keypoints_list)
