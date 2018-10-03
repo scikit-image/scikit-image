@@ -435,7 +435,7 @@ def test_mean_std_2d():
     image = np.random.rand(256, 256)
     window_size = 11
     m, s = _mean_std(image, w=window_size)
-    mean_kernel = np.ones((window_size,) * 2) / window_size**2
+    mean_kernel = np.full((window_size,) * 2,  1 / window_size**2)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
@@ -446,7 +446,7 @@ def test_mean_std_2d():
 def test_mean_std_3d():
     image = np.random.rand(40, 40, 40)
     window_size = 5
-    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    mean_kernel = np.full((window_size,) * 3, 1 / window_size**3)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
