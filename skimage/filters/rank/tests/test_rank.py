@@ -183,7 +183,7 @@ class TestRank():
         mask = np.ones((100, 100), dtype=np.uint8)
 
         for i in range(5):
-            image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
+            image = np.full((100, 100), 255 * 2 ** i, dtype=np.uint16)
             if i > 3:
                 expected = ["Bitdepth of"]
             else:
@@ -244,7 +244,7 @@ class TestRank():
     def test_pass_on_bitdepth(self):
         # should pass because data bitdepth is not too high for the function
 
-        image = np.ones((100, 100), dtype=np.uint16) * 2 ** 11
+        image = np.full((100, 100), 2 ** 11, dtype=np.uint16)
         elem = np.ones((3, 3), dtype=np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)

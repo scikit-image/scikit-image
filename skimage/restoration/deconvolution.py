@@ -378,7 +378,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
 
     image = image.astype(np.float)
     psf = psf.astype(np.float)
-    im_deconv = 0.5 * np.ones(image.shape)
+    im_deconv = np.full(image.shape, 0.5)
     psf_mirror = psf[::-1, ::-1]
 
     for _ in range(iterations):

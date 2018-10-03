@@ -48,7 +48,7 @@ class TestPeakLocalMax():
         assert_array_almost_equal(peaks, [(3, 3)])
 
     def test_constant_image(self):
-        image = 128 * np.ones((20, 20), dtype=np.uint8)
+        image = np.full((20, 20), 128, dtype=np.uint8)
         peaks = peak.peak_local_max(image, min_distance=1)
         assert len(peaks) == 0
 
