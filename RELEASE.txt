@@ -105,6 +105,8 @@ make a PR to update these notes after you are done with the release. ;-)
     ``pip install twine``.
   - Download ``wheel-uploader`` [1]_ and place it on your PATH.
   - Run ``tools/upload_wheels.sh``.
+  - If everything worked, delete the wheels from your local directory with
+    ``rm -rf *.whl``
 
 .. [1] https://github.com/MacPython/terryfy/blob/master/wheel-uploader
 
