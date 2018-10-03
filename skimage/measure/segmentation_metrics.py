@@ -13,8 +13,7 @@ def compare_adapted_rand_error(im_true, im_test):
     """Compute Adapted Rand error as defined by the SNEMI3D contest [1]
 
     Formula is given as 1 - the maximal F-score of the Rand index
-    (excluding the zero component of the original labels). Adapted
-    from the SNEMI3D MATLAB script, hence the strange style.
+    (excluding the zero component of the original labels).
 
     Parameters
     ----------
@@ -35,7 +34,10 @@ def compare_adapted_rand_error(im_true, im_test):
 
     References
     ----------
-    [1]: http://brainiac2.mit.edu/SNEMI3D/evaluation
+    .. [1] Arganda-Carreras I, Turaga SC, Berger DR, et al. (2015)
+           Crowdsourcing the creation of image segmentation algorithms
+           for connectomics. Front. Neuroanat. 9:142.
+           :DOI:`10.3389/fnana.2015.00142`
     """
     _assert_compatible(im_true, im_test)
 
@@ -69,8 +71,9 @@ def compare_adapted_rand_error(im_true, im_test):
 
     return (are, precision, recall)
 
+
 def compare_variation_of_information(im_true, im_test, *, weights=np.ones(2)):
-    """Return the variation of information metric. [1]
+    """Return the variation of information between two segmentations.
 
     VI(X, Y) = H(X | Y) + H(Y | X), where H(.|.) denotes the conditional
     entropy.
@@ -90,10 +93,12 @@ def compare_variation_of_information(im_true, im_test, *, weights=np.ones(2)):
 
     References
     ----------
-    [1] Meila, M. (2007). Comparing clusterings - an information based
-    distance. Journal of Multivariate Analysis 98, 873-895.
+    .. [1] Meila, M. (2007). Comparing clusterings - an information
+           based distance. Journal of Multivariate Analysis 98, 873-895.
+           :DOI:`10.1016/j.jmva.2006.11.013`
     """
     return weights @ compare_split_variation_of_information(im_true, im_test)
+
 
 def compare_split_variation_of_information(im_true, im_test):
     """Return the symmetric conditional entropies associated with the VI.
@@ -122,6 +127,7 @@ def compare_split_variation_of_information(im_true, im_test):
     # false splits, false merges
     return np.array([hygx.sum(), hxgy.sum()])
 
+
 def _contingency_table(im_true, im_test):
     """Return the contingency table for all regions in matched segmentations.
 
@@ -148,6 +154,7 @@ def _contingency_table(im_true, im_test):
     cont = sparse.coo_matrix((data, (im_test_r, im_true_r))).tocsr()
     return cont
 
+
 def _xlogx(x):
     """Compute x * log_2(x).
 
@@ -171,6 +178,7 @@ def _xlogx(x):
     nz = z.nonzero()
     z[nz] *= np.log2(z[nz])
     return y
+
 
 def _divide_rows(matrix, column):
     """Divide each row of `matrix` by the corresponding element in `column`.
@@ -205,6 +213,7 @@ def _divide_rows(matrix, column):
         out /= column[:, np.newaxis]
     return out
 
+
 def _divide_columns(matrix, row):
     """Divide each column of `matrix` by the corresponding element in `row`.
 
@@ -237,6 +246,7 @@ def _divide_columns(matrix, row):
     else:
         out /= row[np.newaxis, :]
     return out
+
 
 def _vi_tables(im_true, im_test):
     """Return probability tables used for calculating VI.
@@ -273,6 +283,7 @@ def _vi_tables(im_true, im_test):
     hxgy = -_xlogx(pxy @ py_inv).sum(axis=0) @ py
 
     return list(map(np.asarray, [hxgy, hygx]))
+
 
 def _invert_nonzero(arr):
     """Returns the inverse of the non-zero elements of arr
