@@ -73,7 +73,7 @@ import functools
 import warnings
 import sys
 
-__version__ = '0.14.1'
+__version__ = '0.14.2-dev'
 
 
 try:
