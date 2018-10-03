@@ -5,6 +5,12 @@ While following this guide, note down all the times that you need to consult a
 previous release manager, or that you find an instruction unclear. You will
 make a PR to update these notes after you are done with the release. ;-)
 
+Some of the instructions don't apply to patch releases. As a reminder, we use a
+variant of "semantic versioning", where version numbers are classified as
+v<major>.<minor>.<patch>. If you are making a patch release, skip the first
+three steps. Instead, make a PR to update ``release_<major>.<minor>.txt`` on
+the corresponding release branch.
+
 - Check ``TODO.txt`` for any outstanding tasks.
 
 - Branch v<major>.<minor>.x from master. This is the "release branch", where
