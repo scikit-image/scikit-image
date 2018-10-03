@@ -144,6 +144,14 @@ make a PR to update these notes after you are done with the release. ;-)
 Conda-forge
 -----------
 
+**Note**: conda-forge now has an automated bot who makes the below PR for you.
+Now all you have to do is to look at pull requests at
+https://github.com/conda-forge/scikit-image-feedstock/pulls
+and check for a new one for this version. Wait for all the continuous
+integration checks to go green, then merge.
+
+The manual instructions remain below in case the bot fails for some reason.
+
 A scikit-image build recipe resides at
 https://github.com/conda-forge/scikit-image-feedstock. You should update it to
 point to the most recent release. You can do this by following these steps:
@@ -166,8 +174,13 @@ point to the most recent release. You can do this by following these steps:
   - Update any requirements in the appropriate sections (build or run).
     Note: don't remove ``numpy x.x``. This tells conda-smithy, conda-forge's
     build system, that the library must be linked against NumPy at build time.
+  - Commit these changes.
+  - Update the infrastructure around the recipe with ``conda-smithy``:
+    * Install conda-smithy either with conda or pip
+    * Run ``conda-smithy rerender`` in the root of the repository, and commit
+      the changes.
 
-- Commit the changes, push to your fork, and submit a pull request to the
+- Push to your fork, and submit a pull request to the
   upstream repo.
 
 Debian
