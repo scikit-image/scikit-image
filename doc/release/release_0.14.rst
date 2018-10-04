@@ -285,7 +285,7 @@ Contributors to this release
 - Alex Rothberg
 - Arka Sadhu
 - Max Schambach
-- Johannes Schönberger
+- Johannes Schönberger
 - Sourav Singh
 - Kesavan Subburam
 - Matt Swain

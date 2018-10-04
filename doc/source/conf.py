@@ -234,7 +234,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikit-image.tex', u'The scikit-image Documentation',
+  ('index', 'scikit-image.tex', u'The scikit-image Documentation',
    u'scikit-image development team', 'manual'),
 ]
 
