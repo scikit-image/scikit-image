@@ -80,6 +80,8 @@ the corresponding release branch.
 - Build the package wheels (pre-compiled binaries) for various platforms:
 
   - Clone https://github.com/scikit-image/scikit-image-wheels.
+  - (If making a patch release, switch to the appropriate v<major>.<minor>.x
+    branch.)
   - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
     release tag (e.g. ``v0.14.0``).
   - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
