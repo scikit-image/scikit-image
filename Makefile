@@ -9,6 +9,9 @@ clean:
 	find . -name "*.so" -o -name "*.pyc" -o -name "*.md5" -o -name "*.pyd" | xargs rm -f
 	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
 
+cleandoc:
+	rm -rf doc/build
+
 test:
 	$(PYTESTS) skimage --doctest-modules
 
@@ -20,5 +23,4 @@ coverage:
 
 html:
 	pip install -q -r requirements/docs.txt
-	rm -rf doc/build
 	export SPHINXOPTS=-W; make -C doc html

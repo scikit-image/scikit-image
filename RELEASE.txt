@@ -100,7 +100,7 @@ the corresponding release branch.
 
   - Edit ``doc/source/_static/docversions.js`` and commit
   - Build a clean version of the docs. In the root directory, run
-    ``python setup.py install``, then ``make html``.
+    ``python setup.py install``, then ``make cleandoc; make html``.
   - In the ``doc/`` directory, build using ``make gh-pages``.
   - Update the symlink to ``stable``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
