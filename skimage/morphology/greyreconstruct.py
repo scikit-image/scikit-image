@@ -157,7 +157,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
                          "or 'dilation'. Got '%s'." % method)
-    images = np.ones(dims) * pad_value
+    images = np.full(dims, pad_value, dtype='float64')
     images[(0, *inside_slices)] = seed
     images[(1, *inside_slices)] = mask
 
@@ -179,8 +179,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
-    prev = -np.ones(len(images), np.int32)
-    next = -np.ones(len(images), np.int32)
+    prev = np.full(len(images), -1, np.int32)
+    next = np.full(len(images), -1, np.int32)
     prev[index_sorted[1:]] = index_sorted[:-1]
     next[index_sorted[:-1]] = index_sorted[1:]
 

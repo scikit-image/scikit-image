@@ -1,3 +1,123 @@
+Announcement: scikit-image 0.14.1
+=================================
+
+We're happy to announce the release of scikit-image v0.14.1!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+This is our first release under our Long Term Support for 0.14 policy. As a
+reminder, 0.14 is the last release to support Python 2.7, but it will be
+updated with bug fixes and popular features until January 1st, 2020.
+
+This release contains the following changes from 0.14.0:
+
+
+Bug fixes
+---------
+- ``skimage.color.adapt_rgb`` was applying input functions to the wrong axis
+  (#3097)
+- ``CollectionViewer`` now indexes correctly (it had been broken by an update
+  to NumPy indexing) (#3288)
+- Handle deprecated indexing-by-list and NumPy ``matrix`` from NumPy 1.15
+  (#3238, #3242, #3292)
+- Fix incorrect inertia tensor calculation (#3303) (Special thanks to JP Cornil
+  for reporting this bug and for their patient help with this fix)
+- Fix missing comma in ``__all__`` listing of ``moments_coord_central``, so it
+  and ``moments_normalized`` can now be correctly imported from the ``measure``
+  namespace (#3374)
+- Fix background color in ``label2rgb(..., kind='avg')`` (#3280)
+
+Enhancements
+------------
+- "Reflect" mode in transforms now works fine when an image dimension has size
+  1 (#3174)
+- ``img_as_float`` now allows single-precision (32-bit) float arrays to pass
+  through unmodified, rather than being up-converted to 64-bit (#3110, #3052,
+  #3391)
+- Speed up rgb2gray computation (#3187)
+- The scikit-image viewer now works with different PyQt versions (#3157)
+- The ``cycle_spin`` function for enhanced denoising works single-threaded
+  when dask is not installed now (#3218)
+- scikit-image's ``io`` module will no longer inadvertently set the matplotlib
+  backend when imported (#3243)
+- Fix deprecated ``get`` keyword from dask in favor of ``scheduler`` (#3366)
+- Add missing ``cval`` parameter to threshold_local (#3370)
+
+
+API changes
+-----------
+- Remove deprecated ``dynamic_range`` in ``measure.compare_psnr`` (#3313)
+
+Documentation
+-------------
+- Improve the documentation on data locality (#3127)
+- Improve the documentation on dealing with video (#3176)
+- Update broken link for Canny filter documentation (#3276)
+- Fix incorrect documentation for the ``center`` parameter of
+  ``skimage.transform.rotate`` (#3341)
+- Fix incorrect formatting of docstring in ``measure.profile_line`` (#3236)
+
+Build process / development
+---------------------------
+- Ensure Cython is 0.23.4 or newer (#3171)
+- Suppress warnings during testing (#3143)
+- Fix skimage.test (#3152)
+- Don't upload artifacts to AppVeyor (there is no way to delete them) (#3315)
+- Remove ``import *`` from the scikit-image package root (#3265)
+- Allow named non-core contributors to issue MeeseeksDev commands (#3357,
+  #3358)
+- Add testing in Python 3.7 (#3359)
+- Add license file to the binary distribution (#3322)
+- ``lookfor`` is no longer defined in ``__init__.py`` but rather imported to it
+  (#3162)
+- Add ``pyproject.toml`` to ensure Cython is present before building (#3295)
+- Add explicit Python version Trove classifiers for PyPI (#3417)
+- Ignore known test failures in 32-bit releases, allowing 32-bit wheel builds
+  (#3434)
+- Ignore failure to raise floating point warnings on certain ARM platforms
+  (#3337)
+- Fix tests to be compatible with PyWavelets 1.0 (#3406)
+
+Credits
+-------
+Made with commits from (alphabetical by last name):
+
+- François Boulogne
+- Genevieve Buckley
+- Sean Budd
+- Matthias Bussonnier
+- Sarkis Dallakian
+- Christoph Deil
+- François-Michel De Rainville
+- Emmanuelle Gouillart
+- Yaroslav Halchenko
+- Mark Harfouche
+- Jonathan Helmus
+- Gregory Lee
+- @Legodev
+- Matt McCormick
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Jesse Pangburn
+- Johannes Schönberger
+- Stefan van der Walt
+
+Reviewed by (alphabetical by last name):
+
+- François Boulogne
+- Emmanuelle Gouillart
+- Mark Harfouche
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Stéfan van der Walt
+- Josh Warner
+
+And with the special support of [MeeseeksDev](https://github.com/MeeseeksBox),
+created by Matthias Bussonnier
+
+
 Announcement: scikit-image 0.14.0
 =================================
 
@@ -165,7 +285,7 @@ Contributors to this release
 - Alex Rothberg
 - Arka Sadhu
 - Max Schambach
-- Johannes Schönberger
+- Johannes Schönberger
 - Sourav Singh
 - Kesavan Subburam
 - Matt Swain

@@ -17,11 +17,7 @@ can be multiple states for a given plugin:
 """
 import sys
 
-if sys.version.startswith('3'):
-    from configparser import ConfigParser  # Python 3
-else:
-    from ConfigParser import ConfigParser  # Python 2
-
+from configparser import ConfigParser
 import os.path
 from glob import glob
 
