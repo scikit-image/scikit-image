@@ -10,10 +10,10 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 
-section "list.installed.dependencies"
+section "List.installed.dependencies"
 pip list
 tools/build_versions.py
-section_end "list.installed.dependencies"
+section_end "List.installed.dependencies"
 
 section "Test"
 pytest $TEST_ARGS skimage
