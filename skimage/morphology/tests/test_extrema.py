@@ -212,13 +212,24 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_empty(self):
         """Test result with empty image."""
-        result = extrema.local_maxima(np.array([]), indices=False)
+        result = extrema.local_maxima(np.array([[]]), indices=False)
         assert result.size == 0
         assert result.dtype == np.uint8
+        assert result.shape == (1, 0)
 
         result = extrema.local_maxima(np.array([]), indices=True)
-        assert result.size == 0
-        assert result.dtype == np.intp
+        assert isinstance(result, tuple)
+        assert len(result) == 1
+        assert result[0].size == 0
+        assert result[0].dtype == np.intp
+
+        result = extrema.local_maxima(np.array([[]]), indices=True)
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+        assert result[0].size == 0
+        assert result[0].dtype == np.intp
+        assert result[1].size == 0
+        assert result[1].dtype == np.intp
 
     def test_dtypes(self):
         """Test results with default configuration for all supported dtypes."""

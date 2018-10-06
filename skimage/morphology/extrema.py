@@ -434,7 +434,11 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     image = np.asarray(image, order="C")
     if image.size == 0:
         # Return early for empty input
-        return np.array([], dtype=(np.intp if indices else np.uint8))
+        if indices:
+            # Make sure that output is a tuple of 1 empty array per dimension
+            return np.nonzero(image)
+        else:
+            return np.zeros(image.shape, dtype=np.uint8)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
