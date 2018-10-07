@@ -1,37 +1,10 @@
 import numpy as np
 from scipy.optimize import basinhopping, minimize
 
-from .pyramids import pyramid_reduce
+from .pyramids import pyramid_gaussian
 from ._warps import warp, SimilarityTransform
 
-__all__ = ['register', 'p_to_matrix', 'matrix_to_p']
-
-
-def _gaussian_pyramid(image, levels=6):
-    """
-    Creates a gaussian pyramid for an image
-    
-    Parameters
-    ----------
-    image : (M, N) ndarray
-        Input image with is used as a base for the pyramid.
-    levels : int, optional (default 6)
-        Int equals to the amount of times the image is blurred and reduced
-    
-    Returns
-    -------
-    pyramid: array
-        Ordered array of images of size level starting with the most blurred
-        
-    """
-    pyramid = levels*[None]
-    pyramid[-1] = image
-
-    for level in range(levels-2, -1, -1):
-        image = pyramid_reduce(image, sigma=2/3)
-        pyramid[level] = (image)
-
-    return pyramid
+__all__ = ['register_affine', 'p_to_matrix', 'matrix_to_p']
 
 
 def _mse(img1, img2):
@@ -94,7 +67,19 @@ def p_to_matrix(param):
     """
     
     r, tc, tr = param
-    return SimilarityTransform(rotation=r, translation=(tc, tr))
+    out = np.empty((3,3))
+    
+    out[0][0] = np.cos(r)
+    out[0][1] = -1*np.sin(r)
+    out[0][2] = tc
+    out[1][0] = np.sin(r)
+    out[1][1] = np.cos(r)
+    out[1][2] = tr
+    out[2][0] = 0
+    out[2][1] = 0
+    out[2][2] = 1
+    
+    return out
 
 
 def matrix_to_p(matrix):
@@ -114,20 +99,20 @@ def matrix_to_p(matrix):
     """
     
     m = matrix.params
-    return (np.arccos(m[0][0])*180/np.pi, m[0][2], m[1][2])
+    return (np.arccos(m[0][0]), m[0][2], m[1][2])
 
 
-def register(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', iter_callback=lambda img, p: None):
+def register_affine(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', iter_callback=lambda img, p: None):
     assert method in ['Powell', 'BH']
-    pyramid_ref = _gaussian_pyramid(reference, levels=nlevels)
-    pyramid_tgt = _gaussian_pyramid(target, levels=nlevels)
+    
+    pyramid_ref = reversed(pyramid_gaussian(reference, levels=6))
+    pyramid_tgt = reversed(pyramid_gaussian(target, levels=6))
     levels = range(nlevels, 0, -1)
     image_pairs = zip(pyramid_ref, pyramid_tgt)
     p = np.zeros(3)
 
     for n, (ref, tgt) in zip(levels, image_pairs):
-        p[1] *= 2
-        p[2] *= 2
+        p[1:3] *= 2
         if method.upper() == 'BH':
             res = basinhopping(cost, p,
                                minimizer_kwargs={'args': (ref, tgt)})
