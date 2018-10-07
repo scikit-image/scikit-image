@@ -4,7 +4,7 @@ from scipy.optimize import basinhopping, minimize
 from .pyramids import pyramid_gaussian
 from ._warps import warp, SimilarityTransform
 
-__all__ = ['register_affine', 'p_to_matrix', 'matrix_to_p']
+__all__ = ['register_affine']
 
 
 def _mse(img1, img2):
