@@ -7,7 +7,8 @@ from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from ..util import crop, dtype_limits
-from ..filters._multiotsu import _find_threshold_multiotsu
+from ..filters._multiotsu import (_find_threshold_multiotsu,
+                                  _find_threshold_multiotsu_bk)  
 
 
 __all__ = ['try_all_threshold',
@@ -728,7 +729,7 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def threshold_multiotsu(image, classes=3, bins=255):
+def threshold_multiotsu(image, classes=3, bins=255, mode='combinations'):
     """Generates multiple thresholds for an input image.
     Based on the Multi-Otsu approach by Liao, Chen and Chung.
 
@@ -805,7 +806,11 @@ def threshold_multiotsu(image, classes=3, bins=255):
     # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.
     aux_thresh = np.zeros(classes - 1)
-    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, bins,
+    if mode == 'combinations':
+        aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, bins,
+                                           aux_thresh)
+    else:
+        aux_thresh = _find_threshold_multiotsu_bk(var_btwcls, classes, bins,
                                            aux_thresh)
 
     # correcting values according to minimum and maximum values.
