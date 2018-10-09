@@ -47,4 +47,4 @@ Other
 * Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
   Remove version restriction in requirements file when appropriate.
   `https://github.com/SimpleITK/SimpleITK/issues/551`
-* Monitor next Pillow release to have a build with PYTHONOPTIMIZE=2.
+* Monitor next Pillow release to have a build with PYTHONOPTIMIZE=2 (See #3398).
