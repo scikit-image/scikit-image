@@ -933,7 +933,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     a = 500.0 * (x - y)
     b = 200.0 * (y - z)
 
-    return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
+    return np.dstack([L, a, b])
 
 
 def lab2xyz(lab, illuminant="D65", observer="2"):
