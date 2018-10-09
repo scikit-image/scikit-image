@@ -11,7 +11,7 @@ __all__ = ['register_affine']
 def _cost_mse(param, reference_image, target_image):
     """
     Finds the error between the overlapping area of two images after transformations are done to one of them
-    
+
     Parameters
     ----------
     param : array
@@ -20,7 +20,7 @@ def _cost_mse(param, reference_image, target_image):
         Input image used for reference
     target_image : (M, N) ndarray
         Input image which is modified and then compared to reference_image
-    
+
     Returns
     -------
     err: int
@@ -34,23 +34,23 @@ def _cost_mse(param, reference_image, target_image):
 def p_to_matrix(param):
     """
     Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
-    
+
     Parameters
     ----------
     param : array
         Input array giving the translation and rotation of an image
-    
+
     Returns
     -------
     matrix : (3, 3) array
         A transformation matrix used to obtain a new image
     """
-    
+
     r, tc, tr = param
-    out = np.empty((3,3))
-    
+    out = np.empty((3, 3))
+
     out[0][0] = np.cos(r)
-    out[0][1] = -1*np.sin(r)
+    out[0][1] = -1 * np.sin(r)
     out[0][2] = tc
     out[1][0] = np.sin(r)
     out[1][1] = np.cos(r)
@@ -58,34 +58,35 @@ def p_to_matrix(param):
     out[2][0] = 0
     out[2][1] = 0
     out[2][2] = 1
-    
+
     return out
 
 
 def matrix_to_p(matrix):
     """
     Converts a 3x3 transformation matrix into a transformation in form of (r, tc, tr)
-    
+
     Parameters
     ----------
     matrix : (3, 3) array
         A transformation matrix used to obtain a new image
-    
+
     Returns
     -------
     param : array
         Input array giving the translation and rotation of an image
-    
+
     """
-    
+
     return (np.arccos(matrix[0][0]), matrix[0][2], matrix[1][2])
 
 
-def register_affine(reference, target, *, cost=_cost_mse, nlevels=7, method='Powell', iter_callback=lambda img, p: None):
+def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
+                    method='Powell', iter_callback=lambda img, p: None):
     assert method in ['Powell', 'BH']
-    
-    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels-1)
-    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels-1)
+
+    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
+    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
     levels = range(nlevels, 0, -1)
     image_pairs = zip(pyramid_ref, pyramid_tgt)
     p = np.zeros(3)
