@@ -637,7 +637,8 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
-    return np.clip(arr, 0, 1)
+    np.clip(arr, 0, 1, out=arr)
+    return arr
 
 
 def rgb2xyz(rgb):
