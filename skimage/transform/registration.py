@@ -5,10 +5,10 @@ from .pyramids import pyramid_gaussian
 from ..measure import compare_mse
 from ._warps import warp, SimilarityTransform
 
-__all__ = ['register_affine']
+__all__ = ['register_affine', 'p_to_matrix', 'matrix_to_p']
 
 
-def _cost_mse(param, reference_image, target_image):
+def _cost_mse(param, im_true, im_test):
     """
     Finds the error between the overlapping area of two images after transformations are done to one of them
 
@@ -16,19 +16,19 @@ def _cost_mse(param, reference_image, target_image):
     ----------
     param : array
         Input array giving the translation and rotation the target image will undergo
-    reference_image : (M, N) ndarray
+    im_true : (M, N) ndarray
         Input image used for reference
-    target_image : (M, N) ndarray
-        Input image which is modified and then compared to reference_image
+    im_test : (M, N) ndarray
+        Input image which is modified and then compared to im_true
 
     Returns
     -------
     err: int
-        Error in the form of the squared difference between pixels
+        Error in the form of the mean of the squared difference between pixels
     """
     transformation = p_to_matrix(param)
-    transformed = warp(target_image, transformation, order=3)
-    return compare_mse(reference_image, transformed)
+    transformed = warp(im_test, transformation, order=3)
+    return compare_mse(im_true, transformed)
 
 
 def p_to_matrix(param):
