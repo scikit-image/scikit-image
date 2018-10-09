@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_array_equal
-from pytest import raises
+from pytest import raises, warns
 
 from skimage.morphology import extrema
 
@@ -461,13 +461,18 @@ class TestLocalMaxima(unittest.TestCase):
         If `allow_borders` is true the array is padded internally and there is
         no problem.
         """
-        result = extrema.local_maxima(np.array([0, 1]), allow_borders=False)
+        warning_msg = "no maxima .* any dimension smaller 3"
+        with warns(UserWarning, match=warning_msg):
+            result = extrema.local_maxima(
+                np.array([0, 1]), allow_borders=False
+            )
         assert_array_equal(result, [0, 0])
         assert result.dtype == np.uint8
 
-        result = extrema.local_maxima(
-            np.array([[1, 2], [2, 2]]), allow_borders=False, indices=True
-        )
+        with warns(UserWarning, match=warning_msg):
+            result = extrema.local_maxima(
+                np.array([[1, 2], [2, 2]]), allow_borders=False, indices=True
+            )
         assert_array_equal(result, np.zeros((2, 0), dtype=np.intp))
         assert result[0].dtype == np.intp
         assert result[1].dtype == np.intp

@@ -16,6 +16,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
+from .._shared.utils import warn
 from . import greyreconstruct
 from .watershed import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
@@ -368,6 +369,12 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
         containing the coordinates (indices) of all found maxima.
 
+    Warns
+    -----
+    UserWarning
+        If `allow_borders` is false and any dimension of the given `image` is
+        shorter than 3 samples, maxima can't exist and a warning is shown.
+
     See Also
     --------
     skimage.morphology.local_minima
@@ -451,9 +458,12 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     _set_edge_values_inplace(flags, value=3)
 
     if any(s < 3 for s in image.shape):
-        # Skip if any dimension is smaller than 3
+        # Warn and skip if any dimension is smaller than 3
         # -> no maxima can exist & structuring element can't be applied
-        pass
+        warn(
+            "no maxima can exist for an image with any dimension smaller 3",
+            stacklevel=3
+        )
     else:
         selem = _resolve_neighborhood(selem, connectivity, image.ndim)
         neighbor_offsets = _offsets_to_raveled_neighbors(
