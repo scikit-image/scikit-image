@@ -9,3 +9,6 @@ scikit-learn
 dask[array]>=0.9.0
 # cloudpickle is necessary to provide the 'processes' scheduler for dask
 cloudpickle>=0.2.1
+nbsphinx
+# Necesarry for parallel programming example
+dask[delayed]>=0.9.0
