@@ -100,7 +100,7 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     d_row, d_col = dst - src
     theta = np.arctan2(d_row, d_col)
 
-    length = np.ceil(np.hypot(d_row, d_col) + 1)
+    length = int(np.ceil(np.hypot(d_row, d_col) + 1))
     # we add one above because we include the last point in the profile
     # (in contrast to standard numpy indexing)
     line_col = np.linspace(src_col, dst_col, length)
