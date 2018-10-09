@@ -13,7 +13,7 @@ class TestPeakLocalMax():
         trivial = np.zeros((25, 25))
         peak_indices = peak.peak_local_max(trivial, min_distance=1, indices=True)
         assert type(peak_indices) is np.ndarray
-        assert not peak_indices     # inherent boolean-ness of empty list
+        assert peak_indices.size == 0
         peaks = peak.peak_local_max(trivial, min_distance=1, indices=False)
         assert (peaks.astype(np.bool) == trivial).all()
 
