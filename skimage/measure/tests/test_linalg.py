@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import constants
-from skimage.measure._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector_3d
+
+from skimage.measure._linalg import distance_point_line, get_any_perpendicular_vector_3d, rotation_matrix, \
+    affine_transform
 from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
@@ -53,51 +55,60 @@ def test_distance_point_line_diagonal_3d():
 
 
 def test_rotate_point_around_line_45():
-    point = [1, 0, 0]
-    line = [0, 0, 0]
+    points = np.asarray([[1, 0, 0]])
     direction = [0, 0, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, constants.pi/2)
-    assert_almost_equal(rotated_point, [0, -1, 0])
+    rot_matrix = rotation_matrix(constants.pi / 4, direction)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [np.sqrt(2) / 2, np.sqrt(2) / 2, 0])
 
 
 def test_rotate_point_around_line_90():
-    point = [1, 0, 0]
-    line = [0, 0, 0]
+    points = np.asarray([[1, 0, 0]])
     direction = [0, 0, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, constants.pi/2)
-    assert_almost_equal(rotated_point, [0, -1, 0])
+    rot_matrix = rotation_matrix(constants.pi / 2, direction)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [0, -1, 0])
 
 
 def test_rotate_point_around_line_180():
-    point = [1, 0, 0]
-    line = [0, 0, 0]
+    points = np.asarray([[1, 0, 0]])
     direction = [0, 0, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, constants.pi)
-    assert_almost_equal(rotated_point, [-1, 0, 0])
+    rot_matrix = rotation_matrix(constants.pi, direction)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [-1, 0, 0])
+
+
+def test_rotate_point_around_line_180_offset():
+    points = np.asarray([[1, 0, 0]])
+    direction = [1, 0, 0]
+    point_on_line = [0, 0, 1]
+    rot_matrix = rotation_matrix(constants.pi, direction, point_on_line)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [1, 0, 2])
 
 
 def test_rotate_point_around_diag_line_180():
-    point = [1, 0, 0]
-    line = [0, 0, 0]
+    points = np.asarray([[1, 0, 0]])
     direction = [1, 1, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, constants.pi)
-    assert_almost_equal(rotated_point, [1, 2, 2])
+    rot_matrix = rotation_matrix(constants.pi, direction)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [-1/3, 2/3, 2/3])
 
 
 def test_rotate_point_around_diag_line_minus_180():
-    point = [1, 0, 0]
-    line = [0, 0, 0]
+    points = np.asarray([[1, 0, 0]])
     direction = [1, 1, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, -constants.pi)
-    assert_almost_equal(rotated_point, [1, 2, 2])
+    rot_matrix = rotation_matrix(-constants.pi, direction)
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points[0], [-1/3, 2/3, 2/3])
 
 
 def test_rotate_point_on_line():
-    point = [1, 1, 1]
-    line = [0, 0, 0]
-    direction = [1, 1, 1]
-    rotated_point = rotate_point_around_line(point, line, direction, constants.pi/5)
-    assert_almost_equal(rotated_point, point)
+    points = np.asarray([[1, 1, 1], [0, 0, 0]])
+    direction = [1, 0, 0]
+    rot_matrix = rotation_matrix(constants.pi, direction, points[0])
+    transformed_points = affine_transform(rot_matrix, points)
+    assert_almost_equal(transformed_points, points)
 
 
 def test_get_any_perpendicular_vector():

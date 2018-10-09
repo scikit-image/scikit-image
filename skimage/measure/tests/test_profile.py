@@ -12,10 +12,6 @@ def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
     expected_prof = np.arange(2, 9)
     assert_equal(prof, expected_prof)
-def test_horizontal_rightward_del():
-    prof = profile_line(image, (2, 2), (2, 8), linewidth=2, order=0)
-    expected_prof = np.arange(2, 9)
-    assert_equal(prof, expected_prof)
 
 def test_horizontal_leftward():
     prof = profile_line(image, (0, 8), (0, 2), order=0)
@@ -156,6 +152,11 @@ def test_3d_diagonal_interpolated_interpolated():
     expected_prof = np.array([0, 0, 0])
     assert_equal(prof, expected_prof)
 
+
+def test_3d_diagonal_interpolated_interpolated():
+    prof = profile_line(image3d, (0, 1, 1), (1, 1, 1), order=1, linewidth=3, multichannel=False, num_sample_points=3)
+    expected_prof = np.array([0, 0, 0])
+    assert_equal(prof, expected_prof)
 
 # def test_rotate_points():
 #     points = np.asarray([[1, 0, 1]])

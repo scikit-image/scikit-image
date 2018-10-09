@@ -2,7 +2,7 @@ import math
 import numpy as np
 from scipy import ndimage as ndi, constants
 
-from ._linalg import distance_point_line, rotate_point_around_line, get_any_perpendicular_vector_3d, rotation_matrix
+from ._linalg import get_any_perpendicular_vector_3d, rotation_matrix, affine_transform
 
 
 def profile_line(image, src, dst, linewidth=1,
@@ -72,7 +72,7 @@ def profile_line(image, src, dst, linewidth=1,
     if image.ndim not in [2, 3, 4]:
         raise ValueError('profile_line is not implemented for images of dimension {0}'.format(image.shape))
 
-    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth, endpoint=endpoint)
+    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth, endpoint=endpoint, num_sample_points=num_sample_points)
     if image.ndim == 4 or (image.ndim == 3 and multichannel):
         # 2D or 3D multichannel
         pixels = [ndi.map_coordinates(image[..., i], perp_lines, order=order,
@@ -114,6 +114,7 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
     src = np.asarray(src, dtype=float)
     dst = np.asarray(dst, dtype=float)
     length = math.ceil(np.linalg.norm(dst - src))
+    unit_dir = (dst - src) / length
 
     # when endpoint is true add 1 to length to include the last point in the profile.
     # (in contrast to standard numpy indexing)
@@ -122,7 +123,7 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
     if len(src) == 2:
         line_row = np.linspace(src[0], dst[0], num, endpoint=endpoint)
         line_col = np.linspace(src[1], dst[1], num, endpoint=endpoint)
-        d_row, d_col = (dst - src) / length
+        d_row, d_col = unit_dir
         # we subtract 1 from linewidth to change from pixel-counting
         # (make this line 3 pixels wide) to point distances (the
         # distance between pixel centers)
@@ -136,29 +137,70 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
         line_pln = np.linspace(src[0], dst[0], num, endpoint=endpoint)
         line_row = np.linspace(src[1], dst[1], num, endpoint=endpoint)
         line_col = np.linspace(src[2], dst[2], num, endpoint=endpoint)
-        d_pln, d_row, d_col = (dst - src) / length
+        d_pln, d_row, d_col = unit_dir
         perp_vector = np.asarray(get_any_perpendicular_vector_3d([d_pln, d_row, d_col]))
         pln_width, row_width, col_width,  = (linewidth - 1) * perp_vector / 2
 
-        perp_pln = [np.linspace(pln_i - pln_width, pln_i + pln_width, linewidth) for pln_i in line_pln]
-        perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth) for row_i in line_row]
-        perp_cols = [np.linspace(col_i - col_width, col_i + col_width, linewidth) for col_i in line_col]
-
-        perp_array = np.array([perp_pln, perp_rows, perp_cols])
+        if linewidth == 1:
+            perp_pln = np.expand_dims(line_pln, axis=1)
+            perp_rows = np.expand_dims(line_row, axis=1)
+            perp_cols = np.expand_dims(line_col, axis=1)
+            return np.array([perp_pln, perp_rows, perp_cols])
 
         if linewidth > 1:
+            # separate the points to only get the outside ones (without the center points)
+            perp_pln = [np.linspace(pln_i - pln_width, pln_i + pln_width, linewidth) for pln_i in line_pln]
+            #perp_pln = np.array_split(np.asarray(perp_pln), 2, axis=1)[-1]
+            perp_pln = np.array_split(np.asarray(perp_pln), 2, axis=1)[0]
+            perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth) for row_i in line_row]
+            #perp_rows = np.array_split(np.asarray(perp_rows), 2, axis=1)[-1]
+            perp_rows = np.array_split(np.asarray(perp_rows), 2, axis=1)[0]
+            perp_cols = [np.linspace(col_i - col_width, col_i + col_width, linewidth) for col_i in line_col]
+            #perp_cols = np.array_split(np.asarray(perp_cols), 2, axis=1)[-1]
+            perp_cols = np.array_split(np.asarray(perp_cols), 2, axis=1)[0]
+            perp_array = np.array([perp_pln, perp_rows, perp_cols])
+
             # create a rotated array of sample points around the direction axis
-            direction = dst - src
             points = perp_array.T.reshape(-1, 3)
+
+
             # split number of samples into even angles to cover 360 degrees
-            # without using the last one (same as first one)
+            # without using the first (0) and the last (2π)
             rot_angles = np.linspace(0, 2 * constants.pi, num_sample_points, endpoint=False)[1:]
             # rot_angles = [constants.pi / 2]  # one rot angle for now
-            for angle in rot_angles:
-                rot_matrix = rotation_matrix(angle, direction, dst)
-                rot_points = np.dot(rot_matrix[:-1, :-1], points.T).T
-                # put back in shape of perp_array
-                rot_points = rot_points.reshape(linewidth, length + 1, 3).T
-                perp_array = np.dstack([perp_array, rot_points])
 
-        return perp_array
+            points_array = [points]
+            for angle in rot_angles:
+                rot_matrix = rotation_matrix(angle, unit_dir, dst)
+                transformed_points = affine_transform(rot_matrix, points)
+                #rot_points = np.dot(rot_matrix[:-1, :-1], points.T).T
+                points_array += [transformed_points]
+
+            # remove duplicate elements - from the center
+            points_array = np.unique(points_array, axis=0)
+
+            # add centers to points
+
+            # put back in shape of perp_array
+            # rot_points = rot_points.reshape(linewidth, length + 1, 3).T
+            # array = np.dstack([array, rot_points])
+
+            #np.asarray(points_array).reshape(3, int(np.floor(linewidth / 2)), -1)
+
+
+            points_array = np.asarray(points_array).reshape((linewidth / 2) * num_sample_points, length + 1, 3).T
+            #points_array = points.reshape((linewidth - 1) * num_sample_points, length + 1, 3).T
+
+
+            #points_array = points_array.reshape(linewidth, length + 1, 3).T
+            #array = np.dstack([array, rot_points])
+
+            # if linewidth is odd, add center elements
+            # if linewidth % 2:
+            #     centers_pln = np.expand_dims(line_pln, axis=1)
+            #     centers_rows = np.expand_dims(line_row, axis=1)
+            #     centers_cols = np.expand_dims(line_col, axis=1)
+            #     np.array([centers_pln, centers_rows, centers_cols])
+            #     array = np.dstack([perp_array, array])
+
+            return points_array

@@ -54,25 +54,30 @@ def rotation_matrix(angle, direction, point=None):
     """
     sina = math.sin(angle)
     cosa = math.cos(angle)
-    #direction = unit_vector(direction[:3])
     # unit direction vector
-    direction = direction[:3] / np.linalg.norm(direction[:3])
+    direction = direction / np.linalg.norm(direction)
 
     # rotation matrix around unit vector
-    R = np.diag([cosa, cosa, cosa])
-    R += np.outer(direction, direction) * (1.0 - cosa)
+    rot_matrix = np.diag([cosa, cosa, cosa])
+    rot_matrix += np.outer(direction, direction) * (1 - cosa)
     direction *= sina
-    R += np.array([[ 0.0,         -direction[2],  direction[1]],
-                  [ direction[2], 0.0,          -direction[0]],
-                  [-direction[1], direction[0],  0.0]])
+    rot_matrix += np.array([[0, -direction[2], direction[1]],
+                            [direction[2], 0, -direction[0]],
+                            [-direction[1], direction[0], 0]])
 
-    M = np.identity(4)
-    M[:3, :3] = R
+    matrix = np.identity(4)
+    matrix[:3, :3] = rot_matrix
     if point is not None:
-        # rotation not around origin
-        point = np.array(point[:3], dtype=np.float64, copy=False)
-        M[:3, 3] = point - np.dot(R, point)
-    return M
+        # rotation not around origin, add translation element
+        matrix[:3, 3] = point - np.dot(rot_matrix, point)
+    return matrix
+
+
+def affine_transform(matrix, points):
+    # make homogeneous
+    ones = np.ones((points.shape[0], 1))
+    points = np.concatenate((points, ones), axis=1)
+    return np.dot(points, matrix.T)[..., :3]
 
 
 def get_any_perpendicular_vector_3d(v):
