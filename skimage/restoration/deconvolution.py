@@ -11,7 +11,7 @@ __keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
-    """Wiener-Hunt deconvolution
+    r"""Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach (i.e. with
     Fourier diagonalisation).
