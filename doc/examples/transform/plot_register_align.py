@@ -1,6 +1,6 @@
 from skimage.data import camera
 from scipy.ndimage import shift as image_shift
-from skimage.transform import register, matrix_to_p, p_to_matrix, warp
+from skimage.transform import register_affine, matrix_to_p, p_to_matrix, warp
 from matplotlib import pyplot as plt
 
 
@@ -21,4 +21,4 @@ def draw_setup(base):
 img = camera()
 img1 = image_shift(img, (0, 25))
 img2 = image_shift(img, (0, -25))
-print(matrix_to_p(register(img1, img2, iter_callback=draw_setup(img2))))
+print(matrix_to_p(register_affine(img1, img2, iter_callback=draw_setup(img2))))
