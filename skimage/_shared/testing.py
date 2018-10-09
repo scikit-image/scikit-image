@@ -24,7 +24,7 @@ from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
 
 
-SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
