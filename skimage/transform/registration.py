@@ -64,11 +64,10 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
-    levels = range(nlevels, 0, -1)
-    image_pairs = zip(pyramid_ref, pyramid_tgt)
+    image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
     p = np.zeros(3)
 
-    for n, (ref, tgt) in reversed(list(zip(levels, image_pairs))):
+    for n, (ref, tgt) in enumerate(image_pairs):
         def _cost(param):
             transformation = _p_to_matrix(param)
             transformed = ndi.affine_transform(tgt, transformation, order=1)
@@ -77,7 +76,7 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
         p[1:3] *= 2
         if method.upper() == 'BH':
             res = basinhopping(_cost, p)
-            if n <= 4:  # avoid basin-hopping in lower levels
+            if n <= nlevels - 4:  # avoid basin-hopping in lower levels
                 method = 'Powell'
         else:
             res = minimize(_cost, p, method='Powell')
