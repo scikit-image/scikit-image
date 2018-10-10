@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.optimize import basinhopping, minimize
+from scipy import ndimage as ndi
 
 from .pyramids import pyramid_gaussian
 from ..measure import compare_mse
-from ._warps import warp, SimilarityTransform
 
-__all__ = ['register_affine', 'p_to_matrix', 'matrix_to_p']
+__all__ = ['register_affine']
 
 
 def _cost_mse(param, im_true, im_test):
@@ -27,7 +27,7 @@ def _cost_mse(param, im_true, im_test):
         Error in the form of the mean of the squared difference between pixels
     """
     transformation = p_to_matrix(param)
-    transformed = warp(im_test, transformation, order=3)
+    transformed = ndi.affine_transform(im_test, transformation, order=1)
     return compare_mse(im_true, transformed)
 
 
@@ -101,7 +101,7 @@ def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
         else:
             res = minimize(cost, p, args=(ref, tgt), method='Powell')
         p = res.x
-        iter_callback(tgt, p)
+        iter_callback(tgt, p_to_matrix(p))
 
     matrix = p_to_matrix(p)
 
