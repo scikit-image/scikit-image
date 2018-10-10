@@ -8,29 +8,6 @@ from ..measure import compare_mse
 __all__ = ['register_affine']
 
 
-def _cost_mse(param, im_true, im_test):
-    """
-    Finds the error between the overlapping area of two images after transformations are done to one of them
-
-    Parameters
-    ----------
-    param : array
-        Input array giving the translation and rotation the target image will undergo
-    im_true : (M, N) ndarray
-        Input image used for reference
-    im_test : (M, N) ndarray
-        Input image which is modified and then compared to im_true
-
-    Returns
-    -------
-    err: int
-        Error in the form of the mean of the squared difference between pixels
-    """
-    transformation = _p_to_matrix(param)
-    transformed = ndi.affine_transform(im_test, transformation, order=1)
-    return compare_mse(im_true, transformed)
-
-
 def _p_to_matrix(param):
     """
     Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
@@ -81,7 +58,7 @@ def _matrix_to_p(matrix):
     return (np.arccos(matrix[0][0]), matrix[0][2], matrix[1][2])
 
 
-def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
+def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
                     method='Powell', iter_callback=lambda img, matrix: None):
     assert method in ['Powell', 'BH']
 
@@ -92,14 +69,18 @@ def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
     p = np.zeros(3)
 
     for n, (ref, tgt) in reversed(list(zip(levels, image_pairs))):
+        def _cost(param):
+            transformation = _p_to_matrix(param)
+            transformed = ndi.affine_transform(tgt, transformation, order=1)
+            return cost(ref, transformed)
+
         p[1:3] *= 2
         if method.upper() == 'BH':
-            res = basinhopping(cost, p,
-                               minimizer_kwargs={'args': (ref, tgt)})
+            res = basinhopping(_cost, p)
             if n <= 4:  # avoid basin-hopping in lower levels
                 method = 'Powell'
         else:
-            res = minimize(cost, p, args=(ref, tgt), method='Powell')
+            res = minimize(_cost, p, method='Powell')
         p = res.x
         iter_callback(tgt, _p_to_matrix(p))
 
