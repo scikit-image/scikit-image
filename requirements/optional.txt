@@ -3,3 +3,4 @@ SimpleITK; python_version < '3.7'
 astropy
 tifffile
 qtpy
+pyamg
