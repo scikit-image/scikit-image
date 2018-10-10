@@ -148,8 +148,8 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     for axis in (all_axes - set(axes)):
         if fixed_image.shape[axis] != moving_image.shape[axis]:
             raise ValueError(
-                'Array shapes along non-transformation axes should be \
-                    equal, but dimensions along axis {a} not'.format(a=axis))
+                "Array shapes along non-transformation axes should be "
+                    "equal, but dimensions along axis {a} not".format(a=axis))
 
     # Determine final size along transformation axes
     # Note that it might be faster to conmpute Fourier transform in a slightly
