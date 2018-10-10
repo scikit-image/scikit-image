@@ -26,12 +26,12 @@ def _cost_mse(param, im_true, im_test):
     err: int
         Error in the form of the mean of the squared difference between pixels
     """
-    transformation = p_to_matrix(param)
+    transformation = _p_to_matrix(param)
     transformed = ndi.affine_transform(im_test, transformation, order=1)
     return compare_mse(im_true, transformed)
 
 
-def p_to_matrix(param):
+def _p_to_matrix(param):
     """
     Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
 
@@ -62,7 +62,7 @@ def p_to_matrix(param):
     return out
 
 
-def matrix_to_p(matrix):
+def _matrix_to_p(matrix):
     """
     Converts a 3x3 transformation matrix into a transformation in form of (r, tc, tr)
 
@@ -82,7 +82,7 @@ def matrix_to_p(matrix):
 
 
 def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
-                    method='Powell', iter_callback=lambda img, p: None):
+                    method='Powell', iter_callback=lambda img, matrix: None):
     assert method in ['Powell', 'BH']
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
@@ -101,8 +101,8 @@ def register_affine(reference, target, *, cost=_cost_mse, nlevels=7,
         else:
             res = minimize(cost, p, args=(ref, tgt), method='Powell')
         p = res.x
-        iter_callback(tgt, p_to_matrix(p))
+        iter_callback(tgt, _p_to_matrix(p))
 
-    matrix = p_to_matrix(p)
+    matrix = _p_to_matrix(p)
 
     return matrix
