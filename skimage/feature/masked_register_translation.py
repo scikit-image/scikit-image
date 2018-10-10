@@ -14,10 +14,6 @@ from functools import partial
 
 # next_fast_len was implemented in scipy 0.18
 # In case it cannot be imported, we use the id function
-# It could be much slower, but I don't think we should back-port
-# next_fast_length in its entirety
-# Take a look at the source:
-# https://github.com/scipy/scipy/blob/v1.1.0/scipy/fftpack/helper.py#L53-L151
 try:
     from scipy.fftpack import next_fast_len
 except ImportError:
