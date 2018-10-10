@@ -46,11 +46,12 @@ def masked_register_translation(
         (or 1) on valid pixels. ``target_mask`` should have the same shape
         as ``target_image``. If ``None``, ``src_mask`` will be used.
     overlap_ratio : float, optional
-        Maximum allowed overlap ratio between masks. The correlation at pixels
-        with an overlap ratio higher than this threshold will be zeroed. A 
-        larger percentage leads to greater robustness to spurious matches, for 
-        example due to noise. A smaller percentage leads to greater 
-        registration range.
+        Minimum allowed overlap ratio between images. The correlation for
+        translations corresponding with an overlap ratio lower than this 
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller 
+        maximum translation, while a higher `overlap_ratio` leads to greater 
+        robustness against spurious matches due to small overlap between 
+        masked images.
 
     Returns
     -------
@@ -115,8 +116,12 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     axes : tuple of ints, optional
         Axes along which to compute the cross-correlation.
     overlap_ratio : float, optional
-        Maximum allowed overlap ratio between masks. The correlation at pixels
-        with overlap ratio higher than this threshold will be zeroed.
+        Minimum allowed overlap ratio between images. The correlation for
+        translations corresponding with an overlap ratio lower than this 
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller 
+        maximum translation, while a higher `overlap_ratio` leads to greater 
+        robustness against spurious matches due to small overlap between 
+        masked images.
 
     Returns
     -------
