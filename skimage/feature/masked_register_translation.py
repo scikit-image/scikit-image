@@ -65,7 +65,8 @@ def masked_register_translation(
     References
     ----------
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
-        IEEE Transactions on Image Processing, vol.21(5), pp. 2706-2718 (2012).
+           IEEE Transactions on Image Processing, vol. 21(5), 
+           pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
     """
     if target_mask is None:
         target_mask = np.array(src_mask, dtype=np.bool, copy=True)
@@ -134,7 +135,8 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     References
     ----------
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
-        IEEE Transactions on Image Processing, vol.21(5), pp. 2706-2718 (2012).
+           IEEE Transactions on Image Processing, vol. 21(5), 
+           pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
     """
     if mode not in {'full', 'same'}:
         raise ValueError("Correlation mode {} is not valid.".format(mode))
