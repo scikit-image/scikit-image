@@ -61,6 +61,18 @@ def test_binary_descriptors_rotation_crosscheck_false():
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 
+    # minkowski takes a different code path, therefore we test it explicitely
+    matches = match_descriptors(descriptors1, descriptors2,
+                                metric='minkowski', cross_check=False)
+    assert_equal(matches[:, 0], exp_matches1)
+    assert_equal(matches[:, 1], exp_matches2)
+
+    # it also has an extra parameter
+    matches = match_descriptors(descriptors1, descriptors2,
+                                metric='minkowski', p=4, cross_check=False)
+    assert_equal(matches[:, 0], exp_matches1)
+    assert_equal(matches[:, 1], exp_matches2)
+
 
 def test_binary_descriptors_rotation_crosscheck_true():
     """Verify matched keypoints and their corresponding masks results between
