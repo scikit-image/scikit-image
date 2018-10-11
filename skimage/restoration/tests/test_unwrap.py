@@ -22,6 +22,7 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
     if np.ma.isMaskedArray(a):
         assert_(np.ma.isMaskedArray(b))
         assert_array_equal(a.mask, b.mask)
+        assert_(a.fill_value == b.fill_value)
         au = np.asarray(a)
         bu = np.asarray(b)
         with warnings.catch_warnings():
@@ -37,8 +38,8 @@ def check_unwrap(image, mask=None):
     image_wrapped = np.angle(np.exp(1j * image))
     if mask is not None:
         print('Testing a masked image')
-        image = np.ma.array(image, mask=mask)
-        image_wrapped = np.ma.array(image_wrapped, mask=mask)
+        image = np.ma.array(image, mask=mask, fill_value=0.5)
+        image_wrapped = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
     image_unwrapped = unwrap_phase(image_wrapped, seed=0)
     assert_phase_almost_equal(image_unwrapped, image)
 
