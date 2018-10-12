@@ -8,7 +8,7 @@ include requirements/README.md
 include Makefile
 include pyproject.toml
 include skimage/scripts/skivi
-recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.md5 *.npy *.txt *.in *.cpp *.md
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini *.npy *.txt *.in *.cpp *.md
 recursive-include skimage/data *
 
 include doc/Makefile
