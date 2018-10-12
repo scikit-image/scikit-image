@@ -25,6 +25,7 @@ Version 0.16
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
   * Remove the ``save-demo.jpg`` line from ``.gitignore``
+  * Remove the warning filter from ``conftest.py``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
@@ -47,3 +48,4 @@ Other
 * Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
   Remove version restriction in requirements file when appropriate.
   `https://github.com/SimpleITK/SimpleITK/issues/551`
+* Monitor next Pillow release to have a build with PYTHONOPTIMIZE=2 (See #3398).

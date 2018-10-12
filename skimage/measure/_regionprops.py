@@ -631,7 +631,7 @@ def _parse_docs():
     import re
     import textwrap
 
-    doc = regionprops.__doc__
+    doc = regionprops.__doc__ or ''
     matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
@@ -648,4 +648,6 @@ def _install_properties_docs():
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
-_install_properties_docs()
+if __debug__:
+    # don't install docstrings when in optimized/non-debug mode
+    _install_properties_docs()

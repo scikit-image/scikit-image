@@ -47,6 +47,9 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Handle default value
+    methods = methods or {}
+
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True)
