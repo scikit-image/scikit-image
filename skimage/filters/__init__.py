@@ -6,7 +6,7 @@ from .edges import (sobel, sobel_h, sobel_v,
                     roberts, roberts_pos_diag, roberts_neg_diag,
                     laplace)
 from ._rank_order import rank_order
-from ._gabor import gabor_kernel, gabor
+from ._gabor import gabor_kernel, gabor, morlet_kernel
 from ._frangi import frangi, hessian
 from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_isodata, threshold_li, threshold_minimum,
@@ -38,6 +38,7 @@ __all__ = ['inverse',
            'laplace',
            'rank_order',
            'gabor_kernel',
+           'morlet_kernel',
            'gabor',
            'try_all_threshold',
            'frangi',
