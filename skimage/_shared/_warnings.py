@@ -73,7 +73,7 @@ def all_warnings():
 
 @contextmanager
 def expected_warnings(matching):
-    """Context for use in testing to catch known warnings matching regexes
+    r"""Context for use in testing to catch known warnings matching regexes
 
     Parameters
     ----------
@@ -113,7 +113,7 @@ def expected_warnings(matching):
         # Allow users to provide None
         while None in matching:
             matching.remove(None)
-        remaining = [m for m in matching if '\A\Z' not in m.split('|')]
+        remaining = [m for m in matching if r'\A\Z' not in m.split('|')]
         for warn in w:
             found = False
             for match in matching:

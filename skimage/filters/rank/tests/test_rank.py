@@ -97,7 +97,7 @@ class TestRank():
             assert_equal(refs["windowed_histogram"],
                          rank.windowed_histogram(self.image, selem))
 
-        with expected_warnings(['precision loss', 'non-integer|\A\Z']):
+        with expected_warnings(['precision loss', r'non-integer|\A\Z']):
             check_all()
 
     def test_random_sizes(self):
