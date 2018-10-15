@@ -48,8 +48,7 @@ Other
 * Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
   Remove version restriction in requirements file when appropriate.
   `https://github.com/SimpleITK/SimpleITK/issues/551`
-* Monitor scipy for a new release that passes PYTHONOPTIMIZE builds
-  `https://github.com/scipy/scipy/pull/9373` This was identified as an issue
-  in SciPy 1.1.0
-    * When SciPy becomes compatible with PYTHONOPTIMIZE, add an environment
-      ``PYTHONOPTIMIZE=2`` to one of the builds.
+* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
+  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
+  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
+  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
