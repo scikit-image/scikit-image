@@ -54,10 +54,5 @@ ax.set_xlim(0, 24)  # a = 6 (times two for 2nd ellipsoid)
 ax.set_ylim(0, 20)  # b = 10
 ax.set_zlim(0, 32)  # c = 16
 
-# This block of loop is for a temporary fix of an issue caused by matplotlib
-# Reference: https://github.com/matplotlib/matplotlib/issues/12239
-for spine in ax.spines.values():
-    spine.set_visible(False)
-
 plt.tight_layout()
 plt.show()
