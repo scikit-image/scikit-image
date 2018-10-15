@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
-from ._warps_cy import _warp_fast
+from ._warps import warp_fast
 from ._radon_transform import sart_projection_update
 from warnings import warn
 
@@ -102,7 +102,7 @@ def radon(image, theta=None, circle=True):
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
-        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
+        rotated = warp_fast(padded_image, build_rotation(theta[i]))
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 

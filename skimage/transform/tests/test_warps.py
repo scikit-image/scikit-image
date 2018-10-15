@@ -12,7 +12,7 @@ from skimage.color import rgb2gray
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
+                                     test_parallel, parametrize)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -508,3 +508,48 @@ def test_keep_range():
                   clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
+
+
+@parametrize("dtype_in", [np.uint8, np.uint16, np.uint32, np.uint64,
+                          np.int8, np.int16, np.int32, np.int64,
+                          np.float32, np.float64])
+def test_default_dtype_out(dtype_in):
+    image = np.zeros((5, 5), dtype=dtype_in)
+    image[0, 0] = 1
+    theta = -np.pi / 2
+    M = np.array([[np.cos(theta), - np.sin(theta), 0],
+                  [np.sin(theta),   np.cos(theta), 4],
+                  [0,               0,             1]])
+
+    x90 = warp(image,
+               inverse_map=ProjectiveTransform(M).inverse,
+               order=1,
+               preserve_range=True)
+    assert x90.dtype == np.dtype(np.double)
+    assert_almost_equal(x90, np.rot90(image))
+
+
+# biquadratic interpolation (order=2) is buggy and falls back on the scipy
+# implementation. just skip it for this tests.
+@parametrize("order", (0, 1, 3))
+@parametrize("dtype_in", [np.uint8, np.uint16, np.uint32, np.uint64,
+                          np.int8, np.int16, np.int32, np.int64,
+                          np.float32, np.float64])
+@parametrize("dtype_out", [np.uint8, np.uint16, np.uint32, np.uint64,
+                           np.int8, np.int16, np.int32, np.int64,
+                           np.float32, np.float64])
+def test_force_dtype(dtype_in, dtype_out, order):
+    image = np.zeros((5, 5), dtype=dtype_in)
+    image[0, 0] = 1
+    theta = -np.pi / 2
+    M = np.array([[np.cos(theta), - np.sin(theta), 0],
+                  [np.sin(theta),   np.cos(theta), 4],
+                  [0,               0,             1]])
+
+    x90 = warp(image,
+               inverse_map=ProjectiveTransform(M).inverse,
+               order=order,
+               preserve_range=True,
+               dtype=dtype_out)
+    assert x90.dtype == np.dtype(dtype_out)
+    assert_almost_equal(x90, np.rot90(image).astype(dtype_out))

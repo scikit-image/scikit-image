@@ -673,8 +673,38 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
             output_image[cval_mask] = cval
 
 
+def warp_fast(image, H, output_shape=None,
+              order=1, mode='constant', cval=0, dtype=np.float64):
+    """Projective transformation (homography).
+
+    This is a Python wrapper for the Cython function ``_warp_fast``.
+    It prepares the data and allocates the necessary memory.
+
+    Parameters
+    ----------
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated (default None).
+    dtype :
+        The numric type of the output image.
+
+    others:
+        See ``_warp_fast``
+    """
+    image = np.ascontiguousarray(image)
+    H = np.ascontiguousarray(H, dtype=np.float64)
+
+    if output_shape is None:
+        out = np.empty_like(image, dtype=dtype)
+    else:
+        out = np.empty(shape=output_shape[:2], dtype=dtype)
+
+    _warp_fast(image, H, out, order=order, mode=mode, cval=cval)
+    return out
+
+
 def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., clip=True, preserve_range=False):
+         mode='constant', cval=0., clip=True, preserve_range=False,
+         dtype=np.float64):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -742,6 +772,9 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         image is converted according to the conventions of `img_as_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
+
+    dtype : optional
+        Numpy dtype for the output image.
 
     Returns
     -------
@@ -812,7 +845,9 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
-    image = convert_to_float(image, preserve_range)
+
+    if not preserve_range:
+        image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)
 
@@ -856,15 +891,18 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         if matrix is not None:
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
-                warped = _warp_fast(image, matrix,
-                                    output_shape=output_shape,
-                                    order=order, mode=mode, cval=cval)
+                warped = warp_fast(image, matrix,
+                                   output_shape=output_shape,
+                                   order=order, mode=mode, cval=cval,
+                                   dtype=dtype)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
-                    dims.append(_warp_fast(image[..., dim], matrix,
-                                           output_shape=output_shape,
-                                           order=order, mode=mode, cval=cval))
+                    dims.append(warp_fast(image[..., dim], matrix,
+                                          output_shape=output_shape,
+                                          order=order, mode=mode,
+                                          cval=cval,
+                                          dtype=dtype))
                 warped = np.dstack(dims)
 
     if warped is None:
