@@ -56,7 +56,6 @@ ax.set_zlim(0, 32)  # c = 16
 
 # This block of loop is for a temporary fix of an issue caused by matplotlib
 # Reference: https://github.com/matplotlib/matplotlib/issues/12239
-
 for spine in ax.spines.values():
     spine.set_visible(False)
 
