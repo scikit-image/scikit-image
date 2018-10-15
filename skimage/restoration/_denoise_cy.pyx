@@ -15,7 +15,8 @@ def _gaussian_weight(np_floats sigma_sqr, np_floats value):
     return exp(-0.5 * value * value / sigma_sqr)
 
 
-cdef np_floats[:] _compute_range_lut(Py_ssize_t win_size, np_floats sigma, np_floats[:] range_lut):
+cdef np_floats[:] _compute_range_lut(Py_ssize_t win_size, np_floats sigma,
+                                     np_floats[::1] range_lut):
 
     cdef:
         Py_ssize_t kr, kc, dr, dc
@@ -42,10 +43,11 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
 
 
 def _denoise_bilateral(np_floats[:, :, ::1] image, np_floats max_value,
-                       Py_ssize_t win_size,
-                       np_floats sigma_color,
+                       Py_ssize_t win_size, np_floats sigma_color,
                        np_floats sigma_spatial, Py_ssize_t bins, mode,
-                       np_floats cval, color_lut, range_lut, out, empty_dims):
+                       np_floats cval, np_floats[::1] color_lut,
+                       np_floats[::1] range_lut, np_floats[::1] empty_dims,
+                       np_floats[:, :, ::1] out):
     cdef:
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]

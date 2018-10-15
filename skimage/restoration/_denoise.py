@@ -153,8 +153,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     empty_dims = np.empty(dims, dtype=image.dtype)
 
     return _denoise_bilateral(image, image.max(), win_size, sigma_color, sigma_spatial,
-                              bins, mode, cval, color_lut, range_lut,
-                              out, empty_dims)
+                              bins, mode, cval, color_lut, range_lut, empty_dims, out)
 
 
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
