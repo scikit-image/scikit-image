@@ -150,6 +150,10 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     dims = image.shape[2]
 
+    # There are a number of arrays needed in the Cython function.
+    # It's easier to allocate them outside of Cython so that all
+    # arrays are in the same type, then just copy the empty array
+    # where needed within Cython.
     empty_dims = np.empty(dims, dtype=image.dtype)
 
     return _denoise_bilateral(image, image.max(), win_size, sigma_color, sigma_spatial,
