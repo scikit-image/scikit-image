@@ -138,6 +138,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
         raise ValueError("The maximum value found in the image was 0.")
 
     image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
 
     sigma_color = sigma_color or image.std()
 
@@ -151,7 +152,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     empty_dims = np.empty(dims, dtype=image.dtype)
 
-    return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
+    return _denoise_bilateral(image, image.max(), win_size, sigma_color, sigma_spatial,
                               bins, mode, cval, color_lut, range_lut,
                               out, empty_dims)
 
@@ -201,6 +202,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     """
     image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
 
     rows = image.shape[0]
     cols = image.shape[1]

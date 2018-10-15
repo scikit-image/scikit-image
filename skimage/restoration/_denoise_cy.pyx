@@ -41,11 +41,12 @@ cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
         return value2
 
 
-def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
+def _denoise_bilateral(np_floats[:, :, ::1] image, np_floats max_value,
+                       Py_ssize_t win_size,
+                       np_floats sigma_color,
                        np_floats sigma_spatial, Py_ssize_t bins, mode,
                        np_floats cval, color_lut, range_lut, out, empty_dims):
     cdef:
-        np_floats max_value
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]
         Py_ssize_t dims = image.shape[2]
@@ -60,10 +61,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
         np_floats[:] centres
         np_floats[:] total_values
 
-        np_floats[:, :, ::1] cimage
-
-    max_value = image.max()
-
     if sigma_color is None:
         csigma_color = image.std()
     else:
@@ -74,7 +71,6 @@ def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
                          "`edge`, `wrap`, `symmetric` or `reflect`.")
     cdef char cmode = ord(mode[0].upper())
 
-    cimage = np.ascontiguousarray(image)
 
     dist_scale = bins / dims / max_value
     values = empty_dims.copy()
@@ -86,7 +82,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
             total_weight = 0
             for d in range(dims):
                 total_values[d] = 0
-                centres[d] = cimage[r, c, d]
+                centres[d] = image[r, c, d]
             for wr in range(-window_ext, window_ext + 1):
                 rr = wr + r
                 kr = wr + window_ext
@@ -98,7 +94,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
                     # distance between centre stack and current position
                     dist = 0
                     for d in range(dims):
-                        value = get_pixel3d(&cimage[0, 0, 0], rows, cols, dims,
+                        value = get_pixel3d(&image[0, 0, 0], rows, cols, dims,
                                             rr, cc, d, cmode, cval)
                         values[d] = value
                         t = centres[d] - value
@@ -121,8 +117,9 @@ def _denoise_bilateral(image, Py_ssize_t win_size, np_floats sigma_color,
     return np.squeeze(np.asarray(out))
 
 
-def _denoise_tv_bregman(image, np_floats weight, int max_iter, np_floats eps,
-                       char isotropic, np_floats[:, :, ::1] out):
+def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
+                        int max_iter, np_floats eps,
+                        char isotropic, np_floats[:, :, ::1] out):
     cdef:
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]
@@ -137,7 +134,6 @@ def _denoise_tv_bregman(image, np_floats weight, int max_iter, np_floats eps,
     u = out.copy()
 
     cdef:
-        np_floats[:, :, ::1] cimage = np.ascontiguousarray(image)
         np_floats[:, :, ::1] cu = u
 
         np_floats[:, :, ::1] dx = out.copy()
@@ -190,7 +186,7 @@ def _denoise_tv_bregman(image, np_floats weight, int max_iter, np_floats eps,
                             + bx[r, c, k]
                             - by[r - 1, c, k]
                             + by[r, c, k]
-                        ) + weight * cimage[r - 1, c - 1, k]
+                        ) + weight * image[r - 1, c - 1, k]
                     ) / norm
                     cu[r, c, k] = unew
 
