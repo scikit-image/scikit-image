@@ -208,9 +208,9 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True,
 
         # Add center elements if linewidth is odd
         if linewidth % 2:
-            pln_stack = np.append(points_array[0], centers[0], axis=1)
-            row_stack = np.append(points_array[1], centers[1], axis=1)
-            col_stack = np.append(points_array[2], centers[2], axis=1)
+            pln_stack = np.append(perp_array[0], centers[0], axis=1)
+            row_stack = np.append(perp_array[1], centers[1], axis=1)
+            col_stack = np.append(perp_array[2], centers[2], axis=1)
             perp_array = np.stack((pln_stack, row_stack, col_stack))
 
         return perp_array

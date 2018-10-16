@@ -157,10 +157,3 @@ def test_3d_diagonal_interpolated():
                         order=1, multichannel=False)
     expected_prof = np.array([1, 0.75, 0, 0.75, 1])
     assert_equal(prof, expected_prof)
-
-
-def test_3d_diagonal_interpolated_interpolated():
-    prof = profile_line(image3d, (0, 0, 0), (1, 1, 1),
-                        order=1, linewidth=3, multichannel=False)
-    expected_prof = np.array([0.25, 0.5193376, 0.4665064])
-    assert_almost_equal(prof, expected_prof)
