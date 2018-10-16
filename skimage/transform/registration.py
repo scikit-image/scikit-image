@@ -8,7 +8,7 @@ from ..measure import compare_mse
 __all__ = ['register_affine']
 
 
-def _p_to_matrix(param):
+def _p_to_matrix(p):
     """
     Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
 
@@ -23,15 +23,14 @@ def _p_to_matrix(param):
         A transformation matrix used to obtain a new image
     """
 
-    r, tc, tr = param
     out = np.empty((3, 3))
 
-    out[0][0] = np.cos(r)
-    out[0][1] = -1 * np.sin(r)
-    out[0][2] = tc
-    out[1][0] = np.sin(r)
-    out[1][1] = np.cos(r)
-    out[1][2] = tr
+    out[0][0] = p[0]
+    out[0][1] = p[1]
+    out[0][2] = p[2]
+    out[1][0] = p[3]
+    out[1][1] = p[4]
+    out[1][2] = p[5]
     out[2][0] = 0
     out[2][1] = 0
     out[2][2] = 1
@@ -55,7 +54,7 @@ def _matrix_to_p(matrix):
 
     """
 
-    return (np.arccos(matrix[0][0]), matrix[0][2], matrix[1][2])
+    return (matrix[0][0], matrix[0][1], matrix[0][2], matrix[1][0], matrix[1][1], matrix[1][2])
 
 
 def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
@@ -65,7 +64,9 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
-    p = np.zeros(3)
+    p = np.zeros(6)
+    p[0] = 1
+    p[4] = 1
 
     for n, (ref, tgt) in enumerate(image_pairs):
         def _cost(param):
@@ -73,7 +74,6 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
             transformed = ndi.affine_transform(tgt, transformation, order=1)
             return cost(ref, transformed)
 
-        p[1:3] *= 2
         if method.upper() == 'BH':
             res = basinhopping(_cost, p)
             if n <= nlevels - 4:  # avoid basin-hopping in lower levels
@@ -86,3 +86,6 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
     matrix = _p_to_matrix(p)
 
     return matrix
+
+
+
