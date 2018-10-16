@@ -1,4 +1,4 @@
-"""Function of unitary fourier transform (uft) and utilities
+r"""Function of unitary fourier transform (uft) and utilities
 
 This module implements the unitary fourier transform, also known as
 the ortho-normal transform. It is especially useful for convolution

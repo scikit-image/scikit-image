@@ -32,8 +32,8 @@ gallery_div = '''\
 examples = glob.glob(os.path.join(example_dir, '**/plot_*.py'), recursive=True)
 
 images, links = [], []
-image_url = 'http://scikit-image.org/docs/dev/_images/'
-link_url = 'http://scikit-image.org/docs/dev/auto_examples/'
+image_url = 'https://scikit-image.org/docs/dev/_images/'
+link_url = 'https://scikit-image.org/docs/dev/auto_examples/'
 
 for example_path in examples:
     example_path = os.path.relpath(example_path, example_dir)

@@ -476,6 +476,11 @@ def test_cache():
 
 
 def test_docstrings_and_props():
+    def foo():
+        """foo"""
+
+    has_docstrings = bool(foo.__doc__)
+
     region = regionprops(SAMPLE)[0]
 
     docs = _parse_docs()
@@ -483,11 +488,13 @@ def test_docstrings_and_props():
 
     nr_docs_parsed = len(docs)
     nr_props = len(props)
-    assert_equal(nr_docs_parsed, nr_props)
-
-    ds = docs['weighted_moments_normalized']
-    assert 'iteration' not in ds
-    assert len(ds.split('\n')) > 3
+    if has_docstrings:
+        assert_equal(nr_docs_parsed, nr_props)
+        ds = docs['weighted_moments_normalized']
+        assert 'iteration' not in ds
+        assert len(ds.split('\n')) > 3
+    else:
+        assert_equal(nr_docs_parsed, 0)
 
 
 def test_incorrect_coordinate_convention():

@@ -156,7 +156,7 @@ def test_ssim_multichannel_chelsea():
 
 def test_gaussian_mssim_vs_IPOL():
     # Tests vs. imdiff result from the following IPOL article and code:
-    # http://www.ipol.im/pub/art/2011/g_lmii/
+    # https://www.ipol.im/pub/art/2011/g_lmii/
     mssim_IPOL = 0.327309966087341
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)

@@ -17,7 +17,7 @@ XY_TO_RC_DEPRECATION_MESSAGE = (
     'regionprops and image moments (including moments, normalized moments, '
     'central moments, and inertia tensor) of 2D images will change from xy '
     'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
     'for details on how to avoid this message.'
 )
 STREL_4 = np.array([[0, 1, 0],
@@ -539,7 +539,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -631,8 +631,8 @@ def _parse_docs():
     import re
     import textwrap
 
-    doc = regionprops.__doc__
-    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+    doc = regionprops.__doc__ or ''
+    matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
 
@@ -648,4 +648,6 @@ def _install_properties_docs():
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
-_install_properties_docs()
+if __debug__:
+    # don't install docstrings when in optimized/non-debug mode
+    _install_properties_docs()

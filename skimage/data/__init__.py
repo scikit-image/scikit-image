@@ -111,7 +111,7 @@ def text():
     Notes
     -----
     This image was downloaded from Wikipedia
-    <http://en.wikipedia.org/wiki/File:Corner.png>`__.
+    <https://en.wikipedia.org/wiki/File:Corner.png>`__.
 
     No known copyright restrictions, released into the public domain.
 

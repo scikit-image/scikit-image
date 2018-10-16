@@ -708,7 +708,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     References
     ----------
-    .. [1] "RANSAC", Wikipedia, http://en.wikipedia.org/wiki/RANSAC
+    .. [1] "RANSAC", Wikipedia, https://en.wikipedia.org/wiki/RANSAC
 
     Examples
     --------

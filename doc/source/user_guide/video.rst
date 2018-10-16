@@ -126,6 +126,6 @@ OpenCV
 ^^^^^^
 
 Finally, another solution is the `VideoReader
-<http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
+<https://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
 class in OpenCV, which has bindings to FFmpeg. If you need OpenCV for other reasons,
 then this may be the best approach.

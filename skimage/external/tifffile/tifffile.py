@@ -62,7 +62,7 @@ For command line usage run `python tifffile.py --help`
 
 Requirements
 ------------
-* `CPython 2.7 or 3.5 <http://www.python.org>`_ (64-bit recommended)
+* `CPython 2.7 or 3.5 <https://www.python.org>`_ (64-bit recommended)
 * `Numpy 1.11 <http://www.numpy.org>`_
 * `Matplotlib 1.5 <http://www.matplotlib.org>`_ (optional for plotting)
 * `Tifffile.c 2017.01.10 <http://www.lfd.uci.edu/~gohlke/>`_
