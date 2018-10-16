@@ -159,7 +159,7 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True,
 
         perp_vector = any_perpendicular_vector_3d([d_pln, d_row, d_col])
         perp_vector = np.asarray(perp_vector)
-        pln_width, row_width, col_width,  = (linewidth - 1) * perp_vector / 2
+        pln_width, row_width, col_width = (linewidth - 1) * perp_vector / 2
 
         # return early if linewidth is 1, (no need to rotate points)
         if linewidth == 1:
