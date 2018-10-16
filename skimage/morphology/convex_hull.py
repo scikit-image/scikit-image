@@ -44,7 +44,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     References
     ----------
-    .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+    .. [1] https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
     ndim = image.ndim

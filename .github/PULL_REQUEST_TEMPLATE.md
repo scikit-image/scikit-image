@@ -11,7 +11,7 @@
   existing benchmark
 - [ ] Unit tests
 
-[For detailed information on these and other aspects see [scikit-image contribution guidelines](http://scikit-image.org/docs/dev/contribute.html)]
+[For detailed information on these and other aspects see [scikit-image contribution guidelines](https://scikit-image.org/docs/dev/contribute.html)]
 
 
 ## References

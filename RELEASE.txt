@@ -5,6 +5,12 @@ While following this guide, note down all the times that you need to consult a
 previous release manager, or that you find an instruction unclear. You will
 make a PR to update these notes after you are done with the release. ;-)
 
+Some of the instructions don't apply to patch releases. As a reminder, we use a
+variant of "semantic versioning", where version numbers are classified as
+v<major>.<minor>.<patch>. If you are making a patch release, skip the first
+three steps. Instead, make a PR to update ``release_<major>.<minor>.txt`` on
+the corresponding release branch.
+
 - Check ``TODO.txt`` for any outstanding tasks.
 
 - Branch v<major>.<minor>.x from master. This is the "release branch", where
@@ -50,15 +56,6 @@ make a PR to update these notes after you are done with the release. ;-)
 - Back on the release branch, update the version number to stable in
   ``skimage/__init__.py``, commit, and push.
 
-- Update the docs:
-
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs.  Run ``python setup.py install`` in the
-    root dir, then ``rm -rf build; make html`` in the ``doc`` dir.
-  - Build using ``make gh-pages``.
-  - Update the symlink to ``stable``.
-  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
-
 - Add the version number as a tag in git::
 
    git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
@@ -83,11 +80,32 @@ make a PR to update these notes after you are done with the release. ;-)
 - Build the package wheels (pre-compiled binaries) for various platforms:
 
   - Clone https://github.com/scikit-image/scikit-image-wheels.
+  - (If making a patch release, switch to the appropriate v<major>.<minor>.x
+    branch.)
   - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
     release tag (e.g. ``v0.14.0``).
+  - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
+    this release tag.
   - Commit and push.
-  - Wait until the corresponding wheels appear at
-    http://wheels.scikit-image.org (about 15 minutes).
+  - Monitor the builds at
+    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
+    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
+  - When all is green, spot-check a couple of builds to make sure that the
+    wheels have correctly uploaded. You should see a message like:
+    ``python -m wheelhouse_uploader upload --local-folder``, with output:
+    ``Wheelhouse successfully published at:
+    http://[crazyrandomstring].rackcdn.com``
+  - Open that URL and check for the wheels as
+    ``scikit_image-<versiontag>-<platforminfo>.whl``
+
+- Update the docs:
+
+  - Edit ``doc/source/_static/docversions.js`` and commit
+  - Build a clean version of the docs. In the root directory, run
+    ``python setup.py install``, then ``make cleandoc; make html``.
+  - In the ``doc/`` directory, build using ``make gh-pages``.
+  - Update the symlink to ``stable``.
+  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Upload the wheels to PyPI:
 
@@ -95,6 +113,8 @@ make a PR to update these notes after you are done with the release. ;-)
     ``pip install twine``.
   - Download ``wheel-uploader`` [1]_ and place it on your PATH.
   - Run ``tools/upload_wheels.sh``.
+  - If everything worked, delete the wheels from your local directory with
+    ``rm -rf *.whl``
 
 .. [1] https://github.com/MacPython/terryfy/blob/master/wheel-uploader
 
@@ -124,14 +144,27 @@ make a PR to update these notes after you are done with the release. ;-)
 - Update the version and the release date on Wikipedia
   https://en.wikipedia.org/wiki/Scikit-image
 
+- Make a PR to scikit-image with any updates you might have to these notes
+
+- If making a patch release (v<major>.<minor>.<patch>), forward-port the
+  release notes to the master branch and make a PR.
+
 Conda-forge
 -----------
 
+**Note**: conda-forge now has an automated bot who makes the below PR for you.
+Now all you have to do is to look at pull requests at
+https://github.com/conda-forge/scikit-image-feedstock/pulls
+and check for a new one for this version. Wait for all the continuous
+integration checks to go green, then merge.
+
+The manual instructions remain below in case the bot fails for some reason.
+
 A scikit-image build recipe resides at
-http://github.com/conda-forge/scikit-image-feedstock. You should update it to
+https://github.com/conda-forge/scikit-image-feedstock. You should update it to
 point to the most recent release. You can do this by following these steps:
 
-- Fork the repository at http://github.com/conda-forge/scikit-image-feedstock,
+- Fork the repository at https://github.com/conda-forge/scikit-image-feedstock,
   and clone it to your machine.
 - Sprout a new branch, e.g. ``v<major>.<minor>``.
 - Find out the SHA256 hash of the source distribution. You can find this at
@@ -149,8 +182,13 @@ point to the most recent release. You can do this by following these steps:
   - Update any requirements in the appropriate sections (build or run).
     Note: don't remove ``numpy x.x``. This tells conda-smithy, conda-forge's
     build system, that the library must be linked against NumPy at build time.
+  - Commit these changes.
+  - Update the infrastructure around the recipe with ``conda-smithy``:
+    * Install conda-smithy either with conda or pip
+    * Run ``conda-smithy rerender`` in the root of the repository, and commit
+      the changes.
 
-- Commit the changes, push to your fork, and submit a pull request to the
+- Push to your fork, and submit a pull request to the
   upstream repo.
 
 Debian

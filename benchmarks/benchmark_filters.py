@@ -1,5 +1,5 @@
 # See "Writing benchmarks" in the asv docs for more information.
-# http://asv.readthedocs.io/en/latest/writing_benchmarks.html
+# https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 from skimage import filters
 

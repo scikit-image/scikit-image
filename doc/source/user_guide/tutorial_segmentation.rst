@@ -38,7 +38,7 @@ Edge-based segmentation
 
 Let us first try to detect edges that enclose the coins. For edge
 detection, we use the `Canny detector 
-<http://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
+<https://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
 
 ::
 
@@ -108,7 +108,7 @@ histogram of grey values:
    
 We will use these markers in a watershed segmentation. The name watershed
 comes from an analogy with hydrology. The `watershed transform
-<http://en.wikipedia.org/wiki/Watershed_%28image_processing%29>`_ floods
+<https://en.wikipedia.org/wiki/Watershed_%28image_processing%29>`_ floods
 an image of elevation starting from markers, in order to determine the catchment
 basins of these markers. Watershed lines separate these catchment basins,
 and correspond to the desired segmentation.

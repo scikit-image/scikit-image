@@ -1,14 +1,14 @@
 # vim ft=yaml
 
 # After changing this file, check it on:
-#   http://yaml-online-parser.appspot.com/
+#   https://yaml-online-parser.appspot.com/
 
 # See tools/travis/notes.txt for some guidelines
 
 language: python
 sudo: false
 cache:
-  # See http://docs.travis-ci.com/user/caching/#pip-cache
+  # See https://docs.travis-ci.com/user/caching/#pip-cache
   directories:
     - $HOME/.cache/pip
     - $HOME/.cache/sphinx
@@ -41,22 +41,29 @@ matrix:
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1
     - os: linux
       python: 3.5
-      env: QT=PyQt5 WITH_PYAMG=1 MINIMUM_REQUIREMENTS=1
+      env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
+    - os: linux
+      python: 3.5
+      env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.7
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
+      env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
     - os: osx
       osx_image: xcode9
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
+    - os: osx
+      osx_image: xcode9
+      language: objective-c
+      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1
     - os: osx
       osx_image: xcode9
       language: objective-c
@@ -69,34 +76,27 @@ before_install:
         virtualenv -p python ~/venv;
         source ~/venv/bin/activate;
       fi
-    - ccache -s
+    - ccache --zero-stats
     - export PATH=/usr/lib/ccache:${PATH}
     - source tools/travis/before_install.sh
     - which python; python --version
+    - pip list
     - tools/build_versions.py
     - tools/check_sdist.py
 
 install:
     - python setup.py develop
+    - ccache --show-stats
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
-    - |
-      if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-        export MPL_DIR=${HOME}/.matplotlib
-      else
-        export MPL_DIR=${HOME}/.config/matplotlib
-      fi
+    - export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
     - mkdir -p ${MPL_DIR}
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
         pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
-      fi
-    - |
-      if [[ "${WITH_PYAMG}" == "1" ]]; then
-        pip install --retries 3 -q pyamg
       fi
     - tools/travis/install_qt.sh
 

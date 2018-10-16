@@ -1,4 +1,4 @@
-"""
+r"""
 
 General Description
 -------------------
@@ -934,7 +934,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] https://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Examples
     --------
@@ -978,7 +978,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Otsu's_method
+    .. [1] https://en.wikipedia.org/wiki/Otsu's_method
 
     Examples
     --------

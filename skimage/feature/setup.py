@@ -12,15 +12,21 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('feature', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['corner_cy.pyx'], working_path=base_path)
-    cython(['censure_cy.pyx'], working_path=base_path)
-    cython(['orb_cy.pyx'], working_path=base_path)
-    cython(['brief_cy.pyx'], working_path=base_path)
-    cython(['_texture.pyx'], working_path=base_path)
-    cython(['_hessian_det_appx.pyx'], working_path=base_path)
-    cython(['_hoghistogram.pyx'], working_path=base_path)
-    cython(['_haar.pyx'], working_path=base_path)
+    cython(['corner_cy.pyx',
+            'censure_cy.pyx',
+            'orb_cy.pyx',
+            'brief_cy.pyx',
+            '_texture.pyx',
+            '_hessian_det_appx.pyx',
+            '_hoghistogram.pyx',
+            ], working_path=base_path)
+    # _haar uses c++, so it must be cythonized seperately
+    cython(['_cascade.pyx',
+            '_haar.pyx'], working_path=base_path)
 
+    config.add_extension('_cascade', sources=['_cascade.cpp'],
+                         include_dirs=[get_numpy_include_dirs()],
+                         language="c++")
     config.add_extension('corner_cy', sources=['corner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('censure_cy', sources=['censure_cy.c'],

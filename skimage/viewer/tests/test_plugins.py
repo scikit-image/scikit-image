@@ -100,7 +100,7 @@ def test_canny():
     canny_edges = viewer.show(False)
     viewer.close()
     edges = canny_edges[0][0]
-    assert edges.sum() == 2852
+    assert edges.sum() == 2846
 
 
 @testing.skipif(not has_qt, reason="Qt not installed")
