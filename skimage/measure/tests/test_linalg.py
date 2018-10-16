@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import constants
 
-from skimage.measure._linalg import distance_point_line, get_any_perpendicular_vector_3d, rotation_matrix, \
-    affine_transform
+from skimage.measure._linalg import distance_point_line, \
+    any_perpendicular_vector_3d, rotation_matrix, affine_transform
 from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
@@ -59,7 +59,8 @@ def test_rotate_point_around_line_45():
     direction = [0, 0, 1]
     rot_matrix = rotation_matrix(constants.pi / 4, direction)
     transformed_points = affine_transform(rot_matrix, points)
-    assert_almost_equal(transformed_points[0], [np.sqrt(2) / 2, np.sqrt(2) / 2, 0])
+    assert_almost_equal(transformed_points[0],
+                        [np.sqrt(2) / 2, np.sqrt(2) / 2, 0])
 
 
 def test_rotate_point_around_line_90():
@@ -111,7 +112,14 @@ def test_rotate_point_on_line():
     assert_almost_equal(transformed_points, points)
 
 
+def test_affine_transform():
+    matrix = np.identity(4)
+    points = [[1, 1, 1], [2, 2, 2]]
+    transformed_points = affine_transform(matrix, points)
+    assert_equal(transformed_points, points)
+
+
 def test_get_any_perpendicular_vector():
     v1 = [1, 1, 1]
-    v2 = get_any_perpendicular_vector_3d(v1)
+    v2 = any_perpendicular_vector_3d(v1)
     assert_equal(np.dot(v1, v2), 0)

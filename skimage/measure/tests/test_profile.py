@@ -111,48 +111,56 @@ image3d[:, 1:-1, 1:-1] = 0
 
 
 def test_3d_vertical_downward():
-    prof = profile_line(image3d, (0, 0, 0), (2, 0, 0), order=0, multichannel=False)
+    prof = profile_line(image3d, (0, 0, 0), (2, 0, 0),
+                        order=0, multichannel=False)
     expected_prof = np.array([1, 1, 1])
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center():
-    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, multichannel=False)
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1),
+                        order=0, multichannel=False)
     expected_prof = np.array([0, 0, 0])
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center_linewidth_even():
-    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=2, multichannel=False)
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1),
+                        order=0, linewidth=2, multichannel=False)
     expected_prof = np.repeat(1/2, 3)
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center_linewidth_odd():
-    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False)
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1),
+                        order=0, linewidth=3, multichannel=False)
     expected_prof = np.repeat(4/5, 3)
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center_linewidth_sample_points():
-    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False, num_sample_points=3)
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3,
+                        multichannel=False, num_sample_points=3)
     expected_prof = np.repeat(3/4, 3)
     assert_equal(prof, expected_prof)
 
 
 def test_3d_diagonal():
-    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=0, multichannel=False)
+    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2),
+                        order=0, multichannel=False)
     expected_prof = np.array([1, 0, 0, 1, 1])
     assert_equal(prof, expected_prof)
 
 
 def test_3d_diagonal_interpolated():
-    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=1, multichannel=False)
+    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2),
+                        order=1, multichannel=False)
     expected_prof = np.array([1, 0.75, 0, 0.75, 1])
     assert_equal(prof, expected_prof)
 
 
 def test_3d_diagonal_interpolated_interpolated():
-    prof = profile_line(image3d, (0, 0, 0), (1, 1, 1), order=1, linewidth=3, multichannel=False)
+    prof = profile_line(image3d, (0, 0, 0), (1, 1, 1),
+                        order=1, linewidth=3, multichannel=False)
     expected_prof = np.array([0.25, 0.5193376, 0.4665064])
     assert_almost_equal(prof, expected_prof)

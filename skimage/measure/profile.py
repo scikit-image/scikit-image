@@ -2,7 +2,8 @@ import math
 import numpy as np
 from scipy import ndimage as ndi, constants
 
-from ._linalg import get_any_perpendicular_vector_3d, rotation_matrix, affine_transform
+from ._linalg import any_perpendicular_vector_3d, rotation_matrix, \
+    affine_transform
 
 
 def profile_line(image, src, dst, linewidth=1,
@@ -34,10 +35,12 @@ def profile_line(image, src, dst, linewidth=1,
         Whether the last axis of the image is to be interpreted as RGB
         channels or another spatial dimension.
     endpoint : bool, optional
-        If True, returns the intensity value at dst. Otherwise, it is not included.
-        Default is True.
+        If True, returns the intensity value at dst.
+        Otherwise, it is not included. Default is True.
     num_sample_points : int, optional
-        The number of sample points for 3d profile lines. generates angles afters.
+        The number of perpendicular sample line profile coordinates in 3d.
+        Default is 4, which yields 4 points along the circumference of the
+        circle created by the linewidth and the center point.
 
     Returns
     -------
@@ -70,23 +73,29 @@ def profile_line(image, src, dst, linewidth=1,
     array([ 1.,  1.,  1.,  2.,  2.,  2.])
     """
     if image.ndim not in [2, 3, 4]:
-        raise ValueError('profile_line is not implemented for images of dimension {0}'.format(image.shape))
+        raise ValueError('profile_line is not implemented for images of '
+                         'dimension {0}'.format(image.shape))
 
-    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth, endpoint=endpoint, num_sample_points=num_sample_points)
+    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth,
+                                           endpoint=endpoint,
+                                           num_sample_points=num_sample_points)
     if image.ndim == 4 or (image.ndim == 3 and multichannel):
         # 2D or 3D multichannel
         pixels = [ndi.map_coordinates(image[..., i], perp_lines, order=order,
-                                      mode=mode, cval=cval) for i in range(image.shape[image.ndim - 1])]
+                                      mode=mode, cval=cval)
+                  for i in range(image.shape[image.ndim - 1])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
         # 2D or 3D grayscale
-        pixels = ndi.map_coordinates(image, perp_lines, order=order, mode=mode, cval=cval)
+        pixels = ndi.map_coordinates(image, perp_lines, order=order,
+                                     mode=mode, cval=cval)
 
     intensities = pixels.mean(axis=1)
     return intensities
 
 
-def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_points=4):
+def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True,
+                              num_sample_points=4):
     """Return the coordinates of the profile of an image along a scan line.
 
     Parameters
@@ -98,8 +107,13 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
     linewidth : int, optional
         Width of the scan, perpendicular to the line. In 3D, this value is the
         diameter of a 3d cylinder along the scan line.
-    endpoint :
-    num_sample_points :
+    endpoint : bool, optional
+        If True, returns the intensity value at dst.
+        Otherwise, it is not included. Default is True.
+    num_sample_points : int, optional
+        The number of perpendicular sample line profile coordinates in 3d.
+        Default is 4, which yields 4 points along the circumference of the
+        circle created by the linewidth and the center point.
 
     Returns
     -------
@@ -118,8 +132,8 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
     length = math.ceil(np.linalg.norm(dst - src))
     unit_dir = (dst - src) / length
 
-    # when endpoint is true add 1 to length to include the last point in the profile.
-    # (in contrast to standard numpy indexing)
+    # when endpoint is true add 1 to length to include the
+    # last point in the profile. (in contrast to standard numpy indexing)
     num = length + 1 if endpoint else length
 
     if len(src) == 2:
@@ -131,8 +145,10 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
         # distance between pixel centers)
         row_width = (linewidth - 1) * d_col / 2
         col_width = (linewidth - 1) * -d_row / 2
-        perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth) for row_i in line_row]
-        perp_cols = [np.linspace(col_i - col_width, col_i + col_width, linewidth) for col_i in line_col]
+        perp_rows = [np.linspace(row_i - row_width, row_i + row_width,
+                                 linewidth) for row_i in line_row]
+        perp_cols = [np.linspace(col_i - col_width, col_i + col_width,
+                                 linewidth) for col_i in line_col]
         return np.array([perp_rows, perp_cols])
 
     elif len(src) == 3:
@@ -140,25 +156,29 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
         line_row = np.linspace(src[1], dst[1], num, endpoint=endpoint)
         line_col = np.linspace(src[2], dst[2], num, endpoint=endpoint)
         d_pln, d_row, d_col = unit_dir
-        perp_vector = np.asarray(get_any_perpendicular_vector_3d([d_pln, d_row, d_col]))
+        perp_vector = np.asarray(any_perpendicular_vector_3d([d_pln, d_row, d_col]))
         pln_width, row_width, col_width,  = (linewidth - 1) * perp_vector / 2
 
-        # return early if linewidth is 1, since there is no need to rotate points
+        # return early if linewidth is 1, (no need to rotate points)
         if linewidth == 1:
             perp_pln = np.expand_dims(line_pln, axis=1)
             perp_rows = np.expand_dims(line_row, axis=1)
             perp_cols = np.expand_dims(line_col, axis=1)
             return np.array([perp_pln, perp_rows, perp_cols])
 
-        # only get half of the pln, rows and col, since they are going to be rotated
-        perp_pln = [np.linspace(pln_i - pln_width, pln_i + pln_width, linewidth) for pln_i in line_pln]
+        # only need half of the pln, rows and col, to rotate them
+        perp_pln = [np.linspace(pln_i - pln_width, pln_i + pln_width,
+                                linewidth) for pln_i in line_pln]
         perp_pln = np.array_split(np.asarray(perp_pln), 2, axis=1)[-1]
-        perp_rows = [np.linspace(row_i - row_width, row_i + row_width, linewidth) for row_i in line_row]
+        perp_rows = [np.linspace(row_i - row_width, row_i + row_width,
+                                 linewidth) for row_i in line_row]
         perp_rows = np.array_split(np.asarray(perp_rows), 2, axis=1)[-1]
-        perp_cols = [np.linspace(col_i - col_width, col_i + col_width, linewidth) for col_i in line_col]
+        perp_cols = [np.linspace(col_i - col_width, col_i + col_width,
+                                 linewidth) for col_i in line_col]
         perp_cols = np.array_split(np.asarray(perp_cols), 2, axis=1)[-1]
 
-        # Get center elements out of array if linewidth is odd (since they would rotate around themselves)
+        # Get center elements out of array if linewidth is odd
+        # (since they would rotate around themselves)
         if linewidth % 2:
             pln_centers = np.expand_dims(line_pln, axis=1)
             rows_centers = np.expand_dims(line_row, axis=1)
@@ -171,7 +191,8 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
 
         # Split number of samples into even angles to cover 360 degrees
         # without using the first (0) and the last (2π) angles
-        rot_angles = np.linspace(0, 2 * constants.pi, num_sample_points, endpoint=False)[1:]
+        rot_angles = np.linspace(0, 2 * constants.pi, num_sample_points,
+                                 endpoint=False)[1:]
         for angle in rot_angles:
             rot_matrix = rotation_matrix(angle, unit_dir, dst)
             transformed_points = affine_transform(rot_matrix, points)
@@ -180,7 +201,8 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True, num_sample_p
         # reshape into stacks of pln, rows and cols
         # the final shape depends on the given linewidth
         shape = int((linewidth - 1) / 2 if linewidth % 2 else linewidth / 2)
-        perp_array = np.asarray(points_array).reshape(shape * num_sample_points, length + 1, 3).T
+        perp_array = np.asarray(points_array).reshape(
+            shape * num_sample_points, length + 1, 3).T
 
         # Add center elements if linewidth is odd
         if linewidth % 2:
