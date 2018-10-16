@@ -33,12 +33,12 @@ image = data.camera()
 
 # Applying multi-Otsu threshold for the default value, generating
 # three classes.
-thresh, _ = threshold_multiotsu(image)
+thresh = threshold_multiotsu(image)
 
 # Using the values on thresh, we generate the three regions.
 regions = np.digitize(image, bins=thresh)
 
-fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 8))
+fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 3.5))
 
 # Plotting the original image.
 ax[0].imshow(image, cmap='gray')
@@ -47,7 +47,7 @@ ax[0].axis('off')
 
 # Plotting the histogram and the two thresholds obtained from
 # multi-Otsu.
-ax[1].hist(image.ravel())
+ax[1].hist(image.ravel(), bins=255)
 ax[1].set_title('Histogram')
 for i in range(len(thresh)):
     ax[1].axvline(thresh[i], color='r')
@@ -56,5 +56,7 @@ for i in range(len(thresh)):
 ax[2].imshow(regions, cmap='Accent')
 ax[2].set_title('Multi-Otsu result')
 ax[2].axis('off')
+
+plt.subplots_adjust()
 
 plt.show()

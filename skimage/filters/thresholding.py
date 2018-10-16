@@ -7,6 +7,8 @@ from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from ..util import crop, dtype_limits
+from ..filters._multiotsu import (_find_threshold_multiotsu,
+                                  _find_threshold_multiotsu_bk)  
 
 
 __all__ = ['try_all_threshold',
@@ -727,7 +729,7 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def threshold_multiotsu(image, classes=3, bins=255):
+def threshold_multiotsu(image, classes=3, bins=255, mode='combinations'):
     """Generates multiple thresholds for an input image.
     Based on the Multi-Otsu approach by Liao, Chen and Chung.
 
@@ -803,51 +805,13 @@ def threshold_multiotsu(image, classes=3, bins=255):
 
     # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.
-    if classes == 2:
-        for idx in range(1, bins - classes):
-            part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, bins-1]
-            if max_sigma < part_sigma:
-                aux_thresh = idx
-                max_sigma = part_sigma
-
-    elif classes == 3:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                part_sigma = var_btwcls[1, idx1] + \
-                            var_btwcls[idx1+1, idx2] + \
-                            var_btwcls[idx2+1, bins-1]
-
-                if max_sigma < part_sigma:
-                    aux_thresh = idx1, idx2
-                    max_sigma = part_sigma
-
-    elif classes == 4:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                for idx3 in range(idx2+1, bins - classes+2):
-                    part_sigma = var_btwcls[1, idx1] + \
-                                var_btwcls[idx1+1, idx2] + \
-                                var_btwcls[idx2+1, idx3] + \
-                                var_btwcls[idx3+1, bins-1]
-
-                    if max_sigma < part_sigma:
-                        aux_thresh = idx1, idx2, idx3
-                        max_sigma = part_sigma
-
-    elif classes == 5:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                for idx3 in range(idx2+1, bins - classes+2):
-                    for idx4 in range(idx3+1, bins - classes+3):
-                        part_sigma = var_btwcls[1, idx1] + \
-                            var_btwcls[idx1+1, idx2] + \
-                            var_btwcls[idx2+1, idx3] + \
-                            var_btwcls[idx3+1, idx4] + \
-                            var_btwcls[idx4+1, bins-1]
-
-                        if max_sigma < part_sigma:
-                            aux_thresh = idx1, idx2, idx3, idx4
-                            max_sigma = part_sigma
+    aux_thresh = np.zeros(classes - 1)
+    if mode == 'combinations':
+        aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, bins,
+                                           aux_thresh)
+    else:
+        aux_thresh = _find_threshold_multiotsu_bk(var_btwcls, classes, bins,
+                                           aux_thresh)
 
     # correcting values according to minimum and maximum values.
     idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / bins
