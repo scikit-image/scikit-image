@@ -2,8 +2,6 @@ import numpy as np
 from skimage.measure import profile_line
 
 from skimage._shared.testing import assert_equal, assert_almost_equal
-#from skimage.measure.profile import _rotation_angles_by_distance_from_line
-#from skimage.measure.profile import _rotate_points
 
 image = np.arange(100, dtype=np.float).reshape((10, 10))
 
@@ -12,6 +10,7 @@ def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
     expected_prof = np.arange(2, 9)
     assert_equal(prof, expected_prof)
+
 
 def test_horizontal_leftward():
     prof = profile_line(image, (0, 8), (0, 2), order=0)
@@ -123,15 +122,21 @@ def test_3d_vertical_downward_through_center():
     assert_equal(prof, expected_prof)
 
 
-def test_3d_vertical_downward_through_center_linewidth():
-    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False)
-    expected_prof = np.array([0, 0, 0])
+def test_3d_vertical_downward_through_center_linewidth_even():
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=2, multichannel=False)
+    expected_prof = np.repeat(1/2, 3)
     assert_equal(prof, expected_prof)
 
 
-def test_3d_vertical_downward_through_center_linewidth_interpolated():
+def test_3d_vertical_downward_through_center_linewidth_odd():
     prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False)
-    expected_prof = np.array([0, 0, 0])
+    expected_prof = np.repeat(4/5, 3)
+    assert_equal(prof, expected_prof)
+
+
+def test_3d_vertical_downward_through_center_linewidth_sample_points():
+    prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3, multichannel=False, num_sample_points=3)
+    expected_prof = np.repeat(3/4, 3)
     assert_equal(prof, expected_prof)
 
 
@@ -148,19 +153,6 @@ def test_3d_diagonal_interpolated():
 
 
 def test_3d_diagonal_interpolated_interpolated():
-    prof = profile_line(image3d, (0, 0, 0), (2, 2, 2), order=1, linewidth=3, multichannel=False)
-    expected_prof = np.array([0, 0, 0])
-    assert_equal(prof, expected_prof)
-
-
-def test_3d_diagonal_interpolated_interpolated():
-    prof = profile_line(image3d, (0, 1, 1), (1, 1, 1), order=1, linewidth=3, multichannel=False, num_sample_points=3)
-    expected_prof = np.array([0, 0, 0])
-    assert_equal(prof, expected_prof)
-
-# def test_rotate_points():
-#     points = np.asarray([[1, 0, 1]])
-#     direction = [5, 0, 0]
-#     point = [0, 0, 0]
-#     rotated_points = _rotate_points(points, direction, point, num_sample_points=4)
-#     assert_almost_equal(rotated_points, [[1, 0, 1], [1, -1, 0], [1, 0, -1], [1, 1, 0]])
+    prof = profile_line(image3d, (0, 0, 0), (1, 1, 1), order=1, linewidth=3, multichannel=False)
+    expected_prof = np.array([0.25, 0.5193376, 0.4665064])
+    assert_almost_equal(prof, expected_prof)
