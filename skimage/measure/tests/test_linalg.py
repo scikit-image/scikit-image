@@ -68,7 +68,7 @@ def test_rotate_point_around_line_90():
     direction = [0, 0, 1]
     rot_matrix = rotation_matrix(constants.pi / 2, direction)
     transformed_points = affine_transform(rot_matrix, points)
-    assert_almost_equal(transformed_points[0], [0, -1, 0])
+    assert_almost_equal(transformed_points[0], [0, 1, 0])
 
 
 def test_rotate_point_around_line_180():
@@ -106,7 +106,7 @@ def test_rotate_point_around_diag_line_minus_180():
 
 def test_rotate_point_on_line():
     points = np.asarray([[1, 1, 1], [0, 0, 0]])
-    direction = [1, 0, 0]
+    direction = [1, 1, 1]
     rot_matrix = rotation_matrix(constants.pi, direction, points[0])
     transformed_points = affine_transform(rot_matrix, points)
     assert_almost_equal(transformed_points, points)
