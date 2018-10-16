@@ -93,7 +93,7 @@ def test_rotate_point_around_diag_line_180():
     direction = [1, 1, 1]
     rot_matrix = rotation_matrix(constants.pi, direction)
     transformed_points = affine_transform(rot_matrix, points)
-    assert_almost_equal(transformed_points[0], [-1/3, 2/3, 2/3])
+    assert_almost_equal(transformed_points[0], [-1 / 3, 2 / 3, 2 / 3])
 
 
 def test_rotate_point_around_diag_line_minus_180():
@@ -101,7 +101,7 @@ def test_rotate_point_around_diag_line_minus_180():
     direction = [1, 1, 1]
     rot_matrix = rotation_matrix(-constants.pi, direction)
     transformed_points = affine_transform(rot_matrix, points)
-    assert_almost_equal(transformed_points[0], [-1/3, 2/3, 2/3])
+    assert_almost_equal(transformed_points[0], [-1 / 3, 2 / 3, 2 / 3])
 
 
 def test_rotate_point_on_line():

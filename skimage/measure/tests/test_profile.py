@@ -127,21 +127,21 @@ def test_3d_vertical_downward_through_center():
 def test_3d_vertical_downward_through_center_linewidth_even():
     prof = profile_line(image3d, (0, 1, 1), (2, 1, 1),
                         order=0, linewidth=2, multichannel=False)
-    expected_prof = np.repeat(1/2, 3)
+    expected_prof = np.repeat(0.5, 3)
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center_linewidth_odd():
     prof = profile_line(image3d, (0, 1, 1), (2, 1, 1),
                         order=0, linewidth=3, multichannel=False)
-    expected_prof = np.repeat(4/5, 3)
+    expected_prof = np.repeat(0.8, 3)
     assert_equal(prof, expected_prof)
 
 
 def test_3d_vertical_downward_through_center_linewidth_sample_points():
     prof = profile_line(image3d, (0, 1, 1), (2, 1, 1), order=0, linewidth=3,
                         multichannel=False, num_sample_points=3)
-    expected_prof = np.repeat(3/4, 3)
+    expected_prof = np.repeat(0.75, 3)
     assert_equal(prof, expected_prof)
 
 

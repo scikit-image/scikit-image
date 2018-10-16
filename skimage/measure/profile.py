@@ -156,7 +156,9 @@ def _line_profile_coordinates(src, dst, linewidth=1, endpoint=True,
         line_row = np.linspace(src[1], dst[1], num, endpoint=endpoint)
         line_col = np.linspace(src[2], dst[2], num, endpoint=endpoint)
         d_pln, d_row, d_col = unit_dir
-        perp_vector = np.asarray(any_perpendicular_vector_3d([d_pln, d_row, d_col]))
+
+        perp_vector = any_perpendicular_vector_3d([d_pln, d_row, d_col])
+        perp_vector = np.asarray(perp_vector)
         pln_width, row_width, col_width,  = (linewidth - 1) * perp_vector / 2
 
         # return early if linewidth is 1, (no need to rotate points)

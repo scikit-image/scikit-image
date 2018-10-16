@@ -21,9 +21,9 @@ def distance_point_line(point, line_1, line_2):
         The distance between the point and the line in units
 
     """
-    distance = np.linalg.norm(np.cross(np.subtract(point, line_2),
-                                       np.subtract(point, line_1)) /
-                              np.linalg.norm(np.subtract(line_2, line_1)))
+    unit = np.subtract(point, line_1) / np.linalg.norm(
+        np.subtract(line_2, line_1))
+    distance = np.linalg.norm(np.cross(np.subtract(point, line_2), unit))
 
     return np.abs(distance)
 
