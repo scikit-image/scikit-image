@@ -30,5 +30,5 @@ $ pip install -U -r requirements/test.txt
 
 ## Blacklist justification
 
-  * cython 0.28.2 was empircally found to fail tests.
-  * cython 0.29.0 eroneously sets the the `__path__` to `none`. See https://github.com/cython/cython/issues/2662
+  * cython 0.28.2 was empircally found to fail tests when other patch releases of `0.28` didn't
+  * cython 0.29.0 eroneously sets the the `__path__` to `None`. See https://github.com/cython/cython/issues/2662
