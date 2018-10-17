@@ -1,4 +1,4 @@
-Cython>=0.23.4,<0.28.2
+Cython>=0.23.4,!=0.28.2,!=0.29.0
 wheel
 numpy>=1.11
 requirements-parser
