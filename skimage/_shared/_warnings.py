@@ -94,7 +94,7 @@ def expected_warnings(matching):
     Raises a ValueError if any match was not found or an unexpected
     warning was raised.
     Allows for three types of behaviors: `and`, `or`, and `optional` matches.
-    This is done to accomodate different build enviroments or loop conditions
+    This is done to accommodate different build environments or loop conditions
     that may produce different warnings.  The behaviors can be combined.
     If you pass multiple patterns, you get an orderless `and`, where all of the
     warnings must be raised.

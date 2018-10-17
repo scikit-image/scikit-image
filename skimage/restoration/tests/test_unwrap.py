@@ -177,7 +177,7 @@ def test_unwrap_3d_middle_wrap_around():
 
 def test_unwrap_2d_compressed_mask():
     # ValueError when image is masked array with a compressed mask (no masked
-    # elments).  GitHub issue #1346
+    # elements).  GitHub issue #1346
     image = np.ma.zeros((10, 10))
     unwrap = unwrap_phase(image)
     assert_(np.all(unwrap == 0))
