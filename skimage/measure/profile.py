@@ -16,7 +16,7 @@ def profile_line(image, src, dst, linewidth=1,
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
         The end point of the scan line. The destination point is *included*
-        in the profile, in constrast to standard numpy indexing.
+        in the profile, in contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional

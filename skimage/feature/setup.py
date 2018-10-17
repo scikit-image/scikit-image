@@ -20,7 +20,7 @@ def configuration(parent_package='', top_path=None):
             '_hessian_det_appx.pyx',
             '_hoghistogram.pyx',
             ], working_path=base_path)
-    # _haar uses c++, so it must be cythonized seperately
+    # _haar uses c++, so it must be cythonized separately
     cython(['_cascade.pyx',
             '_haar.pyx'], working_path=base_path)
 

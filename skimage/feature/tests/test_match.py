@@ -61,7 +61,7 @@ def test_binary_descriptors_rotation_crosscheck_false():
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 
-    # minkowski takes a different code path, therefore we test it explicitely
+    # minkowski takes a different code path, therefore we test it explicitly
     matches = match_descriptors(descriptors1, descriptors2,
                                 metric='minkowski', cross_check=False)
     assert_equal(matches[:, 0], exp_matches1)

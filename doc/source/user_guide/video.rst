@@ -37,7 +37,7 @@ More information is available in an `FFmpeg tutorial on image sequences
 <http://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
 
 Generating an image sequence has disadvantages: they can be large and unwieldy,
-and generating them can take some time. It is generally preferrable to work
+and generating them can take some time. It is generally preferable to work
 directly with the original video file. For a more direct solution, we need to
 execute FFmpeg or LibAV from Python to read frames from the video.
 FFmpeg and LibAV are two large open-source
