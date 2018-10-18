@@ -35,10 +35,13 @@ def cython(pyx_files, working_path=''):
     except ImportError:
         # If cython is not found, the build will make use of
         # the distributed .c files if present
-        c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
+        c_files = [f.replace('.pyx.in', '').replace('.pyx', '')
+                   for f in pyx_files]
         for cfile in [os.path.join(working_path, f) for f in c_files]:
-            if not os.path.isfile(cfile):
-                raise RuntimeError('Cython >= %s is required to build scikit-image from git checkout' \
+            if not (os.path.isfile(cfile + '.c') or
+                    os.path.isfile(cfile + '.cpp')):
+                raise RuntimeError('Cython >= %s is required to build '
+                                   'scikit-image from git checkout' \
                                    % CYTHON_VERSION)
 
         print("Cython >= %s not found; falling back to pre-built %s" \
