@@ -196,7 +196,6 @@ def test_excludes_random_colors():
     for color in colors:
         assert tuple(color) in [(20, 25), (20, 26), (21, 26)]
 
-
 def test_throws_when_intensity_range_equals_excluded_intensities():
 
     random = np.random.RandomState(42)
@@ -235,7 +234,7 @@ def test_custom_background_color():
                                   intensity_range=intensity_range,
                                   background=(21, 31),
                                   random_seed=42)
-    print(image.shape)
+
     assert set(image[:, :, 0].flatten()) == {20, 21}
     assert set(image[:, :, 1].flatten()) == {30, 31}
 
