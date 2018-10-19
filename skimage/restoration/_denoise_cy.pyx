@@ -193,13 +193,15 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
         double rmse = DBL_MAX
         double norm = (weight + 4 * lam)
 
-    u[1:-1, 1:-1] = image
+    height, width = image.shape[:2]
+    u_height, u_width = u.shape[:2]
+    u[1:u_height-1, 1:u_width-1] = image
 
     # reflect image
-    u[0, 1:-1] = image[1, :]
-    u[1:-1, 0] = image[:, 1]
-    u[-1, 1:-1] = image[-2, :]
-    u[1:-1, -1] = image[:, -2]
+    u[0, 1:u_width-1] = image[1, :]
+    u[1:u_height-1, 0] = image[:, 1]
+    u[u_height-1, 1:u_width-1] = image[height-2, :]
+    u[1:u_height-1, u_width-1] = image[:, width-2]
 
     while i < max_iter and rmse > eps:
 
@@ -276,4 +278,4 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
         rmse = sqrt(rmse / total)
         i += 1
 
-    return np.squeeze(np.asarray(u[1:-1, 1:-1]))
+    return np.squeeze(np.asarray(u[1:u_height-1, 1:u_width-1]))
