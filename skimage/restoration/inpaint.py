@@ -6,6 +6,8 @@ import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
 from ..measure import label
+from multiprocessing import Pool, Array
+from itertools import repeat
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):
@@ -14,7 +16,7 @@ def _get_neighborhood(nd_idx, radius, nd_shape):
     return bounds_lo, bounds_hi
 
 
-def _inpaint_biharmonic_single_channel(mask, out, limits):
+def _inpaint_biharmonic_single_channel(mask, out, limits, processes=1):
     # Initialize sparse matrices
     matrix_unknown = sparse.lil_matrix((np.sum(mask), out.size))
     matrix_known = sparse.lil_matrix((np.sum(mask), out.size))
@@ -25,29 +27,15 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
     # Find masked points and prepare them to be easily enumerate over
     mask_pts = np.array(np.where(mask)).T
 
-    # Iterate over masked points
-    for mask_pt_n, mask_pt_idx in enumerate(mask_pts):
-        # Get bounded neighborhood of selected radius
-        b_lo, b_hi = _get_neighborhood(mask_pt_idx, 2, out.shape)
+    # Iterate over masked points in parallel
+    # Make the matrices shared memory objects
+    pool = Pool(processes)
+    matrix_unknown_s = Array('d', matrix_unknown)
+    matrix_known_s = Array('d', matrix_known)
 
-        # Create biharmonic coefficients ndarray
-        neigh_coef = np.zeros(b_hi - b_lo)
-        neigh_coef[tuple(mask_pt_idx - b_lo)] = 1
-        neigh_coef = laplace(laplace(neigh_coef))
-
-        # Iterate over masked point's neighborhood
-        it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-        coefs, multi_indices = [(coef, it_inner.multi_index) for coef in it_inner]
-        multi_indices = np.vstack(multi_indices)
-        tmp_pt_idxs = multi_indices + b_lo
-        tmp_pt_is = np.ravel_multi_index(tmp_pt_idxs.transpose(), mask.shape)
-        for coef, tmp_pt_idx, tmp_pt_i in zip(coefs, tmp_pt_idxs, tmp_pt_is):
-            if coef == 0:
-                continue
-            if mask[tuple(tmp_pt_idx)]:
-                matrix_unknown[mask_pt_n, tmp_pt_i] = coef
-            else:
-                matrix_known[mask_pt_n, tmp_pt_i] = coef
+    pool.starmap(_modify_matrices_by_point,
+                 zip(mask_pts, range(len(mask_pts)), repeat(out.shape), repeat(mask),
+                     repeat(matrix_unknown_s), repeat(matrix_known_s)), chunksize=100)
 
     # Prepare diagonal matrix
     flat_diag_image = sparse.dia_matrix((out.flatten(), np.array([0])),
@@ -72,6 +60,30 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
         out[tuple(mask_pt_idx)] = result[mask_pt_n]
 
     return out
+
+
+def _modify_matrices_by_point(mask_pt_idx, mask_pt_n, out_shape, mask, matrix_unknown, matrix_known):
+    # Get bounded neighborhood of selected radius
+    b_lo, b_hi = _get_neighborhood(mask_pt_idx, 2, out_shape)
+
+    # Create biharmonic coefficients ndarray
+    neigh_coef = np.zeros(b_hi - b_lo)
+    neigh_coef[tuple(mask_pt_idx - b_lo)] = 1
+    neigh_coef = laplace(laplace(neigh_coef))
+
+    # Iterate over masked point's neighborhood
+    it_inner = np.nditer(neigh_coef, flags=['multi_index'])
+    coefs, multi_indices = [(coef, it_inner.multi_index) for coef in it_inner]
+    multi_indices = np.vstack(multi_indices)
+    tmp_pt_idxs = multi_indices + b_lo
+    tmp_pt_is = np.ravel_multi_index(tmp_pt_idxs.transpose(), mask.shape)
+    for coef, tmp_pt_idx, tmp_pt_i in zip(coefs, tmp_pt_idxs, tmp_pt_is):
+        if coef == 0:
+            continue
+        if mask[tuple(tmp_pt_idx)]:
+            matrix_unknown[mask_pt_n, tmp_pt_i] = coef
+        else:
+            matrix_known[mask_pt_n, tmp_pt_i] = coef
 
 
 def inpaint_biharmonic(image, mask, multichannel=False):
