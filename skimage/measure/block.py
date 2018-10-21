@@ -18,6 +18,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=-1):
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
+    axis : int
+        Specify the axis on which func will be called. Default is -1
 
     Returns
     -------
