@@ -2,7 +2,7 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0):
+def block_reduce(image, block_size, func=np.sum, cval=0, axis=-1):
     """Down-sample image by applying function to local blocks.
 
     Parameters
@@ -74,6 +74,6 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
     out = view_as_blocks(image, block_size)
 
     for i in range(len(out.shape) // 2):
-        out = func(out, axis=-1)
+        out = func(out, axis=axis)
 
     return out
