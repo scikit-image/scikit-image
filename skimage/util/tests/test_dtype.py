@@ -39,7 +39,7 @@ def test_range(dtype, f_and_dt):
 
     f, dt = f_and_dt
 
-    with expected_warnings(['precision loss|sign loss|\A\Z']):
+    with expected_warnings([r'precision loss|sign loss|\A\Z']):
         y = f(x)
 
     omin, omax = dtype_range[dt]
@@ -72,7 +72,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    with expected_warnings(['precision loss|sign loss|\A\Z']):
+    with expected_warnings([r'precision loss|sign loss|\A\Z']):
         y = convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]

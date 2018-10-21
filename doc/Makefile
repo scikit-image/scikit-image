@@ -3,8 +3,8 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j 1
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXOPTS    ?= -j $(shell nproc)
+SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 

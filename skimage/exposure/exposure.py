@@ -457,7 +457,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
                     upper_percentile=99, method='linear'):
-    """Detemine if an image is low contrast.
+    """Determine if an image is low contrast.
 
     Parameters
     ----------

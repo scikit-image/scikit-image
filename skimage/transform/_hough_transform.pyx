@@ -343,7 +343,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Increase the parameter to extract longer lines.
     line_gap : int
         Maximum gap between pixels to still form a line.
-        Increase the parameter to merge broken lines more aggresively.
+        Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
     seed : int, optional

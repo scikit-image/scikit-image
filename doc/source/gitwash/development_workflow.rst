@@ -334,7 +334,7 @@ Rewriting commit history
 
    Do this only for your own feature branches.
 
-There's an embarassing typo in a commit you made? Or perhaps the you
+There's an embarrassing typo in a commit you made? Or perhaps the you
 made several false starts you would like the posterity not to see.
 
 This can be done via *interactive rebasing*.

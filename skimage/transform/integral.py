@@ -5,7 +5,7 @@ from .._shared.utils import warn
 
 
 def integral_image(image):
-    """Integral image / summed area table.
+    r"""Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
     left of it, i.e.:

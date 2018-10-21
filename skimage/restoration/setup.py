@@ -13,11 +13,11 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('restoration', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_unwrap_1d.pyx'], working_path=base_path)
-    cython(['_unwrap_2d.pyx'], working_path=base_path)
-    cython(['_unwrap_3d.pyx'], working_path=base_path)
-    cython(['_denoise_cy.pyx'], working_path=base_path)
-    cython(['_nl_means_denoising.pyx'], working_path=base_path)
+    cython(['_unwrap_1d.pyx',
+            '_unwrap_2d.pyx',
+            '_unwrap_3d.pyx',
+            '_denoise_cy.pyx',
+            '_nl_means_denoising.pyx'], working_path=base_path)
 
     config.add_extension('_unwrap_1d', sources=['_unwrap_1d.c'],
                          include_dirs=[get_numpy_include_dirs()])
