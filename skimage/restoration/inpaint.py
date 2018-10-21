@@ -37,12 +37,13 @@ def _inpaint_biharmonic_single_channel(mask, out, limits):
 
         # Iterate over masked point's neighborhood
         it_inner = np.nditer(neigh_coef, flags=['multi_index'])
-        for coef in it_inner:
+        coefs, multi_indices = [(coef, it_inner.multi_index) for coef in it_inner]
+        multi_indices = np.vstack(multi_indices)
+        tmp_pt_idxs = multi_indices + b_lo
+        tmp_pt_is = np.ravel_multi_index(tmp_pt_idxs.transpose(), mask.shape)
+        for coef, tmp_pt_idx, tmp_pt_i in zip(coefs, tmp_pt_idxs, tmp_pt_is):
             if coef == 0:
                 continue
-            tmp_pt_idx = np.add(b_lo, it_inner.multi_index)
-            tmp_pt_i = np.ravel_multi_index(tmp_pt_idx, mask.shape)
-
             if mask[tuple(tmp_pt_idx)]:
                 matrix_unknown[mask_pt_n, tmp_pt_i] = coef
             else:
