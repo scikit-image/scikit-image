@@ -163,8 +163,8 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
                     "equal, but dimensions along axis {a} not".format(a=axis))
 
     # Determine final size along transformation axes
-    # Note that it might be faster to conmpute Fourier transform in a slightly
-    # larger shape (`fast_shape`) Then, after all fourier transforms are done,
+    # Note that it might be faster to compute Fourier transform in a slightly
+    # larger shape (`fast_shape`). Then, after all fourier transforms are done,
     # we slice back to`final_shape` using `final_slice`.
     final_shape = list(arr1.shape)
     for axis in axes:
@@ -177,7 +177,7 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     # 7)
     fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axes])
 
-    # We use numpy's fft because it allows to leave transform axes unchanged
+    # We use numpy's fft because it allows to leave transform axes unchanged,
     # which is not possible with SciPy's fftn/ifftn
     # E.g. arr shape (2,3,7), transform along axes (0, 1) with shape (4,4)
     # results in arr_fft shape (4,4, 7)
@@ -187,7 +187,7 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0
 
-    # N-dimensional analog to rotation by 180deg is flip over all relevant axes
+    # N-dimensional analog to rotation by 180deg is flip over all relevant axes.
     # See [1] for discussion.
     rotated_moving_image = _flip(moving_image, axes=axes)
     rotated_moving_mask = _flip(moving_mask, axes=axes)
@@ -197,7 +197,7 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     fixed_mask_fft = fft(fixed_mask)
     rotated_moving_mask_fft = fft(rotated_moving_mask)
 
-    # Calculate overlap of masks at every point in the convolution
+    # Calculate overlap of masks at every point in the convolution.
     # Locations with high overlap should not be taken into account.
     number_overlap_masked_px = np.real(
         ifft(rotated_moving_mask_fft * fixed_mask_fft))
@@ -225,7 +225,7 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
 
     denom = np.sqrt(fixed_denom * moving_denom)
 
-    # Slice back to expected convolution shape
+    # Slice back to expected convolution shape.
     numerator = numerator[final_slice]
     denom = denom[final_slice]
     number_overlap_masked_px = number_overlap_masked_px[final_slice]
@@ -238,7 +238,7 @@ def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
         number_overlap_masked_px = _centering(number_overlap_masked_px)
 
     # Pixels where `denom` is very small will introduce large
-    # numbers after division To get around this problem,
+    # numbers after division. To get around this problem,
     # we zero-out problematic pixels.
     tol = 1e3 * eps * np.max(np.abs(denom), axis=axes, keepdims=True)
     nonzero_indices = denom > tol
