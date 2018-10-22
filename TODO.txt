@@ -48,6 +48,9 @@ Other
 * Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
   Remove version restriction in requirements file when appropriate.
   `https://github.com/SimpleITK/SimpleITK/issues/551`
+* When minimum supported version of ``scipy`` reaches 0.18, use 
+  ``scipy.fftpack.next_fast_len`` directly in 
+  ``skimage.feature.masked_register_translation``.
 * Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
   `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
   in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
