@@ -2,7 +2,7 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0, axis=-1):
+def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
     """Down-sample image by applying function to local blocks.
 
     Parameters
@@ -18,8 +18,9 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=-1):
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
-    axis : int
-        Specify the axis on which func will be called. Default is -1
+    axis : array_like
+        Specify the list of axes to reduce over, on which func will be called. If None,
+        it reduces over all axes.
 
     Returns
     -------
