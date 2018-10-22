@@ -89,10 +89,12 @@ def test_cross_correlate_masked_output_shape():
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
 
-    full_xcorr = cross_correlate_masked(arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
+    full_xcorr = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
     assert_equal(full_xcorr.shape, expected_full_shape)
 
-    same_xcorr = cross_correlate_masked(arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
+    same_xcorr = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
     assert_equal(same_xcorr.shape, expected_same_shape)
 
 
@@ -175,12 +177,14 @@ def test_cross_correlate_masked_over_axes():
     with_loop = np.empty_like(arr1, dtype=np.complex)
     for index in range(arr1.shape[-1]):
         with_loop[:, :, index] = cross_correlate_masked(arr1[:, :, index],
-                                      arr2[:, :, index],
-                                      m1[:, :, index],
-                                      m2[:, :, index],
-                                      axes=(0, 1), mode='same')
+                                                        arr2[:, :, index],
+                                                        m1[:, :, index],
+                                                        m2[:, :, index],
+                                                        axes=(0, 1), 
+                                                        mode='same')
 
-    over_axes = cross_correlate_masked(arr1, arr2, m1, m2, axes=(0, 1), mode='same')
+    over_axes = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1), mode='same')
 
     testing.assert_array_almost_equal(with_loop, over_axes)
 

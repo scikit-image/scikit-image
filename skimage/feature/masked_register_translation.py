@@ -81,8 +81,9 @@ def masked_register_translation(
     # cross-correlation
     size_mismatch = np.array(target_image.shape) - np.array(src_image.shape)
 
-    xcorr = cross_correlate_masked(target_image, src_image, target_mask, src_mask,
-                 axes=(0, 1), mode='full', overlap_ratio=overlap_ratio)
+    xcorr = cross_correlate_masked(target_image, src_image, 
+                 target_mask, src_mask, axes=(0, 1), mode='full', 
+                 overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
     maxima = np.transpose(np.nonzero(xcorr == xcorr.max()))
@@ -91,7 +92,8 @@ def masked_register_translation(
     return -shifts + (size_mismatch / 2)
 
 
-def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
+def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), 
+                           overlap_ratio=3 / 10):
     """
     Masked normalized cross-correlation between arrays.
 
