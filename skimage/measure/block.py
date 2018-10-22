@@ -80,7 +80,15 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
 
     out = view_as_blocks(image, block_size)
 
-    for i in range(len(out.shape) // 2):
-        out = func(out, axis=axis)
+    if axis is None:
+        for i in range(len(out.shape) // 2):
+            out = func(out, axis=-1)
+
+    else:
+        np_axis = np.array(axis)
+        np_axis -= len(out.shape) // 2
+        np_axis = np.sort(np_axis)
+        for ax in np_axis:
+            out = func(out, axis=ax)
 
     return out
