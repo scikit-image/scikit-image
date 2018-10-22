@@ -58,6 +58,10 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=-1):
         raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
 
+    if axis is not None and len(axis) > len(block_size):
+        raise ValueError("`axis` can not have more indexes than the ones in "
+                         "the number of dims in `block_size`.")
+
     pad_width = []
     for i in range(len(block_size)):
         if block_size[i] < 1:
