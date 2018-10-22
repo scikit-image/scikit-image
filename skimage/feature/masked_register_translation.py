@@ -1,5 +1,5 @@
 """
-Implementation of the masked normalized cross-correlation (MNXC)
+Implementation of the masked normalized cross-correlation.
 
 Based on the following publication:
 D. Padfield. Masked object registration in the Fourier domain.
@@ -81,7 +81,7 @@ def masked_register_translation(
     # cross-correlation
     size_mismatch = np.array(target_image.shape) - np.array(src_image.shape)
 
-    xcorr = mnxc(target_image, src_image, target_mask, src_mask,
+    xcorr = cross_correlate_masked(target_image, src_image, target_mask, src_mask,
                  axes=(0, 1), mode='full', overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
@@ -91,9 +91,9 @@ def masked_register_translation(
     return -shifts + (size_mismatch / 2)
 
 
-def mnxc(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
+def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), overlap_ratio=3 / 10):
     """
-    Masked normalized cross-correlation (MNXC) between arrays.
+    Masked normalized cross-correlation between arrays.
 
     Parameters
     ----------
