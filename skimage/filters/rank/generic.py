@@ -92,28 +92,28 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     is_8bit = image.dtype in (np.uint8, np.int8)
 
     if is_8bit:
-        max_bin = 256
+        n_bins = 256
     else:
         # Convert to a Python int to avoid the potential overflow when we add
         # 1 to the maximum of the image.
-        max_bin = int(max(3, image.max())) + 1
+        n_bins = int(max(3, image.max())) + 1
 
-    if max_bin > 2**10:
+    if n_bins > 2**10:
         warn("Bad rank filter performance is expected due to a "
              "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(max_bin, np.log2(max_bin)))
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)))
 
-    return image, selem, out, mask, max_bin
+    return image, selem, out, mask, n_bins
 
 
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype)
+    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+                                                    out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
+         out=out, n_bins=n_bins)
 
     return out.reshape(out.shape[:2])
 
@@ -121,12 +121,12 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None, pixel_size=1):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype,
-                                                     pixel_size=pixel_size)
+    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+                                                    out_dtype,
+                                                    pixel_size=pixel_size)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
+         out=out, n_bins=n_bins)
 
     return out
 

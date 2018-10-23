@@ -52,7 +52,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 signed char shift_x, signed char shift_y,
                 double p0, double p1,
                 Py_ssize_t s0, Py_ssize_t s1,
-                Py_ssize_t max_bin) except *:
+                Py_ssize_t n_bins) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
     use kernel function return value for output image.
     """
@@ -73,7 +73,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     assert centre_c < scols
 
 
-    cdef Py_ssize_t mid_bin = max_bin / 2
+    cdef Py_ssize_t mid_bin = n_bins / 2
 
     # define pointers to the data
     cdef char* mask_data = &mask[0, 0]
@@ -85,8 +85,8 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef double pop = 0
 
     # the current local histogram distribution
-    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(max_bin * sizeof(Py_ssize_t))
-    for i in range(max_bin):
+    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(n_bins * sizeof(Py_ssize_t))
+    for i in range(n_bins):
         histo[i] = 0
 
     # these lists contain the relative pixel row and column for each of the 4
@@ -152,7 +152,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
         r = 0
         c = 0
-        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin, mid_bin,
+        kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins, mid_bin,
                p0, p1, s0, s1)
 
         # main loop
@@ -173,7 +173,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     if is_in_mask(rows, cols, rr, cc, mask_data):
                         histogram_decrement(histo, &pop, image[rr, cc])
 
-                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
                        mid_bin, p0, p1, s0, s1)
 
             r += 1  # pass to the next row
@@ -193,7 +193,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+            kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
                    mid_bin, p0, p1, s0, s1)
 
             # ---> east to west
@@ -210,7 +210,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     if is_in_mask(rows, cols, rr, cc, mask_data):
                         histogram_decrement(histo, &pop, image[rr, cc])
 
-                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], max_bin,
+                kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
                        mid_bin, p0, p1, s0, s1)
 
             r += 1  # pass to the next row
@@ -231,7 +231,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
-                   max_bin, mid_bin, p0, p1, s0, s1)
+                   n_bins, mid_bin, p0, p1, s0, s1)
 
         # release memory allocated by malloc
         free(se_e_r)

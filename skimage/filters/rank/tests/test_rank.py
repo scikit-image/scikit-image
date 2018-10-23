@@ -9,7 +9,7 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, xfail, arch32
+from skimage._shared.testing import test_parallel, xfail, arch32, parametrize
 
 
 class TestRank():
