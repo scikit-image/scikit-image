@@ -452,6 +452,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         del filled
     labels = np.atleast_3d(labels)
 
+    # No unlabeled pixel, so nothing to do
+    if (labels == 0).sum() == 0:
+        labels = np.squeeze(labels)
+        labels[inds_isolated_seeds] = isolated_values
+        return labels
 
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
