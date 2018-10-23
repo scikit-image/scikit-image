@@ -10,12 +10,13 @@ __all__ = ['register_affine']
 
 def _p_to_matrix(p):
     """
-    Converts a transformation in form of (r, tc, tr) into a 3x3 transformation matrix
+    Converts a transformation of the first 2 rows of a 3x3 transformation matrix
+    to the full matrix
 
     Parameters
     ----------
     param : array
-        Input array giving the translation and rotation of an image
+        Input array giving the affine transformation paramaters
 
     Returns
     -------
@@ -40,7 +41,8 @@ def _p_to_matrix(p):
 
 def _matrix_to_p(matrix):
     """
-    Converts a 3x3 transformation matrix into a transformation in form of (r, tc, tr)
+    Converts a 3x3 transformation matrix into a transformation in form of first
+    2 rows unravelled
 
     Parameters
     ----------
@@ -50,7 +52,7 @@ def _matrix_to_p(matrix):
     Returns
     -------
     param : array
-        Input array giving the translation and rotation of an image
+        Input array giving the affine transformation of an image
 
     """
 
