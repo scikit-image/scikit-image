@@ -398,17 +398,21 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
 
     for i in range(1, n_bins):
         P = histo[i]
+        if P == 0:
+            continue
+
         q1 = q1 + P
+
         if q1 == pop:
             break
-        if q1 > 0:
-            mu1 = mu1 + i * P
-            mu2 = mu - mu1
-            t = (pop - q1) * mu1 - mu2 * q1
-            sigma_b = (t * t) / (q1 * (pop - q1))
-            if sigma_b > max_sigma_b:
-                max_sigma_b = sigma_b
-                max_i = i
+
+        mu1 = mu1 + i * P
+        mu2 = mu - mu1
+        t = (pop - q1) * mu1 - mu2 * q1
+        sigma_b = (t * t) / (q1 * (pop - q1))
+        if sigma_b > max_sigma_b:
+            max_sigma_b = sigma_b
+            max_i = i
 
     out[0] = <dtype_t_out>max_i
 
