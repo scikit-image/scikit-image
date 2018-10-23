@@ -14,6 +14,23 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, arch32, parametrize, xfail
 from pytest import param
 
+
+def test_otsu_edge_case():
+    # This is an edge case that causes OTSU to appear to misbehave
+    # Pixel [1, 1] may take a value of of 41 or 81. Both should be considered
+    # valid. The value will change depending on the particular implementation
+    # of OTSU. It also may depend on how the compiler chooses to optimize
+    # the order of the operations.
+    img = np.array([[  0,  41,   0],
+                    [ 30,  81, 106],
+                    [  0, 147,   0]], dtype=np.uint8)
+    selem = np.array([[0, 1, 0],
+                      [1, 1, 1],
+                      [0, 1, 0]], dtype=np.uint8)
+    otsu = rank.otsu(img, selem)
+    assert otsu[1, 1] in [41, 81]
+
+
 class TestRank():
     def setup(self):
         np.random.seed(0)
