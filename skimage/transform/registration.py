@@ -59,8 +59,13 @@ def _matrix_to_p(matrix):
     return (matrix[0][0], matrix[0][1], matrix[0][2], matrix[1][0], matrix[1][1], matrix[1][2])
 
 
-def register_affine(reference, target, *, cost=compare_mse, nlevels=7,
+def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
                     iter_callback=lambda img, matrix: None):
+
+    if nlevels is None:
+        min_dim = min(reference.shape)
+        max_level = max(int(np.log2([min_dim])[0]) - 2, 2)
+        nlevels = min(max_level, 7)
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
