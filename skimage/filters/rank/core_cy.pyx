@@ -72,8 +72,6 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     assert centre_r < srows
     assert centre_c < scols
 
-    # add 1 to ensure maximum value is included in histogram -> range(max_bin)
-    max_bin += 1
 
     cdef Py_ssize_t mid_bin = max_bin / 2
 
