@@ -1,5 +1,5 @@
 from numpy cimport uint8_t, uint16_t, double_t
-
+cimport numpy as cnp
 
 ctypedef fused dtype_t:
     uint8_t
@@ -19,8 +19,8 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
-                char[:, ::1] selem,
-                char[:, ::1] mask,
+                cnp.uint8_t[:, ::1] selem,
+                cnp.uint8_t[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
                 signed char shift_x, signed char shift_y,
                 double p0, double p1,

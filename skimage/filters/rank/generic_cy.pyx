@@ -436,8 +436,8 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
 
 
 def _autolevel(dtype_t[:, ::1] image,
-               char[:, ::1] selem,
-               char[:, ::1] mask,
+               cnp.uint8_t[:, ::1] selem,
+               cnp.uint8_t[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -446,8 +446,8 @@ def _autolevel(dtype_t[:, ::1] image,
 
 
 def _bottomhat(dtype_t[:, ::1] image,
-               char[:, ::1] selem,
-               char[:, ::1] mask,
+               cnp.uint8_t[:, ::1] selem,
+               cnp.uint8_t[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -456,8 +456,8 @@ def _bottomhat(dtype_t[:, ::1] image,
 
 
 def _equalize(dtype_t[:, ::1] image,
-              char[:, ::1] selem,
-              char[:, ::1] mask,
+              cnp.uint8_t[:, ::1] selem,
+              cnp.uint8_t[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -466,8 +466,8 @@ def _equalize(dtype_t[:, ::1] image,
 
 
 def _gradient(dtype_t[:, ::1] image,
-              char[:, ::1] selem,
-              char[:, ::1] mask,
+              cnp.uint8_t[:, ::1] selem,
+              cnp.uint8_t[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -476,8 +476,8 @@ def _gradient(dtype_t[:, ::1] image,
 
 
 def _maximum(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
-             char[:, ::1] mask,
+             cnp.uint8_t[:, ::1] selem,
+             cnp.uint8_t[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -486,8 +486,8 @@ def _maximum(dtype_t[:, ::1] image,
 
 
 def _mean(dtype_t[:, ::1] image,
-          char[:, ::1] selem,
-          char[:, ::1] mask,
+          cnp.uint8_t[:, ::1] selem,
+          cnp.uint8_t[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -496,8 +496,8 @@ def _mean(dtype_t[:, ::1] image,
 
 
 def _geometric_mean(dtype_t[:, ::1] image,
-                    char[:, ::1] selem,
-                    char[:, ::1] mask,
+                    cnp.uint8_t[:, ::1] selem,
+                    cnp.uint8_t[:, ::1] mask,
                     dtype_t_out[:, :, ::1] out,
                     signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -506,8 +506,8 @@ def _geometric_mean(dtype_t[:, ::1] image,
 
 
 def _subtract_mean(dtype_t[:, ::1] image,
-                   char[:, ::1] selem,
-                   char[:, ::1] mask,
+                   cnp.uint8_t[:, ::1] selem,
+                   cnp.uint8_t[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
                    signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -516,8 +516,8 @@ def _subtract_mean(dtype_t[:, ::1] image,
 
 
 def _median(dtype_t[:, ::1] image,
-            char[:, ::1] selem,
-            char[:, ::1] mask,
+            cnp.uint8_t[:, ::1] selem,
+            cnp.uint8_t[:, ::1] mask,
             dtype_t_out[:, :, ::1] out,
             signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -526,8 +526,8 @@ def _median(dtype_t[:, ::1] image,
 
 
 def _minimum(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
-             char[:, ::1] mask,
+             cnp.uint8_t[:, ::1] selem,
+             cnp.uint8_t[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -536,8 +536,8 @@ def _minimum(dtype_t[:, ::1] image,
 
 
 def _enhance_contrast(dtype_t[:, ::1] image,
-                      char[:, ::1] selem,
-                      char[:, ::1] mask,
+                      cnp.uint8_t[:, ::1] selem,
+                      cnp.uint8_t[:, ::1] mask,
                       dtype_t_out[:, :, ::1] out,
                       signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -546,8 +546,8 @@ def _enhance_contrast(dtype_t[:, ::1] image,
 
 
 def _modal(dtype_t[:, ::1] image,
-           char[:, ::1] selem,
-           char[:, ::1] mask,
+           cnp.uint8_t[:, ::1] selem,
+           cnp.uint8_t[:, ::1] mask,
            dtype_t_out[:, :, ::1] out,
            signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -556,8 +556,8 @@ def _modal(dtype_t[:, ::1] image,
 
 
 def _pop(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
-         char[:, ::1] mask,
+         cnp.uint8_t[:, ::1] selem,
+         cnp.uint8_t[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -566,8 +566,8 @@ def _pop(dtype_t[:, ::1] image,
 
 
 def _sum(dtype_t[:, ::1] image,
-         char[:, ::1] selem,
-         char[:, ::1] mask,
+         cnp.uint8_t[:, ::1] selem,
+         cnp.uint8_t[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -576,8 +576,8 @@ def _sum(dtype_t[:, ::1] image,
 
 
 def _threshold(dtype_t[:, ::1] image,
-               char[:, ::1] selem,
-               char[:, ::1] mask,
+               cnp.uint8_t[:, ::1] selem,
+               cnp.uint8_t[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -586,8 +586,8 @@ def _threshold(dtype_t[:, ::1] image,
 
 
 def _tophat(dtype_t[:, ::1] image,
-            char[:, ::1] selem,
-            char[:, ::1] mask,
+            cnp.uint8_t[:, ::1] selem,
+            cnp.uint8_t[:, ::1] mask,
             dtype_t_out[:, :, ::1] out,
             signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -596,8 +596,8 @@ def _tophat(dtype_t[:, ::1] image,
 
 
 def _noise_filter(dtype_t[:, ::1] image,
-                  char[:, ::1] selem,
-                  char[:, ::1] mask,
+                  cnp.uint8_t[:, ::1] selem,
+                  cnp.uint8_t[:, ::1] mask,
                   dtype_t_out[:, :, ::1] out,
                   signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -606,8 +606,8 @@ def _noise_filter(dtype_t[:, ::1] image,
 
 
 def _entropy(dtype_t[:, ::1] image,
-             char[:, ::1] selem,
-             char[:, ::1] mask,
+             cnp.uint8_t[:, ::1] selem,
+             cnp.uint8_t[:, ::1] mask,
              dtype_t_out[:, :, ::1] out,
              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -616,8 +616,8 @@ def _entropy(dtype_t[:, ::1] image,
 
 
 def _otsu(dtype_t[:, ::1] image,
-          char[:, ::1] selem,
-          char[:, ::1] mask,
+          cnp.uint8_t[:, ::1] selem,
+          cnp.uint8_t[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
@@ -626,8 +626,8 @@ def _otsu(dtype_t[:, ::1] image,
 
 
 def _windowed_hist(dtype_t[:, ::1] image,
-                   char[:, ::1] selem,
-                   char[:, ::1] mask,
+                   cnp.uint8_t[:, ::1] selem,
+                   cnp.uint8_t[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
                    signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
