@@ -111,7 +111,7 @@ def test_rag_error():
     labels[5:, :] = 1
     with testing.raises(ValueError):
         graph.rag_mean_color(img, labels,
-                             2, 'non existant mode')
+                             2, 'non existent mode')
 
 
 def _weight_mean_color(graph, src, dst, n):

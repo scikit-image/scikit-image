@@ -52,28 +52,28 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
     image = ndi.gaussian_filter(image, sigma=[sigma, sigma, 0])
+    height, width = image.shape[:2]
 
     # compute edge weights in 8 connectivity:
-    down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:-1, :, :])
-    	*(image[1:, :, :] - image[:-1, :, :]), axis=-1))
-    right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :-1, :])
-    	*(image[:, 1:, :] - image[:, :-1, :]), axis=-1))
-    dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:-1, :-1, :])
-	*(image[1:, 1:, :] - image[:-1, :-1, :]), axis=-1))
-    uright_cost = np.sqrt(np.sum((image[1:, :-1, :] - image[:-1, 1:, :])
-    	*(image[1:, :-1, :] - image[:-1, 1:, :]), axis=-1))
+    down_cost = np.sqrt(np.sum((image[1:, :, :] - image[:height-1, :, :]) *
+    	                         (image[1:, :, :] - image[:height-1, :, :]), axis=-1))
+    right_cost = np.sqrt(np.sum((image[:, 1:, :] - image[:, :width-1, :]) *
+    	                          (image[:, 1:, :] - image[:, :width-1, :]), axis=-1))
+    dright_cost = np.sqrt(np.sum((image[1:, 1:, :] - image[:height-1, :width-1, :]) *
+	                               (image[1:, 1:, :] - image[:height-1, :width-1, :]), axis=-1))
+    uright_cost = np.sqrt(np.sum((image[1:, :width-1, :] - image[:height-1, 1:, :]) *
+    	                           (image[1:, :width-1, :] - image[:height-1, 1:, :]), axis=-1))
     cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([
     	right_cost.ravel(), down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
 
     # compute edges between pixels:
-    height, width = image.shape[:2]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
             = np.arange(width * height, dtype=np.intp).reshape(height, width)
-    down_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
-    right_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
-    dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
-    uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
+    down_edges  = np.c_[segments[1:, :].ravel(), segments[:height-1, :].ravel()]
+    right_edges = np.c_[segments[:, 1:].ravel(), segments[:, :width-1].ravel()]
+    dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:height-1, :width-1].ravel()]
+    uright_edges = np.c_[segments[:height-1, 1:].ravel(), segments[1:, :width-1].ravel()]
     cdef cnp.ndarray[cnp.intp_t, ndim=2] edges \
             = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
 

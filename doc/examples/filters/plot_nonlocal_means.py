@@ -9,7 +9,7 @@ average of a selection of other pixels values: small patches centered on the
 other pixels are compared to the patch centered on the pixel of interest, and
 the average is performed only for pixels that have patches close to the current
 patch. As a result, this algorithm can restore well textures, that would be
-blurred by other denoising algoritm.
+blurred by other denoising algorithm.
 
 When the `fast_mode` argument is `False`, a spatial Gaussian weighting is
 applied to the patches when computing patch distances.  When `fast_mode` is

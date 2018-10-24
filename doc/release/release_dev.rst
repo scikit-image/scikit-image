@@ -19,6 +19,8 @@ New Features
 - unsharp mask filtering (#2772)
 - New options ``connectivity``, ``indices`` and ``allow_borders`` for
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
+- Image translation registration for masked data 
+  (``skimage.feature.masked_register_translation``)
 
 
 Improvements
@@ -40,7 +42,7 @@ API Changes
   removed. Use parameter ``data_range`` instead.
 - imageio is now the preferred plugin for reading and writing images.
 - imageio is now a dependency of scikit-image.
-- ``rectangular_grid`` now returns a tuple instead of a list for compatiblity
+- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
   with numpy 1.15
 - ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
   base10 instead of the natural logarithm as discussed in issue #2995.

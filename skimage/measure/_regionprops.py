@@ -340,7 +340,7 @@ class _RegionProperties(object):
         value = getattr(self, key, None)
         if value is not None:
             return value
-        else:  # backwards compatability
+        else:  # backwards compatibility
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):

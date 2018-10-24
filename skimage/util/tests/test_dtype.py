@@ -132,9 +132,9 @@ def test_clobber():
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
 
-            with warnings.catch_warnings():
-                # UserWarning for possible precision loss, expected
-                warnings.simplefilter('ignore', UserWarning)
+            # UserWarning for possible precision loss, expected
+            with expected_warnings([r'Possible precision loss|\A\Z',
+                                    r'Possible sign loss|\A\Z']):
                 img_in = func_input_type(img)
                 img_in_before = img_in.copy()
                 img_out = func_output_type(img_in)

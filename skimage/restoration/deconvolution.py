@@ -78,8 +78,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        \Lambda_H^\dagger F y
 
     where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
-    Fourier transfroms respectively, :math:`\Lambda_H` the transfer
-    function (or the Fourier transfrom of the PSF, see [Hunt] below)
+    Fourier transforms respectively, :math:`\Lambda_H` the transfer
+    function (or the Fourier transform of the PSF, see [Hunt] below)
     and :math:`\Lambda_D` the filter to penalize the restored image
     frequencies (Laplacian by default, that is penalization of high
     frequency). The parameter :math:`\lambda` tunes the balance
@@ -260,7 +260,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     areg2 = np.abs(reg) ** 2
     atf2 = np.abs(trans_fct) ** 2
 
-    # The Fourier transfrom may change the image.size attribut, so we
+    # The Fourier transform may change the image.size attribute, so we
     # store it.
     if is_real:
         data_spectrum = uft.urfft2(image.astype(np.float))

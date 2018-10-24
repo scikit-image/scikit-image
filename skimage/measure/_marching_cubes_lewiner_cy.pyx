@@ -942,7 +942,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
     cdef int nt
     cdef int case, config, subconfig
 
-    # Unfortunately specifying a step in range() siginificantly degrades
+    # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
     # we have:  max_x = Nx_bound + st + st - 1
     #       ->  Nx_bound = max_allowable_x + 1 - 2 * st

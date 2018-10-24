@@ -33,7 +33,7 @@ def histogram(image, nbins=256):
     ----------
     image : array
         Input image.
-    nbins : int
+    nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
@@ -96,7 +96,7 @@ def cumulative_distribution(image, nbins=256):
     ----------
     image : array
         Image array.
-    nbins : int
+    nbins : int, optional
         Number of bins for image histogram.
 
     Returns
@@ -175,7 +175,7 @@ def intensity_range(image, range_values='image', clip_negative=False):
     ----------
     image : array
         Input image.
-    range_values : str or 2-tuple
+    range_values : str or 2-tuple, optional
         The image intensity range is configured by this parameter.
         The possible values for this parameter are enumerated below.
 
@@ -192,7 +192,7 @@ def intensity_range(image, range_values='image', clip_negative=False):
             intensity range explicitly. This option is included for functions
             that use `intensity_range` to support all desired range types.
 
-    clip_negative : bool
+    clip_negative : bool, optional
         If True, clip the negative range (i.e. return 0 for min intensity)
         even if the image dtype allows negative values.
     """
@@ -222,7 +222,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     ----------
     image : array
         Image array.
-    in_range, out_range : str or 2-tuple
+    in_range, out_range : str or 2-tuple, optional
         Min and max intensity values of input and output image.
         The possible values for this parameter are enumerated below.
 
@@ -316,9 +316,9 @@ def adjust_gamma(image, gamma=1, gain=1):
     ----------
     image : ndarray
         Input image.
-    gamma : float
+    gamma : float, optional
         Non negative real number. Default value is 1.
-    gain : float
+    gain : float, optional
         The constant multiplier. Default value is 1.
 
     Returns
@@ -374,9 +374,9 @@ def adjust_log(image, gain=1, inv=False):
     ----------
     image : ndarray
         Input image.
-    gain : float
+    gain : float, optional
         The constant multiplier. Default value is 1.
-    inv : float
+    inv : float, optional
         If True, it performs inverse logarithmic correction,
         else correction will be logarithmic. Defaults to False.
 
@@ -418,13 +418,13 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     ----------
     image : ndarray
         Input image.
-    cutoff : float
+    cutoff : float, optional
         Cutoff of the sigmoid function that shifts the characteristic curve
         in horizontal direction. Default value is 0.5.
-    gain : float
+    gain : float, optional
         The constant multiplier in exponential's power of sigmoid function.
         Default value is 10.
-    inv : bool
+    inv : bool, optional
         If True, returns the negative sigmoid correction. Defaults to False.
 
     Returns
@@ -457,7 +457,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
                     upper_percentile=99, method='linear'):
-    """Detemine if an image is low contrast.
+    """Determine if an image is low contrast.
 
     Parameters
     ----------

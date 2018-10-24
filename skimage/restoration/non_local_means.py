@@ -70,7 +70,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     The computing time depends only weakly on the patch size, thanks to
     the computation of the integral of patches distances for a given
     shift, that reduces the number of operations [1]_. Therefore, this
-    algorithm executes faster than the classic algorith
+    algorithm executes faster than the classic algorithm
     (``fast_mode=False``), at the expense of using twice as much memory.
     This implementation has been proven to be more efficient compared to
     other alternatives, see e.g. [3]_.
