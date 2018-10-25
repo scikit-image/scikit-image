@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.linalg
 from scipy.interpolate import RectBivariateSpline
 from ..util import img_as_float
 from ..filters import sobel
@@ -40,7 +39,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Explicit time stepping parameter.
     bc : {'periodic', 'free', 'fixed'}, optional
         Boundary conditions for worm. 'periodic' attaches the two ends of the
-        snake, 'fixed' holds the end-points in place, and'free' allows free
+        snake, 'fixed' holds the end-points in place, and 'free' allows free
         movement of the ends. 'fixed' and 'free' can be combined by parsing
         'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
         yields same behaviour as 'fixed' and 'free', respectively.
@@ -76,13 +75,13 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     Initialize spline:
 
-    >>> s = np.linspace(0, 2*np.pi,100)
-    >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
+    >>> s = np.linspace(0, 2*np.pi, 100)
+    >>> init = 50 * np.array([np.cos(s), np.sin(s)]).T + 50
 
     Fit spline to image:
 
     >>> snake = active_contour(img, init, w_edge=0, w_line=1) #doctest: +SKIP
-    >>> dist = np.sqrt((45-snake[:, 0])**2 +(35-snake[:, 1])**2) #doctest: +SKIP
+    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2) #doctest: +SKIP
     >>> int(np.mean(dist)) #doctest: +SKIP
     25
 
