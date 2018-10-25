@@ -8,7 +8,7 @@ import numpy as np
 from libc.math cimport exp, fabs, sqrt
 from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
-from ..util import img_as_float
+from ..util import img_as_float64
 
 
 cdef inline double _gaussian_weight(double sigma_sqr, double value):
@@ -78,7 +78,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(img_as_float64(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -163,7 +163,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
 
 def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
                        char isotropic):
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(img_as_float64(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
