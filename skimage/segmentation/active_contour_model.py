@@ -22,15 +22,15 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     image : (N, M) or (N, M, 3) ndarray
         Input image.
     snake : (N, 2) ndarray
-        Initialisation coordinates of snake. For periodic snakes, it should
-        not include duplicate endpoints.
+        Initial snake coordinates. For periodic boundary conditions, endpoints
+        must not be duplicated.
     alpha : float, optional
         Snake length shape parameter. Higher values makes snake contract
         faster.
     beta : float, optional
         Snake smoothness shape parameter. Higher values makes snake smoother.
     w_line : float, optional
-        Controls attraction to brightness. Use negative values to attract to
+        Controls attraction to brightness. Use negative values to attract toward
         dark regions.
     w_edge : float, optional
         Controls attraction to edges. Use negative values to repel snake from
