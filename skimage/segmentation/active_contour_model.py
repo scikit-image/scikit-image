@@ -126,11 +126,11 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                img.T, kx=2, ky=2, s=0)
 
     x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
-    xsave = np.empty((convergence_order, len(x)))
-    ysave = np.empty((convergence_order, len(x)))
+    n = len(x)
+    xsave = np.empty((convergence_order, n))
+    ysave = np.empty((convergence_order, n))
 
     # Build snake shape matrix for Euler equation
-    n = len(x)
     a = np.roll(np.eye(n), -1, axis=0) + \
         np.roll(np.eye(n), -1, axis=1) - \
         2*np.eye(n)  # second order derivative, central difference
