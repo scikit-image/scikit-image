@@ -50,7 +50,7 @@ cdef inline void nearest_neighbour_interpolation(
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : np_float
+    r, c : float32 or float64
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
@@ -59,7 +59,7 @@ cdef inline void nearest_neighbour_interpolation(
 
     Returns
     -------
-    value : np_float
+    value : float32 or float64
         Interpolated value.
 
     """
@@ -80,7 +80,7 @@ cdef inline void bilinear_interpolation(
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : np_float
+    r, c : float32 or float64
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
@@ -123,7 +123,7 @@ cdef inline np_floats quadratic_interpolation(np_floats x,
 
     Parameters
     ----------
-    x : np_float
+    x : float32 or float64
         Position in the interval [0, 2].
     f : real numeric[3]
         Function values at positions [0, 2].
@@ -153,7 +153,7 @@ cdef inline void biquadratic_interpolation(
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : np_float
+    r, c : float32 or float64
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
@@ -193,14 +193,14 @@ cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) nog
 
     Parameters
     ----------
-    x : np_float
+    x : float32 or float64
         Position in the interval [0, 1].
     f : real numeric[4]
         Function values at positions [-1, 0, 1, 2].
 
     Returns
     -------
-    value : np_float
+    value : float32 or float64
         Interpolated value to be used in bicubic_interpolation.
 
     """
@@ -227,7 +227,7 @@ cdef inline void bicubic_interpolation(np_real_numeric* image,
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : np_float
+    r, c : float32 or float64
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
