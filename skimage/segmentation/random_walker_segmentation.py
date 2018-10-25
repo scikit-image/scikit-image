@@ -456,7 +456,24 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if (labels == 0).sum() == 0:
         labels = np.squeeze(labels)
         labels[inds_isolated_seeds] = isolated_values
-        return labels
+        warn('Random walker only segments unlabeled areas, where '
+        'labels == 0. No zero valued areas in labels were '
+        'found. Returning provided labels.')
+
+        if return_full_prob:
+            # Find and iterate over valid labels
+            unique_labels = np.unique(labels)
+            unique_labels = unique_labels[unique_labels > 0]
+
+            out_labels = np.empty(labels.shape + (len(unique_labels),),
+                                  dtype=np.bool)
+            for n, i in enumerate(unique_labels):
+                out_labels[..., n] = (labels == i)
+
+        else:
+            out_labels = labels
+        return out_labels
+
 
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,

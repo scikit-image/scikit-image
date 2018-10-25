@@ -374,7 +374,8 @@ def test_nothing_to_do():
 		markers[y][x] = 1
 
 	markers[image == 0] = -1
-	output_labels = random_walker(image, markers)
+	with expected_warnings(['"cg" mode' + '|' + SCIPY_EXPECTED]):
+		output_labels = random_walker(image, markers, mode='cg')
 	assert np.all(output_labels[markers == 1] == 1)
 	# Here 0-labeled pixels could not be determined (no connexion to seed)
 	assert np.all(output_labels[markers == 0] == -1) 
