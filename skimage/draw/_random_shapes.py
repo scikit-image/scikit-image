@@ -206,7 +206,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
 
     """
 
-    intensity_range = np.asarray(intensity_range)
+    intensity_range = np.squeeze(np.asarray(intensity_range))
     exclude = np.ascontiguousarray(exclude)
 
     if intensity_range.ndim == 1:
