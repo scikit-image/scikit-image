@@ -222,7 +222,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
             raise ValueError(msg)
         else:
             return colors
-    color_candidates = [np.arange(r[0], r[1]+1) for r in intensity_range]
+    color_candidates = [np.arange(r[0], r[1] + 1) for r in intensity_range]
     color_candidates = [np.setdiff1d(c, e) for c, e
                         in zip(color_candidates, exclude)]
     colors = np.transpose([random.choice(c, size=num_colors)
