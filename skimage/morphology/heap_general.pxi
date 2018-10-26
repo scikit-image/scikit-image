@@ -126,7 +126,7 @@ cdef inline void heappush(Heap *heap, Heapitem *new_elem):
 
     # restore heap invariant, all parents <= children
     while child > 0:
-        parent = (child + 1) / 2 - 1 # __parent(i)
+        parent = (child + 1) // 2 - 1 # __parent(i)
 
         if smaller(heap.ptrs[child], heap.ptrs[parent]):
             swap(parent, child, heap)

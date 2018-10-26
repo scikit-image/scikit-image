@@ -300,12 +300,12 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef double dceil_prev = 0
 
     cdef char cmethod
-    if method == 'bresenham':
+    if method == b'bresenham':
         d = 3 - 2 * radius
-        cmethod = 'b'
-    elif method == 'andres':
+        cmethod = b'b'
+    elif method == b'andres':
         d = radius - 1
-        cmethod = 'a'
+        cmethod = b'a'
     else:
         raise ValueError('Wrong method')
 
@@ -313,14 +313,14 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
         rr.extend([r, -r, r, -r, c, -c, c, -c])
         cc.extend([c, c, -c, -c, r, r, -r, -r])
 
-        if cmethod == 'b':
+        if cmethod == b'b':
             if d < 0:
                 d += 4 * c + 6
             else:
                 d += 4 * (c - r) + 10
                 r -= 1
             c += 1
-        elif cmethod == 'a':
+        elif cmethod == b'a':
             if d >= 2 * (c - 1):
                 d = d - 2 * c
                 c = c + 1

@@ -233,7 +233,7 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
     # corners
     #
     a = <Py_ssize_t>(<cnp.float64_t>radius * 2.0 / 2.414213)
-    a_2 = a / 2
+    a_2 = a // 2
     if a_2 == 0:
         a_2 = 1
     ph.a_2 = a_2
@@ -537,7 +537,7 @@ cdef inline void update_histogram(Histograms *ph,
         value = ph.data[stride]
         pixel_count[0] -= 1
         hist_piece.fine[value] -= 1
-        hist_piece.coarse[value / 16] -= 1
+        hist_piece.coarse[value // 16] -= 1
 
     x = coord.x + current_column
     y = coord.y + current_row
@@ -549,7 +549,7 @@ cdef inline void update_histogram(Histograms *ph,
         value = ph.data[stride]
         pixel_count[0] += 1
         hist_piece.fine[value] += 1
-        hist_piece.coarse[value / 16] += 1
+        hist_piece.coarse[value // 16] += 1
 
 ############################################################################
 #
@@ -617,7 +617,7 @@ cdef inline cnp.uint8_t find_median(Histograms *ph) nogil:
         return 0
 
     # +50 for roundoff
-    pixels_below = (ph.accumulator_count * ph.percent + 50) / 100
+    pixels_below = (ph.accumulator_count * ph.percent + 50) // 100
 
     if pixels_below > 0:
         pixels_below -= 1
