@@ -5,6 +5,7 @@ from .edges import (sobel, sobel_h, sobel_v,
                     prewitt, prewitt_h, prewitt_v,
                     roberts, roberts_pos_diag, roberts_neg_diag,
                     laplace)
+from ._identity import identity
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from ._frangi import frangi, hessian
@@ -13,6 +14,7 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold, apply_hysteresis_threshold)
+from .ridges import meijering, sato, frangi, hessian
 from . import rank
 from .rank import median
 from ._unsharp_mask import unsharp_mask
@@ -37,9 +39,12 @@ __all__ = ['inverse',
            'roberts_neg_diag',
            'laplace',
            'rank_order',
+           'identity',
            'gabor_kernel',
            'gabor',
            'try_all_threshold',
+           'meijering',
+           'sato',
            'frangi',
            'hessian',
            'threshold_otsu',

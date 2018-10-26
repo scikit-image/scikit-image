@@ -4,7 +4,7 @@ __all__ = ['frangi', 'hessian']
 
 
 def _frangi_hessian_common_filter(image, scale_range, scale_step,
-                                  beta1, beta2):
+                                  beta1, beta2, black_ridges=True):
     """This is an intermediate function for Frangi and Hessian filters.
 
     Shares the common code for Frangi and Hessian functions.
