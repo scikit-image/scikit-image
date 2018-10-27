@@ -83,7 +83,7 @@ def _sortbyabs(array, axis=0):
 
 def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
     """
-    Generate fell Hessian matrices from Hessian elements of n-dimensional
+    Generate full Hessian matrices from Hessian elements of n-dimensional
     image.
 
     Parameters
@@ -350,9 +350,6 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
-    alpha : float, optional
-        Frangi correction constant that adjusts the filter's
-        sensitivity to deviation from a plate-like structure.
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
