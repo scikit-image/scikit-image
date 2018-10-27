@@ -21,6 +21,9 @@ New Features
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
 - Image translation registration for masked data 
   (``skimage.feature.masked_register_translation``)
+- Frangi (vesselness) filter for 3D data
+- Meijering (neuriteness) filter for nD data
+- Sato (tubeness) filter for 2D and 3D data
 
 
 Improvements
@@ -71,6 +74,7 @@ API Changes
 Bugfixes
 --------
 
+- Correct bright ridge detection for Frangi filter (#2700)
 
 
 Deprecations
