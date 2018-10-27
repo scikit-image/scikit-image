@@ -537,8 +537,8 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             r_g = lambda1 ** 2 + lambda2 ** 2
 
             # Compute output image for given (sigma) scale
-            filtered = (np.exp(-r_b / beta) *
-                        (np.ones(shape) - np.exp(-r_g / gamma)))
+            filtered = (np.exp(-r_b / beta)
+                        * (np.ones(shape) - np.exp(-r_g / gamma)))
 
             # Store results in (2+1)D matrices
             filtered_array[i] = filtered
@@ -560,9 +560,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             r_g = lambda1 ** 2 + lambda2 ** 2 + lambda3 ** 2
 
             # Compute output image for given (sigma) scale
-            filtered = ((np.ones(shape) - np.exp(-r_a / alpha)) *
-                        np.exp(-r_b / beta) *
-                        (np.ones(shape) - np.exp(-r_g / gamma)))
+            filtered = ((np.ones(shape) - np.exp(-r_a / alpha))
+                        * np.exp(-r_b / beta)
+                        * (np.ones(shape) - np.exp(-r_g / gamma)))
 
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
