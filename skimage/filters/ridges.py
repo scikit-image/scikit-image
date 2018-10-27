@@ -203,7 +203,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
 
         # Compute 2D Hessian eigenvalues
         hessian_eigenvalues = np.array(hessian_matrix_eigvals(
-                                       *hessian_elements))
+                                        hessian_elements))
 
     elif ndim > 2:
 

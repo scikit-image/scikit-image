@@ -12,8 +12,7 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold, apply_hysteresis_threshold)
-from .ridges import (compute_hessian_eigenvalues, meijering, sato, frangi,
-                     hessian)
+from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from .rank import median
 from ._unsharp_mask import unsharp_mask
@@ -41,7 +40,6 @@ __all__ = ['inverse',
            'gabor_kernel',
            'gabor',
            'try_all_threshold',
-           'compute_hessian_eigenvalues',
            'meijering',
            'sato',
            'frangi',
