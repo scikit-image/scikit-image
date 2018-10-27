@@ -183,7 +183,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         Array with (sorted) eigenvalues of Hessian eigenvalues for each pixel
         of the input image.
     """
-    
+
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
@@ -203,7 +203,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
 
         # Compute 2D Hessian eigenvalues
         hessian_eigenvalues = np.array(hessian_matrix_eigvals(
-                                        hessian_elements))
+                                       hessian_elements))
 
     elif ndim > 2:
 
