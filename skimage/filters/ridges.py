@@ -15,7 +15,6 @@ from warnings import warn
 import numpy as np
 
 from ..util import img_as_float, invert
-from ..feature import hessian_matrix, hessian_matrix_eigvals
 from .._shared.utils import assert_nD
 
 
@@ -184,6 +183,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         Array with (sorted) eigenvalues of Hessian eigenvalues for each pixel
         of the input image.
     """
+    
+    # Import has to be here due to circular import error
+    from ..feature import hessian_matrix, hessian_matrix_eigvals
 
     # Get image dimensions
     ndim = image.ndim
