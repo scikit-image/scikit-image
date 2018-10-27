@@ -529,7 +529,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 lines[nlines, 1, 0] = line_end[2]
                 lines[nlines, 1, 1] = line_end[3]
                 nlines += 1
-                if nlines > lines_max:
+                if nlines >= lines_max:
                     break
 
     PyMem_Free(line_end)
