@@ -491,3 +491,18 @@ def test_keep_range():
                   clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
+
+
+def test_zero_image_size():
+    with testing.raises(ValueError):
+        warp(np.zeros(0),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((0, 10)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 0)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 10, 0)),
+             SimilarityTransform())
