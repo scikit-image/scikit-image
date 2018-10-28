@@ -89,10 +89,10 @@ def test_invalid_block_size():
 
 
 def test_block_reduce_argmax():
-    image = np.asarray([[ 0,  0, 11,  0],
-                        [ 0,  9,  0,  0],
-                        [18,  0,  0,  0],
-                        [ 0,  0, 10,  0]])
+    image = np.asarray([[0, 0, 11, 0],
+                        [0, 9, 0, 0],
+                        [18, 0, 0, 0],
+                        [0, 0, 10, 0]])
 
     out1 = block_reduce(image, (2, 2), func=np.argmax, axis=[0])
     expected1 = np.asarray([[[0, 1],
@@ -106,7 +106,7 @@ def test_block_reduce_argmax():
     expected2 = np.array([[[0, 1],
                            [0, 0]],
                           [[0, 0],
-                           [0,0]]])
+                           [0, 0]]])
 
     assert_equal(expected2, out2)
 
