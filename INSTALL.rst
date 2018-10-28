@@ -86,7 +86,7 @@ b. Debian and Ubuntu
 ````````````````````
 Install all the required dependencies::
 
-  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
+  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy python3-tk
 
 Install suitable compilers::
 
