@@ -9,7 +9,7 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, xfail, arch32
+from skimage._shared.testing import test_parallel, xfail, arch32, parametrize
 
 
 class TestRank():
@@ -182,10 +182,11 @@ class TestRank():
         out = np.empty((100, 100), dtype=np.uint16)
         mask = np.ones((100, 100), dtype=np.uint8)
 
-        for i in range(5):
-            image = np.full((100, 100), 255 * 2 ** i, dtype=np.uint16)
-            if i > 3:
-                expected = ["Bitdepth of"]
+        for i in range(8, 13):
+            max_val = 2 ** i - 1
+            image = np.full((100, 100), max_val, dtype=np.uint16)
+            if i > 10:
+                expected = ["Bad rank filter performance"]
             else:
                 expected = []
             with expected_warnings(expected):
@@ -248,7 +249,7 @@ class TestRank():
         elem = np.ones((3, 3), dtype=np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
-        with expected_warnings(["Bitdepth of"]):
+        with expected_warnings(["Bad rank filter performance"]):
             rank.maximum(image=image, selem=elem, out=out, mask=mask)
 
 
@@ -331,24 +332,21 @@ class TestRank():
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
-
-    def test_compare_8bit_vs_16bit(self):
+    @parametrize('method',
+                 ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+                  'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+                  'enhance_contrast', 'pop', 'threshold', 'tophat'])
+    def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
-
         image8 = util.img_as_ubyte(data.camera())[::2, ::2]
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
-        methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                   'enhance_contrast', 'pop', 'threshold', 'tophat']
-
-        for method in methods:
-            func = getattr(rank, method)
-            f8 = func(image8, disk(3))
-            f16 = func(image16, disk(3))
-            assert_equal(f8, f16)
+        func = getattr(rank, method)
+        f8 = func(image8, disk(3))
+        f16 = func(image16, disk(3))
+        assert_equal(f8, f16)
 
 
     def test_trivial_selem8(self):
@@ -530,11 +528,11 @@ class TestRank():
         selem = np.ones((64, 64), dtype=np.uint8)
         data = np.zeros((65, 65), dtype=np.uint16)
         data[:64, :64] = np.reshape(np.arange(4096), (64, 64))
-        with expected_warnings(['Bitdepth of 11']):
+        with expected_warnings(['Bad rank filter performance']):
             assert(np.max(rank.entropy(data, selem)) == 12)
 
         # make sure output is of dtype double
-        with expected_warnings(['Bitdepth of 11']):
+        with expected_warnings(['Bad rank filter performance']):
             out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
         assert out.dtype == np.double
 
@@ -569,8 +567,8 @@ class TestRank():
         for bitdepth in range(17):
             value = 2 ** bitdepth - 1
             image[10, 10] = value
-            if bitdepth > 11:
-                expected = ['Bitdepth of %s' % (bitdepth - 1)]
+            if bitdepth >= 11:
+                expected = ['Bad rank filter performance']
             else:
                 expected = []
             with expected_warnings(expected):
