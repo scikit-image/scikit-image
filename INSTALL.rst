@@ -90,7 +90,7 @@ Install all the required dependencies::
 
 Install suitable compilers::
 
-  sudo apt-get install build-essential cython
+  sudo apt-get install build-essential cython3
 
 Complete the general development installation instructions above.
 
