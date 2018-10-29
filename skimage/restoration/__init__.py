@@ -2,7 +2,8 @@
 
 """
 
-from .deconvolution import wiener, unsupervised_wiener, richardson_lucy, blind_richardson_lucy
+from .deconvolution import wiener, unsupervised_wiener, richardson_lucy, \
+    blind_richardson_lucy
 from .unwrap import unwrap_phase
 from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
                        denoise_bilateral, denoise_wavelet, estimate_sigma)

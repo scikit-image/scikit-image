@@ -393,7 +393,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     return im_deconv
 
 
-def blind_richardson_lucy(image, psf=None, iterations=10, return_iterations=False, clip=False):
+def blind_richardson_lucy(image, psf=None, iterations=10,
+                          return_iterations=False, clip=False):
     """Blind Richardson-Lucy deconvolution.
 
     Parameters
@@ -439,17 +440,23 @@ def blind_richardson_lucy(image, psf=None, iterations=10, return_iterations=Fals
     Notes
     -----
 
-    This function estimates a point spread function based on an inverse Richardson Lucy algorithm as described
-    in Fish et al., 1995. It is an iterative process where the PSF and image is deconvolved, respectively.
-    It is more noise tolerant than other algorithms, such as Ayers-Dainty and the Weiner filter algorithms (taken
-    from the paper).
+    This function estimates a point spread function based on an
+    inverse Richardson Lucy algorithm as described
+    in Fish et al., 1995. It is an iterative process where the PSF
+    and image is deconvolved, respectively.
+    It is more noise tolerant than other algorithms,
+    such as Ayers-Dainty and the Weiner filter algorithms
+    (taken from the paper).
 
-    The algorithm performs well with gaussian PSFs and can recover them nicely without any prior knowledge. If
-    one has already an educated guess, one should pass the PSF as argument to the function.
-    Note, that the PSF should have the same shape as the image, and the PSF should be centered.
+    The algorithm performs well with gaussian PSFs and can recover
+    them nicely without any prior knowledge. If one has already an
+    educated guess, one should pass the PSF as argument to the function.
+    Note, that the PSF should have the same shape as the image,
+    and the PSF should be centered.
 
-    Due to its nature, the algorithm may divide by 0. The function catches this issue and aborts the iterative
-    process. Mostly, the optimal number of iterations is before this error may occur.
+    Due to its nature, the algorithm may divide by 0.
+    The function catches this issue and aborts the iterative process.
+    Mostly, the optimal number of iterations is before this error may occur.
 
     References
     ----------

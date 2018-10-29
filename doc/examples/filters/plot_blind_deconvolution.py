@@ -2,19 +2,27 @@
 =====================
 Blind Image Deconvolution
 =====================
-Normally, image deconvolution is based on a prior knowledge of the Point Spread Function (PSF) used to deconvolve the
-image. However, _blind_ methods are available that estimate the PSF iteratively from the image itself. This
-algorithm is based on the Richardson Lucy (RL) deconvolution algorithm. In this case, the RL algorithm is not only
-used for deconvolving the image, but also the PSF estimate. This process is iterative, alternating between deconvolving
-the PSF and deconvolving the image.
+Normally, image deconvolution is based on a prior knowledge of the
+Point Spread Function (PSF) used to deconvolve the image.
+However, _blind_ methods are available that estimate the PSF
+iteratively from the image itself. This algorithm is based on the
+Richardson Lucy (RL) deconvolution algorithm. In this case,
+the RL algorithm is not only used for deconvolving the image,
+but also the PSF estimate. This process is iterative,
+alternating between deconvolving the PSF and deconvolving the image.
 
-The following example shows a centered cross that was convolved with a gaussian kernel with sigma = 2. Further Poisson
-shot noise was added. Using the convolved image as argument in the blind image deconvolution function, the algorithm
-is capable to recover to a large extent the original image and a good guess for the PSF (Figure 1).
+The following example shows a centered cross that was convolved
+with a gaussian kernel with sigma = 2. Further Poisson
+shot noise was added. Using the convolved image as argument
+in the blind image deconvolution function, the algorithm
+is capable to recover to a large extent the original image
+and a good guess for the PSF (Figure 1).
 
-Figure 2 shows the iterative progress where the first images look like artifacts, but after a given amount of iterations,
-the cross and the PSF nicely show up. Figure 3 shows the absolute difference between the original image and the
-deconvolved one indicating that the optimal number of iterations is 33.
+Figure 2 shows the iterative progress where the first images look
+like artifacts, but after a given amount of iterations,
+the cross and the PSF nicely show up. Figure 3 shows the absolute
+difference between the original image and the deconvolved one
+indicating that the optimal number of iterations is 33.
 
 .. [1] William Hadley Richardson, "Bayesian-Based Iterative
        Method of Image Restoration",
@@ -35,7 +43,7 @@ import matplotlib.pyplot as plt
 from skimage.restoration import blind_richardson_lucy
 
 # Initialize image that is to be recovered (cross)
-im = np.zeros((100,100), dtype=np.float32)
+im = np.zeros((100, 100), dtype=np.float32)
 im[40:60, 45:55] = 1
 im[45:55, 40:60] = 1
 
@@ -46,7 +54,7 @@ im += np.random.poisson(2.0, im.shape) / 255
 # Create the PSF
 psf_gaussian = np.zeros_like(im)
 w, h = im.shape
-psf_gaussian[w//2, h//2] = 1
+psf_gaussian[w // 2, h // 2] = 1
 psf_gaussian = gaussian(psf_gaussian, 2)
 
 # Convolve image using PSF
@@ -59,15 +67,19 @@ reconstruction = blind_richardson_lucy(im_conv,
                                        return_iterations=True)
 
 
-plt.figure(figsize=(12,14))
+plt.figure(figsize=(12, 14))
 
-for i in range(iterations*2):
-    plt.subplot(10, 10, i+1)
+for i in range(iterations * 2):
+    plt.subplot(10, 10, i + 1)
     plt.imshow(reconstruction[i // 2, i % 2], cmap='gray')
     plt.axis('off')
 
 # Calculate residuals from reconstruction array
-residuals = np.array([((im-reconstruction[i,0])**2).sum() for i in range(reconstruction.shape[0])])
+residuals = np.empty(reconstruction.shape[0])
+
+for i in range(reconstruction.shape[0]):
+    residuals[i] = (im-reconstruction[i, 0] ** 2).sum()
+
 best_fit = np.argmin(residuals)
 
 plt.figure()
@@ -77,7 +89,7 @@ plt.ylabel('Residuals')
 plt.xlabel('Iteration#')
 
 
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.subplot(151)
 plt.imshow(im, cmap='gray')
 plt.title('Source Image')
@@ -92,11 +104,11 @@ plt.title('Convolved image')
 
 plt.subplot(154)
 plt.imshow(reconstruction[best_fit, 0], cmap='gray')
-plt.title('Recovered image,\n iteration #{}'.format(best_fit+1))
+plt.title('Recovered image,\n iteration #{}'.format(best_fit + 1))
 
 plt.subplot(155)
 plt.imshow(reconstruction[best_fit, 1], cmap='gray')
-plt.title('Recovered PSF,\n iteration #{}'.format(best_fit+1))
+plt.title('Recovered PSF,\n iteration #{}'.format(best_fit + 1))
 
 plt.tight_layout()
 
