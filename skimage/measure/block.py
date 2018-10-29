@@ -19,8 +19,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
         Constant padding value if image is not perfectly divisible by the
         block size.
     axis : array_like
-        Specify the list of axes to reduce over, on which func will be called. If None,
-        it reduces over all axes.
+        Specify the list of axes to reduce over, on which func will be
+        called. If None, it reduces over all axes.
 
     Returns
     -------
