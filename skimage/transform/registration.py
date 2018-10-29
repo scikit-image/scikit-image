@@ -65,6 +65,42 @@ def _matrix_to_argmin(matrix):
 
 def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
                     iter_callback=lambda img, matrix: None):
+    """
+    Returns a matrix which registers the target image to the reference image
+
+    Uses image registration techniques, and only optimises with affine transformations.
+
+    Parameters
+    ----------
+    reference : ndimage
+        A reference image to compare against the target
+
+    target : ndimage
+        Our target for registration. Transforming this image using the return value
+        `matrix` aligns it with the reference.
+
+    cost : function, optional
+        A cost function which takes two images and returns a score which is at a
+        minimum when images are aligned. Uses the mean square error as default.
+
+    nlevels : integer, optional
+        Change the maximum height we use for creating the Gaussian pyramid.
+        By default we take a guess based on the resolution of the image,
+        as extremely low resolution images may hinder registration.
+
+    iter_callback : function, optional
+        If given, this function is called once per pyramid level with the current
+        downsampled image and transformation matrix guess as the only arguments.
+        This is useful for debugging or for plotting intermediate results
+        during the iterative processs.
+
+    Returns
+    -------
+    matrix : array
+        A transformation matrix used to obtain a new image.
+        ndi.affine_transform(target, matrix) will align your target image.
+
+    """
 
     if nlevels is None:
         min_dim = min(reference.shape)
