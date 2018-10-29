@@ -18,7 +18,7 @@ def _argmin_to_matrix(argmin):
 
     Parameters
     ----------
-    argmin : array
+    argmin : (6) array
         Input array giving the argument of the minimum function to optimise against
 
     Returns
@@ -55,7 +55,7 @@ def _matrix_to_argmin(matrix):
 
     Returns
     -------
-    argmin : array
+    argmin : (6) array
         Output array giving the argument of the minimum function to optimise against
 
     """
