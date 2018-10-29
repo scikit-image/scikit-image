@@ -1,14 +1,11 @@
-from skimage.data import camera
-from scipy import ndimage as ndi
-from skimage.transform import register_affine
-from matplotlib import pyplot as plt
 import numpy as np
+from scipy import ndimage as ndi
+from matplotlib import pyplot as plt
+
+from skimage.data import camera
+from skimage.transform import register_affine
 from skimage import measure
 
-rows=6
-cols=6
-start_with=10
-show_every=3
 callback_arr = []
 callback = lambda i, m: callback_arr.append((i,m))
 r = 0.12
@@ -50,10 +47,11 @@ for a in ax:
     a.set_yticklabels([])
 
 for i, image in enumerate([1, 2, 4]):
-    err = measure.compare_mse(cam, ndi.affine_transform(start, callback_arr[image][1]))
+    err = measure.compare_mse(
+        cam, ndi.affine_transform(start, callback_arr[image][1]))
     ax[i+2].set_title('iter %d, mse %d' % (image, int(err)))
     ax[i+2].imshow(ndi.affine_transform(callback_arr[image][0], callback_arr[image][1]), cmap='gray',
-         interpolation='gaussian', resample=True)
+                   interpolation='gaussian', resample=True)
 
     y, x = callback_arr[image][0].shape
 
@@ -63,8 +61,8 @@ for i, image in enumerate([1, 2, 4]):
 
 err = measure.compare_mse(cam, ndi.affine_transform(start, trans))
 ax[5].set_title('final correction, mse %d' % int(err))
-ax[5].imshow(ndi.affine_transform(start, trans),cmap='gray',
-        interpolation='gaussian', resample=True)
+ax[5].imshow(ndi.affine_transform(start, trans), cmap='gray',
+             interpolation='gaussian', resample=True)
 y, x = start.shape
 
 ax[5].set_xticks(np.arange(x/5, x, x/5), minor=True)

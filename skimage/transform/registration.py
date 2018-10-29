@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import basinhopping, minimize
+from scipy.optimize import minimize
 from scipy import ndimage as ndi
 
 from .pyramids import pyramid_gaussian
@@ -8,15 +8,18 @@ from ..measure import compare_mse
 __all__ = ['register_affine']
 
 
-def _p_to_matrix(p):
+def _argmin_to_matrix(argmin):
     """
-    Converts a transformation of the first 2 rows of a 3x3 transformation matrix
-    to the full matrix
+    Converts the optimisation parameters to a 3x3 transformation matrix
+
+    The optimisation paramters are known as the argmin and are composed of
+    the first 2 rows of the transformation matrix, as that is all that
+    is used in an affine transformation.
 
     Parameters
     ----------
-    param : array
-        Input array giving the affine transformation paramaters
+    argmin : array
+        Input array giving the argument of the minimum function to optimise against
 
     Returns
     -------
@@ -24,25 +27,26 @@ def _p_to_matrix(p):
         A transformation matrix used to obtain a new image
     """
 
-    out = np.empty((3, 3))
+    matrix = np.empty((3, 3))
 
-    out[0][0] = p[0]
-    out[0][1] = p[1]
-    out[0][2] = p[2]
-    out[1][0] = p[3]
-    out[1][1] = p[4]
-    out[1][2] = p[5]
-    out[2][0] = 0
-    out[2][1] = 0
-    out[2][2] = 1
+    matrix[0][0] = argmin[0]
+    matrix[0][1] = argmin[1]
+    matrix[0][2] = argmin[2]
+    matrix[1][0] = argmin[3]
+    matrix[1][1] = argmin[4]
+    matrix[1][2] = argmin[5]
+    matrix[2][0] = 0
+    matrix[2][1] = 0
+    matrix[2][2] = 1
 
-    return out
+    return matrix
 
 
-def _matrix_to_p(matrix):
+def _matrix_to_argmin(matrix):
     """
-    Converts a 3x3 transformation matrix into a transformation in form of first
-    2 rows unravelled
+    Converts a 3x3 transformation matrix to the optimisation parameters
+
+    See the inverse function `_argmin_to_matrix`.
 
     Parameters
     ----------
@@ -51,8 +55,8 @@ def _matrix_to_p(matrix):
 
     Returns
     -------
-    param : array
-        Input array giving the affine transformation of an image
+    argmin : array
+        Output array giving the argument of the minimum function to optimise against
 
     """
 
@@ -70,20 +74,20 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
-    p = np.zeros(6)
-    p[0] = 1
-    p[4] = 1
+    argmin = np.zeros(6)
+    argmin[0] = 1
+    argmin[4] = 1
 
     for (ref, tgt) in image_pairs:
         def _cost(param):
-            transformation = _p_to_matrix(param)
+            transformation = _argmin_to_matrix(param)
             transformed = ndi.affine_transform(tgt, transformation, order=1)
             return cost(ref, transformed)
 
-        res = minimize(_cost, p, method='Powell')
-        p = res.x
-        iter_callback(tgt, _p_to_matrix(p))
+        result = minimize(_cost, argmin, method='Powell')
+        argmin = result.x
+        iter_callback(tgt, _argmin_to_matrix(argmin))
 
-    matrix = _p_to_matrix(p)
+    matrix = _argmin_to_matrix(argmin)
 
     return matrix
