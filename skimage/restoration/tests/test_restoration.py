@@ -106,9 +106,9 @@ def test_blind_richardson_lucy():
     im_conv = convolve2d(im, psf_gaussian, 'same')
     iterations = 50
 
-    im_deconv, psf = blind_richardson_lucy(im_conv, iterations=iterations)
+    im_deconv, psf = restoration.blind_richardson_lucy(im_conv, iterations=iterations)
 
-    path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
+    path = pjoin(dirname(abspath(__file__)), 'reconstruction_blind_RL.npy')
     im_deconv_test, psf_test = np.load(path)
     np.testing.assert_allclose(im_deconv, im_deconv_test, rtol=1e-3)
     np.testing.assert_allclose(psf, psf_test, rtol=1e-3)
