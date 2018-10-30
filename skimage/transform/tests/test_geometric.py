@@ -1,4 +1,5 @@
 import numpy as np
+import re
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,

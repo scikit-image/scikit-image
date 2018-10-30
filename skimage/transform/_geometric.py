@@ -719,6 +719,36 @@ class ProjectiveTransform(GeometricTransform):
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
 
+    def __nice__(self):
+        """ common 'paramstr' used by __str__ and __repr__ """
+        # paramstr = str(self.params.tolist())  # original proposal
+        npstring = np.array2string(self.params, separator=', ')
+        # add a newline and indentation after the first square braket to ensure
+        # the columns of the params matrix are aligned in the repr
+        lines = npstring[1:].split('\n ')
+        indented_lines = ['    ' + p for p in lines]
+        paramstr = 'matrix=[\n' + '\n'.join(indented_lines)
+        print(paramstr)
+        return paramstr
+
+    def __repr__(self):
+        """ Add standard repr formatting around a nice string """
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        # modname = self.__class__.__module__  # uncomment for more verbosity
+        # classstr = modname + '.' + classname
+        return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
+
+    def __str__(self):
+        """ Add standard str formatting around a nice string """
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        # modname = self.__class__.__module__  # uncomment for more verbosity
+        # classstr = modname + '.' + classname
+        return '<{}({})>'.format(classstr, paramstr)
+
 
 class AffineTransform(ProjectiveTransform):
     """2D affine transformation.
