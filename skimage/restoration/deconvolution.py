@@ -478,7 +478,8 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
     if psf is None:
         psf = np.full(image.shape, 0.5)
     else:
-        assert psf.shape == image.shape, 'Image and PSF should have the same shape!'
+        assert psf.shape == image.shape, \
+            'Image and PSF should have the same shape!'
         psf = psf.astype(np.float)
 
     for i in range(iterations):
@@ -488,14 +489,19 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
         #       Using `im_deconv` instead recovers PSF.
         relative_blur_psf = im_deconv / fftconvolve(psf, im_deconv, 'same')
 
-        # Check if relative_blur_psf contains nan, causing the algorithm to fail
-        if np.count_nonzero(~np.isnan(relative_blur_psf)) < relative_blur_psf.size:
-            warnings.warn('Iterations stopped after {} iterations because PSF contains zeros!'.format(i),
+        # Check if relative_blur_psf contains nan,
+        # causing the algorithm to fail
+        if np.count_nonzero(~np.isnan(relative_blur_psf)) \
+                < relative_blur_psf.size:
+            warnings.warn('Iterations stopped after {} iterations'
+                          ' because PSF contains zeros!'.format(i),
                           RuntimeWarning)
             break
 
         else:
-            psf *= fftconvolve(relative_blur_psf, im_deconv[::-1, ::-1], 'same')
+            psf *= fftconvolve(relative_blur_psf,
+                               im_deconv[::-1, ::-1],
+                               'same')
 
             # Compute inverse again
             psf_mirror = psf[::-1, ::-1]
