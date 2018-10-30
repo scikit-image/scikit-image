@@ -14,14 +14,14 @@ Conversion between color models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Color images can be represented using different `color spaces
-<http://en.wikipedia.org/wiki/Color_space>`_. One of the most common
+<https://en.wikipedia.org/wiki/Color_space>`_. One of the most common
 color spaces is the `RGB space
-<http://en.wikipedia.org/wiki/RGB_color_model>`_, where an image has red,
+<https://en.wikipedia.org/wiki/RGB_color_model>`_, where an image has red,
 green and blue channels. However, other color models are widely used,
 such as the `HSV color model
-<http://en.wikipedia.org/wiki/HSL_and_HSV>`_, where hue, saturation and
+<https://en.wikipedia.org/wiki/HSL_and_HSV>`_, where hue, saturation and
 value are independent channels, or the `CMYK model
-<http://en.wikipedia.org/wiki/CMYK_color_model>`_ used for printing.
+<https://en.wikipedia.org/wiki/CMYK_color_model>`_ used for printing.
 
 :mod:`skimage.color` provides utility functions to convert images
 to and from different color spaces. Integer-type arrays can be
@@ -67,7 +67,7 @@ Converting an RGB image to a grayscale image is realized with
 :func:`rgb2gray` uses a non-uniform weighting of color channels, because of the
 different sensitivity of the human eye to different colors. Therefore,
 such a weighting ensures `luminance preservation
-<http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale>`_
+<https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale>`_
 from RGB to grayscale::
 
     >>> red_pixel = np.array([[[255, 0, 0]]], dtype=np.uint8)
@@ -133,7 +133,7 @@ A first class of methods compute a nonlinear function of the intensity,
 that is independent of the pixel values of a specific image. Such methods
 are often used for correcting a known non-linearity of sensors, or
 receptors such as the human eye. A well-known example is `Gamma
-correction <http://en.wikipedia.org/wiki/Gamma_correction>`_, implemented
+correction <https://en.wikipedia.org/wiki/Gamma_correction>`_, implemented
 in :func:`adjust_gamma`.
 
 Other methods re-distribute pixel values according to the *histogram* of

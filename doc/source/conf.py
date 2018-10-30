@@ -234,7 +234,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikit-image.tex', u'The scikit-image Documentation',
+  ('index', 'scikit-image.tex', u'The scikit-image Documentation',
    u'scikit-image development team', 'manual'),
 ]
 
@@ -318,17 +318,17 @@ plot2rst_rcparams = {'image.cmap' : 'gray',
 # intersphinx
 # -----------------------------------------------------------------------------
 _python_version_str = '{0.major}.{0.minor}'.format(sys.version_info)
-_python_doc_base = 'http://docs.python.org/' + _python_version_str
+_python_doc_base = 'https://docs.python.org/' + _python_version_str
 intersphinx_mapping = {
     'python': (_python_doc_base, None),
-    'numpy': ('http://docs.scipy.org/doc/numpy',
+    'numpy': ('https://docs.scipy.org/doc/numpy',
               (None, './_intersphinx/numpy-objects.inv')),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference',
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference',
               (None, './_intersphinx/scipy-objects.inv')),
     'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
-    'matplotlib': ('http://matplotlib.org/',
-                   (None, 'http://matplotlib.org/objects.inv'))
+    'matplotlib': ('https://matplotlib.org/',
+                   (None, 'https://matplotlib.org/objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
@@ -381,8 +381,8 @@ def linkcode_resolve(domain, info):
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "master/skimage/%s%s" % (fn, linespec))
     else:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

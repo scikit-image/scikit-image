@@ -1,7 +1,7 @@
 from .util import prepare_for_display, window_manager, GuiLockError
 
 try:
-    # we try to aquire the gui lock first
+    # we try to acquire the gui lock first
     # or else the gui import might trample another
     # gui's pyos_inputhook.
     window_manager.acquire('gtk')

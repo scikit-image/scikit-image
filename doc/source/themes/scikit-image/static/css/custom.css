@@ -264,7 +264,7 @@ td.field-body p {
 }
 
 /*
-Overrride some default settings in sphinx-gallery's gallery.css.
+Override some default settings in sphinx-gallery's gallery.css.
 
 The !important property is necessary to ensure these settings take precedence
 over the ones bundled with sphinx-gallery.

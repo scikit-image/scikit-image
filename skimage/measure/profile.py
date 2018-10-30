@@ -16,7 +16,7 @@ def profile_line(image, src, dst, linewidth=1,
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
         The end point of the scan line. The destination point is *included*
-        in the profile, in constrast to standard numpy indexing.
+        in the profile, in contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -100,7 +100,7 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     d_row, d_col = dst - src
     theta = np.arctan2(d_row, d_col)
 
-    length = np.ceil(np.hypot(d_row, d_col) + 1)
+    length = int(np.ceil(np.hypot(d_row, d_col) + 1))
     # we add one above because we include the last point in the profile
     # (in contrast to standard numpy indexing)
     line_col = np.linspace(src_col, dst_col, length)

@@ -359,7 +359,7 @@ def py_hsv_2_rgb(H, S, V):
         Each from 0 - 255
 
     conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
+    https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
     cdef float HSV[3]
@@ -398,7 +398,7 @@ def py_rgb_2_hsv(R, G, B):
         Ranges (0...360), (0...1), (0...1)
 
     conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
+    https://en.wikipedia.org/wiki/HSL_and_HSV
 
     '''
     cdef float HSV[3]

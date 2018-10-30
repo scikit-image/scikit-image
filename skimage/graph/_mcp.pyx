@@ -602,7 +602,7 @@ cdef class MCP:
                 # If we have already found the best path here then
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
-                    # Give subclass the oportunity to examine these two nodes
+                    # Give subclass the opportunity to examine these two nodes
                     # Note that only when both nodes are "frozen" their
                     # cumulative cost is set. By doing the check here, each
                     # pair of nodes is checked exactly once.

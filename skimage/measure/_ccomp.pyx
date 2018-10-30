@@ -35,7 +35,7 @@ cdef void get_bginfo(background_val, bginfo *ret) except *:
         ret.background_val = background_val
 
     # The node -999 doesn't exist, it will get subsituted by a meaningful value
-    # upon the first background pixel occurence
+    # upon the first background pixel occurrence
     ret.background_node = BG_NODE_NULL
     ret.background_label = 0
 
@@ -389,7 +389,7 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
 
     scanBG(data_p, forest_p, &shapeinfo, &bg)
     # the data are treated as degenerated 3D arrays if needed
-    # witout any performance sacrifice
+    # without any performance sacrifice
     scan3D(data_p, forest_p, &shapeinfo, &bg, connectivity)
 
     # Label output

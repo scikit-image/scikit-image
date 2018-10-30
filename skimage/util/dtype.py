@@ -86,7 +86,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     References
     ----------
     .. [1] DirectX data conversion rules.
-           http://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
+           https://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
     .. [2] Data Conversions. In "OpenGL ES 2.0 Specification v2.0.25",
            pp 7-8. Khronos Group, 2010.
     .. [3] Proper treatment of pixels as integers. A.W. Paeth.
@@ -245,14 +245,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     # float -> any
     if kind_in == 'f':
-        if np.min(image) < -1.0 or np.max(image) > 1.0:
-            raise ValueError("Images of type float must be between -1 and 1.")
         if kind_out == 'f':
             # float -> float
             if itemsize_in > itemsize_out:
                 prec_loss()
             return image.astype(dtype_out)
 
+        if np.min(image) < -1.0 or np.max(image) > 1.0:
+            raise ValueError("Images of type float must be between -1 and 1.")
         # floating point -> integer
         prec_loss()
         # use float type that can represent output integer type

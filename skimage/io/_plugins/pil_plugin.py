@@ -23,7 +23,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
 
     Notes
     -----
-    Files are read using the Python Imaging Libary.
+    Files are read using the Python Imaging Library.
     See PIL docs [1]_ for a list of supported formats.
 
     References
@@ -224,7 +224,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
 
     Notes
     -----
-    Use the Python Imaging Libary.
+    Use the Python Imaging Library.
     See PIL docs [1]_ for a list of other supported formats.
     All images besides single channel PNGs are converted using `img_as_uint8`.
     Single Channel PNGs have the following behavior:

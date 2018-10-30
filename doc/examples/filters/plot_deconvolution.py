@@ -14,7 +14,7 @@ iterations, which needs to be hand-tuned.
        Method of Image Restoration",
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), :DOI:`10.1364/JOSA.62.000055`
 
-.. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+.. [2] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 """
 import numpy as np
 import matplotlib.pyplot as plt

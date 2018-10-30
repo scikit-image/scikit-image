@@ -5,7 +5,7 @@ Making your own copy (fork) of scikit-image
 ======================================================
 
 You need to do this only once.  The instructions here are very similar
-to the instructions at http://help.github.com/forking/ |emdash| please see
+to the instructions at https://help.github.com/forking/ |emdash| please see
 that page for more detail.  We're repeating some of it here just to give the
 specifics for the `scikit-image`_ project, and to suggest some default names.
 

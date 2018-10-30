@@ -17,7 +17,7 @@ cam_noisy = cam_noisy.astype(cam.dtype)
 
 def test_PSNR_vs_IPOL():
     # Tests vs. imdiff result from the following IPOL article and code:
-    # http://www.ipol.im/pub/art/2011/g_lmii/
+    # https://www.ipol.im/pub/art/2011/g_lmii/
     p_IPOL = 22.4497
     p = compare_psnr(cam, cam_noisy)
     assert_almost_equal(p, p_IPOL, decimal=4)

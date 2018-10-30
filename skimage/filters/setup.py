@@ -13,11 +13,11 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
     config.add_data_dir('rank/tests')
 
-    cython(['_ctmf.pyx'], working_path=base_path)
-    cython(['rank/core_cy.pyx'], working_path=base_path)
-    cython(['rank/generic_cy.pyx'], working_path=base_path)
-    cython(['rank/percentile_cy.pyx'], working_path=base_path)
-    cython(['rank/bilateral_cy.pyx'], working_path=base_path)
+    cython(['_ctmf.pyx',
+            'rank/core_cy.pyx',
+            'rank/generic_cy.pyx',
+            'rank/percentile_cy.pyx',
+            'rank/bilateral_cy.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
                          include_dirs=[get_numpy_include_dirs()])
