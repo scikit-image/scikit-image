@@ -78,7 +78,7 @@ for i in range(iterations * 2):
 residuals = np.empty(reconstruction.shape[0])
 
 for i in range(reconstruction.shape[0]):
-    residuals[i] = (im-reconstruction[i, 0] ** 2).sum()
+    residuals[i] = (im - reconstruction[i, 0] ** 2).sum()
 
 best_fit = np.argmin(residuals)
 

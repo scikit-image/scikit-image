@@ -484,7 +484,8 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
     for i in range(iterations):
         # Deconvolve the PSF
         # Hack: in original publication one would have used `image`,
-        #       however, this does not work. Using `im_deconv` instead recovers PSF.
+        #       however, this does not work.
+        #       Using `im_deconv` instead recovers PSF.
         relative_blur_psf = im_deconv / fftconvolve(psf, im_deconv, 'same')
 
         # Check if relative_blur_psf contains nan, causing the algorithm to fail
