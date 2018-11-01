@@ -412,7 +412,7 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
 
     return_iterations : boolean, optional
         Returns instead of a tuple of the final restorated image and used PSF
-        a tuple of all iterations for further investigation
+        a tuple of all iterations for further investigation.
 
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
