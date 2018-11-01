@@ -1,5 +1,5 @@
 import numpy as np
-import os.path as path
+from pathlib import Path
 from scipy.ndimage import fourier_shift
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal
@@ -9,7 +9,10 @@ from skimage.feature.masked_register_translation import (
     masked_register_translation, cross_correlate_masked)
 from skimage.io import imread
 
-IMAGES_DIR = path.join(path.dirname(__file__), 'images')
+# Location of test images
+# These images are taken from Dirk Padfields' MATLAB package
+# available on his website: www.dirkpadfield.com 
+IMAGES_DIR = Path(__file__).parent / 'images'
 
 def test_masked_registration_vs_register_translation():
     """masked_register_translation should give the same results as
@@ -88,10 +91,10 @@ def test_masked_registration_padfield_data():
     shifts = [(75, 75), (-130, 130), (130, 130)]
     for xi, yi in shifts:
         
-        fixed_image = imread(path.join(
-            IMAGES_DIR, 'OriginalX{:d}Y{:d}.png'.format(xi, yi)))
-        moving_image = imread(path.join(
-            IMAGES_DIR, 'TransformedX{:d}Y{:d}.png'.format(xi, yi)))
+        fixed_image = imread(
+            IMAGES_DIR / 'OriginalX{:d}Y{:d}.png'.format(xi, yi))
+        moving_image = imread(
+            IMAGES_DIR / 'TransformedX{:d}Y{:d}.png'.format(xi, yi))
 
         # Valid pixels are 1
         fixed_mask = (fixed_image != 0)
