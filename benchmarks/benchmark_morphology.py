@@ -3,6 +3,7 @@
 
 import numpy as np
 from skimage import data, filters, morphology
+from skimage.util import invert
 
 
 class Watershed(object):
@@ -42,8 +43,8 @@ class Watershed(object):
 class Skeletonize3d(object):
 
     def setup(self, *args):
-        # we stack the horse data 5 times to get an example image
-        self.image = np.stack(5 * [data.horse()])
+        # we stack the horse data 5 times to get an example volume
+        self.image = np.stack(5 * [invert(data.horse())])
 
     def time_skeletonize_3d(self):
         morphology.skeletonize_3d(self.image)
