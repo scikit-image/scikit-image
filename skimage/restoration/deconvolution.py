@@ -405,7 +405,7 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
     psf : ndarray, optional
        A first estimate of the point spread function, same size as image
 
-    iterations : int
+    iterations : int, optional
        Number of iterations. This parameter plays the role of
        regularisation. After a given iterations, the estimates can produce
        division by 0 problems, then the algorithm is automatically stopped.
