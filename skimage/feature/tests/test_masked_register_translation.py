@@ -12,7 +12,7 @@ from skimage.io import imread
 # Location of test images
 # These images are taken from Dirk Padfields' MATLAB package
 # available on his website: www.dirkpadfield.com 
-IMAGES_DIR = Path(__file__).parent / 'images'
+IMAGES_DIR = Path(__file__).parent / 'data'
 
 def test_masked_registration_vs_register_translation():
     """masked_register_translation should give the same results as
