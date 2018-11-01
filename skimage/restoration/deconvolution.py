@@ -462,7 +462,7 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
     ----------
     .. [1] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
            "Blind deconvolution by means of the Richardson–Lucy algorithm."
-           JOSA A 12, no. 1 (1995): 58-65.
+           JOSA A 12, no. 1 (1995): 58-65. :DOI:`10.1364/JOSAA.12.000058`
 
            https://pdfs.semanticscholar.org/9e3f/a71e22caf358dbe873e9649f08c205d0c0c0.pdf
     """
