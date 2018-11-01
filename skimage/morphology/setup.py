@@ -16,8 +16,9 @@ def configuration(parent_package='', top_path=None):
             '_skeletonize_cy.pyx',
             '_convex_hull.pyx',
             '_greyreconstruct.pyx',
-            '_skeletonize_3d_cy.pyx.in',
             '_extrema_cy.pyx'], working_path=base_path)
+    # _skeletonize_3d uses c++, so it must be cythonized separately
+    cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -27,8 +28,9 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_greyreconstruct', sources=['_greyreconstruct.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.cpp'],
+                         include_dirs=[get_numpy_include_dirs()],
+                         language='c++')
     config.add_extension('_extrema_cy', sources=['_extrema_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
