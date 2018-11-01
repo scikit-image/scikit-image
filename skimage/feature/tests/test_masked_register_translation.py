@@ -79,24 +79,33 @@ def test_masked_registration_random_masks_non_equal_sizes():
 
 
 def test_masked_registration_padfield_data():
-    """ Masked translation registration should behave like in the original publication """
-    # Test translated from MATLABimplementation `MaskedFFTRegistrationTest` file. You can find the source code here: 
+    """ Masked translation registration should behave like in the original 
+    publication """
+    # Test translated from MATLABimplementation `MaskedFFTRegistrationTest` 
+    # file. You can find the source code here: 
     # http://www.dirkpadfield.com/Home/MaskedFFTRegistrationCode.zip
 
     shifts = [(75, 75), (-130, 130), (130, 130)]
     for xi, yi in shifts:
         
-        fixed_image = imread(path.join(IMAGES_DIR, 'OriginalX{:d}Y{:d}.png'.format(xi, yi)))
-        moving_image = imread(path.join(IMAGES_DIR, 'TransformedX{:d}Y{:d}.png'.format(xi, yi)))
+        fixed_image = imread(path.join(
+            IMAGES_DIR, 'OriginalX{:d}Y{:d}.png'.format(xi, yi)))
+        moving_image = imread(path.join(
+            IMAGES_DIR, 'TransformedX{:d}Y{:d}.png'.format(xi, yi)))
 
         # Valid pixels are 1
         fixed_mask = (fixed_image != 0)
         moving_mask = (moving_image != 0)
 
         # Note that shifts in x and y and shifts in cols and rows
-        shift_y, shift_x = masked_register_translation(fixed_image, moving_image, fixed_mask, moving_mask, overlap_ratio = 1/10)
-        # NOTE: by looking at the test code from Padfield's MaskedFFTRegistrationCode repository,
-        #		the shifts were not xi and yi, but xi and -yi
+        shift_y, shift_x = masked_register_translation(fixed_image, 
+                                                       moving_image, 
+                                                       fixed_mask, 
+                                                       moving_mask, 
+                                                       overlap_ratio = 1/10)
+        # Note: by looking at the test code from Padfield's 
+        # MaskedFFTRegistrationCode repository, the 
+        # shifts were not xi and yi, but xi and -yi
         assert_equal((shift_x, shift_y), (-xi, yi))
 
 def test_cross_correlate_masked_output_shape():
