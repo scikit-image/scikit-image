@@ -403,7 +403,7 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
        Input degraded image (can be N dimensional).
 
     psf : ndarray, optional
-       A first estimate of the point spread function, same size as image
+       A first estimate of the point spread function, same size as image.
 
     iterations : int, optional
        Number of iterations. This parameter plays the role of
