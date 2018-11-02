@@ -333,10 +333,6 @@ the documentation.
     pip install sphinx_gallery
     pip install sphinx-copybutton
 
-`copybutton file <https://github.com/choldgraf/sphinx-copybutton/blob/master/sphinx_copybutton/_static/copybutton.css>`__ is modified to generate the online documentation by
-adding ``background: transparent no-repeat none; border: none;`` and
-adjusting ``margin: 0.5px; height: 1.6em; padding: 0 2px 0px;`` at ``a.copybtn``.
-
 **LaTeX Ubuntu:**
 
 .. code:: sh
