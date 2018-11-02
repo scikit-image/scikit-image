@@ -2,8 +2,120 @@ import numpy as np
 from .dtype import img_as_float
 
 
-__all__ = ['random_noise']
+__all__ = ['random_noise', 'blue_noise']
 
+def blue_noise(shape, radius=0.01, k=30, seed=None):
+    """
+    Function to add random noise of various types to a floating-point image.
+
+    Parameters
+    ----------
+
+    shape : tuple
+        Two-dimensional domain (width x height) over which to sample noise
+    radius : float
+        Minimum distance between samples
+    k : int
+        Limit of samples to choose before rejection (typically k = 30)
+    seed : int
+        If provided, this will set the random seed before generating noise,
+        for valid pseudo-random comparisons.
+
+    Notes:
+    ------
+
+    This function implements the method introduced in "Fast Poisson Disk
+    Sampling in Arbitrary Dimensions, Robert Bridson, Siggraph, 2007" for
+    generating (fast) blue noise.
+
+    See also:
+    ---------
+    https://github.com/scikit-image/scikit-image/issues/2380
+
+    """
+
+    def squared_distance(p0, p1):
+        return (p0[0]-p1[0])**2 + (p0[1]-p1[1])**2
+
+    def random_point_around(p, k=1):
+        # WARNING: This is not uniform around p but we can live with it
+        R = rng.uniform(radius, 2*radius, k)
+        T = rng.uniform(0, 2*np.pi, k)
+        P = np.empty((k, 2))
+        P[:, 0] = p[0]+R*np.sin(T)
+        P[:, 1] = p[1]+R*np.cos(T)
+        return P
+
+    def in_limits(p):
+        return 0 <= p[0] < width and 0 <= p[1] < height
+
+    def neighborhood(shape, index, n=2):
+        row, col = index
+        row0, row1 = max(row-n, 0), min(row+n+1, shape[0])
+        col0, col1 = max(col-n, 0), min(col+n+1, shape[1])
+        I = np.dstack(np.mgrid[row0:row1, col0:col1])
+        I = I.reshape(I.size//2, 2).tolist()
+        I.remove([row, col])
+        return I
+
+    def in_neighborhood(p):
+        i, j = int(p[0]/cellsize), int(p[1]/cellsize)
+        if M[i, j]:
+            return True
+        for (i, j) in N[(i, j)]:
+            if M[i, j] and squared_distance(p, P[i, j]) < squared_radius:
+                return True
+        return False
+
+    def add_point(p):
+        points.append(p)
+        i, j = int(p[0]/cellsize), int(p[1]/cellsize)
+        P[i, j], M[i, j] = p, True
+
+        
+    # When given a seed, we use a private random generator in order to not
+    # disturb the default and global random generator
+    if seed is not None:
+        from numpy.random.mtrand import RandomState
+        rng = RandomState(seed=seed)
+    else:
+        rng = np.random
+
+    # Get width and height
+    width, height = shape
+        
+    # Here 2 corresponds to the number of dimension
+    cellsize = radius/np.sqrt(2)
+    rows = int(np.ceil(width/cellsize))
+    cols = int(np.ceil(height/cellsize))
+
+    # Squared radius because we'll compare squared distance
+    squared_radius = radius*radius
+
+    # Positions cells
+    P = np.zeros((rows, cols, 2), dtype=np.float32)
+    M = np.zeros((rows, cols), dtype=bool)
+
+    # Cache generation for neighborhood
+    N = {}
+    for i in range(rows):
+        for j in range(cols):
+            N[(i, j)] = neighborhood(M.shape, (i, j), 2)
+
+    points = []
+    add_point((rng.uniform(width), rng.uniform(height)))
+    while len(points):
+        i = np.random.randint(len(points))
+        p = points[i]
+        del points[i]
+        Q = random_point_around(p, k)
+        for q in Q:
+            if in_limits(q) and not in_neighborhood(q):
+                add_point(q)
+
+    return P[M]
+
+    
 
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     """
