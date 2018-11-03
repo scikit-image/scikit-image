@@ -6,8 +6,8 @@ from ._geometric import (SimilarityTransform, AffineTransform,
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float)
+from .._shared.utils import (get_bound_method_class, safe_as_int, warn)
+from ..util.dtype import convert_to_float
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,

@@ -5,7 +5,6 @@ import numpy as np
 import types
 import numbers
 
-from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
@@ -216,27 +215,3 @@ def check_random_state(seed):
         return seed
     raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
                      ' instance' % seed)
-
-
-def convert_to_float(image, preserve_range):
-    """Convert input image to double image with the appropriate range.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    preserve_range : bool
-        Determines if the range of the image should be kept or transformed
-        using img_as_float. Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
-
-    Returns
-    -------
-    image : ndarray
-        Transformed version of the input.
-    """
-    if preserve_range:
-        image = image.astype(np.double)
-    else:
-        image = img_as_float(image)
-    return image

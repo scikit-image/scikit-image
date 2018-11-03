@@ -3,8 +3,9 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
+from ..util.dtype import convert_to_float
 from ..color import guess_spatial_dimensions
-from .._shared.utils import warn, convert_to_float
+from .._shared.utils import warn
 
 
 __all__ = ['gaussian']
