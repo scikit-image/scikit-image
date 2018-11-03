@@ -19,16 +19,27 @@ def test_otsu_edge_case():
     # This is an edge case that causes OTSU to appear to misbehave
     # Pixel [1, 1] may take a value of of 41 or 81. Both should be considered
     # valid. The value will change depending on the particular implementation
-    # of OTSU. It also may depend on how the compiler chooses to optimize
-    # the order of the operations.
-    img = np.array([[  0,  41,   0],
-                    [ 30,  81, 106],
-                    [  0, 147,   0]], dtype=np.uint8)
+    # of OTSU.
+    # To better understand, see
+    # https://mybinder.org/v2/gist/hmaarrfk/4afae1cfded1d78e44c9e4f58285d552/master
+
     selem = np.array([[0, 1, 0],
                       [1, 1, 1],
                       [0, 1, 0]], dtype=np.uint8)
-    otsu = rank.otsu(img, selem)
-    assert otsu[1, 1] in [41, 81]
+
+    img = np.array([[  0,  41,   0],
+                    [ 30,  81, 106],
+                    [  0, 147,   0]], dtype=np.uint8)
+
+    result = rank.otsu(img, selem)
+    assert result[1, 1] in [41, 81]
+
+    img = np.array([[  0, 214,   0],
+                    [229, 104, 141],
+                    [  0, 172,   0]], dtype=np.uint8)
+    result = rank.otsu(img, selem)
+    assert result[1, 1] in [141, 172]
+
 
 
 class TestRank():
@@ -64,6 +75,10 @@ class TestRank():
                 # used.
                 assert result[3, 5] in [41, 81]
                 result[3, 5] = 81
+                # Pixel [19, 18] is also found to be problematic for the same
+                # reason.
+                assert result[19, 18] in [141, 172]
+                result[19, 18] = 172
                 assert_array_equal(expected, result)
             else:
                 assert_array_equal(expected, result)
