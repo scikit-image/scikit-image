@@ -317,7 +317,19 @@ Building docs
 -------------
 
 To build docs, run ``make`` from the ``doc`` directory. ``make help`` lists
-all targets.
+all targets. For example, to build the HTML documentation, you can run:
+
+.. code:: sh
+
+    make SPHINXOPTS= html
+
+Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
+To rebuild a full clean documentation, run:
+
+.. code:: sh
+
+    make clean
+    make SPHINXOPTS= html
 
 Requirements
 ~~~~~~~~~~~~
@@ -327,11 +339,12 @@ the documentation.
 
 **Sphinx:**
 
+Sphinx and other python packages needed to build the documentation
+can be installed using ``scikit-image/requirements/docs.txt`` file.
+
 .. code:: sh
 
-    pip install sphinx
-    pip install sphinx_gallery
-    pip install sphinx-copybutton
+    pip install -r requirements/docs.txt
 
 **LaTeX Ubuntu:**
 

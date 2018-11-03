@@ -298,3 +298,15 @@ div.sphx-glr-download a:hover {
 p.sphx-glr-signature a.reference.external {
   display: none !important;
 }
+
+a.copybtn {
+    background: transparent no-repeat none;
+    border:none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.5px !important;
+    width: 1em;
+    height: 1.6em !important;
+    padding: 0 2px 0px !important;
+  }
