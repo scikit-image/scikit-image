@@ -12,10 +12,10 @@ def blue_noise(shape, radius, k=30, seed=None):
     ----------
 
     shape : tuple
-        Two-dimensional domain (width x height) over which to sample noise
+        Two-dimensional domain (width x height) 
     radius : float
         Minimum distance between samples
-    k : int
+    k : int, optional
         Limit of samples to choose before rejection (typically k = 30)
     seed : int, optional
         If provided, this will set the random seed before generating noise,
@@ -25,117 +25,69 @@ def blue_noise(shape, radius, k=30, seed=None):
     ----------
 
     .. [1] Fast Poisson Disk Sampling in Arbitrary Dimensions, Robert Bridson,
-           Siggraph, 2007. :DOI: 10.1145/1278780.1278807
-
+           Siggraph, 2007. :DOI:`10.1145/1278780.1278807`
     """
 
-    def squared_distance(p0, p1):
-        """
-        Return squared Euclidean distance between p0 and p1
-        """
-        return (p0[0]-p1[0])**2 + (p0[1]-p1[1])**2
+    def sqdist(a, b):
+        """ Squared Euclidean distance """
+        dx, dy = a[0] - b[0], a[1] - b[1]
+        return dx * dx + dy * dy
 
-    
-    def random_point_around(p, radius, k=1):
-        """ 
-        Generate k random points around p within torus (radius, 2*radius)
-        """
-        
-        # WARNING: This is not uniform around p but we can live with it
-        R = rng.uniform(radius, 2*radius, k)
-        T = rng.uniform(0, 2*np.pi, k)
-        P = np.empty((k, 2))
-        P[:, 0] = p[0]+R*np.sin(T)
-        P[:, 1] = p[1]+R*np.cos(T)
-        return P
+    def grid_coords(p):
+        """ Return index of cell grid corresponding to p """
+        return int(floor(p[0] / cellsize)), int(floor(p[1] / cellsize))
 
-    def in_limits(p):
-        """
-        Checks if p is inside the provided rectangle [0,width]x[0,height]
-        """
-        
-        return 0 <= p[0] < width and 0 <= p[1] < height
+    def fits(p, radius):
+        """ Check whether p can be added to the queue """
 
-    
-    def neighborhood(shape, index, n=2):
-        """
-        Find neighborhood of size n for a given index
-         (relatively to array indices)
-        """
-        
-        row, col = index
-        row0, row1 = max(row-n, 0), min(row+n+1, shape[0])
-        col0, col1 = max(col-n, 0), min(col+n+1, shape[1])
-        I = np.dstack(np.mgrid[row0:row1, col0:col1])
-        I = I.reshape(I.size//2, 2).tolist()
-        I.remove([row, col])
-        return I
+        radius2 = radius*radius
+        gx, gy = grid_coords(p)
+        for x in range(max(gx - 2, 0), min(gx + 3, grid_width)):
+            for y in range(max(gy - 2, 0), min(gy + 3, grid_height)):
+                g = grid[x + y * grid_width]
+                if g is None:
+                    continue
+                if sqdist(p, g) <= radius2:
+                    return False
+        return True
 
-    def in_neighborhood(p, squared_radius):
-        """
-        Checks whether p is inside neighborhood defined by provided radius.
-        """
-        i, j = int(p[0]/cellsize), int(p[1]/cellsize)
-        if M[i, j]:
-            return True
-        for (i, j) in N[(i, j)]:
-            if M[i, j] and squared_distance(p, P[i, j]) < squared_radius:
-                return True
-        return False
-
-    def add_point(p):
-        """
-        Add a new sample to the list of samples
-        """
-        points.append(p)
-        i, j = int(p[0]/cellsize), int(p[1]/cellsize)
-        P[i, j], M[i, j] = p, True
-
-        
     # When given a seed, we use a private random generator in order to not
-    # disturb the default and global random generator
+    # disturb the default global random generator
     if seed is not None:
         from numpy.random.mtrand import RandomState
         rng = RandomState(seed=seed)
     else:
         rng = np.random
-
-    # Get width and height
+    
     width, height = shape
-        
-    # Here 2 corresponds to the number of dimension
-    cellsize = radius/np.sqrt(2)
-    rows = int(np.ceil(width/cellsize))
-    cols = int(np.ceil(height/cellsize))
+    cellsize = radius / sqrt(2)
+    grid_width = int(ceil(width / cellsize))
+    grid_height = int(ceil(height / cellsize))
+    grid = [None] * (grid_width * grid_height)
 
-    # Squared radius because we'll only compare squared distances
-    squared_radius = radius*radius
+    p = rng.uniform(0,shape, 2)
+    queue = [p]
+    grid_x, grid_y = grid_coords(p)
+    grid[grid_x + grid_y * grid_width] = p
 
-    # Cell position
-    P = np.zeros((rows, cols, 2), dtype=np.float32)
+    while queue:
+        qi = rng.randint(len(queue))
+        qx, qy = queue[qi]
+        queue[qi] = queue[-1]
+        queue.pop()
+        for _ in range(k):
 
-    # Cell validity
-    M = np.zeros((rows, cols), dtype=bool)
+            # WARNING: p is not uniform sampled but we can live with it here
+            theta = 2*pi*rng.uniform()
+            r = radius * (rng.uniform() + 1)
+            p = qx + r * cos(theta), qy + r * sin(theta)
+            if not (0 <= p[0] < width and 0 <= p[1] < height) or not fits(p, radius):
+                continue
+            queue.append(p)
+            gx, gy = grid_coords(p)
+            grid[gx + gy * grid_width] = p
 
-    # Neighborhood computation
-    N = {}
-    for i in range(rows):
-        for j in range(cols):
-            N[(i, j)] = neighborhood(M.shape, (i, j), 2)
-
-
-    points = []
-    add_point((rng.uniform(width), rng.uniform(height)))
-    while len(points):
-        i = np.random.randint(len(points))
-        p = points[i]
-        del points[i]
-        Q = random_point_around(p, radius, k)
-        for q in Q:
-            if in_limits(q) and not in_neighborhood(q, squared_radius):
-                add_point(q)
-
-    return P[M]
+    return np.array([p for p in grid if p is not None])
     
 
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
