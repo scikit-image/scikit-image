@@ -57,7 +57,7 @@ builtins.__SKIMAGE_SETUP__ = True
 
 # Support for openmp
 
-compile_flags = ['-fopenmp']
+compile_flags = ['-fopenmp', '-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION']
 link_flags = ['-fopenmp']
 
 code = """#include <omp.h>
