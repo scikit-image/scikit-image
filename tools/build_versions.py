@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from pathlib import Path
-import requirements
 import pkg_resources
+import re
 
 
 def main():
@@ -10,13 +10,17 @@ def main():
 
     for requirement_file in requirements_dir.glob('*.txt'):
         print(requirement_file.name)
-        with open(str(requirement_file), 'r') as fd:
-            for req in requirements.parse(fd):
+        with open(str(requirement_file), 'r') as f:
+            for req in f:
+                req = req.strip()
+                if req[0] == '#':
+                    continue
+                req = re.split('<|>|=|!|;', req)[0]
                 try:
-                    version = pkg_resources.get_distribution(req.name).version
-                    print(req.name.rjust(20), version)
+                    version = pkg_resources.get_distribution(req).version
+                    print(req.rjust(20), version)
                 except pkg_resources.DistributionNotFound:
-                    print(req.name.rjust(20), 'is not installed')
+                    print(req.rjust(20), 'is not installed')
 
 
 if __name__ == '__main__':
