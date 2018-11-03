@@ -1,4 +1,6 @@
 import numpy as np
+from warnings import warn
+
 from . import _hoghistogram
 
 

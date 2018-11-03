@@ -1,6 +1,5 @@
 import numpy as np
 from .util import prepare_for_display, window_manager
-from ..._shared.utils import warn
 
 from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
                             QGridLayout)

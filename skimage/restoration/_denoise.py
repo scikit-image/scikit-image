@@ -2,9 +2,9 @@ import itertools
 import scipy.stats
 import numpy as np
 from math import ceil
+from warnings import warn
 from .. import img_as_float
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
-from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
@@ -112,11 +112,11 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                        "channels. Input image with shape {0} has {1} channels "
                        "in last axis. ``denoise_bilateral`` is implemented "
                        "for 2D grayscale and color images only")
-                warn(msg.format(image.shape, image.shape[2]))
+                warn(msg.format(image.shape, image.shape[2]), stacklevel=2)
             else:
                 msg = "Input image must be grayscale, RGB, or RGBA; " \
                       "but has shape {0}."
-                warn(msg.format(image.shape))
+                warn(msg.format(image.shape), stacklevel=2)
     else:
         if image.ndim > 2:
             raise ValueError("Bilateral filter is not implemented for "
@@ -498,7 +498,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     if not wavelet.orthogonal:
         warn(("Wavelet thresholding was designed for use with orthogonal "
               "wavelets. For nonorthogonal wavelets such as {}, results are "
-              "likely to be suboptimal.").format(wavelet.name))
+              "likely to be suboptimal.").format(wavelet.name), stacklevel=2)
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
@@ -525,7 +525,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
 
     if method is not None and threshold is not None:
         warn(("Thresholding method {} selected.  The user-specified threshold "
-              "will be ignored.").format(method))
+              "will be ignored.").format(method), stacklevel=2)
 
     if threshold is None:
         var = sigma**2
@@ -754,7 +754,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
         msg = ("image is size {0} on the last axis, but multichannel is "
                "False.  If this is a color image, please set multichannel "
                "to True for proper noise estimation.")
-        warn(msg.format(image.shape[-1]))
+        warn(msg.format(image.shape[-1]), stacklevel=2)
     coeffs = pywt.dwtn(image, wavelet='db2')
     detail_coeffs = coeffs['d' * image.ndim]
     return _sigma_est_dwt(detail_coeffs, distribution='Gaussian')

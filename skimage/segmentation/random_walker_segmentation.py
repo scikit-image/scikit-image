@@ -10,8 +10,7 @@ significantly the performance.
 
 import numpy as np
 from scipy import sparse, ndimage as ndi
-
-from .._shared.utils import warn
+from warnings import warn
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -401,12 +400,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
              ' rebuilding SciPy with UMFPACK; this will greatly '
              'accelerate the conjugate gradient ("cg") solver. '
              'You may also install pyamg and run the random_walker '
-             'function in "cg_mg" mode (see docstring).')
+             'function in "cg_mg" mode (see docstring).', stacklevel=2)
 
     if (labels != 0).all():
         warn('Random walker only segments unlabeled areas, where '
              'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.')
+             'found. Returning provided labels.', stacklevel=2)
 
         return _unchanged_labels(labels, return_full_prob)
 
@@ -493,7 +492,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         if not amg_loaded:
             warn("""pyamg (http://pyamg.github.io/)) is needed to use
                 this mode, but is not installed. The 'cg' mode will be used
-                instead.""")
+                instead.""", stacklevel=2)
             X = _solve_cg(lap_sparse, B, tol=tol,
                           return_full_prob=return_full_prob)
         else:

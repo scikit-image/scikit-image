@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage as ndi
-from .._shared.utils import warn
+from warnings import warn
+
 from . import _marching_cubes_classic_cy
 
 

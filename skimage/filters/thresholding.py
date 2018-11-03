@@ -4,8 +4,10 @@ import numpy as np
 from scipy import ndimage as ndi
 from collections import OrderedDict
 from collections.abc import Iterable
+from warnings import warn
+
 from ..exposure import histogram
-from .._shared.utils import check_nD, warn, deprecated
+from .._shared.utils import check_nD
 from ..transform import integral_image
 from ..util import crop, dtype_limits
 from ..filters._multiotsu import _find_threshold_multiotsu
@@ -273,7 +275,7 @@ def threshold_otsu(image, nbins=256):
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
-        warn(msg.format(image.shape))
+        warn(msg.format(image.shape), stacklevel=2)
 
     # Check if the image is multi-colored or not
     if image.min() == image.max():

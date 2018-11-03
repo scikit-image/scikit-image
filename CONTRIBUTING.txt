@@ -478,7 +478,8 @@ that has to be changed to
 
     def a_function(image, rescale=None):
         if rescale is None:
-            warn('The default value of rescale will change to `False` in version N+3')
+            warn('The default value of rescale will change to `False` in '
+                 'version N+3', stacklevel=2)
             rescale = True
         out = do_something(image, rescale=rescale)
         return out

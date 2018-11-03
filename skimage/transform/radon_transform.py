@@ -61,7 +61,7 @@ def radon(image, theta=None, circle=True):
         reconstruction_circle = reconstruction_circle <= radius ** 2
         if not np.all(reconstruction_circle | (image == 0)):
             warn('Radon transform: image must be zero outside the '
-                 'reconstruction circle')
+                 'reconstruction circle', stacklevel=2)
         # Crop image to make it square
         slices = []
         for d in (0, 1):

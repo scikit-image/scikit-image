@@ -1,8 +1,8 @@
 import numpy as np
+from warnings import warn
 
 from ..color import rgb2gray
 from ..util.dtype import dtype_range, dtype_limits
-from .._shared.utils import warn
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
@@ -123,7 +123,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     if len(sh) == 3 and sh[-1] < 4:
         warn("This might be a color image. The histogram will be "
              "computed on the flattened image. You can instead "
-             "apply this function to each color channel.")
+             "apply this function to each color channel.", stacklevel=2)
 
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.

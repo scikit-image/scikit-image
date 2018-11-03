@@ -51,6 +51,7 @@ References
 import functools
 import numpy as np
 from scipy import ndimage as ndi
+from warnings import warn
 from ...util import img_as_ubyte
 from ..._shared.utils import check_nD, warn
 
@@ -71,7 +72,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
                    .format(image.dtype))
-        warn(message, stacklevel=2)
+        warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
@@ -107,7 +108,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         warn("Bad rank filter performance is expected due to a "
              "large number of bins ({}), equivalent to an approximate "
              "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
-             stacklevel=2)
+             stacklevel=3)
 
     return image, selem, out, mask, n_bins
 

@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 import numpy as np
-from .._shared.utils import warn
+from warnings import warn
 
 cimport numpy as cnp
 
@@ -371,8 +371,8 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
         # use the full connectivity by default
         connectivity = ndim
     elif neighbors is not None:
-        DeprecationWarning("The argument 'neighbors' is deprecated, use "
-                           "'connectivity' instead")
+        warn(DeprecationWarning("The argument 'neighbors' is deprecated, use "
+                                "'connectivity' instead"), stacklevel=2)
         # backwards-compatible neighbors recalc to connectivity,
         if neighbors == 4:
             connectivity = 1

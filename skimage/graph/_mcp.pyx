@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn
+from warnings import warn
 
 cimport numpy as cnp
 from . cimport heap
@@ -305,7 +305,7 @@ cdef class MCP:
         except TypeError:
             self.flat_costs = costs.astype(FLOAT_D).flatten('F')
             warn('Upgrading NumPy should decrease memory usage and increase'
-                 ' speed.')
+                 ' speed.', stacklevel=2)
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
         self.dim = len(costs.shape)

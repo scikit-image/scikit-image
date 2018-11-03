@@ -6,10 +6,10 @@ import types
 import numbers
 
 from ..util import img_as_float
-from ._warnings import all_warnings, warn
+from ._warnings import all_warnings
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
+           'safe_as_int', 'check_nD', 'check_shape_equality']
 
 
 class skimage_deprecation(Warning):

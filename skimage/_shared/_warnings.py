@@ -3,16 +3,7 @@ import sys
 import warnings
 import re
 
-__all__ = ['all_warnings', 'expected_warnings', 'warn']
-
-
-def warn(message, category=None, stacklevel=2):
-    """A version of `warnings.warn` with a default stacklevel of 2.
-    """
-    if category is not None:
-        warnings.warn(message, category=category, stacklevel=stacklevel)
-    else:
-        warnings.warn(message, stacklevel=stacklevel)
+__all__ = ['all_warnings', 'expected_warnings']
 
 
 @contextmanager
@@ -24,7 +15,7 @@ def all_warnings():
     --------
     >>> import warnings
     >>> def foo():
-    ...     warnings.warn(RuntimeWarning("bar"))
+    ...     warnings.warn(RuntimeWarning("bar"), stacklevel=2)
 
     We raise the warning once, while the warning filter is set to "once".
     Hereafter, the warning is invisible, even with custom filters:

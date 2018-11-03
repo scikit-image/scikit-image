@@ -1,10 +1,10 @@
 import numpy as np
+from warnings import warn
 
 from ..io.manage_plugins import call_plugin
 from ..color import rgb2gray
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
-from .._shared.utils import warn
 
 
 __all__ = ['imread', 'imsave', 'imshow', 'show',
@@ -125,9 +125,10 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if check_contrast and is_low_contrast(arr):
-        warn('%s is a low contrast image' % fname)
+        warn('%s is a low contrast image' % fname, stacklevel=2)
     if arr.dtype == bool:
-        warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
+        warn('%s is a boolean image: setting True to 1 and False to 0' % fname,
+             stacklevel=2)
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 

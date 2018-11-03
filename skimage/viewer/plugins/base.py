@@ -90,7 +90,8 @@ class Plugin(QtWidgets.QDialog):
             self.image_filter = image_filter
         elif image_filter is not None:
             warn("If the Plugin class defines an `image_filter` method, "
-                 "then the `image_filter` argument is ignored.")
+                 "then the `image_filter` argument is ignored.",
+                 stacklevel=2)
 
         self.setWindowTitle(self.name)
         self.layout = QtWidgets.QGridLayout(self)

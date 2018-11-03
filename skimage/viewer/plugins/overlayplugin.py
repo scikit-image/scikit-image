@@ -34,7 +34,7 @@ class OverlayPlugin(Plugin):
     def __init__(self, **kwargs):
         if not is_installed('matplotlib', '>=1.2'):
             msg = "Matplotlib >= 1.2 required for OverlayPlugin."
-            warn(RuntimeWarning(msg))
+            warn(RuntimeWarning(msg), stacklevel=2)
         super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None

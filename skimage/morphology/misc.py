@@ -2,7 +2,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn
+from warnings import warn
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -130,7 +130,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     if len(component_sizes) == 2 and out.dtype != bool:
         warn("Only one label was provided to `remove_small_objects`. "
-             "Did you mean to use a boolean array?")
+             "Did you mean to use a boolean array?", stacklevel=2)
 
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]
@@ -203,7 +203,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     # Creates warning if image is an integer image
     if ar.dtype != bool:
         warn("Any labeled images will be returned as a boolean array. "
-             "Did you mean to use a boolean array?", UserWarning)
+             "Did you mean to use a boolean array?", UserWarning, stacklevel=2)
 
     if in_place:
         out = ar

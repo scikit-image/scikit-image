@@ -1,9 +1,10 @@
 from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
+from warnings import warn
 
 from ..util import img_as_float
-from .._shared.utils import warn, convert_to_float
+from .._shared.utils import convert_to_float
 
 
 __all__ = ['gaussian']
@@ -102,7 +103,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB "
                "by default. Use `multichannel=False` to interpret as "
                "3D image with last dimension of length 3.")
-        warn(RuntimeWarning(msg))
+        warn(RuntimeWarning(msg), stacklevel=2)
         multichannel = True
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")

@@ -1,12 +1,13 @@
 import numpy as np
 from scipy import ndimage as ndi
+from warnings import warn
 
 from ._geometric import (SimilarityTransform, AffineTransform,
                          ProjectiveTransform, _to_ndimage_mode)
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
-from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
+from .._shared.utils import (get_bound_method_class, safe_as_int,
                              convert_to_float)
 
 HOMOGRAPHY_TRANSFORMS = (
@@ -114,7 +115,7 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
                                  "greater than or equal to zero")
             elif np.any((anti_aliasing_sigma > 0) & (factors <= 1)):
                 warn("Anti-aliasing standard deviation greater than zero but "
-                     "not down-sampling along all axes")
+                     "not down-sampling along all axes", stacklevel=2)
 
         # Translate modes used by np.pad to those used by ndi.gaussian_filter
         np_pad_to_ndimage = {
@@ -820,7 +821,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
              "around SciPy's interpolation functions, which itself "
              "is not verified to be a correct implementation. Until "
              "skimage's implementation is fixed, we recommend "
-             "to use bi-linear or bi-cubic interpolation instead.")
+             "to use bi-linear or bi-cubic interpolation instead.",
+             stacklevel=2)
 
     if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input

@@ -1,6 +1,5 @@
 import numpy as np
-
-from .._shared.utils import warn
+from warnings import warn
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
@@ -85,7 +84,7 @@ def unwrap_phase(image, wrap_around=False, seed=None):
     if image.ndim in (2, 3) and 1 in image.shape:
         warn('Image has a length 1 dimension. Consider using an '
              'array of lower dimensionality to use a more efficient '
-             'algorithm')
+             'algorithm', stacklevel=2)
 
     if np.ma.isMaskedArray(image):
         mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])

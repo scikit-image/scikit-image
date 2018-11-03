@@ -1,8 +1,8 @@
 import itertools
+from warnings import warn
 
 import numpy as np
 
-from .._shared.utils import warn
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
@@ -158,7 +158,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
             raise ValueError("`image` and `label` must be the same shape")
 
         if image.min() < 0:
-            warn("Negative intensities in `image` are not supported")
+            warn("Negative intensities in `image` are not supported",
+                 stacklevel=2)
 
         image = img_as_float(rgb2gray(image))
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)

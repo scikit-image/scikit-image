@@ -1,7 +1,7 @@
 import numpy as np
+from warnings import warn
 
 from . import polygon as draw_polygon, circle as draw_circle
-from .._shared.utils import warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -347,7 +347,7 @@ def random_shapes(image_shape,
                 break
         else:
             warn('Could not fit any shapes to image, '
-                 'consider reducing the minimum dimension')
+                 'consider reducing the minimum dimension', stacklevel=2)
 
     if not multichannel:
         image = np.squeeze(image, axis=2)
