@@ -1,11 +1,14 @@
 """
-==================
-Blue noise samples
-==================
+==========
+Blue noise
+==========
 
 Blue noise refers to sample sets that have random and yet uniform distributions
 with absence of any spectral bias. Such noise is very useful in a variety of
 graphics applications like rendering, dithering, stippling, etc.
+
+This example shows the difference between uniform, grid jittered and blue noise
+sampling.
 """
 import numpy as np
 import matplotlib.pyplot as plt
