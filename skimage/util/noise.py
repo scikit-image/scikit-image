@@ -4,7 +4,7 @@ from .dtype import img_as_float
 
 __all__ = ['random_noise', 'blue_noise']
 
-def blue_noise(shape, radius=0.01, k=30, seed=None):
+def blue_noise(shape, radius, k=30, seed=None):
     """
     Generate blue noise over a two-dimensional rectangle of size (width,height)
 
@@ -49,13 +49,14 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         P[:, 1] = p[1]+R*np.cos(T)
         return P
 
-    def in_limits(p, width, height):
+    def in_limits(p):
         """
         Checks if p is inside the provided rectangle [0,width]x[0,height]
         """
         
         return 0 <= p[0] < width and 0 <= p[1] < height
 
+    
     def neighborhood(shape, index, n=2):
         """
         Find neighborhood of size n for a given index
@@ -110,15 +111,18 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
     # Squared radius because we'll only compare squared distances
     squared_radius = radius*radius
 
-    # Positions cells
+    # Cell position
     P = np.zeros((rows, cols, 2), dtype=np.float32)
+
+    # Cell validity
     M = np.zeros((rows, cols), dtype=bool)
 
-    # Cache generation for neighborhood
+    # Neighborhood computation
     N = {}
     for i in range(rows):
         for j in range(cols):
             N[(i, j)] = neighborhood(M.shape, (i, j), 2)
+
 
     points = []
     add_point((rng.uniform(width), rng.uniform(height)))
@@ -128,11 +132,10 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         del points[i]
         Q = random_point_around(p, radius, k)
         for q in Q:
-            if in_limits(q, width, height) and not in_neighborhood(q, radius):
+            if in_limits(q) and not in_neighborhood(q, squared_radius):
                 add_point(q)
 
     return P[M]
-
     
 
 def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
