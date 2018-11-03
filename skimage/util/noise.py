@@ -6,7 +6,7 @@ __all__ = ['random_noise', 'blue_noise']
 
 def blue_noise(shape, radius=0.01, k=30, seed=None):
     """
-    Function to add random noise of various types to a floating-point image.
+    Generate blue noise over a two-dimensional rectangle of size (width,height)
 
     Parameters
     ----------
@@ -17,27 +17,30 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         Minimum distance between samples
     k : int
         Limit of samples to choose before rejection (typically k = 30)
-    seed : int
+    seed : int, optional
         If provided, this will set the random seed before generating noise,
         for valid pseudo-random comparisons.
 
-    Notes:
-    ------
+    References
+    ----------
 
-    This function implements the method introduced in "Fast Poisson Disk
-    Sampling in Arbitrary Dimensions, Robert Bridson, Siggraph, 2007" for
-    generating (fast) blue noise.
-
-    See also:
-    ---------
-    https://github.com/scikit-image/scikit-image/issues/2380
+    .. [1] Fast Poisson Disk Sampling in Arbitrary Dimensions, Robert Bridson,
+           Siggraph, 2007. :DOI: 10.1145/1278780.1278807
 
     """
 
     def squared_distance(p0, p1):
+        """
+        Return squared Euclidean distance between p0 and p1
+        """
         return (p0[0]-p1[0])**2 + (p0[1]-p1[1])**2
 
-    def random_point_around(p, k=1):
+    
+    def random_point_around(p, radius, k=1):
+        """ 
+        Generate k random points around p within torus (radius, 2*radius)
+        """
+        
         # WARNING: This is not uniform around p but we can live with it
         R = rng.uniform(radius, 2*radius, k)
         T = rng.uniform(0, 2*np.pi, k)
@@ -46,10 +49,19 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         P[:, 1] = p[1]+R*np.cos(T)
         return P
 
-    def in_limits(p):
+    def in_limits(p, width, height):
+        """
+        Checks if p is inside the provided rectangle [0,width]x[0,height]
+        """
+        
         return 0 <= p[0] < width and 0 <= p[1] < height
 
     def neighborhood(shape, index, n=2):
+        """
+        Find neighborhood of size n for a given index
+         (relatively to array indices)
+        """
+        
         row, col = index
         row0, row1 = max(row-n, 0), min(row+n+1, shape[0])
         col0, col1 = max(col-n, 0), min(col+n+1, shape[1])
@@ -58,7 +70,10 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         I.remove([row, col])
         return I
 
-    def in_neighborhood(p):
+    def in_neighborhood(p, squared_radius):
+        """
+        Checks whether p is inside neighborhood defined by provided radius.
+        """
         i, j = int(p[0]/cellsize), int(p[1]/cellsize)
         if M[i, j]:
             return True
@@ -68,6 +83,9 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         return False
 
     def add_point(p):
+        """
+        Add a new sample to the list of samples
+        """
         points.append(p)
         i, j = int(p[0]/cellsize), int(p[1]/cellsize)
         P[i, j], M[i, j] = p, True
@@ -89,7 +107,7 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
     rows = int(np.ceil(width/cellsize))
     cols = int(np.ceil(height/cellsize))
 
-    # Squared radius because we'll compare squared distance
+    # Squared radius because we'll only compare squared distances
     squared_radius = radius*radius
 
     # Positions cells
@@ -108,9 +126,9 @@ def blue_noise(shape, radius=0.01, k=30, seed=None):
         i = np.random.randint(len(points))
         p = points[i]
         del points[i]
-        Q = random_point_around(p, k)
+        Q = random_point_around(p, radius, k)
         for q in Q:
-            if in_limits(q) and not in_neighborhood(q):
+            if in_limits(q, width, height) and not in_neighborhood(q, radius):
                 add_point(q)
 
     return P[M]
