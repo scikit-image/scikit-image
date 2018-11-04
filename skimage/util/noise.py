@@ -1,5 +1,6 @@
 import numpy as np
 from .dtype import img_as_float
+from math import cos, sin, floor, sqrt, pi, ceil
 
 
 __all__ = ['random_noise', 'blue_noise']
@@ -65,7 +66,7 @@ def blue_noise(shape, radius, k=30, seed=None):
     grid_height = int(ceil(height / cellsize))
     grid = [None] * (grid_width * grid_height)
 
-    p = rng.uniform(0,shape, 2)
+    p = rng.uniform(0, shape, 2)
     queue = [p]
     grid_x, grid_y = grid_coords(p)
     grid[grid_x + grid_y * grid_width] = p
@@ -76,10 +77,8 @@ def blue_noise(shape, radius, k=30, seed=None):
         queue[qi] = queue[-1]
         queue.pop()
         for _ in range(k):
-
-            # WARNING: p is not uniform sampled but we can live with it here
-            theta = 2*pi*rng.uniform()
-            r = radius * (rng.uniform() + 1)
+            theta = rng.uniform(0,2*pi)
+            r = radius * np.sqrt(rng.uniform(1, 4))
             p = qx + r * cos(theta), qy + r * sin(theta)
             if not (0 <= p[0] < width and 0 <= p[1] < height) or not fits(p, radius):
                 continue
