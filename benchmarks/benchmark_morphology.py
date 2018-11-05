@@ -39,7 +39,6 @@ class Watershed(object):
                              compactness=compactness)
 
 
-
 class Skeletonize3d(object):
 
     def setup(self, *args):

@@ -28,7 +28,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_greyreconstruct', sources=['_greyreconstruct.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_skeletonize_3d_cy', sources=['_skeletonize_3d_cy.cpp'],
+    config.add_extension('_skeletonize_3d_cy',
+                         sources=['_skeletonize_3d_cy.cpp'],
                          include_dirs=[get_numpy_include_dirs()],
                          language='c++')
     config.add_extension('_extrema_cy', sources=['_extrema_cy.c'],
