@@ -24,9 +24,9 @@ def main():
                 # Get the name of the package
                 req = re.split('<|>|=|!|;', req)[0]
                 try:
-                    # use pkg_resources to reliably get the version at install time
-                    # by package name. pkg_resources needs the name of the package
-                    # from pip, and not "import". 
+                    # use pkg_resources to reliably get the version at install
+                    # time by package name. pkg_resources needs the name of the
+                    # package from pip, and not "import".
                     # e.g. req is 'scikit-learn', not 'sklearn'
                     version = pkg_resources.get_distribution(req).version
                     print(req.rjust(20), version)
