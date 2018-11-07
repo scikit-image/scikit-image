@@ -26,10 +26,25 @@ ctypedef fused uint32_or_float64:
     cnp.uint32_t
     cnp.float64_t
 
+ctypedef fused any_int_or_float:
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.float32_t
+    cnp.float64_t
+
+
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
                uint32_or_float64[:, :, :, ::1] out,
-               bint symmetric):
+               uint32_or_float64[:, ::1] out_total,
+               bint symmetric,
+               bint normed):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -48,24 +63,33 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
     out : ndarray
         On input a 4D array of zeros, and on output it contains
         the results of the GLCM computation.
+    out_total: ndarray
+        On input a 2D array of zeros. On output, if normed is True,
+        it contains the totals used to normalise for each given offset.
     symmetric : boolean
         If True, the output matrix `P[:, :, d, theta]` is symmetric.
-
+    normed:
+        If True, normalize `out` by dividing by the total number of
+        accumulated co-occurrences for the given offset. The elements
+        of the resulting matrix sum to 1.
     """
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col, start_row,\
-                   end_row, start_col, end_col, offset_row, offset_col
+                   end_row, start_col, end_col, offset_row, offset_col,\
+                   idx, jdx
         any_int i, j
         cnp.float64_t angle, distance
+    num_dist = distances.shape[0]
+    num_angle = angles.shape[0]
 
     with nogil:
         rows = image.shape[0]
         cols = image.shape[1]
 
-        for a_idx in range(angles.shape[0]):
+        for a_idx in range(num_angle):
             angle = angles[a_idx]
-            for d_idx in range(distances.shape[0]):
+            for d_idx in range(num_dist):
                 distance = distances[d_idx]
                 offset_row = <int>round(sin(angle) * distance)
                 offset_col = <int>round(cos(angle) * distance)
@@ -82,9 +106,21 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                         j = image[row, col]
                         if 0 <= i < levels and 0 <= j < levels:
                             out[i, j, d_idx, a_idx] += 1
+                            if normed:
+                                out_total[d_idx, a_idx] += 1
                             # make each GLMC symmetric if needed
                             if symmetric:
                                 out[j, i, d_idx, a_idx] += 1
+                                if normed:
+                                    out_total[d_idx, a_idx] += 1
+        if normed:
+            # normalize each GLMC
+            for d_idx in range(num_dist):
+                for a_idx in range(num_angle):
+                    if out_total[d_idx, a_idx] != 0:
+                        for idx in range(levels):
+                            for jdx in range(levels):
+                                out[idx, jdx, d_idx, a_idx] /= out_total[d_idx, a_idx]
 
 
 cdef inline int _bit_rotate_right(int value, int length) nogil:
@@ -367,3 +403,127 @@ cpdef int _multiblock_lbp(float[:, ::1] int_image,
         lbp_code |= has_greater_value << (7 - element_num)
 
     return lbp_code
+
+
+def _glcm_norm(cnp.float64_t[:,:,:,::1] P,
+               Py_ssize_t num_level,
+               Py_ssize_t num_dist,
+               Py_ssize_t num_angle):
+    """Perform co-occurrence matrix normalisation.
+
+    Parameters
+    ----------
+    P : float64 array
+        Input array. `P` is the grey-level co-occurrence histogram
+        for which to compute the specified property. The value
+        `P[i,j,d,theta]` is the number of times that grey-level j
+        occurs at a distance d and at an angle theta from
+        grey-level i.
+    num_level: int
+    num_dist: int
+    num_angle: int
+        Input array P should be of shape
+        [num_level,num_level,num_dist,num_angle]
+    """
+
+    cdef:
+        Py_ssize_t a_idx, d_idx, idx, jdx
+        cnp.float64_t acc
+
+    with nogil:
+        # normalize each GLMC
+        for d_idx in range(num_dist):
+            for a_idx in range(num_angle):
+                acc = 0.0
+                for idx in range(num_level):
+                    for jdx in range(num_level):
+                        acc += P[idx, jdx, d_idx, a_idx]
+                if acc != 0.0:
+                    for idx in range(num_level):
+                        for jdx in range(num_level):
+                            P[idx, jdx, d_idx, a_idx] /= acc
+
+
+def _coprop_weights(cnp.float64_t[:, :, :, ::1] P,
+                    Py_ssize_t num_level,
+                    Py_ssize_t num_dist,
+                    Py_ssize_t num_angle,
+                    bint normed,
+                    str prop):
+    """Perform co-occurrence matrix normalisation if needed, and multiply by appropriate *weight* for `prop` in
+    ['contrast', 'dissimilarity', 'homogeneity']
+
+    Parameters
+    ----------
+    P : ndarray
+        Grey-level co-occurrence matrix, typically as output from `greycomatrix`.
+    num_level : int
+        The number of grey levels in the original image.
+    num_dist : int
+        Number of pixel pair distance offsets.
+    num_angle : int
+        Number of pixel pair angles.
+    normed : boolean
+        Flag if `P` is *already* normalised. Mirrors `normed` flag for `greycomatrix`.
+    prop : str
+        `prop` value from `greycoprops`. Should be one of 'contrast', 'dissimilarity' or 'homogeneity'.
+    """
+
+    cdef Py_ssize_t idx, jdx, a_idx, d_idx
+    cdef cnp.float64_t acc, weight, diff
+    cdef bint get_out
+    # The line below will cause an error if `prop` is inappropriate
+    cdef int i_prop = ['contrast', 'dissimilarity', 'homogeneity'].index(prop)
+    out = np.zeros((num_dist, num_angle), dtype=np.float64)
+    cdef double[:, ::1] out_view = out
+    weights = np.zeros((num_level, num_level), dtype=np.float64)
+    cdef double[:, ::1] weights_view = weights
+
+    with nogil:
+
+        for idx in range(num_level):
+            for jdx in range(num_level):
+                diff = idx - jdx
+                if i_prop == 2:
+                    # Reciprocal of actual weight to avoid an unnecessary extra division below
+                    weights_view[idx, jdx] = 1. + (diff * diff)
+                else:
+                    weights_view[idx, jdx] = diff * diff if i_prop == 0 else (diff if diff >= 0.0 else -diff)
+
+        for d_idx in range(num_dist):
+            for a_idx in range(num_angle):
+                # Accumulate sum of elements of `P` for this `d_idx` / `a_idx`.
+                # If `normed` is True, acc is used only as a flag to indicate whether
+                # the weights need applying for this `d_idx` / `a_idx`, hence if / break blocks.
+                acc = 0.0
+                for idx in range(num_level):
+                    for jdx in range(num_level):
+                        acc += P[idx, jdx, d_idx, a_idx]
+                        get_out = (normed and acc != 0)
+                        if get_out:
+                            break
+                    if get_out:
+                        break
+                # If acc is zero, every value in P for current d_idx and a_idx is also zero, so there's
+                # nothing more to do. This assumes that every value in P is zero or positive.
+                # We could test for the latter, but it would slow things down
+                if acc != 0.0:
+                    if i_prop == 2: # homogeneity
+                        if normed: # P is already normalised
+                            for idx in range(num_level):
+                                for jdx in range(num_level):
+                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] / weights_view[idx, jdx]
+                        else: # P not normalised
+                            for idx in range(num_level):
+                                for jdx in range(num_level):
+                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] / (acc * weights_view[idx, jdx])
+                    else: # contrast or dissimilarity
+                        if normed: # P is already normalised
+                            for idx in range(num_level):
+                                for jdx in range(num_level):
+                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx]
+                        else: # P not normalised
+                            for idx in range(num_level):
+                                for jdx in range(num_level):
+                                    out_view[d_idx, a_idx] += P[idx, jdx, d_idx, a_idx] * weights_view[idx, jdx] / acc
+    return out
