@@ -378,35 +378,41 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
-    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b, t
-    cdef double mu = 0.
+    cdef Py_ssize_t P, q1, mu1, mu2, mu = 0
+    cdef double sigma_b, max_sigma_b, t
 
     # compute local mean
     if pop:
         for i in range(n_bins):
             mu += histo[i] * i
-        mu = mu / pop
     else:
         out[0] = <dtype_t_out>0
+        return
+
 
     # maximizing the between class variance
     max_i = 0
-    q1 = histo[0] / pop
-    mu1 = 0.
+    q1 = histo[0]
+    mu1 = 0
     max_sigma_b = 0.
 
     for i in range(1, n_bins):
-        P = histo[i] / pop
-        new_q1 = q1 + P
-        if new_q1 > 0:
-            mu1 = (q1 * mu1 + i * P) / new_q1
-            mu2 = (mu - new_q1 * mu1) / (1. - new_q1)
-            t = mu1 - mu2
-            sigma_b = new_q1 * (1. - new_q1) * (t * t)
-            if sigma_b > max_sigma_b:
-                max_sigma_b = sigma_b
-                max_i = i
-            q1 = new_q1
+        P = histo[i]
+        if P == 0:
+            continue
+
+        q1 = q1 + P
+
+        if q1 == pop:
+            break
+
+        mu1 = mu1 + i * P
+        mu2 = mu - mu1
+        t = (pop - q1) * mu1 - mu2 * q1
+        sigma_b = (t * t) / (q1 * (pop - q1))
+        if sigma_b > max_sigma_b:
+            max_sigma_b = sigma_b
+            max_i = i
 
     out[0] = <dtype_t_out>max_i
 

@@ -1,5 +1,5 @@
 imread
-SimpleITK; python_version < '3.7'
+SimpleITK
 astropy
 tifffile
 qtpy
