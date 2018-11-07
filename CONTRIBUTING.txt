@@ -321,7 +321,7 @@ all targets. For example, to build the HTML documentation, you can run:
 
 .. code:: sh
 
-    make SPHINXOPTS= html
+    make html
 
 Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
 To rebuild a full clean documentation, run:
@@ -329,7 +329,7 @@ To rebuild a full clean documentation, run:
 .. code:: sh
 
     make clean
-    make SPHINXOPTS= html
+    make html
 
 Requirements
 ~~~~~~~~~~~~
