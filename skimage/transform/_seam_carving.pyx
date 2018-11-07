@@ -166,7 +166,7 @@ def _seam_carve_v(img, energy_map, iters, border):
     ----------
     .. [1] Shai Avidan and Ariel Shamir
            "Seam Carving for Content-Aware Image Resizing"
-           http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
+           https://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
     # This reference has been kept to be used for the `np.argsort` call
     last_row_obj = np.zeros(img.shape[1], dtype=np.float)

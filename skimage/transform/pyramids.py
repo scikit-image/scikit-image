@@ -157,7 +157,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     ----------
     image : ndarray
         Input image.
-    max_layer : int
+    max_layer : int, optional
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
     downscale : float, optional
@@ -240,7 +240,7 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     ----------
     image : ndarray
         Input image.
-    max_layer : int
+    max_layer : int, optional
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
     downscale : float, optional

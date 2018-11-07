@@ -234,7 +234,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikit-image.tex', u'The scikit-image Documentation',
+  ('index', 'scikit-image.tex', u'The scikit-image Documentation',
    u'scikit-image development team', 'manual'),
 ]
 
@@ -328,7 +328,7 @@ intersphinx_mapping = {
     'sklearn': ('http://scikit-learn.org/stable',
                 (None, './_intersphinx/sklearn-objects.inv')),
     'matplotlib': ('https://matplotlib.org/',
-                   (None, 'http://matplotlib.org/objects.inv'))
+                   (None, 'https://matplotlib.org/objects.inv'))
 }
 
 # ----------------------------------------------------------------------------
@@ -381,8 +381,8 @@ def linkcode_resolve(domain, info):
     fn = relpath(fn, start=dirname(skimage.__file__))
 
     if 'dev' in skimage.__version__:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "master/skimage/%s%s" % (fn, linespec))
     else:
-        return ("http://github.com/scikit-image/scikit-image/blob/"
+        return ("https://github.com/scikit-image/scikit-image/blob/"
                 "v%s/skimage/%s%s" % (skimage.__version__, fn, linespec))

@@ -17,6 +17,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      shape_index)
 from .template import match_template
 from .register_translation import register_translation
+from .masked_register_translation import masked_register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -54,6 +55,7 @@ __all__ = ['canny',
            'corner_orientations',
            'match_template',
            'register_translation',
+           'masked_register_translation',
            'BRIEF',
            'CENSURE',
            'ORB',

@@ -220,7 +220,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+    .. [1] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
     .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
 

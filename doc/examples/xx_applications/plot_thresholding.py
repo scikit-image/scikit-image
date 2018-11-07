@@ -108,7 +108,7 @@ plt.show()
 # which are separated by the threshold. Equivalently, this threshold minimizes
 # the intra-class variance.
 #
-# .. [2] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
 
 from skimage.filters import threshold_otsu

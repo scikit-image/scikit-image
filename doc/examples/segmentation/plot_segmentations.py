@@ -75,7 +75,7 @@ As with SLIC, there is an additional *compactness* argument that makes it
 harder for markers to flood faraway pixels. This makes the watershed regions
 more regularly shaped. [5]_
 
-.. [4] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+.. [4] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
 .. [5] Peer Neubert & Peter Protzel (2014). Compact Watershed and
        Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation

@@ -26,7 +26,7 @@ class SegmentationSuite:
 
         References
         ----------
-        .. [1]: http://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
         """
         pass
 

@@ -24,7 +24,7 @@ from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
 
 
-SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
@@ -167,7 +167,7 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|\A\Z']):
+    with expected_warnings([r'precision|\A\Z']):
         r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
@@ -178,7 +178,7 @@ def mono_check(plugin, fmt='png'):
         img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss|\A\Z']):
+        with expected_warnings([r'sign loss|\A\Z']):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:

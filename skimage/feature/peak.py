@@ -18,7 +18,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
         coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
     else:
         coord = np.column_stack(coord)
-    # Higest peak first
+    # Highest peak first
     return coord[::-1]
 
 

@@ -227,7 +227,7 @@ def _polygon(r, c, shape):
 
     cdef Py_ssize_t r_i, c_i
 
-    # make contigous arrays for r, c coordinates
+    # make contiguous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(r, dtype=np.double)
     contiguous_cdata = np.ascontiguousarray(c, dtype=np.double)

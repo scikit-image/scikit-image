@@ -14,7 +14,7 @@ The delta-E notation comes from the German word for "Sensation" (Empfindung).
 
 Reference
 ---------
-http://en.wikipedia.org/wiki/Color_difference
+https://en.wikipedia.org/wiki/Color_difference
 
 """
 
@@ -40,7 +40,7 @@ def deltaE_cie76(lab1, lab2):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] A. R. Robertson, "The CIE 1976 color-difference formulae,"
            Color Res. Appl. 2, 7-11 (1977).
     """
@@ -99,7 +99,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
     L1, C1 = np.rollaxis(lab2lch(lab1), -1)[:2]
@@ -151,7 +151,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
            :DOI:`10.1364/AO.33.008069`
     .. [3] M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent
@@ -277,7 +277,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     .. [3] F. J. J. Clarke, R. McDonald, and B. Rigg, "Modification to the
            JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132

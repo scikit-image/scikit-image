@@ -79,18 +79,18 @@ our `setup of AppVeyor`_ (a continuous integration service).
 .. _setup of AppVeyor: https://github.com/scikit-image/scikit-image/blob/master/.appveyor.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
-.. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+.. _virtual environments: https://docs.python-guide.org/en/latest/dev/virtualenvs/
 .. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
 b. Debian and Ubuntu
 ````````````````````
 Install all the required dependencies::
 
-  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
+  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy python3-tk
 
 Install suitable compilers::
 
-  sudo apt-get install build-essential cython
+  sudo apt-get install build-essential cython3
 
 Complete the general development installation instructions above.
 

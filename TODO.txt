@@ -25,6 +25,7 @@ Version 0.16
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
   * Remove the ``save-demo.jpg`` line from ``.gitignore``
+  * Remove the warning filter from ``conftest.py``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
@@ -44,6 +45,10 @@ Other
   for sparse matricies (``np.matrix``) used by scipy.sparse in
   ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
   moves away from using ``np.matrix`` in a future version too.
-* Monitor SimpleITK Pypi releases to find when a 3.7 release comes out.
-  Remove version restriction in requirements file when appropriate.
-  `https://github.com/SimpleITK/SimpleITK/issues/551`
+* When minimum supported version of ``scipy`` reaches 0.18, use 
+  ``scipy.fftpack.next_fast_len`` directly in 
+  ``skimage.feature.masked_register_translation``.
+* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
+  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
+  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
+  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.

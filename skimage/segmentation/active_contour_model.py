@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.linalg
 from scipy.interpolate import RectBivariateSpline
 from ..util import img_as_float
 from ..filters import sobel
@@ -23,15 +22,15 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     image : (N, M) or (N, M, 3) ndarray
         Input image.
     snake : (N, 2) ndarray
-        Initialisation coordinates of snake. For periodic snakes, it should
-        not include duplicate endpoints.
+        Initial snake coordinates. For periodic boundary conditions, endpoints
+        must not be duplicated.
     alpha : float, optional
         Snake length shape parameter. Higher values makes snake contract
         faster.
     beta : float, optional
         Snake smoothness shape parameter. Higher values makes snake smoother.
     w_line : float, optional
-        Controls attraction to brightness. Use negative values to attract to
+        Controls attraction to brightness. Use negative values to attract toward
         dark regions.
     w_edge : float, optional
         Controls attraction to edges. Use negative values to repel snake from
@@ -40,7 +39,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Explicit time stepping parameter.
     bc : {'periodic', 'free', 'fixed'}, optional
         Boundary conditions for worm. 'periodic' attaches the two ends of the
-        snake, 'fixed' holds the end-points in place, and'free' allows free
+        snake, 'fixed' holds the end-points in place, and 'free' allows free
         movement of the ends. 'fixed' and 'free' can be combined by parsing
         'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
         yields same behaviour as 'fixed' and 'free', respectively.
@@ -60,7 +59,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     ----------
     .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour
             models". International Journal of Computer Vision 1 (4): 321
-            (1988).
+            (1988). DOI:`10.1007/BF00133570`
 
     Examples
     --------
@@ -74,15 +73,15 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> img[rr, cc] = 1
     >>> img = gaussian(img, 2)
 
-    Initiliaze spline:
+    Initialize spline:
 
-    >>> s = np.linspace(0, 2*np.pi,100)
-    >>> init = 50*np.array([np.cos(s), np.sin(s)]).T+50
+    >>> s = np.linspace(0, 2*np.pi, 100)
+    >>> init = 50 * np.array([np.cos(s), np.sin(s)]).T + 50
 
     Fit spline to image:
 
     >>> snake = active_contour(img, init, w_edge=0, w_line=1) #doctest: +SKIP
-    >>> dist = np.sqrt((45-snake[:, 0])**2 +(35-snake[:, 1])**2) #doctest: +SKIP
+    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2) #doctest: +SKIP
     >>> int(np.mean(dist)) #doctest: +SKIP
     25
 
@@ -127,11 +126,11 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                img.T, kx=2, ky=2, s=0)
 
     x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
-    xsave = np.empty((convergence_order, len(x)))
-    ysave = np.empty((convergence_order, len(x)))
+    n = len(x)
+    xsave = np.empty((convergence_order, n))
+    ysave = np.empty((convergence_order, n))
 
     # Build snake shape matrix for Euler equation
-    n = len(x)
     a = np.roll(np.eye(n), -1, axis=0) + \
         np.roll(np.eye(n), -1, axis=1) - \
         2*np.eye(n)  # second order derivative, central difference

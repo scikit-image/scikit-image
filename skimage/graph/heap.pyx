@@ -183,7 +183,7 @@ cdef class BinaryHeap:
         return s
 
 
-    ## C Maintanance methods
+    ## C Maintenance methods
 
     cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) nogil:
         # init indexing ints

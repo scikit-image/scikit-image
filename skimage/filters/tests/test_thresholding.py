@@ -16,7 +16,8 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_triangle,
                                           threshold_minimum,
                                           try_all_threshold,
-                                          _mean_std)
+                                          _mean_std,
+                                          _cross_entropy)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
 
@@ -51,19 +52,18 @@ class TestSimpleImage():
         assert 2 <= threshold_otsu(image) < 3
 
     def test_li(self):
-        assert int(threshold_li(self.image)) == 2
+        assert 2 < threshold_li(self.image) < 3
 
     def test_li_negative_int(self):
         image = self.image - 2
-        assert int(threshold_li(image)) == 0
+        assert 0 < threshold_li(image) < 1
 
     def test_li_float_image(self):
-        image = np.float64(self.image)
-        assert 2 <= threshold_li(image) < 3
+        image = self.image.astype(float)
+        assert 2 < threshold_li(image) < 3
 
     def test_li_constant_image(self):
-        with testing.raises(ValueError):
-            threshold_li(np.ones((10, 10)))
+        assert threshold_li(np.ones((10, 10))) == 1.
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -216,23 +216,60 @@ def test_otsu_one_color_image():
 
 
 def test_li_camera_image():
-    camera = skimage.img_as_ubyte(data.camera())
-    assert 63 < threshold_li(camera) < 65
+    image = skimage.img_as_ubyte(data.camera())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 62 < threshold_li(image) < 63
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    assert ce_actual < _cross_entropy(image, threshold - 1)
 
 
 def test_li_coins_image():
-    coins = skimage.img_as_ubyte(data.coins())
-    assert 95 < threshold_li(coins) < 97
+    image = skimage.img_as_ubyte(data.coins())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 94 < threshold_li(image) < 95
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    # in the case of the coins image, the minimum cross-entropy is achieved one
+    # threshold below that found by the iterative method. Not sure why that is
+    # but `threshold_li` does find the stationary point of the function (ie the
+    # tolerance can be reduced arbitrarily but the exact same threshold is
+    # found), so my guess some kind of histogram binning effect.
+    assert ce_actual < _cross_entropy(image, threshold - 2)
 
 
 def test_li_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
-    assert 0.37 < threshold_li(coins) < 0.38
+    assert 94/255 < threshold_li(coins) < 95/255
 
 
 def test_li_astro_image():
-    img = skimage.img_as_ubyte(data.astronaut())
-    assert 66 < threshold_li(img) < 68
+    image = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 64 < threshold < 65
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    assert ce_actual < _cross_entropy(image, threshold - 1)
+
+
+def test_li_nan_image():
+    image = np.full((5, 5), np.nan)
+    assert np.isnan(threshold_li(image))
+
+
+def test_li_inf_image():
+    image = np.array([np.inf, np.nan])
+    assert threshold_li(image) == np.inf
+
+
+def test_li_inf_minus_inf():
+    image = np.array([np.inf, -np.inf])
+    assert threshold_li(image) == 0
+
+
+def test_li_constant_image_with_nan():
+    image = np.array([8, 8, 8, 8, np.nan])
+    assert threshold_li(image) == 8
 
 
 def test_yen_camera_image():
@@ -398,7 +435,7 @@ def test_mean_std_2d():
     image = np.random.rand(256, 256)
     window_size = 11
     m, s = _mean_std(image, w=window_size)
-    mean_kernel = np.ones((window_size,) * 2) / window_size**2
+    mean_kernel = np.full((window_size,) * 2,  1 / window_size**2)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
@@ -409,7 +446,7 @@ def test_mean_std_2d():
 def test_mean_std_3d():
     image = np.random.rand(40, 40, 40)
     window_size = 5
-    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    mean_kernel = np.full((window_size,) * 3, 1 / window_size**3)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
