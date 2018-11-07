@@ -251,7 +251,7 @@ def greycoprops(P, prop='contrast', normed=False):
         results[mask_0] = 1
 
         # handle the standard case
-        mask_1 = (not mask_0)
+        mask_1 = (mask_0 == False)
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
     else:
         raise ValueError('%s is an invalid property' % prop)
