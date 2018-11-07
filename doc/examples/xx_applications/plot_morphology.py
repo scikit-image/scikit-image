@@ -239,6 +239,6 @@ plot_comparison(horse_mask, hull2, 'convex hull')
 # Processing <http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures
 # /ImageProcessing-html/topic4.htm>`_
 #
-# 3. http://en.wikipedia.org/wiki/Mathematical_morphology
+# 3. https://en.wikipedia.org/wiki/Mathematical_morphology
 
 plt.show()

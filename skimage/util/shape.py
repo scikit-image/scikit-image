@@ -146,7 +146,7 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Hyperrectangle
+    .. [1] https://en.wikipedia.org/wiki/Hyperrectangle
 
     Examples
     --------

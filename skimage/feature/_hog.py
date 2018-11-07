@@ -109,7 +109,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [1] https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
 
     .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
            Human Detection, IEEE Computer Society Conference on Computer
@@ -144,7 +144,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     if block_norm is None:
         block_norm = 'L1'
         warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15. To supress this message '
+             'be changed to `L2-Hys` in v0.15. To suppress this message '
              'specify explicitly the normalization method.',
              skimage_deprecation)
 

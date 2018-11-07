@@ -18,7 +18,7 @@ from .._shared.utils import warn
 # needed to speed up a few cases.
 # See discussions at:
 # https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
-# http://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
+# https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
     from scipy.sparse.linalg.dsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
@@ -254,7 +254,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method.  This mode
-          requires that the pyamg module (http://pyamg.org/) is
+          requires that the pyamg module (http://pyamg.github.io/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
 
@@ -470,7 +470,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       return_full_prob=return_full_prob)
     if mode == 'cg_mg':
         if not amg_loaded:
-            warn("""pyamg (http://pyamg.org/)) is needed to use
+            warn("""pyamg (http://pyamg.github.io/)) is needed to use
                 this mode, but is not installed. The 'cg' mode will be used
                 instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol,

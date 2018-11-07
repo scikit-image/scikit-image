@@ -68,7 +68,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     Because of the prevalence of exclusively positive floating-point images in
     intermediate calculations, it is not possible to intuit if an input is
-    signed based on dtype alone. Instead, negative values are explicity
+    signed based on dtype alone. Instead, negative values are explicitly
     searched for. Only if found does this function assume signed input.
     Unexpected results only occur in rare, poorly exposes cases (e.g. if all
     values are above 50 percent gray in a signed `image`). In this event,

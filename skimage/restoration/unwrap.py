@@ -107,6 +107,7 @@ def unwrap_phase(image, wrap_around=False, seed=None):
                   wrap_around, seed)
 
     if np.ma.isMaskedArray(image):
-        return np.ma.array(image_unwrapped, mask=mask)
+        return np.ma.array(image_unwrapped, mask=mask,
+                           fill_value=image.fill_value)
     else:
         return image_unwrapped

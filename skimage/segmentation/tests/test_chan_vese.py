@@ -14,7 +14,7 @@ def test_chan_vese_flat_level_set():
     # infinite time, the segmentation will still converge.
     img = np.zeros((10, 10))
     img[3:6, 3:6] = np.ones((3, 3))
-    ls = np.ones((10, 10)) * 1000
+    ls = np.full((10, 10), 1000)
     result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=ls)
     assert_array_equal(result.astype(np.float), np.ones((10, 10)))
     result = chan_vese(img, mu=0.0, tol=1e-3, init_level_set=-ls)

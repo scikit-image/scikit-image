@@ -17,7 +17,7 @@ def _convert_input(image, preserve_range):
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        Also see http://scikit-image.org/docs/dev/user_guide/data_types.html
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     """
     if preserve_range:
         image = image.astype(np.double)
@@ -59,7 +59,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
     truncate : float, optional
         Truncate the filter at this many standard deviations.
 

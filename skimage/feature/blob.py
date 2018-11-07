@@ -12,7 +12,7 @@ from .._shared.utils import assert_nD
 
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
-# Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
+# Theory behind: https://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
 
 
 def _compute_disk_overlap(d, r1, r2):
@@ -167,7 +167,7 @@ def _prune_blobs(blobs_array, overlap):
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5,):
-    """Finds blobs in the given grayscale image.
+    r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method [1]_.
     For each blob found, the method returns its coordinates and the standard
@@ -206,7 +206,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
+    .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
 
     Examples
     --------
@@ -277,7 +277,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
              overlap=.5, log_scale=False):
-    """Finds blobs in the given grayscale image.
+    r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
     For each blob found, the method returns its coordinates and the standard
@@ -320,7 +320,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
+    .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
 
     Examples
     --------
@@ -423,7 +423,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_determinant_of_the_Hessian
+    .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_determinant_of_the_Hessian
 
     .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
            "SURF: Speeded Up Robust Features"
