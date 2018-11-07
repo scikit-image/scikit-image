@@ -340,7 +340,7 @@ the documentation.
 **Sphinx:**
 
 Sphinx and other python packages needed to build the documentation
-can be installed using ``scikit-image/requirements/docs.txt`` file.
+can be installed using: ``scikit-image/requirements/docs.txt`` file.
 
 .. code:: sh
 

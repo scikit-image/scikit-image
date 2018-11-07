@@ -301,7 +301,7 @@ p.sphx-glr-signature a.reference.external {
 
 a.copybtn {
     background: transparent no-repeat none;
-    border:none;
+    border: none;
     position: absolute;
     top: 0;
     right: 0;
@@ -309,4 +309,15 @@ a.copybtn {
     width: 1em;
     height: 1.6em !important;
     padding: 0 2px 0px !important;
+    text-shadow: none;
   }
+
+
+  .o-tooltip--left:after {
+    opacity: 0;
+    font-family: monospace !important;
+    font-weight: bold;
+    font-size: 13px !important;
+    background: #3F556B !important;
+    z-index: 100 !important;
+}
