@@ -160,6 +160,7 @@ def greycoprops(P, prop='contrast', normed=False):
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
+
     Each GLCM is normalized to have a sum of 1 before the computation of texture
     properties, unless normed = True when it is assumed to already be so
     normalized.
