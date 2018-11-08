@@ -30,4 +30,4 @@ $ pip install -U -r requirements/test.txt
 
 ## [default.txt-reasoning]default.txt
 
-matplotlib 3.0.0 is decided against due to this PR https://github.com/scikit-image/scikit-image/pull/3474. The marching cube example on the dev version is not displayed correctly because of a bug from matplotlib version 3.0.0 https://github.com/matplotlib/matplotlib/issues/12239. 
+matplotlib 3.0.0 is not used because of a bug that collapses 3D axes (see https://github.com/scikit-image/scikit-image/pull/3474 and https://github.com/matplotlib/matplotlib/issues/12239).  We expect this issue to be resolved in the next matplotlib release.
