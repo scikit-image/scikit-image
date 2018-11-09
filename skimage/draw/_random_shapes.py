@@ -287,7 +287,7 @@ def random_shapes(image_shape,
         background is always excluded.
     background : {tuple of ints, int}, optional
         Pixel intensities for background. Values between 0 and 255 are allowed.
-        For multichannel, a tuple of length num_channels is required.
+        For multichannel, a tuple of length ``num_channels`` is required.
     allow_overlap : bool, optional
         If `True`, allow shapes to overlap.
     num_trials : int, optional
