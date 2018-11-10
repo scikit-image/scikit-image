@@ -159,37 +159,37 @@ class TestGLCM():
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=True, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=True)
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
 
     def test_dissimilarity_not_normed(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=False, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
 
     def test_dissimilarity_normed_true_false(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=True, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416667, decimal=6)
 
     def test_dissimilarity_2(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=True)[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
 
     def test_dissimilarity_2_not_normed(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=False, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
 
     def test_dissimilarity_2_normed_true_false(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
+        np.testing.assert_almost_equal(dissimilarity, 0.666667, decimal=6)
 
     def test_non_normalized_glcm(self):
         img = (np.random.random((100, 100)) * 8).astype(np.uint8)
