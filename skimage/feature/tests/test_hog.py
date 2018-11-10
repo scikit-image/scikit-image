@@ -59,10 +59,8 @@ def test_hog_odd_cell_size():
     correct_output[0] = 0.4999775
     correct_output[4] = 0.4999775
 
-    output = feature.hog(img, orientations=9, pixels_per_cell=(3, 3),
-                         cells_per_block=(1, 1), block_norm='L1',
-                         feature_vector=True, transform_sqrt=False,
-                         visualize=False)
+    output = feature.hog(img, pixels_per_cell=(3, 3),
+                         cells_per_block=(1, 1), block_norm='L1')
 
     assert_almost_equal(output, correct_output)
 
