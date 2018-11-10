@@ -140,44 +140,56 @@ class TestGLCM():
     def test_contrast(self):
         result = greycomatrix(self.image, [1, 2], [0], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
         contrast = greycoprops(result, 'contrast', normed=True)
-        np.testing.assert_almost_equal(contrast[0, 0], 0.585, decimal=3)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
 
     def test_contrast_not_normed(self):
         result = greycomatrix(self.image, [1, 2], [0], 4,
                               normed=False, symmetric=True)
-        result = np.round(result, 3)
         contrast = greycoprops(result, 'contrast', normed=False)
-        np.testing.assert_almost_equal(contrast[0, 0], 0.585, decimal=3)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
+
+    def test_contrast_normed_true_false(self):
+        result = greycomatrix(self.image, [1, 2], [0], 4,
+                              normed=True, symmetric=True)
+        contrast = greycoprops(result, 'contrast', normed=False)
+        np.testing.assert_almost_equal(contrast[0, 0], 0.583333, decimal=6)
 
     def test_dissimilarity(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=True)
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
 
     def test_dissimilarity_not_normed(self):
         result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
                               normed=False, symmetric=True)
-        result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)
-        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
+
+    def test_dissimilarity_normed_true_false(self):
+        result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
+                              normed=True, symmetric=True)
+        dissimilarity = greycoprops(result, 'dissimilarity', normed=False)
+        np.testing.assert_almost_equal(dissimilarity[0, 0], 0.416666, decimal=6)
 
     def test_dissimilarity_2(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
-        result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=True)[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.665, decimal=3)
+        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
 
     def test_dissimilarity_2_not_normed(self):
         result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=False, symmetric=True)
-        result = np.round(result, 3)
         dissimilarity = greycoprops(result, 'dissimilarity', normed=False)[0, 0]
-        np.testing.assert_almost_equal(dissimilarity, 0.665, decimal=3)
+        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
+
+    def test_dissimilarity_2_normed_true_false(self):
+        result = greycomatrix(self.image, [1, 3], [np.pi / 2], 4,
+                              normed=True, symmetric=True)
+        dissimilarity = greycoprops(result, 'dissimilarity', normed=False)[0, 0]
+        np.testing.assert_almost_equal(dissimilarity, 0.666666, decimal=6)
 
     def test_non_normalized_glcm(self):
         img = (np.random.random((100, 100)) * 8).astype(np.uint8)
@@ -201,6 +213,12 @@ class TestGLCM():
         homogeneity = greycoprops(result, 'homogeneity', normed=False)[0, 0]
         np.testing.assert_almost_equal(homogeneity, 0.80833333)
 
+    def test_homogeneity_normed_true_false(self):
+        result = greycomatrix(self.image, [1], [0, 6], 4, normed=True,
+                              symmetric=True)
+        homogeneity = greycoprops(result, 'homogeneity', normed=False)[0, 0]
+        np.testing.assert_almost_equal(homogeneity, 0.80833333)
+
     def test_energy(self):
         result = greycomatrix(self.image, [1], [0, 4], 4, normed=True,
                               symmetric=True)
@@ -209,6 +227,12 @@ class TestGLCM():
 
     def test_energy_not_normed(self):
         result = greycomatrix(self.image, [1], [0, 4], 4, normed=False,
+                              symmetric=True)
+        energy = greycoprops(result, 'energy', normed=False)[0, 0]
+        np.testing.assert_almost_equal(energy, 0.38188131)
+
+    def test_energy_normed_true_false(self):
+        result = greycomatrix(self.image, [1], [0, 4], 4, normed=True,
                               symmetric=True)
         energy = greycoprops(result, 'energy', normed=False)[0, 0]
         np.testing.assert_almost_equal(energy, 0.38188131)
@@ -227,6 +251,13 @@ class TestGLCM():
         np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
         np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
 
+    def test_correlation_normed_true_false(self):
+        result = greycomatrix(self.image, [1, 2], [0], 4, normed=True,
+                              symmetric=True)
+        energy = greycoprops(result, 'correlation', normed=False)
+        np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
+        np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
+
     def test_uniform_properties(self):
         im = np.ones((4, 4), dtype=np.uint8)
         result = greycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=True,
@@ -235,9 +266,9 @@ class TestGLCM():
                      'energy', 'correlation', 'ASM']:
             greycoprops(result, prop, normed=True)
 
-    def test_uniform_properties_not_normed(self):
+    def test_uniform_properties_normed_true_false(self):
         im = np.ones((4, 4), dtype=np.uint8)
-        result = greycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=False,
+        result = greycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=True,
                               symmetric=True)
         for prop in ['contrast', 'dissimilarity', 'homogeneity',
                      'energy', 'correlation', 'ASM']:
