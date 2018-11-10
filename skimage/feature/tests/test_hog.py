@@ -63,7 +63,7 @@ def test_hog_odd_cell_size():
                          cells_per_block=(1, 1), block_norm='L1',
                          feature_vector=True, transform_sqrt=False,
                          visualize=False)
-    
+
     assert_almost_equal(output, correct_output)
 
 
