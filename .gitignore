@@ -35,4 +35,4 @@ skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
 
 save-demo.jpg
-skimage/feature/texture.3508.py
+
