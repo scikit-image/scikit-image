@@ -25,8 +25,11 @@ from skimage.transform import register_affine
 from skimage import measure
 
 intermediates_list = []
+
+
 def save_intermediate_alignments(image, matrix):
     intermediates_list.append((image, matrix))
+
 
 r = 0.12
 c, s = np.cos(r), np.sin(r)
