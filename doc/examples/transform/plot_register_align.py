@@ -8,29 +8,28 @@ from skimage import measure
 
 intermediates_list = []
 def save_intermediate_alignments(image, matrix):
-    intermediates_list.append((image,matrix))
+    intermediates_list.append((image, matrix))
 
 r = 0.12
 c, s = np.cos(r), np.sin(r)
-out = np.array([[c, -s, 0.2], [s, c, 0.1], [0, 0, 1]])
+matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
 
-cam = camera()
-start = ndi.affine_transform(cam, out)
-start = ndi.shift(start, (0, 50))
-trans = register_affine(cam, start, iter_callback=save_intermediate_alignments)
+image = camera()
+target = ndi.affine_transform(image, matrix_transform)
+register_matrix = register_affine(image, target, iter_callback=save_intermediate_alignments)
 _, ax = plt.subplots(1, 6)
 
 ax[0].set_title('reference')
-ax[0].imshow(cam, cmap='gray')
-y, x = cam.shape
+ax[0].imshow(image, cmap='gray')
+y, x = image.shape
 ax[0].set_xticks(np.arange(x/5, x, x/5), minor=True)
 ax[0].set_yticks(np.arange(y/5, y, y/5), minor=True)
 ax[0].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
-err = measure.compare_mse(cam, start)
+err = measure.compare_mse(image, target)
 ax[1].set_title('target, mse %d' % int(err))
-ax[1].imshow(start, cmap='gray')
-y, x = start.shape
+ax[1].imshow(target, cmap='gray')
+y, x = target.shape
 ax[1].set_xticks(np.arange(x/5, x, x/5), minor=True)
 ax[1].set_yticks(np.arange(y/5, y, y/5), minor=True)
 ax[1].grid(which='minor', color='w', linestyle='-', linewidth=1)
@@ -41,7 +40,7 @@ for a in ax:
 
 for i, iter_num in enumerate([1, 2, 4]):
     err = measure.compare_mse(
-        cam, ndi.affine_transform(start, intermediates_list[iter_num][1]))
+        image, ndi.affine_transform(target, intermediates_list[iter_num][1]))
     ax[i+2].set_title('iter %d, mse %d' % (iter_num, int(err)))
     ax[i+2].imshow(ndi.affine_transform(intermediates_list[iter_num][0], intermediates_list[iter_num][1]), cmap='gray',
                    interpolation='gaussian', resample=True)
@@ -52,11 +51,11 @@ for i, iter_num in enumerate([1, 2, 4]):
     ax[i+2].set_yticks(np.arange(y/5, y, y/5), minor=True)
     ax[i+2].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
-err = measure.compare_mse(cam, ndi.affine_transform(start, trans))
+err = measure.compare_mse(image, ndi.affine_transform(target, register_matrix))
 ax[5].set_title('final correction, mse %d' % int(err))
-ax[5].imshow(ndi.affine_transform(start, trans), cmap='gray',
+ax[5].imshow(ndi.affine_transform(target, register_matrix), cmap='gray',
              interpolation='gaussian', resample=True)
-y, x = start.shape
+y, x = target.shape
 
 ax[5].set_xticks(np.arange(x/5, x, x/5), minor=True)
 ax[5].set_yticks(np.arange(y/5, y, y/5), minor=True)
