@@ -1,3 +1,21 @@
+"""
+=====================================
+Affine Registration
+=====================================
+
+In this example, we use image registration to find an affine transformation
+which can be used to align our target and reference images.
+
+The ``register_affine`` function uses a Gaussian pyramid and an
+optimisation function to find the optimal transformation. This optimal
+transformation, when applied to the target image, aligns it to the reference image [1]_.
+
+.. [1] Juan Nunez-Iglesias, Stefan van der Walt, and Harriet Dashnow. Elegant
+SciPy: The Art of Scientic Python. 1st. O'Reilly Media, Inc., 2017. isbn:
+1491922877, 9781491922873.
+
+"""
+
 import numpy as np
 from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
