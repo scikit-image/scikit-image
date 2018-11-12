@@ -27,7 +27,8 @@ def _parameter_vector_to_matrix(parameter_vector, N):
         A transformation matrix used to obtain a new image
     """
 
-    return np.concatenate((np.reshape(parameter_vector, (N, N+1)), [[0]*N + [1]]), axis=0)
+    return np.concatenate(
+        (np.reshape(parameter_vector, (N, N + 1)), [[0] * N + [1]]), axis=0)
 
 
 def _matrix_to_parameter_vector(matrix):
@@ -121,7 +122,9 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
 
         result = minimize(_cost, parameter_vector, method='Powell')
         parameter_vector = result.x
-        iter_callback(tgt, _parameter_vector_to_matrix(parameter_vector, num_dims))
+        iter_callback(
+            tgt, _parameter_vector_to_matrix(
+                parameter_vector, num_dims))
 
     matrix = _parameter_vector_to_matrix(parameter_vector, num_dims)
 

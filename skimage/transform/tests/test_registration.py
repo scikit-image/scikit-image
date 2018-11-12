@@ -10,17 +10,19 @@ from skimage._shared._warnings import expected_warnings
 
 def test_register_affine():
     reference = data.camera()
-    inner_matrix = [[1.1,   0],
-                    [0,   1]]
-    right_matrix = np.zeros((2,1))
+    inner_matrix = [[1.1, 0],
+                    [0, 1]]
+    right_matrix = np.zeros((2, 1))
     bottom_matrix = [[0, 0, 1]]
     matrix_transform = np.concatenate((inner_matrix, right_matrix), axis=1)
-    matrix_transform = np.concatenate((matrix_transform, bottom_matrix), axis=0)
+    matrix_transform = np.concatenate(
+        (matrix_transform, bottom_matrix), axis=0)
 
     inverse_inner = np.linalg.inv(inner_matrix)
     inverse_right = -np.matmul(inverse_inner, right_matrix)
     inverse_transform = np.concatenate((inverse_inner, inverse_right), axis=1)
-    inverse_transform = np.concatenate((inverse_transform, bottom_matrix), axis=0)
+    inverse_transform = np.concatenate(
+        (inverse_transform, bottom_matrix), axis=0)
 
     target = ndi.affine_transform(reference, matrix_transform)
     with expected_warnings(['The default multichannel']):
