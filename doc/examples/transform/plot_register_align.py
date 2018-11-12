@@ -6,25 +6,18 @@ from skimage.data import camera
 from skimage.transform import register_affine
 from skimage import measure
 
-callback_arr = []
-callback = lambda i, m: callback_arr.append((i,m))
-r = 0.12
-out = np.empty((3, 3))
+intermediates_list = []
+def save_intermediate_alignments(image, matrix):
+    intermediates_list.append((image,matrix))
 
-out[0][0] = np.cos(r)
-out[0][1] = -np.sin(r)
-out[0][2] = 0.2
-out[1][0] = np.sin(r)
-out[1][1] = np.cos(r)
-out[1][2] = 0.1
-out[2][0] = 0
-out[2][1] = 0
-out[2][2] = 1
+r = 0.12
+c, s = np.cos(r), np.sin(r)
+out = np.array([[c, -s, 0.2], [s, c, 0.1], [0, 0, 1]])
 
 cam = camera()
 start = ndi.affine_transform(cam, out)
 start = ndi.shift(start, (0, 50))
-trans = register_affine(cam, start, iter_callback=callback)
+trans = register_affine(cam, start, iter_callback=save_intermediate_alignments)
 _, ax = plt.subplots(1, 6)
 
 ax[0].set_title('reference')
@@ -46,14 +39,14 @@ for a in ax:
     a.set_xticklabels([])
     a.set_yticklabels([])
 
-for i, image in enumerate([1, 2, 4]):
+for i, iter_num in enumerate([1, 2, 4]):
     err = measure.compare_mse(
-        cam, ndi.affine_transform(start, callback_arr[image][1]))
-    ax[i+2].set_title('iter %d, mse %d' % (image, int(err)))
-    ax[i+2].imshow(ndi.affine_transform(callback_arr[image][0], callback_arr[image][1]), cmap='gray',
+        cam, ndi.affine_transform(start, intermediates_list[iter_num][1]))
+    ax[i+2].set_title('iter %d, mse %d' % (iter_num, int(err)))
+    ax[i+2].imshow(ndi.affine_transform(intermediates_list[iter_num][0], intermediates_list[iter_num][1]), cmap='gray',
                    interpolation='gaussian', resample=True)
 
-    y, x = callback_arr[image][0].shape
+    y, x = intermediates_list[iter_num][0].shape
 
     ax[i+2].set_xticks(np.arange(x/5, x, x/5), minor=True)
     ax[i+2].set_yticks(np.arange(y/5, y, y/5), minor=True)
