@@ -461,18 +461,18 @@ class TestLocalMaxima(unittest.TestCase):
         If `allow_borders` is true the array is padded internally and there is
         no problem.
         """
-        warning_msg = "no maxima .* any dimension smaller 3"
+        warning_msg = "maxima can't exist .* any dimension smaller 3 .*"
+        x = np.array([0, 1])
+        extrema.local_maxima(x, allow_borders=True)  # no warning
         with warns(UserWarning, match=warning_msg):
-            result = extrema.local_maxima(
-                np.array([0, 1]), allow_borders=False
-            )
+            result = extrema.local_maxima(x, allow_borders=False)
         assert_equal(result, [0, 0])
         assert result.dtype == np.uint8
 
+        x = np.array([[1, 2], [2, 2]])
+        extrema.local_maxima(x, allow_borders=True, indices=True)  # no warning
         with warns(UserWarning, match=warning_msg):
-            result = extrema.local_maxima(
-                np.array([[1, 2], [2, 2]]), allow_borders=False, indices=True
-            )
+            result = extrema.local_maxima(x, allow_borders=False, indices=True)
         assert_equal(result, np.zeros((2, 0), dtype=np.intp))
         assert result[0].dtype == np.intp
         assert result[1].dtype == np.intp

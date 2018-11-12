@@ -461,7 +461,8 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         # Warn and skip if any dimension is smaller than 3
         # -> no maxima can exist & structuring element can't be applied
         warn(
-            "no maxima can exist for an image with any dimension smaller 3",
+            "maxima can't exist for an image with any dimension smaller 3 "
+            "if borders aren't allowed",
             stacklevel=3
         )
     else:
