@@ -94,9 +94,9 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
     >>> from skimage.data import camera
     >>> reference_image = camera()
     >>> matrix_transform = [
-            [np.cos(0.12), -np.sin(0.12), 0.2],
-            [np.sin(0.12),  np.cos(0.12), 0.1],
-            [0,             0,            1.0]]
+    >>>        [np.cos(0.12), -np.sin(0.12), 0.2],
+    >>>        [np.sin(0.12),  np.cos(0.12), 0.1],
+    >>>        [0,             0,            1.0]]
     >>> target_image  = ndi.affine_transform(reference_image, matrix_transform)
     >>> output_matrix = register_affine(reference_image, target_image)
     >>> registered_target = ndi.affine_transform(target_image, output_matrix)
