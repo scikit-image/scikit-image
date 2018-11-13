@@ -37,6 +37,14 @@ API Changes
   removed. Use parameter ``data_range`` instead.
 
 
+Bugfixes
+--------
+
+- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
+  no longer raise an error if any dimension of the image is smaller 3 and
+  the keyword ``allow_borders`` was false.
+
+
 Deprecations
 ------------
 

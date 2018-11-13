@@ -16,6 +16,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
+from .._shared.utils import warn
 from . import greyreconstruct
 from .watershed import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
@@ -319,11 +320,13 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         selem = np.asarray(selem, dtype=bool)
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
-            raise ValueError("selem and image must have the same number of "
-                             "dimensions")
+            raise ValueError(
+                "structuring element and image must have the same number of "
+                "dimensions"
+            )
         # Must only specify direct neighbors
         if any(s != 3 for s in selem.shape):
-            raise ValueError("dimension size in selem is not 3")
+            raise ValueError("dimension size in structuring element is not 3")
 
     return selem
 
@@ -351,9 +354,10 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
-        If True, the output will be an array representing indices of local
-        maxima. If False, the output will be an array of 0's and 1's with the
-        same shape as `image`.
+        If True, the output will be a tuple of one-dimensional arrays
+        representing the indices of local maxima in each dimension. If False,
+        the output will be an array of 0's and 1's with the same shape as
+        `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid maxima.
 
@@ -364,6 +368,12 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         returned with 1's indicating the position of local maxima
         (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
         containing the coordinates (indices) of all found maxima.
+
+    Warns
+    -----
+    UserWarning
+        If `allow_borders` is false and any dimension of the given `image` is
+        shorter than 3 samples, maxima can't exist and a warning is shown.
 
     See Also
     --------
@@ -431,31 +441,45 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     image = np.asarray(image, order="C")
     if image.size == 0:
         # Return early for empty input
-        return np.array([], dtype=(np.intp if indices else np.uint8))
+        if indices:
+            # Make sure that output is a tuple of 1 empty array per dimension
+            return np.nonzero(image)
+        else:
+            return np.zeros(image.shape, dtype=np.uint8)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
         # from the image border
         image = _fast_pad(image, image.min())
 
-    selem = _resolve_neighborhood(selem, connectivity, image.ndim)
-    neighbor_offsets = _offsets_to_raveled_neighbors(
-        image.shape, selem, center=((1,) * image.ndim))
-
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
     flags = np.zeros(image.shape, dtype=np.uint8)
     _set_edge_values_inplace(flags, value=3)
 
-    try:
-        _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
-    except TypeError:
-        if image.dtype == np.float16:
-            # Provide the user with clearer error message
-            raise TypeError("dtype of `image` is float16 which is not "
-                            "supported, try upcasting to float32")
-        else:
-            raise
+    if any(s < 3 for s in image.shape):
+        # Warn and skip if any dimension is smaller than 3
+        # -> no maxima can exist & structuring element can't be applied
+        warn(
+            "maxima can't exist for an image with any dimension smaller 3 "
+            "if borders aren't allowed",
+            stacklevel=3
+        )
+    else:
+        selem = _resolve_neighborhood(selem, connectivity, image.ndim)
+        neighbor_offsets = _offsets_to_raveled_neighbors(
+            image.shape, selem, center=((1,) * image.ndim)
+        )
+
+        try:
+            _local_maxima(image.ravel(), flags.ravel(), neighbor_offsets)
+        except TypeError:
+            if image.dtype == np.float16:
+                # Provide the user with clearer error message
+                raise TypeError("dtype of `image` is float16 which is not "
+                                "supported, try upcasting to float32")
+            else:
+                raise  # Otherwise raise original message
 
     if allow_borders:
         # Revert padding performed at the beginning of the function
@@ -493,9 +517,10 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
-        If True, the output will be an array representing indices of local
-        minima. If False, the output will be an array of 0's and 1's with the
-        same shape as `image`.
+        If True, the output will be a tuple of one-dimensional arrays
+        representing the indices of local minima in each dimension. If False,
+        the output will be an array of 0's and 1's with the same shape as
+        `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid minima.
 
