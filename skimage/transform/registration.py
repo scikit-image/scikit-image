@@ -12,14 +12,15 @@ def _parameter_vector_to_matrix(parameter_vector, N):
     """
     Converts the optimisation parameters to a 3x3 transformation matrix
 
-    The optimisation paramters are known as the parameter_vector and are composed of
-    the first 2 rows of the transformation matrix, as that is all that
-    is used in an affine transformation.
+    The optimisation paramters are known as the parameter_vector and are
+    composed of the first 2 rows of the transformation matrix, as that is
+    all that is used in an affine transformation.
 
     Parameters
     ----------
     parameter_vector : (N*(N+1)) array
-        Input array giving the argument of the minimum function to optimise against
+        Input array giving the argument of the minimum function to
+        optimise against
 
     Returns
     -------
@@ -45,7 +46,8 @@ def _matrix_to_parameter_vector(matrix):
     Returns
     -------
     parameter_vector : (N*(N+1)) array
-        Output array giving the argument of the minimum function to optimise against
+        Output array giving the argument of the minimum function to
+        optimise against
 
     """
 
@@ -65,12 +67,13 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
         A reference image to compare against the target
 
     target : ndimage
-        Our target for registration. Transforming this image using the return value
-        `matrix` aligns it with the reference.
+        Our target for registration. Transforming this image using the
+        return value `matrix` aligns it with the reference.
 
     cost : function, optional
-        A cost function which takes two images and returns a score which is at a
-        minimum when images are aligned. Uses the mean square error as default.
+        A cost function which takes two images and returns a score which is
+        at a minimum when images are aligned. Uses the mean square error as
+        default.
 
     nlevels : integer, optional
         Change the maximum height we use for creating the Gaussian pyramid.
@@ -78,10 +81,10 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
         as extremely low resolution images may hinder registration.
 
     iter_callback : function, optional
-        If given, this function is called once per pyramid level with the current
-        downsampled image and transformation matrix guess as the only arguments.
-        This is useful for debugging or for plotting intermediate results
-        during the iterative processs.
+        If given, this function is called once per pyramid level with the
+        current downsampled image and transformation matrix guess as the only
+        arguments. This is useful for debugging or for plotting intermediate
+        results during the iterative processs.
 
     Returns
     -------
@@ -97,7 +100,7 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
     >>>        [np.cos(0.12), -np.sin(0.12), 0.2],
     >>>        [np.sin(0.12),  np.cos(0.12), 0.1],
     >>>        [0,             0,            1.0]]
-    >>> target_image  = ndi.affine_transform(reference_image, matrix_transform)
+    >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
     >>> output_matrix = register_affine(reference_image, target_image)
     >>> registered_target = ndi.affine_transform(target_image, output_matrix)
 

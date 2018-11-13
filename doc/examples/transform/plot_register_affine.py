@@ -64,8 +64,13 @@ for i, iter_num in enumerate([1, 2, 4]):
     err = measure.compare_mse(
         image, ndi.affine_transform(target, intermediates_list[iter_num][1]))
     ax[i + 2].set_title('iter %d, mse %d' % (iter_num, int(err)))
-    ax[i + 2].imshow(ndi.affine_transform(intermediates_list[iter_num][0], intermediates_list[iter_num][1]), cmap='gray',
-                     interpolation='gaussian', resample=True)
+    ax[i + 2].imshow(
+        ndi.affine_transform(
+            intermediates_list[iter_num][0],
+            intermediates_list[iter_num][1]),
+        cmap='gray',
+        interpolation='gaussian',
+        resample=True)
 
     y, x = intermediates_list[iter_num][0].shape
 
@@ -75,8 +80,11 @@ for i, iter_num in enumerate([1, 2, 4]):
 
 err = measure.compare_mse(image, ndi.affine_transform(target, register_matrix))
 ax[5].set_title('final correction, mse %d' % int(err))
-ax[5].imshow(ndi.affine_transform(target, register_matrix), cmap='gray',
-             interpolation='gaussian', resample=True)
+ax[5].imshow(
+    ndi.affine_transform(target, register_matrix),
+    cmap='gray',
+    interpolation='gaussian',
+    resample=True)
 y, x = target.shape
 
 ax[5].set_xticks(np.arange(x / 5, x, x / 5), minor=True)

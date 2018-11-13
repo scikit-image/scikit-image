@@ -4,7 +4,8 @@ from scipy import ndimage as ndi
 from skimage import data
 from skimage.transform import registration
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_array_almost_equal
+from skimage._shared.testing import (assert_array_equal,
+                                     assert_array_almost_equal)
 from skimage._shared._warnings import expected_warnings
 
 
