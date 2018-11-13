@@ -91,6 +91,7 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
 
     Example
     -------
+    >>> from skimage.data import camera
     >>> reference_image = camera()
     >>> matrix_transform = [
             [np.cos(0.12), -np.sin(0.12), 0.2],
