@@ -253,3 +253,6 @@
 
 - Kevin Mader
   Montage improvements
+
+- Lars Grüter
+  Flood-fill based local maxima detection

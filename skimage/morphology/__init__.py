@@ -11,7 +11,7 @@ from ._skeletonize_3d import skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
-from .extrema import (h_minima, h_maxima, local_maxima, local_minima)
+from .extrema import h_minima, h_maxima, local_maxima, local_minima
 
 
 __all__ = ['binary_erosion',
