@@ -85,7 +85,8 @@ def _fast_skeletonize(image):
             # tuple. Use the fact that 0 is Falsy, and 1 is truthy in C
             # for the iteration instead.
             # for first_pass in (True, False):
-            for first_pass in range(1, -1, -1):
+            for pass_num in range(2):
+                first_pass = (pass_num == 0)
                 for row in range(1, nrows-1):
                     for col in range(1, ncols-1):
                         # all set pixels ...
