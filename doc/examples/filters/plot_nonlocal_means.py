@@ -36,14 +36,14 @@ import matplotlib.pyplot as plt
 from skimage import data, img_as_float
 from skimage.restoration import denoise_nl_means, estimate_sigma
 from skimage.measure import compare_psnr
+from skimage.util import random_noise
 
 
 astro = img_as_float(data.astronaut())
 astro = astro[30:180, 150:300]
 
 sigma = 0.08
-noisy = astro + sigma * np.random.standard_normal(astro.shape)
-noisy = np.clip(noisy, 0, 1)
+noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
 sigma_est = np.mean(estimate_sigma(noisy, multichannel=True))
