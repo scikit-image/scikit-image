@@ -78,8 +78,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
     image = np.pad(image, pad_width=pad_width, mode='constant',
                    constant_values=cval)
 
-    out = view_as_blocks(image, block_size)
-
+    blocked = view_as_blocks(image, block_size)
+    
     if axis is None:
         for i in range(len(out.shape) // 2):
             out = func(out, axis=-1)
@@ -92,3 +92,4 @@ def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
             out = func(out, axis=ax)
 
     return out
+

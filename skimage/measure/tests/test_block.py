@@ -42,8 +42,8 @@ def test_block_reduce_median():
 
     image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = block_reduce(image2, (4, 5), func=np.median)
-    expected2 = np.array([[ 14.,  17.],
-                          [  0.,   0.]])
+    expected2 = np.array([[ 14.,  6.5],
+                          [  0.,  0. ]])
     assert_equal(expected2, out2)
 
     image3 = np.array([[1, 5, 5, 5], [5, 5, 5, 1000]])

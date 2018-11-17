@@ -9,7 +9,7 @@ cimport cython
 cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
-from ..util import img_as_float
+from ..util import img_as_float64
 from .._shared.utils import warn
 
 
@@ -47,7 +47,7 @@ def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                             "will be interpreted as a multichannel 2d image, "
                             "which may not be intended." % str(image.shape[2])))
 
-    image = img_as_float(image)
+    image = img_as_float64(image)
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.

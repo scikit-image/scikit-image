@@ -19,6 +19,8 @@ New Features
 - unsharp mask filtering (#2772)
 - New options ``connectivity``, ``indices`` and ``allow_borders`` for
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
+- Image translation registration for masked data 
+  (``skimage.feature.masked_register_translation``)
 
 
 Improvements
@@ -69,6 +71,9 @@ API Changes
 Bugfixes
 --------
 
+- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
+  no longer raise an error if any dimension of the image is smaller 3 and
+  the keyword ``allow_borders`` was false.
 
 
 Deprecations
