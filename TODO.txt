@@ -45,6 +45,8 @@ Other
   for sparse matricies (``np.matrix``) used by scipy.sparse in
   ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
   moves away from using ``np.matrix`` in a future version too.
+* Remove the conditional import and function call when ``numpy`` is set
+  to > 1.15.x in ``skimage/util/arraycrop.py``.
 * When minimum supported version of ``scipy`` reaches 0.18, use 
   ``scipy.fftpack.next_fast_len`` directly in 
   ``skimage.feature.masked_register_translation``.
