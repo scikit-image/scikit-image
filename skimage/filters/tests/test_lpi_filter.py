@@ -23,7 +23,6 @@ class TestLPIFilter2D(unittest.TestCase):
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)
 
-    @testing.fixture(autouse=True)
     def setUp(self):
         self.f = LPIFilter2D(self.filt_func)
 
