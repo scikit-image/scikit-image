@@ -32,7 +32,6 @@ class TestImageCollection(TestCase):
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['camera.png', 'moon.png']]
 
-    @testing.fixture(autouse=True)
     def setUp(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
