@@ -50,7 +50,6 @@ class TestMorphology(TestCase):
 
 
 class TestEccentricStructuringElements(TestCase):
-    @testing.fixture(autouse=True)
     def setUp(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0

@@ -11,7 +11,6 @@ from skimage._shared.testing import assert_equal, assert_allclose, TestCase
 
 
 class TestMultiImage(TestCase):
-    @testing.fixture(autouse=True)
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
