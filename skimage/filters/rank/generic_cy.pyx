@@ -335,6 +335,7 @@ cdef inline void _kernel_noise_filter(dtype_t_out* out, Py_ssize_t odepth,
     # early stop if at least one pixel of the neighborhood has the same g
     if histo[g] > 0:
         out[0] = <dtype_t_out>0
+        return
 
     for i in range(g, -1, -1):
         if histo[i]:
