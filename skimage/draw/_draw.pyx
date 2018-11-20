@@ -67,6 +67,9 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef Py_ssize_t dc = abs(c1 - c0)
     cdef Py_ssize_t sr, sc, d, i
 
+    cdef Py_ssize_t[::1] rr = np.zeros(max(dc, dr) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(max(dc, dr) + 1, dtype=np.intp)
+
     with nogil:
         if (c1 - c) > 0:
             sc = 1
@@ -83,10 +86,6 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             sc, sr = sr, sc
         d = (2 * dr) - dc
 
-    cdef Py_ssize_t[::1] rr = np.zeros(int(dc) + 1, dtype=np.intp)
-    cdef Py_ssize_t[::1] cc = np.zeros(int(dc) + 1, dtype=np.intp)
-
-    with nogil:
         for i in range(dc):
             if steep:
                 rr[i] = c
