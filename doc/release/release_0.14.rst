@@ -1,3 +1,13 @@
+Announcement: scikit-image 0.14.2
+=================================
+
+API changes
+-----------
+- ``skimage.measure.regionprops`` no longer removes singleton dimensions from
+  label images (#3284). To recover the old behavior, replace
+  ``regionprops(label_image)`` calls with
+  ``regionprops(np.squeeze(label_image))``
+
 Announcement: scikit-image 0.14.1
 =================================
 
