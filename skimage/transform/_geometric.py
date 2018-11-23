@@ -3,7 +3,7 @@ import numpy as np
 from scipy import spatial
 
 from .._shared.utils import get_bound_method_class, safe_as_int
-
+from .._shared.utils import warn
 
 def _to_ndimage_mode(mode):
     """Convert from `numpy.pad` mode name to the corresponding ndimage mode."""
@@ -163,21 +163,14 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Source coordinates.
-
-        """
+    @property
+    def inverse_params(self):
         raise NotImplementedError()
+
+    @property
+    def inverse(self):
+        """Return the inverse transformation."""
+        return self.__class__(matrix=self.inverse_params)
 
     def residuals(self, src, dst):
         """Determine residuals of transformed destination coordinates.
@@ -200,10 +193,27 @@ class GeometricTransform(object):
         """
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
+    def __matmul__(self, other):
+        """Combine this transformation with another.
+
+        Given two callable transforms `A` and `B` the result of `A @ B` is
+        a transformation `C` that implements ``C(coords) == A(B(coords))``.
+
+        If ``A`` and ``B`` are of the same type, then the resulting transform
+        will have the same type. If they are of different types, then
+        the result will be of a promoted type.
+
+        """
+        raise NotImplementedError()
+
     def __add__(self, other):
         """Combine this transformation with another.
 
         """
+        warn("``__add__`` or ``+`` is deprecated. Use ``__matmul__`` or "
+             "``@``. Note that the order of the operations is swapped in "
+             "``@`` compared to ``+``.",
+             UserWarning)
         raise NotImplementedError()
 
 
@@ -245,6 +255,10 @@ class FundamentalMatrixTransform(GeometricTransform):
             raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
 
+    @property
+    def inverse_params(self):
+        return self.params.T
+
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -261,23 +275,6 @@ class FundamentalMatrixTransform(GeometricTransform):
         """
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
         return coords_homogeneous @ self.params.T
-
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        coords : (N, 3) array
-            Epipolar lines in the source image.
-
-        """
-        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return coords_homogeneous @ self.params
 
     def _setup_constraint_matrix(self, src, dst):
         """Setup and solve the homogeneous epipolar constraint matrix::
@@ -539,7 +536,7 @@ class ProjectiveTransform(GeometricTransform):
         self.params = matrix
 
     @property
-    def _inv_matrix(self):
+    def inverse_params(self):
         return np.linalg.inv(self.params)
 
     def _apply_mat(self, coords, matrix):
@@ -570,22 +567,6 @@ class ProjectiveTransform(GeometricTransform):
 
         """
         return self._apply_mat(coords, self.params)
-
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Source coordinates.
-
-        """
-        return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -690,22 +671,28 @@ class ProjectiveTransform(GeometricTransform):
 
         return True
 
-    def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+    def __matmul__(self, other):
         if isinstance(other, ProjectiveTransform):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise use general projective transformation
             if type(self) == type(other):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other.params @ self.params)
-        elif (hasattr(other, '__name__')
-                and other.__name__ == 'inverse'
-                and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(other.__self__._inv_matrix @ self.params)
+            # 2.7 compatibility
+            return tform(matrix=self.params.dot(other.params))
+        else:
+            raise TypeError("Cannot combine transformations of differing "
+                            "types.")
+
+    def __add__(self, other):
+        """Combine this transformation with another.
+
+        """
+        warn("``__add__`` or ``+`` is deprecated. Use ``__matmul__`` or "
+             "``@``. Note that the order of the operations is swapped in "
+             "``@`` compared to ``+``.",
+             UserWarning)
+        if isinstance(other, ProjectiveTransform):
+            return other.__matmul__(self)
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -732,7 +719,8 @@ class AffineTransform(ProjectiveTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     scale : (sx, sy) as array, list or tuple, optional
         Scale factors.
     rotation : float, optional
@@ -751,28 +739,13 @@ class AffineTransform(ProjectiveTransform):
 
     _coeffs = range(6)
 
-    def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
-                 translation=None):
-        params = any(param is not None
-                     for param in (scale, rotation, shear, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, scale=(1, 1), rotation=0, shear=0,
+                 translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
-            if scale is None:
-                scale = (1, 1)
-            if rotation is None:
-                rotation = 0
-            if shear is None:
-                shear = 0
-            if translation is None:
-                translation = (0, 0)
-
+        else:
             sx, sy = scale
             self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
@@ -780,9 +753,6 @@ class AffineTransform(ProjectiveTransform):
                 [                      0,                                0, 1]
             ])
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
 
     @property
     def scale(self):
@@ -902,7 +872,15 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         return out
 
-    def inverse(self, coords):
+    @property
+    def inverse(self):
+        raise NotImplementedError(
+            "Inverse transforms for ``PiecewiseAffineTransform`` has not "
+            "been implemented yet. If you need to apply the inverse map, "
+            "consider calling the function ``inverse_map`` instead."
+        )
+
+    def inverse_map(self, coords):
         """Apply inverse transformation.
 
         Coordinates outside of the mesh will be set to `- 1`.
@@ -951,9 +929,9 @@ class EuclideanTransform(ProjectiveTransform):
 
     where the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
-         [b0  a0  b1]
-         [0   0    1]]
+        [[a0  -b0  a1]
+         [b0   a0  b1]
+         [ 0    0   1]]
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
@@ -962,7 +940,8 @@ class EuclideanTransform(ProjectiveTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     translation : (tx, ty) as array, list or tuple, optional
@@ -975,18 +954,12 @@ class EuclideanTransform(ProjectiveTransform):
 
     """
 
-    def __init__(self, matrix=None, rotation=None, translation=None):
-        params = any(param is not None
-                     for param in (rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, rotation=0, translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
+        else:
             if rotation is None:
                 rotation = 0
             if translation is None:
@@ -998,9 +971,6 @@ class EuclideanTransform(ProjectiveTransform):
                 [                 0,                    0, 1]
             ])
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -1050,9 +1020,9 @@ class SimilarityTransform(EuclideanTransform):
 
     where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
-         [b0  a0  b1]
-         [0   0    1]]
+        [[a0  -b0  a1]
+         [b0   a0  b1]
+         [ 0    0   1]]
 
     The similarity transformation extends the Euclidean transformation with a
     single scaling factor in addition to the rotation and translation
@@ -1061,7 +1031,8 @@ class SimilarityTransform(EuclideanTransform):
     Parameters
     ----------
     matrix : (3, 3) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If matrix is specified, other
+        parameters are ignored.
     scale : float, optional
         Scale factor.
     rotation : float, optional
@@ -1076,26 +1047,13 @@ class SimilarityTransform(EuclideanTransform):
 
     """
 
-    def __init__(self, matrix=None, scale=None, rotation=None,
-                 translation=None):
-        params = any(param is not None
-                     for param in (scale, rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and"
-                             " the implicit parameters at the same time.")
-        elif matrix is not None:
+    def __init__(self, matrix=None, scale=1, rotation=0,
+                 translation=(0, 0)):
+        if matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
-            if scale is None:
-                scale = 1
-            if rotation is None:
-                rotation = 0
-            if translation is None:
-                translation = (0, 0)
-
+        else:
             self.params = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
@@ -1103,9 +1061,7 @@ class SimilarityTransform(EuclideanTransform):
             ])
             self.params[0:2, 0:2] *= scale
             self.params[0:2, 2] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
+
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -1283,7 +1239,8 @@ class PolynomialTransform(GeometricTransform):
 
         return dst
 
-    def inverse(self, coords):
+    @property
+    def inverse(self):
         raise Exception(
             'There is no explicit way to do the inverse polynomial '
             'transformation. Instead, estimate the inverse transformation '
