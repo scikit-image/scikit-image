@@ -1,5 +1,4 @@
 include setup*.py
-include conftest.py
 include MANIFEST.in
 include *.txt
 include *.rst
