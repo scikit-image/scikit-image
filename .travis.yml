@@ -44,7 +44,7 @@ matrix:
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1
     - os: linux
       python: 3.5
-      env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
+      env: MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.5
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
@@ -53,7 +53,7 @@ matrix:
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
       python: 3.6
-      env: QT=PyQt5 WITH_PYAMG=1
+      env: QT=PyQt5
     - os: linux
       python: 3.7
       dist: xenial # Required for Python 3.7
