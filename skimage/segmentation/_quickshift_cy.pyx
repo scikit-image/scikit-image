@@ -60,6 +60,13 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     cdef Py_ssize_t r, c, r_, c_, channel, r_min, r_max, c_min, c_max
     cdef double* current_pixel_ptr
 
+    # this will break ties that otherwise would give us headache
+    densities += random_state.normal(scale=0.00001, size=(height, width))
+    # default parent to self
+    cdef Py_ssize_t[:, ::1] parent = \
+        np.arange(width * height, dtype=np.intp).reshape(height, width)
+    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
+
     # compute densities
     with nogil:
         current_pixel_ptr = &image[0, 0, 0]
@@ -83,16 +90,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                         densities[r, c] += exp(dist * inv_kernel_size_sqr)
                 current_pixel_ptr += channels
 
-    # this will break ties that otherwise would give us headache
-    densities += random_state.normal(scale=0.00001, size=(height, width))
-
-    # default parent to self
-    cdef Py_ssize_t[:, ::1] parent = \
-        np.arange(width * height, dtype=np.intp).reshape(height, width)
-    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
-
-    # find nearest node with higher density
-    with nogil:
+        # find nearest node with higher density
         current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
             r_min = max(r - kernel_width, 0)
