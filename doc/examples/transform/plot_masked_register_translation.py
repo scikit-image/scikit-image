@@ -40,7 +40,7 @@ corrupted_pixels = np.random.choice([False, True],
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
 offset_image *= corrupted_pixels
-print("Known offset (y, x): {}".format(shift))
+print("Known offset (row, col): {}".format(shift))
 
 # Determine what the mask is based on which pixels are invalid
 # In this case, we know what the mask should be since we corrupted 
@@ -49,7 +49,7 @@ mask = corrupted_pixels
 
 detected_shift = masked_register_translation(image, offset_image, mask)
 
-print("Detected pixel offset (y, x): {}".format(-detected_shift))
+print("Detected pixel offset (row, col): {}".format(-detected_shift))
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)
@@ -96,11 +96,11 @@ offset_image = ndi.shift(image, shift)
 image *= mask1
 offset_image *= mask2
 
-print("Known offset (y, x): {}".format(shift))
+print("Known offset (row, col): {}".format(shift))
 
 detected_shift = masked_register_translation(image, offset_image, mask1, mask2)
 
-print("Detected pixel offset (y, x): {}".format(-detected_shift))
+print("Detected pixel offset (row, col): {}".format(-detected_shift))
 
 fig = plt.figure(figsize=(8,3))
 ax1 = plt.subplot(1, 2, 1)
