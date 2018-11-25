@@ -16,13 +16,11 @@ tools/build_versions.py
 section_end "List.installed.dependencies"
 
 section "Test"
-if [[ "$INSTALL_FROM_SDIST" == "1" ]]; then
-    pushd ..
-    pytest $TEST_ARGS --pyargs skimage
-    popd
-else
-    pytest $TEST_ARGS skimage
-fi
+# We can't run it in the git directory since there is a folder called `skimage`
+# in there. pytest will crawl that instead of the module.
+pushd ..
+pytest $TEST_ARGS --pyargs skimage
+popd
 section_end "Test"
 
 section "Flake8.test"

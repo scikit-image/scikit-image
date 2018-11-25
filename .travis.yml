@@ -90,10 +90,10 @@ install:
     - ccache --show-stats
     # Test installing without cython using the sdist
     - if [[ "$INSTALL_FROM_SDIST" == "1" ]]; then
-        pip uninstall cython -y ;
-        pip install dist/scikit-image-*.tar.gz ;
+        pip uninstall cython -y;
+        pip install dist/scikit-image-*.tar.gz;
       else
-        python setup.py develop ;
+        pip install --no-build-isolation .;
       fi
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
