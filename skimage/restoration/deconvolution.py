@@ -409,7 +409,7 @@ def richardson_lucy(image, psf=None, iterations=50,
     # complexity O(N log(N)) for each dimension and the direct method does
     # straight arithmetic (and is O(n*k) to add n elements k times)
     direct_time = np.prod(image.shape + time_psf)
-    fft_time = np.sum([n*np.log(n) for n in image.shape + time_psf])
+    fft_time = np.sum([n * np.log(n) for n in image.shape + time_psf])
 
     # see whether the fourier transform convolution method or the direct
     # convolution method is faster (discussed in scikit-image PR #1792)
@@ -429,7 +429,8 @@ def richardson_lucy(image, psf=None, iterations=50,
         psf = np.full(image.shape, 0.5)
     elif psf is not None and blind:
         assert psf.shape == image.shape, \
-            'For blind deconvolution, image and PSF should have the same shape!'
+            'For blind deconvolution, ' \
+            'image and PSF should have the same shape!'
         psf = psf.astype(np.float)
     else:
         pass
@@ -444,7 +445,9 @@ def richardson_lucy(image, psf=None, iterations=50,
             # Hack: in original publication one would have used `image`,
             #       however, this does not work.
             #       Using `im_deconv` instead recovers PSF.
-            relative_blur_psf = im_deconv / convolve_method(psf, im_deconv, 'same')
+            relative_blur_psf = im_deconv / convolve_method(psf,
+                                                            im_deconv,
+                                                            'same')
 
             # Check for zeros in PSF, causes the latter code to crash
             if np.count_nonzero(~np.isnan(relative_blur_psf)) \
