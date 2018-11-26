@@ -40,7 +40,7 @@ import numpy as np
 from scipy.signal import convolve2d
 from skimage.filters import gaussian
 import matplotlib.pyplot as plt
-from skimage.restoration import blind_richardson_lucy
+from skimage.restoration import richardson_lucy
 
 # Initialize image that is to be recovered (cross)
 im = np.zeros((100, 100), dtype=np.float32)
@@ -62,9 +62,9 @@ im_conv = convolve2d(im, psf_gaussian, 'same')
 iterations = 50
 
 # Run blind deconvolution and try to recover the used PSF
-reconstruction = blind_richardson_lucy(im_conv,
-                                       iterations=iterations,
-                                       return_iterations=True)
+reconstruction = richardson_lucy(im_conv, blind=True,
+                                 iterations=iterations,
+                                 return_iterations=True)
 
 
 plt.figure(figsize=(12, 14))

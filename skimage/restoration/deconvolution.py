@@ -327,18 +327,23 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def richardson_lucy(image, psf, iterations=50, clip=True):
+def richardson_lucy(image, psf=None, iterations=50,
+                    return_iterations=False, blind=False, clip=True):
     """Richardson-Lucy deconvolution.
 
     Parameters
     ----------
     image : ndarray
        Input degraded image (can be N dimensional).
-    psf : ndarray
+    psf : ndarray, optional
        The point spread function.
-    iterations : int
+    iterations : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
+    return_iterations : boolean, optional
+        Returns a list of the PSF and the deconvolved image for each iteration
+    blind : boolean, optional
+        Performs a blind deconvolution by estimating the PSF from the image
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
@@ -347,6 +352,9 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     -------
     im_deconv : ndarray
        The deconvolved image.
+
+    psf : ndarray
+        The last PSF estimate to deconvolve image
 
     Examples
     --------
@@ -358,94 +366,17 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
     >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
 
-    References
-    ----------
-    .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
-    """
-    # compute the times for direct convolution and the fft method. The fft is of
-    # complexity O(N log(N)) for each dimension and the direct method does
-    # straight arithmetic (and is O(n*k) to add n elements k times)
-    direct_time = np.prod(image.shape + psf.shape)
-    fft_time =  np.sum([n*np.log(n) for n in image.shape + psf.shape])
-
-    # see whether the fourier transform convolution method or the direct
-    # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 40.032 * fft_time / direct_time
-
-    if time_ratio <= 1 or len(image.shape) > 2:
-        convolve_method = fftconvolve
-    else:
-        convolve_method = convolve
-
-    image = image.astype(np.float)
-    psf = psf.astype(np.float)
-    im_deconv = np.full(image.shape, 0.5)
-    psf_mirror = psf[::-1, ::-1]
-
-    for _ in range(iterations):
-        relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
-
-    if clip:
-        im_deconv[im_deconv > 1] = 1
-        im_deconv[im_deconv < -1] = -1
-
-    return im_deconv
-
-
-def blind_richardson_lucy(image, psf=None, iterations=10,
-                          return_iterations=False, clip=False):
-    """Blind Richardson-Lucy deconvolution.
-
-    Parameters
-    ----------
-    image : ndarray
-       Input degraded image (can be N dimensional).
-
-    psf : ndarray, optional
-       A first estimate of the point spread function, same size as image
-
-    iterations : int
-       Number of iterations. This parameter plays the role of
-       regularisation. After a given iterations, the estimates can produce
-       division by 0 problems, then the algorithm is automatically stopped.
-
-    return_iterations : boolean, optional
-        Returns instead of a tuple of the final restorated image and used PSF
-        a tuple of all iterations for further investigation
-
-    clip : boolean, optional
-       True by default. If true, pixel value of the result above 1 or
-       under -1 are thresholded for skimage pipeline compatibility.
-
-    Returns
-    -------
-    im_deconv : ndarray
-       The deconvolved image.
-    psf : ndarray
-        The last PSF estimate to deconvolve image
-
-    Examples
-    --------
-    >>> from skimage.restoration import blind_richardson_lucy
-    >>> image = np.zeros((100,100))
-    >>> im[40:60, 45:55] = 1
-    >>> im[45:55, 40:60] = 1
-    >>> psf = np.zeros_like(image)
-    >>> psf[50,50] = 1
-    >>> psf = gaussian(psf, 2)
-    >>> image_conv = convolve2d(image, psf, 'same')
-    >>> deconvolved, calc_psf = blind_richardson_lucy(image_conv, 10)
-
     Notes
     -----
+    The Richardson-Lucy algorithm is an iterative algorithm to
+    deconvolve an image using a given point spread function (PSF).
 
-    This function estimates a point spread function based on an
-    inverse Richardson Lucy algorithm as described
-    in Fish et al., 1995. It is an iterative process where the PSF
+    If no PSF is provided, the algorithm performs an "inverse" Richardson
+    Lucy algorithm as described in Fish et al., 1995.
+    It is an iterative process where the PSF
     and image is deconvolved, respectively.
     It is more noise tolerant than other algorithms,
-    such as Ayers-Dainty and the Weiner filter algorithms
+    such as Ayers-Dainty and the Wiener filter algorithms
     (taken from the paper).
 
     The algorithm performs well with gaussian PSFs and can recover
@@ -460,62 +391,85 @@ def blind_richardson_lucy(image, psf=None, iterations=10,
 
     References
     ----------
-    .. [1] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
+    ..
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [2] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
            "Blind deconvolution by means of the Richardson–Lucy algorithm."
            JOSA A 12, no. 1 (1995): 58-65.
-
-           https://pdfs.semanticscholar.org/9e3f/a71e22caf358dbe873e9649f08c205d0c0c0.pdf
     """
+    if psf is None:
+        time_psf = image.shape
+    else:
+        time_psf = psf.shape
+
+    # compute the times for direct convolution and the fft method. The fft is of
+    # complexity O(N log(N)) for each dimension and the direct method does
+    # straight arithmetic (and is O(n*k) to add n elements k times)
+    direct_time = np.prod(image.shape + time_psf)
+    fft_time = np.sum([n*np.log(n) for n in image.shape + time_psf])
+
+    # see whether the fourier transform convolution method or the direct
+    # convolution method is faster (discussed in scikit-image PR #1792)
+    time_ratio = 40.032 * fft_time / direct_time
+
+    if time_ratio <= 1 or len(image.shape) > 2:
+        convolve_method = fftconvolve
+    else:
+        convolve_method = convolve
+
     if return_iterations:
         all_iterations = np.empty((iterations, 2,) + image.shape)
 
-    # Convert image to float for computations
     image = image.astype(np.float)
-
-    # Initialize im_deconv and PSF
-    im_deconv = np.full(image.shape, 0.5)
 
     if psf is None:
         psf = np.full(image.shape, 0.5)
-    else:
+    elif psf is not None and blind:
         assert psf.shape == image.shape, \
-            'Image and PSF should have the same shape!'
+            'For blind deconvolution, image and PSF should have the same shape!'
         psf = psf.astype(np.float)
+    else:
+        pass
+
+    im_deconv = np.full(image.shape, 0.5)
+    psf_mirror = psf[::-1, ::-1]
 
     for i in range(iterations):
-        # Deconvolve the PSF
-        # Hack: in original publication one would have used `image`,
-        #       however, this does not work.
-        #       Using `im_deconv` instead recovers PSF.
-        relative_blur_psf = im_deconv / fftconvolve(psf, im_deconv, 'same')
+        # If blind deconvolution option is set
+        if blind:
+            # Deconvolve the PSF
+            # Hack: in original publication one would have used `image`,
+            #       however, this does not work.
+            #       Using `im_deconv` instead recovers PSF.
+            relative_blur_psf = im_deconv / convolve_method(psf, im_deconv, 'same')
 
-        # Check if relative_blur_psf contains nan,
-        # causing the algorithm to fail
-        if np.count_nonzero(~np.isnan(relative_blur_psf)) \
-                < relative_blur_psf.size:
-            warnings.warn('Iterations stopped after {} iterations'
-                          ' because PSF contains zeros!'.format(i),
-                          RuntimeWarning)
-            break
+            # Check for zeros in PSF, causes the latter code to crash
+            if np.count_nonzero(~np.isnan(relative_blur_psf)) \
+                    < relative_blur_psf.size:
+                warnings.warn('Iterations stopped after {} iterations'
+                              ' because PSF contains zeros!'.format(i),
+                              RuntimeWarning)
+                break
 
-        else:
-            psf *= fftconvolve(relative_blur_psf,
-                               im_deconv[::-1, ::-1],
-                               'same')
+            else:
+                psf *= convolve_method(relative_blur_psf,
+                                       im_deconv[::-1, ::-1],
+                                       'same')
 
-            # Compute inverse again
-            psf_mirror = psf[::-1, ::-1]
+                # Compute inverse again
+                psf_mirror = psf[::-1, ::-1]
 
-            # Standard Richardson-Lucy deconvolution
-            relative_blur = image / fftconvolve(im_deconv, psf, 'same')
-            im_deconv *= fftconvolve(relative_blur, psf_mirror, 'same')
+        relative_blur = image / convolve_method(im_deconv, psf, 'same')
+        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
-            # Add iteration to list, if desired
-            if return_iterations:
-                all_iterations[i, 0] = im_deconv.copy()
-                all_iterations[i, 1] = psf.copy()
+        # Add iteration to list, if desired
+        if return_iterations:
+            all_iterations[i, 0] = im_deconv.copy()
+            all_iterations[i, 1] = psf.copy()
 
-    # Don't know if this makes sense here...
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
