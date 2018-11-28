@@ -12,8 +12,8 @@ transformation, when applied to the target image, aligns it to the
 reference image [1]_.
 
 .. [1] Juan Nunez-Iglesias, Stefan van der Walt, and Harriet Dashnow. Elegant
-SciPy: The Art of Scientic Python. 1st. O'Reilly Media, Inc., 2017. isbn:
-1491922877, 9781491922873.
+        SciPy: The Art of Scientic Python. 1st. O'Reilly Media, Inc., 2017. isbn:
+        1491922877, 9781491922873.
 
 """
 
