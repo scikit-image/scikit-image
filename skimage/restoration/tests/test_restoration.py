@@ -107,7 +107,6 @@ def test_blind_richardson_lucy():
     iterations = 50
 
     im_deconv, psf = restoration.richardson_lucy(im_conv,
-                                                 blind=True,
                                                  iterations=iterations)
 
     path = pjoin(dirname(abspath(__file__)), 'reconstruction_blind_RL.npy')

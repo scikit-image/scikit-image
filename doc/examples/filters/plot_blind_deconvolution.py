@@ -62,7 +62,7 @@ im_conv = convolve2d(im, psf_gaussian, 'same')
 iterations = 50
 
 # Run blind deconvolution and try to recover the used PSF
-reconstruction = richardson_lucy(im_conv, blind=True,
+reconstruction = richardson_lucy(im_conv,
                                  iterations=iterations,
                                  return_iterations=True)
 

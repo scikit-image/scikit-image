@@ -328,7 +328,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
 
 def richardson_lucy(image, psf=None, iterations=50,
-                    return_iterations=False, blind=False, clip=True):
+                    return_iterations=False, refine_psf=False, clip=True):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -337,13 +337,15 @@ def richardson_lucy(image, psf=None, iterations=50,
        Input degraded image (can be N dimensional).
     psf : ndarray, optional
        The point spread function.
+       If not passed, a blind deconvolution is performed.
     iterations : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
     return_iterations : boolean, optional
-        Returns a list of the PSF and the deconvolved image for each iteration
-    blind : boolean, optional
-        Performs a blind deconvolution by estimating the PSF from the image
+        Returns a list of the PSF and the deconvolved image for each iteration.
+    refine_psf : boolean, optional
+        Refines the passed PSF by means of blind deconvolution.
+        If no PSF is passed, this is automatically turned on.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
@@ -354,7 +356,7 @@ def richardson_lucy(image, psf=None, iterations=50,
        The deconvolved image.
 
     psf : ndarray
-        The last PSF estimate to deconvolve image
+        The last PSF estimate to deconvolve image.
 
     Examples
     --------
@@ -391,15 +393,13 @@ def richardson_lucy(image, psf=None, iterations=50,
 
     References
     ----------
-    ..
-
-    References
-    ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+
     .. [2] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
            "Blind deconvolution by means of the Richardson–Lucy algorithm."
-           JOSA A 12, no. 1 (1995): 58-65.
+           JOSA A 12, no. 1 (1995): 58-65. doi: 10.1364/JOSAA.12.000058.
     """
+    # Set the time aspect of the PSF depending on the algorithm used.
     if psf is None:
         time_psf = image.shape
     else:
@@ -412,7 +412,7 @@ def richardson_lucy(image, psf=None, iterations=50,
     fft_time = np.sum([n * np.log(n) for n in image.shape + time_psf])
 
     # see whether the fourier transform convolution method or the direct
-    # convolution method is faster (discussed in scikit-image PR #1792)
+    # convolution method is faster (discussed in scikit-image PR #1792).
     time_ratio = 40.032 * fft_time / direct_time
 
     if time_ratio <= 1 or len(image.shape) > 2:
@@ -420,27 +420,38 @@ def richardson_lucy(image, psf=None, iterations=50,
     else:
         convolve_method = convolve
 
+    # Flag: return all iterations, not only the last one.
     if return_iterations:
         all_iterations = np.empty((iterations, 2,) + image.shape)
 
     image = image.astype(np.float)
 
+    # Initialize PSF
+    # No PSF was passed, create an ndarray with 0.5 in each cell.
     if psf is None:
         psf = np.full(image.shape, 0.5)
-    elif psf is not None and blind:
+        refine_psf = True  # enable blind deconvolution automatically
+
+    # If PSF was passed and refine_psf option set to true,
+    #  check if PSF has the same shape as the image, otherwise
+    #  the following code does not work.
+    elif psf is not None and refine_psf:
         assert psf.shape == image.shape, \
-            'For blind deconvolution, ' \
+            'For refining the PSF, ' \
             'image and PSF should have the same shape!'
         psf = psf.astype(np.float)
+
     else:
         pass
 
+    # Initialize deconvolution image for estimating PSF
     im_deconv = np.full(image.shape, 0.5)
     psf_mirror = psf[::-1, ::-1]
 
+    # Apply algorithm for finite iterations
     for i in range(iterations):
-        # If blind deconvolution option is set
-        if blind:
+        # Blind deconvolution or refining PSF if an estimate was passed.
+        if refine_psf:
             # Deconvolve the PSF
             # Hack: in original publication one would have used `image`,
             #       however, this does not work.
@@ -465,6 +476,7 @@ def richardson_lucy(image, psf=None, iterations=50,
                 # Compute inverse again
                 psf_mirror = psf[::-1, ::-1]
 
+        # Perform deconvolution
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
         im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
 
