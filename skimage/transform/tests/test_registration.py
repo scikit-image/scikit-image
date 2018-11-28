@@ -26,9 +26,8 @@ def test_register_affine():
         (inverse_transform, bottom_matrix), axis=0)
 
     target = ndi.affine_transform(reference, matrix_transform)
-    with expected_warnings(['The default multichannel']):
-        matrix = registration.register_affine(reference, target)
-        assert_array_almost_equal(matrix, inverse_transform, decimal=0)
+    matrix = registration.register_affine(reference, target)
+    assert_array_almost_equal(matrix, inverse_transform, decimal=0)
 
 
 def test_matrix_parameter_vector_conversion():
