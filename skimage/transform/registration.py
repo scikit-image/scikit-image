@@ -34,7 +34,7 @@ def _parameter_vector_to_matrix(parameter_vector, N):
 
 def _matrix_to_parameter_vector(matrix):
     """
-    Converts a 3x3 transformation matrix to the optimisation parameters
+    Converts a (N+1)x(N+1) transformation matrix to the optimisation parameters
 
     See the inverse function `_parameter_vector_to_matrix`.
 
@@ -55,6 +55,7 @@ def _matrix_to_parameter_vector(matrix):
 
 
 def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
+                    multichannel=False,
                     iter_callback=lambda img, matrix: None):
     """
     Returns a matrix which registers the target image to the reference image
@@ -79,6 +80,10 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
         Change the maximum height we use for creating the Gaussian pyramid.
         By default we take a guess based on the resolution of the image,
         as extremely low resolution images may hinder registration.
+
+    multichannel : bool, optional
+        Whether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension. By default, this is False.
 
     iter_callback : function, optional
         If given, this function is called once per pyramid level with the
@@ -113,8 +118,10 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
         max_level = max(int(np.log2([min_dim])[0]) - 2, 2)
         nlevels = min(max_level, 7)
 
-    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1)
-    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1)
+    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1,
+        multichannel=multichannel)
+    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1,
+        multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
     parameter_vector = _matrix_to_parameter_vector(np.identity(num_dims + 1))
 
