@@ -230,5 +230,3 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
 
         rmse = sqrt(rmse / total)
         i += 1
-
-    return np.squeeze(np.asarray(out[1:out_height-1, 1:out_width-1]))

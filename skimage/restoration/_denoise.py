@@ -215,8 +215,8 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
-
-    return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic, out)
+    _denoise_tv_bregman(image, weight, max_iter, eps, isotropic, out)
+    return np.squeeze(out[1:-1, 1:-1])
 
 
 def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
