@@ -146,15 +146,14 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         np_floats rmse = DBL_MAX
         np_floats norm = (weight + 4 * lam)
 
-    height, width = image.shape[:2]
-    out_height, out_width = out.shape[:2]
-    out[1:out_height-1, 1:out_width-1] = image
+    out_rows, out_cols = out.shape[:2]
+    out[1:out_rows-1, 1:out_cols-1] = image
 
     # reflect image
-    out[0, 1:out_width-1] = image[1, :]
-    out[1:out_height-1, 0] = image[:, 1]
-    out[out_height-1, 1:out_width-1] = image[height-2, :]
-    out[1:out_height-1, out_width-1] = image[:, width-2]
+    out[0, 1:out_cols-1] = image[1, :]
+    out[1:out_rows-1, 0] = image[:, 1]
+    out[out_rows-1, 1:out_cols-1] = image[rows-1, :]
+    out[1:out_rows-1, out_cols-1] = image[:, cols-1]
 
     while i < max_iter and rmse > eps:
 
