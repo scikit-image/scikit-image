@@ -1131,7 +1131,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
-    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[mask] = 116. * np.cbrt(L[mask]) - 16.
     L[~mask] = 903.3 * L[~mask]
 
     u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
