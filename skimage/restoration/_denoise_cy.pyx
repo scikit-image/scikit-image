@@ -159,9 +159,9 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
 
         rmse = 0
 
-        for k in range(dims):
-            for r in range(1, rows + 1):
-                for c in range(1, cols + 1):
+        for r in range(1, rows + 1):
+            for c in range(1, cols + 1):
+                for k in range(dims):
 
                     uprev = out[r, c, k]
 
