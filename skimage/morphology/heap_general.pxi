@@ -19,7 +19,7 @@ cdef struct Heap:
     Heapitem *data
     Heapitem **ptrs
 
-cdef inline Heap *heap_from_numpy2():
+cdef inline Heap *heap_from_numpy2() nogil:
     cdef Py_ssize_t k
     cdef Heap *heap
     heap = <Heap *> malloc(sizeof (Heap))
@@ -31,12 +31,12 @@ cdef inline Heap *heap_from_numpy2():
         heap.ptrs[k] = heap.data + k
     return heap
 
-cdef inline void heap_done(Heap *heap):
+cdef inline void heap_done(Heap *heap) nogil:
    free(heap.data)
    free(heap.ptrs)
    free(heap)
 
-cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h):
+cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h) nogil:
     h.ptrs[a], h.ptrs[b] = h.ptrs[b], h.ptrs[a]
 
 
@@ -47,7 +47,7 @@ cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h):
 #
 # Note: heap ordering is the same as python heapq, i.e., smallest first.
 ######################################################
-cdef inline void heappop(Heap *heap, Heapitem *dest):
+cdef inline void heappop(Heap *heap, Heapitem *dest) nogil:
 
     cdef Py_ssize_t i, smallest, l, r # heap indices
 
@@ -100,7 +100,7 @@ cdef inline void heappop(Heap *heap, Heapitem *dest):
 #
 # Note: heap ordering is the same as python heapq, i.e., smallest first.
 ##################################################
-cdef inline void heappush(Heap *heap, Heapitem *new_elem):
+cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
 
     cdef Py_ssize_t child = heap.items
     cdef Py_ssize_t parent

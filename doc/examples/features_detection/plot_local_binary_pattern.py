@@ -132,8 +132,8 @@ for ax, labels in zip(ax_img, label_sets):
 for ax, labels, name in zip(ax_hist, label_sets, titles):
     counts, _, bars = hist(ax, lbp)
     highlight_bars(bars, labels)
-    ax.set_ylim(ymax=np.max(counts[:-1]))
-    ax.set_xlim(xmax=n_points + 2)
+    ax.set_ylim(top=np.max(counts[:-1]))
+    ax.set_xlim(right=n_points + 2)
     ax.set_title(name)
 
 ax_hist[0].set_ylabel('Percentage')

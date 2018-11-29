@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_equal
-from pytest import raises
+from pytest import raises, warns
 
 from skimage.morphology import extrema
 
@@ -212,13 +212,24 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_empty(self):
         """Test result with empty image."""
-        result = extrema.local_maxima(np.array([]), indices=False)
+        result = extrema.local_maxima(np.array([[]]), indices=False)
         assert result.size == 0
         assert result.dtype == np.uint8
+        assert result.shape == (1, 0)
 
         result = extrema.local_maxima(np.array([]), indices=True)
-        assert result.size == 0
-        assert result.dtype == np.intp
+        assert isinstance(result, tuple)
+        assert len(result) == 1
+        assert result[0].size == 0
+        assert result[0].dtype == np.intp
+
+        result = extrema.local_maxima(np.array([[]]), indices=True)
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+        assert result[0].size == 0
+        assert result[0].dtype == np.intp
+        assert result[1].size == 0
+        assert result[1].dtype == np.intp
 
     def test_dtypes(self):
         """Test results with default configuration for all supported dtypes."""
@@ -438,6 +449,33 @@ class TestLocalMaxima(unittest.TestCase):
 
         with raises(TypeError, match="float16 which is not supported"):
             extrema.local_maxima(np.empty(1, dtype=np.float16))
+
+    def test_small_array(self):
+        """Test output for arrays with dimension smaller 3.
+
+        If any dimension of an array is smaller than 3 and `allow_borders` is
+        false a structuring element, which has at least 3 elements in each
+        dimension, can't be applied. This is an implementation detail so
+        `local_maxima` should still return valid output (see gh-3261).
+
+        If `allow_borders` is true the array is padded internally and there is
+        no problem.
+        """
+        warning_msg = "maxima can't exist .* any dimension smaller 3 .*"
+        x = np.array([0, 1])
+        extrema.local_maxima(x, allow_borders=True)  # no warning
+        with warns(UserWarning, match=warning_msg):
+            result = extrema.local_maxima(x, allow_borders=False)
+        assert_equal(result, [0, 0])
+        assert result.dtype == np.uint8
+
+        x = np.array([[1, 2], [2, 2]])
+        extrema.local_maxima(x, allow_borders=True, indices=True)  # no warning
+        with warns(UserWarning, match=warning_msg):
+            result = extrema.local_maxima(x, allow_borders=False, indices=True)
+        assert_equal(result, np.zeros((2, 0), dtype=np.intp))
+        assert result[0].dtype == np.intp
+        assert result[1].dtype == np.intp
 
 
 if __name__ == "__main__":

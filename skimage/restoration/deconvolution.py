@@ -159,7 +159,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
-    user_params : dict
+    user_params : dict, optional
        Dictionary of parameters for the Gibbs sampler. See below.
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
@@ -337,7 +337,7 @@ def richardson_lucy(image, psf=None, iterations=50,
        Input degraded image (can be N dimensional).
     psf : ndarray, optional
        The point spread function.
-       If not passed, a blind deconvolution is performed.
+       If None, a blind deconvolution is performed.
     iterations : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
