@@ -133,11 +133,8 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         Py_ssize_t total = rows * cols * dims
 
     shape_ext = (rows2, cols2, dims)
-    u = out.copy()
 
     cdef:
-        np_floats[:, :, ::1] cu = u
-
         np_floats[:, :, ::1] dx = out.copy()
         np_floats[:, :, ::1] dy = out.copy()
         np_floats[:, :, ::1] bx = out.copy()
@@ -150,14 +147,14 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         np_floats norm = (weight + 4 * lam)
 
     height, width = image.shape[:2]
-    u_height, u_width = u.shape[:2]
-    u[1:u_height-1, 1:u_width-1] = image
+    out_height, out_width = out.shape[:2]
+    out[1:out_height-1, 1:out_width-1] = image
 
     # reflect image
-    u[0, 1:u_width-1] = image[1, :]
-    u[1:u_height-1, 0] = image[:, 1]
-    u[u_height-1, 1:u_width-1] = image[height-2, :]
-    u[1:u_height-1, u_width-1] = image[:, width-2]
+    out[0, 1:out_width-1] = image[1, :]
+    out[1:out_height-1, 0] = image[:, 1]
+    out[out_height-1, 1:out_width-1] = image[height-2, :]
+    out[1:out_height-1, out_width-1] = image[:, width-2]
 
     while i < max_iter and rmse > eps:
 
@@ -167,19 +164,19 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
             for r in range(1, rows + 1):
                 for c in range(1, cols + 1):
 
-                    uprev = cu[r, c, k]
+                    uprev = out[r, c, k]
 
                     # forward derivatives
-                    ux = cu[r, c + 1, k] - uprev
-                    uy = cu[r + 1, c, k] - uprev
+                    ux = out[r, c + 1, k] - uprev
+                    uy = out[r + 1, c, k] - uprev
 
                     # Gauss-Seidel method
                     unew = (
                         lam * (
-                            + cu[r + 1, c, k]
-                            + cu[r - 1, c, k]
-                            + cu[r, c + 1, k]
-                            + cu[r, c - 1, k]
+                            + out[r + 1, c, k]
+                            + out[r - 1, c, k]
+                            + out[r, c + 1, k]
+                            + out[r, c - 1, k]
 
                             + dx[r, c - 1, k]
                             - dx[r, c, k]
@@ -192,7 +189,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
                             + by[r, c, k]
                         ) + weight * image[r - 1, c - 1, k]
                     ) / norm
-                    cu[r, c, k] = unew
+                    out[r, c, k] = unew
 
                     # update root mean square error
                     tx = unew - uprev
@@ -234,4 +231,4 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         rmse = sqrt(rmse / total)
         i += 1
 
-    return np.squeeze(np.asarray(u[1:u_height-1, 1:u_width-1]))
+    return np.squeeze(np.asarray(out[1:out_height-1, 1:out_width-1]))
