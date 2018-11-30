@@ -348,7 +348,7 @@ def richardson_lucy(image, psf=None, iterations=50,
         If no PSF is passed, this is automatically turned on.
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
-       under -1 are thresholded for skimage pipeline compatibility.
+       below -1 are thresholded for skimage pipeline compatibility.
 
     Returns
     -------
