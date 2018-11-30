@@ -198,7 +198,7 @@ def greycoprops(P, prop='contrast', pre_normalized=False):
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
     >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
-    ...                  pre_normalized=True, symmetric=True)
+    ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
     array([[ 0.58333333,  1.        ],
