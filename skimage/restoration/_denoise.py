@@ -24,7 +24,7 @@ def _compute_range_lut(win_size, sigma):
     grid_points = np.arange(-win_size, win_size + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     d = np.hypot(rr, cc)
-    range_lut = _gaussian_weight(sigma**2, d)
+    range_lut = _gaussian_weight(sigma**2, d).ravel()
     return range_lut
 
 
