@@ -1,25 +1,31 @@
+import itertools
 import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
-from ..restoration._denoise_cy import (_denoise_bilateral, _denoise_tv_bregman,
-                                       _gaussian_weight)
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
 
 
+def _gaussian_weight(sigma_sqr, value):
+    return np.exp(-0.5 * value * value / sigma_sqr)
+
+
 def _compute_color_lut(bins, sigma, max_value, dtype):
-    color_lut = np.empty(bins, dtype=dtype)
-
-    sigma *= sigma
-    max_value /= bins
-
-    for b in range(bins):
-        color_lut[b] = _gaussian_weight(sigma, b * max_value)
-
+    color_lut = _gaussian_weight(sigma**2, np.linspace(0, max_value/bins, bins,
+                                                       endpoint=False))
     return color_lut
+
+
+def _compute_range_lut(win_size, sigma):
+    grid_points = np.arange(-win_size, win_size + 1)
+    rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
+    d = np.hypot(rr, cc)
+    range_lut = _gaussian_weight(sigma**2, d)
+    return range_lut
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -144,7 +150,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     color_lut = _compute_color_lut(bins, sigma_color, max_value, image.dtype)
 
-    range_lut = np.empty(win_size * win_size, dtype=image.dtype)
+    range_lut = _compute_range_lut(win_size, sigma_spatial)
 
     out = np.empty(image.shape, dtype=image.dtype)
 

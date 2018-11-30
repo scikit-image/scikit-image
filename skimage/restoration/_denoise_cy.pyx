@@ -11,30 +11,6 @@ from .._shared.interpolation cimport get_pixel3d
 from .._shared.fused_numerics cimport np_floats
 
 
-def _gaussian_weight(np_floats sigma_sqr, np_floats value):
-    return exp(-0.5 * value * value / sigma_sqr)
-
-
-cdef np_floats[:] _compute_range_lut(Py_ssize_t win_size, np_floats sigma,
-                                     np_floats[::1] range_lut):
-
-    cdef:
-        Py_ssize_t kr, kc, dr, dc
-        Py_ssize_t window_ext = (win_size - 1) / 2
-        np_floats dist
-
-    sigma *= sigma
-
-    for kr in range(win_size):
-        for kc in range(win_size):
-            dr = kr - window_ext
-            dc = kc - window_ext
-            dist = sqrt(dr * dr + dc * dc)
-            range_lut[kr * win_size + kc] = _gaussian_weight(sigma, dist)
-
-    return range_lut
-
-
 cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2):
     if value1 < value2:
         return value1
