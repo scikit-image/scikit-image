@@ -131,21 +131,16 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
     # count co-occurrences
-    if normed:
-        P = np.zeros((levels, levels, len(distances), len(angles)),
-                     dtype=np.float64, order='C')
-        P_tot = np.zeros((len(distances), len(angles)),
-                         dtype=np.float64, order='C')
-        _glcm_loop(image, distances, angles, levels, P, P_tot, symmetric, normed)
-    else:
-        P = np.zeros((levels, levels, len(distances), len(angles)),
-                     dtype=np.uint32, order='C')
-        _glcm_loop(image, distances, angles, levels, P, None, symmetric, normed)
+    P = np.zeros((levels, levels, len(distances), len(angles)),
+                 dtype=np.float64 if normed else np.uint32, order='C')
+    P_tot = np.zeros((len(distances), len(angles)),
+                     dtype=np.float64, order='C') if normed else None
+    _glcm_loop(image, distances, angles, levels, P, P_tot, symmetric, normed)
 
     return P
 
 
-def greycoprops(P, prop='contrast', normed=False):
+def greycoprops(P, prop='contrast', pre_normalized=False):
     """Calculate texture properties of a GLCM.
 
     Compute a feature of a grey level co-occurrence matrix to serve as
@@ -162,7 +157,7 @@ def greycoprops(P, prop='contrast', normed=False):
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
     Each GLCM is normalized to have a sum of 1 before the computation of texture
-    properties, unless normed = True when it is assumed to already be so
+    properties, unless pre_normalized = True when it is assumed to already be so
     normalized.
 
     Parameters
@@ -176,7 +171,7 @@ def greycoprops(P, prop='contrast', normed=False):
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
-    normed : boolean, optional
+    pre_normalized : boolean, optional
         Flag if `P` is *already* normalised. Mirrors `normed` flag for
         `greycomatrix`. If `True` a normalised input array is *assumed*
         and *not* checked for.
@@ -203,7 +198,7 @@ def greycoprops(P, prop='contrast', normed=False):
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
     >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
-    ...                  normed=True, symmetric=True)
+    ...                  pre_normalized=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
     array([[ 0.58333333,  1.        ],
@@ -221,8 +216,8 @@ def greycoprops(P, prop='contrast', normed=False):
     if P.dtype != np.float64 or not P.flags['C_CONTIGUOUS']:
         P = P.astype(np.float64, order='C')
     if prop in ['contrast', 'dissimilarity', 'homogeneity']:
-        return _coprop_weights(P, num_level, num_dist, num_angle, normed, prop)
-    elif not normed:
+        return _coprop_weights(P, num_level, num_dist, num_angle, pre_normalized, prop)
+    elif not pre_normalized:
         # normalize each GLCM
         _glcm_norm(P, num_level, num_dist, num_angle)
 
