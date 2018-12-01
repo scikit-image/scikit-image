@@ -3,16 +3,16 @@
 RGB to grayscale
 ================
 
-This example converts an image with RGB channels into an image with a single 
-grayscale channel. 
+This example converts an image with RGB channels into an image with a single
+grayscale channel.
 
-The value of each grayscale pixel is calculated as the weighted sum of the 
+The value of each grayscale pixel is calculated as the weighted sum of the
 corresponding red, green and blue pixels as::
 
         Y = 0.2125 R + 0.7154 G + 0.0721 B
 
-These weights are used by CRT phosphors as they better represent human 
-perception of red, green and blue than equal weights. [1]_ 
+These weights are used by CRT phosphors as they better represent human
+perception of red, green and blue than equal weights. [1]_
 
 References
 ----------
