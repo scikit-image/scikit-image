@@ -15,8 +15,7 @@ SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 
-if (Version(np.__version__) >= '1.15.0' and
-        Version(scipy.__version__) <= '1.1.0'):
+if (Version(np.__version__) >= '1.15.0'):
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
     NUMPY_MATRIX_WARNING = 'None'
@@ -71,7 +70,6 @@ def test_2d_bf():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    print(np.__version__, scipy.__version__)
     with expected_warnings([NUMPY_MATRIX_WARNING]):
         labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
