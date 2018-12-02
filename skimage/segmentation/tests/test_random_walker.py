@@ -19,7 +19,7 @@ if (Version(np.__version__) >= '1.15.0' and
         Version(scipy.__version__) <= '1.1.0'):
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
-    NUMPY_MATRIX_WARNING = None
+    NUMPY_MATRIX_WARNING = 'matrix subclass'
 
 
 def make_2d_syntheticdata(lx, ly=None):
