@@ -18,7 +18,7 @@ PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 if (Version(np.__version__) >= '1.15.0'):
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
-    NUMPY_MATRIX_WARNING = 'None'
+    NUMPY_MATRIX_WARNING = None
 
 
 def make_2d_syntheticdata(lx, ly=None):
