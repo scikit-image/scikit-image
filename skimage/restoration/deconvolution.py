@@ -397,7 +397,7 @@ def richardson_lucy(image, psf=None, iterations=50,
 
     .. [2] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
            "Blind deconvolution by means of the Richardson–Lucy algorithm."
-           JOSA A 12, no. 1 (1995): 58-65. doi: 10.1364/JOSAA.12.000058.
+           JOSA A 12, no. 1 (1995): 58-65. DOI:`10.1364/JOSAA.12.000058`.
     """
     # Set the time aspect of the PSF depending on the algorithm used.
     if psf is None:
