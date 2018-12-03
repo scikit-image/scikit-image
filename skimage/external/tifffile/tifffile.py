@@ -72,6 +72,10 @@ Revisions
 ---------
 2018.10.08
     No longer use numpy.fromstring just use numpy.frombuffer.
+    Note that this has been fixed upstream in 2018.02.18.
+    Unfortunately, upstream code claims to depend on Numpy 1.14.
+    To not bump the minimum version requirements of scikit-image,
+    this targetted fix was added to the vendored version.
 2017.01.12
     Read Zeiss SEM metadata.
     Read OME-TIFF with invalid references to external files.
