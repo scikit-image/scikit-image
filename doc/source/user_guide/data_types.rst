@@ -63,24 +63,29 @@ img_as_int     Convert to 16-bit int.
 =============  =================================
 
 These functions convert images to the desired dtype and *properly rescale their
-values*. If conversion reduces the precision of the image, then a warning is
-issued::
+values*::
 
    >>> from skimage import img_as_ubyte
    >>> image = np.array([0, 0.5, 1], dtype=float)
    >>> img_as_ubyte(image)
-   WARNING:dtype_converter:Possible precision loss when converting from
-   float64 to uint8
    array([  0, 128, 255], dtype=uint8)
 
-Warnings can be locally ignored with a context manager::
+These conversions can result in a loss of precision, since 8 bits cannot hold
+the same amount of information as 64 bits::
 
-   >>> import warnings
-   >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> with warnings.catch_warnings():
-   ...     warnings.simplefilter("ignore")
-   ...     img_as_ubyte(image)
-   array([  0, 128, 255], dtype=uint8)
+   >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
+   >>> image_as_ubyte(image)
+   array([  0, 128, 128, 255], dtype=uint8)
+
+If desired, the user can be warned when such loss of information happens, by
+using a keyword argument::
+
+   >>> image_as_ubyte(image, warn_on_precision_loss=True)
+   UserWarning: Possible precision loss when converting from float64 to uint8
+   array([  0, 128, 128, 255], dtype=uint8)
+
+There is also a keyword argument to warn when it is possible to lose sign
+information, ``warn_on_sign_loss=True``.
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
