@@ -89,7 +89,7 @@ before_install:
 install:
     - ccache --show-stats
     # Test installing without cython using the sdist
-    - if [[ "$INSTALL_FROM_SDIST" == "1" ]]; then
+    - if [[ $INSTALL_FROM_SDIST ]]; then
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
