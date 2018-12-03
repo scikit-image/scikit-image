@@ -73,7 +73,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
     with expected_warnings([r'precision loss|sign loss|\A\Z']):
-        y = convert(x, dt)
+        y = convert(x, dt, warn_on_precision_loss=True, warn_on_sign_loss=True)
 
     omin, omax = dtype_range_extra[dt]
     _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),

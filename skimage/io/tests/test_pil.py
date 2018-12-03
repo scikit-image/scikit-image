@@ -45,11 +45,16 @@ def test_png_round_trip():
     fname = f.name
     f.close()
     I = np.eye(3)
-    with expected_warnings(['Possible precision loss']):
-        imsave(fname, I)
+    imsave(fname, I)
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
+
+
+def test_imread_as_gray_flatten():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+    assert_array_equal(img, img_flat)
 
 
 def test_imread_as_gray():
@@ -207,8 +212,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss',
-                            'is a low contrast image']):
+    with expected_warnings(['is a low contrast image']):
         imsave(s, image)
 
     # read from file-like object
@@ -238,8 +242,7 @@ def test_imsave_boolean_input():
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    with expected_warnings(['precision loss']):
-        pil_image = ndarray_to_pil(image)
+    pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert_equal(out.shape, shape)
 

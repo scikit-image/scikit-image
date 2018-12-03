@@ -83,8 +83,7 @@ class TestRank():
             else:
                 assert_array_equal(expected, result)
 
-        with expected_warnings(['precision loss']):
-            check()
+        check()
 
 
     def test_random_sizes(self):
@@ -290,8 +289,7 @@ class TestRank():
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, disk(3))
-            with expected_warnings(['precision loss']):
-                out_f = func(image_float, disk(3))
+            out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
 
@@ -304,8 +302,11 @@ class TestRank():
         image[image > 127] = 0
         image_s = image.astype(np.int8)
         with expected_warnings(['sign loss', 'precision loss']):
-            image_u = img_as_ubyte(image_s)
-            assert_equal(image_u, img_as_ubyte(image_s))
+            image_u = img_as_ubyte(image_s, warn_on_precision_loss=True,
+                                   warn_on_sign_loss=True)
+            assert_equal(image_u, img_as_ubyte(image_s,
+                                               warn_on_precision_loss=True,
+                                               warn_on_sign_loss=True))
 
         methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
@@ -313,10 +314,8 @@ class TestRank():
 
         for method in methods:
             func = getattr(rank, method)
-
-            with expected_warnings(['sign loss', 'precision loss']):
-                out_u = func(image_u, disk(3))
-                out_s = func(image_s, disk(3))
+            out_u = func(image_u, disk(3))
+            out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
     @parametrize('method',
