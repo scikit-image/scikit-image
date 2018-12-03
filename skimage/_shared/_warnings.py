@@ -84,7 +84,8 @@ def expected_warnings(matching):
     --------
     >>> from skimage import data, img_as_ubyte, img_as_float
     >>> with expected_warnings(['precision loss']):
-    ...     d = img_as_ubyte(img_as_float(data.coins()))
+    ...     d = img_as_ubyte(img_as_float(data.coins()),
+    ...                      warn_on_precision_loss=True)
 
     Notes
     -----
