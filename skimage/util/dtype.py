@@ -352,7 +352,8 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
     return image.astype(dtype_out)
 
 
-def img_as_float32(image, force_copy=False):
+def img_as_float32(image, force_copy=False, *,
+                   warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
     Parameters
@@ -361,6 +362,18 @@ def img_as_float32(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -375,10 +388,13 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.float32, force_copy)
+    return convert(image, np.float32, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss):
 
 
-def img_as_float64(image, force_copy=False):
+def img_as_float64(image, force_copy=False, *,
+                   warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -387,6 +403,18 @@ def img_as_float64(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -402,9 +430,12 @@ def img_as_float64(image, force_copy=False):
 
     """
     return convert(image, np.float64, force_copy)
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss):
 
 
-def img_as_float(image, force_copy=False):
+def img_as_float(image, force_copy=False, *,
+                 warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to floating point format.
 
     This function is similar to `img_as_float64`, but will not convert
@@ -416,6 +447,18 @@ def img_as_float(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -430,10 +473,13 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.floating, force_copy)
+    return convert(image, np.floating, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss)
 
 
-def img_as_uint(image, force_copy=False):
+def img_as_uint(image, force_copy=False, *,
+                warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -442,6 +488,18 @@ def img_as_uint(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -454,10 +512,13 @@ def img_as_uint(image, force_copy=False):
     Positive values are scaled between 0 and 65535.
 
     """
-    return convert(image, np.uint16, force_copy)
+    return convert(image, np.uint16, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss)
 
 
-def img_as_int(image, force_copy=False):
+def img_as_int(image, force_copy=False, *,
+               warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -466,6 +527,18 @@ def img_as_int(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -479,10 +552,13 @@ def img_as_int(image, force_copy=False):
     the output image will still only have positive values.
 
     """
-    return convert(image, np.int16, force_copy)
+    return convert(image, np.int16, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss)
 
 
-def img_as_ubyte(image, force_copy=False):
+def img_as_ubyte(image, force_copy=False, *,
+                 warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -491,6 +567,18 @@ def img_as_ubyte(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -503,10 +591,13 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return convert(image, np.uint8, force_copy)
+    return convert(image, np.uint8, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss)
 
 
-def img_as_bool(image, force_copy=False):
+def img_as_bool(image, force_copy=False, *,
+                warn_on_precision_loss=False, warn_on_sign_loss=False):
     """Convert an image to boolean format.
 
     Parameters
@@ -515,6 +606,18 @@ def img_as_bool(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    warn_on_precision_loss : bool, optional
+        Issue a warning when converting to a format might incure a loss of
+        information.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
+    warn_on_sign_loss : bool, optional
+        Issue a warning when converting from a signed format to an unsigned
+        format.
+
+        .. versionadded:: 0.15
+            Previously, this warning would always be raised.
 
     Returns
     -------
@@ -527,4 +630,6 @@ def img_as_bool(image, force_copy=False):
     half is False. All negative values (if present) are False.
 
     """
-    return convert(image, np.bool_, force_copy)
+    return convert(image, np.bool_, force_copy,
+                   warn_on_precision_loss=warn_on_precision_loss,
+                   warn_on_sign_loss=warn_on_sign_loss)
