@@ -20,7 +20,8 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 from ._warnings import expected_warnings
 import warnings
 
-from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+from .. import data, io
+from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
 
 

@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 from scipy import ndimage as ndi
-import skimage
+
+from skimage import util
 from skimage import data
 from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
@@ -215,22 +216,22 @@ class TestSimpleImage():
 
 
 def test_otsu_camera_image():
-    camera = skimage.img_as_ubyte(data.camera())
+    camera = util.img_as_ubyte(data.camera())
     assert 86 < threshold_otsu(camera) < 88
 
 
 def test_otsu_coins_image():
-    coins = skimage.img_as_ubyte(data.coins())
+    coins = util.img_as_ubyte(data.coins())
     assert 106 < threshold_otsu(coins) < 108
 
 
 def test_otsu_coins_image_as_float():
-    coins = skimage.img_as_float(data.coins())
+    coins = util.img_as_float(data.coins())
     assert 0.41 < threshold_otsu(coins) < 0.42
 
 
 def test_otsu_astro_image():
-    img = skimage.img_as_ubyte(data.astronaut())
+    img = util.img_as_ubyte(data.astronaut())
     with expected_warnings(['grayscale']):
         assert 109 < threshold_otsu(img) < 111
 
@@ -242,7 +243,7 @@ def test_otsu_one_color_image():
 
 
 def test_li_camera_image():
-    image = skimage.img_as_ubyte(data.camera())
+    image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 62 < threshold_li(image) < 63
@@ -251,7 +252,7 @@ def test_li_camera_image():
 
 
 def test_li_coins_image():
-    image = skimage.img_as_ubyte(data.coins())
+    image = util.img_as_ubyte(data.coins())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 94 < threshold_li(image) < 95
@@ -265,12 +266,12 @@ def test_li_coins_image():
 
 
 def test_li_coins_image_as_float():
-    coins = skimage.img_as_float(data.coins())
+    coins = util.img_as_float(data.coins())
     assert 94/255 < threshold_li(coins) < 95/255
 
 
 def test_li_astro_image():
-    image = skimage.img_as_ubyte(data.astronaut())
+    image = util.img_as_ubyte(data.astronaut())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
     assert 64 < threshold < 65
@@ -299,17 +300,17 @@ def test_li_constant_image_with_nan():
 
 
 def test_yen_camera_image():
-    camera = skimage.img_as_ubyte(data.camera())
+    camera = util.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
 
 
 def test_yen_coins_image():
-    coins = skimage.img_as_ubyte(data.coins())
+    coins = util.img_as_ubyte(data.coins())
     assert 109 < threshold_yen(coins) < 111
 
 
 def test_yen_coins_image_as_float():
-    coins = skimage.img_as_float(data.coins())
+    coins = util.img_as_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
@@ -320,7 +321,7 @@ def test_local_even_block_size_error():
 
 
 def test_isodata_camera_image():
-    camera = skimage.img_as_ubyte(data.camera())
+    camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_isodata(camera)
     assert np.floor((camera[camera <= threshold].mean() +
@@ -331,7 +332,7 @@ def test_isodata_camera_image():
 
 
 def test_isodata_coins_image():
-    coins = skimage.img_as_ubyte(data.coins())
+    coins = util.img_as_ubyte(data.coins())
 
     threshold = threshold_isodata(coins)
     assert np.floor((coins[coins <= threshold].mean() +
@@ -342,7 +343,7 @@ def test_isodata_coins_image():
 
 
 def test_isodata_moon_image():
-    moon = skimage.img_as_ubyte(data.moon())
+    moon = util.img_as_ubyte(data.moon())
 
     threshold = threshold_isodata(moon)
     assert np.floor((moon[moon <= threshold].mean() +
@@ -357,7 +358,7 @@ def test_isodata_moon_image():
 
 
 def test_isodata_moon_image_negative_int():
-    moon = skimage.img_as_ubyte(data.moon()).astype(np.int32)
+    moon = util.img_as_ubyte(data.moon()).astype(np.int32)
     moon -= 100
 
     threshold = threshold_isodata(moon)
@@ -373,7 +374,7 @@ def test_isodata_moon_image_negative_int():
 
 
 def test_isodata_moon_image_negative_float():
-    moon = skimage.img_as_ubyte(data.moon()).astype(np.float64)
+    moon = util.img_as_ubyte(data.moon()).astype(np.float64)
     moon -= 100
 
     assert -14 < threshold_isodata(moon) < -13
@@ -385,12 +386,12 @@ def test_isodata_moon_image_negative_float():
 
 
 def test_threshold_minimum():
-    camera = skimage.img_as_ubyte(data.camera())
+    camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
     assert_equal(threshold, 76)
 
-    astronaut = skimage.img_as_ubyte(data.astronaut())
+    astronaut = util.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
     assert_equal(threshold, 114)
 

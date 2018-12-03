@@ -15,7 +15,7 @@ from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import TestCase
 
-from skimage import img_as_float, img_as_ubyte
+from skimage.util import img_as_float, img_as_ubyte
 from skimage.io import imread
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,

@@ -51,7 +51,7 @@ References
 import functools
 import numpy as np
 from scipy import ndimage as ndi
-from ... import img_as_ubyte
+from ...util import img_as_ubyte
 from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy

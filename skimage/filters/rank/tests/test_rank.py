@@ -5,7 +5,7 @@ from skimage._shared.testing import (assert_equal, assert_array_equal,
 from skimage._shared import testing
 
 import skimage
-from skimage import img_as_ubyte, img_as_float
+from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank

@@ -3,8 +3,9 @@ import os
 import numpy as np
 from scipy import ndimage as ndi
 
+from skimage import data_dir
 from skimage import color, data, transform
-from skimage import img_as_uint, img_as_ubyte, data_dir
+from skimage.util import img_as_uint, img_as_ubyte
 from skimage.morphology import grey, selem
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
