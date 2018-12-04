@@ -197,7 +197,7 @@ def test_denoise_bilateral_types(dtype):
     img += 0.5 * img.std() * np.random.rand(*img.shape)
     img = np.clip(img, 0, 1)
 
-    # make sure that it can actually process the float32 types
+    # check that we can process multiple float types
     out = restoration.denoise_bilateral(img, sigma_color=0.1,
                                         sigma_spatial=10, multichannel=False)
 
