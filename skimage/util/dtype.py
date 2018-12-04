@@ -103,6 +103,13 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
     and:
     https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
 
+    .. versionchanged :: 0.15
+        ``convert`` no longer warns about possible precision or sign
+        information loss. See discussions on these warnings at:
+        https://github.com/scikit-image/scikit-image/issues/2602
+        https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
+        https://github.com/scikit-image/scikit-image/pull/3575
+
     References
     ----------
     .. [1] DirectX data conversion rules.
@@ -144,15 +151,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
         raise ValueError("Can not convert from {} to {}."
                          .format(dtypeobj_in, dtypeobj_out))
-
-    def sign_loss():
-        warn("Possible sign loss when converting negative image of type "
-             "{} to positive image of type {}."
-             .format(dtypeobj_in, dtypeobj_out))
-
-    def prec_loss():
-        warn("Possible precision loss when converting from {} to {}"
-             .format(dtypeobj_in, dtypeobj_out))
 
     def _dtype_itemsize(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`
@@ -207,7 +205,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
             return a.copy() if copy else a
         elif n > m:
             # downscale with precision loss
-            prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype_bits(kind, m))
                 np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
@@ -229,7 +226,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
         else:
             # upscale to a multiple of `n` bits,
             # then downscale with precision loss
-            prec_loss()
             o = (m // n + 1) * n
             if copy:
                 b = np.empty(a.shape, _dtype_bits(kind, o))
@@ -251,9 +247,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
 
     # any -> binary
     if kind_out == 'b':
-        if kind_in in "fi":
-            sign_loss()
-        prec_loss()
         return image > dtype_in(dtype_range[dtype_in][1] / 2)
 
     # binary -> any
@@ -267,14 +260,11 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
     if kind_in == 'f':
         if kind_out == 'f':
             # float -> float
-            if itemsize_in > itemsize_out:
-                prec_loss()
             return image.astype(dtype_out)
 
         if np.min(image) < -1.0 or np.max(image) > 1.0:
             raise ValueError("Images of type float must be between -1 and 1.")
         # floating point -> integer
-        prec_loss()
         # use float type that can represent output integer type
         computation_type = _dtype_itemsize(itemsize_out, dtype_in,
                                            np.float32, np.float64)
@@ -302,9 +292,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
 
     # signed/unsigned int -> float
     if kind_out == 'f':
-        if itemsize_in >= itemsize_out:
-            prec_loss()
-
         # use float type that can exactly represent input integers
         computation_type = _dtype_itemsize(itemsize_in, dtype_out,
                                            np.float32, np.float64)
@@ -333,9 +320,7 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
             # unsigned int -> unsigned int
             return _scale(image, 8 * itemsize_in, 8 * itemsize_out)
 
-    # signed int -> unsigned int
-    if kind_out == 'u':
-        sign_loss()
+        # signed int -> unsigned int
         image = _scale(image, 8 * itemsize_in - 1, 8 * itemsize_out)
         result = np.empty(image.shape, dtype_out)
         np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
