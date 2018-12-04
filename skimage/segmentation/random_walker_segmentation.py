@@ -236,7 +236,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels are consecutive. In the multichannel case, `labels` should have
         the same shape as a single channel of `data`, i.e. without the final
         dimension denoting channels.
-    beta : float
+    beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
     mode : string, available options {'cg_mg', 'cg', 'bf'}
@@ -257,21 +257,21 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           requires that the pyamg module (http://pyamg.github.io/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
-
-    tol : float
+          
+    tol : float, optional
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
-    copy : bool
+    copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
-    multichannel : bool, default False
+    multichannel : bool, optional
         If True, input data is parsed as multichannel data (see 'data' above
-        for proper input format in this case)
-    return_full_prob : bool, default False
+        for proper input format in this case).
+    return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-    spacing : iterable of floats
+    spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
 
