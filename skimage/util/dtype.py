@@ -54,8 +54,7 @@ def dtype_limits(image, clip_negative=False):
     return imin, imax
 
 
-def convert(image, dtype, force_copy=False, uniform=False, *,
-            warn_on_precision_loss=False, warn_on_sign_loss=False):
+def convert(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
@@ -83,25 +82,6 @@ def convert(image, dtype, force_copy=False, uniform=False, *,
         By default (uniform=False) floating point values are scaled and
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
-    warn_on_precision_loss : bool, optional
-        Issue a warning when converting to a format might incure a loss of
-        information.
-
-        .. versionadded:: 0.15
-            Previously, this warning would always be raised.
-    warn_on_sign_loss : bool, optional
-        Issue a warning when converting from a signed format to an unsigned
-        format.
-
-        .. versionadded:: 0.15
-            Previously, this warning would always be raised.
-
-    Notes
-    -----
-    See discussions on these warnings at:
-    https://github.com/scikit-image/scikit-image/issues/2602
-    and:
-    https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
 
     .. versionchanged :: 0.15
         ``convert`` no longer warns about possible precision or sign
