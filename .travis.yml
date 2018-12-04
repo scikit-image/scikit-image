@@ -82,7 +82,9 @@ before_install:
     - which python; python --version
     - pip list
     - tools/build_versions.py
-    - tools/check_sdist.py
+    - python setup.py sdist
+    - SDIST_NAME=dist/`python setup.py --fullname`.tar.gz
+    - tools/check_sdist.py $SDIST_NAME
 
 install:
     - python setup.py develop
