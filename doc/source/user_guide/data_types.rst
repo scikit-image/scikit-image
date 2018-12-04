@@ -70,22 +70,12 @@ values*::
    >>> img_as_ubyte(image)
    array([  0, 128, 255], dtype=uint8)
 
-These conversions can result in a loss of precision, since 8 bits cannot hold
-the same amount of information as 64 bits::
+Be careful! These conversions can result in a loss of precision, since 8 bits
+cannot hold the same amount of information as 64 bits::
 
    >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
    >>> image_as_ubyte(image)
    array([  0, 128, 128, 255], dtype=uint8)
-
-If desired, the user can be warned when such loss of information happens, by
-using a keyword argument::
-
-   >>> image_as_ubyte(image, warn_on_precision_loss=True)
-   UserWarning: Possible precision loss when converting from float64 to uint8
-   array([  0, 128, 128, 255], dtype=uint8)
-
-There is also a keyword argument to warn when it is possible to lose sign
-information, ``warn_on_sign_loss=True``.
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
