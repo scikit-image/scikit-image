@@ -135,8 +135,7 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    with expected_warnings(['precision loss']):
-        img = util.img_as_ubyte(test_img)
+    img = util.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -277,7 +276,7 @@ def test_adapthist_grayscale():
     img = util.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with expected_warnings(['precision loss|non-contiguous input']):
+    with expected_warnings(['non-contiguous input']):
         adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                               clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
@@ -293,8 +292,7 @@ def test_adapthist_color():
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-    with expected_warnings(['precision loss']):
-        adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert adapted.min() == 0
     assert adapted.max() == 1.0
@@ -311,8 +309,7 @@ def test_adapthist_alpha():
     img = util.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
-    with expected_warnings(['precision loss']):
-        adapted = exposure.equalize_adapthist(img)
+    adapted = exposure.equalize_adapthist(img)
     assert adapted.shape != img.shape
     img = img[:, :, :3]
     full_scale = exposure.rescale_intensity(img)

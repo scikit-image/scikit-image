@@ -174,8 +174,7 @@ class TestColorconv(TestCase):
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_rgb = img_as_ubyte(self.img_rgb)
-        with expected_warnings(['precision loss']):
-            new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
+        new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
         assert_equal(new, img_rgb)
 
     # RGB<->HED roundtrip with float image
@@ -189,8 +188,7 @@ class TestColorconv(TestCase):
         img_rgb = self.img_rgb
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
                               rgb_from_hdx)
-        with expected_warnings(['precision loss']):
-            assert_equal(img_as_ubyte(conv), img_rgb)
+        assert_equal(img_as_ubyte(conv), img_rgb)
 
     # RGB<->HDX roundtrip with float image
     def test_hdx_rgb_roundtrip_float(self):

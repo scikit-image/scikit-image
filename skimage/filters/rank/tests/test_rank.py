@@ -301,12 +301,8 @@ class TestRank():
         image = img_as_ubyte(data.camera())[::2, ::2]
         image[image > 127] = 0
         image_s = image.astype(np.int8)
-        with expected_warnings(['sign loss', 'precision loss']):
-            image_u = img_as_ubyte(image_s, warn_on_precision_loss=True,
-                                   warn_on_sign_loss=True)
-            assert_equal(image_u, img_as_ubyte(image_s,
-                                               warn_on_precision_loss=True,
-                                               warn_on_sign_loss=True))
+        image_u = img_as_ubyte(image_s)
+        assert_equal(image_u, img_as_ubyte(image_s))
 
         methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
