@@ -18,20 +18,16 @@ lighting).
 import matplotlib.pyplot as plt
 
 from skimage import data
+from skimage import exposure
 from skimage.transform import match_histograms
 
-reference = data.astronaut()
+reference = data.coffee()
 image = data.chelsea()
 
 matched = match_histograms(image, reference)
 
-fig = plt.figure()
-gs = plt.GridSpec(2, 3)
-
-ax1 = fig.add_subplot(gs[0, 0])
-ax2 = fig.add_subplot(gs[0, 1], sharex=ax1, sharey=ax1)
-ax3 = fig.add_subplot(gs[0, 2], sharex=ax1, sharey=ax1)
-
+fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3),
+                                    sharex=True, sharey=True)
 for aa in (ax1, ax2, ax3):
     aa.set_axis_off()
 
@@ -41,6 +37,31 @@ ax2.imshow(reference)
 ax2.set_title('Reference')
 ax3.imshow(matched)
 ax3.set_title('Matched')
+
+plt.tight_layout()
+plt.show()
+
+
+######################################################################
+# To illustrate the effect of the histogram matching, we plot for each
+# RGB channel, the histogram and the cumulative histogram. Clearly,
+# the matched image has the same cumulative histogram as the reference
+# image for each channel.
+
+fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(8, 8))
+
+
+for i, img in enumerate((image, reference, matched)):
+    for c, c_color in enumerate(('red', 'green', 'blue')):
+        img_hist, bins = exposure.histogram(img[..., c], source_range='dtype')
+        axes[c, i].plot(bins, img_hist / img_hist.max())
+        img_cdf, bins = exposure.cumulative_distribution(img[..., c])
+        axes[c, i].plot(bins, img_cdf)
+        axes[c, 0].set_ylabel(c_color)
+
+axes[0, 0].set_title('Source')
+axes[0, 1].set_title('Reference')
+axes[0, 2].set_title('Matched')
 
 plt.tight_layout()
 plt.show()
