@@ -1,7 +1,12 @@
 from itertools import product
-
 import numpy as np
-import dask
+from .._shared.utils import warn
+
+try:
+    import dask
+    dask_available = True
+except ImportError:
+    dask_available = False
 
 
 def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
@@ -143,8 +148,11 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
+    if not dask_available:
+        warn('The optional dask dependency is not installed. '
+             'The number of worker is set to 1.')
     # compute a running average across the cycle shifts
-    if num_workers == 1:
+    if num_workers == 1 or not dask_available:
         # serial processing
         mean = _run_one_shift(all_shifts[0])
         for shift in all_shifts[1:]:
