@@ -671,8 +671,14 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     image, but larger thresholds also decrease the detail present in the image.
 
     If the input is 3D, this function performs wavelet denoising on each color
-    plane separately. The output image is clipped between either [-1, 1] and
-    [0, 1] depending on the input image range.
+    plane separately.
+
+    For floating point inputs, the original input range is maintained and there
+    is no clipping applied to the output. Other input types will be converted
+    to a floating point value in the range [-1, 1] or [0, 1] depending on the
+    input image range. Any rescaling applied to the `image` will also be
+    applied to `sigma` to maintain the same relative amplitude for the supplied
+    noise standard deviation.
 
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
@@ -722,11 +728,22 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
             ('Invalid method: {}. The currently supported methods are '
              '"BayesShrink" and "VisuShrink"').format(method))
 
-    image = img_as_float(image)
-
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
             sigma = [sigma] * image.shape[-1]
+
+    clip_output = False
+    if image.dtype.kind != 'f':
+        clip_output = True
+        data_range_pre = image.max() - image.min()
+        image = img_as_float(image)
+        data_range_post = image.max() - image.min()
+        scale_factor = data_range_post / data_range_pre
+        if sigma is not None:
+            if multichannel:
+                sigma = [s * scale_factor for s in sigma]
+            else:
+                sigma *= scale_factor
 
     if multichannel:
         if convert2ycbcr:
@@ -735,13 +752,15 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                 # renormalizing this color channel to live in [0, 1]
                 min, max = out[..., i].min(), out[..., i].max()
                 channel = out[..., i] - min
-                channel /= max - min
+                sf = max - min
+                channel /= sf
+                _sigma = sigma[i]/sf if sigma[i] is not None else None
                 out[..., i] = denoise_wavelet(channel, wavelet=wavelet,
-                                              method=method, sigma=sigma[i],
+                                              method=method, sigma=_sigma,
                                               mode=mode,
                                               wavelet_levels=wavelet_levels)
 
-                out[..., i] = out[..., i] * (max - min)
+                out[..., i] = out[..., i] * sf
                 out[..., i] += min
             out = color.ycbcr2rgb(out)
         else:
@@ -757,8 +776,11 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                                  sigma=sigma, mode=mode,
                                  wavelet_levels=wavelet_levels)
 
-    clip_range = (-1, 1) if image.min() < 0 else (0, 1)
-    return np.clip(out, *clip_range)
+    if clip_output:
+        clip_range = (-1, 1) if image.min() < 0 else (0, 1)
+        return np.clip(out, *clip_range)
+    else:
+        return out
 
 
 def estimate_sigma(image, average_sigmas=False, multichannel=False):

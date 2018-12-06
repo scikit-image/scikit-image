@@ -432,6 +432,49 @@ def test_wavelet_denoising():
         assert_(np.sum(res1**2) <= np.sum(res2**2))
 
 
+def test_wavelet_denoising_scaling():
+    """Test case for floating point input outside the [-1, 1] range."""
+    rstate = np.random.RandomState(1234)
+    for dtype in [np.float16, np.float32, np.float64, np.int16, np.uint8]:
+        # clean signal in range [0, 255]
+        x = np.linspace(0, 255, 1024, dtype=dtype)
+
+        # add noise and clip to original signal range
+        sigma = 25.
+        noisy = x + sigma*rstate.randn(x.size)
+        noisy = np.clip(noisy, x.min(), x.max())
+        noisy = noisy.astype(x.dtype)
+
+        sigma_est = restoration.estimate_sigma(noisy)
+        denoised = restoration.denoise_wavelet(noisy,
+                                               sigma=sigma_est,
+                                               wavelet='sym4',
+                                               multichannel=False)
+
+        data_range = x.max() - x.min()
+        psnr_noisy = compare_psnr(x, noisy, data_range=data_range)
+        if np.dtype(dtype).kind == 'f':
+            psnr_denoised = compare_psnr(x, denoised, data_range=data_range)
+
+            # output's max value is not substantially smaller than signal's
+            assert_(denoised.max() > 0.9 * x.max())
+        else:
+            # have to compare to x_as_float in integer input cases
+            x_as_float = img_as_float(x)
+            f_data_range = x_as_float.max() - x_as_float.min()
+            psnr_denoised = compare_psnr(x_as_float, denoised,
+                                         data_range=f_data_range)
+
+            # output has been clipped to expected range
+            assert_(denoised.max() <= 1.0)
+            if np.dtype(dtype).kind == 'u':
+                assert_(denoised.min() >= 0)
+            else:
+                assert_(denoised.min() >= -1)
+
+        assert_(psnr_denoised > psnr_noisy)
+
+
 def test_wavelet_threshold():
     rstate = np.random.RandomState(1234)
 
