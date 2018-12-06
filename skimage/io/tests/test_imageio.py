@@ -6,8 +6,8 @@ from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_array_almost_equal, TestCase,
-                                     expected_warnings)
+from skimage._shared.testing import assert_array_almost_equal, TestCase
+from skimage._shared._warnings import expected_warnings
 
 
 def setup():
