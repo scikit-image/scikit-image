@@ -434,44 +434,68 @@ def test_wavelet_denoising():
 
 
 @testing.parametrize(
-    'dtype, convert2ycbcr, estimate_sigma',
+    'case, dtype, convert2ycbcr, estimate_sigma',
     itertools.product(
+        ['1d', '2d multichannel'],
         [np.float16, np.float32, np.float64, np.int16, np.uint8],
         [True, False],
         [True, False])
 )
-def test_wavelet_denoising_scaling(dtype, convert2ycbcr, estimate_sigma):
-    """Test case for floating point input outside the [-1, 1] range."""
+def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
+                                   estimate_sigma):
+    """Test cases for images without prescaling via img_as_float."""
     rstate = np.random.RandomState(1234)
-    # clean signal in range [0, 255]
-    x = np.linspace(0, 255, 1024, dtype=dtype)
+
+    if case == '1d':
+        # 1D single-channel in range [0, 255]
+        x = np.linspace(0, 255, 1024)
+    elif case == '2d multichannel':
+        # 2D multichannel in range [0, 255]
+        x = data.astronaut()[:64, :64]
+    x = x.astype(dtype)
 
     # add noise and clip to original signal range
     sigma = 25.
-    noisy = x + sigma * rstate.randn(x.size)
+    noisy = x + sigma * rstate.randn(*x.shape)
     noisy = np.clip(noisy, x.min(), x.max())
     noisy = noisy.astype(x.dtype)
+
+    multichannel = x.shape[-1] == 3
 
     if estimate_sigma:
         if convert2ycbcr:
             # YCbCr expects a sigma appropriate to data in the range [0, 1]
-            sigma_est = restoration.estimate_sigma(noisy/x.max())
+            sigma_est = restoration.estimate_sigma(noisy/x.max(),
+                                                   multichannel=multichannel)
         else:
-            sigma_est = restoration.estimate_sigma(noisy)
+            sigma_est = restoration.estimate_sigma(noisy,
+                                                   multichannel=multichannel)
     else:
         sigma_est = None
+
+    if convert2ycbcr and not multichannel:
+        # YCbCr requires multichannel == True
+        with testing.raises(ValueError):
+            denoised = restoration.denoise_wavelet(noisy,
+                                                   sigma=sigma_est,
+                                                   wavelet='sym4',
+                                                   multichannel=multichannel,
+                                                   convert2ycbcr=convert2ycbcr)
+        return
+
     denoised = restoration.denoise_wavelet(noisy,
                                            sigma=sigma_est,
                                            wavelet='sym4',
-                                           multichannel=False,
+                                           multichannel=multichannel,
                                            convert2ycbcr=convert2ycbcr)
 
     data_range = x.max() - x.min()
     psnr_noisy = compare_psnr(x, noisy, data_range=data_range)
-    if np.dtype(dtype).kind == 'f':
+    clipped = np.dtype(dtype).kind != 'f'
+    if not clipped:
         psnr_denoised = compare_psnr(x, denoised, data_range=data_range)
 
-        # output's max value is not substantially smaller than signal's
+        # output's max value is not substantially smaller than x's
         assert_(denoised.max() > 0.9 * x.max())
     else:
         # have to compare to x_as_float in integer input cases
@@ -661,6 +685,12 @@ def test_wavelet_denoising_args():
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
+            if convert2ycbcr and not multichannel:
+                with testing.raises(ValueError):
+                    restoration.denoise_wavelet(noisy,
+                                                convert2ycbcr=convert2ycbcr,
+                                                multichannel=multichannel)
+                continue
             anticipated_warnings = (PYWAVELET_ND_INDEXING_WARNING
                                     if multichannel else None)
             for sigma in [0.1, [0.1, 0.1, 0.1], None]:
