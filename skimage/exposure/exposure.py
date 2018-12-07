@@ -36,7 +36,28 @@ def _offset_array(arr, low_boundary, high_boundary):
 
 
 def _bincount_histogram(image, source_range):
-    """Efficient histogram calculation for a flat image of integers."""
+    """
+    Efficient histogram calculation for an image of integers.
+
+    This function is significantly more efficient than np.histogram but
+    works only on images of integers. It is based on np.bincount.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    source_range : string
+        'image' determines the range from the input image.
+        'dtype' determines the range from the expected range of the images
+        of that data type.
+
+    Returns
+    -------
+    hist : array
+        The values of the histogram.
+    bin_centers : array
+        The values at the center of the bins.
+    """
     if source_range not in ['image', 'dtype']:
         raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
