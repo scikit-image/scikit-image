@@ -767,13 +767,15 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
             ('Invalid method: {}. The currently supported methods are '
              '"BayesShrink" and "VisuShrink"').format(method))
 
-    image, sigma = _scale_sigma_and_image_consistently(image, sigma,
-                                                       multichannel,
-                                                       convert2ycbcr)
-
     # floating-point inputs are not rescaled, so don't clip their output.
     clip_output = image.dtype.kind != 'f'
 
+    if convert2ycbcr and not multichannel:
+        raise ValueError("convert2ycbcr requires multichannel == True")
+
+    image, sigma = _scale_sigma_and_image_consistently(image, sigma,
+                                                       multichannel,
+                                                       convert2ycbcr)
     if multichannel:
         if convert2ycbcr:
             out = color.rgb2ycbcr(image)
