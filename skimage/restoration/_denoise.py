@@ -619,6 +619,32 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
+def _scale_sigma_and_image_consistently(image, sigma, multichannel):
+    """If the `image` is to be rescaled, also rescale `sigma` consistently.
+
+    Images that are not floating point will be rescaled via `img_as_float`.
+
+    Sigma gets rescaled by the same amount, under the assumption that any
+    user-specified sigma would be at the same magnitude scale as the image.
+    """
+    if multichannel:
+        if isinstance(sigma, numbers.Number) or sigma is None:
+            sigma = [sigma] * image.shape[-1]
+
+    if image.dtype.kind != 'f':
+        range_pre = image.max() - image.min()
+        image = img_as_float(image)
+        range_post = image.max() - image.min()
+        # apply the same magnitude scaling to sigma
+        scale_factor = range_post / range_pre
+        if multichannel:
+            sigma = [s * scale_factor if s is not None else s for s in sigma]
+        elif sigma is not None:
+            sigma *= scale_factor
+
+    return image, sigma
+
+
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
                     convert2ycbcr=False, method='BayesShrink'):
@@ -728,40 +754,32 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
             ('Invalid method: {}. The currently supported methods are '
              '"BayesShrink" and "VisuShrink"').format(method))
 
-    if multichannel:
-        if isinstance(sigma, numbers.Number) or sigma is None:
-            sigma = [sigma] * image.shape[-1]
+    image, sigma = _scale_sigma_and_image_consistently(image, sigma,
+                                                       multichannel)
 
-    clip_output = False
-    if image.dtype.kind != 'f':
-        clip_output = True
-        data_range_pre = image.max() - image.min()
-        image = img_as_float(image)
-        data_range_post = image.max() - image.min()
-        scale_factor = data_range_post / data_range_pre
-        if sigma is not None:
-            if multichannel:
-                sigma = [s * scale_factor for s in sigma]
-            else:
-                sigma *= scale_factor
+    # floating-point inputs are not rescaled, so don't clip their input.
+    clip_output = image.dtype.kind != 'f'
 
     if multichannel:
         if convert2ycbcr:
             out = color.rgb2ycbcr(image)
             for i in range(3):
                 # renormalizing this color channel to live in [0, 1]
-                min, max = out[..., i].min(), out[..., i].max()
-                channel = out[..., i] - min
-                sf = max - min
-                channel /= sf
-                _sigma = sigma[i]/sf if sigma[i] is not None else None
+                _min, _max = out[..., i].min(), out[..., i].max()
+                scale_factor = _max - _min
+                if scale_factor == 0:
+                    # skip any channel containing only zeros!
+                    continue
+                channel = out[..., i] - _min
+                channel /= scale_factor
+                _sigma = (sigma[i] / scale_factor if sigma[i] is not None
+                          else None)
                 out[..., i] = denoise_wavelet(channel, wavelet=wavelet,
                                               method=method, sigma=_sigma,
                                               mode=mode,
                                               wavelet_levels=wavelet_levels)
-
-                out[..., i] = out[..., i] * sf
-                out[..., i] += min
+                out[..., i] = out[..., i] * scale_factor
+                out[..., i] += _min
             out = color.ycbcr2rgb(out)
         else:
             out = np.empty_like(image)
@@ -778,9 +796,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
 
     if clip_output:
         clip_range = (-1, 1) if image.min() < 0 else (0, 1)
-        return np.clip(out, *clip_range)
-    else:
-        return out
+        out = np.clip(out, *clip_range, out=out)
+    return out
 
 
 def estimate_sigma(image, average_sigmas=False, multichannel=False):
