@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import pytest
 
@@ -432,9 +433,14 @@ def test_wavelet_denoising():
         assert_(np.sum(res1**2) <= np.sum(res2**2))
 
 
-@testing.parametrize('dtype',
-                     [np.float16, np.float32, np.float64, np.int16, np.uint8])
-def test_wavelet_denoising_scaling(dtype):
+@testing.parametrize(
+    'dtype, convert2ycbcr, estimate_sigma',
+    itertools.product(
+        [np.float16, np.float32, np.float64, np.int16, np.uint8],
+        [True, False],
+        [True, False])
+)
+def test_wavelet_denoising_scaling(dtype, convert2ycbcr, estimate_sigma):
     """Test case for floating point input outside the [-1, 1] range."""
     rstate = np.random.RandomState(1234)
     # clean signal in range [0, 255]
@@ -446,11 +452,19 @@ def test_wavelet_denoising_scaling(dtype):
     noisy = np.clip(noisy, x.min(), x.max())
     noisy = noisy.astype(x.dtype)
 
-    sigma_est = restoration.estimate_sigma(noisy)
+    if estimate_sigma:
+        if convert2ycbcr:
+            # YCbCr expects a sigma appropriate to data in the range [0, 1]
+            sigma_est = restoration.estimate_sigma(noisy/x.max())
+        else:
+            sigma_est = restoration.estimate_sigma(noisy)
+    else:
+        sigma_est = None
     denoised = restoration.denoise_wavelet(noisy,
                                            sigma=sigma_est,
                                            wavelet='sym4',
-                                           multichannel=False)
+                                           multichannel=False,
+                                           convert2ycbcr=convert2ycbcr)
 
     data_range = x.max() - x.min()
     psnr_noisy = compare_psnr(x, noisy, data_range=data_range)
