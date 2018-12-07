@@ -619,13 +619,18 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def _scale_sigma_and_image_consistently(image, sigma, multichannel):
-    """If the `image` is to be rescaled, also rescale `sigma` consistently.
+def _scale_sigma_and_image_consistently(image, sigma, multichannel,
+                                        convert2ycbcr):
+    """If the ``image`` is to be rescaled, also rescale ``sigma`` consistently.
 
-    Images that are not floating point will be rescaled via `img_as_float`.
+    Images that are not floating point will be rescaled via ``img_as_float``.
 
-    Sigma gets rescaled by the same amount, under the assumption that any
-    user-specified sigma would be at the same magnitude scale as the image.
+    Unless ``convert2ycbcr`` is ``True``, sigma gets rescaled by the same
+    amount.
+
+    When convert2ycbcr is True, there is a separate rescaling of each channel
+    to the range [0, 1] within ``denoise_wavelet`` and the user must specify a
+    sigma appropriate to that range.
     """
     if multichannel:
         if isinstance(sigma, numbers.Number) or sigma is None:
@@ -634,6 +639,9 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel):
     if image.dtype.kind != 'f':
         range_pre = image.max() - image.min()
         image = img_as_float(image)
+        if convert2ycbcr:
+            # do not rescale sigma in convert2ycbcr case
+            return image, sigma
         range_post = image.max() - image.min()
         # apply the same magnitude scaling to sigma
         scale_factor = range_post / range_pre
@@ -704,10 +712,15 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     to a floating point value in the range [-1, 1] or [0, 1] depending on the
     input image range. Any rescaling applied to the `image` will also be
     applied to `sigma` to maintain the same relative amplitude for the supplied
-    noise standard deviation.
+    noise standard deviation. he only exception to this automated `sigma`
+    scaling is when ``convert2ycbcr`` is set to ``True`` (see below).
 
-    When YCbCr conversion is done, every color channel is scaled between 0
-    and 1, and `sigma` values are applied to these scaled color channels.
+    When YCbCr conversion is enabled, every color channel is scaled between 0
+    and 1, and ``sigma`` values are applied to these scaled color channels.
+    Thus, some care needs to be taken to compute any user-provided ``sigma``
+    using a signal in the range [0, 1]. For example, if ``estimate_sigma`` is
+    used, the user should first rescale floating point data to the range
+    [0, 1].
 
     Many wavelet coefficient thresholding approaches have been proposed. By
     default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
@@ -755,9 +768,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
              '"BayesShrink" and "VisuShrink"').format(method))
 
     image, sigma = _scale_sigma_and_image_consistently(image, sigma,
-                                                       multichannel)
+                                                       multichannel,
+                                                       convert2ycbcr)
 
-    # floating-point inputs are not rescaled, so don't clip their input.
+    # floating-point inputs are not rescaled, so don't clip their output.
     clip_output = image.dtype.kind != 'f'
 
     if multichannel:
@@ -772,10 +786,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     continue
                 channel = out[..., i] - _min
                 channel /= scale_factor
-                _sigma = (sigma[i] / scale_factor if sigma[i] is not None
-                          else None)
                 out[..., i] = denoise_wavelet(channel, wavelet=wavelet,
-                                              method=method, sigma=_sigma,
+                                              method=method, sigma=sigma[i],
                                               mode=mode,
                                               wavelet_levels=wavelet_levels)
                 out[..., i] = out[..., i] * scale_factor
