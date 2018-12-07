@@ -442,7 +442,7 @@ def test_wavelet_denoising_scaling(dtype):
 
     # add noise and clip to original signal range
     sigma = 25.
-    noisy = x + sigma*rstate.randn(x.size)
+    noisy = x + sigma * rstate.randn(x.size)
     noisy = np.clip(noisy, x.min(), x.max())
     noisy = noisy.astype(x.dtype)
 
