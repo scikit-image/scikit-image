@@ -20,7 +20,7 @@ thresholding segmentation is not sufficient.
     >>> from skimage import data
     >>> from skimage.exposure import histogram
     >>> coins = data.coins()
-    >>> hist = histogram(coins)
+    >>> hist, hist_centers = histogram(coins)
 
 Simply thresholding the image leads either to missing significant parts
 of the coins, or to merging parts of the background with the
