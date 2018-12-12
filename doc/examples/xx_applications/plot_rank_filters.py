@@ -39,16 +39,17 @@ import matplotlib.pyplot as plt
 
 from skimage import img_as_ubyte
 from skimage import data
+from skimage.exposure import histogram
 
 noisy_image = img_as_ubyte(data.camera())
-hist = np.histogram(noisy_image, bins=np.arange(0, 256))
+hist, hist_centers = histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax[0].axis('off')
 
-ax[1].plot(hist[1][:-1], hist[0], lw=2)
+ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Histogram of grey values')
 
 plt.tight_layout()

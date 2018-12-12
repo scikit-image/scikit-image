@@ -12,28 +12,107 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal,
+                                     assert_equal,
                                      assert_almost_equal)
 
 
 # Test integer histograms
 # =======================
 
+def test_wrong_source_range():
+    im = np.array([-1, 100], dtype=np.int8)
+    with testing.raises(ValueError):
+        frequencies, bin_centers = exposure.histogram(im, source_range='foobar')
+
+
 def test_negative_overflow():
-    im = np.array([-1, 127], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im)
-    assert_array_equal(bin_centers, np.arange(-1, 128))
+    im = np.array([-1, 100], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    assert_array_equal(bin_centers, np.arange(-1, 101))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
     assert_array_equal(frequencies[1:-1], 0)
 
 
 def test_all_negative_image():
-    im = np.array([-128, -1], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im)
-    assert_array_equal(bin_centers, np.arange(-128, 0))
+    im = np.array([-100, -1], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    assert_array_equal(bin_centers, np.arange(-100, 0))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
     assert_array_equal(frequencies[1:-1], 0)
+
+
+def test_int_range_image():
+    im = np.array([10, 100], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    assert_equal(len(bin_centers), len(frequencies))
+    assert_equal(bin_centers[0], 10)
+    assert_equal(bin_centers[-1], 100)
+
+
+def test_peak_uint_range_dtype():
+    im = np.array([10, 100], dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(0, 256))
+    assert_equal(frequencies[10], 1)
+    assert_equal(frequencies[100], 1)
+    assert_equal(frequencies[101], 0)
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_peak_int_range_dtype():
+    im = np.array([10, 100], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(-128, 128))
+    assert_equal(frequencies[128+10], 1)
+    assert_equal(frequencies[128+100], 1)
+    assert_equal(frequencies[128+101], 0)
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_flat_uint_range_dtype():
+    im = np.linspace(0, 255, 256, dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(0, 256))
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_flat_int_range_dtype():
+    im = np.linspace(-128, 128, 256, dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(-128, 128))
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_peak_float_out_of_range_image():
+    im = np.array([10, 100], dtype=np.float16)
+    frequencies, bin_centers = exposure.histogram(im, nbins=90, source_range='image')
+    # offset values by 0.5 for float...
+    assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
+
+
+def test_peak_float_out_of_range_dtype():
+    im = np.array([10, 100], dtype=np.float16)
+    nbins = 10
+    frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
+    assert_almost_equal(np.min(bin_centers), -0.9, 3)
+    assert_almost_equal(np.max(bin_centers), 0.9, 3)
+    assert_equal(len(bin_centers), 10)
+
+
+def test_normalize():
+    im = np.array([0, 255, 255], dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=False)
+    expected = np.zeros(256)
+    expected[0] = 1
+    expected[-1] = 2
+    assert_equal(frequencies, expected)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=True)
+    expected /= 3.
+    assert_equal(frequencies, expected)
 
 
 # Test histogram equalization
