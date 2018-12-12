@@ -27,7 +27,7 @@ def test_wrong_source_range():
 
 def test_negative_overflow():
     im = np.array([-1, 100], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    frequencies, bin_centers = exposure.histogram(im)
     assert_array_equal(bin_centers, np.arange(-1, 101))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
@@ -36,7 +36,7 @@ def test_negative_overflow():
 
 def test_all_negative_image():
     im = np.array([-100, -1], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    frequencies, bin_centers = exposure.histogram(im)
     assert_array_equal(bin_centers, np.arange(-100, 0))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
@@ -45,7 +45,7 @@ def test_all_negative_image():
 
 def test_int_range_image():
     im = np.array([10, 100], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im, source_range='image')
+    frequencies, bin_centers = exposure.histogram(im)
     assert_equal(len(bin_centers), len(frequencies))
     assert_equal(bin_centers[0], 10)
     assert_equal(bin_centers[-1], 100)
@@ -87,7 +87,7 @@ def test_flat_int_range_dtype():
 
 def test_peak_float_out_of_range_image():
     im = np.array([10, 100], dtype=np.float16)
-    frequencies, bin_centers = exposure.histogram(im, nbins=90, source_range='image')
+    frequencies, bin_centers = exposure.histogram(im, nbins=90)
     # offset values by 0.5 for float...
     assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
 
