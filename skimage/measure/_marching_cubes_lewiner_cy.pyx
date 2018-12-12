@@ -746,7 +746,7 @@ cdef class Lut:
     This class defines functions to look up values using 1, 2 or 3 indices.
     """
 
-    cdef char* VALUES
+    cdef signed char* VALUES
     cdef int L0 # Length
     cdef int L1 # size of tuple
     cdef int L2 # size of tuple in tuple (if any)
@@ -767,7 +767,7 @@ cdef class Lut:
         array = array.ravel()
         cdef int n, N
         N = self.L0 * self.L1 * self.L2
-        self.VALUES = <char *> malloc(N * sizeof(char))
+        self.VALUES = <signed char *> malloc(N * sizeof(signed char))
         for n in range(N):
             self.VALUES[n] = array[n]
 
