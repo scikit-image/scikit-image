@@ -42,11 +42,12 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         are dilated or eroded.
     mask : ndarray
         The maximum (dilation) / minimum (erosion) allowed value at each pixel.
-    method : {'dilation'|'erosion'}
+    method : {'dilation'|'erosion'}, optional
         Perform reconstruction by dilation or erosion. In dilation (or
         erosion), the seed image is dilated (or eroded) until limited by the
         mask image. For dilation, each seed value must be less than or equal
         to the corresponding mask value; for erosion, the reverse is true.
+        Default is 'dilation'.
     selem : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
         Default is the ball of radius 1 according to the maximum norm
