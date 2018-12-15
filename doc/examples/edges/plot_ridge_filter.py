@@ -51,33 +51,25 @@ def identity(image, **kwargs):
 
 
 image = page()
-
 cmap = plt.cm.gray
 
 kwargs = {}
 kwargs['scale_range'] = (1, 3)
 kwargs['scale_step'] = 5
 
+fig, axes = plt.subplots(2, 5)
 for i, black_ridges in enumerate([1, 0]):
-
     for j, func in enumerate([identity, meijering, sato, frangi, hessian]):
-
         kwargs['black_ridges'] = black_ridges
-
-        plt.subplot(2, 5, 1 + 5 * i + j)
-
-        plt.imshow(func(image, **kwargs), cmap=cmap, aspect='auto')
-
+        axes[i, j].imshow(func(image, **kwargs), cmap=cmap, aspect='auto')
         if i == 0:
-            plt.title(['Original\nimage', 'Meijering\nneuriteness',
-                       'Sato\ntubeness', 'Frangi\nvesselness',
-                       'Hessian\nvesselness'][j])
-
+            axes[i, j].set_title(['Original\nimage', 'Meijering\nneuriteness',
+                                  'Sato\ntubeness', 'Frangi\nvesselness',
+                                  'Hessian\nvesselness'][j])
         if j == 0:
-            plt.ylabel('black_ridges = ' + str(bool(black_ridges)))
-
-        plt.xticks([])
-        plt.yticks([])
+            axes[i, j].set_ylabel('black_ridges = ' + str(bool(black_ridges)))
+        axes[i, j].set_xticks([])
+        axes[i, j].set_yticks([])
 
 plt.tight_layout()
 plt.show()
