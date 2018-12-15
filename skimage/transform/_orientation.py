@@ -1,4 +1,3 @@
-import collections as coll
 import numpy as np
 
 
@@ -106,7 +105,7 @@ def _axis_0_rotation_matrix(u, indices=None):
 def convert_quasipolar_coords(r, thetas):
     r"""Convert quasipolar coordinates to their Cartesian equivalents.
 
-    Quasipolar coordinate conversion is defined as follows [1]_:
+    Quasipolar coordinate conversion [1]_ is defined as follows:
 
     .. math::
 
@@ -172,6 +171,7 @@ def convert_quasipolar_coords(r, thetas):
     --------
     >>> convert_quasipolar_coords(1, [0])
     array([ 0.,  1.])
+
     >>> convert_quasipolar_coords(10, [np.pi / 2, 0])
     array([  0.,   0.,  10.])
     """
@@ -212,7 +212,7 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     dst : (N, ) array
         Vector of desired direction.
     use_homogeneous_coords : bool, optional
-        Wheter the input vectors should be treated as homogeneous coordinates.
+        Whether the input vectors should be treated as homogeneous coordinates.
 
     Returns
     -------
@@ -231,14 +231,13 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     --------
     >>> X = np.asarray([1, 0])
     >>> Y = np.asarray([.5, .5])
-
     >>> M = compute_rotation_matrix(X, Y)
     >>> Z = M @ X
-
     >>> uY = Y / np.linalg.norm(Y)
     >>> np.allclose(Z, uY)
     True
     """
+    # step 1: vectors are normalized
     homogeneous_slice = -use_homogeneous_coords or None
     X = _normalize(src[:homogeneous_slice])
     Y = _normalize(dst[:homogeneous_slice])
@@ -247,15 +246,20 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
         X = np.append(X, 1)
         Y = np.append(Y, 1)
 
-    w = np.flatnonzero(~np.isclose(X, Y))  # indices of difference
+    # step 2: a vector is created containing the
+    #         indices of difference between input vectors
+    w = np.flatnonzero(~np.isclose(X, Y))
 
+    # step 3: matrices are generated for each input vector
+    #         to rotate respective vector to the 0th axis
     Mx = _axis_0_rotation_matrix(X, w)
     My = _axis_0_rotation_matrix(Y, w)
 
-    My_inverse = My.T    # since My is orthogonal, its inverse is its transpose
-    
-    M = My_inverse @ Mx  # by rotating both vectors to the same direction
-                         # and inverting one operation, a final
-                         # rotation matrix is created
+    # step 4: by rotating both vectors to the same direction
+    #         and inverting one operation, a final
+    #         rotation matrix is created
+    My_inverse = My.T  # since My is orthogonal, its inverse is its transpose
+
+    M = My_inverse @ Mx
 
     return M

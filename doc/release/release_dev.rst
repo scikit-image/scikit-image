@@ -19,8 +19,10 @@ This release of scikit-image officially supports Python 3.6, 3.7, and
 
 New Features
 ------------
-- Vector to vector rotation matrix generation (#3125)
-- Quasipolar to Cartesian coordinate conversion (#3125)
+- Vector-to-vector rotation matrix generation
+  (``skimage.transform.compute_rotation_matrix``) (#3125)
+- Quasipolar to Cartesian coordinate conversion
+  (``skimage.transform.convert_quasipolar_coords``) (#3125)
 
 
 Improvements
