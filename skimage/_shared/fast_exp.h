@@ -1,6 +1,6 @@
 /* A fast approximation of the exponential function.
  * Reference [1]: https://schraudolph.org/pubs/Schraudolph99.pdf
- * Reference [2]: http://dx.doi.org/10.1162/089976600300015033
+ * Reference [2]: https://doi.org/10.1162/089976600300015033
  * Additional improvements by Leonid Bloch. */
 
 /* use just EXP_A = 1512775 for integer version, to avoid FP calculations */
