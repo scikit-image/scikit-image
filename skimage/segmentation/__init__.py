@@ -31,7 +31,7 @@ __all__ = ['random_walker',
            'morphological_geodesic_active_contour',
            'morphological_chan_vese',
            'inverse_gaussian_gradient',
-           'histogram_backprojection'
+           'histogram_backprojection',
            'circle_level_set',
            'checkerboard_level_set',
            'flood',
