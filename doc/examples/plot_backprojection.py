@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 
 from skimage.exposure import histogram_backproject
 from skimage import data
-from skimage.filter import threshold_otsu
+from skimage.filters import threshold_otsu
 from skimage import img_as_ubyte
 
 
