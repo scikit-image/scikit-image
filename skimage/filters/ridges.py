@@ -500,9 +500,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
         raise ValueError('Sigma values less than zero are not valid')
 
     # Rescale filter parameters
-    alpha = 2 * alpha ** 2
-    beta = 2 * beta ** 2
-    gamma = 2 * gamma ** 2
+    alpha_sq = 2 * alpha ** 2
+    beta_sq = 2 * beta ** 2
+    gamma_sq = 2 * gamma ** 2
 
     # Get image dimensions
     ndim = image.ndim
@@ -535,8 +535,8 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             r_g = lambda1 ** 2 + lambda2 ** 2
 
             # Compute output image for given (sigma) scale
-            filtered = (np.exp(-r_b / beta)
-                        * (np.ones(shape) - np.exp(-r_g / gamma)))
+            filtered = (np.exp(-r_b / beta_sq)
+                        * (np.ones(shape) - np.exp(-r_g / gamma_sq)))
 
             # Store results in (2+1)D matrices
             filtered_array[i] = filtered
@@ -558,9 +558,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             r_g = lambda1 ** 2 + lambda2 ** 2 + lambda3 ** 2
 
             # Compute output image for given (sigma) scale
-            filtered = ((np.ones(shape) - np.exp(-r_a / alpha))
-                        * np.exp(-r_b / beta)
-                        * (np.ones(shape) - np.exp(-r_g / gamma)))
+            filtered = ((np.ones(shape) - np.exp(-r_a / alpha_sq))
+                        * np.exp(-r_b / beta_sq)
+                        * (np.ones(shape) - np.exp(-r_g / gamma_sq)))
 
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
