@@ -3,19 +3,17 @@
 Histogram Backprojection
 ========================
 
-Histogram Backprojection is a tool for image segmentation, object tracking
-etc. based on object's color or intensity distribution.
+Histogram Backprojection is a tool for image segmentation based on object's
+color or intensity distribution.
 
-In simple words, it calculates the histogram of an object(which you want to
-detect or track) and uses this histogram as a feature to find the object in
-other images. So it takes two images as input, one is your object image and
-the next is the image where you want to find the object. The function then
-calculates histograms of two images and gives you a **backprojected image**.
-Backprojected image is a grayscale image where each pixel denotes the
-probability of that pixel being part of your object. Higher value means it
-is most likely part of your object. So thresholding this backprojected image
-for a suitable value gives the mask of your object. So for best results,
-your object should fill the object image as far as possible.
+The histogram of an object, which you want to detect or track, is used as a
+feature to find the object in other images. So it takes two images as input,
+one is your object image and the next is the image where you want to find the
+object. The function then computes the histograms of these two images and
+return a **backprojected image**. A backprojected image is a grayscale image
+where each pixel denotes the probability of that pixel being part of the
+object. By thresholding this backprojected image with a suitable value gives
+the objects' mask.
 
 In below example, the brown region in the image is needed to be segmented.
 So, first 200x200 block of image is selected as object image. Then
@@ -25,7 +23,7 @@ and mask gives the segmented object.
 
 .. [1] Swain, Michael J., and Dana H. Ballard. "Indexing via color histograms."
        Active Perception and Robot Vision. Springer Berlin Heidelberg,
-       1992. 261-273.
+       1992. 261-273.  DOI:`10.1109/ICCV.1990.139558`
 
 """
 import numpy as np
