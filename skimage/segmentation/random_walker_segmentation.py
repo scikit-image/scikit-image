@@ -209,6 +209,22 @@ def _check_isolated_seeds(labels):
     return inds, values
 
 
+def _unchanged_labels(labels, return_full_prob=False):
+    if return_full_prob:
+	# Find and iterate over valid labels
+        unique_labels = np.unique(labels)
+        unique_labels = unique_labels[unique_labels > 0]
+
+        out_labels = np.empty(labels.shape + (len(unique_labels),),
+				dtype=np.bool)
+        for n, i in enumerate(unique_labels):
+            out_labels[..., n] = (labels == i)
+
+    else:
+        out_labels = labels
+    return out_labels
+
+
 #----------- Random walker algorithm --------------------------------
 
 
@@ -383,19 +399,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
              'labels == 0. No zero valued areas in labels were '
              'found. Returning provided labels.')
 
-        if return_full_prob:
-            # Find and iterate over valid labels
-            unique_labels = np.unique(labels)
-            unique_labels = unique_labels[unique_labels > 0]
-
-            out_labels = np.empty(labels.shape + (len(unique_labels),),
-                                  dtype=np.bool)
-            for n, i in enumerate(unique_labels):
-                out_labels[..., n] = (labels == i)
-
-        else:
-            out_labels = labels
-        return out_labels
+        return _unchanged_labels(labels, return_full_prob)
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
@@ -459,20 +463,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         warn('Random walker only segments unlabeled areas, where '
         'labels == 0. No zero valued areas in labels were '
         'found. Returning provided labels.')
+        return _unchanged_labels(labels, return_full_prob)
 
-        if return_full_prob:
-            # Find and iterate over valid labels
-            unique_labels = np.unique(labels)
-            unique_labels = unique_labels[unique_labels > 0]
-
-            out_labels = np.empty(labels.shape + (len(unique_labels),),
-                                  dtype=np.bool)
-            for n, i in enumerate(unique_labels):
-                out_labels[..., n] = (labels == i)
-
-        else:
-            out_labels = labels
-        return out_labels
 
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
