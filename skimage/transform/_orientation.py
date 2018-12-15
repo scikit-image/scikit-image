@@ -105,7 +105,7 @@ def _axis_0_rotation_matrix(u, indices=None):
 
 
 def convert_quasipolar_coords(r, thetas):
-    """Converts quasipolar coordinates to their Cartesian equivalents.
+    r"""Converts quasipolar coordinates to their Cartesian equivalents.
 
     Quasipolar coordinate conversion is defined as follows:
 
@@ -195,14 +195,14 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     """Generates a matrix for the rotation of one vector to the direction
     of another.
 
-    The MNMRG algorithm cam be described as follows:
-    1. directional vectors X and Y are normalized
-    2. a vector w is initialized containing the indices of the differences
-       between X and Y
-    3. matrices Mx and My for the rotation of X and Y to the same axis are
-       generated
-    4. the inverse of My is mulitplied by Mx to form the rotation matrix M
-       which rotates vector X to the direction of vector Y
+    The MNMRG algorithm can be described as follows:
+        1. directional vectors X and Y are normalized
+        2. a vector w is initialized containing the indices of the differences
+           between X and Y
+        3. matrices Mx and My for the rotation of X and Y to the same axis are
+           generated
+        4. the inverse of My is mulitplied by Mx to form the rotation matrix M
+           which rotates vector X to the direction of vector Y
 
     Parameters
     ----------
