@@ -242,7 +242,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
     whole image containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to neurites, according to the method described in _[1].
+    an image region to neurites, according to the method described in [1]_.
 
     Parameters
     ----------
@@ -270,13 +270,13 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
         Unser, M. (2004). Design and validation of a tool for neurite tracing
         and analysis in fluorescence microscopy images. Cytometry Part A,
         58(2), 167-176.
-        https://imagescience.org/meijering/publications/download/cyto2004.pdf
+        :DOI:`10.1002/cyto.a.20022`
     """
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
     if np.any(np.asarray(sigmas) < 0.0):
-        raise ValueError("Sigma values less than zero are not valid")
+        raise ValueError('Sigma values less than zero are not valid')
 
     # Get image dimensions
     ndim = image.ndim
@@ -340,7 +340,7 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     whole image containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to tubes, according to the method described in _[1].
+    an image region to tubes, according to the method described in [1]_.
 
     Parameters
     ----------
@@ -365,14 +365,13 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
         Koller, T., ..., Kikinis, R. (1998). Three-dimensional multi-scale line
         filter for segmentation and visualization of curvilinear structures in
         medical images. Medical image analysis, 2(2), 143-168.
-        (https://pdfs.semanticscholar.org/6964/ \
-         59e0c67f729a05a819699adae5d64aaab4b3.pdf)
+        :DOI:`10.1016/S1361-8415(98)80009-1`
     """
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
     if np.any(np.asarray(sigmas) < 0.0):
-        raise ValueError("Sigma values less than zero are not valid")
+        raise ValueError('Sigma values less than zero are not valid')
 
     # Get image dimensions
     ndim = image.ndim
@@ -439,7 +438,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     whole image containing such objects.
 
     Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to vessels, according to the method described in _[1].
+    an image region to vessels, according to the method described in [1]_.
 
     Parameters
     ----------
@@ -470,8 +469,8 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     Notes
     -----
     Written by Marc Schrijver, November 2001
-    Re-Written by D. J. Kroon University of Twente, May 2009, _[2]
-    Adoption of 3D version from D. G. Ellis, Januar 20017, _[3]
+    Re-Written by D. J. Kroon, University of Twente, May 2009, [2]_
+    Adoption of 3D version from D. G. Ellis, Januar 20017, [3]_
 
     References
     ----------
@@ -479,26 +478,26 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
         (1998,). Multiscale vessel enhancement filtering. In International
         Conference on Medical Image Computing and Computer-Assisted
         Intervention (pp. 130-137). Springer Berlin Heidelberg.
-        http://www.tecn.upf.es/~afrangi/articles/miccai1998.pdf
+        :DOI:`10.1007/BFb0056195`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
 
     # Check deprecated keyword parameters
     if beta1:
-        warn("""Use keyword parameter 'beta' instead of 'beta1' which
-                will be removed in version 0.16.""")
+        warn('Use keyword parameter `beta` instead of `beta1` which '
+             'will be removed in version 0.17.')
         beta = beta1
 
     if beta1:
-        warn("""Use keyword parameter 'gamma' instead of 'beta2' which
-                will be removed in version 0.16.""")
+        warn('Use keyword parameter `gamma` instead of `beta2` which '
+             'will be removed in version 0.17.')
         gamma = beta2
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
     if np.any(np.asarray(sigmas) < 0.0):
-        raise ValueError("Sigma values less than zero are not valid")
+        raise ValueError('Sigma values less than zero are not valid')
 
     # Rescale filter parameters
     alpha = 2 * alpha ** 2
@@ -589,7 +588,7 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     image containing such objects.
 
     Almost equal to Frangi filter, but uses alternative method of smoothing.
-    Refer to _[1] to find the differences between Frangi and Hessian filters.
+    Refer to [1]_ to find the differences between Frangi and Hessian filters.
 
     Parameters
     ----------
@@ -620,27 +619,26 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     Notes
     -----
     Written by Marc Schrijver (November 2001)
-    Re-Written by D. J. Kroon University of Twente (May 2009) _[2]
+    Re-Written by D. J. Kroon University of Twente (May 2009) [2]_
 
     References
     ----------
     .. [1] Ng, C. C., Yap, M. H., Costen, N., & Li, B. (2014,). Automatic
         wrinkle detection using hybrid Hessian filter. In Asian Conference on
         Computer Vision (pp. 609-622). Springer International Publishing.
-        (https://dspace.lboro.ac.uk/dspace-jspui/bitstream/ \
-         2134/20252/1/Choon-accv2014final-604.pdf)
+        :DOI:`10.1007/978-3-319-16811-1_40`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
 
     # Check deprecated keyword parameters
     if beta1:
-        warn("""Use keyword parameter 'beta' instead of 'beta1' which
-                will be removed in version 0.16.""")
+        warn('Use keyword parameter `beta` instead of `beta1` which '
+             'will be removed in version 0.17.')
         beta = beta1
 
     if beta2:
-        warn("""Use keyword parameter 'gamma' instead of 'beta2' which
-                will be removed in version 0.16.""")
+        warn('Use keyword parameter `gamma` instead of `beta2` which '
+             'will be removed in version 0.17.')
         gamma = beta2
 
     filtered = frangi(image, scale_range=scale_range, scale_step=scale_step,
