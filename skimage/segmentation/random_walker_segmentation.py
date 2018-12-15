@@ -316,9 +316,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     data points are spaced differently in one or more spatial dimensions.
     Anisotropic data is commonly encountered in medical imaging.
 
-    The algorithm was first proposed in *Random walks for image
-    segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
-    2006 Nov;28(11):1768-83.
+    The algorithm was first proposed in [1]_.
 
     The algorithm solves the diffusion equation at infinite times for
     sources placed on markers of each phase in turn. A pixel is labeled with
@@ -352,6 +350,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     where x_m = 1 on markers of the given phase, and 0 on other markers.
     This linear system is solved in the algorithm using a direct method for
     small images, and an iterative method for larger images.
+
+    References
+    ----------
+    .. [1] Leo Grady, Random walks for image segmentation, IEEE Trans Pattern
+    Anal Mach Intell. 2006 Nov;28(11):1768-83. doi:10.1109/TPAMI.2006.233
+
 
     Examples
     --------
