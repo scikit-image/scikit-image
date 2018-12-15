@@ -15,8 +15,7 @@ SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 
-if (Version(np.__version__) >= '1.15.0' and
-        Version(scipy.__version__) <= '1.1.0'):
+if (Version(np.__version__) >= '1.15.0'):
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
     NUMPY_MATRIX_WARNING = None
@@ -71,17 +70,20 @@ def test_2d_bf():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
                                  return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
     # Now test with more than two labels
     labels[55, 80] = 3
-    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
                                  return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
@@ -146,7 +148,8 @@ def test_reorder_labels():
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[labels == 2] = 4
-    labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
     return data, labels_bf
@@ -158,7 +161,8 @@ def test_2d_inactive():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[10:20, 10:20] = -1
     labels[46:50, 33:38] = -2
-    labels = random_walker(data, labels, beta=90)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
     return data, labels
@@ -362,7 +366,8 @@ def test_length2_spacing():
     labels = np.zeros((10, 10), dtype=np.uint8)
     labels[2, 4] = 1
     labels[6, 8] = 4
-    random_walker(img, labels, spacing=(1., 2.))
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        random_walker(img, labels, spacing=(1., 2.))
 
 
 def test_bad_inputs():
@@ -411,8 +416,10 @@ def test_isolated_seeds():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    res = random_walker(a, mask)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask)
     assert res[1, 1] == 1
-    res = random_walker(a, mask, return_full_prob=True)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0

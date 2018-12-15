@@ -812,6 +812,10 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
+
+    if image.size == 0:
+        raise ValueError("Cannot warp empty image with dimensions", image.shape)
+
     image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)

@@ -86,11 +86,11 @@ b. Debian and Ubuntu
 ````````````````````
 Install all the required dependencies::
 
-  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
+  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy python3-tk
 
 Install suitable compilers::
 
-  sudo apt-get install build-essential cython
+  sudo apt-get install build-essential cython3
 
 Complete the general development installation instructions above.
 

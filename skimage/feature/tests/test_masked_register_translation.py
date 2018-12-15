@@ -1,12 +1,18 @@
 import numpy as np
+from pathlib import Path
 from scipy.ndimage import fourier_shift
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal
 from skimage.data import camera
 from skimage.feature.register_translation import register_translation
 from skimage.feature.masked_register_translation import (
-    masked_register_translation, mnxc)
+    masked_register_translation, cross_correlate_masked)
+from skimage.io import imread
 
+# Location of test images
+# These images are taken from Dirk Padfields' MATLAB package
+# available on his website: www.dirkpadfield.com 
+IMAGES_DIR = Path(__file__).parent / 'data'
 
 def test_masked_registration_vs_register_translation():
     """masked_register_translation should give the same results as
@@ -75,7 +81,37 @@ def test_masked_registration_random_masks_non_equal_sizes():
     assert_equal(measured_shift, -np.array(shift))
 
 
-def test_mnxc_output_shape():
+def test_masked_registration_padfield_data():
+    """ Masked translation registration should behave like in the original 
+    publication """
+    # Test translated from MATLABimplementation `MaskedFFTRegistrationTest` 
+    # file. You can find the source code here: 
+    # http://www.dirkpadfield.com/Home/MaskedFFTRegistrationCode.zip
+
+    shifts = [(75, 75), (-130, 130), (130, 130)]
+    for xi, yi in shifts:
+        
+        fixed_image = imread(
+            IMAGES_DIR / 'OriginalX{:d}Y{:d}.png'.format(xi, yi))
+        moving_image = imread(
+            IMAGES_DIR / 'TransformedX{:d}Y{:d}.png'.format(xi, yi))
+
+        # Valid pixels are 1
+        fixed_mask = (fixed_image != 0)
+        moving_mask = (moving_image != 0)
+
+        # Note that shifts in x and y and shifts in cols and rows
+        shift_y, shift_x = masked_register_translation(fixed_image, 
+                                                       moving_image, 
+                                                       fixed_mask, 
+                                                       moving_mask, 
+                                                       overlap_ratio = 1/10)
+        # Note: by looking at the test code from Padfield's 
+        # MaskedFFTRegistrationCode repository, the 
+        # shifts were not xi and yi, but xi and -yi
+        assert_equal((shift_x, shift_y), (-xi, yi))
+
+def test_cross_correlate_masked_output_shape():
     """Masked normalized cross-correlation should return a shape
     of N + M + 1 for each transform axis."""
     shape1 = (15, 4, 5)
@@ -89,14 +125,16 @@ def test_mnxc_output_shape():
     m1 = np.ones_like(arr1)
     m2 = np.ones_like(arr2)
 
-    full_xcorr = mnxc(arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
+    full_xcorr = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1, 2), mode='full')
     assert_equal(full_xcorr.shape, expected_full_shape)
 
-    same_xcorr = mnxc(arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
+    same_xcorr = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1, 2), mode='same')
     assert_equal(same_xcorr.shape, expected_same_shape)
 
 
-def test_mnxc_test_against_mismatched_dimensions():
+def test_cross_correlate_masked_test_against_mismatched_dimensions():
     """Masked normalized cross-correlation should raise an error if array
     dimensions along non-transformation axes are mismatched."""
     shape1 = (23, 1, 1)
@@ -110,10 +148,10 @@ def test_mnxc_test_against_mismatched_dimensions():
     m2 = np.ones_like(arr2)
 
     with testing.raises(ValueError):
-        mnxc(arr1, arr2, m1, m2, axes=(1, 2))
+        cross_correlate_masked(arr1, arr2, m1, m2, axes=(1, 2))
 
 
-def test_mnxc_output_range():
+def test_cross_correlate_masked_output_range():
     """Masked normalized cross-correlation should return between 1 and -1."""
     # See random number generator for reproducible results
     np.random.seed(23)
@@ -132,7 +170,7 @@ def test_mnxc_output_range():
     m1 = np.random.choice([True, False], arr1.shape)
     m2 = np.random.choice([True, False], arr2.shape)
 
-    xcorr = mnxc(arr1, arr2, m1, m2, axes=(1, 2))
+    xcorr = cross_correlate_masked(arr1, arr2, m1, m2, axes=(1, 2))
 
     # No assert array less or equal, so we add an eps
     # Also could not find an `assert_array_greater`, Use (-xcorr) instead
@@ -141,7 +179,7 @@ def test_mnxc_output_range():
     testing.assert_array_less(-xcorr, 1 + eps)
 
 
-def test_mnxc_side_effects():
+def test_cross_correlate_masked_side_effects():
     """Masked normalized cross-correlation should not modify the inputs."""
     shape1 = (2, 2, 2)
     shape2 = (2, 2, 2)
@@ -156,10 +194,10 @@ def test_mnxc_side_effects():
     for arr in (arr1, arr2, m1, m2):
         arr.setflags(write=False)
 
-    mnxc(arr1, arr2, m1, m2)
+    cross_correlate_masked(arr1, arr2, m1, m2)
 
 
-def test_mnxc_over_axes():
+def test_cross_correlate_masked_over_axes():
     """Masked normalized cross-correlation over axes should be
     equivalent to a loop over non-transform axes."""
     # See random number generator for reproducible results
@@ -174,18 +212,20 @@ def test_mnxc_over_axes():
     # Loop over last axis
     with_loop = np.empty_like(arr1, dtype=np.complex)
     for index in range(arr1.shape[-1]):
-        with_loop[:, :, index] = mnxc(arr1[:, :, index],
-                                      arr2[:, :, index],
-                                      m1[:, :, index],
-                                      m2[:, :, index],
-                                      axes=(0, 1), mode='same')
+        with_loop[:, :, index] = cross_correlate_masked(arr1[:, :, index],
+                                                        arr2[:, :, index],
+                                                        m1[:, :, index],
+                                                        m2[:, :, index],
+                                                        axes=(0, 1), 
+                                                        mode='same')
 
-    over_axes = mnxc(arr1, arr2, m1, m2, axes=(0, 1), mode='same')
+    over_axes = cross_correlate_masked(
+        arr1, arr2, m1, m2, axes=(0, 1), mode='same')
 
     testing.assert_array_almost_equal(with_loop, over_axes)
 
 
-def test_mnxc_autocorrelation_trivial_masks():
+def test_cross_correlate_masked_autocorrelation_trivial_masks():
     """Masked normalized cross-correlation between identical arrays
     should reduce to an autocorrelation even with random masks."""
     # See random number generator for reproducible results
@@ -198,7 +238,7 @@ def test_mnxc_autocorrelation_trivial_masks():
     m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
     m2 = np.random.choice([True, False], arr2.shape, p=[3 / 4, 1 / 4])
 
-    xcorr = mnxc(arr1, arr1, m1, m1, axes=(0, 1),
+    xcorr = cross_correlate_masked(arr1, arr1, m1, m1, axes=(0, 1),
                  mode='same', overlap_ratio=0).real
     max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
 

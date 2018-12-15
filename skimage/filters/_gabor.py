@@ -52,7 +52,7 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [2] https://web.archive.org/web/20180127125930/http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     Examples
     --------
@@ -144,7 +144,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Gabor_filter
-    .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
+    .. [2] https://web.archive.org/web/20180127125930/http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     Examples
     --------
