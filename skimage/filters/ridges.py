@@ -184,6 +184,9 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         of the input image.
     """
 
+    # Check image dimensions
+    assert_nD(image, [2, 'more'])
+
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
@@ -213,11 +216,6 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         # Compute nD Hessian eigenvalues
         hessian_eigenvalues = hessian_nd_eigenvalues(hessian_full, ndim)
 
-    else:
-
-        # Check image dimensions
-        assert_nD(image, [2, 'more'])
-
     if sorting == 'abs':
 
         # Sort eigenvalues by absolute values in ascending order
@@ -246,7 +244,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, ..., P]) ndarray
         Array with input image data.
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
@@ -261,7 +259,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
 
     Returns
     -------
-    out : (N, M) ndarray
+    out : (N, M[, ..., P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     References
@@ -272,6 +270,9 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
         58(2), 167-176.
         :DOI:`10.1002/cyto.a.20022`
     """
+
+    # Check image dimensions
+    assert_nD(image, [2, 'more'])
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
@@ -321,11 +322,6 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
 
-        else:
-
-            # Check image dimensions
-            assert_nD(image, [2, 'more'])
-
     # Return for every pixel the value of the (sigma) scale with the maximum
     # output pixel value
     return np.max(filtered_array, axis=0)
@@ -339,12 +335,13 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to tubes, according to the method described in [1]_.
+    Defined only for 2-D and 3-D images. Calculates the eigenvectors of the
+    Hessian to compute the similarity of an image region to tubes, according to
+    the method described in [1]_.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, P]) ndarray
         Array with input image data.
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
@@ -356,7 +353,7 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
 
     Returns
     -------
-    out : (N, M) ndarray
+    out : (N, M[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     References
@@ -367,6 +364,9 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
         medical images. Medical image analysis, 2(2), 143-168.
         :DOI:`10.1016/S1361-8415(98)80009-1`
     """
+
+    # Check image dimensions
+    assert_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
@@ -418,11 +418,6 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
 
-        else:
-
-            # Check image dimensions
-            assert_nD(image, [2, 3])
-
     # Return for every pixel the value of the (sigma) scale with the maximum
     # output pixel value
     return np.max(filtered_array, axis=0)
@@ -437,12 +432,13 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Calculates the eigenvectors of the Hessian to compute the similarity of
-    an image region to vessels, according to the method described in [1]_.
+    Defined only for 2-D and 3-D images. Calculates the eigenvectors of the
+    Hessian to compute the similarity of an image region to vessels, according
+    to the method described in [1]_.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, P]) ndarray
         Array with input image data.
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
@@ -463,7 +459,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
 
     Returns
     -------
-    out : (N, M) ndarray
+    out : (N, M[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     Notes
@@ -493,6 +489,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
         warn('Use keyword parameter `gamma` instead of `beta2` which '
              'will be removed in version 0.17.')
         gamma = beta2
+
+    # Check image dimensions
+    assert_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
@@ -566,11 +565,6 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
             filtered_array[i] = filtered
             lambdas_array[i] = np.max([lambda2, lambda3], axis=0)
 
-        else:
-
-            # Check image dimensions
-            assert_nD(image, [2, 3])
-
     # Remove background
     filtered_array[lambdas_array > 0] = 0
 
@@ -587,12 +581,13 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     wrinkles, rivers. It can be used to calculate the fraction of the whole
     image containing such objects.
 
-    Almost equal to Frangi filter, but uses alternative method of smoothing.
-    Refer to [1]_ to find the differences between Frangi and Hessian filters.
+    Defined only for 2-D and 3-D images. Almost equal to Frangi filter, but
+    uses alternative method of smoothing. Refer to [1]_ to find the differences
+    between Frangi and Hessian filters.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (N, M[, P]) ndarray
         Array with input image data.
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
@@ -613,7 +608,7 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
 
     Returns
     -------
-    out : (N, M) ndarray
+    out : (N, M[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     Notes
