@@ -30,7 +30,7 @@ def _normalize(x):
 
 
 def _axis_0_rotation_matrix(u, indices=None):
-    """Generates a matrix that rotates a vector to coincide with the 0th (y-)
+    """Generate a matrix that rotates a vector to coincide with the 0th (y-)
        coordinate axis.
 
     Parameters
@@ -71,9 +71,8 @@ def _axis_0_rotation_matrix(u, indices=None):
 
     R = np.eye(ndim)
 
-    # Loop to create matrices of stages
-    # These stages are 2D rotations around fixed axes that are
-    # multiplied to form our nD matrix; see: [2]
+    # loop to create stages of 2D rotations around fixed axes
+    # that are multiplied to form our nD matrix; see: [2]_
     for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
         A = np.eye(ndim)
 
@@ -86,11 +85,11 @@ def _axis_0_rotation_matrix(u, indices=None):
 
             r = np.hypot(x[i], x[j])
             if r > 0:
-                # Calculation of coefficients
+                # calculation of coefficients
                 pcos = x[i] / r
                 psin = -x[j] / r
 
-                # Base 2-dimensional rotation
+                # base 2-dimensional rotation
                 A[i, i] = pcos
                 A[i, j] = -psin
                 A[j, i] = psin
@@ -99,15 +98,15 @@ def _axis_0_rotation_matrix(u, indices=None):
                 x[i] = r
                 x[j] = 0
 
-        R = A @ R  # Multiply R by current matrix of stage A
+        R = A @ R  # multiply R by current matrix of stage A
 
     return R
 
 
 def convert_quasipolar_coords(r, thetas):
-    r"""Converts quasipolar coordinates to their Cartesian equivalents.
+    r"""Convert quasipolar coordinates to their Cartesian equivalents.
 
-    Quasipolar coordinate conversion is defined as follows:
+    Quasipolar coordinate conversion is defined as follows [1]_:
 
     .. math::
 
@@ -192,17 +191,19 @@ def convert_quasipolar_coords(r, thetas):
 
 
 def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
-    """Generates a matrix for the rotation of one vector to the direction
+    """Generate a matrix for the rotation of one vector to the direction
     of another.
 
-    The MNMRG algorithm can be described as follows:
-        1. directional vectors X and Y are normalized
-        2. a vector w is initialized containing the indices of the differences
-           between X and Y
-        3. matrices Mx and My for the rotation of X and Y to the same axis are
-           generated
-        4. the inverse of My is mulitplied by Mx to form the rotation matrix M
-           which rotates vector X to the direction of vector Y
+    The MNMRG algorithm [1]_ can be summarized as follows:
+        1. directional vectors ``X`` and ``Y`` are normalized
+        2. a vector ``w`` is initialized containing the
+           indices of the differences between ``X`` and ``Y``
+        3. matrices ``Mx`` and ``My`` are generated for the rotation
+           of ``X`` and ``Y`` to the same axis for all indices
+           in ``w``
+        4. the inverse of ``My`` is mulitplied by ``Mx`` to form
+           the rotation matrix ``M`` which rotates vector ``X`` to the
+           direction of vector ``Y``
 
     Parameters
     ----------
@@ -211,12 +212,12 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     dst : (N, ) array
         Vector of desired direction.
     use_homogeneous_coords : bool, optional
-        If the input vectors should be treated as homogeneous coordinates.
+        Wheter the input vectors should be treated as homogeneous coordinates.
 
     Returns
     -------
     M : (N, N) array
-        Matrix that rotates `src` to coincide with `dst`.
+        Matrix that rotates ``src`` to coincide with ``dst``.
 
     References
     ----------
@@ -251,7 +252,8 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     Mx = _axis_0_rotation_matrix(X, w)
     My = _axis_0_rotation_matrix(Y, w)
 
-    My_inverse = My.T    # since My is orthogonal its inverse is its transpose
+    My_inverse = My.T    # since My is orthogonal, its inverse is its transpose
+    
     M = My_inverse @ Mx  # by rotating both vectors to the same direction
                          # and inverting one operation, a final
                          # rotation matrix is created
