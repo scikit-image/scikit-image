@@ -210,6 +210,11 @@ def _check_isolated_seeds(labels):
 
 
 def _unchanged_labels(labels, return_full_prob=False):
+    """
+    Return the input array of labels, unless ``return_full_prob`` is True,
+    in which case a mask of pixels is returned for each unique label, with the
+    last dimension corresponding to unique labels.
+    """
     if return_full_prob:
 	# Find and iterate over valid labels
         unique_labels = np.unique(labels)
