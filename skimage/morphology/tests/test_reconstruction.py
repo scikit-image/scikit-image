@@ -126,7 +126,8 @@ def test_invalid_offset_not_none():
                      [1, 1, 1, 1, 1, 4, 4, 4],
                      [1, 1, 1, 1, 1, 4, 4, 4]])
     with testing.raises(ValueError):
-        reconstruction(image, mask, method='dilation', selem=np.ones((3, 3)), offset=np.array([3, 0]))
+        reconstruction(image, mask, method='dilation',
+                       selem=np.ones((3, 3)), offset=np.array([3, 0]))
 
 
 def test_offset_not_none():
@@ -136,4 +137,5 @@ def test_offset_not_none():
     expected = np.array([0, 3, 6, 6, 6, 6, 6, 4, 4, 0])
 
     assert_array_almost_equal(
-        reconstruction(seed, mask, method='dilation', selem=np.ones(3), offset=np.array([0])), expected)
+        reconstruction(seed, mask, method='dilation',
+                       selem=np.ones(3), offset=np.array([0])), expected)

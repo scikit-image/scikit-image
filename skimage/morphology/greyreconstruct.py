@@ -54,7 +54,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
     offset : ndarray, optional
         The coordinates of the center of the structuring element.
-        Default is located on the real center of the selem, in that case selem dimensions must be odd.
+        Default is located on the real center of the selem, in that case
+        selem dimensions must be odd.
 
     Returns
     -------
@@ -206,5 +207,6 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1).astype(int)
+    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1) \
+        .astype(int)
     return rec_img[inside_slices]
