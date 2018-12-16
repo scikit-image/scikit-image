@@ -216,12 +216,12 @@ def _unchanged_labels(labels, return_full_prob=False):
     last dimension corresponding to unique labels.
     """
     if return_full_prob:
-	# Find and iterate over valid labels
+        # Find and iterate over valid labels
         unique_labels = np.unique(labels)
         unique_labels = unique_labels[unique_labels > 0]
 
         out_labels = np.empty(labels.shape + (len(unique_labels),),
-				dtype=np.bool)
+                              dtype=np.bool)
         for n, i in enumerate(unique_labels):
             out_labels[..., n] = (labels == i)
 
@@ -230,7 +230,7 @@ def _unchanged_labels(labels, return_full_prob=False):
     return out_labels
 
 
-#----------- Random walker algorithm --------------------------------
+# ----------- Random walker algorithm --------------------------------
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
@@ -278,7 +278,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           requires that the pyamg module (http://pyamg.github.io/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
-          
+
     tol : float, optional
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
@@ -470,10 +470,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels = np.squeeze(labels)
         labels[inds_isolated_seeds] = isolated_values
         warn('Random walker only segments unlabeled areas, where '
-        'labels == 0. No zero valued areas in labels were '
-        'found. Returning provided labels.')
+             'labels == 0. No zero valued areas in labels were '
+             'found. Returning provided labels.')
         return _unchanged_labels(labels, return_full_prob)
-
 
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
