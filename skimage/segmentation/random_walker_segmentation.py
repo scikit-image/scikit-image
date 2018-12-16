@@ -50,7 +50,7 @@ import functools
 if Version(scipy.__version__) >= Version('1.1'):
     cg = functools.partial(cg, atol=0)
 
-#-----------Laplacian--------------------
+# -----------Laplacian--------------------
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
