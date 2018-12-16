@@ -78,7 +78,7 @@ def _sortbyabs(array, axis=0):
     index[axis] = np.abs(array).argsort(axis)
 
     # Return abs sorted array
-    return array[index]
+    return array[tuple(index)]
 
 
 def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
@@ -184,9 +184,6 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         of the input image.
     """
 
-    # Check image dimensions
-    assert_nD(image, [2, 'more'])
-
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
@@ -270,9 +267,6 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
         58(2), 167-176.
         :DOI:`10.1002/cyto.a.20022`
     """
-
-    # Check image dimensions
-    assert_nD(image, [2, 'more'])
 
     # Check (sigma) scales
     sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
