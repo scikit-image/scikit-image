@@ -359,8 +359,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     References
     ----------
     .. [1] Leo Grady, Random walks for image segmentation, IEEE Trans Pattern
-    Anal Mach Intell. 2006 Nov;28(11):1768-83. :DOI:`10.1109/TPAMI.2006.233`
-
+    Anal Mach Intell. 2006 Nov;28(11):1768-83. :DOI:`10.1109/TPAMI.2006.233`.
 
     Examples
     --------
