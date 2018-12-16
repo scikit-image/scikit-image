@@ -8,7 +8,6 @@ image intensities to detect tube-like structures where the intensity changes
 perpendicular but not along the structure.
 """
 
-from itertools import combinations_with_replacement
 
 from warnings import warn
 
@@ -81,84 +80,6 @@ def _sortbyabs(array, axis=0):
     return array[tuple(index)]
 
 
-def hessian_nd_matrix(hessian_elements, ndim, order='rc'):
-    """
-    Generate full Hessian matrices from Hessian elements of n-dimensional
-    image.
-
-    Parameters
-    ----------
-    hessian_elements : (E, N, ..., M) ndarray
-        Array with Hessian elements for each image pixel.
-    ndim : int
-        Dimensions of input image.
-     order : {'xy', 'rc'}, optional
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'xy' indicates the usage
-        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
-        the use of the first axis initially (Hrr, Hrc, Hcc).
-
-    Returns
-    -------
-    hessian_full : (n, n, N, ..., M) ndarray
-        Array with full Hessian matrices for each image pixel.
-    """
-
-    # Generate empty array for storing Hessian matrices for each pixel
-    d_hessian = (ndim, ndim)
-    d_image = hessian_elements[0].shape
-    hessian_full = np.zeros(d_hessian + d_image)
-
-    # Generate list of image dimensions
-    axes = range(ndim)
-    if order == 'rc':
-        axes = reversed(axes)
-
-    # Fill Hessian matrices with Hessian elements
-    for index, (ax0, ax1) in enumerate(combinations_with_replacement(axes, 2)):
-        element = hessian_elements[index]
-        hessian_full[ax0, ax1] = element
-        if ax0 != ax1:
-            hessian_full[ax1, ax0] = element
-
-    # Reshape array such that Hessian matrices are given by the last indices
-    d_hessian = list(range(2))
-    d_image = list(range(2, 2 + ndim))
-    hessian_full = np.transpose(hessian_full, d_image + d_hessian)
-
-    # Return array with full Hessian matrices
-    return hessian_full
-
-
-def hessian_nd_eigenvalues(hessian_full, ndim):
-    """
-    Eigenvalues of Hessian matrices of n-dimensional image.
-
-    Parameters
-    ----------
-    hessian_full : (n, n, M_1, ..., M_ndim) ndarray
-        Array with n-dimensional Hessian matrices for each image pixel.
-    ndim : int
-        Dimensions of input image.
-
-    Returns
-    -------
-    eigenvalues : (n, M_1, ..., M_ndim) ndarray
-        Array with n Hessian eigenvalues for each image pixel.
-    """
-
-    # Compute Hessian eigenvalues
-    eigenvalues = np.linalg.eigvalsh(hessian_full)
-
-    # Reshape array such that eigenvalues are given by the first index
-    d_image = list(range(ndim))
-    d_eigen = list(range(ndim, ndim + 1))
-    eigenvalues = np.transpose(eigenvalues, d_eigen + d_image)
-
-    # Return array with Hessian eigenvalues
-    return eigenvalues
-
-
 def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     """
     Compute Hessian eigenvalues of nD images.
@@ -187,9 +108,6 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     # Import has to be here due to circular import error
     from ..feature import hessian_matrix, hessian_matrix_eigvals
 
-    # Get image dimensions
-    ndim = image.ndim
-
     # Convert image to float
     image = img_as_float(image)
 
@@ -199,19 +117,8 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     # Correct for scale
     hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
-    if ndim == 2:
-
-        # Compute 2D Hessian eigenvalues
-        hessian_eigenvalues = np.array(hessian_matrix_eigvals(
-                                       hessian_elements))
-
-    elif ndim > 2:
-
-        # Make nD hessian
-        hessian_full = hessian_nd_matrix(hessian_elements, ndim, order='rc')
-
-        # Compute nD Hessian eigenvalues
-        hessian_eigenvalues = hessian_nd_eigenvalues(hessian_full, ndim)
+    # Compute Hessian eigenvalues
+    hessian_eigenvalues = np.array(hessian_matrix_eigvals(hessian_elements))
 
     if sorting == 'abs':
 
@@ -227,7 +134,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     return hessian_eigenvalues
 
 
-def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
+def meijering(image, sigmas=range(1, 10, 2), alpha=None,
               black_ridges=True):
     """
     Filter an image with the Meijering neuriteness filter.
@@ -243,10 +150,8 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
     ----------
     image : (N, M[, ..., P]) ndarray
         Array with input image data.
-    scale_range : 2-tuple of floats, optional
-        The range of sigmas used.
-    scale_step : float, optional
-        Step size between sigmas.
+    sigmas : iterable of floats, optional
+        Sigmas used as scales of filter
     alpha : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a plate-like structure.
@@ -269,8 +174,8 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
     """
 
     # Check (sigma) scales
-    sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
-    if np.any(np.asarray(sigmas) < 0.0):
+    sigmas = np.asarray(sigmas)
+    if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
 
     # Get image dimensions
@@ -321,7 +226,7 @@ def meijering(image, scale_range=(1, 10), scale_step=2, alpha=None,
     return np.max(filtered_array, axis=0)
 
 
-def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
+def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -337,10 +242,8 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     ----------
     image : (N, M[, P]) ndarray
         Array with input image data.
-    scale_range : 2-tuple of floats, optional
-        The range of sigmas used.
-    scale_step : float, optional
-        Step size between sigmas.
+    sigmas : iterable of floats, optional
+        Sigmas used as scales of filter.
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -363,8 +266,8 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     assert_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
-    if np.any(np.asarray(sigmas) < 0.0):
+    sigmas = np.asarray(sigmas)
+    if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
 
     # Get image dimensions
@@ -417,8 +320,9 @@ def sato(image, scale_range=(1, 10), scale_step=2, black_ridges=True):
     return np.max(filtered_array, axis=0)
 
 
-def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
-           alpha=0.5, beta=0.5, gamma=15, black_ridges=True):
+def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
+           beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
+           black_ridges=True):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -434,6 +338,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     ----------
     image : (N, M[, P]) ndarray
         Array with input image data.
+    sigmas : iterable of floats, optional
+        Sigmas used as scales of filter, i.e.,
+        np.arange(scale_range[0], scale_range[1], scale_step)
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
@@ -479,17 +386,22 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
              'will be removed in version 0.17.')
         beta = beta1
 
-    if beta1:
+    if beta2:
         warn('Use keyword parameter `gamma` instead of `beta2` which '
              'will be removed in version 0.17.')
         gamma = beta2
+
+    if scale_range and scale_step:
+        warn('Use keyword parameter `sigmas` instead of `scale_range` and '
+             '`scale_range` which will be removed in version 0.17.')
+        sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
     # Check image dimensions
     assert_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
-    if np.any(np.asarray(sigmas) < 0.0):
+    sigmas = np.asarray(sigmas)
+    if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
 
     # Rescale filter parameters
@@ -567,8 +479,9 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     return np.max(filtered_array, axis=0)
 
 
-def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
-            alpha=0.5, beta=0.5, gamma=15, black_ridges=True):
+def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
+            beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
+            black_ridges=True):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -583,13 +496,13 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     ----------
     image : (N, M[, P]) ndarray
         Array with input image data.
+    sigmas : iterable of floats, optional
+        Sigmas used as scales of filter, i.e.,
+        np.arange(scale_range[0], scale_range[1], scale_step)
     scale_range : 2-tuple of floats, optional
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
-    alpha : float, optional
-        Frangi correction constant that adjusts the filter's
-        sensitivity to deviation from a plate-like structure.
     beta = beta1 : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
@@ -619,20 +532,10 @@ def hessian(image, scale_range=(1, 10), scale_step=2, beta1=None, beta2=None,
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
 
-    # Check deprecated keyword parameters
-    if beta1:
-        warn('Use keyword parameter `beta` instead of `beta1` which '
-             'will be removed in version 0.17.')
-        beta = beta1
-
-    if beta2:
-        warn('Use keyword parameter `gamma` instead of `beta2` which '
-             'will be removed in version 0.17.')
-        gamma = beta2
-
-    filtered = frangi(image, scale_range=scale_range, scale_step=scale_step,
-                      beta1=None, beta2=None, alpha=alpha, beta=beta,
-                      gamma=gamma, black_ridges=black_ridges)
+    filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
+                      scale_step=scale_step, beta1=beta1, beta2=beta2,
+                      alpha=alpha, beta=beta, gamma=gamma,
+                      black_ridges=black_ridges)
 
     filtered[filtered <= 0] = 1
     return filtered

@@ -54,8 +54,7 @@ image = page()
 cmap = plt.cm.gray
 
 kwargs = {}
-kwargs['scale_range'] = (1, 3)
-kwargs['scale_step'] = 5
+kwargs['sigmas'] = [1]
 
 fig, axes = plt.subplots(2, 5)
 for i, black_ridges in enumerate([1, 0]):
