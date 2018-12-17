@@ -336,6 +336,27 @@ def test_trivial_cases():
         test = random_walker(img, labels, return_full_prob=True)
     np.testing.assert_array_equal(test, expected)
 
+    # Unlabeled voxels not connected to seed, so nothing can be done
+    img = np.full((10, 10), False)
+    object_A = np.array([(6,7), (6,8), (7,7), (7,8)])
+    object_B = np.array([(3,1), (4,1), (2,2), (3,2), (4,2), (2,3), (3,3)])
+    for x, y in np.vstack((object_A, object_B)):
+            img[y][x] = True
+
+    markers = np.zeros((10, 10), dtype=np.int8)
+    for x, y in object_B:
+            markers[y][x] = 1
+
+    markers[img == 0] = -1
+    with expected_warnings(["Returning provided labels"]):
+            output_labels = random_walker(img, markers)
+    assert np.all(output_labels[markers == 1] == 1)
+    # Here 0-labeled pixels could not be determined (no connexion to seed)
+    assert np.all(output_labels[markers == 0] == -1) 
+    with expected_warnings(["Returning provided labels"]):
+        test = random_walker(img, markers, return_full_prob=True)
+
+
 
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
