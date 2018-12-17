@@ -160,7 +160,8 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
-def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200, positivity=False):
+def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200,
+                             positivity=False):
     """Perform total-variation denoising on n-dimensional images.
 
     Parameters
@@ -214,15 +215,14 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200, posit
             out_nopos = image + d
         else:
             out_nopos = image
-            
+
         if not positivity:
             out = out_nopos
         else:
-            out     = np.maximum (0 ,out_nopos)
-            removed = np.minimum (out_nopos, 0) 
-            d       = d-removed
+            out = np.maximum(0, out_nopos)
+            removed = np.minimum(out_nopos, 0) 
+            d = d-removed
 
-            
         E = (d ** 2).sum()
 
         # g stores the gradients of out along each axis
@@ -334,9 +334,11 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
         out = np.zeros_like(image)
         for c in range(image.shape[-1]):
             out[..., c] = _denoise_tv_chambolle_nd(image[..., c], weight, eps,
-                                                   n_iter_max, positivity=positivity)
+                                                   n_iter_max,
+                                                   positivity=positivity)
     else:
-        out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max, positivity=positivity)
+        out = _denoise_tv_chambolle_nd(image, weight, eps, n_iter_max,
+                                       positivity=positivity)
     return out
 
 
