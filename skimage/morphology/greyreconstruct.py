@@ -146,7 +146,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         offset = np.array([d // 2 for d in selem.shape])
     else:
         if offset.ndim != selem.ndim:
-            raise ValueError("offset and selem ndims must be identical")
+            raise ValueError("Offset and selem ndims must be equal.")
         if not all([(0 <= o < d) for o, d in zip(offset, selem.shape)]):
             raise ValueError("Offset must be included inside selem")
 
