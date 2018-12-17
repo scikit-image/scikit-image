@@ -155,7 +155,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Make padding for edges of reconstructed image so we can ignore boundaries
     dims = np.zeros(seed.ndim + 1, dtype=int)
-    dims[1:] = np.array(seed.shape) + (np.array(selem.shape) - 1).astype(int)
+    dims[1:] = np.array(seed.shape) + (np.array(selem.shape) - 1)
     dims[0] = 2
     inside_slices = tuple(slice(o, o + s) for o, s in zip(offset, seed.shape))
     # Set padded region to minimum image intensity and mask along first axis so
@@ -207,6 +207,5 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1) \
-        .astype(int)
+    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1)
     return rec_img[inside_slices]
