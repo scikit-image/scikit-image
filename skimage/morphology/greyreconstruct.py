@@ -50,11 +50,11 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         Default is 'dilation'.
     selem : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
-        Default is the ball of radius 1 according to the maximum norm
-        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
+        Default is the n-D square of radius equal to 1 (i.e. a 3x3 square
+        for 2D images, a 3x3x3 cube for 3D images, etc.)
     offset : ndarray, optional
         The coordinates of the center of the structuring element.
-        Default is located on the real center of the selem, in that case
+        Default is located on the geometrical center of the selem, in that case
         selem dimensions must be odd.
 
     Returns
