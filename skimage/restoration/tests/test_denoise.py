@@ -46,6 +46,23 @@ def test_denoise_tv_chambolle_2d():
     assert_(grad_denoised.dtype == np.float)
     assert_(np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()))
 
+def test_denoise_tv_chambolle_2d_positivity():
+    # astronaut image
+    img = astro_gray.copy()
+    # add noise to astronaut
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, img.min(), 1)
+    # denoise
+    denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.1, positivity=True)
+    # which dtype?
+    assert_(denoised_astro.dtype in [np.float, np.float32, np.float64])
+    from scipy import ndimage as ndi
+    grad = ndi.morphological_gradient(img, size=((3, 3)))
+    grad_denoised = ndi.morphological_gradient(denoised_astro, size=((3, 3)))
+    # test if the total variation has decreased
+    assert_(grad_denoised.dtype == np.float)
+    assert_(np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()))
+
 
 def test_denoise_tv_chambolle_multichannel():
     denoised0 = restoration.denoise_tv_chambolle(astro[..., 0], weight=0.1)

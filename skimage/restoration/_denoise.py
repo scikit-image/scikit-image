@@ -220,8 +220,8 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200,
             out = out_nopos
         else:
             out = np.maximum(0, out_nopos)
-            removed = np.minimum(out_nopos, 0) 
-            d = d-removed
+            removed = np.minimum(out_nopos, 0)
+            d = d - removed
 
         E = (d ** 2).sum()
 
