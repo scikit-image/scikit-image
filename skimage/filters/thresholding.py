@@ -802,8 +802,9 @@ def _mean_std(image, w):
     image : ndarray
         Input image.
     w : int, tuple
-        window size of the kernel (e.g. odd integers or tuple of odd number 5,
-        (3, 5)).
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
 
     Returns
     -------
@@ -877,7 +878,9 @@ def threshold_niblack(image, window_size=15, k=0.2):
     image: (N, M) ndarray
         Grayscale input image.
     window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
     k : float, optional
         Value of parameter k in threshold formula.
 
@@ -926,7 +929,9 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     image: (N, M) ndarray
         Grayscale input image.
     window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional
