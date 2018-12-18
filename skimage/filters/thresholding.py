@@ -2,7 +2,7 @@ import itertools
 import math
 import numpy as np
 from scipy import ndimage as ndi
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
@@ -793,15 +793,15 @@ def threshold_triangle(image, nbins=256):
 
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
-    neighborhood defined by a rectangular window with size w times w.
+    neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation. This is
-    used by threshold_niblack and threshold_sauvola.
+    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    w : int, tuple
+    w : int, tuple or list of integer
         Odd size window specified as a single integer (e.g., 3, 5,
         etc.) or a tuple of the same dimension than ``image``
         containing odd integers (e.g., (3, 5)).
@@ -827,7 +827,7 @@ def _mean_std(image, w):
                 .format(axis_size)
             )
 
-    if isinstance(w, tuple):
+    if isinstance(w, Iterable):
         for axis in w:
             _sanity_check_window_size(axis)
         kern_size = tuple(w_ + 1 for w_ in w)
@@ -875,9 +875,9 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
+    image: ndarray
+        Input image.
+    window_size : int, tuple or list of integer
         Odd size window specified as a single integer (e.g., 3, 5,
         etc.) or a tuple of the same dimension than ``image``
         containing odd integers (e.g., (3, 5)).
@@ -926,9 +926,9 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
+    image: ndarray
+        Input image.
+    window_size : int, tuple or list of integer
         Odd size window specified as a single integer (e.g., 3, 5,
         etc.) or a tuple of the same dimension than ``image``
         containing odd integers (e.g., (3, 5)).
@@ -950,7 +950,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     References
     ----------
-    .. [1] J. Sauvola and M. Pietikainen, "Adaptive document image
+    .. [1] J. Sauvola and M". Pietikainen, Adaptive document image
            binarization," Pattern Recognition 33(2),
            pp. 225-236, 2000.
            :DOI:`10.1016/S0031-3203(99)00055-2`
