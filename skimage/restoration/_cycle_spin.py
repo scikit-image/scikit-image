@@ -148,11 +148,12 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
-    if not dask_available:
+    if not dask_available and num_workers > 1:
+        num_workers = 1
         warn('The optional dask dependency is not installed. '
              'The number of worker is set to 1.')
     # compute a running average across the cycle shifts
-    if num_workers == 1 or not dask_available:
+    if num_workers == 1:
         # serial processing
         mean = _run_one_shift(all_shifts[0])
         for shift in all_shifts[1:]:
