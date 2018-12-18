@@ -187,6 +187,30 @@ class TestSimpleImage():
         out = self.image > thres
         assert_equal(ref, out)
 
+    def test_threshold_niblack_tuple_window_size(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, True, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, True],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_niblack(self.image, window_size=(3, 3), k=0.5)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola_tuple_window_size(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_sauvola(self.image, window_size=(3, 3), k=0.2, r=128)
+        out = self.image > thres
+        assert_equal(ref, out)
+
 
 def test_otsu_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

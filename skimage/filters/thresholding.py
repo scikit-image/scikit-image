@@ -801,8 +801,9 @@ def _mean_std(image, w):
     ----------
     image : ndarray
         Input image.
-    w : int
-        Odd window size (e.g. 3, 5, 7, ..., 21, ...).
+    w : int, tuple
+        window size of the kernel (e.g. odd integers or tuple of odd number 5,
+        (3, 5)).
 
     Returns
     -------
@@ -818,27 +819,40 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    if w == 1 or w % 2 == 0:
-        raise ValueError(
-            "Window size w = %s must be odd and greater than 1." % w)
+    def _sanity_check_window_size(axis_size):
+        if axis_size == 1 or axis_size % 2 == 0:
+            raise ValueError(
+                "Window size w = {} must be odd and greater than 1."
+                .format(axis_size)
+            )
 
-    left_pad = w // 2 + 1
-    right_pad = w // 2
-    padded = np.pad(image.astype('float'), (left_pad, right_pad),
+    if isinstance(w, tuple):
+        for axis in w:
+            _sanity_check_window_size(axis)
+        kern_size = tuple(w_ + 1 for w_ in w)
+    else:
+        _sanity_check_window_size(w)
+        kern_size = (w + 1, ) * image.ndim
+        w = (w, ) * image.ndim
+
+    total_window_size = np.prod(w)
+
+    pad_width = tuple((k_ // 2 + 1, k_ // 2) for k_ in w)
+    padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
     padded_sq = padded * padded
 
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros((w + 1,) * image.ndim)
+    kern = np.zeros(kern_size)
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
+    m = crop(sum_full, pad_width) / total_window_size
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
+    g2 = crop(sum_sq_full, pad_width) / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
