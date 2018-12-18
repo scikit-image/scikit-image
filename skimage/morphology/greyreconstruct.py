@@ -42,15 +42,20 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         are dilated or eroded.
     mask : ndarray
         The maximum (dilation) / minimum (erosion) allowed value at each pixel.
-    method : {'dilation'|'erosion'}
+    method : {'dilation'|'erosion'}, optional
         Perform reconstruction by dilation or erosion. In dilation (or
         erosion), the seed image is dilated (or eroded) until limited by the
         mask image. For dilation, each seed value must be less than or equal
         to the corresponding mask value; for erosion, the reverse is true.
-    selem : ndarray
+        Default is 'dilation'.
+    selem : ndarray, optional
         The neighborhood expressed as an n-D array of 1's and 0's.
-        Default is the ball of radius 1 according to the maximum norm
-        (i.e. a 3x3 square for 2D images, a 3x3x3 cube for 3D images, etc.)
+        Default is the n-D square of radius equal to 1 (i.e. a 3x3 square
+        for 2D images, a 3x3x3 cube for 3D images, etc.)
+    offset : ndarray, optional
+        The coordinates of the center of the structuring element.
+        Default is located on the geometrical center of the selem, in that case
+        selem dimensions must be odd.
 
     Returns
     -------
@@ -139,15 +144,20 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         if not all([d % 2 == 1 for d in selem.shape]):
             raise ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
+    else:
+        if offset.ndim != selem.ndim:
+            raise ValueError("Offset and selem ndims must be equal.")
+        if not all([(0 <= o < d) for o, d in zip(offset, selem.shape)]):
+            raise ValueError("Offset must be included inside selem")
+
     # Cross out the center of the selem
     selem[tuple(slice(d, d + 1) for d in offset)] = False
 
     # Make padding for edges of reconstructed image so we can ignore boundaries
-    padding = (np.array(selem.shape) / 2).astype(int)
     dims = np.zeros(seed.ndim + 1, dtype=int)
-    dims[1:] = np.array(seed.shape) + 2 * padding
+    dims[1:] = np.array(seed.shape) + (np.array(selem.shape) - 1)
     dims[0] = 2
-    inside_slices = tuple(slice(p, -p) for p in padding)
+    inside_slices = tuple(slice(o, o + s) for o, s in zip(offset, seed.shape))
     # Set padded region to minimum image intensity and mask along first axis so
     # we can interleave image and mask pixels when sorting.
     if method == 'dilation':
@@ -197,5 +207,5 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(seed.shape) + 2 * padding
+    rec_img.shape = np.array(seed.shape) + (np.array(selem.shape) - 1)
     return rec_img[inside_slices]
