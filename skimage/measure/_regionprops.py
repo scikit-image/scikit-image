@@ -586,10 +586,13 @@ def perimeter(image, neighbourhood=4):
 
     Parameters
     ----------
-    image : array
-        Binary image.
+    image : (N, M) ndarray
+        2D binary image.
+
     neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination.
+        Neighborhood connectivity for border pixel determination. It's used to
+        compute the contour. A higher neighbourhood widens the border on which
+        the perimeter is computed.
 
     Returns
     -------
@@ -601,6 +604,21 @@ def perimeter(image, neighbourhood=4):
     .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+
+    # coins image (binary)
+    >>> img_coins = util.img_as_ubyte(data.coins()) > 110
+
+    # total perimeter of all objects in the image
+    >>> perimeter(img_coins, neighbourhood=4)
+    7796.867996436004
+    >>> perimeter(img_coins, neighbourhood=8)
+    8806.268073325286
+
     """
     if neighbourhood == 4:
         strel = STREL_4
