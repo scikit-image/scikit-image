@@ -588,7 +588,6 @@ def perimeter(image, neighbourhood=4):
     ----------
     image : (N, M) ndarray
         2D binary image.
-
     neighbourhood : 4 or 8, optional
         Neighborhood connectivity for border pixel determination. It's used to
         compute the contour. A higher neighbourhood widens the border on which
@@ -615,11 +614,14 @@ def perimeter(image, neighbourhood=4):
 
     # total perimeter of all objects in the image
     >>> perimeter(img_coins, neighbourhood=4)
-    7796.867996436004
+    7796.8679964360044
     >>> perimeter(img_coins, neighbourhood=8)
-    8806.268073325286
+    8806.2680733252855
 
     """
+    if image.ndim > 2:
+        raise NotImplementedError('perimeter does not support 3D images')
+
     if neighbourhood == 4:
         strel = STREL_4
     else:
