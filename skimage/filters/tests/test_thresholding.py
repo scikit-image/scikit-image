@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 from scipy import ndimage as ndi
-from collections import Iterable
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
@@ -475,7 +474,7 @@ def test_mean_std_2d(window_size, mean_kernel):
 
 @pytest.mark.parametrize(
     "window_size, mean_kernel", [
-        (5, np.full((5,) * 3, 1 / 5 ** 3)),
+        (5, np.full((5,) * 3, 1 / 5) ** 3),
         ((5, 5, 5), np.full((5, 5, 5), 1 / 5 ** 3)),
         ((3, 5, 7), np.full((3, 5, 7), 1 / np.prod((3, 5, 7))))]
 )

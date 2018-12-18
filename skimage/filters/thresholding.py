@@ -2,7 +2,8 @@ import itertools
 import math
 import numpy as np
 from scipy import ndimage as ndi
-from collections import OrderedDict, Iterable
+from collections import OrderedDict
+from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
