@@ -148,7 +148,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
-    if not dask_available and num_workers > 1:
+    if not dask_available and (num_workers is None or num_workers > 1):
         num_workers = 1
         warn('The optional dask dependency is not installed. '
              'The number of workers is set to 1. To silence '
