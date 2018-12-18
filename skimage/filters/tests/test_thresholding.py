@@ -20,6 +20,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           _cross_entropy)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_equal
 
 
 class TestSimpleImage():
@@ -197,7 +198,7 @@ class TestSimpleImage():
         )
         thres = threshold_niblack(self.image, window_size=(3, 3), k=0.5)
         out = self.image > thres
-        assert_equal(ref, out)
+        assert_array_equal(ref, out)
 
     def test_threshold_sauvola_tuple_window_size(self):
         ref = np.array(
@@ -209,7 +210,7 @@ class TestSimpleImage():
         )
         thres = threshold_sauvola(self.image, window_size=(3, 3), k=0.2, r=128)
         out = self.image > thres
-        assert_equal(ref, out)
+        assert_array_equal(ref, out)
 
 
 def test_otsu_camera_image():
