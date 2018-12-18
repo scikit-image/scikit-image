@@ -183,7 +183,7 @@ def test_save_with_alpha_channel():
 
 
 def test_indexing():
-    array = 128 * np.ones((10, 10, 3), dtype=np.uint8)
+    array = np.full((10, 10, 3), 128, dtype=np.uint8)
     pic = novice.Picture(array=array)
 
     pic[0:5, 0:5] = (0, 0, 0)

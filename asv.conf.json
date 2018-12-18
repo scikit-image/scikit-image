@@ -7,7 +7,7 @@
     "project": "scikit-image",
 
     // The project's homepage
-    "project_url": "http://scikit-image.org/",
+    "project_url": "https://scikit-image.org/",
 
     // The URL or local path of the source code repository for the
     // project being benchmarked
@@ -35,7 +35,7 @@
     "install_timeout": 1200,
 
     // the base URL to show a commit for the project.
-    "show_commit_url": "http://github.com/scikit-image/scikit-image/commit/",
+    "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
     // The Pythons you'd like to test against.  If not provided, defaults
     // to the current version of Python used to run `asv`.
@@ -55,7 +55,8 @@
          "cython": ["0.27", "0.28"],
          "numpy": ["1.13", "1.14"],
          "scipy": ["1.0", "1.1"],
-         "matplotlib": ["2.2"]
+         "matplotlib": ["2.2"],
+         "six": ["1.10"]
     },
 
     // Combinations of libraries/python versions can be excluded/included
@@ -79,10 +80,10 @@
     //     Platform, as in sys.platform. Possible values for the common
     //     cases: 'linux2', 'win32', 'cygwin', 'darwin'.
     //
-    // "exclude": [
+    "exclude": [
     //     {"python": "3.2", "sys_platform": "win32"}, // skip py3.2 on windows
-    //     {"environment_type": "conda", "six": null}, // don't run without six on conda
-    // ],
+         {"environment_type": "conda", "six": null}, // don't run without six on conda
+    ],
     //
     // "include": [
     //     // additional env for python2.7

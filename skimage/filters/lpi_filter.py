@@ -20,7 +20,7 @@ def _centre(x, oshape):
 
     """
     start = (np.array(x.shape) - np.array(oshape)) // 2 + 1
-    out = x[[slice(s, s + n) for s, n in zip(start, oshape)]]
+    out = x[tuple(slice(s, s + n) for s, n in zip(start, oshape))]
     return out
 
 
@@ -35,7 +35,7 @@ def _pad(data, shape):
 
     """
     out = np.zeros(shape)
-    out[[slice(0, n) for n in data.shape]] = data
+    out[tuple(slice(0, n) for n in data.shape)] = data
     return out
 
 

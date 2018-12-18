@@ -8,7 +8,7 @@ import numpy as np
 from libc.math cimport exp, fabs, sqrt
 from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
-from ..util import img_as_float
+from ..util import img_as_float64
 
 
 cdef inline double _gaussian_weight(double sigma_sqr, double value):
@@ -78,7 +78,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(img_as_float64(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -163,7 +163,7 @@ def _denoise_bilateral(image, Py_ssize_t win_size, sigma_color,
 
 def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
                        char isotropic):
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(img_as_float64(image))
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -193,13 +193,15 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
         double rmse = DBL_MAX
         double norm = (weight + 4 * lam)
 
-    u[1:-1, 1:-1] = image
+    height, width = image.shape[:2]
+    u_height, u_width = u.shape[:2]
+    u[1:u_height-1, 1:u_width-1] = image
 
     # reflect image
-    u[0, 1:-1] = image[1, :]
-    u[1:-1, 0] = image[:, 1]
-    u[-1, 1:-1] = image[-2, :]
-    u[1:-1, -1] = image[:, -2]
+    u[0, 1:u_width-1] = image[1, :]
+    u[1:u_height-1, 0] = image[:, 1]
+    u[u_height-1, 1:u_width-1] = image[height-2, :]
+    u[1:u_height-1, u_width-1] = image[:, width-2]
 
     while i < max_iter and rmse > eps:
 
@@ -276,4 +278,4 @@ def _denoise_tv_bregman(image, double weight, int max_iter, double eps,
         rmse = sqrt(rmse / total)
         i += 1
 
-    return np.squeeze(np.asarray(u[1:-1, 1:-1]))
+    return np.squeeze(np.asarray(u[1:u_height-1, 1:u_width-1]))

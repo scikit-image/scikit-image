@@ -109,18 +109,18 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [1] https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
 
     .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
            Human Detection, IEEE Computer Society Conference on Computer
            Vision and Pattern Recognition 2005 San Diego, CA, USA,
            https://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf,
-           DOI:10.1109/CVPR.2005.177
+           :DOI:`10.1109/CVPR.2005.177`
 
     .. [3] Lowe, D.G., Distinctive image features from scale-invatiant
            keypoints, International Journal of Computer Vision (2004) 60: 91,
            http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf,
-           DOI:10.1023/B:VISI.0000029664.99615.94
+           :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
     .. [4] Dalal, N, Finding People in Images and Videos,
            Human-Computer Interaction [cs.HC], Institut National Polytechnique
@@ -144,7 +144,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     if block_norm is None:
         block_norm = 'L1'
         warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15. To supress this message '
+             'be changed to `L2-Hys` in v0.15. To suppress this message '
              'specify explicitly the normalization method.',
              skimage_deprecation)
 

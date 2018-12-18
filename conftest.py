@@ -17,3 +17,9 @@ try:
     import visvis
 except ImportError:
     collect_ignore.append("skimage/measure/mc_meta/visual_test.py")
+
+# importing skimage.novice issues some warnings. Without these lines,
+# pytest issues numerous warnings when crawling the package.
+import warnings
+
+warnings.filterwarnings('ignore', message='The `skimage.novice` module')

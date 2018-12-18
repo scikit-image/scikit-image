@@ -361,7 +361,7 @@ class CollectionViewer(ImageViewer):
         self.slider = Slider('frame', **slider_kws)
         self.layout.addWidget(self.slider)
 
-        # TODO: Adjust height to accomodate slider; the following doesn't work
+        # TODO: Adjust height to accommodate slider; the following doesn't work
         # s_size = self.slider.sizeHint()
         # cs_size = self.canvas.sizeHint()
         # self.resize(cs_size.width(), cs_size.height() + s_size.height())
@@ -386,7 +386,7 @@ class CollectionViewer(ImageViewer):
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:
-                index = 0.1 * int(key - 48) * self.num_images
+                index = int(0.1 * (key - 48) * self.num_images)
                 self.update_index('', index)
                 event.accept()
             else:

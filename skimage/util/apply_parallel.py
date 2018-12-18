@@ -58,7 +58,7 @@ def _ensure_dask_array(array, chunks=None):
 
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords={}, *, compute=True):
+                   extra_arguments=(), extra_keywords={}, *, compute=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -90,8 +90,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
     compute : bool, optional
-        Whether to compute right away (default) or
-        skip computing and return a dask Array.
+        If ``True``, compute eagerly returning a NumPy Array.
+        If ``False``, compute lazily returning a Dask Array.
+        If ``None`` (default), compute based on array type provided
+        (eagerly for NumPy Arrays and lazily for Dask Arrays).
 
     Returns
     -------
@@ -112,6 +114,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     if not dask_available:
         raise RuntimeError("Could not import 'dask'.  Please install "
                            "using 'pip install dask'")
+
+    if compute is None:
+        compute = not isinstance(array, da.Array)
 
     if chunks is None:
         shape = array.shape

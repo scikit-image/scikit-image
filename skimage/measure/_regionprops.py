@@ -17,7 +17,7 @@ XY_TO_RC_DEPRECATION_MESSAGE = (
     'regionprops and image moments (including moments, normalized moments, '
     'central moments, and inertia tensor) of 2D images will change from xy '
     'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
     'for details on how to avoid this message.'
 )
 STREL_4 = np.array([[0, 1, 0],
@@ -273,13 +273,14 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
+        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return sign * 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -339,7 +340,7 @@ class _RegionProperties(object):
         value = getattr(self, key, None)
         if value is not None:
             return value
-        else:  # backwards compatability
+        else:  # backwards compatibility
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
@@ -365,6 +366,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
     ----------
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
+
+        .. versionchanged:: 0.14.1
+            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
+            so any number of singleton dimensions was allowed. This resulted in
+            inconsistent handling of images with singleton dimensions. To
+            recover the old behaviour, use
+            ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
@@ -387,7 +395,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     The following properties can be accessed as attributes or keys:
 
     **area** : int
-        Number of pixels of region.
+        Number of pixels of the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
@@ -397,7 +405,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
-        Number of pixels of convex hull image.
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
@@ -417,7 +426,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
     **filled_area** : int
-        Number of pixels of filled region.
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the filled_image.
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
@@ -468,9 +478,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        Angle between the X-axis and the major axis of the ellipse that has
-        the same second-moments as the region. Ranging from `-pi/2` to
-        `pi/2` in counter-clockwise direction.
+        In 'rc' coordinates, angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+
+        In `xy` coordinates, as above but the angle is now measured from the
+        "x" or horizontal axis.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
@@ -528,7 +541,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -545,8 +558,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
     (22.729879860483141, 81.912285234465827)
 
     """
-
-    label_image = np.squeeze(label_image)
 
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
@@ -622,8 +633,8 @@ def _parse_docs():
     import re
     import textwrap
 
-    doc = regionprops.__doc__
-    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+    doc = regionprops.__doc__ or ''
+    matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
     prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
 
@@ -639,4 +650,6 @@ def _install_properties_docs():
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
-_install_properties_docs()
+if __debug__:
+    # don't install docstrings when in optimized/non-debug mode
+    _install_properties_docs()

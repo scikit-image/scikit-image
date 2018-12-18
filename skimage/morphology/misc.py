@@ -141,7 +141,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
                        min_size=None):
-    """Remove continguous holes smaller than the specified size.
+    """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------

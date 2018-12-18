@@ -21,7 +21,7 @@ line.
 
 See Wikipedia_ for more details on the algorithm.
 
-.. _Wikipedia: http://en.wikipedia.org/wiki/Watershed_(image_processing)
+.. _Wikipedia: https://en.wikipedia.org/wiki/Watershed_(image_processing)
 
 """
 import numpy as np

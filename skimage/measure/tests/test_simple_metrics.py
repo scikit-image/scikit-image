@@ -17,7 +17,7 @@ cam_noisy = cam_noisy.astype(cam.dtype)
 
 def test_PSNR_vs_IPOL():
     # Tests vs. imdiff result from the following IPOL article and code:
-    # http://www.ipol.im/pub/art/2011/g_lmii/
+    # https://www.ipol.im/pub/art/2011/g_lmii/
     p_IPOL = 22.4497
     p = compare_psnr(cam, cam_noisy)
     assert_almost_equal(p, p_IPOL, decimal=4)
@@ -38,17 +38,6 @@ def test_PSNR_float():
     with expected_warnings(['Inputs have mismatched dtype']):
         p_mixed = compare_psnr(cam / 255., np.float32(cam_noisy / 255.))
     assert_almost_equal(p_mixed, p_float64, decimal=5)
-
-
-def test_PSNR_dynamic_range_and_data_range():
-    # Tests deprecation of "dynamic_range" in favor of "data_range"
-    out1 = compare_psnr(cam/255., cam_noisy/255., data_range=1)
-    with expected_warnings(
-            '`dynamic_range` has been deprecated in favor of '
-            '`data_range`. The `dynamic_range` keyword argument '
-            'will be removed in v0.14'):
-        out2 = compare_psnr(cam/255., cam_noisy/255., dynamic_range=1)
-    assert_equal(out1, out2)
 
 
 def test_PSNR_errors():

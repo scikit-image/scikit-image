@@ -32,7 +32,6 @@ class TestImageCollection(TestCase):
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['camera.png', 'moon.png']]
 
-    @testing.fixture(autouse=True)
     def setUp(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
@@ -46,7 +45,7 @@ class TestImageCollection(TestCase):
     def test_getitem(self):
         num = len(self.images)
         for i in range(-num, num):
-            assert type(self.images[i]) is np.ndarray
+            assert isinstance(self.images[i], np.ndarray)
         assert_allclose(self.images[0],
                         self.images[-num])
 

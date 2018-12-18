@@ -4,6 +4,7 @@ from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_marching_cubes_isotropic():
@@ -94,10 +95,11 @@ def test_correct_mesh_orientation():
                       [5, 4, 3]])
 
     # Correct mesh orientation - descent
-    corrected_faces1 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='descent')
-    corrected_faces2 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='ascent')
+    with expected_warnings(['`correct_mesh_orientation` is deprecated']):
+        corrected_faces1 = correct_mesh_orientation(
+            sphere_small, verts, faces, gradient_direction='descent')
+        corrected_faces2 = correct_mesh_orientation(
+            sphere_small, verts, faces, gradient_direction='ascent')
 
     # Ensure ascent is opposite of descent for all faces
     assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])

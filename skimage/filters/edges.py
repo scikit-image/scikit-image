@@ -203,7 +203,7 @@ def scharr(image, mask=None):
     .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical
            Optimization of Kernel Based Image Derivatives.
 
-    .. [2] http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+    .. [2] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
 
     Examples
     --------

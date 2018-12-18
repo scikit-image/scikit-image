@@ -1,3 +1,8 @@
+Version 0.15
+------------
+- ``skimage.feature.canny`` now uses a more accurate Gaussian filter
+  internally; output values will be different from 0.14.
+
 Version 0.14
 ------------
 - ``skimage.filters.gaussian_filter`` has been removed. Use

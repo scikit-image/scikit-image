@@ -114,7 +114,7 @@ def frangi(image, scale_range=(1, 10), scale_step=2, beta1=0.5, beta2=15,
            vessel enhancement filtering," In LNCS, vol. 1496, pages 130-137,
            Germany, 1998. Springer-Verlag.
     .. [2] Kroon, D.J.: Hessian based Frangi vesselness filter.
-    .. [3] http://mplab.ucsd.edu/tutorials/gabor.pdf.
+    .. [3] https://web.archive.org/web/20180127125930/http://mplab.ucsd.edu/tutorials/gabor.pdf
     """
     filtered, lambdas = _frangi_hessian_common_filter(image,
                                                       scale_range, scale_step,

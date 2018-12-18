@@ -220,13 +220,13 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+    .. [1] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
     .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
 
     .. [3] Peer Neubert & Peter Protzel (2014). Compact Watershed and
            Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
-           Algorithms. ICPR 2014, pp 996-1001. DOI:10.1109/ICPR.2014.181
+           Algorithms. ICPR 2014, pp 996-1001. :DOI:`10.1109/ICPR.2014.181`
            https://www.tu-chemnitz.de/etit/proaut/forschung/rsrc/cws_pSLIC_ICPR.pdf
 
     Examples

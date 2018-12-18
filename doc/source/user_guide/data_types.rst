@@ -14,7 +14,7 @@ Data type  Range
 =========  =================================
 uint8      0 to 255
 uint16     0 to 65535
-uint32     0 to 2\ :sup:`32`
+uint32     0 to 2\ :sup:`32` - 1
 float      -1 to 1 or 0 to 1
 int8       -128 to 127
 int16      -32768 to 32767
@@ -241,6 +241,6 @@ just the positive range of a signed dtype.
 References
 ==========
 
-.. _numpy: http://docs.scipy.org/doc/numpy/user/
-.. [1] http://docs.scipy.org/doc/numpy/user/basics.types.html
+.. _numpy: https://docs.scipy.org/doc/numpy/user/
+.. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
 .. _OpenCV: http://opencv.org/

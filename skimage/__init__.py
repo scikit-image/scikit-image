@@ -47,18 +47,27 @@ Utility Functions
 -----------------
 img_as_float
     Convert an image to floating point format, with values in [0, 1].
+    Is similar to `img_as_float64`, but will not convert lower-precision
+    floating point arrays to `float64`.
+img_as_float32
+    Convert an image to single-precision (32-bit) floating point format,
+    with values in [0, 1].
+img_as_float64
+    Convert an image to double-precision (64-bit) floating point format,
+    with values in [0, 1].
 img_as_uint
     Convert an image to unsigned integer format, with values in [0, 65535].
 img_as_int
     Convert an image to signed integer format, with values in [-32768, 32767].
 img_as_ubyte
     Convert an image to unsigned byte format, with values in [0, 255].
+img_as_bool
+    Convert an image to boolean format, with values either True or False.
+dtype_limits
+    Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
 """
 
-import imp
-import functools
-import warnings
 import sys
 
 
@@ -78,7 +87,7 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-http://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
@@ -93,6 +102,7 @@ def _raise_build_error(e):
     raise ImportError("""%s
 It seems that scikit-image has not been built correctly.
 %s""" % (e, msg))
+
 
 try:
     # This variable is injected in the __builtins__ by the build
@@ -112,10 +122,17 @@ else:
         del geometry
     except ImportError as e:
         _raise_build_error(e)
-    from .util.dtype import *
+
+    # All skimage root imports go here
+    from .util.dtype import (img_as_float32,
+                             img_as_float64,
+                             img_as_float,
+                             img_as_int,
+                             img_as_uint,
+                             img_as_ubyte,
+                             img_as_bool,
+                             dtype_limits)
     from .data import data_dir
+    from .util.lookfor import lookfor
 
-
-from .util.lookfor import lookfor
-
-del warnings, functools, imp, sys
+del sys

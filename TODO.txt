@@ -24,6 +24,8 @@ Version 0.16
 * Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog
 * Remove deprecated module ``skimage.novice``
+  * Remove the ``save-demo.jpg`` line from ``.gitignore``
+  * Remove the warning filter from ``conftest.py``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
@@ -36,3 +38,19 @@ Other
   once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
   ``skimage.feature.corner``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.
+* Remove the conditional import and function call when ``numpy`` is set
+  to > 1.15.x in ``skimage/util/arraycrop.py``.
+* When minimum supported version of ``scipy`` reaches 0.18, use 
+  ``scipy.fftpack.next_fast_len`` directly in 
+  ``skimage.feature.masked_register_translation``.
+* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
+  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
+  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
+  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.

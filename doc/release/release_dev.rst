@@ -9,7 +9,7 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 
 
@@ -19,6 +19,8 @@ New Features
 - unsharp mask filtering (#2772)
 - New options ``connectivity``, ``indices`` and ``allow_borders`` for
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
+- Image translation registration for masked data 
+  (``skimage.feature.masked_register_translation``)
 
 
 Improvements
@@ -36,6 +38,12 @@ Improvements
 API Changes
 -----------
 
+- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
+  removed. Use parameter ``data_range`` instead.
+- imageio is now the preferred plugin for reading and writing images.
+- imageio is now a dependency of scikit-image.
+- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
+  with numpy 1.15
 - ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
   base10 instead of the natural logarithm as discussed in issue #2995.
 - Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
@@ -63,6 +71,9 @@ API Changes
 Bugfixes
 --------
 
+- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
+  no longer raise an error if any dimension of the image is smaller 3 and
+  the keyword ``allow_borders`` was false.
 
 
 Deprecations

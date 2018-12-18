@@ -17,11 +17,7 @@ can be multiple states for a given plugin:
 """
 import sys
 
-if sys.version.startswith('3'):
-    from configparser import ConfigParser  # Python 3
-else:
-    from ConfigParser import ConfigParser  # Python 2
-
+from configparser import ConfigParser
 import os.path
 from glob import glob
 
@@ -45,7 +41,7 @@ plugin_meta_data = {}
 # the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
-    'all': ['pil', 'matplotlib', 'qt'],
+    'all': ['imageio', 'pil', 'matplotlib', 'qt'],
     'imshow': ['matplotlib'],
     'imshow_collection': ['matplotlib']
 }

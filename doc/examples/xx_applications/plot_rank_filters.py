@@ -31,7 +31,7 @@ linear and non-linear filters available in skimage. We use the ``camera`` image
 from ``skimage.data`` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
-       Recognition 35 (2002) 527-535, DOI:10.1016/S0031-3203(01)00047-4
+       Recognition 35 (2002) 527-535, :DOI:`10.1016/S0031-3203(01)00047-4`
 """
 
 import numpy as np
@@ -39,16 +39,17 @@ import matplotlib.pyplot as plt
 
 from skimage import img_as_ubyte
 from skimage import data
+from skimage.exposure import histogram
 
 noisy_image = img_as_ubyte(data.camera())
-hist = np.histogram(noisy_image, bins=np.arange(0, 256))
+hist, hist_centers = histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax[0].axis('off')
 
-ax[1].plot(hist[1][:-1], hist[0], lw=2)
+ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Histogram of grey values')
 
 plt.tight_layout()
@@ -172,8 +173,8 @@ plt.tight_layout()
 # function for each pixel neighborhood. The local version [3]_ of the
 # histogram equalization emphasizes every local gray-level variations.
 #
-# .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
-# .. [3] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+# .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
+# .. [3] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 from skimage import exposure
 from skimage.filters import rank
@@ -361,7 +362,7 @@ plt.tight_layout()
 #     Otsu thresholding can be found in :
 #     :py:func:`skimage.filters.threshold_otsu`.
 #
-# .. [4] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [4] https://en.wikipedia.org/wiki/Otsu's_method
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu

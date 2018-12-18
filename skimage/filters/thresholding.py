@@ -47,8 +47,10 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """
     from matplotlib import pyplot as plt
 
+    # Handle default value
+    methods = methods or {}
+
     num_rows = math.ceil((len(methods) + 1.) / num_cols)
-    num_rows = int(num_rows)  # Python 2.7 support
     fig, ax = plt.subplots(num_rows, num_cols, figsize=figsize,
                            sharex=True, sharey=True)
     ax = ax.ravel()
@@ -135,7 +137,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
 
 def threshold_local(image, block_size, method='gaussian', offset=0,
-                    mode='reflect', param=None):
+                    mode='reflect', param=None, cval=0):
     """Compute a threshold mask image based on local pixel neighborhood.
 
     Also known as adaptive or dynamic thresholding. The threshold value is
@@ -173,6 +175,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         'generic' method. This functions takes the flat array of local
         neighbourhood as a single argument and returns the calculated
         threshold for the centre pixel.
+    cval : float, optional
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
@@ -182,7 +186,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
 
     References
     ----------
-    .. [1] http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
+    .. [1] https://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
 
     Examples
     --------
@@ -200,22 +204,28 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
-                           output=thresh_image, mode=mode)
+                           output=thresh_image, mode=mode, cval=cval)
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
         else:
             sigma = param
-        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode)
+        ndi.gaussian_filter(image, sigma, output=thresh_image, mode=mode,
+                            cval=cval)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution
-        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode)
-        ndi.convolve1d(thresh_image, mask, axis=1,
-                       output=thresh_image, mode=mode)
+        ndi.convolve1d(image, mask, axis=0, output=thresh_image, mode=mode,
+                       cval=cval)
+        ndi.convolve1d(thresh_image, mask, axis=1, output=thresh_image,
+                       mode=mode, cval=cval)
     elif method == 'median':
-        ndi.median_filter(image, block_size, output=thresh_image, mode=mode)
+        ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
+                          cval=cval)
+    else:
+        raise ValueError("Invalid method specified. Please use `generic`, "
+                         "`gaussian`, `mean`, or `median`.")
 
     return thresh_image - offset
 
@@ -244,7 +254,7 @@ def threshold_otsu(image, nbins=256):
 
     References
     ----------
-    .. [1] Wikipedia, http://en.wikipedia.org/wiki/Otsu's_Method
+    .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
 
     Examples
     --------
@@ -268,7 +278,7 @@ def threshold_otsu(image, nbins=256):
                          "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -309,10 +319,10 @@ def threshold_yen(image, nbins=256):
     ----------
     .. [1] Yen J.C., Chang F.J., and Chang S. (1995) "A New Criterion
            for Automatic Multilevel Thresholding" IEEE Trans. on Image
-           Processing, 4(3): 370-378. DOI:10.1109/83.366472
+           Processing, 4(3): 370-378. :DOI:`10.1109/83.366472`
     .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
-           Electronic Imaging, 13(1): 146-165, DOI:10.1117/1.1631315
+           Electronic Imaging, 13(1): 146-165, :DOI:`10.1117/1.1631315`
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
     .. [3] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -323,7 +333,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
@@ -379,12 +389,12 @@ def threshold_isodata(image, nbins=256, return_all=False):
     .. [1] Ridler, TW & Calvard, S (1978), "Picture thresholding using an
            iterative selection method"
            IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
-           DOI:10.1109/TSMC.1978.4310039
+           :DOI:`10.1109/TSMC.1978.4310039`
     .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165,
            http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
-           DOI:10.1117/1.1631315
+           :DOI:`10.1117/1.1631315`
     .. [3] ImageJ AutoThresholder code,
            http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -395,7 +405,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -451,13 +461,73 @@ def threshold_isodata(image, nbins=256, return_all=False):
         return thresholds[0]
 
 
-def threshold_li(image):
-    """Return threshold value based on adaptation of Li's Minimum Cross Entropy method.
+# Computing a histogram using np.histogram on a uint8 image with bins=256
+# doesn't work and results in aliasing problems. We use a fully specified set
+# of bins to ensure that each uint8 value false into its own bin.
+_DEFAULT_ENTROPY_BINS = tuple(np.arange(-0.5, 255.51, 1))
+
+
+def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
+    """Compute cross-entropy between distributions above and below a threshold.
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : array
+        The input array of values.
+    threshold : float
+        The value dividing the foreground and background in ``image``.
+    bins : int or array of float, optional
+        The number of bins or the bin edges. (Any valid value to the ``bins``
+        argument of ``np.histogram`` will work here.) For an exact calculation,
+        each unique value should have its own bin. The default value for bins
+        ensures exact handling of uint8 images: ``bins=256`` results in
+        aliasing problems due to bin width not being equal to 1.
+
+    Returns
+    -------
+    nu : float
+        The cross-entropy target value as defined in [1]_.
+
+    Notes
+    -----
+    See Li and Lee, 1993 [1]_; this is the objective function `threshold_li`
+    minimizes. This function can be improved but this implementation most
+    closely matches equation 8 in [1]_ and equations 1-3 in [2]_.
+
+    References
+    ----------
+    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
+           Pattern Recognition, 26(4): 617-625
+           :DOI:`10.1016/0031-3203(93)90115-D`
+    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
+           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
+           :DOI:`10.1016/S0167-8655(98)00057-9`
+    """
+    histogram, bin_edges = np.histogram(image, bins=bins, density=True)
+    bin_centers = np.convolve(bin_edges, [0.5, 0.5], mode='valid')
+    t = np.flatnonzero(bin_centers > threshold)[0]
+    m0a = np.sum(histogram[:t])  # 0th moment, background
+    m0b = np.sum(histogram[t:])
+    m1a = np.sum(histogram[:t] * bin_centers[:t])  # 1st moment, background
+    m1b = np.sum(histogram[t:] * bin_centers[t:])
+    mua = m1a / m0a  # mean value, background
+    mub = m1b / m0b
+    nu = -m1a * np.log(mua) - m1b * np.log(mub)
+    return nu
+
+
+def threshold_li(image, *, tolerance=None):
+    """Compute threshold value by Li's iterative Minimum Cross Entropy method.
+
+    Parameters
+    ----------
+    image : ndarray
         Input image.
+
+    tolerance : float, optional
+        Finish the computation when the change in the threshold in an iteration
+        is less than this value. By default, this is half of the range of the
+        input image, divided by 256.
 
     Returns
     -------
@@ -469,14 +539,14 @@ def threshold_li(image):
     ----------
     .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
            Pattern Recognition, 26(4): 617-625
-           DOI:10.1016/0031-3203(93)90115-D
+           :DOI:`10.1016/0031-3203(93)90115-D`
     .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
            Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
-           DOI:10.1016/S0167-8655(98)00057-9
+           :DOI:`10.1016/S0167-8655(98)00057-9`
     .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
            Techniques and Quantitative Performance Evaluation" Journal of
            Electronic Imaging, 13(1): 146-165
-           DOI:10.1117/1.1631315
+           :DOI:`10.1117/1.1631315`
     .. [4] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
 
     Examples
@@ -486,44 +556,47 @@ def threshold_li(image):
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
-    # Make sure image has more than one value
+    # Remove nan:
+    image = image[~np.isnan(image)]
+    if image.size == 0:
+        return np.nan
+
+    # Make sure image has more than one value; otherwise, return that value
+    # This works even for np.inf
     if np.all(image == image.flat[0]):
-        raise ValueError("threshold_li is expected to work with images "
-                         "having more than one value. The input image seems "
-                         "to have just one value {0}.".format(image.flat[0]))
+        return image.flat[0]
 
-    # Copy to ensure input image is not modified
-    image = image.copy()
-    # Requires positive image (because of log(mean))
-    immin = np.min(image)
-    image -= immin
-    imrange = np.max(image)
-    tolerance = 0.5 * imrange / 256
+    # At this point, the image only contains np.inf, -np.inf, or valid numbers
+    image = image[np.isfinite(image)]
+    # if there are no finite values in the image, return 0. This is because
+    # at this point we *know* that there are *both* inf and -inf values,
+    # because inf == inf evaluates to True. We might as well separate them.
+    if image.size == 0:
+        return 0.
 
-    # Calculate the mean gray-level
-    mean = np.mean(image)
+    # Li's algorithm requires positive image (because of log(mean))
+    image_min = np.min(image)
+    image -= image_min
+    image_range = np.max(image)
+    tolerance = tolerance or 0.5 * image_range / 256
 
     # Initial estimate
-    new_thresh = mean
-    old_thresh = new_thresh + 2 * tolerance
+    t_curr = np.mean(image)
+    t_next = t_curr + 2 * tolerance
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
-    while abs(new_thresh - old_thresh) > tolerance:
-        old_thresh = new_thresh
-        threshold = old_thresh + tolerance   # range
-        # Calculate the means of background and object pixels
-        mean_back = image[image <= threshold].mean()
-        mean_obj = image[image > threshold].mean()
+    while abs(t_next - t_curr) > tolerance:
+        t_curr = t_next
+        foreground = (image > t_curr)
+        mean_fore = np.mean(image[foreground])
+        mean_back = np.mean(image[~foreground])
 
-        temp = (mean_back - mean_obj) / (np.log(mean_back) - np.log(mean_obj))
+        t_next = ((mean_back - mean_fore) /
+                  (np.log(mean_back) - np.log(mean_fore)))
 
-        if temp < 0:
-            new_thresh = temp - tolerance
-        else:
-            new_thresh = temp + tolerance
-
-    return threshold + immin
+    threshold = t_next + image_min
+    return threshold
 
 
 def threshold_minimum(image, nbins=256, max_iter=10000):
@@ -561,7 +634,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
            vol. 55, pp. 532-537, 1993.
     .. [2] Prewitt, JMS & Mendelsohn, ML (1966), "The analysis of cell
            images", Annals of the New York Academy of Sciences 128: 1035-1053
-           DOI:10.1111/j.1749-6632.1965.tb11715.x
+           :DOI:`10.1111/j.1749-6632.1965.tb11715.x`
 
     Examples
     --------
@@ -588,7 +661,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     smooth_hist = np.copy(hist).astype(np.float64)
 
@@ -629,7 +702,7 @@ def threshold_mean(image):
     .. [1] C. A. Glasbey, "An analysis of histogram-based thresholding
         algorithms," CVGIP: Graphical Models and Image Processing,
         vol. 55, pp. 532-537, 1993.
-        DOI:10.1006/cgip.1993.1040
+        :DOI:`10.1006/cgip.1993.1040`
 
     Examples
     --------
@@ -663,7 +736,7 @@ def threshold_triangle(image, nbins=256):
     .. [1] Zack, G. W., Rogers, W. E. and Latt, S. A., 1977,
        Automatic Measurement of Sister Chromatid Exchange Frequency,
        Journal of Histochemistry and Cytochemistry 25 (7), pp. 741-753
-       DOI:10.1177/25.7.70454
+       :DOI:`10.1177/25.7.70454`
     .. [2] ImageJ AutoThresholder code,
        http://fiji.sc/wiki/index.php/Auto_Threshold
 
@@ -676,7 +749,7 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
@@ -743,7 +816,7 @@ def _mean_std(image, w):
            implementation of local adaptive thresholding techniques
            using integral images." in Document Recognition and
            Retrieval XV, (San Jose, USA), Jan. 2008.
-           DOI:10.1117/12.767755
+           :DOI:`10.1117/12.767755`
     """
     if w == 1 or w % 2 == 0:
         raise ValueError(
@@ -861,7 +934,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     .. [1] J. Sauvola and M. Pietikainen, "Adaptive document image
            binarization," Pattern Recognition 33(2),
            pp. 225-236, 2000.
-           DOI:10.1016/S0031-3203(99)00055-2
+           :DOI:`10.1016/S0031-3203(99)00055-2`
 
     Examples
     --------
@@ -910,7 +983,7 @@ def apply_hysteresis_threshold(image, low, high):
     .. [1] J. Canny. A computational approach to edge detection.
            IEEE Transactions on Pattern Analysis and Machine Intelligence.
            1986; vol. 8, pp.679-698.
-           DOI: 10.1109/TPAMI.1986.4767851
+           :DOI:`10.1109/TPAMI.1986.4767851`
     """
     low = np.clip(low, a_min=None, a_max=high)  # ensure low always below high
     mask_low = image > low

@@ -9,7 +9,7 @@ __pycache__
 *.pyd
 *.bak
 *.c
-skimage/feature/_haar.cpp
+*.cpp
 *.new
 *.md5
 *.old
@@ -33,3 +33,5 @@ doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
+
+save-demo.jpg

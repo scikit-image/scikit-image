@@ -62,7 +62,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     References
     ----------
-    .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+    .. [1] https://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
     Examples
     --------
@@ -147,14 +147,14 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Total_variation_denoising
+    .. [1] https://en.wikipedia.org/wiki/Total_variation_denoising
     .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
            Regularized Problems",
            ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
-           http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
-    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+           https://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
     return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
@@ -205,7 +205,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
                 slices_d[ax] = slice(1, None)
                 slices_p[ax+1] = slice(0, -1)
                 slices_p[0] = ax
-                d[slices_d] += p[slices_p]
+                d[tuple(slices_d)] += p[tuple(slices_p)]
                 slices_d[ax] = slice(None)
                 slices_p[ax+1] = slice(None)
             out = image + d
@@ -219,7 +219,7 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
         for ax in range(ndim):
             slices_g[ax+1] = slice(0, -1)
             slices_g[0] = ax
-            g[slices_g] = np.diff(out, axis=ax)
+            g[tuple(slices_g)] = np.diff(out, axis=ax)
             slices_g[ax+1] = slice(None)
 
         norm = np.sqrt((g ** 2).sum(axis=0))[np.newaxis, ...]
@@ -278,7 +278,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     Make sure to set the multichannel parameter appropriately for color images.
 
     The principle of total variation denoising is explained in
-    http://en.wikipedia.org/wiki/Total_variation_denoising
+    https://en.wikipedia.org/wiki/Total_variation_denoising
 
     The principle of total variation denoising is to minimize the
     total variation of the image, which can be roughly described as
@@ -362,7 +362,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
     """
     # Consider regions with detail coefficients exactly zero to be masked out
     detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
@@ -421,17 +421,21 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     """
     wavelet = pywt.Wavelet(wavelet)
+    if not wavelet.orthogonal:
+        warn(("Wavelet thresholding was designed for use with orthogonal "
+              "wavelets. For nonorthogonal wavelets such as {}, results are "
+              "likely to be suboptimal.").format(wavelet.name))
 
     # original_extent is used to workaround PyWavelets issue #80
     # odd-sized input results in an image with 1 extra sample after waverecn
-    original_extent = [slice(s) for s in image.shape]
+    original_extent = tuple(slice(s) for s in image.shape)
 
     # Determine the number of wavelet decomposition levels
     if wavelet_levels is None:
@@ -545,25 +549,35 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     When YCbCr conversion is done, every color channel is scaled between 0
     and 1, and `sigma` values are applied to these scaled color channels.
 
-    Many wavelet coefficient thresholding approaches have been proposed.  By
+    Many wavelet coefficient thresholding approaches have been proposed. By
     default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
     thresholding method that computes separate thresholds for each wavelet
     sub-band as described in [1]_.
 
     If ``method == "VisuShrink"``, a single "universal threshold" is applied to
-    all wavelet detail coefficients as described in [2]_.  This threshold
+    all wavelet detail coefficients as described in [2]_. This threshold
     is designed to remove all Gaussian noise at a given ``sigma`` with high
     probability, but tends to produce images that appear overly smooth.
+
+    Although any of the wavelets from ``PyWavelets`` can be selected, the
+    thresholding methods assume an orthogonal wavelet transform and may not
+    choose the threshold appropriately for biorthogonal wavelets. Orthogonal
+    wavelets are desirable because white noise in the input remains white noise
+    in the subbands. Biorthogonal wavelets lead to colored noise in the
+    subbands. Additionally, the orthogonal wavelets in PyWavelets are
+    orthonormal so that noise variance in the subbands remains identical to the
+    noise variance of the input. Example orthogonal wavelets are the Daubechies
+    (e.g. 'db2') or symmlet (e.g. 'sym2') families.
 
     References
     ----------
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------
@@ -651,7 +665,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------

@@ -7,7 +7,7 @@ The Histogram of Oriented Gradient (HOG) feature descriptor is popular
 for object detection [1]_.
 
 In the following example, we compute the `HOG descriptor
-<http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients>`__
+<https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients>`__
 and display a visualisation.
 
 Algorithm overview
