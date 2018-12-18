@@ -31,8 +31,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
-    If peaks are flat (i.e. multiple adjacent pixels have identical
-    intensities), the coordinates of all such pixels are returned.
+    If there are multiple local maxima with identical pixel intensities
+    inside the region defined with `min_distance`,
+    the coordinates of all such pixels are returned.
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
     of the two is chosen as the minimum intensity threshold of peaks.
