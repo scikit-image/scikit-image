@@ -189,11 +189,11 @@ class TestSimpleImage():
 
     def test_threshold_niblack_iterable_window_size(self):
         ref = np.array(
-            [[False, False, False,  True,  True],
-             [False, False,  True,  True,  True],
-             [False,  True,  True,  True, False],
-             [False,  True,  True,  True, False],
-             [True,  True, False, False, False]]
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
         )
         thres = threshold_niblack(self.image, window_size=[3, 5], k=0.5)
         out = self.image > thres
@@ -201,11 +201,11 @@ class TestSimpleImage():
 
     def test_threshold_sauvola_iterable_window_size(self):
         ref = np.array(
-            [[False, False, False,  True,  True],
-             [False, False,  True,  True,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True,  True, False],
-             [True,  True, False, False, False]]
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
         )
         thres = threshold_sauvola(self.image, window_size=(3, 5), k=0.2, r=128)
         out = self.image > thres
