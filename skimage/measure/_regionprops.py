@@ -395,7 +395,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     The following properties can be accessed as attributes or keys:
 
     **area** : int
-        Number of pixels of region.
+        Number of pixels of the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
@@ -405,7 +405,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
-        Number of pixels of convex hull image.
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
@@ -425,7 +426,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
     **filled_area** : int
-        Number of pixels of filled region.
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the filled_image.
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
