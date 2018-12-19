@@ -63,7 +63,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
 
     if mask is not None:
         err_msg = "image and mask should have the same shape but are {} and {}"
-        assert image.shape == mask.shape, err_msg.format(image.shape, mask.shape)
+        assert image.shape == mask.shape, \
+               err_msg.format(image.shape, mask.shape)
         if mask.dtype != np.bool_:
             raise TypeError("mask should be of type bool.")
         borders = mask
