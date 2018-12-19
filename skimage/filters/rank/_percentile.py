@@ -27,7 +27,6 @@ from ..._shared.utils import check_nD
 from . import percentile_cy
 from .generic import _handle_input
 
-
 __all__ = ['autolevel_percentile', 'gradient_percentile',
            'mean_percentile', 'subtract_mean_percentile',
            'enhance_contrast_percentile', 'percentile', 'pop_percentile',
