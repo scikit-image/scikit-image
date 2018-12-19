@@ -1,0 +1,99 @@
+# Azure Pipelines configuration file for Continuous Integration
+# for building the package and running tests under Windows
+
+jobs:
+- job: 'Default'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    maxParallel: 10
+    matrix:
+      Python35-x64:
+        PYTHON_VERSION: '3.5'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python36:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python36-x64:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python37:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python37-x64:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python37-x64-pre:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: '--pre'
+  continueOnError: false
+  timeoutInMinutes: 60
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(PYTHON_VERSION)'
+      architecture: '$(ARCH)'
+
+  - powershell: |
+      Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
+    displayName: 'Add Python paths to PATH'
+
+  - script: |
+      :: Update pip
+      python -m pip install --retries 3 -U pip setuptools
+
+      :: Check that we have the expected version and architecture for Python.
+      python --version
+      pip --version
+      pip list
+      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+    displayName: 'Update pip, and list versions'
+
+  - script: |
+      :: Get stdint headers needed by tifffile.c.
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
+      
+      :: Install the build and runtime dependencies of the project.
+      pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
+      pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
+      python setup.py bdist_wheel 
+      dir dist
+
+      :: Install the generated wheel package to test it.
+      pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
+
+      :: Install the test dependencies
+      pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
+    displayName: 'Installation'
+
+  - script: |
+      :: # [AppVeyor leftovers][For further consideration] # Build the docs
+      :: # pip install %PIP_FLAGS% --retries 3 -r requirements/docs.txt
+      :: # SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
+
+      :: Use the Agg backend in Matplotlib
+      echo "backend : Agg" > matplotlibrc
+      
+      :: Run unit tests with pytest
+      pytest -v --pyargs skimage
+
+      :: # [AppVeyor leftovers][For further consideration] artifacts:
+      :: # Archive the generated wheel package in the ci.appveyor.com build report.
+      :: #- path: dist\*
+
+      :: # [AppVeyor leftovers][For further consideration] on_success:
+      :: #- TODO: upload the content of dist/*.whl to a public wheelhouse
+
+      :: # [AppVeyor leftovers][For further consideration] cache:
+      :: # Avoid re-downloading large packages
+      :: #- '%APPDATA%\pip\Cache'
+    workingDirectory: C:\
+    displayName: 'Testing'
