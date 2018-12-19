@@ -609,7 +609,7 @@ def perimeter(image, neighbourhood=4):
     >>> from skimage import data, util
     >>> from skimage.measure import label
     >>> # coins image (binary)
-    >>> img_coins = util.img_as_ubyte(data.coins()) > 110
+    >>> img_coins = data.coins() > 110
     >>> # total perimeter of all objects in the image
     >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
     7796.867...
