@@ -611,10 +611,10 @@ def perimeter(image, neighbourhood=4):
     >>> # coins image (binary)
     >>> img_coins = util.img_as_ubyte(data.coins()) > 110
     >>> # total perimeter of all objects in the image
-    >>> perimeter(img_coins, neighbourhood=4)
-    7796.8679964360044
-    >>> perimeter(img_coins, neighbourhood=8)
-    8806.2680733252855
+    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    7796.867...
+    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    8806.268...
 
     """
     if image.ndim != 2:
