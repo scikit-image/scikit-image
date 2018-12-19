@@ -9,7 +9,7 @@ However, _blind_ methods are available that estimate the PSF
 from the image itself. This algorithm is based on the
 Richardson Lucy (RL) deconvolution algorithm. In this case,
 the RL algorithm is not only used for deconvolving the image,
-but also the PSF estimate. This process is iterative,
+but also for the PSF estimation. This process is iterative,
 alternating between deconvolving the PSF and deconvolving the image.
 
 The following example shows a centered cross that was convolved
