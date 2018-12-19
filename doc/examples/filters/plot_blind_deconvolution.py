@@ -19,12 +19,6 @@ in the blind image deconvolution function, the algorithm
 is capable to recover to a large extent the original image
 and a good guess for the PSF (Figure 1).
 
-Figure 2 shows the iterative progress where the first images look
-like artifacts, but after a given amount of iterations,
-the cross and the PSF nicely show up. Figure 3 shows the absolute
-difference between the original image and the deconvolved one
-indicating that the optimal number of iterations is 33.
-
 .. [1] William Hadley Richardson, "Bayesian-Based Iterative
        Method of Image Restoration",
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), :DOI:`10.1364/JOSA.62.000055`
@@ -69,13 +63,6 @@ reconstruction = richardson_lucy(noisy_image_conv,
                                  return_iterations=True)
 
 
-plt.figure(figsize=(12, 14))
-
-for i in range(iterations * 2):
-    plt.subplot(10, 10, i + 1)
-    plt.imshow(reconstruction[i // 2, i % 2], cmap='gray')
-    plt.axis('off')
-
 # Calculate residuals from reconstruction array
 residuals = np.empty(reconstruction.shape[0])
 
@@ -84,34 +71,53 @@ for i in range(reconstruction.shape[0]):
 
 best_fit = np.argmin(residuals)
 
+
+fig, ax = plt.subplots(ncols=5, figsize=(12, 6))
+
+ax[0].imshow(noisy_image, cmap='gray')
+ax[0].set_title('Source Image')
+
+ax[1].imshow(psf_gaussian, cmap='gray')
+ax[1].set_title('Source PSF')
+
+ax[2].imshow(noisy_image_conv, cmap='gray')
+ax[2].set_title('Convolved image')
+
+ax[3].imshow(reconstruction[best_fit, 0], cmap='gray')
+ax[3].set_title('Recovered image,\n iteration #{}'.format(best_fit + 1))
+
+ax[4].imshow(reconstruction[best_fit, 1], cmap='gray')
+ax[4].set_title('Recovered PSF,\n iteration #{}'.format(best_fit + 1))
+
+plt.tight_layout()
+
+plt.show()
+
+###################################################
+# Figure 2 shows the iterative progress where the first images look
+# like artifacts, but after a given amount of iterations,
+# the cross and the PSF nicely show up. Figure 3 shows the absolute
+# difference between the original image and the deconvolved one
+# indicating that the optimal number of iterations is 33.
+
+
+
+
+plt.figure(figsize=(12, 14))
+
+for i in range(iterations * 2):
+    plt.subplot(10, 10, i + 1)
+    plt.imshow(reconstruction[i // 2, i % 2], cmap='gray')
+    plt.axis('off')
+plt.show()
+
+
+
 plt.figure()
 plt.plot(residuals)
 plt.scatter(best_fit, residuals[best_fit], marker='o', s=100, alpha=.5)
 plt.ylabel('Residuals')
 plt.xlabel('Iteration#')
-
-
-plt.figure(figsize=(12, 6))
-plt.subplot(151)
-plt.imshow(noisy_image, cmap='gray')
-plt.title('Source Image')
-
-plt.subplot(152)
-plt.imshow(psf_gaussian, cmap='gray')
-plt.title('Source PSF')
-
-plt.subplot(153)
-plt.imshow(noisy_image_conv, cmap='gray')
-plt.title('Convolved image')
-
-plt.subplot(154)
-plt.imshow(reconstruction[best_fit, 0], cmap='gray')
-plt.title('Recovered image,\n iteration #{}'.format(best_fit + 1))
-
-plt.subplot(155)
-plt.imshow(reconstruction[best_fit, 1], cmap='gray')
-plt.title('Recovered PSF,\n iteration #{}'.format(best_fit + 1))
-
-plt.tight_layout()
-
 plt.show()
+
+
