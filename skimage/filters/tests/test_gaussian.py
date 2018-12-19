@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.filters._gaussian import gaussian
+from skimage.filters._gaussian import gaussian, guess_spatial_dimensions
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
@@ -68,3 +68,17 @@ def test_4d_ok():
     img[2, 2, 2, 2] = 1
     res = gaussian(img, 1, mode='reflect')
     assert np.allclose(res.sum(), 1)
+
+
+def test_guess_spatial_dimensions():
+    im1 = np.zeros((5, 5))
+    im2 = np.zeros((5, 5, 5))
+    im3 = np.zeros((5, 5, 3))
+    im4 = np.zeros((5, 5, 5, 3))
+    im5 = np.zeros((5,))
+    testing.assert_equal(guess_spatial_dimensions(im1), 2)
+    testing.assert_equal(guess_spatial_dimensions(im2), 3)
+    testing.assert_equal(guess_spatial_dimensions(im3), None)
+    testing.assert_equal(guess_spatial_dimensions(im4), 3)
+    with testing.raises(ValueError):
+        guess_spatial_dimensions(im5)
