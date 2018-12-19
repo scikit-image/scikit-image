@@ -38,31 +38,32 @@ indicating that the optimal number of iterations is 33.
 """
 import numpy as np
 from scipy.signal import convolve2d
-from skimage.filters import gaussian
 import matplotlib.pyplot as plt
+
+from skimage.filters import gaussian
 from skimage.restoration import richardson_lucy
 
 # Initialize image that is to be recovered (cross)
-im = np.zeros((100, 100), dtype=np.float32)
-im[40:60, 45:55] = 1
-im[45:55, 40:60] = 1
+noisy_image = np.zeros((100, 100), dtype=np.float32)
+noisy_image[40:60, 45:55] = 1
+noisy_image[45:55, 40:60] = 1
 
 # Add some poisson photon shot noise
 np.random.seed(0)
-im += np.random.poisson(2.0, im.shape) / 255
+noisy_image += np.random.poisson(2.0, noisy_image.shape) / 255
 
 # Create the PSF
-psf_gaussian = np.zeros_like(im)
-w, h = im.shape
+psf_gaussian = np.zeros_like(noisy_image)
+w, h = noisy_image.shape
 psf_gaussian[w // 2, h // 2] = 1
 psf_gaussian = gaussian(psf_gaussian, 2)
 
 # Convolve image using PSF
-im_conv = convolve2d(im, psf_gaussian, 'same')
+noisy_image_conv = convolve2d(noisy_image, psf_gaussian, 'same')
 iterations = 50
 
 # Run blind deconvolution and try to recover the used PSF
-reconstruction = richardson_lucy(im_conv,
+reconstruction = richardson_lucy(noisy_image_conv,
                                  iterations=iterations,
                                  return_iterations=True)
 
@@ -78,7 +79,7 @@ for i in range(iterations * 2):
 residuals = np.empty(reconstruction.shape[0])
 
 for i in range(reconstruction.shape[0]):
-    residuals[i] = (im - reconstruction[i, 0] ** 2).sum()
+    residuals[i] = (noisy_image - reconstruction[i, 0] ** 2).sum()
 
 best_fit = np.argmin(residuals)
 
@@ -91,7 +92,7 @@ plt.xlabel('Iteration#')
 
 plt.figure(figsize=(12, 6))
 plt.subplot(151)
-plt.imshow(im, cmap='gray')
+plt.imshow(noisy_image, cmap='gray')
 plt.title('Source Image')
 
 plt.subplot(152)
@@ -99,7 +100,7 @@ plt.imshow(psf_gaussian, cmap='gray')
 plt.title('Source PSF')
 
 plt.subplot(153)
-plt.imshow(im_conv, cmap='gray')
+plt.imshow(noisy_image_conv, cmap='gray')
 plt.title('Convolved image')
 
 plt.subplot(154)
