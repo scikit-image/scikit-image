@@ -1,5 +1,4 @@
 from .colorconv import (convert_colorspace,
-                        guess_spatial_dimensions,
                         rgba2rgb,
                         rgb2hsv,
                         hsv2rgb,
@@ -68,7 +67,6 @@ from .delta_e import (deltaE_cie76,
 
 
 __all__ = ['convert_colorspace',
-           'guess_spatial_dimensions',
            'rgba2rgb',
            'rgb2hsv',
            'hsv2rgb',

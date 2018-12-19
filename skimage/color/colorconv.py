@@ -56,37 +56,6 @@ from scipy import linalg
 from ..util import dtype, dtype_limits
 
 
-def guess_spatial_dimensions(image):
-    """Make an educated guess about whether an image has a channels dimension.
-
-    Parameters
-    ----------
-    image : ndarray
-        The input image.
-
-    Returns
-    -------
-    spatial_dims : int or None
-        The number of spatial dimensions of `image`. If ambiguous, the value
-        is ``None``.
-
-    Raises
-    ------
-    ValueError
-        If the image array has less than two or more than four dimensions.
-    """
-    if image.ndim == 2:
-        return 2
-    if image.ndim == 3 and image.shape[-1] != 3:
-        return 3
-    if image.ndim == 3 and image.shape[-1] == 3:
-        return None
-    if image.ndim == 4 and image.shape[-1] == 3:
-        return 3
-    else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
-
-
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
