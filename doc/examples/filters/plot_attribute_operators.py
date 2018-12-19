@@ -17,7 +17,7 @@ References
 .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
        Component Tree Computation Algorithms. IEEE Transactions on Image
        Processing, 23(9), 3885-3895.
-       DOI:10.1109/TIP.2014.2336551
+        :DOI:`10.1109/TIP.2014.2336551`
 .. [3] Vincent L., Proc. "Grayscale area openings and closings,
        their efficient implementation and applications",
        EURASIP Workshop on Mathematical Morphology and its
