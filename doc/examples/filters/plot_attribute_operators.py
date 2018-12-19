@@ -24,7 +24,7 @@ from skimage.morphology import closing
 from skimage.morphology import square
 
 params = {
-    'retina': {'image': data.retina().T,
+    'retina': {'image': data.microaneurysms().T,
                'figsize': (15, 8),
                'diameter': 12},
     'page': {'image': data.page(),

@@ -29,7 +29,7 @@ __all__ = ['data_dir',
            'clock',
            'coffee',
            'coins',
-           'retina',
+           'microaneurysms',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
@@ -320,18 +320,18 @@ def hubble_deep_field():
     return load("hubble_deep_field.jpg")
 
 
-def retina():
-    """Gray-level "retina" image.
+def microaneurysms():
+    """Gray-level "microaneurysms" image.
 
     Detail from an image of the retina (green channel).
     Contains blood vessels, microaneurysms and exudates.
 
     Returns
     -------
-    retina : (86, 103) uint8 ndarray
-        Retina image.
+    microaneurysms : (86, 103) uint8 ndarray
+        Retina image with lesions.
     """
-    return load("retina.png")
+    return load("microaneurysms.png")
 
 
 def rocket():
