@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 from skimage import data
 from skimage.color import rgb2gray
 from skimage.draw import circle_perimeter

@@ -50,8 +50,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
-    callback(snake, i, conv): function, optional
-        Called every 11 iterations with three args.
+    callback: function, optional
+        Called every 11 iterations with three args (snake, i, conv).
         snake: (N, 2) ndarray -- the current snake.
         i: int -- the total number of iterations completed.
         conv: float -- convergence criterion. This value is computed by
