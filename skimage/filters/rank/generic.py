@@ -66,7 +66,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     assert_nD(image, 2)
-    if image.dtype not in (np.uint8, np.uint16):
+    if image.dtype not in (np.uint8, np.uint16, np.bool_):
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
