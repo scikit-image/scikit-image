@@ -1,20 +1,13 @@
-import math
-import unittest
-
 import numpy as np
 from skimage.morphology import max_tree, area_closing, area_opening
 from skimage.morphology import max_tree_local_maxima, diameter_opening
 from skimage.morphology import diameter_closing
 from skimage.util import invert
 
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, TestCase
+
 eps = 1e-12
-
-
-def diff(a, b):
-    a = np.asarray(a, dtype=np.float64)
-    b = np.asarray(b, dtype=np.float64)
-    t = ((a - b)**2).sum()
-    return math.sqrt(t)
 
 
 def _full_type_test(img, param, expected, func, param_scale=False,
@@ -22,16 +15,14 @@ def _full_type_test(img, param, expected, func, param_scale=False,
 
     # images as they are
     out = func(img, param, **keywords)
-    error = diff(out, expected)
-    assert error < eps
+    assert_array_equal(out, expected)
 
     # unsigned int
     for dt in [np.uint32, np.uint64]:
         img_cast = img.astype(dt)
         out = func(img_cast, param, **keywords)
         exp_cast = expected.astype(dt)
-        error = diff(out, exp_cast)
-        assert error < eps
+        assert_array_equal(out, exp_cast)
 
     # float
     data_float = img.astype(np.float64)
@@ -59,11 +50,10 @@ def _full_type_test(img, param, expected, func, param_scale=False,
         img_s = img_signed.astype(dt)
         out = func(img_s, param, **keywords)
         exp_s = exp_signed.astype(dt)
-        error = diff(out, exp_s)
-        assert error < eps
+        assert_array_equal(out, exp_s)
 
 
-class TestMaxtree(unittest.TestCase):
+class TestMaxtree(TestCase):
 
     def test_max_tree(self):
         "Test for max tree"
@@ -85,29 +75,23 @@ class TestMaxtree(unittest.TestCase):
         for img_type in [np.uint8, np.uint16, np.uint32, np.uint64]:
             img = img.astype(img_type)
             P, S = max_tree(img)
-            error = diff(P, P_exp)
-            assert error < eps
-            error = diff(S, S_exp)
-            assert error < eps
+            assert_array_equal(P, P_exp)
+            assert_array_equal(S, S_exp)
 
         for img_type in [np.int8, np.int16, np.int32, np.int64]:
             img = img.astype(img_type)
             img_shifted = img - 9
             P, S = max_tree(img_shifted)
-            error = diff(P, P_exp)
-            assert error < eps
-            error = diff(S, S_exp)
-            assert error < eps
+            assert_array_equal(P, P_exp)
+            assert_array_equal(S, S_exp)
 
         img_float = img.astype(np.float)
         img_float = (img_float - 8) / 2.0
         for img_type in [np.float32, np.float64]:
             img_float = img_float.astype(img_type)
             P, S = max_tree(img_float)
-            error = diff(P, P_exp)
-            assert error < eps
-            error = diff(S, S_exp)
-            assert error < eps
+            assert_array_equal(P, P_exp)
+            assert_array_equal(S, S_exp)
 
         return
 
@@ -380,18 +364,17 @@ class TestMaxtree(unittest.TestCase):
             test_data = data.astype(dtype)
             out = max_tree_local_maxima(test_data)
             out_bin = out > 0
-            error = diff(expected_result, out_bin)
-            assert error < eps
+            assert_array_equal(expected_result, out_bin)
             assert out.dtype == expected_result.dtype
             assert np.max(out) == 5
 
             P, S = max_tree(test_data)
             out = max_tree_local_maxima(test_data,
-                                                 parent=P,
-                                                 tree_traverser=S)
+                                        parent=P,
+                                        tree_traverser=S)
 
-            error = diff(expected_result, out_bin)
-            assert error < eps
+            assert_array_equal(expected_result, out_bin)
+
             assert out.dtype == expected_result.dtype
             assert np.max(out) == 5
 
@@ -434,8 +417,7 @@ class TestMaxtree(unittest.TestCase):
         # test for local maxima
         out = max_tree_local_maxima(data)
         out_bin = out > 0
-        error = diff(expected_result, out_bin)
-        assert error < eps
+        assert_array_equal(expected_result, out_bin)
         assert np.max(out) == 6
 
     def test_3d(self):
@@ -468,8 +450,7 @@ class TestMaxtree(unittest.TestCase):
 
         out = max_tree_local_maxima(img)
         out_bin = out > 0
-        error = diff(local_maxima, out_bin)
-        assert error < eps
+        assert_array_equal(local_maxima, out_bin)
         assert np.max(out) == 5
 
 if __name__ == "__main__":

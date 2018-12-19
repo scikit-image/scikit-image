@@ -48,7 +48,8 @@ cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t 
     """recursive function to get the root of the current tree. Importantly, the
     function changes the tree (path compression), that reduces the complexity
     from O(n*n) to O(n*log(n)). Despite of path compression, our tests showed
-    that the non-recursive version seems to perform better.
+    that the non-recursive version seems to perform better. We leave this version
+    for future improvements.
     """
     if parent[index] != index:
         parent[index] = find_root_recursive(parent, parent[index])
