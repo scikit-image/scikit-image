@@ -1,18 +1,19 @@
 """
-=====================
+=========================
 Blind Image Deconvolution
-=====================
-Normally, image deconvolution is based on a prior knowledge of the
+=========================
+
+Normally, image deconvolution is based on prior knowledge of the
 Point Spread Function (PSF) used to deconvolve the image.
 However, _blind_ methods are available that estimate the PSF
-iteratively from the image itself. This algorithm is based on the
+from the image itself. This algorithm is based on the
 Richardson Lucy (RL) deconvolution algorithm. In this case,
 the RL algorithm is not only used for deconvolving the image,
 but also the PSF estimate. This process is iterative,
 alternating between deconvolving the PSF and deconvolving the image.
 
 The following example shows a centered cross that was convolved
-with a gaussian kernel with sigma = 2. Further Poisson
+with a gaussian kernel with ``sigma=2``. Thereafter, Poisson
 shot noise was added. Using the convolved image as argument
 in the blind image deconvolution function, the algorithm
 is capable to recover to a large extent the original image
