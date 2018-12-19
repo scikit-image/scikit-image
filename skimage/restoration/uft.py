@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# uft.py --- Unitary fourier transform
-
-"""Function of unitary fourier transform and utilities
+r"""Function of unitary fourier transform (uft) and utilities
 
 This module implements the unitary fourier transform, also known as
 the ortho-normal transform. It is especially useful for convolution
@@ -22,7 +19,6 @@ References
 
 """
 
-from __future__ import division, print_function
 
 import numpy as np
 
@@ -284,6 +280,10 @@ def uirfft2(inarray, shape=None):
     ----------
     inarray : ndarray, shape (M, N, ..., P)
         The array to transform.
+    shape : tuple of int, optional
+        The shape of the output. The shape of ``rfft`` is ambiguous in
+        case of odd-valued input shape. In this case, this parameter
+        should be provided. See ``np.fft.irfftn``.
 
     Returns
     -------
@@ -357,8 +357,8 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     dim : int, optional
         The last axis along which to compute the transform. All
         axes by default.
-    is_real : boolean (optional, default True)
-       If True, imp_resp is supposed real and the Hermitian property
+    is_real : boolean, optional
+       If True (default), imp_resp is supposed real and the Hermitian property
        is used with rfftn Fourier transform.
 
     Returns
@@ -413,10 +413,10 @@ def laplacian(ndim, shape, is_real=True):
     ----------
     ndim : int
         The dimension of the Laplacian.
-    shape : tuple, shape
-        The support on which to compute the transfer function
-    is_real : boolean (optional, default True)
-       If True, imp_resp is assumed to be real-valued and
+    shape : tuple
+        The support on which to compute the transfer function.
+    is_real : boolean, optional
+       If True (default), imp_resp is assumed to be real-valued and
        the Hermitian property is used with rfftn Fourier transform
        to return the transfer function.
 
@@ -444,5 +444,5 @@ def laplacian(ndim, shape, is_real=True):
                               0.0,
                               -1.0]).reshape([-1 if i == dim else 1
                                               for i in range(ndim)])
-    impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
+    impr[(slice(1, 2), ) * ndim] = 2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr

@@ -1,0 +1,469 @@
+.. _howto_contribute:
+
+How to contribute to ``skimage``
+================================
+
+Developing Open Source is great fun!  Join us on the `scikit-image mailing
+list <https://mail.python.org/mailman/listinfo/scikit-image>`_ and tell us
+which of the following challenges you'd like to solve.
+
+* Mentoring is available for those new to scientific programming in Python.
+* If you're looking for something to implement, you can find a list of
+  `requested features on GitHub <https://github.com/scikit-image/scikit-image/wiki/Requested-features>`__.
+  In addition, you can browse the
+  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?state=open>`__.
+* The technical detail of the `development process`_ is summed up below.
+  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
+
+.. contents::
+   :local:
+
+Development process
+-------------------
+
+Here's the long and short of it:
+
+1. If you are a first-time contributor:
+
+   * Go to `https://github.com/scikit-image/scikit-image
+     <https://github.com/scikit-image/scikit-image>`_ and click the
+     "fork" button to create your own copy of the project.
+
+   * Clone the project to your local computer::
+
+      git clone https://github.com/your-username/scikit-image.git
+
+   * Change the directory::
+
+      cd scikit-image
+
+   * Add the upstream repository::
+
+      git remote add upstream https://github.com/scikit-image/scikit-image.git
+
+   * Now, you have remote repositories named:
+
+     - ``upstream``, which refers to the ``scikit-image`` repository
+     - ``origin``, which refers to your personal fork
+
+2. Develop your contribution:
+
+   * Pull the latest changes from upstream::
+
+      git checkout master
+      git pull upstream master
+
+   * Create a branch for the feature you want to work on. Since the
+     branch name will appear in the merge message, use a sensible name
+     such as 'transform-speedups'::
+
+      git checkout -b transform-speedups
+
+   * Commit locally as you progress (``git add`` and ``git commit``)
+
+3. To submit your contribution:
+
+   * Push your changes back to your fork on GitHub::
+
+      git push origin transform-speedups
+
+   * Enter your GitHub username and password (repeat contributors or advanced
+     users can remove this step by connecting to GitHub with SSH. See detailed
+     instructions below if desired).
+
+   * Go to GitHub. The new branch will show up with a green Pull Request
+     button - click it.
+
+   * If you want, post on the `mailing list
+     <https://mail.python.org/mailman/listinfo/scikit-image>`_ to explain your changes or
+     to ask for review.
+
+For a more detailed discussion, read these :doc:`detailed documents
+<gitwash/index>` on how to use Git with ``scikit-image``
+(`<https://scikit-image.org/docs/dev/gitwash/index.html>`_).
+
+4. Review process:
+
+   * Reviewers (the other developers and interested community members) will
+     write inline and/or general comments on your Pull Request (PR) to help
+     you improve its implementation, documentation and style.  Every single
+     developer working on the project has their code reviewed, and we've come
+     to see it as friendly conversation from which we all learn and the
+     overall code quality benefits.  Therefore, please don't let the review
+     discourage you from contributing: its only aim is to improve the quality
+     of project, not to criticize (we are, after all, very grateful for the
+     time you're donating!).
+
+   * To update your pull request, make your changes on your local repository
+     and commit. As soon as those changes are pushed up (to the same branch as
+     before) the pull request will update automatically.
+
+   * `Travis-CI <https://travis-ci.org/>`__, a continuous integration service,
+     is triggered after each Pull Request update to build the code, run unit
+     tests, measure code coverage and check coding style (PEP8) of your
+     branch. The Travis tests must pass before your PR can be merged. If
+     Travis fails, you can find out why by clicking on the "failed" icon (red
+     cross) and inspecting the build and test log.
+
+   * A pull request must be approved by two core team members before merging.
+
+5. Document changes
+
+   If your change introduces any API modifications, please update
+   ``doc/source/api_changes.txt``.
+
+   If your change introduces a deprecation, add a reminder to ``TODO.txt``
+   for the team to remove the deprecated functionality in the future.
+
+.. note::
+
+   To reviewers: if it is not obvious from the PR description, add a short
+   explanation of what a branch did to the merge message and, if closing a
+   bug, also add "Closes #123" where 123 is the issue number.
+
+
+Divergence between ``upstream master`` and your feature branch
+--------------------------------------------------------------
+
+If GitHub indicates that the branch of your Pull Request can no longer
+be merged automatically, merge the master branch into yours::
+
+   git fetch upstream master
+   git merge upstream/master
+
+If any conflicts occur, they need to be fixed before continuing.  See
+which files are in conflict using::
+
+   git status
+
+Which displays a message like::
+
+   Unmerged paths:
+     (use "git add <file>..." to mark resolution)
+
+     both modified:   file_with_conflict.txt
+
+Inside the conflicted file, you'll find sections like these::
+
+   <<<<<<< HEAD
+   The way the text looks in your branch
+   =======
+   The way the text looks in the master branch
+   >>>>>>> master
+
+Choose one version of the text that should be kept, and delete the
+rest::
+
+   The way the text looks in your branch
+
+Now, add the fixed file::
+
+   git add file_with_conflict.txt
+
+Once you've fixed all merge conflicts, do::
+
+   git commit
+
+.. note::
+
+   Advanced Git users are encouraged to `rebase instead of merge
+   <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
+   but we squash and merge most PRs either way.
+
+Guidelines
+----------
+
+* All code should have tests (see `test coverage`_ below for more details).
+* All code should be documented, to the same
+  `standard <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
+* For new functionality, always add an example to the gallery.
+* No changes are ever committed without review and approval by two core
+  team members.  Ask on the
+  `mailing list <https://mail.python.org/mailman/listinfo/scikit-image>`_ if
+  you get no response to your pull request.
+  **Never merge your own pull request.**
+* Examples in the gallery should have a maximum figure width of 8 inches.
+
+Stylistic Guidelines
+--------------------
+
+* Set up your editor to remove trailing whitespace.  Follow `PEP08
+  <https://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+
+* Use numpy data types instead of strings (``np.uint8`` instead of
+  ``"uint8"``).
+
+* Use the following import conventions::
+
+   import numpy as np
+   import matplotlib.pyplot as plt
+   from scipy import ndimage as ndi
+
+   cimport numpy as cnp  # in Cython code
+
+* When documenting array parameters, use ``image : (M, N) ndarray``
+  and then refer to ``M`` and ``N`` in the docstring, if necessary.
+
+* Refer to array dimensions as (plane), row, column, not as x, y, z. See
+  :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
+  in the user guide for more information.
+
+* Functions should support all input image dtypes.  Use utility functions such
+  as ``img_as_float`` to help convert to an appropriate type.  The output
+  format can be whatever is most efficient.  This allows us to string together
+  several functions into a pipeline, e.g.::
+
+   hough(canny(my_image))
+
+* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
+  in C/C++ and Cython code.
+
+* Use relative module imports, i.e. ``from .._shared import xyz`` rather than
+  ``from skimage._shared import xyz``.
+
+* Wrap Cython code in a pure Python function, which defines the API. This
+  improves compatibility with code introspection tools, which are often not
+  aware of Cython code.
+
+* For Cython functions, release the GIL whenever possible, using
+  ``with nogil:``.
+
+
+Testing
+-------
+``scikit-image`` has an extensive test suite that ensures correct
+execution on your system.  The test suite has to pass before a pull
+request can be merged, and tests should be added to cover any
+modifications to the code base.
+
+We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+testing framework, with tests located in the various
+``skimage/submodule/tests`` folders.
+
+To use ``pytest``, ensure that Cython extensions are built and that
+the library is installed in development mode::
+
+    $ pip install -e .
+
+Now, run all tests using::
+
+    $ PYTHONPATH=. pytest skimage
+
+Or the tests for a specific submodule::
+
+    $ PYTHONPATH=. pytest skimage/morphology
+
+Or tests from a specific file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py
+
+Or a single test within that file::
+
+    $ PYTHONPATH=. pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+
+Use ``--doctest-modules`` to run doctests.
+For example, run all tests and all doctests using::
+
+    $ PYTHONPATH=. pytest --doctest-modules skimage
+
+Test coverage
+-------------
+
+Tests for a module should ideally cover all code in that module,
+i.e., statement coverage should be at 100%.
+
+To measure the test coverage, install
+`pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
+(using ``easy_install pytest-cov``) and then run::
+
+  $ make coverage
+
+This will print a report with one line for each file in `skimage`,
+detailing the test coverage::
+
+  Name                                             Stmts   Exec  Cover   Missing
+  ------------------------------------------------------------------------------
+  skimage/color/colorconv                             77     77   100%
+  skimage/filter/__init__                              1      1   100%
+  ...
+
+
+Activate Travis-CI for your fork (optional)
+-------------------------------------------
+
+Travis-CI checks all unittests in the project to prevent breakage.
+
+Before sending a pull request, you may want to check that Travis-CI
+successfully passes all tests. To do so,
+
+* Go to `Travis-CI <https://travis-ci.org/>`__ and follow the Sign In link at
+  the top
+
+* Go to your `profile page <https://travis-ci.org/profile>`__ and switch on
+  your scikit-image fork
+
+It corresponds to steps one and two in
+`Travis-CI documentation <https://about.travis-ci.org/docs/user/getting-started/>`__
+(Step three is already done in scikit-image).
+
+Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
+and you will receive an email notification when the process is done.
+
+Every time Travis is triggered, it also calls on `Codecov
+<https://codecov.io>`_ to inspect the current test overage.
+
+
+Building docs
+-------------
+
+To build docs, run ``make`` from the ``doc`` directory. ``make help`` lists
+all targets. For example, to build the HTML documentation, you can run:
+
+.. code:: sh
+
+    make html
+
+Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
+To rebuild a full clean documentation, run:
+
+.. code:: sh
+
+    make clean
+    make html
+
+Requirements
+~~~~~~~~~~~~
+
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
+the documentation.
+
+**Sphinx:**
+
+Sphinx and other python packages needed to build the documentation
+can be installed using: ``scikit-image/requirements/docs.txt`` file.
+
+.. code:: sh
+
+    pip install -r requirements/docs.txt
+
+**LaTeX Ubuntu:**
+
+.. code:: sh
+
+    sudo apt-get install -qq texlive texlive-latex-extra dvipng
+
+**LaTeX Mac:**
+
+Install the full `MacTex <https://www.tug.org/mactex/>`__ installation or
+install the smaller
+`BasicTex <https://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
+and *dvipng* packages:
+
+.. code:: sh
+
+    sudo tlmgr install ucs dvipng
+
+Fixing Warnings
+~~~~~~~~~~~~~~~
+
+-  "citation not found: R###" There is probably an underscore after a
+   reference in the first line of a docstring (e.g. [1]\_). Use this
+   method to find the source file: $ cd doc/build; grep -rin R####
+
+-  "Duplicate citation R###, other instance in..."" There is probably a
+   [2] without a [1] in one of the docstrings
+
+-  Make sure to use pre-sphinxification paths to images (not the
+   \_images directory)
+
+Auto-generating dev docs
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This set of instructions was used to create
+scikit-image/tools/deploy-docs.sh
+
+-  Go to Github account settings -> personal access tokens
+-  Create a new token with access rights ``public_repo`` and
+   ``user:email only``
+-  Install the travis command line tool: ``gem install travis``. On OSX,
+   you can get gem via ``brew install ruby``.
+-  Take then token generated by Github and run
+   ``travis encrypt GH_TOKEN=<token>`` from inside a scikit-image repo
+-  Paste the output into the secure: field of ``.travis.yml``.
+-  The decrypted GH\_TOKEN env var will be available for travis scripts
+
+https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+https://docs.travis-ci.com/user/encryption-keys/
+
+Deprecation cycle
+-----------------
+
+If the behavior of the library has to be changed, a deprecation cycle must be
+followed to warn users.
+
+- a deprecation cycle is *not* necessary when:
+
+    * adding a new function, or
+    * adding a new keyword argument to the *end* of a function signature, or
+    * fixing what was buggy behaviour
+
+- a deprecation cycle is necessary for *any breaking API change*, meaning a
+    change where the function, invoked with the same arguments, would return a
+    different result after the change. This includes:
+
+    * changing the order of arguments or keyword arguments, or
+    * adding arguments or keyword arguments to a function, or
+    * changing a function's name or submodule, or
+    * changing the default value of a function's arguments.
+
+Usually, our policy is to put in place a deprecation cycle over two releases.
+
+For the sake of illustration, we consider the modification of a default value in
+a function signature. In version N (therefore, next release will be N+1), we
+have
+
+.. code-block:: python
+
+    def a_function(image, rescale=True):
+        out = do_something(image, rescale=rescale)
+        return out
+
+that has to be changed to
+
+.. code-block:: python
+
+    def a_function(image, rescale=None):
+        if rescale is None:
+            warn('The default value of rescale will change to `False` in version N+3')
+            rescale = True
+        out = do_something(image, rescale=rescale)
+        return out
+
+and in version N+3
+
+.. code-block:: python
+
+    def a_function(image, rescale=False):
+        out = do_something(image, rescale=rescale)
+        return out
+
+Here is the process for a 2-release deprecation cycle:
+
+- In the signature, set default to `None`, and modify the docstring to specify
+  that it's `True`.
+- In the function, _if_ rescale is set to `None`, set to `True` and warn that the
+  default will change to `False` in version N+3.
+- In ``doc/release/release_dev.rst``, under deprecations, add "In
+  `a_function`, the `rescale` argument will default to `False` in N+3."
+- In ``TODO.txt``, create an item in the section related to version N+3 and write
+  "change rescale default to False in a_function".
+
+Note that the 2-release deprecation cycle is not a strict rule and in some
+cases, the developers can agree on a different procedure upon justification
+(like when we can't detect the change, or it involves moving or deleting an
+entire function for example).
+
+Bugs
+----
+
+Please `report bugs on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.

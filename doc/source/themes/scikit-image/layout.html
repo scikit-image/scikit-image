@@ -79,7 +79,7 @@
     {%- block extrahead %}{% endblock %}
 </head>
 <body class="container">
-    <a href="http://scikit-image.org" class="logo"><img src="{{ pathto('_static/', 1) }}img/logo.png" alt=""></a>
+    <a href="https://scikit-image.org" class="logo"><img src="{{ pathto('_static/', 1) }}img/logo.png" alt=""></a>
     <div class="clearfix"></div>
     <div class="navbar">
         <div class="navbar-inner">
@@ -89,13 +89,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="span9">
-            {% block body %}{% endblock %}
-        </div>
         <div class="span3">
             {%- for sidebartemplate in sidebars %}
                 {%- include sidebartemplate %}
             {%- endfor %}
+        </div>
+        <div class="span9">
+            {% block body %}{% endblock %}
         </div>
     </div>
     <div class="well footer">

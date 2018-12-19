@@ -14,9 +14,9 @@ Original author: Lee Kamentsky
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage import (gaussian_filter,
-                           generate_binary_structure, binary_erosion, label)
-from .. import dtype_limits
+from scipy.ndimage import generate_binary_structure, binary_erosion, label
+from ..filters import gaussian
+from .. import dtype_limits, img_as_float
 from .._shared.utils import assert_nD
 
 
@@ -57,7 +57,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     Parameters
     -----------
     image : 2D array
-        Greyscale input image to detect edges on; can be of any dtype.
+        Grayscale input image to detect edges on; can be of any dtype.
     sigma : float
         Standard deviation of the Gaussian filter.
     low_threshold : float
@@ -109,7 +109,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
     .. [2] William Green's Canny tutorial
-           http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+           http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
     Examples
     --------
@@ -154,18 +154,23 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     # because who knows what lies beyond the edge of the image?
     #
     assert_nD(image, 2)
+    dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        low_threshold = 0.1 * dtype_limits(image, clip_negative=False)[1]
+        low_threshold = 0.1 * dtype_max
+    else:
+        low_threshold = low_threshold / dtype_max
 
     if high_threshold is None:
-        high_threshold = 0.2 * dtype_limits(image, clip_negative=False)[1]
+        high_threshold = 0.2 * dtype_max
+    else:
+        high_threshold = high_threshold / dtype_max
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
 
     def fsmooth(x):
-        return gaussian_filter(x, sigma, mode='constant')
+        return img_as_float(gaussian(x, sigma, mode='constant'))
 
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
     jsobel = ndi.sobel(smoothed, axis=1)
@@ -271,6 +276,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #
     high_mask = local_maxima & (magnitude >= high_threshold)
     low_mask = local_maxima & (magnitude >= low_threshold)
+
     #
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them

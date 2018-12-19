@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import division
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
@@ -11,7 +9,7 @@ from warnings import warn
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=None):
+def radon(image, theta=None, circle=True):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -21,13 +19,13 @@ def radon(image, theta=None, circle=None):
     image : array_like, dtype=float
         Input image. The rotation axis will be located in the pixel with
         indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
-    theta : array_like, dtype=float, optional (default np.arange(180))
-        Projection angles (in degrees).
+    theta : array_like, dtype=float, optional
+        Projection angles (in degrees). If `None`, the value is set to
+        np.arange(180).
     circle : boolean, optional
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
-        The default behavior (None) is equivalent to False.
 
     Returns
     -------
@@ -47,17 +45,13 @@ def radon(image, theta=None, circle=None):
     Notes
     -----
     Based on code of Justin K. Romberg
-    (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
+    (https://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
 
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
-    if circle is None:
-        warn('The default of `circle` in `skimage.transform.radon` '
-             'will change to `True` in version 0.15.')
-        circle = False
 
     if circle:
         radius = min(image.shape) // 2
@@ -125,7 +119,7 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=None):
+           filter="ramp", interpolation="linear", circle=True):
     """
     Inverse radon transform.
 
@@ -143,20 +137,19 @@ def iradon(radon_image, theta=None, output_size=None,
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    output_size : int
+    output_size : int, optional
         Number of rows and columns in the reconstruction.
-    filter : str, optional (default ramp)
+    filter : str, optional
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
         Assign None to use no filter.
-    interpolation : str, optional (default 'linear')
+    interpolation : str, optional
         Interpolation method used in reconstruction. Methods available:
         'linear', 'nearest', and 'cubic' ('cubic' is slow).
     circle : boolean, optional
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
-        The default behavior (None) is equivalent to False.
 
     Returns
     -------
@@ -200,10 +193,6 @@ def iradon(radon_image, theta=None, output_size=None,
         else:
             output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2
                                                / 2.0)))
-    if circle is None:
-        warn('The default of `circle` in `skimage.transform.iradon` '
-             'will change to `True` in version 0.15.')
-        circle = False
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
 
@@ -349,14 +338,14 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
-    projection_shifts : 1D array, dtype=float
+    projection_shifts : 1D array, dtype=float, optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
-    clip : length-2 sequence of floats
+    clip : length-2 sequence of floats, optional
         Force all values in the reconstructed tomogram to lie in the range
         ``[clip[0], clip[1]]``
-    relaxation : float
+    relaxation : float, optional
         Relaxation parameter for the update step. A higher value can
         improve the convergence rate, but one runs the risk of instabilities.
         Values close to or higher than 1 are not recommended.
@@ -397,7 +386,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
            reconstruction based on the golden section." Nuclear Science
            Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
     .. [5] Kaczmarz' method, Wikipedia,
-           http://en.wikipedia.org/wiki/Kaczmarz_method
+           https://en.wikipedia.org/wiki/Kaczmarz_method
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')

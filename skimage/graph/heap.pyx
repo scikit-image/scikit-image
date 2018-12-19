@@ -31,7 +31,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from __future__ import division
 
 # cython specific imports
 import cython
@@ -184,7 +183,7 @@ cdef class BinaryHeap:
         return s
 
 
-    ## C Maintanance methods
+    ## C Maintenance methods
 
     cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) nogil:
         # init indexing ints

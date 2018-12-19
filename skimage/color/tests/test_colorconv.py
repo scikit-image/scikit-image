@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Tests for color conversion functions.
 
 Authors
@@ -11,16 +8,12 @@ Authors
 :license: modified BSD
 """
 
-from __future__ import division
 import os.path
 
 import numpy as np
-from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_array_almost_equal,
-                           assert_raises,
-                           TestCase,
-                           )
+from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_almost_equal
+from skimage._shared.testing import TestCase
 
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
@@ -41,13 +34,13 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2yiq, yiq2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
+                           rgb2ydbdr, ydbdr2rgb,
                            rgba2rgb,
-                           guess_spatial_dimensions
-                           )
+                           guess_spatial_dimensions)
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
-
+from skimage._shared import testing
 import colorsys
 
 
@@ -61,7 +54,8 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    assert_raises(ValueError, guess_spatial_dimensions, im5)
+    with testing.raises(ValueError):
+        guess_spatial_dimensions(im5)
 
 
 class TestColorconv(TestCase):
@@ -195,10 +189,11 @@ class TestColorconv(TestCase):
         img_rgb = self.img_rgb
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
                               rgb_from_hdx)
-        assert_equal(img_as_ubyte(conv), img_rgb)
+        with expected_warnings(['precision loss']):
+            assert_equal(img_as_ubyte(conv), img_rgb)
 
-    # RGB<->HDX roundtrip with ubyte image
-    def test_hdx_rgb_roundtrip(self):
+    # RGB<->HDX roundtrip with float image
+    def test_hdx_rgb_roundtrip_float(self):
         from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
         img_rgb = img_as_float(self.img_rgb)
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
@@ -224,24 +219,32 @@ class TestColorconv(TestCase):
                             self.colbars_array)
 
     def test_convert_colorspace(self):
-        colspaces = ['HSV', 'RGB CIE', 'XYZ']
-        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb]
-        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz]
+        colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr', 'YDbDr']
+        colfuncs_from = [
+            hsv2rgb, rgbcie2rgb, xyz2rgb,
+            ycbcr2rgb, ypbpr2rgb, ydbdr2rgb
+        ]
+        colfuncs_to = [
+            rgb2hsv, rgb2rgbcie, rgb2xyz,
+            rgb2ycbcr, rgb2ypbpr, rgb2ydbdr
+        ]
 
-        assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                               'RGB'), self.colbars_array)
+        assert_almost_equal(
+            convert_colorspace(self.colbars_array, 'RGB', 'RGB'),
+            self.colbars_array)
+
         for i, space in enumerate(colspaces):
             gt = colfuncs_from[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, space,
-                                                  'RGB'), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, space, 'RGB'), gt)
             gt = colfuncs_to[i](self.colbars_array)
-            assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
-                                                   space), gt)
+            assert_almost_equal(
+                convert_colorspace(self.colbars_array, 'RGB', space), gt)
 
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'nokey', 'XYZ')
-        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
-                                                           'RGB', 'nokey')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'nokey', 'XYZ')
+        self.assertRaises(ValueError, convert_colorspace,
+                          self.colbars_array, 'RGB', 'nokey')
 
     def test_rgb2grey(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)
@@ -468,11 +471,13 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[1, 0, 0]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[235, 128, 128]]]))
+        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[1, 0, 0]]]))
         rgb = np.array([[[0.0, 1.0, 0.0]]])
         assert_array_almost_equal(rgb2yuv(rgb), np.array([[[0.587, -0.28886916, -0.51496512]]]))
         assert_array_almost_equal(rgb2yiq(rgb), np.array([[[0.587, -0.27455667, -0.52273617]]]))
         assert_array_almost_equal(rgb2ypbpr(rgb), np.array([[[0.587, -0.331264, -0.418688]]]))
         assert_array_almost_equal(rgb2ycbcr(rgb), np.array([[[144.553,   53.797,   34.214]]]))
+        assert_array_almost_equal(rgb2ydbdr(rgb), np.array([[[0.587, -0.883, 1.116]]]))
 
     def test_yuv_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
@@ -480,6 +485,7 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(yiq2rgb(rgb2yiq(img_rgb)), img_rgb)
         assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
         assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
+        assert_array_almost_equal(ydbdr2rgb(rgb2ydbdr(img_rgb)), img_rgb)
 
     def test_rgb2yiq_conversion(self):
         rgb = img_as_float(self.img_rgb)[::16, ::16]
@@ -492,7 +498,12 @@ class TestColorconv(TestCase):
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
-    assert_raises(ValueError, gray2rgb, x)
+    w = gray2rgb(x)
+    expected_output = np.array([[ 0, 0, 0 ],
+                                [ 0.5, 0.5, 0.5, ],
+                                [ 1, 1, 1 ]])
+
+    assert_equal(w, expected_output)
 
     x = x.reshape((3, 1))
     y = gray2rgb(x)
@@ -531,8 +542,3 @@ def test_gray2rgb_alpha():
                           alpha=True)[0, 0, 3], 1)
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                           alpha=True)[0, 0, 3], 255)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

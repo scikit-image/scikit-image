@@ -1,4 +1,3 @@
-from __future__ import division
 import numbers
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
@@ -147,7 +146,7 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Hyperrectangle
+    .. [1] https://en.wikipedia.org/wiki/Hyperrectangle
 
     Examples
     --------
@@ -249,7 +248,7 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     arr_in = np.ascontiguousarray(arr_in)
 
-    slices = [slice(None, None, st) for st in step]
+    slices = tuple(slice(None, None, st) for st in step)
     window_strides = np.array(arr_in.strides)
 
     indexing_strides = arr_in[slices].strides

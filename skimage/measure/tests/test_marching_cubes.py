@@ -1,40 +1,10 @@
-import sys
 import numpy as np
-from numpy.testing import assert_raises
-
 from skimage.draw import ellipsoid, ellipsoid_stats
-from skimage.measure import (marching_cubes,
-                             marching_cubes_classic, marching_cubes_lewiner,
+from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
                              mesh_surface_area, correct_mesh_orientation)
-from skimage.measure._marching_cubes_lewiner import _expected_output_args
-
-def func_that_knows_about_its_outputs(r):
-    # Must be defined in global scope to avoid syntax error on Python 2 *sigh*
-    nout = _expected_output_args()
-    print(nout)
-    r.append(nout)
-    return [nout] * int(nout)
-
-
-def test_expected_output_args():
-    
-    foo = func_that_knows_about_its_outputs
-    
-    res = []
-    foo(res)
-    a = foo(res)
-    a, b = foo(res)
-    a, b, c = foo(res)
-    assert res == [0, 1, 2, 3] or res == [0, 0, 2, 3]
-    # ``a = foo()`` somehow yields 0 in test, which is ok for us;
-    # we only want to distinguish between > 2 args or not
-    
-    if sys.version_info >= (3, 3):
-        res = []
-        exec('*a, b, c = foo(res)')
-        exec('a, b, c, *d = foo(res)')
-        exec('a, b, *c, d, e = foo(res)')
-        assert res == [2.1, 3.1, 4.1]
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_marching_cubes_isotropic():
@@ -55,7 +25,8 @@ def test_marching_cubes_isotropic():
 
 
 def test_marching_cubes_anisotropic():
-    spacing = (1., 10 / 6., 16 / 6.)
+    # test spacing as numpy array (and not just tuple)
+    spacing = np.array([1., 10 / 6., 16 / 6.])
     ellipsoid_anisotropic = ellipsoid(6, 10, 16, spacing=spacing,
                                       levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)
@@ -68,26 +39,38 @@ def test_marching_cubes_anisotropic():
     assert surf > surf_calc and surf_calc > surf * 0.985
     
     # Lewiner
-    verts, faces = marching_cubes_lewiner(ellipsoid_anisotropic, 0., spacing=spacing)[:2]
+    verts, faces = marching_cubes_lewiner(
+        ellipsoid_anisotropic, 0., spacing=spacing)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
 
+    # Test spacing together with allow_degenerate=False
+    marching_cubes_lewiner(ellipsoid_anisotropic, 0, spacing=spacing,
+                           allow_degenerate=False)
+
 
 def test_invalid_input():
     # Classic
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 0)
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((2, 2, 1)), 1)
-    assert_raises(ValueError, marching_cubes_classic, np.ones((3, 3, 3)), 1,
-                  spacing=(1, 2))
-    assert_raises(ValueError, marching_cubes_classic, np.zeros((20, 20)), 0)
+    with testing.raises(ValueError):
+        marching_cubes_classic(np.zeros((2, 2, 1)), 0)
+    with testing.raises(ValueError):
+        marching_cubes_classic(np.zeros((2, 2, 1)), 1)
+    with testing.raises(ValueError):
+        marching_cubes_classic(np.ones((3, 3, 3)), 1, spacing=(1, 2))
+    with testing.raises(ValueError):
+        marching_cubes_classic(np.zeros((20, 20)), 0)
     
     # Lewiner
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((2, 2, 1)), 0)
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((2, 2, 1)), 1)
-    assert_raises(ValueError, marching_cubes_lewiner, np.ones((3, 3, 3)), 1,
-                  spacing=(1, 2))
-    assert_raises(ValueError, marching_cubes_lewiner, np.zeros((20, 20)), 0)
+    with testing.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((2, 2, 1)), 0)
+    with testing.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((2, 2, 1)), 1)
+    with testing.raises(ValueError):
+        marching_cubes_lewiner(np.ones((3, 3, 3)), 1,
+                               spacing=(1, 2))
+    with testing.raises(ValueError):
+        marching_cubes_lewiner(np.zeros((20, 20)), 0)
 
 
 def test_correct_mesh_orientation():
@@ -112,19 +95,20 @@ def test_correct_mesh_orientation():
                       [5, 4, 3]])
 
     # Correct mesh orientation - descent
-    corrected_faces1 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='descent')
-    corrected_faces2 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='ascent')
+    with expected_warnings(['`correct_mesh_orientation` is deprecated']):
+        corrected_faces1 = correct_mesh_orientation(
+            sphere_small, verts, faces, gradient_direction='descent')
+        corrected_faces2 = correct_mesh_orientation(
+            sphere_small, verts, faces, gradient_direction='ascent')
 
     # Ensure ascent is opposite of descent for all faces
-    np.testing.assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
+    assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
 
     # Ensure correct faces have been reversed: 1, 4, and 5
     idx = [1, 4, 5]
     expected = faces.copy()
     expected[idx] = expected[idx, ::-1]
-    np.testing.assert_array_equal(expected, corrected_faces1)
+    assert_array_equal(expected, corrected_faces1)
 
 
 def test_both_algs_same_result_ellipse():
@@ -133,8 +117,10 @@ def test_both_algs_same_result_ellipse():
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
     
     vertices1, faces1 = marching_cubes_classic(sphere_small, 0)[:2]
-    vertices2, faces2 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False)[:2]
-    vertices3, faces3 = marching_cubes_lewiner(sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
+    vertices2, faces2 = marching_cubes_lewiner(
+        sphere_small, 0, allow_degenerate=False)[:2]
+    vertices3, faces3 = marching_cubes_lewiner(
+        sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
     
     # Order is different, best we can do is test equal shape and same vertices present
     assert _same_mesh(vertices1, faces1, vertices2, faces2)
@@ -149,22 +135,23 @@ def _same_mesh(vertices1, faces1, vertices2, faces2, tol=1e-10):
     triangles1 = vertices1[np.array(faces1)]
     triangles2 = vertices2[np.array(faces2)]
     # Sort vertices within each triangle
-    triang1 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles1]
-    triang2 = [np.concatenate(sorted(t, key=lambda x:tuple(x))) for t in triangles2]
+    triang1 = [np.concatenate(sorted(t, key=lambda x:tuple(x)))
+               for t in triangles1]
+    triang2 = [np.concatenate(sorted(t, key=lambda x:tuple(x)))
+               for t in triangles2]
     # Sort the resulting 9-element "tuples"
     triang1 = np.array(sorted([tuple(x) for x in triang1]))
     triang2 = np.array(sorted([tuple(x) for x in triang2]))
-    return triang1.shape == triang2.shape and np.allclose(triang1, triang2, 0, tol)
+    return (triang1.shape == triang2.shape and
+            np.allclose(triang1, triang2, 0, tol))
 
 
 def test_both_algs_same_result_donut():
     # Performing this test on data that does not have ambiguities
-    
     n = 48
     a, b = 2.5/n, -1.25
-    isovalue = 0.0
-    
-    vol = np.empty((n,n,n), 'float32')
+
+    vol = np.empty((n, n, n), 'float32')
     for iz in range(vol.shape[0]):
         for iy in range(vol.shape[1]):
             for ix in range(vol.shape[2]):
@@ -188,7 +175,3 @@ def test_both_algs_same_result_donut():
     assert not _same_mesh(vertices2, faces2, vertices3, faces3)
     # Would have been nice if old and new classic would have been the same
     # assert _same_mesh(vertices1, faces1, vertices3, faces3, 5)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

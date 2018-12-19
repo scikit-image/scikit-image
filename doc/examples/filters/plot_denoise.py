@@ -38,12 +38,11 @@ noise.
 .. _`YCbCr color space`: https://en.wikipedia.org/wiki/YCbCr
 
 """
-import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.restoration import (denoise_tv_chambolle, denoise_bilateral,
                                  denoise_wavelet, estimate_sigma)
-from skimage import data, img_as_float, color
+from skimage import data, img_as_float
 from skimage.util import random_noise
 
 
@@ -52,8 +51,8 @@ original = img_as_float(data.chelsea()[100:250, 50:300])
 sigma = 0.155
 noisy = random_noise(original, var=sigma**2)
 
-fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(8, 5), sharex=True,
-                       sharey=True, subplot_kw={'adjustable': 'box-forced'})
+fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(8, 5),
+                       sharex=True, sharey=True)
 
 plt.gray()
 

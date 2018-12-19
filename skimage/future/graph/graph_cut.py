@@ -48,14 +48,14 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     ----------
     .. [1] Alain Tremeau and Philippe Colantoni
            "Regions Adjacency Graph Applied To Color Image Segmentation"
-           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.11.5274
+           :DOI:`10.1109/83.841950`
 
     """
     if not in_place:
         rag = rag.copy()
 
     # Because deleting edges while iterating through them produces an error.
-    to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
+    to_remove = [(x, y) for x, y, d in rag.edges(data=True)
                  if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
 
@@ -111,7 +111,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     >>> from skimage import data, segmentation
     >>> from skimage.future import graph
     >>> img = data.astronaut()
-    >>> labels = segmentation.slic(img, compactness=30, n_segments=400)
+    >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
     >>> new_labels = graph.cut_normalized(labels, rag)
 
@@ -125,21 +125,21 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     if not in_place:
         rag = rag.copy()
 
-    for node in rag.nodes_iter():
+    for node in rag.nodes():
         rag.add_edge(node, node, weight=max_edge)
 
     _ncut_relabel(rag, thresh, num_cuts)
 
     map_array = np.zeros(labels.max() + 1, dtype=labels.dtype)
     # Mapping from old labels to new
-    for n, d in rag.nodes_iter(data=True):
+    for n, d in rag.nodes(data=True):
         map_array[d['labels']] = d['ncut label']
 
     return map_array[labels]
 
 
 def partition_by_cut(cut, rag):
-    """Compute resulting subgraphs from given bi-parition.
+    """Compute resulting subgraphs from given bi-partition.
 
     Parameters
     ----------
@@ -231,7 +231,7 @@ def _label_all(rag, attr_name):
     """
     node = min(rag.nodes())
     new_label = rag.node[node]['labels'][0]
-    for n, d in rag.nodes_iter(data=True):
+    for n, d in rag.nodes(data=True):
         d[attr_name] = new_label
 
 

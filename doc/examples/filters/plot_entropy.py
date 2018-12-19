@@ -30,7 +30,7 @@ from skimage.morphology import disk
 
 # First example: object detection.
 
-noise_mask = 28 * np.ones((128, 128), dtype=np.uint8)
+noise_mask = np.full((128, 128), 28, dtype=np.uint8)
 noise_mask[32:-32, 32:-32] = 30
 
 noise = (noise_mask * np.random.random(noise_mask.shape) - 0.5 *
@@ -54,11 +54,8 @@ fig.tight_layout()
 
 image = img_as_ubyte(data.camera())
 
-fig, (ax0, ax1) = plt.subplots(ncols=2,
-                               figsize=(12, 4),
-                               sharex=True,
-                               sharey=True,
-                               subplot_kw={"adjustable": "box-forced"})
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(12, 4),
+                               sharex=True, sharey=True)
 
 img0 = ax0.imshow(image, cmap=plt.cm.gray)
 ax0.set_title("Image")

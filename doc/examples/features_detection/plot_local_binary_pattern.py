@@ -11,7 +11,6 @@ whether the surrounding points are greater than or less than the central point
 Before trying out LBP on an image, it helps to look at a schematic of LBPs.
 The below code is just used to plot the schematic.
 """
-from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -133,8 +132,8 @@ for ax, labels in zip(ax_img, label_sets):
 for ax, labels, name in zip(ax_hist, label_sets, titles):
     counts, _, bars = hist(ax, lbp)
     highlight_bars(bars, labels)
-    ax.set_ylim(ymax=np.max(counts[:-1]))
-    ax.set_xlim(xmax=n_points + 2)
+    ax.set_ylim(top=np.max(counts[:-1]))
+    ax.set_xlim(right=n_points + 2)
     ax.set_title(name)
 
 ax_hist[0].set_ylabel('Percentage')
@@ -167,9 +166,9 @@ def match(refs, img):
     best_name = None
     lbp = local_binary_pattern(img, n_points, radius, METHOD)
     n_bins = int(lbp.max() + 1)
-    hist, _ = np.histogram(lbp, normed=True, bins=n_bins, range=(0, n_bins))
+    hist, _ = np.histogram(lbp, density=True, bins=n_bins, range=(0, n_bins))
     for name, ref in refs.items():
-        ref_hist, _ = np.histogram(ref, normed=True, bins=n_bins,
+        ref_hist, _ = np.histogram(ref, density=True, bins=n_bins,
                                    range=(0, n_bins))
         score = kullback_leibler_divergence(hist, ref_hist)
         if score < best_score:

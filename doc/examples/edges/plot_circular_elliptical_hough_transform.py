@@ -4,7 +4,7 @@ Circular and Elliptical Hough Transforms
 ========================================
 
 The Hough transform in its simplest form is a `method to detect
-straight lines <http://en.wikipedia.org/wiki/Hough_transform>`__
+straight lines <https://en.wikipedia.org/wiki/Hough_transform>`__
 but it can also be used to detect circles or ellipses.
 The algorithm assumes that the edge is detected and it is robust against
 noise or missing points.
@@ -126,9 +126,8 @@ image_rgb[cy, cx] = (0, 0, 255)
 edges = color.gray2rgb(img_as_ubyte(edges))
 edges[cy, cx] = (250, 0, 0)
 
-fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4), sharex=True,
-                                sharey=True,
-                                subplot_kw={'adjustable':'box-forced'})
+fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
+                                sharex=True, sharey=True)
 
 ax1.set_title('Original picture')
 ax1.imshow(image_rgb)

@@ -1,13 +1,9 @@
-try:
-    from urllib.request import urlopen  # Python 3
-except ImportError:
-    from urllib2 import urlopen  # Python 2
+from urllib.request import urlopen
 
 import os
 import re
 import tempfile
 from contextlib import contextmanager
-import six
 
 
 URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
@@ -15,7 +11,7 @@ URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
 
 def is_url(filename):
     """Return True if string is an http or ftp path."""
-    return (isinstance(filename, six.string_types) and
+    return (isinstance(filename, str) and
             URL_REGEX.match(filename) is not None)
 
 

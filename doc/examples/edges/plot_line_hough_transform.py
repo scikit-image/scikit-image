@@ -3,10 +3,11 @@
 Straight line Hough transform
 =============================
 
-The Hough transform in its simplest form is a method to detect straight lines.
+The Hough transform in its simplest form is a method to detect straight lines
+[1]_.
 
 In the following example, we construct an image with a line intersection. We
-then use the `Hough transform  <http://en.wikipedia.org/wiki/Hough_transform>`__.
+then use the `Hough transform  <https://en.wikipedia.org/wiki/Hough_transform>`__.
 to explore a parameter space for straight lines that may run through the image.
 
 Algorithm overview
@@ -31,7 +32,7 @@ local maxima in the resulting histogram indicates the parameters of the most
 probably lines. In our example, the maxima occur at 45 and 135 degrees,
 corresponding to the normal vector angles of each line.
 
-Another approach is the Progressive Probabilistic Hough Transform [1]_. It is
+Another approach is the Progressive Probabilistic Hough Transform [2]_. It is
 based on the assumption that using a random subset of voting points give a good
 approximation to the actual result, and that lines can be extracted during the
 voting process by walking along connected components. This returns the
@@ -45,13 +46,14 @@ than 10 with a gap less than 3 pixels.
 References
 ----------
 
-.. [1] C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic
+.. [1] Duda, R. O. and P. E. Hart, "Use of the Hough Transformation to
+       Detect Lines and Curves in Pictures," Comm. ACM, Vol. 15,
+       pp. 11-15 (January, 1972)
+
+.. [2] C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic
        Hough transform for line detection", in IEEE Computer Society
        Conference on Computer Vision and Pattern Recognition, 1999.
 
-.. [2] Duda, R. O. and P. E. Hart, "Use of the Hough Transformation to
-       Detect Lines and Curves in Pictures," Comm. ACM, Vol. 15,
-       pp. 11-15 (January, 1972)
 """
 import numpy as np
 
@@ -74,8 +76,7 @@ image[idx, idx] = 255
 h, theta, d = hough_line(image)
 
 # Generating figure 1
-fig, axes = plt.subplots(1, 3, figsize=(15, 6),
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(15, 6))
 ax = axes.ravel()
 
 ax[0].imshow(image, cmap=cm.gray)
@@ -129,7 +130,6 @@ ax[2].set_title('Probabilistic Hough')
 
 for a in ax:
     a.set_axis_off()
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 plt.show()

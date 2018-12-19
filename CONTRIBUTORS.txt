@@ -1,4 +1,4 @@
-- Stefan van der Walt
+﻿- Stefan van der Walt
   Project coordination
 
 - Nicolas Pinto
@@ -247,3 +247,22 @@
 
 - Scott Sievert
   Wavelet denoising
+
+- Gleb Goussarov
+  Chan-Vese Segmentation
+
+- Kevin Mader
+  Montage improvements
+
+- David Volgyes
+  Unsharp masking
+
+- Lars Grüter
+  Flood-fill based local maxima detection
+
+- Laurent P. René de Cotret
+  Implementation of masked image translation registration
+
+- Mark Harfouche
+  Enabled GIL free operation of many algorithms implemented in Cython.
+  Maintenance of the build and test infrastructure.

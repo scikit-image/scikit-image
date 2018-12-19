@@ -1,14 +1,15 @@
 from collections import namedtuple
 import numpy as np
-import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ...util.colormap import viridis
 from ..._shared.utils import warn
+from math import floor, ceil
+
 
 _default_colormap = 'gray'
-_nonstandard_colormap = viridis
+_nonstandard_colormap = 'viridis'
 _diverging_colormap = 'RdBu'
 
 
@@ -48,10 +49,10 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.float) and
+    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
-                         is_low_contrast(image))
+                      is_low_contrast(image))
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
     return ImageProperties(signed, out_of_range_float,
@@ -111,7 +112,7 @@ def _get_display_range(image):
     return lo, hi, cmap
 
 
-def imshow(im, ax=None, show_cbar=None, **kwargs):
+def imshow(image, ax=None, show_cbar=None, **kwargs):
     """Show the input image and return the current axes.
 
     By default, the image is displayed in greyscale, rather than
@@ -130,7 +131,7 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
 
     Parameters
     ----------
-    im : array, shape (M, N[, 3])
+    image : array, shape (M, N[, 3])
         The image to display.
     ax: `matplotlib.axes.Axes`, optional
         The axis to use for the image, defaults to plt.gca().
@@ -144,9 +145,9 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
     ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
-    if kwargs.get('cmap', None) == 'viridis':
-        kwargs['cmap'] = viridis
-    lo, hi, cmap = _get_display_range(im)
+    import matplotlib.pyplot as plt
+
+    lo, hi, cmap = _get_display_range(image)
 
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', cmap)
@@ -154,12 +155,11 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
     kwargs.setdefault('vmax', hi)
 
     ax = ax or plt.gca()
-    ax_im = ax.imshow(im, **kwargs)
+    ax_im = ax.imshow(image, **kwargs)
     if (cmap != _default_colormap and show_cbar is not False) or show_cbar:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(ax_im, cax=cax)
-    ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
 
     return ax_im
@@ -168,16 +168,41 @@ def imshow(im, ax=None, show_cbar=None, **kwargs):
 def imshow_collection(ic, *args, **kwargs):
     """Display all images in the collection.
 
+    Returns
+    -------
+    fig : `matplotlib.figure.Figure`
+        The `Figure` object returned by `plt.subplots`.
     """
-    fig, axes = plt.subplots(1, len(ic))
+    import matplotlib.pyplot as plt
+
+    if len(ic) < 1:
+        raise ValueError('Number of images to plot must be greater than 0')
+
+    # The target is to plot images on a grid with aspect ratio 4:3
+    num_images = len(ic)
+    # Two pairs of `nrows, ncols` are possible
+    k = (num_images * 12)**0.5
+    r1 = max(1, floor(k / 4))
+    r2 = ceil(k / 4)
+    c1 = ceil(num_images / r1)
+    c2 = ceil(num_images / r2)
+    # Select the one which is closer to 4:3
+    if abs(r1 / c1 - 0.75) < abs(r2 / c2 - 0.75):
+        nrows, ncols = r1, c1
+    else:
+        nrows, ncols = r2, c2
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+    ax = np.asarray(axes).ravel()
     for n, image in enumerate(ic):
-        kwargs['ax'] = axes[n]
-        imshow(image, *args, **kwargs)
+        ax[n].imshow(image, *args, **kwargs)
+    kwargs['ax'] = axes
+    return fig
 
 
-imread = plt.imread
-show = plt.show
+imread = matplotlib.image.imread
 
 
 def _app_show():
+    from matplotlib.pyplot import show
     show()

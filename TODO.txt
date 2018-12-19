@@ -1,42 +1,56 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-Version 0.14
-------------
-* Remove deprecated ``ntiles_*` kwargs in ``equalize_adapthist``.
-* Remove deprecated ``skimage.restoration.nl_means_denoising``.
-* Remove deprecated ``skimage.filters.gaussian_filter``.
-* Remove deprecated ``skimage.filters.gabor_filter``.
-* Remove deprecated ``skimage.measure.LineModel`` and
-  add an alias LineModel = LineModelND. While the deprecated LineModel has for
-  parameters `(dist, theta)`, LineModelND has the more general parameters
-  `(origin, direction)`.
-* Remove deprecated old syntax support for ``skimage.transform.integrate``.
-* Remove deprecated ``skimage.measure.structural_similarity`` alias and
-  deprecation warning test for this alias.
-* Remove deprecated ``sigma_range`` kwargs in ``skimage.restoration.denoise_bilateral``
-  and corresponding tests.
-* Remove deprecation error on the usage of ``ntiles_x``, ``ntiles_y`` in
-  ``skimage.exposure.equalize_adapthist`` and the corresponding test.
-* Remove the freeimage plugin shim to imageio.
-* Remove deprecated `normalise` and corresponding test for ``skimage.feature.hog``.
-* Remove deprecated ``marching_cubes`` from ``skimage.measure``.
-
 
 Version 0.15
 ------------
-* In ``skimage.util.dtype_limits``, set default behavior of `clip_negative` to `False`.
-* In ``skimage.transform.radon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.iradon``, set default behavior of `circle` to `True`.
-* In ``skimage.transform.swirl``, set default behavior of `mode` to `reflect`.
-* In ``skimage.restoration.denoise_bilateral``, set default behavior of
-  `multichannel` to False
-* In ``skimage.restoration.denoise_nl_means``, set default behavior of
-  `multichannel` to False
+* Finalize ``skimage.future.graph`` API.
+* Finalize ``skimage.future.manual_segmentation`` API.
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
-* Remove deprecated function ``threshold_adaptive`` in
-  ``skimage/filters/thresholding.py``.
-* In ``skimage.transform.resize``, set default value of ``mode`` to
-  ``'reflect'``.
-* In ``skimage.transform.rescale``, set default value of ``mode`` to
-  ``'reflect'``.
+
+Version 0.16
+------------
+* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``,
+  ``skimage.transform.pyramid_expandset``, set default value of
+  ``multichannel`` to False
+* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
+  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
+* Remove checks for the ``multichannel`` deprecation warnings in several tests
+  in ``skimage.transform.tests.test_pyramids.py`` and
+  ``skimage.transform.tests.test_warps.py``.
+* Remove `flatten` for `imread` in ``skimage.io._io.py``.
+* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
+* Remove deprecated argument ``visualise`` from function skimage.feature.hog
+* Remove deprecated module ``skimage.novice``
+  * Remove the ``save-demo.jpg`` line from ``.gitignore``
+  * Remove the warning filter from ``conftest.py``
+* In ``skimage.measure._regionprops``, remove all references to
+  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
+* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
+  arguments.
+* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+
+Other
+-----
+* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
+  once minimal required ``numpy`` is set to >= 1.14.0.
+* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
+  ``skimage.feature.corner``.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for sparse matricies (``np.matrix``) used by scipy.sparse in
+  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
+  moves away from using ``np.matrix`` in a future version too.
+* Remove the conditional import and function call when ``numpy`` is set
+  to > 1.15.x in ``skimage/util/arraycrop.py``.
+* When minimum supported version of ``scipy`` reaches 0.18, use 
+  ``scipy.fftpack.next_fast_len`` directly in 
+  ``skimage.feature.masked_register_translation``.
+* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
+  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
+  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
+  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.

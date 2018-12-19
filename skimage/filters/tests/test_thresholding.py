@@ -1,14 +1,11 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
-from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_raises)
 
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
-                                          threshold_adaptive,
                                           threshold_otsu,
                                           threshold_li,
                                           threshold_yen,
@@ -18,7 +15,11 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum,
-                                          _mean_std)
+                                          try_all_threshold,
+                                          _mean_std,
+                                          _cross_entropy)
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
 
 
 class TestSimpleImage():
@@ -28,6 +29,16 @@ class TestSimpleImage():
                                [1, 2, 5, 4, 1],
                                [2, 4, 5, 2, 1],
                                [4, 5, 1, 0, 0]], dtype=int)
+
+    def test_minimum(self):
+        with pytest.raises(RuntimeError):
+            threshold_minimum(self.image)
+
+    def test_try_all_threshold(self):
+        fig, ax = try_all_threshold(self.image)
+        all_texts = [axis.texts for axis in ax if axis.texts != []]
+        text_content = [text.get_text() for x in all_texts for text in x]
+        assert 'RuntimeError' in text_content
 
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
@@ -41,18 +52,18 @@ class TestSimpleImage():
         assert 2 <= threshold_otsu(image) < 3
 
     def test_li(self):
-        assert int(threshold_li(self.image)) == 2
+        assert 2 < threshold_li(self.image) < 3
 
     def test_li_negative_int(self):
         image = self.image - 2
-        assert int(threshold_li(image)) == 0
+        assert 0 < threshold_li(image) < 1
 
     def test_li_float_image(self):
-        image = np.float64(self.image)
-        assert 2 <= threshold_li(image) < 3
+        image = self.image.astype(float)
+        assert 2 < threshold_li(image) < 3
 
     def test_li_constant_image(self):
-        assert_raises(ValueError, threshold_li, np.ones((10,10)))
+        assert threshold_li(np.ones((10, 10))) == 1.
 
     def test_yen(self):
         assert threshold_yen(self.image) == 2
@@ -105,32 +116,6 @@ class TestSimpleImage():
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024,
                                             return_all=True))
 
-    def test_threshold_local_equals_adaptive(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        with expected_warnings(['deprecated', 'return value']):
-            thresholded_original = threshold_adaptive(self.image, 3,
-                                                      method='generic',
-                                                      param=func)
-        threshold_new = threshold_local(self.image, 3, method='generic',
-                                        param=func)
-        assert_equal(thresholded_original, self.image > threshold_new)
-
-    def test_threshold_adaptive_generic(self):
-        def func(arr):
-            return arr.sum() / arr.shape[0]
-        ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
-        )
-        with expected_warnings(['deprecated', 'return value']):
-            out = threshold_adaptive(self.image, 3, method='generic',
-                                     param=func)
-        assert_equal(ref, out)
-
     def test_threshold_local_gaussian(self):
         ref = np.array(
             [[False, False, False, False,  True],
@@ -167,6 +152,16 @@ class TestSimpleImage():
         )
         out = threshold_local(self.image, 3, method='median')
         assert_equal(ref, self.image > out)
+
+    def test_threshold_local_median_constant_mode(self):
+        out = threshold_local(self.image, 3, method='median',
+                              mode='constant', cval=20)
+        expected = np.array([[20.,  1.,  3.,  4., 20.],
+                            [ 1.,  1.,  3.,  4.,  4.],
+                            [ 2.,  2.,  4.,  4.,  4.],
+                            [ 4.,  4.,  4.,  1.,  2.],
+                            [20.,  5.,  5.,  2., 20.]])
+        assert_equal(expected, out)
 
     def test_threshold_niblack(self):
         ref = np.array(
@@ -216,27 +211,65 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    assert_raises(ValueError, threshold_otsu, img)
+    with testing.raises(ValueError):
+        threshold_otsu(img)
 
 
 def test_li_camera_image():
-    camera = skimage.img_as_ubyte(data.camera())
-    assert 63 < threshold_li(camera) < 65
+    image = skimage.img_as_ubyte(data.camera())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 62 < threshold_li(image) < 63
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    assert ce_actual < _cross_entropy(image, threshold - 1)
 
 
 def test_li_coins_image():
-    coins = skimage.img_as_ubyte(data.coins())
-    assert 95 < threshold_li(coins) < 97
+    image = skimage.img_as_ubyte(data.coins())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 94 < threshold_li(image) < 95
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    # in the case of the coins image, the minimum cross-entropy is achieved one
+    # threshold below that found by the iterative method. Not sure why that is
+    # but `threshold_li` does find the stationary point of the function (ie the
+    # tolerance can be reduced arbitrarily but the exact same threshold is
+    # found), so my guess some kind of histogram binning effect.
+    assert ce_actual < _cross_entropy(image, threshold - 2)
 
 
 def test_li_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
-    assert 0.37 < threshold_li(coins) < 0.38
+    assert 94/255 < threshold_li(coins) < 95/255
 
 
 def test_li_astro_image():
-    img = skimage.img_as_ubyte(data.astronaut())
-    assert 66 < threshold_li(img) < 68
+    image = skimage.img_as_ubyte(data.astronaut())
+    threshold = threshold_li(image)
+    ce_actual = _cross_entropy(image, threshold)
+    assert 64 < threshold < 65
+    assert ce_actual < _cross_entropy(image, threshold + 1)
+    assert ce_actual < _cross_entropy(image, threshold - 1)
+
+
+def test_li_nan_image():
+    image = np.full((5, 5), np.nan)
+    assert np.isnan(threshold_li(image))
+
+
+def test_li_inf_image():
+    image = np.array([np.inf, np.nan])
+    assert threshold_li(image) == np.inf
+
+
+def test_li_inf_minus_inf():
+    image = np.array([np.inf, -np.inf])
+    assert threshold_li(image) == 0
+
+
+def test_li_constant_image_with_nan():
+    image = np.array([8, 8, 8, 8, np.nan])
+    assert threshold_li(image) == 8
 
 
 def test_yen_camera_image():
@@ -254,9 +287,10 @@ def test_yen_coins_image_as_float():
     assert 0.43 < threshold_yen(coins) < 0.44
 
 
-def test_adaptive_even_block_size_error():
+def test_local_even_block_size_error():
     img = data.camera()
-    assert_raises(ValueError, threshold_local, img, block_size=4)
+    with testing.raises(ValueError):
+        threshold_local(img, block_size=4)
 
 
 def test_isodata_camera_image():
@@ -343,9 +377,11 @@ def test_threshold_minimum_synthetic():
     threshold = threshold_minimum(img)
     assert_equal(threshold, 95)
 
+
 def test_threshold_minimum_failure():
     img = np.zeros((16*16), dtype=np.uint8)
-    assert_raises(RuntimeError, threshold_minimum, img)
+    with testing.raises(RuntimeError):
+        threshold_minimum(img)
 
 
 def test_mean():
@@ -399,7 +435,7 @@ def test_mean_std_2d():
     image = np.random.rand(256, 256)
     window_size = 11
     m, s = _mean_std(image, w=window_size)
-    mean_kernel = np.ones((window_size,) * 2) / window_size**2
+    mean_kernel = np.full((window_size,) * 2,  1 / window_size**2)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
@@ -410,7 +446,7 @@ def test_mean_std_2d():
 def test_mean_std_3d():
     image = np.random.rand(40, 40, 40)
     window_size = 5
-    mean_kernel = np.ones((window_size,) * 3) / window_size**3
+    mean_kernel = np.full((window_size,) * 3, 1 / window_size**3)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
@@ -419,5 +455,11 @@ def test_mean_std_3d():
     np.testing.assert_allclose(s, expected_s)
 
 
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+def test_niblack_sauvola_pathological_image():
+    # For certain values, floating point error can cause
+    # E(X^2) - (E(X))^2 to be negative, and taking the square root of this
+    # resulted in NaNs. Here we check that these are safely caught.
+    # see https://github.com/scikit-image/scikit-image/issues/3007
+    value = 0.03082192 + 2.19178082e-09
+    src_img = np.full((4, 4), value).astype(np.float64)
+    assert not np.any(np.isnan(threshold_niblack(src_img)))

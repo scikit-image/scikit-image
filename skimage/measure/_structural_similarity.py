@@ -1,19 +1,17 @@
-from __future__ import division
 
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared.utils import deprecated
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 
 __all__ = ['compare_ssim']
 
 
 def compare_ssim(X, Y, win_size=None, gradient=False,
                  data_range=None, multichannel=False, gaussian_weights=False,
-                 full=False, dynamic_range=None, **kwargs):
+                 full=False, **kwargs):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -25,8 +23,8 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         odd value.  If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
     gradient : bool, optional
-        If True, also return the gradient.
-    data_range : int, optional
+        If True, also return the gradient with respect to Y.
+    data_range : float, optional
         The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
@@ -74,25 +72,16 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
        structural similarity. IEEE Transactions on Image Processing,
        13, 600-612.
        https://ece.uwaterloo.ca/~z70wang/publications/ssim.pdf,
-       DOI:10.1.1.11.2477
+       :DOI:`10.1109/TIP.2003.819861`
 
     .. [2] Avanaki, A. N. (2009). Exact global histogram specification
        optimized for structural similarity. Optical Review, 16, 613-621.
-       http://arxiv.org/abs/0901.0065,
-       DOI:10.1007/s10043-009-0119-z
+       :arXiv:`0901.0065`
+       :DOI:`10.1007/s10043-009-0119-z`
 
     """
-    if not X.dtype == Y.dtype:
-        raise ValueError('Input images must have the same dtype.')
-
     if not X.shape == Y.shape:
         raise ValueError('Input images must have the same dimensions.')
-
-    if dynamic_range is not None:
-        warn('`dynamic_range` has been deprecated in favor of '
-             '`data_range`. The `dynamic_range` keyword argument '
-             'will be removed in v0.14', skimage_deprecation)
-        data_range = dynamic_range
 
     if multichannel:
         # loop over channels
@@ -155,6 +144,9 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         raise ValueError('Window size must be odd.')
 
     if data_range is None:
+        if X.dtype != Y.dtype:
+            warn("Inputs have mismatched dtype.  Setting data_range based on "
+                 "X.dtype.")
         dmin, dmax = dtype_range[X.dtype.type]
         data_range = dmax - dmin
 
@@ -228,14 +220,3 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
             return mssim, S
         else:
             return mssim
-
-
-@deprecated('compare_ssim', removed_version='0.14')
-def structural_similarity(X, Y, win_size=None, gradient=False,
-                          dynamic_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
-    """""" + compare_ssim.__doc__
-    return compare_ssim(X, Y, win_size=win_size, gradient=gradient,
-                        data_range=dynamic_range,
-                        multichannel=multichannel,
-                        gaussian_weights=gaussian_weights, full=full, **kwargs)

@@ -5,8 +5,8 @@ Build image pyramids
 
 The ``pyramid_gaussian`` function takes an image and yields successive images
 shrunk by a constant scale factor. Image pyramids are often used, e.g., to
-implement algorithms for denoising, texture discrimination, and scale-
-invariant detection.
+implement algorithms for denoising, texture discrimination, and scale-invariant
+detection.
 
 """
 import numpy as np
@@ -18,7 +18,7 @@ from skimage.transform import pyramid_gaussian
 
 image = data.astronaut()
 rows, cols, dim = image.shape
-pyramid = tuple(pyramid_gaussian(image, downscale=2))
+pyramid = tuple(pyramid_gaussian(image, downscale=2, multichannel=True))
 
 composite_image = np.zeros((rows, cols + cols // 2, 3), dtype=np.double)
 

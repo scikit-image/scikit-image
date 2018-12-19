@@ -1,12 +1,10 @@
-import skimage.graph.mcp as mcp
-from numpy.testing import (assert_array_equal,
-                           assert_almost_equal,
-                           )
-                           
 import numpy as np
+import skimage.graph.mcp as mcp
+
+from skimage._shared.testing import assert_array_equal
+
 
 a = np.ones((8, 8), dtype=np.float32)
-
 
 horizontal_ramp = np.array([[  0.,   1.,   2.,   3.,   4.,  5.,  6.,  7.,],
                             [  0.,   1.,   2.,   3.,   4.,  5.,  6.,  7.,],
@@ -28,14 +26,12 @@ vertical_ramp = np.array(  [[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,],
 
 
 def test_anisotropy():
-    
     # Create seeds; vertical seeds create a horizonral ramp
-    seeds_for_horizontal = [(i, 0) for i in range(8) ]
-    seeds_for_vertcal = [(0, i) for i in range(8) ]
-    
-    
+    seeds_for_horizontal = [(i, 0) for i in range(8)]
+    seeds_for_vertcal = [(0, i) for i in range(8)]
+
     for sy in range(1, 5):
-        for sx in range(1,5):
+        for sx in range(1, 5):
             sampling = sy, sx
             # Trace horizontally
             m1 = mcp.MCP_Geometric(a, sampling=sampling, fully_connected=True)
@@ -47,7 +43,3 @@ def test_anisotropy():
             # Check
             assert_array_equal(costs1, horizontal_ramp * sx)
             assert_array_equal(costs2, vertical_ramp * sy)
-
-
-if __name__ == "__main__":
-    np.testing.run_module_suite()

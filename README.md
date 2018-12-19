@@ -1,9 +1,9 @@
 # scikit-image: Image processing in Python
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-image/scikit-image?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Stackoverflow](https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg)](https://stackoverflow.com/questions/tagged/scikit-image)
+[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://skimage.zulipchat.com)
 [![codecov.io](https://codecov.io/github/scikit-image/scikit-image/coverage.svg?branch=master)](https://codecov.io/github/scikit-image/scikit-image?branch=master)
 
-- **Website (including documentation):** [http://scikit-image.org/](http://scikit-image.org)
+- **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
 - **Mailing list:** [https://mail.python.org/mailman/listinfo/scikit-image](https://mail.python.org/mailman/listinfo/scikit-image)
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
 
@@ -11,15 +11,14 @@
 
 - **Debian/Ubuntu:** ``sudo apt-get install python-skimage``
 - **OSX:** ``pip install scikit-image``
-- **Anaconda:** ``conda install scikit-image``
-- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image)
+- **Anaconda:** ``conda install -c conda-forge scikit-image``
+- **Windows:** Download [Windows binaries](http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image)
 
-Also see
-[http://scikit-image.org/docs/dev/install.html](http://scikit-image.org/docs/dev/install.html)
+Also see [installing ``scikit-image``](INSTALL.rst).
 
 ## Installation from source
 
-Install [dependencies](DEPENDS.txt) using:
+Install dependencies using:
 
 ```
 pip install -r requirements.txt
@@ -34,7 +33,12 @@ $ pip install .
 If you plan to develop the package, you may run it directly from source:
 
 ```
-$ python setup.py develop       # Do this once to add pkg to Python path
+$ pip install -e .  # Do this once to add package to Python path
+```
+
+Every time you modify Cython files, also run:
+
+```
 $ python setup.py build_ext -i  # Build binary extensions
 ```
 
@@ -69,3 +73,12 @@ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
+## Citation
+
+If you find this project useful, please cite:
+
+> Stéfan van der Walt, Johannes L. Schönberger, Juan Nunez-Iglesias,
+> François Boulogne, Joshua D. Warner, Neil Yager, Emmanuelle
+> Gouillart, Tony Yu, and the scikit-image contributors.
+> *scikit-image: Image processing in Python*. PeerJ 2:e453 (2014)
+> https://doi.org/10.7717/peerj.453

@@ -19,18 +19,19 @@ from skimage import exposure
 
 
 color_image = data.hubble_deep_field()
-img = color.rgb2grey(color_image)
+
+# for illustration purposes, we work on a crop of the image.
+x_0 = 70
+y_0 = 354
+width = 100
+height = 100
+
+img = color.rgb2gray(color_image)[y_0:(y_0 + height), x_0:(x_0 + width)]
 
 # the rescaling is done only for visualization purpose.
 # the algorithms would work identically in an unscaled version of the
 # image. However, the parameter h needs to be adapted to the scale.
 img = exposure.rescale_intensity(img)
-
-# for visualization, we work on a crop of the image.
-x_0 = 70
-y_0 = 354
-width = 100
-height = 100
 
 
 ##############################################################
@@ -48,7 +49,7 @@ overlay = color.label2rgb(label_maxima, img, alpha=0.7, bg_label=0,
 # We observed in the previous image, that there are many local maxima
 # that are caused by the noise in the image.
 # For this, we find all local maxima with a height of h.
-# This height is the grey level value by which we need to descent
+# This height is the gray level value by which we need to descent
 # in order to reach a higher maximum and it can be seen as a local
 # contrast measurement.
 # The value of h scales with the dynamic range of the image, i.e.
@@ -67,18 +68,15 @@ overlay_h = color.label2rgb(label_h_maxima, img, alpha=0.7, bg_label=0,
 # a new figure with 3 subplots
 fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
-ax[0].imshow(img[y_0:(y_0 + height), x_0:(x_0 + width)], cmap='gray',
-             interpolation='none')
+ax[0].imshow(img, cmap='gray', interpolation='none')
 ax[0].set_title('Original image')
 ax[0].axis('off')
 
-ax[1].imshow(overlay[y_0:(y_0 + height), x_0:(x_0 + width)],
-             interpolation='none')
+ax[1].imshow(overlay, interpolation='none')
 ax[1].set_title('Local Maxima')
 ax[1].axis('off')
 
-ax[2].imshow(overlay_h[y_0:(y_0 + height), x_0:(x_0 + width)],
-             interpolation='none')
+ax[2].imshow(overlay_h, interpolation='none')
 ax[2].set_title('h maxima for h = %.2f' % h)
 ax[2].axis('off')
 plt.show()

@@ -1,46 +1,55 @@
-"""Testing utilities."""
-
+"""
+Testing utilities.
+"""
 
 import os
 import re
+import struct
 import threading
 import functools
 from tempfile import NamedTemporaryFile
 
-from numpy import testing
 import numpy as np
+from numpy import testing
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_array_less, assert_array_almost_equal_nulp,
+                           assert_equal, TestCase, assert_allclose,
+                           assert_almost_equal, assert_, assert_warns,
+                           assert_no_warnings)
+
 from ._warnings import expected_warnings
 import warnings
 
 from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+import pytest
 
 
-SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+
+skipif = pytest.mark.skipif
+xfail = pytest.mark.xfail
+parametrize = pytest.mark.parametrize
+raises = pytest.raises
+fixture = pytest.fixture
+
+# true if python is running in 32bit mode
+# Calculate the size of a void * pointer in bits
+# https://docs.python.org/3/library/struct.html
+arch32 = struct.calcsize("P") * 8 == 32
 
 
-def _assert_less(a, b, msg=None):
+def assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a < b, message
 
 
-def _assert_greater(a, b, msg=None):
+def assert_greater(a, b, msg=None):
     message = "%r is not greater than %r" % (a, b)
     if msg is not None:
         message += ": " + msg
     assert a > b, message
-
-
-try:
-    from nose.tools import assert_less
-except ImportError:
-    assert_less = _assert_less
-
-try:
-    from nose.tools import assert_greater
-except ImportError:
-    assert_greater = _assert_greater
 
 
 def doctest_skip_parser(func):
@@ -48,9 +57,11 @@ def doctest_skip_parser(func):
 
     Say a function has a docstring::
 
+        >>> something, HAVE_AMODULE, HAVE_BMODULE = 0, False, False
         >>> something # skip if not HAVE_AMODULE
-        >>> something + else
+        0
         >>> something # skip if HAVE_BMODULE
+        0
 
     This decorator will evaluate the expression after ``skip if``.  If this
     evaluates to True, then the comment is replaced by ``# doctest: +SKIP``. If
@@ -61,8 +72,8 @@ def doctest_skip_parser(func):
     global ``HAVE_BMODULE`` is False, the returned function will have docstring::
 
         >>> something # doctest: +SKIP
-        >>> something + else
-        >>> something
+        >>> something + else # doctest: +SKIP
+        >>> something # doctest: +SKIP
 
     """
     lines = func.__doc__.split('\n')
@@ -88,14 +99,14 @@ def doctest_skip_parser(func):
     return func
 
 
-def roundtrip(img, plugin, suffix):
+def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
     if '.' not in suffix:
         suffix = '.' + suffix
     temp_file = NamedTemporaryFile(suffix=suffix, delete=False)
     fname = temp_file.name
     temp_file.close()
-    io.imsave(fname, img, plugin=plugin)
+    io.imsave(fname, image, plugin=plugin)
     new = io.imread(fname, plugin=plugin)
     try:
         os.remove(fname)
@@ -156,7 +167,7 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|\A\Z']):
+    with expected_warnings([r'precision|\A\Z']):
         r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
@@ -167,7 +178,7 @@ def mono_check(plugin, fmt='png'):
         img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss|\A\Z']):
+        with expected_warnings([r'sign loss|\A\Z']):
             r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:

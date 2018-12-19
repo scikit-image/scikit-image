@@ -1,11 +1,12 @@
-import os.path
+import os
 
 import numpy as np
-from numpy.testing import assert_raises, assert_equal, assert_allclose
-
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
 from skimage.io import reset_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose, TestCase
 
 
 def test_string_split():
@@ -23,7 +24,7 @@ def test_string_sort():
     assert_equal(sorted_filenames, sorted_filenames)
 
 
-class TestImageCollection():
+class TestImageCollection(TestCase):
 
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png']]
@@ -44,15 +45,16 @@ class TestImageCollection():
     def test_getitem(self):
         num = len(self.images)
         for i in range(-num, num):
-            assert type(self.images[i]) is np.ndarray
+            assert isinstance(self.images[i], np.ndarray)
         assert_allclose(self.images[0],
-                                  self.images[-num])
+                        self.images[-num])
 
-        # assert_raises expects a callable, hence this thin wrapper function.
         def return_img(n):
             return self.images[n]
-        assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num - 1)
+        with testing.raises(IndexError):
+            return_img(num)
+        with testing.raises(IndexError):
+            return_img(-num - 1)
 
     def test_slicing(self):
         assert type(self.images[:]) is ImageCollection
@@ -69,7 +71,8 @@ class TestImageCollection():
 
         def set_files(f):
             self.images.files = f
-        assert_raises(AttributeError, set_files, 'newfiles')
+        with testing.raises(AttributeError):
+            set_files('newfiles')
 
     def test_custom_load(self):
         load_pattern = [(1, 'one'), (2, 'two')]
@@ -94,9 +97,5 @@ class TestImageCollection():
         assert_equal(array.shape, expected_shape)
 
     def test_concatentate_mismatched_image_shapes(self):
-        assert_raises(ValueError, self.images.concatenate)
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+        with testing.raises(ValueError):
+            self.images.concatenate()

@@ -5,8 +5,6 @@ import numpy as np
 import types
 import numbers
 
-import six
-
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
@@ -59,7 +57,7 @@ class deprecated(object):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
-                func_code = six.get_function_code(func)
+                func_code = func.__code__
                 warnings.simplefilter('always', skimage_deprecation)
                 warnings.warn_explicit(msg,
                                        category=skimage_deprecation,
@@ -120,18 +118,18 @@ def safe_as_int(val, atol=1e-3):
 
     Examples
     --------
-    >>> _safe_as_int(7.0)
+    >>> safe_as_int(7.0)
     7
 
-    >>> _safe_as_int([9, 4, 2.9999999999])
-    array([9, 4, 3], dtype=int32)
+    >>> safe_as_int([9, 4, 2.9999999999])
+    array([9, 4, 3])
 
-    >>> _safe_as_int(53.01)
+    >>> safe_as_int(53.1)
     Traceback (most recent call last):
         ...
     ValueError: Integer argument required but received 53.1, check inputs.
 
-    >>> _safe_as_int(53.01, atol=0.01)
+    >>> safe_as_int(53.01, atol=0.01)
     53
 
     """
@@ -189,9 +187,8 @@ def copy_func(f, name=None):
         Name of new function.
 
     """
-    return types.FunctionType(six.get_function_code(f),
-                              six.get_function_globals(f), name or f.__name__,
-                              six.get_function_defaults(f), six.get_function_closure(f))
+    return types.FunctionType(f.__code__, f.__globals__, name or f.__name__,
+                              f.__defaults__, f.__closure__)
 
 
 def check_random_state(seed):
@@ -230,7 +227,8 @@ def convert_to_float(image, preserve_range):
         Input image.
     preserve_range : bool
         Determines if the range of the image should be kept or transformed
-        using img_as_float.
+        using img_as_float. Also see
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -242,4 +240,3 @@ def convert_to_float(image, preserve_range):
     else:
         image = img_as_float(image)
     return image
-

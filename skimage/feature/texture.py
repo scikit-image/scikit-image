@@ -3,6 +3,7 @@ Methods to characterize image textures.
 """
 
 import numpy as np
+import warnings
 from .._shared.utils import assert_nD
 from ..util import img_as_float
 from ..color import gray2rgb
@@ -62,7 +63,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
     .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [3] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
@@ -106,7 +107,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
 
     image_max = image.max()
 
-    if np.issubdtype(image.dtype, np.float):
+    if np.issubdtype(image.dtype, np.floating):
         raise ValueError("Float images are not supported by greycomatrix. "
                          "Convert the image to an unsigned integer type.")
 
@@ -140,7 +141,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
 
-    # normalize each GLMC
+    # normalize each GLCM
     if normed:
         P = P.astype(np.float64)
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
@@ -166,6 +167,8 @@ def greycoprops(P, prop='contrast'):
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
+    Each GLCM is normalized to have a sum of 1 before the computation of texture
+    properties.
 
     Parameters
     ----------
@@ -213,6 +216,12 @@ def greycoprops(P, prop='contrast'):
     assert num_level == num_level2
     assert num_dist > 0
     assert num_angle > 0
+
+    # normalize each GLCM
+    P = P.astype(np.float64)
+    glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+    glcm_sums[glcm_sums == 0] = 1
+    P /= glcm_sums
 
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
@@ -301,7 +310,7 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/Articoliriferimento/LBP.pdf, 2002.
+           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
@@ -367,10 +376,10 @@ def multiblock_lbp(int_image, r, c, width, height):
     return lbp_code
 
 
-def draw_multiblock_lbp(img, r, c, width, height,
+def draw_multiblock_lbp(image, r, c, width, height,
                         lbp_code=0,
-                        color_greater_block=[1, 1, 1],
-                        color_less_block=[0, 0.69, 0.96],
+                        color_greater_block=(1, 1, 1),
+                        color_less_block=(0, 0.69, 0.96),
                         alpha=0.5
                         ):
     """Multi-block local binary pattern visualization.
@@ -381,7 +390,7 @@ def draw_multiblock_lbp(img, r, c, width, height,
 
     Parameters
     ----------
-    img : ndarray of float or uint
+    image : ndarray of float or uint
         Image on which to visualize the pattern.
     r : int
         Row-coordinate of top left corner of a rectangle containing feature.
@@ -396,15 +405,15 @@ def draw_multiblock_lbp(img, r, c, width, height,
     lbp_code : int
         The descriptor of feature to visualize. If not provided, the
         descriptor with 0 value will be used.
-    color_greater_block : list of 3 floats
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater
         intensity value. They should be in the range [0, 1].
         Corresponding values define (R, G, B) values. Default value
-        is white [1, 1, 1].
-    color_greater_block : list of 3 floats
+        is white (1, 1, 1).
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater intensity
         value. They should be in the range [0, 1]. Corresponding values define
-        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+        (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization.
         1 - fully transparent, 0 - opaque.
@@ -429,11 +438,11 @@ def draw_multiblock_lbp(img, r, c, width, height,
     color_less_block = np.asarray(color_less_block, dtype=np.float64)
 
     # Copy array to avoid the changes to the original one.
-    output = np.copy(img)
+    output = np.copy(image)
 
     # As the visualization uses RGB color we need 3 bands.
-    if len(img.shape) < 3:
-        output = gray2rgb(img)
+    if len(image.shape) < 3:
+        output = gray2rgb(image)
 
     # Colors are specified in floats.
     output = img_as_float(output)

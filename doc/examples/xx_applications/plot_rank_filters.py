@@ -4,10 +4,10 @@ Rank filters
 ============
 
 Rank filters are non-linear filters using the local gray-level ordering to
-compute the filtered value. This ensemble of filters share a common base: the
-local gray-level histogram is computed on the neighborhood of a pixel (defined
-by a 2-D structuring element). If the filtered value is taken as the middle
-value of the histogram, we get the classical median filter.
+compute the filtered value [1]_. This ensemble of filters share a common base:
+the local gray-level histogram is computed on the neighborhood of a pixel
+(defined by a 2-D structuring element). If the filtered value is taken as the
+middle value of the histogram, we get the classical median filter.
 
 Rank filters can be used for several purposes such as:
 
@@ -31,7 +31,7 @@ linear and non-linear filters available in skimage. We use the ``camera`` image
 from ``skimage.data`` for all comparisons.
 
 .. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
-       Recognition 35 (2002) 527-535, DOI:10.1016/S0031-3203(01)00047-4
+       Recognition 35 (2002) 527-535, :DOI:`10.1016/S0031-3203(01)00047-4`
 """
 
 import numpy as np
@@ -39,16 +39,17 @@ import matplotlib.pyplot as plt
 
 from skimage import img_as_ubyte
 from skimage import data
+from skimage.exposure import histogram
 
 noisy_image = img_as_ubyte(data.camera())
-hist = np.histogram(noisy_image, bins=np.arange(0, 256))
+hist, hist_centers = histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax[0].axis('off')
 
-ax[1].plot(hist[1][:-1], hist[0], lw=2)
+ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Histogram of grey values')
 
 plt.tight_layout()
@@ -87,7 +88,6 @@ ax[3].set_title('Median $r=20$')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -120,7 +120,6 @@ ax[1].set_title('Local mean $r=10$')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -158,7 +157,6 @@ ax[3].imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -175,8 +173,8 @@ plt.tight_layout()
 # function for each pixel neighborhood. The local version [3]_ of the
 # histogram equalization emphasizes every local gray-level variations.
 #
-# .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
-# .. [3] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+# .. [2] https://en.wikipedia.org/wiki/Histogram_equalization
+# .. [3] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 from skimage import exposure
 from skimage.filters import rank
@@ -239,7 +237,6 @@ ax[1].set_title('Local autolevel')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -284,7 +281,6 @@ for i in range(0, len(image_list)):
     ax[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     ax[i].set_title(title_list[i])
     ax[i].axis('off')
-    ax[i].set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -315,7 +311,6 @@ ax[3].imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -345,7 +340,6 @@ ax[3].imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -354,7 +348,7 @@ plt.tight_layout()
 # Image threshold
 # ===============
 #
-# The Otsu threshold [1]_ method can be applied locally using the local gray-
+# The Otsu threshold [4]_ method can be applied locally using the local gray-
 # level distribution. In the example below, for each pixel, an "optimal"
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
@@ -368,7 +362,7 @@ plt.tight_layout()
 #     Otsu thresholding can be found in :
 #     :py:func:`skimage.filters.threshold_otsu`.
 #
-# .. [4] http://en.wikipedia.org/wiki/Otsu's_method
+# .. [4] https://en.wikipedia.org/wiki/Otsu's_method
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu
@@ -404,7 +398,6 @@ ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -431,7 +424,6 @@ ax[1].set_title('Local Otsu ($r=%d$)' % radius)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -472,7 +464,6 @@ ax[3].set_title('Morphological gradient')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -513,7 +504,6 @@ ax[1].set_title('Entropy')
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -661,7 +651,6 @@ ax[1].imshow(rndi, cmap=plt.cm.gray)
 
 for a in ax:
     a.axis('off')
-    a.set_adjustable('box-forced')
 
 plt.tight_layout()
 
@@ -689,3 +678,5 @@ ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
 plt.tight_layout()
+
+plt.show()
