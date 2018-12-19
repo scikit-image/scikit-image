@@ -17,7 +17,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
     in_place : bool, optional
         Whether or not to manipulate the labels array in-place.
     mask : ndarray of bool, same shape as `image`, optional.
-        Image data mask.
+        Image data mask. Objects in labels image overlapping with
+        True pixels of mask will be removed.
     Returns
     -------
     out : (M[, N[, ..., P]]) array
