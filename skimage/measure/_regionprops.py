@@ -608,11 +608,9 @@ def perimeter(image, neighbourhood=4):
     --------
     >>> from skimage import data, util
     >>> from skimage.measure import label
-
-    # coins image (binary)
+    >>> # coins image (binary)
     >>> img_coins = util.img_as_ubyte(data.coins()) > 110
-
-    # total perimeter of all objects in the image
+    >>> # total perimeter of all objects in the image
     >>> perimeter(img_coins, neighbourhood=4)
     7796.8679964360044
     >>> perimeter(img_coins, neighbourhood=8)
