@@ -10,7 +10,7 @@ representation of the image. Many morphological operators can be built
 from this representation, namely attribute openings and closings.
 
 This file also contains implementations of max-tree based filters and
-functions to characterize the tree components. 
+functions to characterize the tree components.
 """
 
 import numpy as np
@@ -44,22 +44,24 @@ ctypedef fused dtype_t:
     np.float64_t
 
 
-cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
+cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent,
+                                       DTYPE_INT64_t index):
     """recursive function to get the root of the current tree. Importantly, the
     function changes the tree (path compression), that reduces the complexity
     from O(n*n) to O(n*log(n)). Despite of path compression, our tests showed
-    that the non-recursive version seems to perform better. We leave this version
-    for future improvements.
+    that the non-recursive version seems to perform better. We leave this
+    version for future improvements.
     """
     if parent[index] != index:
         parent[index] = find_root_recursive(parent, parent[index])
     return parent[index]
 
 
-cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent, DTYPE_INT64_t index):
+cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
+                                    DTYPE_INT64_t index):
     """function to get the root of the current tree. Here, we do without path
-    compression and accept the higher complexity, but the function is inline and
-    avoids some overhead induced by its recursive version.
+    compression and accept the higher complexity, but the function is inline
+    and avoids some overhead induced by its recursive version.
     """
     while parent[index] != parent[parent[index]]:
         parent[index] = parent[parent[index]]
@@ -75,19 +77,21 @@ cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
     component tree.
     """
     cdef DTYPE_INT64_t q = 0
+    cdef DTYPE_INT64_t p
     for p in sorted_indices:
         q = parent[p]
         if image[q] == image[parent[q]]:
             parent[p] = parent[q]
 
 
-cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(DTYPE_INT32_t[::1] offsets,
-                                                         DTYPE_INT32_t[::1] shape):
+cdef np.ndarray[DTYPE_INT32_t, ndim=2] unravel_offsets(
+                                    DTYPE_INT32_t[::1] offsets,
+                                    DTYPE_INT32_t[::1] shape):
     """Unravels a list of offset indices. These offsets can be (and normally
     are) negative. The function generates an array of shape
     (number of offsets, image dimensions), where each row corresponds
     to the coordinates of each point.
-    
+
     See also
     --------
     unravel_index
@@ -95,9 +99,10 @@ cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(DTYPE_INT32_t[::1] offs
 
     cdef DTYPE_INT32_t number_of_dimensions = len(shape)
     cdef DTYPE_INT32_t number_of_points = len(offsets)
-    cdef np.ndarray[DTYPE_INT32_t, ndim = 2] points = np.zeros((number_of_points,
-                                                                number_of_dimensions),
-                                                               dtype=np.int32)
+    cdef np.ndarray[DTYPE_INT32_t, ndim=2] points = np.zeros(
+                                        (number_of_points,
+                                         number_of_dimensions),
+                                        dtype=np.int32)
     cdef DTYPE_INT32_t neg_shift = - np.min(offsets)
 
     cdef DTYPE_INT32_t i, offset, curr_index, coord
@@ -125,8 +130,9 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
     cdef DTYPE_INT64_t res_coord = 0
     cdef int i = 0
 
-    cdef np.ndarray[DTYPE_INT32_t, ndim = 1] p_coord = np.array(np.unravel_index(index, shape),
-                                                                dtype = np.int32)
+    cdef np.ndarray[DTYPE_INT32_t, ndim=1] p_coord = np.array(
+                                                np.unravel_index(index, shape),
+                                                dtype=np.int32)
 
     # get the coordinates of the point from a 1D index
     for i in range(number_of_dimensions):
@@ -140,17 +146,16 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
     return 1
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
-                                                          DTYPE_INT64_t[::1] parent,
-                                                          DTYPE_INT64_t[::1] sorted_indices):
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
+                                            DTYPE_INT64_t[::1] parent,
+                                            DTYPE_INT64_t[::1] sorted_indices):
     """computes the area of all max-tree components
     attribute to be used in area opening and closing
-    """                                             
-           
+    """
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] area = np.ones(number_of_pixels,
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] area = np.ones(number_of_pixels,
                                                               dtype=np.float64)
 
     for p in sorted_indices[::-1]:
@@ -162,23 +167,26 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
     return area
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] image,
-                                                               DTYPE_INT32_t[::1] shape,
-                                                               DTYPE_INT64_t[::1] parent,
-                                                               DTYPE_INT64_t[::1] sorted_indices):
+cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_extension(
+                                            dtype_t[::1] image,
+                                            DTYPE_INT32_t[::1] shape,
+                                            DTYPE_INT64_t[::1] parent,
+                                            DTYPE_INT64_t[::1] sorted_indices):
     """computes the bounding box extension of all max-tree components
     attribute to be used in diameter opening and closing
-    """                                             
-                         
+    """
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] extension = np.ones(number_of_pixels,
-                                                                   dtype=np.float64)
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] max_coord = np.array(np.unravel_index(np.arange(number_of_pixels),
-                                                                                   shape), dtype=np.float64).T
-    cdef np.ndarray[DTYPE_FLOAT64_t, ndim = 2] min_coord = np.array(np.unravel_index(np.arange(number_of_pixels),
-                                                                                   shape), dtype=np.float64).T
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] extension = np.ones(
+                                                    number_of_pixels,
+                                                    dtype=np.float64)
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=2] max_coord = np.array(
+                        np.unravel_index(np.arange(number_of_pixels),
+                        shape), dtype=np.float64).T
+    cdef np.ndarray[DTYPE_FLOAT64_t, ndim=2] min_coord = np.array(
+                        np.unravel_index(np.arange(number_of_pixels),
+                        shape), dtype=np.float64).T
 
     for p in sorted_indices[::-1]:
         if p == p_root:
@@ -381,7 +389,8 @@ cpdef void _max_tree(dtype_t[::1] image,
 
     cdef DTYPE_INT64_t[::1] zpar = parent.copy()
 
-    cdef np.ndarray[DTYPE_INT32_t, ndim = 2] points = unravel_offsets(structure, shape)
+    cdef np.ndarray[DTYPE_INT32_t, ndim=2] points = unravel_offsets(
+                                                        structure, shape)
 
     # initialization of the image parent.
     for i in range(number_of_pixels):
