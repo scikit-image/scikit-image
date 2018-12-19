@@ -28,7 +28,7 @@ References
        of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
        A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
        Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-       DOI:10.1007/3-540-36104-9_23
+        :DOI:`10.1007/3-540-36104-9_23`
 """
 
 import numpy as np
