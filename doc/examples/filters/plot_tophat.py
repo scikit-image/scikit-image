@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage import morphology
+from skimage import color, morphology
 
 image = color.rgb2gray(data.hubble_deep_field())[:500, :500]
 
