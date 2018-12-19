@@ -589,7 +589,7 @@ def perimeter(image, neighbourhood=4):
     image : (N, M) ndarray
         2D binary image.
     neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination. It's used to
+        Neighborhood connectivity for border pixel determination. It is used to
         compute the contour. A higher neighbourhood widens the border on which
         the perimeter is computed.
 
@@ -619,8 +619,8 @@ def perimeter(image, neighbourhood=4):
     8806.2680733252855
 
     """
-    if image.ndim > 2:
-        raise NotImplementedError('perimeter does not support 3D images')
+    if image.ndim != 2:
+        raise NotImplementedError('`perimeter` supports 2D images only')
 
     if neighbourhood == 4:
         strel = STREL_4
