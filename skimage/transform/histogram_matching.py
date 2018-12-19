@@ -20,7 +20,7 @@ def _match_cumulative_cdf(source, template):
 
 
 
-def match_histograms(image, reference):
+def match_histograms(image, reference, multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
@@ -28,10 +28,12 @@ def match_histograms(image, reference):
     Parameters
     ----------
     image : ndarray
-        Input image. Can be gray-scale or in color
+        Input image. Can be gray-scale or in color.
     reference : ndarray
         Image to match histogram of. Must have the same number of channels as
         image.
+    multichannel : bool, optional
+        Apply the matching separately for each channel.
 
     Returns
     -------
@@ -55,9 +57,7 @@ def match_histograms(image, reference):
     if image.ndim != reference.ndim:
         raise ValueError('Image and reference must have the same number of channels.')
 
-    if image.ndim == 2:
-        matched = _match_cumulative_cdf(image, reference)
-    elif image.ndim == 3:
+    if multichannel:
         if image.shape[-1] != reference.shape[-1]:
             raise ValueError('Number of channels in the input image and reference '
                              'image must match!')
@@ -66,5 +66,7 @@ def match_histograms(image, reference):
         for channel in range(image.shape[-1]):
             matched_channel = _match_cumulative_cdf(image[..., channel], reference[..., channel])
             matched[..., channel] = matched_channel
+    else:
+        matched = _match_cumulative_cdf(image, reference)
 
     return matched

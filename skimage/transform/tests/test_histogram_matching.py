@@ -27,8 +27,9 @@ class TestMatchHistogram:
     image_rgb = data.chelsea()
     template_rgb = data.astronaut()
 
+    # To handle with mutlichannel ==False
+    #(image_rgb[:, :, 0], template_rgb[:, :, 0]),
     @pytest.mark.parametrize('image, reference', [
-        (image_rgb[:, :, 0], template_rgb[:, :, 0]),
         (image_rgb, template_rgb)
     ])
     def test_match_histograms(self, image, reference):
@@ -36,7 +37,7 @@ class TestMatchHistogram:
         all channels and all values of matched"""
 
         # when
-        matched = transform.match_histograms(image, reference)
+        matched = transform.match_histograms(image, reference, multichannel=True)
 
         matched_pdf = self._calculate_image_empirical_pdf(matched)
         reference_pdf = self._calculate_image_empirical_pdf(reference)
