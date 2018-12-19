@@ -120,8 +120,8 @@ def test_callback():
     rr, cc = circle_perimeter(35, 45, 25)
     img[rr, cc] = 1
     img = gaussian(img, 2)
-    s = np.linspace(0, 2*np.pi, 100)
-    init = 50*np.array([np.cos(s), np.sin(s)]).T+50
+    s = np.linspace(0, 2 * np.pi, 100)
+    init = 50 * np.array([np.cos(s), np.sin(s)]).T + 50
     active_contour(img, init, callback=cb)
 
     assert_equal(iterations,
