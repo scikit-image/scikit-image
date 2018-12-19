@@ -27,7 +27,7 @@ References
        Bertin, E. (2007). Effective Component Tree Computation with
        Application to Pattern Recognition in Astronomical Imaging.
        In International Conference on Image Processing (ICIP) (pp. 41-44).
-       DOI:10.1109/ICIP.2007.4379949
+        :DOI:`10.1109/ICIP.2007.4379949`
 .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
        quasi-linear time. IEEE Transactions on Image Processing, 15(11),
        3531-3539.
