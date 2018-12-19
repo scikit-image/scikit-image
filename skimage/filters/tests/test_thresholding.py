@@ -460,7 +460,9 @@ def test_triangle_flip():
     [(11, np.full((11,) * 2,  1 / 11 ** 2)),
      ((11, 11), np.full((11, 11), 1 / 11 ** 2)),
      ((9, 13), np.full((9, 13), 1 / np.prod((9, 13)))),
-     ((13, 9), np.full((13, 9), 1 / np.prod((13, 9))))]
+     ((13, 9), np.full((13, 9), 1 / np.prod((13, 9)))),
+     ((1, 9), np.full((1, 9), 1 / np.prod((1, 9))))
+     ]
 )
 def test_mean_std_2d(window_size, mean_kernel):
     image = np.random.rand(256, 256)
@@ -476,6 +478,7 @@ def test_mean_std_2d(window_size, mean_kernel):
     "window_size, mean_kernel", [
         (5, np.full((5,) * 3, 1 / 5) ** 3),
         ((5, 5, 5), np.full((5, 5, 5), 1 / 5 ** 3)),
+        ((1, 5, 5), np.full((1, 5, 5), 1 / 5 ** 2)),
         ((3, 5, 7), np.full((3, 5, 7), 1 / np.prod((3, 5, 7))))]
 )
 def test_mean_std_3d(window_size, mean_kernel):

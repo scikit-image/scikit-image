@@ -822,9 +822,9 @@ def _mean_std(image, w):
            :DOI:`10.1117/12.767755`
     """
     def _sanity_check_window_size(axis_size):
-        if axis_size == 1 or axis_size % 2 == 0:
+        if axis_size % 2 == 0:
             raise ValueError(
-                "Window size w = {} must be odd and greater than 1."
+                "Window size w = {} must be odd."
                 .format(axis_size)
             )
 
@@ -878,7 +878,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer
+    window_size : int, tuple or list of integer, optional
         Odd size window specified as a single integer (e.g., 3, 5,
         etc.) or a tuple of the same dimension than ``image``
         containing odd integers (e.g., (3, 5)).
@@ -929,7 +929,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer
+    window_size : int, tuple or list of integer, optional
         Odd size window specified as a single integer (e.g., 3, 5,
         etc.) or a tuple of the same dimension than ``image``
         containing odd integers (e.g., (3, 5)).
