@@ -19,7 +19,7 @@ New Features
 - unsharp mask filtering (#2772)
 - New options ``connectivity``, ``indices`` and ``allow_borders`` for
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
-- Image translation registration for masked data 
+- Image translation registration for masked data
   (``skimage.feature.masked_register_translation``)
 
 
@@ -95,6 +95,11 @@ Deprecations
   row-column coordinates.
 - ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
   and will be removed in 0.16. Use ``area_threshold`` instead.
+- ``skimage.filters.median`` will change behavior in the future to have an
+  identical behavior as ``scipy.ndimage.median_filter``. This behavior can be
+  set already using ``behavior='new'``. In 0.17, it will be the default
+  behavior and in 0.19, the parameter of the previous behavior (i.e., ``mask``,
+  ``shift_x``, ``shift_y``) will be removed.
 
 
 Contributors to this release

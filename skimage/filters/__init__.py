@@ -14,7 +14,7 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_niblack, threshold_sauvola,
                            try_all_threshold, apply_hysteresis_threshold)
 from . import rank
-from .rank import median
+from ._median import median
 from ._unsharp_mask import unsharp_mask
 
 
