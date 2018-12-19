@@ -13,7 +13,7 @@ References
 .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
        Connected Operators for Image and Sequence Processing.
        IEEE Transactions on Image Processing, 7(4), 555-570.
-       DOI:10.1109/83.663500
+        :DOI:`10.1109/83.663500`
 .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
        Component Tree Computation Algorithms. IEEE Transactions on Image
        Processing, 23(9), 3885-3895.
