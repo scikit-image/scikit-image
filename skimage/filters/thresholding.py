@@ -278,7 +278,7 @@ def threshold_otsu(image, nbins=256):
                          "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -333,7 +333,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
@@ -405,7 +405,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -661,7 +661,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     smooth_hist = np.copy(hist).astype(np.float64)
 
@@ -749,7 +749,7 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.

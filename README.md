@@ -1,6 +1,6 @@
 # scikit-image: Image processing in Python
 [![Stackoverflow](https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg)](https://stackoverflow.com/questions/tagged/scikit-image)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-image/scikit-image?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://skimage.zulipchat.com)
 [![codecov.io](https://codecov.io/github/scikit-image/scikit-image/coverage.svg?branch=master)](https://codecov.io/github/scikit-image/scikit-image?branch=master)
 
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
@@ -81,4 +81,4 @@ If you find this project useful, please cite:
 > François Boulogne, Joshua D. Warner, Neil Yager, Emmanuelle
 > Gouillart, Tony Yu, and the scikit-image contributors.
 > *scikit-image: Image processing in Python*. PeerJ 2:e453 (2014)
-> http://dx.doi.org/10.7717/peerj.453
+> https://doi.org/10.7717/peerj.453
