@@ -7,6 +7,8 @@ Version 0.15
 * Finalize ``skimage.future.manual_segmentation`` API.
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
+* Update RELEASE.txt regarding Azure Pipelines after making changes to
+  scikit-image-wheels repo.
 
 Version 0.16
 ------------
