@@ -2,6 +2,7 @@
 ========
 Max-tree
 ========
+
 The max-tree is a hierarchical representation of an image that is the basis
 for a large family of morphological filters.
 
@@ -14,7 +15,7 @@ represented by a tree. whenever a connected component A obtained by
 thresholding with threshold t1 is contained in a component B obtained by
 thresholding with threshold t1 < t2, we say that B is the parent of A.
 The resulting tree structure is called a component tree. The max-tree
-is a compact representation of such a component tree.
+is a compact representation of such a component tree. [1]_, [2]_, [3]_, [4]_
 
 In this example we give an intuition of what a max-tree is.
 
@@ -231,6 +232,7 @@ for k, threshold in enumerate(thresholds.tolist()):
 # to each other. There is an arrow in the graph, if a component at one level
 # is included in the component of a lower level. The max-tree is just
 # a different encoding of the pixel sets.
+#
 # 1. the component tree: pixel sets are explicitly written out. We see for
 #    instance that {6} (result of applying a threshold at 41) is the parent
 #    of {0, 1, 5, 6} (threshold at 40).

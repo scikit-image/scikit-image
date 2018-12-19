@@ -2,22 +2,24 @@
 ===================
 Attribute operators
 ===================
-Attribute operators (or connected operators) is a family of contour preserving
-filtering operations in mathematical morphology. They can be implemented by
-max-trees, a compact hierarchical representation of the image.
 
-Here, we show how to use area and diameter openings.
+Attribute operators (or connected operators) [1]_ is a family of contour
+preserving filtering operations in mathematical morphology. They can be
+implemented by max-trees [2]_, a compact hierarchical representation of the
+image.
+
+Here, we show how to use area and diameter openings [3]_ [4]_.
 
 References
 ----------
 .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
        Connected Operators for Image and Sequence Processing.
        IEEE Transactions on Image Processing, 7(4), 555-570.
-        :DOI:`10.1109/83.663500`
+       :DOI:`10.1109/83.663500`
 .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
        Component Tree Computation Algorithms. IEEE Transactions on Image
        Processing, 23(9), 3885-3895.
-        :DOI:`10.1109/TIP.2014.2336551`
+       :DOI:`10.1109/TIP.2014.2336551`
 .. [3] Vincent L., Proc. "Grayscale area openings and closings,
        their efficient implementation and applications",
        EURASIP Workshop on Mathematical Morphology and its
@@ -28,7 +30,7 @@ References
        of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
        A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
        Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-        :DOI:`10.1007/3-540-36104-9_23`
+       :DOI:`10.1007/3-540-36104-9_23`
 """
 
 import numpy as np
