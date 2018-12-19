@@ -55,11 +55,11 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         snake: (N, 2) ndarray -- the current snake.
         i: int -- the total number of iterations completed.
         conv: float -- convergence criterion. This value is computed by
-            looking over the previous 10 snakes to find the minimum distance
-            that each point has moved, and taking the maximum. If any
-            point is moving, the value will be high and the algorithm will
-            continue. If all points are stationary, the value will be low, and
-            the algorithm terminates when the value falls below 'convergence'.
+        looking over the previous 10 snakes to find the minimum distance
+        that each point has moved, and taking the maximum. If any
+        point is moving, the value will be high and the algorithm will
+        continue. If all points are stationary, the value will be low, and
+        the algorithm terminates when the value falls below 'convergence'.
 
     Returns
     -------
