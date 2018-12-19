@@ -31,7 +31,7 @@ References
 .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
        quasi-linear time. IEEE Transactions on Image Processing, 15(11),
        3531-3539.
-       DOI:10.1109/TIP.2006.877518
+        :DOI:`10.1109/TIP.2006.877518`
 .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
        Component Tree Computation Algorithms. IEEE Transactions on Image
        Processing, 23(9), 3885-3895.
