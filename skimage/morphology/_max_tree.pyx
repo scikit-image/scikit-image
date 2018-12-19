@@ -75,6 +75,7 @@ cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
     component tree.
     """
     cdef DTYPE_INT64_t q = 0
+    cdef DTYPE_INT64_t p
     for p in sorted_indices:
         q = parent[p]
         if image[q] == image[parent[q]]:
@@ -140,13 +141,12 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
     return 1
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
-                                                          DTYPE_INT64_t[::1] parent,
-                                                          DTYPE_INT64_t[::1] sorted_indices):
+cpdef double[::1] _compute_area(dtype_t[::1] image,
+                              DTYPE_INT64_t[::1] parent,
+                              DTYPE_INT64_t[::1] sorted_indices):
     """computes the area of all max-tree components
     attribute to be used in area opening and closing
-    """                                             
-           
+    """
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
@@ -162,14 +162,14 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_area(dtype_t[::1] image,
     return area
 
 
-cpdef np.ndarray[DTYPE_FLOAT64_t, ndim = 1] _compute_extension(dtype_t[::1] image,
-                                                               DTYPE_INT32_t[::1] shape,
-                                                               DTYPE_INT64_t[::1] parent,
-                                                               DTYPE_INT64_t[::1] sorted_indices):
+cpdef double[::1] _compute_extension(dtype_t[::1] image,
+                                     DTYPE_INT32_t[::1] shape,
+                                     DTYPE_INT64_t[::1] parent,
+                                     DTYPE_INT64_t[::1] sorted_indices):
     """computes the bounding box extension of all max-tree components
     attribute to be used in diameter opening and closing
     """                                             
-                         
+
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
