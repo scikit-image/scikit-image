@@ -38,57 +38,68 @@ from skimage import data
 from skimage.morphology import closing
 from skimage.morphology import square
 
-# image with printed letters
-image = data.page()
+params = {
+    'retina': {'image': data.retina().T,
+               'figsize': (15, 8),
+               'diameter': 12},
+    'page': {'image': data.page(),
+             'figsize': (15, 5),
+             'diameter': 23}
+}
 
-fig, ax = plt.subplots(2, 3, figsize=(15, 5))
+for dataset in params:
+    # image with printed letters
+    image = params[dataset]['image']
+    figsize = params[dataset]['figsize']
+    diameter = params[dataset]['diameter']
 
-# Original image
-ax[0, 0].imshow(image, cmap='gray', aspect='equal')
-ax[0, 0].set_title('Original')
-ax[0, 0].axis('off')
+    fig, ax = plt.subplots(2, 3, figsize=figsize)
+    # Original image
+    ax[0, 0].imshow(image, cmap='gray', aspect='equal')
+    ax[0, 0].set_title('Original')
+    ax[0, 0].axis('off')
 
-ax[1, 0].imshow(image, cmap='gray', aspect='equal')
-ax[1, 0].set_title('Original')
-ax[1, 0].axis('off')
+    ax[1, 0].imshow(image, cmap='gray', aspect='equal')
+    ax[1, 0].set_title('Original')
+    ax[1, 0].axis('off')
 
-# Diameter closing : we remove all dark structures with a maximal
-# extension of less than 23. I.e. in closed_attr, all local minima
-# have at least a maximal extension of 23.
-closed_attr = diameter_closing(image, 23)
+    # Diameter closing : we remove all dark structures with a maximal
+    # extension of less than 23. I.e. in closed_attr, all local minima
+    # have at least a maximal extension of <diameter>.
+    closed_attr = diameter_closing(image, diameter)
 
-# We then calculate the difference to the original image.
-tophat_attr = closed_attr - image
+    # We then calculate the difference to the original image.
+    tophat_attr = closed_attr - image
 
-ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal')
-ax[0, 1].set_title('Diameter Closing')
-ax[0, 1].axis('off')
+    ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal')
+    ax[0, 1].set_title('Diameter Closing')
+    ax[0, 1].axis('off')
 
-ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal')
-ax[0, 2].set_title('Tophat (Difference)')
-ax[0, 2].axis('off')
+    ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal')
+    ax[0, 2].set_title('Tophat (Difference)')
+    ax[0, 2].axis('off')
 
-# A morphological closing is removing all dark structures that cannot
-# contain a structuring element of a certain size.
-closed = closing(image, square(12))
+    # A morphological closing is removing all dark structures that cannot
+    # contain a structuring element of a certain size.
+    closed = closing(image, square(diameter))
 
-# Again we calculate the difference to the original image.
-tophat = closed - image
+    # Again we calculate the difference to the original image.
+    tophat = closed - image
 
-ax[1, 1].imshow(closed, cmap='gray', aspect='equal')
-ax[1, 1].set_title('Morphological Closing')
-ax[1, 1].axis('off')
+    ax[1, 1].imshow(closed, cmap='gray', aspect='equal')
+    ax[1, 1].set_title('Morphological Closing')
+    ax[1, 1].axis('off')
 
-ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
-ax[1, 2].set_title('Tophat (Difference)')
-ax[1, 2].axis('off')
+    ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
+    ax[1, 2].set_title('Tophat (Difference)')
+    ax[1, 2].axis('off')
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
 
-# Comparing the two results, we observe that the difference between
-# image and morphological closing also extracts the long line. A thin
-# but long line cannot contain the structuring element. The diameter
-# closing stops the filling as soon as a maximal extension is reached.
-# The line is therefore not filled and therefore not extracted by the
-# difference.
+    # Comparing the two results, we observe that the difference between
+    # image and morphological closing also extracts the long line. A thin
+    # but long line cannot contain the structuring element. The diameter
+    # closing stops the filling as soon as a maximal extension is reached.
+    # The line is therefore not filled and therefore not extracted by the
+    # difference.

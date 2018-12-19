@@ -185,9 +185,9 @@ P_rav = P.ravel()
 #####################################################################
 # Image plots
 # ===========
-# Then, we visualize the image and its raveled indices. 
+# Then, we visualize the image and its raveled indices.
 # Concretely, we plot the image with the following overlays:
-# - the image values 
+# - the image values
 # - the raveled indices (serve as pixel identifiers)
 # - the output of the max_tree function
 
@@ -198,19 +198,7 @@ image_rav = image.ravel()
 raveled_indices = np.arange(np.prod(image.shape))
 raveled_indices = raveled_indices.reshape(image.shape).astype(np.int)
 
-#fig = plt.figure(figsize=(18, 9))
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(9,3))
-# gs = GridSpec(3, 9,
-#               left=0.05, right=0.95,
-#               top=0.95, bottom=0.05,
-#               height_ratios=[1.5, 1, 3])
-# gs.update(wspace=0.05, hspace=0.2)
-
-# ax1 = plt.subplot(gs[0, 0])
-# ax2 = plt.subplot(gs[0, 1])
-# ax3 = plt.subplot(gs[0, 2])
-# ax4 = plt.subplot(gs[0, 3:])
-#ax4.axis('off')
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(9, 3))
 
 plot_img(image - image.min(), ax1, 'Image Values',
          plot_text=True, image_values=image)
@@ -224,16 +212,14 @@ plot_img(image - image.min(), ax3, 'Max-tree indices',
 # Visualizing threshold operations
 # ================================
 # Now, we investigate the results of a series of threshold operations.
-# The component tree (and max-tree) provide representations of the 
+# The component tree (and max-tree) provide representations of the
 # inclusion relationships between connected components at different
-# levels. 
-fig, axes = plt.subplots(3, 3, sharey=True, sharex=True, figsize=(6,6))
+# levels.
+fig, axes = plt.subplots(3, 3, sharey=True, sharex=True, figsize=(6, 6))
 thresholds = np.unique(image)
 for k, threshold in enumerate(thresholds.tolist()):
     bin_img = image >= threshold
-    #ax = plt.subplot(gs[1, k])
-    #ax = plt.subplot(gs[1, k])
-    plot_img(bin_img, axes[(k//3),(k%3)], 'Threshold : %i' % threshold,
+    plot_img(bin_img, axes[(k // 3), (k % 3)], 'Threshold : %i' % threshold,
              plot_text=True, image_values=raveled_indices)
 
 
@@ -280,9 +266,6 @@ pos_cmt = position_nodes_for_max_tree(CMT, image_rav)
 pos_mt = dict(zip(MT.nodes, [pos_cmt[node] for node in MT.nodes]))
 
 # plot the trees with networkx and matplotlib
-#ax1 = plt.subplot(gs[2, :3])
-#ax2 = plt.subplot(gs[2, 3:6], sharey=ax1)
-#ax3 = plt.subplot(gs[2, 6:], sharey=ax2)
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=True, figsize=(7, 18))
 
 # component tree
@@ -326,5 +309,4 @@ plt.xlim(xmin=0)
 plt.title('Canonical max tree')
 plt.tight_layout()
 plt.axis('off')
-
 plt.show()
