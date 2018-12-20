@@ -25,11 +25,13 @@ from skimage.morphology import square
 
 datasets = {
     'retina': {'image': data.microaneurysms().T,
-               'figsize': (15, 8),
-               'diameter': 12},
+               'figsize': (15, 9),
+               'diameter': 12,
+               'title': 'Detection of microaneurysm'},
     'page': {'image': data.page(),
-             'figsize': (15, 5),
-             'diameter': 23}
+             'figsize': (15, 7),
+             'diameter': 23,
+             'title': 'Text detection'}
 }
 
 for dataset in datasets.values():
@@ -41,11 +43,11 @@ for dataset in datasets.values():
     fig, ax = plt.subplots(2, 3, figsize=figsize)
     # Original image
     ax[0, 0].imshow(image, cmap='gray', aspect='equal')
-    ax[0, 0].set_title('Original', fontsize=18)
+    ax[0, 0].set_title('Original', fontsize=16)
     ax[0, 0].axis('off')
 
     ax[1, 0].imshow(image, cmap='gray', aspect='equal')
-    ax[1, 0].set_title('Original', fontsize=18)
+    ax[1, 0].set_title('Original', fontsize=16)
     ax[1, 0].axis('off')
 
     # Diameter closing : we remove all dark structures with a maximal
@@ -57,11 +59,11 @@ for dataset in datasets.values():
     tophat_attr = closed_attr - image
 
     ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal')
-    ax[0, 1].set_title('Diameter Closing', fontsize=18)
+    ax[0, 1].set_title('Diameter Closing', fontsize=16)
     ax[0, 1].axis('off')
 
     ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal')
-    ax[0, 2].set_title('Tophat (Difference)', fontsize=18)
+    ax[0, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[0, 2].axis('off')
 
     # A morphological closing removes all dark structures that cannot
@@ -72,14 +74,15 @@ for dataset in datasets.values():
     tophat = closed - image
 
     ax[1, 1].imshow(closed, cmap='gray', aspect='equal')
-    ax[1, 1].set_title('Morphological Closing', fontsize=18)
+    ax[1, 1].set_title('Morphological Closing', fontsize=16)
     ax[1, 1].axis('off')
 
     ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
-    ax[1, 2].set_title('Tophat (Difference)', fontsize=18)
+    ax[1, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[1, 2].axis('off')
-
-    plt.tight_layout()
+    plt.suptitle(dataset['title'], fontsize=18)
+    plt.tight_layout(rect=(0, 0, 1, 0.88))
+    #plt.tight_layout()
     plt.show()
 
 
