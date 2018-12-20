@@ -792,6 +792,26 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
+def _validate_window_size(axis_sizes):
+    """Ensure all sizes in ``axis_sizes`` are odd.
+
+    Parameters
+    ----------
+    axis_sizes : iterable of int
+
+    Raises
+    ------
+    ValueError
+        If any given axis size is even.
+    """
+    for axis_size in axis_sizes:
+        if axis_size % 2 == 0:
+            msg = ('Window size for `threshold_sauvola` or '
+                   '`threshold_niblack` must not be even on any dimension. '
+                   'Got {}'.format(axis_sizes))
+            raise ValueError(msg)
+
+
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
@@ -821,21 +841,10 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    def _sanity_check_window_size(axis_size):
-        if axis_size % 2 == 0:
-            raise ValueError(
-                "Window size w = {} must be odd."
-                .format(axis_size)
-            )
-
-    if isinstance(w, Iterable):
-        for axis in w:
-            _sanity_check_window_size(axis)
-        kern_size = tuple(w_ + 1 for w_ in w)
-    else:
-        _sanity_check_window_size(w)
-        kern_size = (w + 1, ) * image.ndim
-        w = (w, ) * image.ndim
+    if not isinstance(w, Iterable):
+        w = (w,) * image.ndim
+    _validate_window_size(w)
+    kern_size = tuple(w_ + 1 for w_ in w)
 
     total_window_size = np.prod(w)
 
