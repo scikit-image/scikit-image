@@ -28,12 +28,14 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default). Only valid
         when ``behavior='rank'``
+
         .. deprecated:: 0.16
            ``mask`` is deprecated in 0.16 and will be removed 0.17.
     shift_x, shift_y : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element). Only valid when ``behavior='ndimage'``.
+
         .. deprecated:: 0.16
            ``shift_x`` and ``shift_y`` are deprecated in 0.16 and will be
            removed in 0.17.
@@ -41,16 +43,20 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         The mode parameter determines how the array borders are handled, where
         ``cval`` is the value when mode is equal to 'constant'.
         Default is 'nearest'.
+
         .. versionadded:: 0.15
            ``mode`` is used when ``behavior='ndimage'``.
     cval : scalar, optional
         Value to fill past edges of input if mode is 'constant'. Default is 0.0
+
         .. versionadded:: 0.15
            ``cval`` was added in 0.15 is used when ``behavior='ndimage'``.
     behavior : {'rank', 'ndimage'}, optional
         Either to use the old behavior (i.e., < 0.15) or the new behavior.
+        The old behavior will call the :func:`skimage.filters.rank.median`.
         The new behavior will call the :func:`scipy.ndimage.median_filter`.
         Default is 'rank'.
+
         .. versionadded:: 0.15
            ``behavior`` is introduced in 0.15
         .. deprecated:: 0.15
