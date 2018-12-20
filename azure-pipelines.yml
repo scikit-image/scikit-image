@@ -1,5 +1,5 @@
 # Azure Pipelines configuration file for Continuous Integration
-# for building the package and running tests under Windows
+# for building the package and running the tests under Windows.
 
 jobs:
 - job: 'Default'
@@ -49,51 +49,58 @@ jobs:
       :: Update pip
       python -m pip install --retries 3 -U pip setuptools
 
-      :: Check that we have the expected version and architecture for Python.
+      :: Check that we have the expected version and architecture for Python
       python --version
       pip --version
-      pip list
       python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-    displayName: 'Update pip, and list versions'
+      pip list
 
-  - script: |
-      :: Get stdint headers needed by tifffile.c.
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
-      
-      :: Install the build and runtime dependencies of the project.
+      :: Install the build and runtime dependencies of the project
       pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
       pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
+      pip list
+    displayName: 'Pre-installation'
+
+  - script: |
+      :: Get stdint headers needed by tifffile.c
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
+
+      :: Compile the package and build the wheel
       python setup.py bdist_wheel 
+
+      :: Install the generated wheel package
       dir dist
-
-      :: Install the generated wheel package to test it.
       pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
-
-      :: Install the test dependencies
-      pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
     displayName: 'Installation'
 
   - script: |
-      :: # [AppVeyor leftovers][For further consideration] # Build the docs
-      :: # pip install %PIP_FLAGS% --retries 3 -r requirements/docs.txt
-      :: # SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
+      :: Install the test dependencies
+      pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
+      pip list
+    displayName: 'Pre-testing'
+
+  - script: |
+      :: Default working directory, where the source code is located,
+      :: is D:\a\1\s or similar. In order to run the tests on the installed
+      :: version of skimage, a different working directory is used.
 
       :: Use the Agg backend in Matplotlib
-      echo "backend : Agg" > matplotlibrc
+      echo "backend\\ :\\ Agg" > matplotlibrc
+
+      echo "Running tests on the following version of scikit-image:"
+      python -c "import skimage; print(skimage.__path__)"
       
       :: Run unit tests with pytest
       pytest -v --pyargs skimage
 
-      :: # [AppVeyor leftovers][For further consideration] artifacts:
+      :: [AppVeyor leftovers][For further consideration]
+      :: # -- Build the docs
+      :: # pip install %PIP_FLAGS% --retries 3 -r requirements/docs.txt
+      :: # SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
+      :: # -- Publish the artifacts
       :: # Archive the generated wheel package in the ci.appveyor.com build report.
-      :: #- path: dist\*
-
-      :: # [AppVeyor leftovers][For further consideration] on_success:
-      :: #- TODO: upload the content of dist/*.whl to a public wheelhouse
-
-      :: # [AppVeyor leftovers][For further consideration] cache:
-      :: # Avoid re-downloading large packages
-      :: #- '%APPDATA%\pip\Cache'
+      :: # path: dist\*
+      :: # -- Upload the content of dist/*.whl to a public wheelhouse
     workingDirectory: C:\
     displayName: 'Testing'
