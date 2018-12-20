@@ -260,6 +260,9 @@
 - Lars Grüter
   Flood-fill based local maxima detection
 
+- Solutus Immensus
+  Histogram matching
+
 - Laurent P. René de Cotret
   Implementation of masked image translation registration
 
