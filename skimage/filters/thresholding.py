@@ -845,11 +845,9 @@ def _mean_std(image, w):
     if not isinstance(w, Iterable):
         w = (w,) * image.ndim
     _validate_window_size(w)
-    kern_size = tuple(w_ + 1 for w_ in w)
 
-    total_window_size = np.prod(w)
 
-    pad_width = tuple((k_ // 2 + 1, k_ // 2) for k_ in w)
+    pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
     padded_sq = padded * padded
@@ -857,10 +855,11 @@ def _mean_std(image, w):
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros(kern_size)
+    kern = np.zeros(tuple(k + 1 for k in w))
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
+    total_window_size = np.prod(w)
     sum_full = ndi.correlate(integral, kern, mode='constant')
     m = crop(sum_full, pad_width) / total_window_size
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
