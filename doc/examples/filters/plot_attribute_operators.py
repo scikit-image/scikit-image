@@ -23,7 +23,7 @@ from skimage import data
 from skimage.morphology import closing
 from skimage.morphology import square
 
-params = {
+datasets = {
     'retina': {'image': data.microaneurysms().T,
                'figsize': (15, 8),
                'diameter': 12},
@@ -32,11 +32,11 @@ params = {
              'diameter': 23}
 }
 
-for dataset in params:
+for dataset in datasets.values():
     # image with printed letters
-    image = params[dataset]['image']
-    figsize = params[dataset]['figsize']
-    diameter = params[dataset]['diameter']
+    image = dataset['image']
+    figsize = dataset['figsize']
+    diameter = dataset['diameter']
 
     fig, ax = plt.subplots(2, 3, figsize=figsize)
     # Original image
@@ -49,7 +49,7 @@ for dataset in params:
     ax[1, 0].axis('off')
 
     # Diameter closing : we remove all dark structures with a maximal
-    # extension of less than 23. I.e. in closed_attr, all local minima
+    # extension of less than 12 or 23. I.e. in closed_attr, all local minima
     # have at least a maximal extension of <diameter>.
     closed_attr = diameter_closing(image, diameter)
 
@@ -64,7 +64,7 @@ for dataset in params:
     ax[0, 2].set_title('Tophat (Difference)', fontsize=18)
     ax[0, 2].axis('off')
 
-    # A morphological closing is removing all dark structures that cannot
+    # A morphological closing removes all dark structures that cannot
     # contain a structuring element of a certain size.
     closed = closing(image, square(diameter))
 
