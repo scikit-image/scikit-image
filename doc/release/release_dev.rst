@@ -97,8 +97,8 @@ Deprecations
   and will be removed in 0.16. Use ``area_threshold`` instead.
 - ``skimage.filters.median`` will change behavior in the future to have an
   identical behavior as ``scipy.ndimage.median_filter``. This behavior can be
-  set already using ``behavior='new'``. In 0.17, it will be the default
-  behavior and in 0.19, the parameter of the previous behavior (i.e., ``mask``,
+  set already using ``behavior='ndimage'``. In 0.16, it will be the default
+  behavior and in 0.17, the parameter of the previous behavior (i.e., ``mask``,
   ``shift_x``, ``shift_y``) will be removed.
 
 
