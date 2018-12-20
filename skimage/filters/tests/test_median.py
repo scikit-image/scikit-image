@@ -25,7 +25,7 @@ def image():
      (None, None, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (True, 1, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (None, False, False, 'constant', 0.0, 'rank', 2, (DeprecationWarning,
-                                                      UserWarning,)),
+                                                       UserWarning,)),
      (None, False, False, 'nearest', 0.0, 'rank', 1, (DeprecationWarning,)),
      (None, False, False, 'nearest', 0.0, 'ndimage', 0, [])]
 )

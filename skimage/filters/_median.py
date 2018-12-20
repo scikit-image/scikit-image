@@ -18,8 +18,8 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         Input image.
     selem : ndarray
         If ``behavior=='rank'``, ``selem`` is a 2-D array of 1's and 0's.
-        If ``behavior=='ndimage'``, ``selem`` is a N-D array of 1's and 0's with
-        the same number of dimension than ``image``.
+        If ``behavior=='ndimage'``, ``selem`` is a N-D array of 1's and 0's
+        with the same number of dimension than ``image``.
         If None, ``selem`` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.)
     out : ndarray, (same dtype as image)
