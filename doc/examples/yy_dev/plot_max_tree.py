@@ -197,7 +197,6 @@ image_rav = image.ravel()
 
 # raveled indices of the example image (for display purpose)
 raveled_indices = np.arange(image.size).reshape(image.shape)
-raveled_indices = raveled_indices.reshape(image.shape).astype(np.int)
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(9, 3))
 
