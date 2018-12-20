@@ -3,6 +3,7 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from collections import OrderedDict
+from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
@@ -793,16 +794,18 @@ def threshold_triangle(image, nbins=256):
 
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
-    neighborhood defined by a rectangular window with size w times w.
+    neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation. This is
-    used by threshold_niblack and threshold_sauvola.
+    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    w : int
-        Odd window size (e.g. 3, 5, 7, ..., 21, ...).
+    w : int, tuple or list of integer
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
 
     Returns
     -------
@@ -818,27 +821,40 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    if w == 1 or w % 2 == 0:
-        raise ValueError(
-            "Window size w = %s must be odd and greater than 1." % w)
+    def _sanity_check_window_size(axis_size):
+        if axis_size % 2 == 0:
+            raise ValueError(
+                "Window size w = {} must be odd."
+                .format(axis_size)
+            )
 
-    left_pad = w // 2 + 1
-    right_pad = w // 2
-    padded = np.pad(image.astype('float'), (left_pad, right_pad),
+    if isinstance(w, Iterable):
+        for axis in w:
+            _sanity_check_window_size(axis)
+        kern_size = tuple(w_ + 1 for w_ in w)
+    else:
+        _sanity_check_window_size(w)
+        kern_size = (w + 1, ) * image.ndim
+        w = (w, ) * image.ndim
+
+    total_window_size = np.prod(w)
+
+    pad_width = tuple((k_ // 2 + 1, k_ // 2) for k_ in w)
+    padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
     padded_sq = padded * padded
 
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros((w + 1,) * image.ndim)
+    kern = np.zeros(kern_size)
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
+    m = crop(sum_full, pad_width) / total_window_size
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
+    g2 = crop(sum_sq_full, pad_width) / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
@@ -860,10 +876,12 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    image: ndarray
+        Input image.
+    window_size : int, tuple or list of integer, optional
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
     k : float, optional
         Value of parameter k in threshold formula.
 
@@ -909,10 +927,12 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    image: ndarray
+        Input image.
+    window_size : int, tuple or list of integer, optional
+        Odd size window specified as a single integer (e.g., 3, 5,
+        etc.) or a tuple of the same dimension than ``image``
+        containing odd integers (e.g., (3, 5)).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional

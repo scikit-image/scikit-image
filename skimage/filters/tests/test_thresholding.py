@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 from scipy import ndimage as ndi
-
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
@@ -20,6 +19,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           _cross_entropy)
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_array_equal
 
 
 class TestSimpleImage():
@@ -186,6 +186,30 @@ class TestSimpleImage():
         thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
         out = self.image > thres
         assert_equal(ref, out)
+
+    def test_threshold_niblack_iterable_window_size(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_niblack(self.image, window_size=[3, 5], k=0.5)
+        out = self.image > thres
+        assert_array_equal(ref, out)
+
+    def test_threshold_sauvola_iterable_window_size(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        thres = threshold_sauvola(self.image, window_size=(3, 5), k=0.2, r=128)
+        out = self.image > thres
+        assert_array_equal(ref, out)
 
 
 def test_otsu_camera_image():
@@ -431,11 +455,18 @@ def test_triangle_flip():
     assert(len(unequal_pos[0]) / t_img.size < 1e-2)
 
 
-def test_mean_std_2d():
+@pytest.mark.parametrize(
+    "window_size, mean_kernel",
+    [(11, np.full((11,) * 2,  1 / 11 ** 2)),
+     ((11, 11), np.full((11, 11), 1 / 11 ** 2)),
+     ((9, 13), np.full((9, 13), 1 / np.prod((9, 13)))),
+     ((13, 9), np.full((13, 9), 1 / np.prod((13, 9)))),
+     ((1, 9), np.full((1, 9), 1 / np.prod((1, 9))))
+     ]
+)
+def test_mean_std_2d(window_size, mean_kernel):
     image = np.random.rand(256, 256)
-    window_size = 11
     m, s = _mean_std(image, w=window_size)
-    mean_kernel = np.full((window_size,) * 2,  1 / window_size**2)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size,
@@ -443,10 +474,15 @@ def test_mean_std_2d():
     np.testing.assert_allclose(s, expected_s)
 
 
-def test_mean_std_3d():
+@pytest.mark.parametrize(
+    "window_size, mean_kernel", [
+        (5, np.full((5,) * 3, 1 / 5) ** 3),
+        ((5, 5, 5), np.full((5, 5, 5), 1 / 5 ** 3)),
+        ((1, 5, 5), np.full((1, 5, 5), 1 / 5 ** 2)),
+        ((3, 5, 7), np.full((3, 5, 7), 1 / np.prod((3, 5, 7))))]
+)
+def test_mean_std_3d(window_size, mean_kernel):
     image = np.random.rand(40, 40, 40)
-    window_size = 5
-    mean_kernel = np.full((window_size,) * 3, 1 / window_size**3)
     m, s = _mean_std(image, w=window_size)
     expected_m = ndi.convolve(image, mean_kernel, mode='mirror')
     np.testing.assert_allclose(m, expected_m)
