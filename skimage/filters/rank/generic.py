@@ -126,7 +126,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     # allocate a new output array if necessary
     if out is None:
-        out = np.empty(image.shape+(pixel_size,))
+        out = np.empty(image.shape + (pixel_size,))
     else:
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
