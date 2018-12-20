@@ -76,7 +76,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     mask : ndarray (integer, float or boolean)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    out_dtype : data-type, optional
+    out_dtype : data-type
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
     pixel_size : int
@@ -95,6 +95,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         neighborhood.
     n_bins : int
         Number of histogram bins.
+    out_dtype : data-type
+        Output data-type.
 
     """
     # check `image` is 2D
@@ -102,7 +104,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     # if `image` is not an integer 8-bit/16-bit or a boolean, we cast it as
     # an unsigned 8-bit image.
-    if image.dtype not in (np.uint8, np.uint16, np.bool_):
+    input_dtype = image.dtype
+    if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
 
     # make `image` contiguous in memory
@@ -127,11 +130,11 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     else:
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
+    out = out.astype(image.dtype)
 
     # cast output in the desired dtype
     if out_dtype is None:
-        out_dtype = image.dtype
-    out = out.astype(out_dtype)
+        out_dtype = input_dtype
 
     # compute the number of bins in the histogram from `image` dtype
     if image.dtype in (np.uint8, np.int8):
@@ -146,7 +149,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
              "large number of bins ({}), equivalent to an approximate "
              "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)))
 
-    return image, selem, out, mask, n_bins
+    return image, selem, out, mask, n_bins, out_dtype
 
 
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -181,14 +184,17 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
-                                                    out_dtype)
+    image, selem, out, mask, n_bins, out_dtype = _handle_input(image,
+                                                               selem,
+                                                               out,
+                                                               mask,
+                                                               out_dtype)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.reshape(out.shape[:2])
+    return out.reshape(out.shape[:2]).astype(out_dtype)
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -230,15 +236,18 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
-                                                    out_dtype,
-                                                    pixel_size=pixel_size)
+    image, selem, out, mask, n_bins, out_dtype = _handle_input(image,
+                                                               selem,
+                                                               out,
+                                                               mask,
+                                                               out_dtype,
+                                                               pixel_size)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out
+    return out.astype(out_dtype)
 
 
 def _default_selem(func):
