@@ -822,16 +822,17 @@ def _mean_std(image, w):
     ----------
     image : ndarray
         Input image.
-    w : int, tuple or list of integer
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    w : int, or iterable of int
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
 
     Returns
     -------
-    m : 2-D array of same size of image with local mean values.
-    s : 2-D array of same size of image with local standard
-        deviation values.
+    m : ndarray of float, same shape as ``image``
+        Local mean of the image.
+    s : ndarray of float, same shape as ``image``
+        Local standard deviation of the image.
 
     References
     ----------
@@ -887,10 +888,10 @@ def threshold_niblack(image, window_size=15, k=0.2):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer, optional
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    window_size : int, or iterable of int
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of parameter k in threshold formula.
 
@@ -938,10 +939,10 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer, optional
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    window_size : int, or iterable of int
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional
