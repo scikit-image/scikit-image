@@ -217,7 +217,7 @@ plot_img(image - image.min(), ax3, 'Max-tree indices',
 # levels.
 fig, axes = plt.subplots(3, 3, sharey=True, sharex=True, figsize=(6, 6))
 thresholds = np.unique(image)
-for k, threshold in enumerate(thresholds.tolist()):
+for k, threshold in enumerate(thresholds):
     bin_img = image >= threshold
     plot_img(bin_img, axes[(k // 3), (k % 3)], 'Threshold : %i' % threshold,
              plot_text=True, image_values=raveled_indices)
