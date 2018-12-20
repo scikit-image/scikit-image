@@ -51,3 +51,29 @@ def test_median_warning(image, mask, shift_x, shift_y, mode, cval, behavior,
 @pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
 def test_median_behavior(image, behavior, func, params):
     assert_allclose(median(image, behavior=behavior), func(image, **params))
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.uint8, np.uint16, np.float32, np.float64]
+)
+def test_median_preserve_dtype(image, dtype):
+    median_image = median(image.astype(dtype), behavior='ndimage')
+    assert median_image.dtype == dtype
+
+
+@pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
+def test_median_error_ndim():
+    img = np.random.randint(0, 10, size=(5, 5, 5), dtype=np.uint8)
+    with pytest.raises(ValueError):
+        median(img, behavior='rank')
+
+
+@pytest.mark.parametrize(
+    "img, behavior",
+    [(np.random.randint(0, 10, size=(3, 3), dtype=np.uint8), 'rank'),
+     (np.random.randint(0, 10, size=(3, 3), dtype=np.uint8), 'ndimage'),
+     (np.random.randint(0, 10, size=(3, 3, 3), dtype=np.uint8), 'ndimage')]
+)
+@pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
+def test_median(img, behavior):
+    median(img, behavior=behavior)

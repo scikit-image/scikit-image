@@ -16,25 +16,25 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : array-like
         Input image.
-    selem : ndarray
+    selem : ndarray, optional
         If ``behavior=='rank'``, ``selem`` is a 2-D array of 1's and 0's.
         If ``behavior=='ndimage'``, ``selem`` is a N-D array of 1's and 0's
         with the same number of dimension than ``image``.
         If None, ``selem`` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.)
-    out : ndarray, (same dtype as image)
+    out : ndarray, (same dtype as image), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default). Only valid
         when ``behavior='rank'``
 
         .. deprecated:: 0.16
            ``mask`` is deprecated in 0.16 and will be removed 0.17.
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
-        to the structuring element sizes (center must be inside the given
-        structuring element). Only valid when ``behavior='ndimage'``.
+        by the structuring element sizes (center must be inside the given
+        structuring element). Only valid when ``behavior='rank'``.
 
         .. deprecated:: 0.16
            ``shift_x`` and ``shift_y`` are deprecated in 0.16 and will be
@@ -70,7 +70,8 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
     See also
     --------
     skimage.filters.rank.median : Rank-based implementation of the median
-        filtering offering more flexibility.
+        filtering offering more flexibility with additional parameters but
+        dedicated for unsigned integer images.
 
     Examples
     --------

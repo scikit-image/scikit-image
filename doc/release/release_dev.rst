@@ -98,8 +98,8 @@ Deprecations
 - ``skimage.filters.median`` will change behavior in the future to have an
   identical behavior as ``scipy.ndimage.median_filter``. This behavior can be
   set already using ``behavior='ndimage'``. In 0.16, it will be the default
-  behavior and in 0.17, the parameter of the previous behavior (i.e., ``mask``,
-  ``shift_x``, ``shift_y``) will be removed.
+  behavior and removed in 0.17 as well as the parameter of the previous
+  behavior (i.e., ``mask``, ``shift_x``, ``shift_y``) will be removed.
 
 
 Contributors to this release
