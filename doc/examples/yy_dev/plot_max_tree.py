@@ -53,16 +53,14 @@ from matplotlib.gridspec import GridSpec
 
 # plot_img is a helper function to plot the images and overlay the image
 # values or indices.
-def plot_img(image, ax, title, plot_text,
-             image_values):
-
+def plot_img(image, ax, title, plot_text, image_values):
     ax.imshow(image, cmap='gray', aspect='equal', vmin=0, vmax=np.max(image))
     ax.set_title(title)
     ax.set_yticks([])
     ax.set_xticks([])
 
     for x in np.arange(-0.5, image.shape[0], 1.0):
-        ax.add_artist(Line2D((x, x), (-0.5, image.shape[0]-0.5),
+        ax.add_artist(Line2D((x, x), (-0.5, image.shape[0] - 0.5),
                              color='blue', linewidth=2))
 
     for y in np.arange(-0.5, image.shape[1], 1.0):
@@ -70,14 +68,11 @@ def plot_img(image, ax, title, plot_text,
                              color='blue', linewidth=2))
 
     if plot_text:
-        k = 0
-        for i in range(image_values.shape[0]):
-            for j in range(image_values.shape[1]):
-                ax.text(j, i, image_values[i, j], fontsize=8,
-                        horizontalalignment='center',
-                        verticalalignment='center',
-                        color='red')
-                k += 1
+        for i, j in np.ndindex(*image_values.shape):
+            ax.text(j, i, image_values[i, j], fontsize=8,
+                    horizontalalignment='center',
+                    verticalalignment='center',
+                    color='red')
     return
 
 
@@ -106,18 +101,17 @@ def accumulate(G, node, res):
     return total
 
 
-# sets the positions of a max-tree. This is necessary, as we wanted to
-# visually distinguish between nodes at the same level and nodes at
-# different levels.
+# sets the positions of a max-tree. This is necessary to visually distinguish
+# between nodes at the same level and nodes at different levels.
 def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
     pos = {}
-    for node in reversed(list(nx.topological_sort(CMT))):
+    for node in reversed(list(nx.topological_sort(canonical_max_tree))):
         value = G.nodes[node]['value']
-        if CMT.out_degree(node) == 0:
+        if canonical_max_tree.out_degree(node) == 0:
             # root
             pos[node] = (root_x, value)
 
-        in_nodes = [y for y in CMT.predecessors(node)]
+        in_nodes = [y for y in canonical_max_tree.predecessors(node)]
 
         # place the nodes at the same level
         level_nodes = [y for y in
@@ -158,6 +152,20 @@ def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
             i += 1
 
     return pos
+
+# plot max and component trees
+def plot_tree(graph, positions, ax, *, title='', labels=None,
+              font_size=8, text_size=8):
+    nx.draw_networkx(graph, pos=positions, ax=ax,
+                     node_size=40, node_shape='s', node_color='white',
+                     font_size=font_size, labels=labels)
+    for v in range(image_rav.min(), image_rav.max() + 1):
+        ax.hlines(v - 0.5, *ax.get_xlim(), linestyles='dotted')
+        ax.text(-3, v - 0.15, "val: %i" % v, fontsize=text_size)
+    ax.hlines(v + 0.5, *ax.get_xlim(), linestyles='dotted')
+    ax.set_xlim(-3, 10)
+    ax.set_title(title)
+    ax.set_axis_off()
 
 
 #####################################################################
@@ -245,69 +253,38 @@ for k, threshold in enumerate(thresholds):
 #    This allows us to represent the graph by an image (top row, third column).
 
 # the canonical max-tree graph
-CMT = nx.DiGraph()
-CMT.add_nodes_from(S)
-for node in CMT.nodes():
-    CMT.nodes[node]['value'] = image_rav[node]
-CMT.add_edges_from([(n, P_rav[n]) for n in S[1:]])
+canonical_max_tree = nx.DiGraph()
+canonical_max_tree.add_nodes_from(S)
+for node in canonical_max_tree.nodes():
+    canonical_max_tree.nodes[node]['value'] = image_rav[node]
+canonical_max_tree.add_edges_from([(n, P_rav[n]) for n in S[1:]])
 
 # max-tree from the canonical max-tree
-MT = nx.DiGraph(CMT)
+nx_max_tree = nx.DiGraph(canonical_max_tree)
 labels = {}
-prune(MT, S[0], labels)
+prune(nx_max_tree, S[0], labels)
 
 # component tree from the max-tree
 labels_ct = {}
-total = accumulate(MT, S[0], labels_ct)
+total = accumulate(nx_max_tree, S[0], labels_ct)
 
 # positions of nodes : canonical max-tree (CMT)
-pos_cmt = position_nodes_for_max_tree(CMT, image_rav)
+pos_cmt = position_nodes_for_max_tree(canonical_max_tree, image_rav)
 
 # positions of nodes : max-tree (MT)
-pos_mt = dict(zip(MT.nodes, [pos_cmt[node] for node in MT.nodes]))
+pos_mt = dict(zip(nx_max_tree.nodes, [pos_cmt[node]
+                                      for node in nx_max_tree.nodes]))
 
 # plot the trees with networkx and matplotlib
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=True, figsize=(7, 18))
 
-# component tree
-plt.sca(ax1)
-nx.draw_networkx(MT, pos=pos_mt,
-                 node_size=40, node_shape='s', node_color='white',
-                 font_size=6, labels=labels_ct)
-for v in range(image_rav.min(), image_rav.max() + 1):
-    plt.axhline(v - 0.5, linestyle=':')
-    plt.text(-3, v - 0.15, "val: %i" % v, fontsize=8)
-plt.axhline(v + 0.5, linestyle=':')
-plt.xlim(xmin=-3, xmax=10)
-plt.title('Component tree')
-plt.tight_layout()
-plt.axis('off')
+plot_tree(nx_max_tree, pos_mt, ax1, title='Component tree',
+          labels=labels_ct, font_size=6, text_size=8)
 
-# max-tree
-plt.sca(ax2)
-nx.draw_networkx(MT, pos=pos_mt,
-                 node_size=40, node_shape='s', node_color='white',
-                 font_size=8, labels=labels)
-for v in range(image_rav.min(), image_rav.max() + 1):
-    plt.axhline(v - 0.5, linestyle=':')
-    plt.text(0, v - 0.15, "val : %i" % v, fontsize=8)
-plt.axhline(v + 0.5, linestyle=':')
-plt.xlim(xmin=0)
-plt.title('Max tree')
-plt.tight_layout()
-plt.axis('off')
+plot_tree(nx_max_tree, pos_mt, ax2, title='Max tree', labels=labels)
 
-# canonical max-tree
-plt.sca(ax3)
-nx.draw_networkx(CMT, pos=pos_cmt,
-                 node_size=40, node_shape='s', node_color='white',
-                 font_size=8)
-for v in range(image_rav.min(), image_rav.max() + 1):
-    plt.axhline(v - 0.5, linestyle=':')
-    plt.text(0, v - 0.15, "val : %i" % v, fontsize=8)
-plt.axhline(v + 0.5, linestyle=':')
-plt.xlim(xmin=0)
-plt.title('Canonical max tree')
-plt.tight_layout()
-plt.axis('off')
+plot_tree(canonical_max_tree, pos_cmt, ax3, title='Canonical max tree')
+
+fig.tight_layout()
+
 plt.show()
