@@ -846,7 +846,6 @@ def _mean_std(image, w):
         w = (w,) * image.ndim
     _validate_window_size(w)
 
-
     pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
