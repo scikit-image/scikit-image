@@ -792,6 +792,26 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
+def _validate_window_size(axis_sizes):
+    """Ensure all sizes in ``axis_sizes`` are odd.
+
+    Parameters
+    ----------
+    axis_sizes : iterable of int
+
+    Raises
+    ------
+    ValueError
+        If any given axis size is even.
+    """
+    for axis_size in axis_sizes:
+        if axis_size % 2 == 0:
+            msg = ('Window size for `threshold_sauvola` or '
+                   '`threshold_niblack` must not be even on any dimension. '
+                   'Got {}'.format(axis_sizes))
+            raise ValueError(msg)
+
+
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
@@ -802,16 +822,17 @@ def _mean_std(image, w):
     ----------
     image : ndarray
         Input image.
-    w : int, tuple or list of integer
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    w : int, or iterable of int
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
 
     Returns
     -------
-    m : 2-D array of same size of image with local mean values.
-    s : 2-D array of same size of image with local standard
-        deviation values.
+    m : ndarray of float, same shape as ``image``
+        Local mean of the image.
+    s : ndarray of float, same shape as ``image``
+        Local standard deviation of the image.
 
     References
     ----------
@@ -821,25 +842,11 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    def _sanity_check_window_size(axis_size):
-        if axis_size % 2 == 0:
-            raise ValueError(
-                "Window size w = {} must be odd."
-                .format(axis_size)
-            )
+    if not isinstance(w, Iterable):
+        w = (w,) * image.ndim
+    _validate_window_size(w)
 
-    if isinstance(w, Iterable):
-        for axis in w:
-            _sanity_check_window_size(axis)
-        kern_size = tuple(w_ + 1 for w_ in w)
-    else:
-        _sanity_check_window_size(w)
-        kern_size = (w + 1, ) * image.ndim
-        w = (w, ) * image.ndim
-
-    total_window_size = np.prod(w)
-
-    pad_width = tuple((k_ // 2 + 1, k_ // 2) for k_ in w)
+    pad_width = tuple((k // 2 + 1, k // 2) for k in w)
     padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
     padded_sq = padded * padded
@@ -847,10 +854,11 @@ def _mean_std(image, w):
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros(kern_size)
+    kern = np.zeros(tuple(k + 1 for k in w))
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
+    total_window_size = np.prod(w)
     sum_full = ndi.correlate(integral, kern, mode='constant')
     m = crop(sum_full, pad_width) / total_window_size
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
@@ -878,10 +886,10 @@ def threshold_niblack(image, window_size=15, k=0.2):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer, optional
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    window_size : int, or iterable of int, optional
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of parameter k in threshold formula.
 
@@ -929,10 +937,10 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     ----------
     image: ndarray
         Input image.
-    window_size : int, tuple or list of integer, optional
-        Odd size window specified as a single integer (e.g., 3, 5,
-        etc.) or a tuple of the same dimension than ``image``
-        containing odd integers (e.g., (3, 5)).
+    window_size : int, or iterable of int, optional
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional
