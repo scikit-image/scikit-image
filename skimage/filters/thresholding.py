@@ -887,7 +887,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     ----------
     image: ndarray
         Input image.
-    window_size : int, or iterable of int
+    window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
         integers (e.g. ``(1, 5, 5)``).
@@ -938,7 +938,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     ----------
     image: ndarray
         Input image.
-    window_size : int, or iterable of int
+    window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
         integers (e.g. ``(1, 5, 5)``).
