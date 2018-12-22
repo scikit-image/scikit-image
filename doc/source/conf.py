@@ -52,7 +52,7 @@ sphinx_gallery_conf = {
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples',
     'backreferences_dir': 'api',
-    'reference_url'     : {'skimage': None,},
+    'reference_url': {'skimage': None, },
     'subsection_order': SubsectionOrder(),
     'within_subsection_order': ExamplesOrder
 }
