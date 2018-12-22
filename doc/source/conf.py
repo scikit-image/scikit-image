@@ -13,6 +13,7 @@
 
 import sys
 import os
+from gallery_order import SubsectionOrder, ExamplesOrder
 import skimage
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -51,9 +52,10 @@ sphinx_gallery_conf = {
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples',
     'backreferences_dir': 'api',
-    'reference_url'     : {
-            'skimage': None,}
-    }
+    'reference_url'     : {'skimage': None,},
+    'subsection_order': SubsectionOrder(),
+    'within_subsection_order': ExamplesOrder
+}
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
