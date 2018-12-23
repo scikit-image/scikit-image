@@ -13,7 +13,6 @@
 
 import sys
 import os
-from gallery_order import SubsectionOrder, ExamplesOrder
 import skimage
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -24,6 +23,7 @@ import skimage
 curpath = os.path.dirname(__file__)
 sys.path.append(os.path.join(curpath, '..', 'ext'))
 
+from gallery_order import SubsectionOrder, ExamplesOrder
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
