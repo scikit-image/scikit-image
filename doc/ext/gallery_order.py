@@ -1,3 +1,4 @@
+import sys
 from os import path
 from collections import OrderedDict
 from sphinx_gallery.sorting import ExplicitOrder
@@ -141,5 +142,5 @@ class ExamplesOrder:
         if filename in examples:
             return examples.index(filename)
         else:
-            raise ValueError('{} is not specified in the gallery order'
-                             .format(filename))
+            # Add it to the end
+            return sys.maxsize
