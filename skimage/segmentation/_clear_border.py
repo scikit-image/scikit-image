@@ -18,7 +18,8 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
         Whether or not to manipulate the labels array in-place.
     mask : ndarray of bool, same shape as `image`, optional.
         Image data mask. Objects in labels image overlapping with
-        True pixels of mask will be removed.
+        False pixels of mask will be removed. If defined, the 
+        argument buffer_size will be ignored.
     Returns
     -------
     out : (M[, N[, ..., P]]) array
@@ -41,12 +42,12 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 1, 1, 1, 1, 1, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> mask = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ...                  [1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ...                  [1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ...                  [1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ...                  [1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ...                  [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    >>> mask = np.array([[0, 1, 1, 1, 1, 1, 1, 1, 1],
+    ...                  [0, 1, 1, 1, 1, 1, 1, 1, 1],
+    ...                  [0, 1, 1, 1, 1, 1, 1, 1, 1],
+    ...                  [0, 1, 1, 1, 1, 1, 1, 1, 1],
+    ...                  [0, 1, 1, 1, 1, 1, 1, 1, 1],
+    ...                  [0, 0, 0, 0, 0, 0, 0, 0, 0]]).astype(np.bool)
     >>> clear_border(labels, mask=mask)
     array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -68,7 +69,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
                err_msg.format(image.shape, mask.shape)
         if mask.dtype != np.bool_:
             raise TypeError("mask should be of type bool.")
-        borders = mask
+        borders = ~mask
     else:
         # create borders with buffer_size
         borders = np.zeros_like(image, dtype=np.bool_)

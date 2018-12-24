@@ -29,12 +29,12 @@ def test_clear_border():
     assert_array_equal(result, 2 * np.ones_like(image))
 
     # test mask
-    mask = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    mask = np.array([[0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 0, 0, 0, 0, 0, 0, 0, 0]]).astype(np.bool)
     result = clear_border(image.copy(), mask=mask)
     ref = image.copy()
     ref[2, 0] = 0
