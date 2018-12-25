@@ -91,10 +91,8 @@ def astronaut():
     1995. She retired in 2006 after spending a total of 38 days, 8 hours
     and 10 minutes in outer space.
 
-    This image was downloaded from the NASA Great Images database
-    <https://flic.kr/p/r9qvLn>`__.
-
-    No known copyright restrictions, released into the public domain.
+    This image was downloaded from the NASA Great Images `database
+    <https://flic.kr/p/r9qvLn>`__ and falls under CC0 license by NASA.
 
     Returns
     -------
@@ -110,10 +108,9 @@ def text():
 
     Notes
     -----
-    This image was downloaded from Wikipedia
-    <https://en.wikipedia.org/wiki/File:Corner.png>`__.
-
-    No known copyright restrictions, released into the public domain.
+    This image was downloaded from `Wikipedia
+    <https://en.wikipedia.org/wiki/File:Corner.png>`__ and
+    falls under CC0 license.
 
     Returns
     -------
@@ -154,7 +151,7 @@ def coins():
     `Brooklyn Museum Collection
     <https://www.brooklynmuseum.org/opencollection/archives/image/51611>`__.
 
-    No known copyright restrictions.
+    This image probably falls under CC0 license.
 
     Returns
     -------
@@ -207,9 +204,9 @@ def horse():
     """Black and white silhouette of a horse.
 
     This image was downloaded from
-    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
+    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`__
 
-    Released into public domain and drawn and uploaded by Andreas Preuss
+    Released under CC0 and drawn and uploaded by Andreas Preuss
     (marauder).
 
     Returns
@@ -228,7 +225,9 @@ def clock():
     aproximately horizontal direction.  It may be used to illustrate
     inverse filters and deconvolution.
 
-    Released into the public domain by the photographer (Stefan van der Walt).
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
 
     Returns
     -------
@@ -248,7 +247,7 @@ def immunohistochemistry():
     This image was acquired at the Center for Microscopy And Molecular Imaging
     (CMMI).
 
-    No known copyright restrictions.
+    This image probably falls under CC0 license.
 
     Returns
     -------
@@ -308,8 +307,10 @@ def hubble_deep_field():
     `HubbleSite
     <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
 
-    The image was captured by NASA and `may be freely used in the public domain
-    <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
+    The image was captured by `NASA
+    <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`__
+    and falls under CC0 license.
+
 
     Returns
     -------
@@ -331,8 +332,9 @@ def rocket():
     `SpaceX Photos
     <https://www.flickr.com/photos/spacexphotos/16511594820/in/photostream/>`__.
 
-    The image was captured by SpaceX and `released in the public domain
-    <http://arstechnica.com/tech-policy/2015/03/elon-musk-puts-spacex-photos-into-the-public-domain/>`_.
+    The image was captured by `SpaceX
+    <http://arstechnica.com/tech-policy/2015/03/elon-musk-puts-spacex-photos-into-the-public-domain/>`__
+    and falls under CC0 license.
 
     Returns
     -------
