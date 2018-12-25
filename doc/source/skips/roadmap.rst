@@ -88,10 +88,10 @@ References
 
 To find out more about the history of this document, please read the following:
 
-- Original blog post
-- GitHub post
-- image.sc forum post
-- This GitHub pull request
+- Original blog post [1]_
+- The GitHub issue [5]_
+- The image.sc forum post [6]_
+- The SKIP GitHub pull request [7]_
 
 Footnotes
 ---------
@@ -118,7 +118,7 @@ don't mind keeping this off our plate for the moment.
 Magical thinking
 ----------------
 
-Philipp Hanslovsky suggested [5]_ that, regarding "doing magic", it is
+Philipp Hanslovsky suggested [8]_ that, regarding "doing magic", it is
 advisable in some contexts, and a good solution is to provide a magic layer
 built on top of the non-magical one. I agree with this assessment, but, until
 1.0, I'm happy for scikit-image to remain the non-magic layer.
@@ -130,4 +130,7 @@ References
 ..[2]: https://en.wikipedia.org/wiki/Functional_programming
 ..[3]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/4
 ..[4]: https://www.python.org/dev/peps/pep-0020/
-..[5]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/3
+..[5]: https://github.com/scikit-image/scikit-image/issues/3263
+..[6]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099
+..[7]: https://github.com/scikit-image/scikit-image/pull/3585
+..[8]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/3
