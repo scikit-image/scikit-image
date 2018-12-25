@@ -59,8 +59,6 @@ Our values
   the vein of Photoshop or GIMP. This often means prioritizing n-dimensional
   data support, and rejecting implementations of "flashy" filters that have
   little scientific value.
-- We are inclusive. We will continue to welcome and mentor newcomers who are
-  making their first contribution.
 - We require excellent documentation. All functions should have docstrings,
   preferably with doctest examples, as well as gallery examples that showcase
   how that function is used in a scientific application. Good documentation is
@@ -71,6 +69,8 @@ Our values
   we prefer to educate users rather than make decisions on their behalf. This
   does not preclude sensible defaults, but it does preclude *value-dependent*
   behavior that is not controllable by the user. [3]_
+- We are inclusive. We will continue to welcome and mentor newcomers who are
+  making their first contribution.
 - We are community-driven. Decisions about the API and features are driven by
   our users' requirements, not by the whims of the core team.
 
