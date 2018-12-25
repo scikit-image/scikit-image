@@ -118,8 +118,16 @@ don't mind keeping this off our plate for the moment.
 Magical thinking
 ----------------
 
-Philipp Hanslovsky suggested [4]_ that, regarding "doing magic", it is
+Philipp Hanslovsky suggested [5]_ that, regarding "doing magic", it is
 advisable in some contexts, and a good solution is to provide a magic layer
 built on top of the non-magical one. I agree with this assessment, but, until
 1.0, I'm happy for scikit-image to remain the non-magic layer.
 
+References
+==========
+
+..[1]: https://ilovesymposia.com/2018/07/13/the-road-to-scikit-image-1-0/
+..[2]: https://en.wikipedia.org/wiki/Functional_programming
+..[3]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/4
+..[4]: https://www.python.org/dev/peps/pep-0020/
+..[5]: https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/3
