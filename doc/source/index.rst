@@ -19,6 +19,7 @@ Sections
    api_changes
    install
    user_guide
+   glossary
    contribute
    license
    auto_examples/index
@@ -44,19 +45,22 @@ Sections
 
        Usage guidelines.
 
-   * - `Contribute <contribute.html>`_
+   * - `Glossary <glossary.html>`_
+
+       Definitions of common terms.
+     
+     - `Contribute <contribute.html>`_
 
        Take part in development.
 
-     - `License Info <license.html>`_
-
-       Conditions on the use and redistribution of this package.
 
    * - `Examples <auto_examples/index.html>`_
 
        Introductory examples
 
-     -
+     - `License Info <license.html>`_
+
+       Conditions on the use and redistribution of this package.
 
 
 
