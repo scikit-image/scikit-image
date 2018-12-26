@@ -14,11 +14,6 @@ functions to characterize the tree components.
 """
 
 import numpy as np
-
-from libc.stdlib cimport free, malloc, realloc
-from scipy.constants import point
-from cProfile import label
-
 cimport numpy as np
 cimport cython
 
