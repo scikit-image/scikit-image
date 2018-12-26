@@ -49,6 +49,7 @@ Work in progress
         with less than 255 labels). See :ref:`data_types`. 
 
     labels
+    label image
         An image of labels is of integer type, where pixels with the same
         integer value belong to the same object. For example, the result of a
         segmentation is an image of labels. :func:`measure.label` labels
