@@ -80,9 +80,9 @@ for dataset in datasets.values():
     ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
     ax[1, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[1, 2].axis('off')
-    plt.suptitle(dataset['title'], fontsize=18)
-    plt.tight_layout(rect=(0, 0, 1, 0.88))
-    #plt.tight_layout()
+    fig.suptitle(dataset['title'], fontsize=18)
+    fig.tight_layout(rect=(0, 0, 1, 0.88))
+
     plt.show()
 
 
