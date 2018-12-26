@@ -28,9 +28,9 @@ Work in progress
     float values
         Representation of real numbers, for example as :obj:`np.float32` or
         :obj:`np.float64`. See :ref:`data_types`. Some operations on images
-        need a float datatype (such as multiplicating image values with
+        need a float datatype (such as multiplying image values with
         exponential prefactors in :func:`filters.gaussian`), so that 
-        image of integer type are converted to float type internally. Also
+        images of integer type are often converted to float type internally. Also
         see :term:`int` values.
 
     histogram
@@ -49,6 +49,7 @@ Work in progress
         with less than 255 labels). See :ref:`data_types`. 
 
     labels
+    label image
         An image of labels is of integer type, where pixels with the same
         integer value belong to the same object. For example, the result of a
         segmentation is an image of labels. :func:`measure.label` labels
