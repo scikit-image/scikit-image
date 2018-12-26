@@ -30,7 +30,7 @@ Work in progress
         :obj:`np.float64`. See :ref:`data_types`. Some operations on images
         need a float datatype (such as multiplying image values with
         exponential prefactors in :func:`filters.gaussian`), so that 
-        image of integer type are converted to float type internally. Also
+        images of integer type are often converted to float type internally. Also
         see :term:`int` values.
 
     histogram
