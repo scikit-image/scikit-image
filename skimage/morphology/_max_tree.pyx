@@ -41,11 +41,25 @@ ctypedef fused dtype_t:
 
 cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent,
                                        DTYPE_INT64_t index):
-    """recursive function to get the root of the current tree. Importantly, the
-    function changes the tree (path compression), that reduces the complexity
-    from O(n*n) to O(n*log(n)). Despite of path compression, our tests showed
-    that the non-recursive version seems to perform better. We leave this
-    version for future improvements.
+    """Get the root of the current tree through a recursive algorithm.
+
+    This function modifies the tree in-place through path compression, which
+    reduces the complexity from O(n*n) to O(n*log(n)). Despite path
+    compression, our tests showed that the non-recursive version
+    (:func:`find_root`) seems to perform better. We leave this version as
+    inspiration for future improvements.
+
+    Parameters
+    ----------
+    parent : array of int
+        The array containing parent relationships.
+    index : int
+        The index of which we want to find the root.
+
+    Returns
+    -------
+    root : int
+        The root found from ``index``.
     """
     if parent[index] != index:
         parent[index] = find_root_recursive(parent, parent[index])
@@ -54,9 +68,23 @@ cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent,
 
 cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
                                     DTYPE_INT64_t index):
-    """function to get the root of the current tree. Here, we do without path
-    compression and accept the higher complexity, but the function is inline
-    and avoids some overhead induced by its recursive version.
+    """Get the root of the current tree.
+
+    Here, we do without path compression and accept the higher complexity, but
+    the function is inline and avoids some overhead induced by its recursive
+    version.
+
+    Parameters
+    ----------
+    parent : array of int
+        The array containing parent relationships.
+    index : int
+        The index of which we want to find the root.
+
+    Returns
+    -------
+    root : int
+        The root found from ``index``.
     """
     while parent[index] != parent[parent[index]]:
         parent[index] = parent[parent[index]]
@@ -64,12 +92,24 @@ cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
 
 
 cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
-                   DTYPE_INT64_t[::1] sorted_indices):
-    """generates a max-tree for which every node's parent is a canonical node.
+                        DTYPE_INT64_t[::1] sorted_indices):
+    """Generate a max-tree for which every node's parent is a canonical node.
+
     The parent of a non-canonical pixel is a canonical pixel.
     The parent of a canonical pixel is also a canonical pixel with a different
     value. There is exactly one canonical pixel for each component in the
     component tree.
+
+    Parameters
+    ----------
+    image : array
+        The raveled image intensity values.
+    parent : array of int
+        The array mapping image indices to their parents in the max-tree.
+        **This array will be modified in-place.**
+    sorted_indices : array of int
+        Array of image indices such that if i comes before j, then i cannot
+        be the parent of j.
     """
     cdef DTYPE_INT64_t q = 0
     cdef DTYPE_INT64_t p
@@ -82,8 +122,9 @@ cdef void canonize(dtype_t[::1] image, DTYPE_INT64_t[::1] parent,
 cdef np.ndarray[DTYPE_INT32_t, ndim=2] unravel_offsets(
                                     DTYPE_INT32_t[::1] offsets,
                                     DTYPE_INT32_t[::1] shape):
-    """Unravels a list of offset indices. These offsets can be (and normally
-    are) negative. The function generates an array of shape
+    """Unravel a list of offset indices.
+
+    These offsets can be negative. The function generates an array of shape
     (number of offsets, image dimensions), where each row corresponds
     to the coordinates of each point.
 
@@ -115,10 +156,21 @@ cdef np.ndarray[DTYPE_INT32_t, ndim=2] unravel_offsets(
 cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
                                       DTYPE_INT32_t[::1] coordinates,
                                       DTYPE_INT32_t[::1] shape):
-    """checks whether a neighbor of a given pixel is inside the image plane.
-    The pixel is given in form of an index in a raveled array, the neighbor
-    is given as a list of coordinates (offset). If the neighbor falls outside
-    the image, the function gives back 0, otherwise 1.
+    """Check whether a neighbor of a given pixel is inside the image.
+
+    Parameters
+    ----------
+    index : int
+        The pixel given as a linear index into the raveled image array.
+    coordinates : array of int, shape ``image.ndim``
+        The neighbor given as a list of offsets from `pixel` in each dimension.
+    shape : array of int, shape ``image.ndim`
+        The image shape.
+
+    Returns
+    -------
+    is_neighbor : uint8
+        0 if the neighbor falls outside the image, 1 otherwise.
     """
 
     cdef DTYPE_INT64_t number_of_dimensions = len(shape)
@@ -144,8 +196,9 @@ cdef DTYPE_UINT8_t _is_valid_neighbor(DTYPE_INT64_t index,
 cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_area(dtype_t[::1] image,
                                             DTYPE_INT64_t[::1] parent,
                                             DTYPE_INT64_t[::1] sorted_indices):
-    """computes the area of all max-tree components
-    attribute to be used in area opening and closing
+    """Compute the area of all max-tree components.
+
+    This attribute is used for area opening and closing
     """
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
@@ -167,8 +220,9 @@ cpdef np.ndarray[DTYPE_FLOAT64_t, ndim=1] _compute_extension(
                                             DTYPE_INT32_t[::1] shape,
                                             DTYPE_INT64_t[::1] parent,
                                             DTYPE_INT64_t[::1] sorted_indices):
-    """computes the bounding box extension of all max-tree components
-    attribute to be used in diameter opening and closing
+    """Compute the bounding box extension of all max-tree components.
+
+    This attribute is used for diameter opening and closing.
     """
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
@@ -203,7 +257,7 @@ cpdef void _max_tree_local_maxima(dtype_t[::1] image,
                                   DTYPE_INT64_t[::1] parent,
                                   DTYPE_INT64_t[::1] sorted_indices
                                   ):
-    """Finds the local maxima in image from the max-tree representation.
+    """Find the local maxima in image from the max-tree representation.
 
     Parameters
     ----------
@@ -269,33 +323,35 @@ cpdef void _direct_filter(dtype_t[::1] image,
                           DTYPE_FLOAT64_t[::1] attribute,
                           DTYPE_FLOAT64_t attribute_threshold
                           ):
-    """Direct filtering. Produces an image in which for all possible
-    thresholds, each connected component has an
-    attribute >= attribute_threshold. This is the basic function
-    which is called by area_opening, diameter_opening, etc.
-    For area_opening for instance, the attribute has to be the area.
-    In this case, an image is produced for which all connected
-    components for all thresholds have at least an area (pixel count)
-    of the threshold given by the user.
+    """Apply a direct filtering.
+
+    This produces an image in which for all possible thresholds, each connected
+    component has the specified attribute value greater than that threshold.
+    This is the basic function called by :func:`area_opening`,
+    :func:`diameter_opening`, and similar.
+
+    For :func:`area_opening`, for instance, the attribute is the area.  In this
+    case, an image is produced for which all connected components for all
+    thresholds have at least an area (pixel count) of the threshold given by
+    the user.
 
     Parameters
     ----------
 
-    image : array of arbitrary type
-            The flattened image pixels.
-    output : array of the same shape and type as image.
-    parent : array of int
-        Image of the same shape as the input image. The value
-        at each pixel is the parent index of this pixel in the max-tree
-        reprentation.
-    sorted_indices : array of int
-        List of length = number of pixels. Each element
-        corresponds to one pixel index in the image. It encodes the order
-        of elements in the tree: a parent of a pixel always comes before
-        the element itself. More formally: i < j implies that j cannot be
-        the parent of i.
+    image : array
+        The flattened image pixels.
+    output : array, same size and type as `image`
+        The array into which to write the output values. **This array will be
+        modified in-place.**
+    parent : array of int, same shape as `image`
+        Image of indices. The value at each pixel is the index of this pixel's
+        parent in the max-tree reprentation.
+    sorted_indices : array of int, same shape as `image`
+        "List" of pixel indices, which contains an ordering of elements in the
+        tree such that a parent of a pixel always comes before the element
+        itself. More formally: i < j implies that j cannot be the parent of i.
     attribute : array of float
-        Contains the attributes for the max-tree
+        Contains the attributes computed for the max-tree.
     attribute_threshold : float
         The threshold to be applied to the attribute.
     """
@@ -344,32 +400,29 @@ cpdef void _max_tree(dtype_t[::1] image,
                      DTYPE_INT64_t[::1] parent,
                      DTYPE_INT64_t[::1] sorted_indices
                      ):
-    """Builds a max-tree.
+    """Build a max-tree.
 
     Parameters
     ----------
-
-    image : array of arbitrary type
+    image : array
         The flattened image pixels.
     mask : array of int
         An array of the same shape as `image` where each pixel contains a
-        nonzero value if it is to be considered for the filtering.
-        NOTE: it is *essential* that the border pixels (those
-        with neighbors falling outside the volume) are all set to zero, or
-        segfaults could occur.
+        nonzero value if it is to be considered for the filtering.  NOTE: it is
+        *essential* that the border pixels (those with neighbors falling
+        outside the volume) are all set to zero, or segfaults could occur.
     structure : array of int
         A list of coordinate offsets to compute the raveled coordinates of each
         neighbor from the raveled coordinates of the current pixel.
     parent : array of int
-        First output: image of the same shape as the input image. The value
-        at each pixel is the parent index of this pixel in the max-tree
-        reprentation.
+        Output image of the same shape as the input image. The value at each
+        pixel is the parent index of this pixel in the max-tree reprentation.
+        **This array will be written to in-place.**
     tree_order : array of int
-        Second output: list of length = number of pixels. Each element
-        corresponds to one pixel index in the image. It encodes the order
-        of elements in the tree: a parent of a pixel always comes before
-        the element itself. More formally: i < j implies that j cannot be
-        the parent of i.
+        Output "list" of pixel indices, which contains an ordering of elements in the
+        tree such that a parent of a pixel always comes before the element
+        itself. More formally: i < j implies that j cannot be the parent of i.
+        the parent of i. **This array will be written to in-place.**
     """
 
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
