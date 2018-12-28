@@ -1,7 +1,7 @@
 """max_tree.py - max_tree representation of images.
 
 This module provides operators based on the max-tree representation of images.
-A grey scale image can be seen as a pile of nested sets, each of which is the
+A grayscale image can be seen as a pile of nested sets, each of which is the
 result of a threshold operation. These sets can be efficiently represented by
 max-trees, where the inclusion relation between connected components at
 different levels are represented by parent-child relationships.
@@ -52,7 +52,7 @@ signed_float_types = [np.float16, np.float32, np.float64]
 
 # building the max tree.
 def max_tree(image, connectivity=2):
-    """Builds the max tree from an image
+    """Build the max tree from an image.
 
     Component trees represent the hierarchical structure of the connected
     components resulting from sequential thresholding operations applied to an
@@ -60,7 +60,7 @@ def max_tree(image, connectivity=2):
     higher level if the latter is included in the first. A max-tree is an
     efficient representation of a component tree. A connected component at
     one level is represented by one reference pixel at this level, which is
-    parent to all other pixels at that level and the reference pixel at the
+    parent to all other pixels at that level and to the reference pixel at the
     level above. The max-tree is the basis for many morphological operators,
     namely connected operators.
 
@@ -90,20 +90,20 @@ def max_tree(image, connectivity=2):
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           DOI:10.1109/83.663500
+           :DOI:`10.1109/83.663500`
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
            In International Conference on Image Processing (ICIP) (pp. 41-44).
-           DOI:10.1109/ICIP.2007.4379949
+           :DOI:`10.1109/ICIP.2007.4379949`
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           DOI:10.1109/TIP.2006.877518
+           :DOI:`10.1109/TIP.2006.877518`
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
     Examples
     --------
@@ -132,7 +132,7 @@ def max_tree(image, connectivity=2):
     flat_neighborhood = _offsets_to_raveled_neighbors(image.shape, neighbors,
                                                       offset).astype(np.int32)
 
-    # pixels need to be sorted according to their grey level.
+    # pixels need to be sorted according to their gray level.
     tree_traverser = np.argsort(image.ravel()).astype(np.int64)
 
     # call of cython function.
@@ -146,7 +146,7 @@ def max_tree(image, connectivity=2):
 
 def area_opening(image, area_threshold=25, connectivity=2,
                  parent=None, tree_traverser=None):
-    """Performs an area opening of the image.
+    """Perform an area opening of the image.
 
     Area opening removes all bright structures of an image with
     a surface smaller than area_threshold.
@@ -160,7 +160,7 @@ def area_opening(image, area_threshold=25, connectivity=2,
     with area_threshold=1 is the identity.
 
     In the binary case, area openings are equivalent to
-    remove_small_objects; this operator is thus extended to grey-level images.
+    remove_small_objects; this operator is thus extended to gray-level images.
 
     Technically, this operator is based on the max-tree representation of
     the image.
@@ -256,7 +256,7 @@ def area_opening(image, area_threshold=25, connectivity=2,
 
 def diameter_opening(image, diameter_threshold=5, connectivity=2,
                      parent=None, tree_traverser=None):
-    """Performs a diameter opening of the image.
+    """Perform a diameter opening of the image.
 
     Diameter opening removes all bright structures of an image with
     maximal extension smaller than diameter_threshold. The maximal
@@ -306,11 +306,11 @@ def diameter_opening(image, diameter_threshold=5, connectivity=2,
            of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
            A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
            Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-           DOI:10.1007/3-540-36104-9_23
+           :DOI:`10.1007/3-540-36104-9_23`
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
     Examples
     --------
@@ -347,7 +347,7 @@ def diameter_opening(image, diameter_threshold=5, connectivity=2,
 
 def area_closing(image, area_threshold=25, connectivity=2,
                  parent=None, tree_traverser=None):
-    """Performs an area closing of the image.
+    """Perform an area closing of the image.
 
     Area closing removes all dark structures of an image with
     a surface smaller than area_threshold.
@@ -360,7 +360,7 @@ def area_closing(image, area_threshold=25, connectivity=2,
     one, with surface = area_threshold.
 
     In the binary case, area closings are equivalent to
-    remove_small_holes; this operator is thus extended to grey-level images.
+    remove_small_holes; this operator is thus extended to gray-level images.
 
     Technically, this operator is based on the max-tree representation of
     the image.
@@ -408,19 +408,19 @@ def area_closing(image, area_threshold=25, connectivity=2,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-           DOI:10.1007/978-3-662-05088-0
+           :DOI:`10.1007/978-3-662-05088-0`
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           DOI:10.1109/83.663500
+           :DOI:`10.1109/83.663500`
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           DOI:10.1109/TIP.2006.877518
+           :DOI:`10.1109/TIP.2006.877518`
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
 
     Examples
@@ -472,7 +472,7 @@ def area_closing(image, area_threshold=25, connectivity=2,
 
 def diameter_closing(image, diameter_threshold=5, connectivity=2,
                      parent=None, tree_traverser=None):
-    """Performs a diameter closing of the image.
+    """Perform a diameter closing of the image.
 
     Diameter closing removes all dark structures of an image with
     maximal extension smaller than diameter_threshold. The maximal
@@ -524,11 +524,11 @@ def diameter_closing(image, diameter_threshold=5, connectivity=2,
            of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
            A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
            Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-           DOI:10.1007/3-540-36104-9_23
+           :DOI:`10.1007/3-540-36104-9_23`
     .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
     Examples
     --------
@@ -581,7 +581,7 @@ def max_tree_local_maxima(image, connectivity=2,
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
-    grey level strictly greater than the grey levels of all pixels in direct
+    gray level strictly greater than the gray levels of all pixels in direct
     neighborhood of the set. The function labels the local maxima.
 
     Technically, the implementation is based on the max-tree representation
@@ -624,19 +624,19 @@ def max_tree_local_maxima(image, connectivity=2,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-           DOI:10.1007/978-3-662-05088-0
+           :DOI:`10.1007/978-3-662-05088-0`
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           DOI:10.1109/83.663500
+           :DOI:`10.1109/83.663500`
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           DOI:10.1109/TIP.2006.877518
+           :DOI:`10.1109/TIP.2006.877518`
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
     Examples
     --------
