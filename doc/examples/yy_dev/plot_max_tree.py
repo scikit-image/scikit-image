@@ -45,15 +45,13 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from skimage.morphology import max_tree
 import networkx as nx
-from matplotlib.gridspec import GridSpec
 
 
 #####################################################################
 # Before we start : a few helper functions
 
-# plot_img is a helper function to plot the images and overlay the image
-# values or indices.
 def plot_img(image, ax, title, plot_text, image_values):
+    """Plot an image, overlaying image values or indices."""
     ax.imshow(image, cmap='gray', aspect='equal', vmin=0, vmax=np.max(image))
     ax.set_title(title)
     ax.set_yticks([])
@@ -76,8 +74,8 @@ def plot_img(image, ax, title, plot_text, image_values):
     return
 
 
-# prune transforms a canonical max-tree to a max-tree.
 def prune(G, node, res):
+    """Transform a canonical max tree to a max tree."""
     value = G.nodes[node]['value']
     res[node] = str(node)
     preds = [p for p in G.predecessors(node)]
@@ -91,8 +89,8 @@ def prune(G, node, res):
     return
 
 
-# accumulate transforms a max-tree to a component tree.
 def accumulate(G, node, res):
+    """Transform a max tree to a component tree."""
     total = G.nodes[node]['label']
     parents = G.predecessors(node)
     for p in parents:
@@ -101,9 +99,12 @@ def accumulate(G, node, res):
     return total
 
 
-# sets the positions of a max-tree. This is necessary to visually distinguish
-# between nodes at the same level and nodes at different levels.
 def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
+    """Set the position of nodes of a max-tree.
+
+    This function helps to visually distinguish between nodes at the same
+    level of the hierarchy and nodes at different levels.
+    """
     pos = {}
     for node in reversed(list(nx.topological_sort(canonical_max_tree))):
         value = G.nodes[node]['value']
@@ -153,9 +154,10 @@ def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
 
     return pos
 
-# plot max and component trees
+
 def plot_tree(graph, positions, ax, *, title='', labels=None,
               font_size=8, text_size=8):
+    """Plot max and component trees."""
     nx.draw_networkx(graph, pos=positions, ax=ax,
                      node_size=40, node_shape='s', node_color='white',
                      font_size=font_size, labels=labels)
