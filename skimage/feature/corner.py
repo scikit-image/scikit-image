@@ -503,8 +503,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] https://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -573,8 +572,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] https://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -1000,8 +998,7 @@ def corner_moravec(image, window_size=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    .. [2] https://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
