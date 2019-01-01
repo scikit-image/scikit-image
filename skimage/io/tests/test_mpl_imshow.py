@@ -4,7 +4,7 @@ from skimage import io
 from skimage._shared._warnings import expected_warnings
 import matplotlib.pyplot as plt
 
-C
+
 def setup():
     io.reset_plugins()
 
