@@ -4,7 +4,7 @@ from skimage import io
 from skimage._shared._warnings import expected_warnings
 import matplotlib.pyplot as plt
 
-
+C
 def setup():
     io.reset_plugins()
 
@@ -104,10 +104,6 @@ def test_outside_standard_range():
 
 def test_nonstandard_type():
     plt.figure()
-    # Warning raised by matplotlib on Windows:
-    # "The CObject type is marked Pending Deprecation in Python 2.7.
-    #  Please use capsule objects instead."
-    # Ref: https://docs.python.org/2/c-api/cobject.html
     with expected_warnings(imshow_expected_warnings +
                            ["Low image data range"]):
         ax_im = io.imshow(im64)
