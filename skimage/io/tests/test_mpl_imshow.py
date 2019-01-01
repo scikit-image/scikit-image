@@ -18,6 +18,19 @@ imf = im8 / 255
 im_lo = imf / 1000
 im_hi = imf + 10
 
+imshow_expected_warnings = [
+    r"tight_layout : falling back to Agg|\A\Z",
+    # Maptlotlib 2.2.3 seems to use np.asscalar which issues a warning
+    # with numpy 1.16
+    # Matplotlib 2.2.3 is the last supported version for python 2.7
+    r"np.asscalar|\A\Z",
+    # Warning raised by matplotlib on Windows:
+    # "The CObject type is marked Pending Deprecation in Python 2.7.
+    #  Please use capsule objects instead."
+    # Ref: https://docs.python.org/2/c-api/cobject.html
+    r"CObject type is marked|\A\Z"
+]
+
 
 def n_subplots(ax_im):
     """Return the number of subplots in the figure containing an ``AxesImage``.
@@ -43,8 +56,7 @@ def n_subplots(ax_im):
 
 def test_uint8():
     plt.figure()
-    with expected_warnings(["tight_layout : falling back to Agg|\A\Z",
-                            "CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings):
         ax_im = io.imshow(im8)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 255)
@@ -54,8 +66,7 @@ def test_uint8():
 
 def test_uint16():
     plt.figure()
-    with expected_warnings(["tight_layout : falling back to Agg|\A\Z",
-                            "CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings):
         ax_im = io.imshow(im16)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 65535)
@@ -65,8 +76,7 @@ def test_uint16():
 
 def test_float():
     plt.figure()
-    with expected_warnings(["tight_layout : falling back to Agg|\A\Z",
-                            "CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings):
         ax_im = io.imshow(imf)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 1)
@@ -75,8 +85,8 @@ def test_float():
 
 
 def test_low_data_range():
-    with expected_warnings(["Low image data range|CObject type is marked",
-                            "tight_layout : falling back to Agg|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings +
+                           [r"Low image data range|\A\Z"]):
         ax_im = io.imshow(im_lo)
     assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
     # check that a colorbar was created
@@ -85,12 +95,8 @@ def test_low_data_range():
 
 def test_outside_standard_range():
     plt.figure()
-    # Warning raised by matplotlib on Windows:
-    # "The CObject type is marked Pending Deprecation in Python 2.7.
-    #  Please use capsule objects instead."
-    # Ref: https://docs.python.org/2/c-api/cobject.html
-    with expected_warnings(["out of standard range|CObject type is marked",
-                            "tight_layout : falling back to Agg|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings +
+                           [r"out of standard range|\A\Z"]):
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
     assert n_subplots(ax_im) == 2
@@ -99,12 +105,8 @@ def test_outside_standard_range():
 
 def test_nonstandard_type():
     plt.figure()
-    # Warning raised by matplotlib on Windows:
-    # "The CObject type is marked Pending Deprecation in Python 2.7.
-    #  Please use capsule objects instead."
-    # Ref: https://docs.python.org/2/c-api/cobject.html
-    with expected_warnings(["Low image data range|CObject type is marked",
-                            "tight_layout : falling back to Agg|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings +
+                           ["Low image data range"]):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
     assert n_subplots(ax_im) == 2
@@ -115,8 +117,7 @@ def test_signed_image():
     plt.figure()
     im_signed = np.array([[-0.5, -0.2], [0.1, 0.4]])
 
-    with expected_warnings(["tight_layout : falling back to Agg|\A\Z",
-                            "CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings):
         ax_im = io.imshow(im_signed)
     assert ax_im.get_clim() == (-0.5, 0.5)
     assert n_subplots(ax_im) == 2

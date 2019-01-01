@@ -57,7 +57,7 @@ from __future__ import division
 from warnings import warn
 import numpy as np
 from scipy import linalg
-from ..util import dtype, dtype_limits
+from ..util.dtype import dtype_limits, img_as_float
 
 
 def guess_spatial_dimensions(image):
@@ -155,7 +155,7 @@ def _prepare_colorarray(arr):
                "got (" + (", ".join(map(str, arr.shape))) + ")")
         raise ValueError(msg)
 
-    return dtype.img_as_float(arr)
+    return img_as_float(arr)
 
 
 def _prepare_rgba_array(arr):
@@ -170,7 +170,7 @@ def _prepare_rgba_array(arr):
                "got {0}".format(arr.shape))
         raise ValueError(msg)
 
-    return dtype.img_as_float(arr)
+    return img_as_float(arr)
 
 
 def rgba2rgb(rgba, background=(1, 1, 1)):
@@ -1408,7 +1408,7 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = dtype.img_as_float(rgb, force_copy=True)
+    rgb = img_as_float(rgb, force_copy=True)
     rgb += 2
     stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
     return np.reshape(stains, rgb.shape)
@@ -1469,7 +1469,7 @@ def combine_stains(stains, conv_matrix):
     """
     from ..exposure import rescale_intensity
 
-    stains = dtype.img_as_float(stains)
+    stains = img_as_float(stains)
     logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
     rgb2 = np.exp(logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
@@ -1575,7 +1575,7 @@ def _prepare_lab_array(arr):
     shape = arr.shape
     if shape[-1] < 3:
         raise ValueError('Input array has less than 3 color channels')
-    return dtype.img_as_float(arr, force_copy=True)
+    return img_as_float(arr, force_copy=True)
 
 
 def rgb2yuv(rgb):
