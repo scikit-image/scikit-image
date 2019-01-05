@@ -778,7 +778,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
-
     """
 
     best_model = None
@@ -790,7 +789,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     if isinstance(min_samples, float):
         if not (0 < min_samples <= 1):
             raise ValueError("`min_samples` as ration must be in range (0, 1)")
-        min_samples = int(min_samples * len(data))
+        min_samples = int(min_samples * len(data[0]))
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
 
