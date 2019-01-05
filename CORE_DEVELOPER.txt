@@ -1,168 +1,126 @@
-So you became a scikit-image core developer
-===========================================
+Core Contributor Guide
+======================
 
-Thank you for your numerous contributions to the project so far. The
-core team has been so impressed by your work that they invited you to
-join them! Congratulations and thank you again!
+Welcome, new core developer!  The core team appreciate the quality of
+your work, and enjoy working with you; we have therefore invited you
+to join us.  Thank you for your numerous contributions to the project
+so far.
 
-This document lays out some guidelines to keep in mind while fulfilling
-your role as a core developer. As you know, anyone can contribute to
-scikit-image at any time via a GitHub pull request. As a core team
-member, your added responsibility is to shepherd those contributions to
-fulfill the `mission, vision, and
-values <https://github.com/scikit-image/scikit-image/pull/3585>`__ of
-the scikit-image project.
+This document offers guidelines for your new role.  First and
+foremost, you should familiarize yourself with the project's
+`mission, vision, and values
+<https://github.com/scikit-image/scikit-image/pull/3585>`__.  When in
+doubt, always refer back here.
 
-This document sets out some guidelines for how best to do that.
+As a core team member, you gain the responsibility of shepherding
+other contributors' through the review process; here are some
+guidelines.
 
-The development model stays the same
-------------------------------------
+All Contributors Are Treated Similarly
+--------------------------------------
 
-Although you now have the ability to push changes directly to the master
-branch, all core developers have agreed to forgo this privilege, and
-instead make changes via one of two modes:
+You now have the ability to push changes directly to the master
+branch, but should never do so; instead, continue making PRs as
+before.
 
-1. Submit your own code as a pull request, and work with two other core
-   developers to merge it. This is the same process as all contributors.
-2. Merge or approve somebody else’s GitHub pull request. This is the new
-   power you get by becoming a core developer, and, much like nuclear
-   launch keys, it is a shared power: you must only merge *after*
-   another core has approved the PR, and after you yourself have
-   carefully reviewed it as well. (See “Reviewing” and especially “If
-   you merge it, you buy it”, below.)
+As a core contributor, you gain the ability to merge merge or approve
+other contributors' pull requests.  Much like nuclear launch keys, it
+is a shared power: you must merge *only after* another core has
+approved the PR, *and* after you yourself have carefully reviewed it.
+(See “Reviewing” and especially “If you merge it, you buy it”,
+below.)
 
 Reviewing
 ---------
 
-About reviews
--------------
+How to Conduct A Good Review
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Always be kind to contributors, past and present. Nearly all of
-scikit-image comes from volunteer work, not directly supported, so its
-very existence is something to be grateful for and even marvel at. This
-is true even if you disagree with some prior API decision or are
-frustrated by a bug that crept in despite the review process. Feel free
-to criticize ideas and implementations, but never be insulting to the
-authors of the code being modified or the code being contributed.
+*Always* be kind to contributors. Nearly all of `scikit-image` is
+volunteer work, for which we are tremendously grateful. Provide
+constructive criticism on ideas and implementations, and remind
+yourself of how it feels when your own work is being evaluated.
 
-scikit-image strongly values mentorship in code review, and this often
-means handholding new contributors, who might have little to no git
-experience, through the revision process. Repeat yourself liberally,
-and, if you don’t recognize a contributor, point them to our development
-guide, or other GitHub workflow tutorials around the web. Don’t assume
-that they know that making another commit will automatically update a
-pull request. Gentle, polite, kind encouragement can be the difference
-between gaining a new core developer or gaining a new abandoned pull
-request. (We have lots of those but we are not collecting them!)
+`scikit-image` strongly values mentorship in code review.  New users
+often need more handholding, having little to no git
+experience. Repeat yourself liberally, and, if you don’t recognize a
+contributor, point them to our development guide, or other GitHub
+workflow tutorials around the web. Do not assume that they know how
+GitHub works (e.g., many don't realize that adding a commit
+automatically updates a pull request). Gentle, polite, kind
+encouragement can make the difference between a new core developer or
+an abandoned pull request.
 
-When reviewing, try to focus most on the API, that is, the part of the
-pull request that new users of scikit-image will see. This is difficult
-and time consuming to change once it has been released, so it’s the most
-important thing to get right from the beginning. Is the API as simple as
-possible? Is it
-`functional <https://en.wikipedia.org/wiki/Functional_programming>`__
-rather than stateful? Does it avoid modifying input variables? Is it
-consistent with other, similar functions in scikit-image?
+When reviewing, focus on the following:
 
-Next in importance, the documentation: any new feature must come with a
-gallery example that shows it off. Make sure that the example doesn’t
-just use the new functionality, but explains it as deeply as possible.
-Would a new user get the idea of the function straight away while
-reading the example?
+1. **API**: The API is what users see when they first use
+   `scikit-image`. APIs are difficult to change once released, so
+   should be  simple, `functional
+   <https://en.wikipedia.org/wiki/Functional_programming>`__ (i.e. not
+   carry state), consistent with other parts of the library, and
+   should avoid modifying input variables.
 
-Next, the algorithm itself: make sure you understand what the code being
-modified or added does. (See “if you merge it, you buy it”, below.) Does
-the algorithm do what it claims to do in the documentation? Does it do
-so in a reasonably effective and readable way, or can you immediately
-see how to simplify it?
+2. **Documentation:** Any new feature should have a gallery
+   example, that not only illustrates but explains it.
 
-In all of the above cases, you should provide guidance to the
-contributor so that they can meet your requirements. Contributions to
-scikit-image should meet all of the above requirements, and come with
-tests (though we have automated tools to check for testing, generally,
-so it is less of a worry for reviewers).
+3. **The algorithm:** You should understand the code being modified or
+   added before approving it.  (See “if you merge it, you buy it”,
+   below.) Implementations should do what they claim, and be simple,
+   readable, and efficient.
 
-There are further changes that are *nitpicky*: spelling mistakes,
-formatting, a missing space. As much as possible, you should avoid
-asking contributors to change these things, and instead either push to
-their branch
-(`Ref1 <https://help.github.com/articles/committing-changes-to-a-pull-request-branch-created-from-a-fork/>`__,
-`Ref2 <https://help.github.com/articles/allowing-changes-to-a-pull-request-branch-created-from-a-fork/>`__)
-or, better yet, use GitHub’s
-`suggestion <https://help.github.com/articles/commenting-on-a-pull-request/>`__
-`feature <https://help.github.com/articles/incorporating-feedback-in-your-pull-request/>`__,
-to make the changes yourself. (The latter is preferred because it gives
-the contributor the ability to see the change and either learn from it
-in accepting it, or defend their original code.) The exception to this
-is in contributions from other core contributors: they have demonstrated
-they have the skills and confidence to fend for themselves. ;) On the
-other hand, nitpicky reviews can be disproportionately discouraging to
-new contributors, who are rightfully not impressed that their
-contribution would be held up over such trivialities.
+4. **Tests:** All contributions to the library *must* be tested.  Good
+   tests not only execute the code, but explores corner cases.  It is
+   tempting not to review tests, but please do so.
 
-Similarly, unless you have a strong indication that the contributor is
-experienced with git, don’t ask them to rebase when there are merge
-conflicts. Instead, get the code to the shape you want it in, and then
-rebase yourself and either force-push to their branch, or submit a new
-pull request to supercede the existing one. (When closing the existing
-one, make sure to communicate that you are not throwing the
-contributor’s work away!)
+Other changes may be *nitpicky*: spelling mistakes, formatting,
+etc. Do not ask contributors to make these changes, and instead
+make the changes by `pushing to their branch
+<https://help.github.com/articles/committing-changes-to-a-pull-request-branch-created-from-a-fork/>`__ [enabling-push-to-branch]_,
+or using GitHub’s `suggestion
+<https://help.github.com/articles/commenting-on-a-pull-request/>`__
+`feature
+<https://help.github.com/articles/incorporating-feedback-in-your-pull-request/>`__.
+(The latter is preferred because it gives the contributor a choice in
+whether to accept the changes.)
 
-After you have made modifications to a contributor’s pull request, make
-sure you point them out, as the contributor might miss them, and miss
-out on a learning opportunity for future contributions.
+.. [enabling-push-to-branch]: https://help.github.com/articles/allowing-changes-to-a-pull-request-branch-created-from-a-fork/
 
-Other core developers
----------------------
+Unless you know that a contributor is experienced with git, don’t
+ask for a rebase when merge conflicts arise. Instead, rebase the
+branch yourself and force-push to their branch.  If the contributor is
+no longer active, you may take over their branch by submitting a new pull
+request.
 
-When you are reviewing a pull request from another core developer, you
-can usually be more relaxed about finishing their work for them. They
-have been through the gauntlet a few times to become core developers, so
-they know how it works and have demonstrated enough persistence that
-they are unlikely to give up after you remind them to put spaces around
-an equals sign.
+Please add a note to a PR after you push new changes; GitHub does not
+send out notifications for these.
 
-However, you should submit *all* nitpicky comments in a single review,
-to minimize the number of iterations that the contributor has to go
-through before getting their contribution merged.
+Merge Only Changes You Understand
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you merge it, you buy it
----------------------------
+*Long-term maintainability* is an important concern.  Code doesn't
+merely have to *work*, but should be *understood* by multiple core
+developers.  Changes will have to be made in the future, and the
+original contributor may have moved on.
 
-A core issue in scikit-image development is *long-term maintainability*.
-Code in scikit-image doesn’t have to *just* work, it must be
-understandable by a large proportion of the core team, because
-refactoring will inevitably happen in the future (whether for API
-changes, performance improvements, new features, or bug fixes), and this
-is impossible if you don’t understand the code. The original
-contributor, in most cases, will have moved on and will be unable to
-help at that point.
+Therefore, *do not merge a code change unless you understand
+it*. Instead, ask for help! It is no shame for a core developer to ask
+a community member, or even an external developer, for added insight.
 
-Therefore, whether you are the first or second reviewer of a pull
-request, you should make sure that you *deeply understand* every aspect
-of it. *If you don’t understand it, don’t merge it!* Even if it passes
-the tests. Instead, ask for help! scikit-image has a long history of
-core developers asking contributors or even external developers for help
-understanding things. Each case is an opportunity to grow as an
-individual and as a team.
-
-We should emphasize that the above relationship to “your” code is one of
-*responsibility*, not ownership. Once merged, the code in scikit-image
-belongs to the scikit-image contributors as a collective, not to the
-original author or to the reviewers.
+While we collectively "own" any patches (and bugs!) that become part
+of the code base, you are vouching for changes you merge.  Please take
+that responsibility seriously.
 
 Further resources
 -----------------
 
-As a core member, you should be more familiar than most with all of the
-resources and community engagement forums that guide scikit-image
-development. Specifically:
+As a core member, you should be familiar with community and developer
+resources such as:
 
 -  Our `contributor
    guide <http://scikit-image.org/docs/stable/contribute.html>`__
 -  Our `community
    guidelines <https://scikit-image.org/community_guidelines.html>`__
--  `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ for style
+-  `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ for Python style
 -  `PEP257 <https://www.python.org/dev/peps/pep-0257/>`__ and the `NumPy
    documentation
    guide <https://docs.scipy.org/doc/numpy/docs/howto_document.html>`__
@@ -176,28 +134,31 @@ development. Specifically:
    list <https://mail.python.org/mailman/listinfo/scikit-image>`__
 -  Our `chat room <https://skimage.zulipchat.com/>`__
 
-Inviting new core members
+You are not required to monitor all of the social resources.
+
+Inviting New Core Members
 -------------------------
 
 Any core member may nominate other contributors to join the core team.
-Nomination happens on a private email list, skimage-core@python.org. As
-of this writing, there is no hard-and-fast rule about who can be
-nominated, but they should have at least one accepted, substantial pull
-request to the library. “Substantial” is a fuzzy term that includes a
-large changeset (not just a few typos), and some back-and-forth
-discussion and iteration on the contents. It is also preferable if the
-nominee has participated in discussion and even review of others’ pull
-requests.
+Nomination happens on a private email list,
+skimage-core@python.org. As of this writing, there is no hard-and-fast
+rule about who can be nominated; at a minimum, they should have
+contributed significant changes of their own, contributed to the
+discussion and review of others' work, and collaborated in a way
+befitting our our community values.
 
-Contribute to this guide!
+Contribute To This Guide!
 -------------------------
 
-This guide was written by core developers after quite some time and
-experience being one, so it might be missing critical information that
-has become second nature after we acquired it. Therefore, as a newly
-invited member, you are best placed to identify gaps in this guide. If
-you have any questions, please ask the rest of the team, then submit a
-pull request to incorporate the answers into this guide!
+This guide reflects the experience of the current core developers.  We
+may well have missed things that, by now, have become second
+nature—things that you, as a new team member, will spot more easily.
+Please ask the other core developers if you have any questions, and
+submit a pull request with insights gained.
 
-Now, we are looking forward to continuing to work with you in the
-future, and to seeing your reviews of still newer contributors!
+Conclusion
+----------
+
+We are excited to have you on board!  We look forward to your
+contributions to the code base and the community.  Thank you in
+advance!
