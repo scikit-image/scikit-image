@@ -20,15 +20,15 @@ All Contributors Are Treated Similarly
 --------------------------------------
 
 You now have the ability to push changes directly to the master
-branch, but should never do so; instead, continue making PRs as
-before.
+branch, but should never do so; instead, continue making pull requests
+as before.
 
 As a core contributor, you gain the ability to merge merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
 is a shared power: you must merge *only after* another core has
-approved the PR, *and* after you yourself have carefully reviewed it.
-(See “Reviewing” and especially “If you merge it, you buy it”,
-below.)
+approved the pull request, *and* after you yourself have carefully
+reviewed it.  (See “Reviewing” and especially “If you merge it, you
+buy it”, below.)
 
 Reviewing
 ---------
@@ -91,8 +91,8 @@ branch yourself and force-push to their branch.  If the contributor is
 no longer active, you may take over their branch by submitting a new pull
 request.
 
-Please add a note to a PR after you push new changes; GitHub does not
-send out notifications for these.
+Please add a note to a pull request after you push new changes; GitHub
+does not send out notifications for these.
 
 Merge Only Changes You Understand
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
