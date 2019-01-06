@@ -787,10 +787,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
     best_inliers = None
 
     random_state = check_random_state(random_state)
-    if isinstance(min_samples, float):
-        if not (0 < min_samples <= 1):
-            raise ValueError("`min_samples` as ratio must be in range [0, 1)")
-        min_samples = int(min_samples * len(data[0]))
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
 
@@ -810,6 +806,11 @@ def ransac(data, model_class, min_samples, residual_threshold,
     data = list(data)
     # number of samples
     num_samples = data[0].shape[0]
+
+    if isinstance(min_samples, float):
+        if not (0 < min_samples <= 1):
+            raise ValueError("`min_samples` as ratio must be in range [0, 1)")
+        min_samples = int(min_samples * num_samples)
 
     if init_inliers is not None and len(init_inliers) != num_samples:
         raise ValueError("RANSAC received a vector of initial inliers (length %i) "
