@@ -778,6 +778,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
+
     """
 
     best_model = None
@@ -788,7 +789,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     random_state = check_random_state(random_state)
     if isinstance(min_samples, float):
         if not (0 < min_samples <= 1):
-            raise ValueError("`min_samples` as ration must be in range (0, 1)")
+            raise ValueError("`min_samples` as ratio must be in range (0, 1)")
         min_samples = int(min_samples * len(data[0]))
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
@@ -808,22 +809,21 @@ def ransac(data, model_class, min_samples, residual_threshold,
     num_samples = data[0].shape[0]
 
     if init_inliers is not None and len(init_inliers) != num_samples:
-        raise ValueError("`number init samples %i are les then data %i "
+        raise ValueError("RANSAC received a vector of initial inliers (length %i) "
+                         "that didn't match the number of samples (%i). "
+                         "The vector of initial inliers should have the same length "
+                         "as the number of samples and contain only True (this sample "
+                         "is an initial inlier) and False (this one isn't) values."
                          % (len(init_inliers), num_samples))
 
-    for num_trials in range(max_trials):
+    # for the first run use initial guess of inliers
+    idxs = (init_inliers if init_inliers is not None
+            else random_state.randint(0, num_samples, min_samples))
 
-        # choose random sample set
-        samples = []
-        # for the first run use intial guess of inliers
-        if num_trials == 0 and init_inliers is not None:
-            for d in data:
-                samples.append(d[init_inliers])
-        else:  # for any further run...
-            random_idxs = random_state.choice(num_samples, min_samples,
-                                              replace=False)
-            for d in data:
-                samples.append(d[random_idxs])
+    for num_trials in range(max_trials):
+        samples = [d[idxs] for d in data]
+        # for next time choose random sample set
+        idxs = random_state.choice(num_samples, min_samples, replace=False)
 
         # check if random sample set is valid
         if is_data_valid is not None and not is_data_valid(*samples):
