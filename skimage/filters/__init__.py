@@ -4,7 +4,7 @@ from .edges import (sobel, sobel_h, sobel_v,
                     scharr, scharr_h, scharr_v,
                     prewitt, prewitt_h, prewitt_v,
                     roberts, roberts_pos_diag, roberts_neg_diag,
-                    laplace)
+                    laplace, forward_energy)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
 from ._frangi import frangi, hessian
@@ -36,6 +36,7 @@ __all__ = ['inverse',
            'roberts_pos_diag',
            'roberts_neg_diag',
            'laplace',
+           'forward_energy',
            'rank_order',
            'gabor_kernel',
            'gabor',

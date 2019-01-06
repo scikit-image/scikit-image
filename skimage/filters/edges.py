@@ -534,3 +534,69 @@ def laplace(image, ksize=3, mask=None):
     _, laplace_op = laplacian(image.ndim, (ksize, ) * image.ndim)
     result = convolve(image, laplace_op)
     return _mask_filter_result(result, mask)
+
+
+def forward_energy(image, mode, mask=None):
+    """Find the edge magnitude using forward energy for seam carving.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mode : str {'horizontal', 'vertical'}
+        Indicates whether seams are to be removed vertically or horizontally.
+        Removing seams horizontally will decrease the height whereas removing
+        vertically will decrease the width.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The forward energy edge map.
+
+    References
+    ----------
+    .. [1] Michael Rubinstein, Ariel Shamir, and Shai Avidan
+           "Improved Seam Carving for Video Retargeting"
+           http://www.eng.tau.ac.il/~avidan/papers/vidret.pdf
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+
+    if mode == 'horizontal':
+        image = np.swapaxes(image, 0, 1)
+
+    height = image.shape[0]
+    width = image.shape[1]
+    
+    energy = np.zeros((height, width))
+    m = np.zeros((height, width))
+    
+    U = np.roll(image, 1, axis=0)
+    L = np.roll(image, 1, axis=1)
+    R = np.roll(image, -1, axis=1)
+    
+    cU = np.abs(R - L)
+    cL = np.abs(U - L) + cU
+    cR = np.abs(U - R) + cU
+    
+    for i in range(1, height):
+        mU = m[i-1]
+        mL = np.roll(mU, 1)
+        mR = np.roll(mU, -1)
+        
+        mULR = np.array([mU, mL, mR])
+        cULR = np.array([cU[i], cL[i], cR[i]])
+        mULR += cULR
+
+        argmins = np.argmin(mULR, axis=0)
+        m[i] = np.choose(argmins, mULR)
+        energy[i] = np.choose(argmins, cULR)
+
+    if mode == 'horizontal':
+        energy = np.swapaxes(energy, 0, 1)
+        
+    return _mask_filter_result(energy, mask)
