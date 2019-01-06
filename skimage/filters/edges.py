@@ -571,23 +571,23 @@ def forward_energy(image, mode, mask=None):
 
     height = image.shape[0]
     width = image.shape[1]
-    
+
     energy = np.zeros((height, width))
     m = np.zeros((height, width))
-    
+
     U = np.roll(image, 1, axis=0)
     L = np.roll(image, 1, axis=1)
     R = np.roll(image, -1, axis=1)
-    
+
     cU = np.abs(R - L)
     cL = np.abs(U - L) + cU
     cR = np.abs(U - R) + cU
-    
+
     for i in range(1, height):
-        mU = m[i-1]
+        mU = m[i - 1]
         mL = np.roll(mU, 1)
         mR = np.roll(mU, -1)
-        
+
         mULR = np.array([mU, mL, mR])
         cULR = np.array([cU[i], cL[i], cR[i]])
         mULR += cULR
@@ -598,5 +598,5 @@ def forward_energy(image, mode, mask=None):
 
     if mode == 'horizontal':
         energy = np.swapaxes(energy, 0, 1)
-        
+
     return _mask_filter_result(energy, mask)
