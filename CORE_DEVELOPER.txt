@@ -16,14 +16,14 @@ As a core team member, you gain the responsibility of shepherding
 other contributors' through the review process; here are some
 guidelines.
 
-All Contributors Are Treated Similarly
---------------------------------------
+All Contributors Are Treated The Same
+-------------------------------------
 
 You now have the ability to push changes directly to the master
 branch, but should never do so; instead, continue making pull requests
 as before.
 
-As a core contributor, you gain the ability to merge merge or approve
+As a core contributor, you gain the ability to merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
 is a shared power: you must merge *only after* another core has
 approved the pull request, *and* after you yourself have carefully
@@ -39,7 +39,8 @@ How to Conduct A Good Review
 *Always* be kind to contributors. Nearly all of `scikit-image` is
 volunteer work, for which we are tremendously grateful. Provide
 constructive criticism on ideas and implementations, and remind
-yourself of how it feels when your own work is being evaluated.
+yourself of how it felt when your own work was being evaluated as a
+novice.
 
 `scikit-image` strongly values mentorship in code review.  New users
 often need more handholding, having little to no git
@@ -48,7 +49,7 @@ contributor, point them to our development guide, or other GitHub
 workflow tutorials around the web. Do not assume that they know how
 GitHub works (e.g., many don't realize that adding a commit
 automatically updates a pull request). Gentle, polite, kind
-encouragement can make the difference between a new core developer or
+encouragement can make the difference between a new core developer and
 an abandoned pull request.
 
 When reviewing, focus on the following:
@@ -102,9 +103,10 @@ merely have to *work*, but should be *understood* by multiple core
 developers.  Changes will have to be made in the future, and the
 original contributor may have moved on.
 
-Therefore, *do not merge a code change unless you understand
-it*. Instead, ask for help! It is no shame for a core developer to ask
-a community member, or even an external developer, for added insight.
+Therefore, *do not merge a code change unless you understand it*. Ask
+for help freely: we have a long history of consulting community
+members, or even an external developers, for added insight where
+needed, and see this as a great learning opportunity.
 
 While we collectively "own" any patches (and bugs!) that become part
 of the code base, you are vouching for changes you merge.  Please take
@@ -145,7 +147,7 @@ skimage-core@python.org. As of this writing, there is no hard-and-fast
 rule about who can be nominated; at a minimum, they should have
 contributed significant changes of their own, contributed to the
 discussion and review of others' work, and collaborated in a way
-befitting our our community values.
+befitting our community values.
 
 Contribute To This Guide!
 -------------------------
