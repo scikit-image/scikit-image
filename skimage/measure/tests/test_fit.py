@@ -355,11 +355,11 @@ def test_ransac_invalid_input():
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=1.01)
-    # `min_samples` as ration must be in range (0, 1)
+    # `min_samples` as ratio must be in range (0, 1)
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=-0.5,
                residual_threshold=0)
-    # `min_samples` as ration must be in range (0, 1)
+    # `min_samples` as ratio must be in range (0, 1)
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=1.5,
                residual_threshold=0)

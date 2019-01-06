@@ -699,7 +699,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
-    init_inliers : [list, tuple of] (N) array of bool or None, optional
+    init_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
 
 
