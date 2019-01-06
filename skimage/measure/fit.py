@@ -668,7 +668,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         (`True` or `None` for success, `False` for failure).
     min_samples : int or float in range [0, 1]
         The minimum number of data points to fit a model to.
-    residual_threshold : float
+    residual_threshold : float larger then 0
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
         This function is called with the randomly selected data before the
@@ -789,15 +789,18 @@ def ransac(data, model_class, min_samples, residual_threshold,
     random_state = check_random_state(random_state)
     if isinstance(min_samples, float):
         if not (0 < min_samples <= 1):
-            raise ValueError("`min_samples` as ratio must be in range (0, 1)")
+            raise ValueError("`min_samples` as ratio must be in range [0, 1)")
         min_samples = int(min_samples * len(data[0]))
     if min_samples < 0:
         raise ValueError("`min_samples` must be greater than zero")
 
+    if residual_threshold < 0:
+        raise ValueError("`residual_threshold` must be greater than zero")
+
     if max_trials < 0:
         raise ValueError("`max_trials` must be greater than zero")
 
-    if stop_probability < 0 or stop_probability > 1:
+    if not (0 <= stop_probability <= 1):
         raise ValueError("`stop_probability` must be in range (0, 1)")
 
     if not isinstance(data, list) and not isinstance(data, tuple):
