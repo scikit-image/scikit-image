@@ -22,6 +22,7 @@ data_dir = osp.abspath(osp.dirname(__file__))
 __all__ = ['data_dir',
            'load',
            'astronaut',
+           'bench',
            'binary_blobs',
            'camera',
            'checkerboard',
@@ -81,6 +82,19 @@ def camera():
         Camera image.
     """
     return load("camera.png")
+
+
+def bench():
+    """Color "bench" image.
+
+    Often used for seam carving examples.
+
+    Returns
+    -------
+    bench : (794, 529) uint8 ndarray
+        Camera image2
+    """
+    return load("bench2.png")
 
 
 def astronaut():

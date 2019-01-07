@@ -6,12 +6,16 @@ Seam Carving
 This example demonstrates how images can be resized using seam carving [1]_.
 Resizing to a new aspect ratio distorts image contents. Seam carving attempts
 to resize *without* distortion, by removing regions of an image which are less
-important. In this example we are using the Sobel filter to signify the
-importance of each pixel.
+important. In this example we are using the Sobel filter and the forward 
+energy filter [2]_ to signify the importance of each pixel.
 
 .. [1] Shai Avidan and Ariel Shamir
        "Seam Carving for Content-Aware Image Resizing"
        http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
+
+.. [2] Michael Rubinstein, Ariel Shamir, and Shai Avidan
+        "Improved Seam Carving for Video Retargeting"
+        http://www.eng.tau.ac.il/~avidan/papers/vidret.pdf
 
 """
 from skimage import data, draw
@@ -20,10 +24,9 @@ import numpy as np
 from skimage import filters, color
 from matplotlib import pyplot as plt
 
-
 hl_color = np.array([0, 1, 0])
 
-img = data.rocket()
+img = data.bench()
 img = util.img_as_float(img)
 eimg = filters.sobel(color.rgb2gray(img))
 
@@ -32,7 +35,13 @@ plt.imshow(img)
 
 ######################################################################
 
-resized = transform.resize(img, (img.shape[0], img.shape[1] - 200),
+plt.figure()
+plt.title('Original Energy Image')
+plt.imshow(eimg)
+
+######################################################################
+
+resized = transform.resize(img, (img.shape[0], img.shape[1] - 400),
                            mode='reflect')
 plt.figure()
 plt.title('Resized Image')
@@ -40,9 +49,50 @@ plt.imshow(resized)
 
 ######################################################################
 
-out = transform.seam_carve(img, eimg, 'vertical', 200)
+def seam_carve(img, f, mode, n, freq=1):
+    """
+    Helper function to recalculate the energy map after each seam removal
+    
+    :param img: image to be carved
+    :param f: energy map function
+    :param mode: str {'vertical', 'horizontal'}
+    :param n: number of seams to remove
+    :param freq: how many seams to remove before recalculating energy map
+    """
+    for i in range(0, n, freq):
+        eimg = f(img, mode)
+        img = transform.seam_carve(img, eimg, mode, freq)
+    return img
+
+
+def energy(img, mode):
+    return filters.sobel(color.rgb2gray(img))
+
+
+out = seam_carve(img, energy, 'vertical', 400)
 plt.figure()
 plt.title('Resized using Seam Carving')
+plt.imshow(out)
+
+######################################################################
+
+def forward_energy(img, mode):
+    """    
+    :param img: image to be carved
+    :param mode: str {'vertical', 'horizontal'}
+    """
+    return filters.forward_energy(color.rgb2gray(img), mode)
+
+
+plt.figure()
+plt.title('Original Forward Energy Image')
+plt.imshow(forward_energy(img, 'vertical'))
+
+######################################################################
+
+out = seam_carve(img, forward_energy, 'vertical', 400)
+plt.figure()
+plt.title('Resized using Forward Energy Seam Carving')
 plt.imshow(out)
 
 ######################################################################
@@ -56,6 +106,10 @@ plt.imshow(out)
 # requires weighting the artifact with low values. Recall lower weights are
 # preferentially removed in seam carving. The following code masks the
 # rocket's region with low weights, indicating it should be removed.
+
+img = data.rocket()
+img = util.img_as_float(img)
+eimg = filters.sobel(color.rgb2gray(img))
 
 masked_img = img.copy()
 
