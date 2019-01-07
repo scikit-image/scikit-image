@@ -6,7 +6,7 @@ Seam Carving
 This example demonstrates how images can be resized using seam carving [1]_.
 Resizing to a new aspect ratio distorts image contents. Seam carving attempts
 to resize *without* distortion, by removing regions of an image which are less
-important. In this example we are using the Sobel filter and the forward 
+important. In this example we are using the Sobel filter and the forward
 energy filter [2]_ to signify the importance of each pixel.
 
 .. [1] Shai Avidan and Ariel Shamir
@@ -49,10 +49,11 @@ plt.imshow(resized)
 
 ######################################################################
 
+
 def seam_carve(img, f, mode, n, freq=1):
     """
     Helper function to recalculate the energy map after each seam removal
-    
+
     :param img: image to be carved
     :param f: energy map function
     :param mode: str {'vertical', 'horizontal'}
@@ -76,8 +77,9 @@ plt.imshow(out)
 
 ######################################################################
 
+
 def forward_energy(img, mode):
-    """    
+    """
     :param img: image to be carved
     :param mode: str {'vertical', 'horizontal'}
     """
