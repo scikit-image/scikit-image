@@ -1,5 +1,5 @@
-Core Contributor Guide
-======================
+Core Developer Guide
+====================
 
 Welcome, new core developer!  The core team appreciate the quality of
 your work, and enjoy working with you; we have therefore invited you
@@ -27,8 +27,8 @@ As a core contributor, you gain the ability to merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
 is a shared power: you must merge *only after* another core has
 approved the pull request, *and* after you yourself have carefully
-reviewed it.  (See “Reviewing” and especially “If you merge it, you
-buy it”, below.)
+reviewed it.  (See `Reviewing`_ and especially `Merge Only Changes You
+Understand`_ below.)
 
 Reviewing
 ---------
@@ -65,9 +65,9 @@ When reviewing, focus on the following:
    example, that not only illustrates but explains it.
 
 3. **The algorithm:** You should understand the code being modified or
-   added before approving it.  (See “if you merge it, you buy it”,
-   below.) Implementations should do what they claim, and be simple,
-   readable, and efficient.
+   added before approving it.  (See `Merge Only Changes You
+   Understand`_ below.) Implementations should do what they claim,
+   and be simple, readable, and efficient.
 
 4. **Tests:** All contributions to the library *must* be tested, and
    each added line of code should be covered by at least one test. Good
