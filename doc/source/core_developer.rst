@@ -89,7 +89,7 @@ whether to accept the changes.)
 
 Unless you know that a contributor is experienced with git, don’t
 ask for a rebase when merge conflicts arise. Instead, rebase the
-branch yourself and force-push to their branch.  If the contributor is
+branch yourself, force-push to their branch, and advise the contributor to force-pull.  If the contributor is
 no longer active, you may take over their branch by submitting a new pull
 request and closing the original. In doing so, ensure you communicate
 that you are not throwing the contributor's work away!
