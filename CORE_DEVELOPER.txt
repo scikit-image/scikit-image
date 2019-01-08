@@ -69,8 +69,8 @@ When reviewing, focus on the following:
    below.) Implementations should do what they claim, and be simple,
    readable, and efficient.
 
-4. **Tests:** All contributions to the library *must* be tested. At a minimum,
-   every new line of code should be executed in at least one test, but good
+4. **Tests:** All contributions to the library *must* be tested, and
+   each added line of code should be covered by at least one test. Good
    tests not only execute the code, but explores corner cases.  It is tempting
    not to review tests, but please do so.
 
