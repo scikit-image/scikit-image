@@ -112,17 +112,19 @@ with open('skimage/__init__.py') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
+
 def parse_requirements_file(filename):
     with open(filename) as fid:
         requires = [l.strip() for l in fid.readlines() if l]
 
     return requires
 
+
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 extras_require = {
     'docs': parse_requirements_file('requirements/docs.txt'),
     'optional': parse_requirements_file('requirements/optional.txt'),
-    'test':parse_requirements_file('requirements/test.txt'),
+    'test': parse_requirements_file('requirements/test.txt'),
 }
 
 # requirements for those browsing PyPI
