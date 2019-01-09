@@ -571,7 +571,7 @@ def forward_energy(image, mode, mask=None):
     image = img_as_float(image)
 
     if mode == 'horizontal':
-        image = np.swapaxes(image, 0, 1)
+        image = image.T
 
     height = image.shape[0]
     width = image.shape[1]
@@ -601,6 +601,6 @@ def forward_energy(image, mode, mask=None):
         energy[i] = np.choose(argmins, cULR)
 
     if mode == 'horizontal':
-        energy = np.swapaxes(energy, 0, 1)
+        energy = energy.T
 
     return _mask_filter_result(energy, mask)
