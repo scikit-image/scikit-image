@@ -196,6 +196,7 @@ plt.title('Resized using Forward Energy Seam Carving')
 plt.imshow(out)
 
 ######################################################################
-# This results in much better output.
+# This results in much better output by preserving the proportions
+# of the person and shortening the bench and fence.
 
 ######################################################################
