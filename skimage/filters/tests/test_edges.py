@@ -416,3 +416,7 @@ def test_range():
                 "Maximum of `{0}` is larger than 1".format(
                     detector.__name__)
                 )
+
+def test_forward():
+    result = filters.forward_energy(np.zeros((10, 10)), 'vertical')
+    result = filters.forward_energy(np.zeros((10, 10)), 'horizontal')
