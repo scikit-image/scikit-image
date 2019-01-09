@@ -19,7 +19,7 @@ def test_stack_non_array():
         io.push([[1, 2, 3]])
 
 
-def test_imread_url():
+def test_imread_file_url():
     # tweak data path so that file URI works on both unix and windows.
     data_path = data_dir.lstrip(os.path.sep)
     data_path = data_path.replace(os.path.sep, '/')
@@ -28,7 +28,7 @@ def test_imread_url():
     assert image.shape == (512, 512)
 
 
-def test_http_url(monkeypatch):
+def test_imread_http_url(monkeypatch):
     def mockopen(resource_name):
         class MockOpen:
             @staticmethod
@@ -48,7 +48,7 @@ def test_http_url(monkeypatch):
                         b'\x00?\x00*\x9f\xff\xd9')
         return MockOpen
 
-    monkeypatch.setattr('skimage.io.util.urlopen', mockopen)
+    monkeypatch.setattr('urllib.request.urlopen', mockopen)
 
     query_string = '?' + 's' * 266
     image_url = 'https://image.com/camera.jpg{}'.format(query_string)
