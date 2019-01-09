@@ -417,6 +417,7 @@ def test_range():
                     detector.__name__)
                 )
 
+
 def test_forward_energy():
     img = np.array([[0, 0, 1, 0, 0],
                     [0, 0, 1, 0, 0],
