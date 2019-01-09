@@ -12,7 +12,7 @@ def test_astronaut():
 def test_bench():
     """ Test that "bench" image can be loaded. """
     bench = data.bench()
-    assert_equal(bench.shape, (794, 529, 3))
+    assert_equal(bench.shape, (529, 794, 3))
 
 
 def test_camera():
