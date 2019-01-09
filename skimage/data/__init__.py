@@ -92,7 +92,14 @@ def bench():
     Returns
     -------
     bench : (794, 529) uint8 ndarray
-        Camera image2
+        Bench image.
+
+    Notes
+    -----
+    This image was downloaded from `improved seam carving website
+    <http://www.faculty.idc.ac.il/arik/SCWeb/vidret/index.html>`__.
+
+    No known copyright restrictions.
     """
     return load("bench2.png")
 
