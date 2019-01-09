@@ -539,6 +539,10 @@ def laplace(image, ksize=3, mask=None):
 def forward_energy(image, mode, mask=None):
     """Find the edge magnitude using forward energy for seam carving.
 
+    Depending on the direction in `mode`, determines the magnitude of
+    each pixel based on the new edges created after removing a seam
+    containing that pixel.
+
     Parameters
     ----------
     image : 2-D array
@@ -561,7 +565,7 @@ def forward_energy(image, mode, mask=None):
     ----------
     .. [1] Michael Rubinstein, Ariel Shamir, and Shai Avidan
            "Improved Seam Carving for Video Retargeting"
-           http://www.eng.tau.ac.il/~avidan/papers/vidret.pdf
+           http://www.faculty.idc.ac.il/arik/SCWeb/vidret/index.html
     """
     assert_nD(image, 2)
     image = img_as_float(image)
