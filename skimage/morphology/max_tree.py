@@ -21,20 +21,20 @@ References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           DOI:10.1109/83.663500
+           :DOI:10.1109/83.663500
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
            In International Conference on Image Processing (ICIP) (pp. 41-44).
-           DOI:10.1109/ICIP.2007.4379949
+           :DOI:10.1109/ICIP.2007.4379949
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           DOI:10.1109/TIP.2006.877518
+           :DOI:10.1109/TIP.2006.877518
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           DOI:10.1109/TIP.2014.2336551
+           :DOI:10.1109/TIP.2014.2336551
 """
 
 import numpy as np
@@ -51,7 +51,7 @@ signed_float_types = [np.float16, np.float32, np.float64]
 
 
 # building the max tree.
-def max_tree(image, connectivity=2):
+def max_tree(image, connectivity=1):
     """Build the max tree from an image.
 
     Component trees represent the hierarchical structure of the connected
@@ -72,7 +72,7 @@ def max_tree(image, connectivity=2):
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 2.
+        4-connectivity and 2 for 8-connectivity. Default value is 1.
 
     Returns
     -------
@@ -144,7 +144,7 @@ def max_tree(image, connectivity=2):
     return parent, tree_traverser
 
 
-def area_opening(image, area_threshold=25, connectivity=2,
+def area_opening(image, area_threshold=25, connectivity=1,
                  parent=None, tree_traverser=None):
     """Perform an area opening of the image.
 
@@ -254,7 +254,7 @@ def area_opening(image, area_threshold=25, connectivity=2,
     return output
 
 
-def diameter_opening(image, diameter_threshold=5, connectivity=2,
+def diameter_opening(image, diameter_threshold=5, connectivity=1,
                      parent=None, tree_traverser=None):
     """Perform a diameter opening of the image.
 
@@ -345,7 +345,7 @@ def diameter_opening(image, diameter_threshold=5, connectivity=2,
     return output
 
 
-def area_closing(image, area_threshold=25, connectivity=2,
+def area_closing(image, area_threshold=25, connectivity=1,
                  parent=None, tree_traverser=None):
     """Perform an area closing of the image.
 
@@ -470,7 +470,7 @@ def area_closing(image, area_threshold=25, connectivity=2,
     return output
 
 
-def diameter_closing(image, diameter_threshold=5, connectivity=2,
+def diameter_closing(image, diameter_threshold=5, connectivity=1,
                      parent=None, tree_traverser=None):
     """Perform a diameter closing of the image.
 
@@ -576,7 +576,7 @@ def diameter_closing(image, diameter_threshold=5, connectivity=2,
     return output
 
 
-def max_tree_local_maxima(image, connectivity=2,
+def max_tree_local_maxima(image, connectivity=1,
                           parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 

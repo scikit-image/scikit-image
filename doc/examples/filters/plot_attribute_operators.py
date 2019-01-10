@@ -51,8 +51,8 @@ for dataset in datasets.values():
     ax[1, 0].axis('off')
 
     # Diameter closing : we remove all dark structures with a maximal
-    # extension of less than 12 or 23. I.e. in closed_attr, all local minima
-    # have at least a maximal extension of <diameter>.
+    # extension of less than <diameter> (12 or 23). I.e. in closed_attr, all
+    # local minima have at least a maximal extension of <diameter>.
     closed_attr = diameter_closing(image, diameter)
 
     # We then calculate the difference to the original image.
