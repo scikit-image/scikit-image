@@ -72,7 +72,7 @@ def max_tree(image, connectivity=1):
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
 
     Returns
     -------
@@ -175,7 +175,7 @@ def area_opening(image, area_threshold=25, connectivity=1,
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
@@ -278,7 +278,7 @@ def diameter_opening(image, diameter_threshold=5, connectivity=1,
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
@@ -375,7 +375,7 @@ def area_closing(image, area_threshold=25, connectivity=1,
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
     parent: ndarray, int64, optional
         Parent image representing the max tree of the inverted image. The
         value of each pixel is the index of its parent in the ravelled array.
@@ -494,7 +494,7 @@ def diameter_closing(image, diameter_threshold=5, connectivity=1,
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
     parent: ndarray, int64, optional
         Precomputed parent image representing the max tree of the inverted
         image. This function is fast, if precomputed parent and tree_traverser
@@ -596,7 +596,7 @@ def max_tree_local_maxima(image, connectivity=1,
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
-        4-connectivity and 2 for 8-connectivity. Default value is 1.
+        a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
     parent: ndarray, int64, optional
         The value of each pixel is the index of its parent in the ravelled
         array.
