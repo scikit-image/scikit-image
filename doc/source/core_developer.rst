@@ -77,15 +77,13 @@ When reviewing, focus on the following:
 Other changes may be *nitpicky*: spelling mistakes, formatting,
 etc. Do not ask contributors to make these changes, and instead
 make the changes by `pushing to their branch
-<https://help.github.com/articles/committing-changes-to-a-pull-request-branch-created-from-a-fork/>`__ [enabling-push-to-branch]_,
+<https://help.github.com/articles/committing-changes-to-a-pull-request-branch-created-from-a-fork/>`__,
 or using GitHub’s `suggestion
 <https://help.github.com/articles/commenting-on-a-pull-request/>`__
 `feature
 <https://help.github.com/articles/incorporating-feedback-in-your-pull-request/>`__.
 (The latter is preferred because it gives the contributor a choice in
 whether to accept the changes.)
-
-.. [enabling-push-to-branch]: https://help.github.com/articles/allowing-changes-to-a-pull-request-branch-created-from-a-fork/
 
 Unless you know that a contributor is experienced with git, don’t
 ask for a rebase when merge conflicts arise. Instead, rebase the
