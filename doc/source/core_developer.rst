@@ -13,7 +13,7 @@ foremost, you should familiarize yourself with the project's
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
-other contributors' through the review process; here are some
+other contributors through the review process; here are some
 guidelines.
 
 All Contributors Are Treated The Same
@@ -56,7 +56,7 @@ an abandoned pull request.
 
 When reviewing, focus on the following:
 
-1. **API**: The API is what users see when they first use
+1. **API:** The API is what users see when they first use
    `scikit-image`. APIs are difficult to change once released, so
    should be  simple, `functional
    <https://en.wikipedia.org/wiki/Functional_programming>`__ (i.e. not
@@ -107,8 +107,8 @@ original contributor may have moved on.
 
 Therefore, *do not merge a code change unless you understand it*. Ask
 for help freely: we have a long history of consulting community
-members, or even an external developers, for added insight where
-needed, and see this as a great learning opportunity.
+members, or even external developers, for added insight where needed,
+and see this as a great learning opportunity.
 
 While we collectively "own" any patches (and bugs!) that become part
 of the code base, you are vouching for changes you merge.  Please take
