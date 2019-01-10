@@ -50,7 +50,7 @@ import networkx as nx
 #####################################################################
 # Before we start : a few helper functions
 
-def plot_img(image, ax, title, plot_text, image_values):
+def plot_img(ax, image, title, plot_text, image_values):
     """Plot an image, overlaying image values or indices."""
     ax.imshow(image, cmap='gray', aspect='equal', vmin=0, vmax=np.max(image))
     ax.set_title(title)
@@ -210,11 +210,11 @@ raveled_indices = np.arange(image.size).reshape(image.shape)
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(9, 3))
 
-plot_img(image - image.min(), ax1, 'Image Values',
+plot_img(ax1, image - image.min(), 'Image Values',
          plot_text=True, image_values=image)
-plot_img(image - image.min(), ax2, 'Raveled Indices',
+plot_img(ax2, image - image.min(), 'Raveled Indices',
          plot_text=True, image_values=raveled_indices)
-plot_img(image - image.min(), ax3, 'Max-tree indices',
+plot_img(ax3, image - image.min(), 'Max-tree indices',
          plot_text=True, image_values=P)
 
 
@@ -229,7 +229,7 @@ fig, axes = plt.subplots(3, 3, sharey=True, sharex=True, figsize=(6, 6))
 thresholds = np.unique(image)
 for k, threshold in enumerate(thresholds):
     bin_img = image >= threshold
-    plot_img(bin_img, axes[(k // 3), (k % 3)], 'Threshold : %i' % threshold,
+    plot_img(axes[(k // 3), (k % 3)], bin_img, 'Threshold : %i' % threshold,
              plot_text=True, image_values=raveled_indices)
 
 
