@@ -24,7 +24,7 @@ Sections
    license
    auto_examples/index
    release_notes_and_installation
-
+   core_developer
 
 .. list-table::
    :class: contentstable
@@ -48,10 +48,11 @@ Sections
    * - `Glossary <glossary.html>`_
 
        Definitions of common terms.
-     
+
      - `Contribute <contribute.html>`_
 
-       Take part in development.
+       Take part in development.  Core developers, please `read your guide
+       <core_developer.html>`_.
 
 
    * - `Examples <auto_examples/index.html>`_
