@@ -181,7 +181,7 @@ Here we provide instructions for two popular environment managers:
 
 venv
 ====
-When using venv, you may find the following bash commands useful::
+When using ``venv``, you may find the following bash commands useful::
 
   # Create a virtualenv named ``skimage-dev`` that lives in the directory of
   # the same name
