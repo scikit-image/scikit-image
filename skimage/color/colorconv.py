@@ -751,7 +751,7 @@ def rgbcie2rgb(rgbcie):
 
 
 def rgb2gray(rgb):
-    """Compute luminance of an RGB image.
+    """Compute luminance of an RGB image, according to ITU-R BT.709-6 (2015) recommendation
 
     Parameters
     ----------
@@ -774,14 +774,15 @@ def rgb2gray(rgb):
 
     References
     ----------
-    .. [1] http://www.poynton.com/PDFs/ColorFAQ.pdf
+    .. [1] https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf
+    .. [2] https://www.itu.int/rec/R-REC-BT.709/en
 
     Notes
     -----
     The weights used in this conversion are calibrated for contemporary
     CRT phosphors::
 
-        Y = 0.2125 R + 0.7154 G + 0.0721 B
+        Y = 0.2126 R + 0.7152 G + 0.0722 B
 
     If there is an alpha channel present, it is ignored.
 
@@ -797,7 +798,7 @@ def rgb2gray(rgb):
         return np.ascontiguousarray(rgb)
 
     rgb = _prepare_colorarray(rgb[..., :3])
-    coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
+    coeffs = np.array([0.2126, 0.7152, 0.0722], dtype=rgb.dtype)
     return rgb @ coeffs
 
 
