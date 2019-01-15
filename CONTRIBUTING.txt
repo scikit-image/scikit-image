@@ -187,7 +187,7 @@ When using venv, you may find the following bash commands useful::
   # the same name
   python -m venv skimage-dev
   # Activate it
-  source env/bin/activate
+  source skimage-dev/bin/activate
   # Install all development and runtime dependencies of scikit-image
   pip install -r <(cat requirements/*.txt)
   # Install scikit-image from source
