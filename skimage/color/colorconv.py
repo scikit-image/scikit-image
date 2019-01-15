@@ -791,6 +791,8 @@ def rgb2gray(rgb):
     If there is an alpha channel present, it is ignored.
     This luminance computation is defined in the ITU-R BT.709-6 (2015)
     recommendation for true CIE luminance extraction from contemporary CRT phosphors.
+    Prior to version 0.15.0, the luminance was computed by
+    `Y = 0.2125 R + 0.7154 G + 0.0721 B` (ITU-R BT.709-1 from 1993).
 
     Examples
     --------
