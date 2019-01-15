@@ -751,7 +751,8 @@ def rgbcie2rgb(rgbcie):
 
 
 def rgb2gray(rgb):
-    """Compute luminance of an RGB image, according to ITU-R BT.709-6 (2015) recommendation.
+    """Compute luminance of an RGB image, 
+    according to ITU-R BT.709-6 (2015) recommendation.
 
     Parameters
     ----------
