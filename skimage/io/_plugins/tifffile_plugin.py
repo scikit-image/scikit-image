@@ -1,4 +1,7 @@
-from ...external.tifffile import TiffFile, imsave
+try:
+    from tifffile import TiffFile, imsave
+except ImportError:
+    from ...external.tifffile import TiffFile, imsave
 
 
 def imread(fname, dtype=None, **kwargs):
