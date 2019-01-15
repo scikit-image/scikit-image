@@ -751,8 +751,7 @@ def rgbcie2rgb(rgbcie):
 
 
 def rgb2gray(rgb):
-    """Compute luminance of an RGB image,
-    according to ITU-R BT.709-6 (2015) recommendation.
+    """Compute luminance of an RGB image.
 
     Parameters
     ----------
@@ -766,6 +765,10 @@ def rgb2gray(rgb):
     out : ndarray
         The luminance image - an array which is the same size as the input
         array, but with the channel dimension removed.
+
+        ..versionchanged:: 0.15.0
+            Now returns luminance according to the ITU-R BT.709-6 (2015)
+            recommendation instead of ITU-R BT.709-1 (1993).
 
     Raises
     ------
@@ -786,6 +789,8 @@ def rgb2gray(rgb):
         Y = 0.2126 R + 0.7152 G + 0.0722 B
 
     If there is an alpha channel present, it is ignored.
+    This luminance computation is defined in the ITU-R BT.709-6 (2015)
+    recommendation for true CIE luminance extraction from contemporary CRT phosphors.
 
     Examples
     --------
