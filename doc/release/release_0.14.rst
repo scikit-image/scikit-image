@@ -1,3 +1,50 @@
+Announcement: scikit-image 0.14.2
+=================================
+
+This release handles an incompatibility between scikit-image and NumPy
+1.16.0, released on January 13th 2019.
+
+It contains the following changes from 0.14.1:
+
+API changes
+-----------
+- ``skimage.measure.regionprops`` no longer removes singleton dimensions from
+  label images (#3284). To recover the old behavior, replace
+  ``regionprops(label_image)`` calls with
+  ``regionprops(np.squeeze(label_image))``
+
+Bug fixes
+---------
+- Address deprecation of NumPy `_validate_lengths` (backport of #3556)
+- Correctly handle the maximum number of lines in Hough transforms
+  (backport of #3514)
+- Correctly implement early stopping criterion for rank kernel noise
+  filter (backport of #3503)
+- Fix `skimage.measure.regionprops` for 1x1 inputs (backport of #3284)
+
+Enhancements
+------------
+- Rewrite of `local_maxima` with flood-fill (backport of #3022, #3447)
+
+Build Process & Testing
+-----------------------
+- Dedicate a `--pre` build in appveyor (backport of #3222)
+- Avoid travis failure regarding scikit.lookfor) (backport of #3477)
+- Stop using the `pytest.fixtures` decorator (#3558)
+- Filter out DeprecationPendingWarning for matrix subclass (#3637)
+- Fix matplotlib test warnings and circular import (#3632)
+
+Contributors & Reviewers
+------------------------
+- François Boulogne
+- Emmanuelle Gouillart
+- Lars Grüter
+- Mark Harfouche
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Stefan van der Walt
+
+
 Announcement: scikit-image 0.14.1
 =================================
 
