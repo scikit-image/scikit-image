@@ -31,7 +31,7 @@ def _compute_disk_overlap(d, r1, r2):
 
     Returns
     -------
-    area: float
+    fraction: float
         Fraction of area of the overlap between the two disks.
     """
 
@@ -68,7 +68,7 @@ def _compute_sphere_overlap(d, r1, r2):
 
     Returns
     -------
-    vol: float
+    fraction: float
         Fraction of volume of the overlap between the two spheres.
 
     Notes
