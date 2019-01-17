@@ -164,7 +164,7 @@ Runtime requirements
 * `Pillow >= 2.1.0 <https://pypi.python.org/pypi/Pillow>`__
     (or `PIL <http://www.pythonware.com/products/pil/>`__)
 * `PyWavelets>=0.4.0 <https://pypi.python.org/pypi/PyWavelets/>`__
-* `dask[array] >= 0.9.0 <http://dask.pydata.org/en/latest/>`__.
+* `dask[array] >= 1.0.0 <http://dask.pydata.org/en/latest/>`__.
     For parallel computation using `skimage.util.apply_parallel`.
 
 You can use pip to automatically install the runtime dependencies as follows::
