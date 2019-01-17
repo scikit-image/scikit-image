@@ -8,6 +8,7 @@ all:
 clean:
 	find . -name "*.so" -o -name "*.pyc" -o -name "*.md5" -o -name "*.pyd" | xargs rm -f
 	find . -name "*.pyx" -exec ./tools/rm_pyx_c_file.sh {} \;
+	rm -f MANIFEST
 
 cleandoc:
 	rm -rf doc/build
