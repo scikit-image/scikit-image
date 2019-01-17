@@ -21,7 +21,8 @@ All Contributors Are Treated The Same
 
 You now have the ability to push changes directly to the master
 branch, but should never do so; instead, continue making pull requests
-as before.
+as before and in accordance with the `general contributor guide
+<http://scikit-image.org/docs/dev/contribute.html>`__.
 
 As a core contributor, you gain the ability to merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
@@ -58,10 +59,11 @@ When reviewing, focus on the following:
 
 1. **API:** The API is what users see when they first use
    `scikit-image`. APIs are difficult to change once released, so
-   should be  simple, `functional
+   should be simple, `functional
    <https://en.wikipedia.org/wiki/Functional_programming>`__ (i.e. not
    carry state), consistent with other parts of the library, and
-   should avoid modifying input variables.
+   should avoid modifying input variables.  Please familiarize
+   yourself with the project's `deprecation policy <http://scikit-image.org/docs/dev/contribute.html#deprecation-cycle>`__.
 
 2. **Documentation:** Any new feature should have a gallery
    example, that not only illustrates but explains it.
@@ -144,12 +146,13 @@ Inviting New Core Members
 -------------------------
 
 Any core member may nominate other contributors to join the core team.
-Nomination happens on a private email list,
+Nominations happen on a private email list,
 skimage-core@python.org. As of this writing, there is no hard-and-fast
-rule about who can be nominated; at a minimum, they should have
-contributed significant changes of their own, contributed to the
-discussion and review of others' work, and collaborated in a way
-befitting our community values.
+rule about who can be nominated; at a minimum, they should have: been
+part of the project for at least six months, contributed
+significant changes of their own, contributed to the discussion and
+review of others' work, and collaborated in a way befitting our
+community values.
 
 Contribute To This Guide!
 -------------------------
