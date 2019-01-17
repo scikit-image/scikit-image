@@ -4,3 +4,8 @@ filename="${1%.*}".c
 if [ -e "$filename" ]; then
 	rm -f "$filename";
 fi
+
+filename="${1%.*}".cpp
+if [ -e "$filename" ]; then
+	rm -f "$filename";
+fi
