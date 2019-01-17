@@ -19,7 +19,7 @@ the corresponding release branch.
 
 - On the release branch, update the release notes:
 
-  1. Review and cleanup ``doc/release/release_dev.txt``.
+  1. Review and cleanup ``doc/release/release_dev.rst``.
 
   2. Make a list of merges, contributors, and reviewers by running
      ``tools/generate_release_notes.py -h`` and following that file's usage.
@@ -48,16 +48,42 @@ the corresponding release branch.
   - Create a PR from v<major>.<minor>.x branch to master (at this point,
     the difference should show the full contents of the release notes).
   - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
-  - Once the consensus is found, ask the project maintainers to merge the PR.
+  - Once the consensus is found, ask the project maintainers to merge
+    the PR.
+  - Cherry pick the change onto the release branch.
 
-- In the master branch, update the version number in ``skimage/__init__.py``
+- On the master branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
   ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``. 
+  ``0`` immediately after ``dev``.
 
-- Back on the release branch, update the version number to stable in
-  ``skimage/__init__.py``, commit, and push.
+- On the master branch, edit ``doc/source/_static/docversions.js``,
+  add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
+  change back to the release branch.
+
+- Back on the release branch, update the version number to match the release
+  version in ``skimage/__init__.py``, commit, and push.
+
+- Update the release docs:
+
+  - On the release branch, build a clean version of the docs. In the
+    root directory, run ``pip install .``.
+  - In the ``doc/`` directory:
+    - Build using
+      ``make clean; make html; make gh-pages``.
+    - In the ``gh-pages/`` directory:
+      - Update the symlink to ``stable`` and commit.
+      - Upload the docs: ``git push origin gh-pages``.
+
+At this point, you are ready to tag the new version.  This "seals the
+deal", so we want to make sure everything is working.  Go to
+https://travis-ci.org/scikit-image/scikit-image/branches, click on the
+release branch, and ensure that all checks have passed for the latest
+build.  Do the same for AppVeyor at
+https://ci.appveyor.com/project/scikit-image/scikit-image/history.
+
+Do not tag until CI is green.
 
 - Add the version number as a tag in git::
 
@@ -72,13 +98,6 @@ the corresponding release branch.
 
   (where ``upstream`` is the name of the
    ``github.com:scikit-image/scikit-image`` repository.)
-
-- Make sure you have all the required write permissions (if not, you will need
-  to ask Stéfan or Juan to grant you the access), specifically, to:
-
-  - https://github.com/scikit-image/scikit-image-wheels
-  - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/scikit-image-web
 
 - Build the package wheels (pre-compiled binaries) for various platforms:
 
@@ -101,14 +120,12 @@ the corresponding release branch.
   - Open that URL and check for the wheels as
     ``scikit_image-<versiontag>-<platforminfo>.whl``
 
-- Update the docs:
+- Make sure you have all the required write permissions (if not, you will need
+  to ask Stéfan or Juan to grant you the access), specifically, to:
 
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs. In the root directory, run
-    ``python setup.py install``, then ``make cleandoc; make html``.
-  - In the ``doc/`` directory, build using ``make gh-pages``.
-  - Update the symlink to ``stable``.
-  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
+  - https://github.com/scikit-image/scikit-image-wheels
+  - https://pypi.org/project/scikit-image/
+  - https://github.com/scikit-image/scikit-image-web
 
 - Upload the wheels to PyPI:
 
