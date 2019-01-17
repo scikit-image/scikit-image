@@ -20,6 +20,8 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+services:
+  - xvfb
 
 env:
   global:
