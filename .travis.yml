@@ -21,6 +21,8 @@ addons:
     - texlive-latex-extra
     - dvipng
     - python-qt4
+services:
+  - xvfb
 
 env:
   global:
