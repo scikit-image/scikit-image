@@ -121,7 +121,7 @@ def hog_histograms(double[:, ::1] gradient_columns,
     c_0 = cell_columns / 2
     cc = cell_rows * number_of_cells_rows
     cr = cell_columns * number_of_cells_columns
-    range_rows_stop = (cell_rows+1) / 2
+    range_rows_stop = (cell_rows + 1) / 2
     range_rows_start = -(cell_rows / 2)
     range_columns_stop = (cell_columns + 1) / 2
     range_columns_start = -(cell_columns / 2)
