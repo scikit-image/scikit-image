@@ -1080,14 +1080,14 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
-    >>> corners
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)  # doctest: +SKIP
+    >>> corners  # doctest: +SKIP
     array([[3, 3],
            [3, 8],
            [8, 3],
            [8, 8]])
-    >>> orientations = corner_orientations(square, corners, octagon(3, 2))
-    >>> np.rad2deg(orientations)
+    >>> orientations = corner_orientations(square, corners, octagon(3, 2))  # doctest: +SKIP
+    >>> np.rad2deg(orientations)  # doctest: +SKIP
     array([  45.,  135.,  -45., -135.])
 
     """
