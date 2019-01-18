@@ -950,12 +950,12 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  1.,  1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.]])
-    >>> peak_local_max(response)
+    >>> peak_local_max(response)  # doctest: +SKIP
     array([[3, 3],
            [3, 2],
            [2, 3],
            [2, 2]])
-    >>> corner_peaks(response)
+    >>> corner_peaks(response)  # doctest: +SKIP
     array([[2, 2]])
 
     """
