@@ -323,8 +323,8 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')
-    >>> hessian_matrix_eigvals(H_elems)[0]
+    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')  # doctest: +SKIP
+    >>> hessian_matrix_eigvals(H_elems)[0]  # doctest: +SKIP
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 2.,  0., -2.,  0.,  2.],
