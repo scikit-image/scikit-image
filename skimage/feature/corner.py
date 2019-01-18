@@ -800,9 +800,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
-    >>> coords_subpix = corner_subpix(img, coords, window_size=7)
-    >>> coords_subpix
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2)  # doctest: +SKIP
+    >>> coords_subpix = corner_subpix(img, coords, window_size=7)  # doctest: +SKIP
+    >>> coords_subpix  # doctest: +SKIP
     array([[ 4.5,  4.5]])
 
     """
