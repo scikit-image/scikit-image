@@ -15,22 +15,22 @@ API changes
 
 Bug fixes
 ---------
-- Address deprecation of NumPy `_validate_lengths` (backport of #3556)
+- Address deprecation of NumPy ``_validate_lengths`` (backport of #3556)
 - Correctly handle the maximum number of lines in Hough transforms
   (backport of #3514)
 - Correctly implement early stopping criterion for rank kernel noise
   filter (backport of #3503)
-- Fix `skimage.measure.regionprops` for 1x1 inputs (backport of #3284)
+- Fix ``skimage.measure.regionprops`` for 1x1 inputs (backport of #3284)
 
 Enhancements
 ------------
-- Rewrite of `local_maxima` with flood-fill (backport of #3022, #3447)
+- Rewrite of ``local_maxima`` with flood-fill (backport of #3022, #3447)
 
 Build Process & Testing
 -----------------------
-- Dedicate a `--pre` build in appveyor (backport of #3222)
-- Avoid travis failure regarding scikit.lookfor) (backport of #3477)
-- Stop using the `pytest.fixtures` decorator (#3558)
+- Dedicate a ``--pre`` build in appveyor (backport of #3222)
+- Avoid Travis-CI failure regarding ``skimage.lookfor`` (backport of #3477)
+- Stop using the ``pytest.fixtures`` decorator (#3558)
 - Filter out DeprecationPendingWarning for matrix subclass (#3637)
 - Fix matplotlib test warnings and circular import (#3632)
 
@@ -75,8 +75,6 @@ Bug fixes
   and ``moments_normalized`` can now be correctly imported from the ``measure``
   namespace (#3374)
 - Fix background color in ``label2rgb(..., kind='avg')`` (#3280)
-- Fix an UnboundLocalVariable error when an image consisting of all NaNs was
-  passed to ``filters.threshold_li`` (#3402)
 
 Enhancements
 ------------
@@ -93,6 +91,7 @@ Enhancements
   backend when imported (#3243)
 - Fix deprecated ``get`` keyword from dask in favor of ``scheduler`` (#3366)
 - Add missing ``cval`` parameter to threshold_local (#3370)
+
 
 API changes
 -----------
@@ -151,7 +150,6 @@ Made with commits from (alphabetical by last name):
 - Jesse Pangburn
 - Johannes Schönberger
 - Stefan van der Walt
-- Hugo VK
 
 Reviewed by (alphabetical by last name):
 
@@ -251,7 +249,7 @@ Bugfixes
 - Changed gradient and L2-Hys norm computation in ``skimage.feature.hog``
   to closely follow the paper. (#2864)
 - Fixed ``skimage.color.convert_colorspace`` not working for YCbCr, YPbPr. (#2780)
-- Fixed incorrect composition of projective tranformation with inverse transformation. (#2826)
+- Fixed incorrect composition of projective transformation with inverse transformation. (#2826)
 - Fixed bug in random walker appearing when seed pixels are isolated inside pruned zones. (#2946)
 - Fixed ``rescale`` not working properly with different rescale factors in multichannel case. (#2959)
 - Fixed float and integer dtype support in ``skimage.util.invert``. (#3030)
@@ -334,7 +332,7 @@ Contributors to this release
 - Alex Rothberg
 - Arka Sadhu
 - Max Schambach
-- Johannes Schönberger
+- Johannes Schönberger
 - Sourav Singh
 - Kesavan Subburam
 - Matt Swain
@@ -394,7 +392,7 @@ This release is the result of 14 months of work.
 It contains the following 186 merged pull requests by 67 committers:
 
 - n-dimensional rescale, resize, and pyramid transforms (#1522)
-- Segmentation: Implemention of a simple Chan-Vese Algorithm (#1957)
+- Segmentation: Implementation of a simple Chan-Vese Algorithm (#1957)
 - JPEG quality argument in imsave (#2063)
 - improve geometric models fitting (line, circle) using LSM (#2433)
 - Improve input parameter handling in `_sift_read` (#2452)
@@ -443,7 +441,7 @@ It contains the following 186 merged pull requests by 67 committers:
 - Fix typo in Chan-Vese docstrings (#2692)
 - Fix data type error with marching_cubes_lewiner(allow_degenerate=False) (#2694)
 - Add handling for uniform arrays when finding local extrema. (#2699)
-- Avoid uneccesary copies in skimage.morphology.label (#2701)
+- Avoid unnecessary copies in skimage.morphology.label (#2701)
 - Deprecate `visualise` in favor of `visualize` in `skimage.feature.hog` (#2705)
 - Remove alpha channel when saving to jpg format (#2706)
 - Tweak in-place installation instructions (#2712)
@@ -489,7 +487,7 @@ It contains the following 186 merged pull requests by 67 committers:
 - The gallery now points to the stable docs (#2822)
 - Adapt AppVeyor to use Python.org dist, and remove install script (#2823)
 - Remove pytest yield (#2824)
-- Bug fix in projective tranformation composition with inverse transformation (#2826)
+- Bug fix in projective transformation composition with inverse transformation (#2826)
 - FIX: add estimate_sigma to __all__ in restoration module (#2829)
 - Switch from LaTeX to MathJax in doc build (#2832)
 - Docstring fixes for better formula formatting (#2834)
@@ -567,7 +565,7 @@ It contains the following 186 merged pull requests by 67 committers:
 - Fix examples not displaying figures (#3040)
 - Correct reference for the coins sample image (#3042)
 - Switch to basis numpy int dtypes in dtype_range (#3050)
-- speedup img_as_float by making division multiplication and avoiding unecessary allocation (#3056)
+- speedup img_as_float by making division multiplication and avoiding unnecessary allocation (#3056)
 - For sparse CG solver, provide atol=0 keyword for SciPy >= 1.1 (#3063)
 - Update dependencies and deprecations to fix Travis builds (#3072)
 - Sanitizing marching_cubes_lewiner spacing input argument (#3074)
