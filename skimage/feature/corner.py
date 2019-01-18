@@ -658,11 +658,11 @@ def corner_foerstner(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> w, q = corner_foerstner(square)
+    >>> w, q = corner_foerstner(square)  # doctest: +SKIP
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
-    >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w  # doctest: +SKIP
+    >>> corner_peaks(foerstner, min_distance=1)  # doctest: +SKIP
     array([[2, 2],
            [2, 7],
            [7, 2],
