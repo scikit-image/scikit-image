@@ -146,8 +146,8 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
-    >>> Hrc
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')  # doctest: +SKIP
+    >>> Hrc  # doctest: +SKIP
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
            [ 0.,  0.,  0.,  0.,  0.],
