@@ -283,8 +283,8 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
+    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)  # doctest: +SKIP
+    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]  # doctest: +SKIP
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  2.,  4.,  2.,  0.],
            [ 0.,  4.,  0.,  4.,  0.],
