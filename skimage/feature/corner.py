@@ -592,7 +592,7 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)  # doctest: +SKIP
     array([[2, 2],
            [2, 7],
            [7, 2],
