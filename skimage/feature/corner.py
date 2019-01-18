@@ -1016,7 +1016,7 @@ def corner_moravec(image, window_size=1):
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_moravec(square).astype(int)
+    >>> corner_moravec(square).astype(int)  # doctest: +SKIP
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
