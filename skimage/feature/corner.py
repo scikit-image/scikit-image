@@ -81,8 +81,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> from skimage.feature import structure_tensor
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> Axx
+    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)  # doctest: +SKIP
+    >>> Axx  # doctest: +SKIP
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  4.,  0.,  4.,  0.],
