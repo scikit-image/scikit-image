@@ -406,8 +406,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     >>> from skimage.feature import shape_index
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> s = shape_index(square, sigma=0.1)
-    >>> s
+    >>> s = shape_index(square, sigma=0.1)  # doctest: +SKIP
+    >>> s  # doctest: +SKIP
     array([[ nan,  nan, -0.5,  nan,  nan],
            [ nan, -0. ,  nan, -0. ,  nan],
            [-0.5,  nan, -1. ,  nan, -0.5],
