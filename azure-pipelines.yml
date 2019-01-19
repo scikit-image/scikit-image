@@ -86,7 +86,7 @@ jobs:
       :: version of skimage, a different working directory is used.
 
       :: Use the Agg backend in Matplotlib
-      echo "backend\\ :\\ Agg" > matplotlibrc
+      echo backend ^: Agg > matplotlibrc
 
       echo "Running tests on the following version of scikit-image:"
       python -c "import skimage; print(skimage.__path__)"
@@ -94,13 +94,9 @@ jobs:
       :: Run unit tests with pytest
       pytest -v --pyargs skimage
 
-      :: [AppVeyor leftovers][For further consideration]
+      :: [For further consideration]
       :: # -- Build the docs
-      :: # pip install %PIP_FLAGS% --retries 3 -r requirements/docs.txt
-      :: # SET PYTHON=%PYTHON%\\python.exe && cd doc && make html
-      :: # -- Publish the artifacts
-      :: # Archive the generated wheel package in the ci.appveyor.com build report.
-      :: # path: dist\*
+      :: # -- Publish the .whl artifacts
       :: # -- Upload the content of dist/*.whl to a public wheelhouse
-    workingDirectory: C:\
+    workingDirectory: $(Agent.ToolsDirectory)
     displayName: 'Testing'
