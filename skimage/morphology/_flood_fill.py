@@ -25,7 +25,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.
+        The index into `image` to start filling.  Integer a convenience for 1-D.
     new_value : `image` type
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
@@ -39,7 +39,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         Adjacent pixels whose squared distance from the center is larger or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
-    tolerance : ``selem`` type, optional
+    tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
         is given, a comparison will be done at every point and this tolerance
@@ -115,31 +115,30 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
             output = image.copy()
         else:
             output = image
-        output[flood_fill_mask(image, seed_point, selem=selem,
+        output[flood(image, seed_point, selem=selem,
                                connectivity=connectivity,
                                tolerance=tolerance)] = new_value
         return output
     else:  # inplace
-        image[flood_fill_mask(image, seed_point, selem=selem,
+        image[flood(image, seed_point, selem=selem,
                               connectivity=connectivity,
                               tolerance=tolerance)] = new_value
         return image
 
 
 
-def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
-                    tolerance=None):
-    """Find mask corresponding to a flood fill applied to an image.
+def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
+    """Mask corresponding to a flood fill.
 
     Starting at a specific `seed_point`, connected points equal or within
-    `tolerance` of the seed value are found, returned as a mask.
+    `tolerance` of the seed value are found.
 
     Parameters
     ----------
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.
+        The index into `image` to start filling.  Integer a convenience for 1-D.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must contain only 1's and 0's, have the same number
@@ -150,11 +149,11 @@ def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
         Adjacent pixels whose squared distance from the center is larger or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
-    tolerance : ``selem`` type, optional
+    tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
         initial value of `image` at `seed_point`.  This is fastest.  If a value
-        is given, a comparison will be done at every point and this tolerance
-        on each side of the initial value will also be filled (inclusive).
+        is given, a comparison will be done at every point and if within
+        tolerance of the initial value will also be filled (inclusive).
 
     Returns
     -------
@@ -175,7 +174,7 @@ def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
 
     Examples
     --------
-    >>> from skimage.morphology import flood_fill_mask
+    >>> from skimage.morphology import flood
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
     >>> image[3, 0] = 1
@@ -189,7 +188,7 @@ def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
 
     Fill connected ones with 5, with full connectivity (diagonals included):
 
-    >>> mask = flood_fill_mask(image, (1, 1))
+    >>> mask = flood(image, (1, 1))
     >>> image[mask] = 5
     >>> image
     array([[0, 0, 0, 0, 0, 0, 0],
@@ -199,7 +198,7 @@ def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
 
     Fill connected fives with 1, with only cardinal direction connectivity:
 
-    >>> mask = flood_fill_mask(image, (1, 1), connectivity=1)
+    >>> mask = flood(image, (1, 1), connectivity=1)
     >>> image[mask] = 1
     >>> image
     array([[0, 0, 0, 0, 0, 0, 0],
@@ -209,7 +208,7 @@ def flood_fill_mask(image, seed_point, *, selem=None, connectivity=None,
 
     Fill with a tolerance:
 
-    >>> mask = flood_fill_mask(image, (0, 0), tolerance=1)
+    >>> mask = flood(image, (0, 0), tolerance=1)
     >>> image[mask] = 5
     >>> image
     array([[5, 5, 5, 5, 5, 5, 5],

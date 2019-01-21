@@ -12,7 +12,7 @@ from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import h_minima, h_maxima, local_maxima, local_minima
-from ._flood_fill import flood_fill, flood_fill_mask
+from ._flood_fill import flood, flood_fill
 
 
 __all__ = ['binary_erosion',
@@ -49,6 +49,6 @@ __all__ = ['binary_erosion',
            'h_maxima',
            'local_maxima',
            'local_minima',
+           'flood',
            'flood_fill',
-           'flood_fill_mask',
            ]

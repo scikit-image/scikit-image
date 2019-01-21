@@ -11,7 +11,7 @@ from ._chan_vese import chan_vese
 from .morphsnakes import (morphological_geodesic_active_contour,
                           morphological_chan_vese, inverse_gaussian_gradient,
                           circle_level_set, checkerboard_level_set)
-from ..morphology import flood_fill, flood_fill_mask
+from ..morphology import flood, flood_fill
 
 
 __all__ = ['random_walker',
@@ -32,6 +32,6 @@ __all__ = ['random_walker',
            'inverse_gaussian_gradient',
            'circle_level_set',
            'checkerboard_level_set',
+           'flood',
            'flood_fill',
-           'flood_fill_mask',
            ]

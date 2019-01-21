@@ -8,10 +8,7 @@ eps = 1e-12
 
 def test_empty_input():
     output = flood_fill(np.empty(0), (), 2)
-    assert output.dtype == np.uint8
-
-    output = flood_fill(np.empty(0), (), 2)
-    assert output.dtype == np.intp
+    assert output.size == 0
 
 
 def test_float16():
