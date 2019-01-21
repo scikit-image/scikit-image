@@ -2,6 +2,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, gaussian_laplace
 import math
 from math import sqrt, log
+import multiprocessing as mp
 from scipy import spatial
 from ..util import img_as_float
 from .peak import peak_local_max
@@ -359,11 +360,15 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
+    pool = mp.Pool()
+    filtered = []
+    for sigma in sigma_list:
+        filtered.append(pool.apply_async(gaussian_laplace, args=(image, sigma)))
+
     # computing gaussian laplace
     # s**2 provides scale invariance
-    gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
-
-    image_cube = np.stack(gl_images, axis=-1)
+    image_cube = np.stack([-s ** 2 * result.get()
+                           for result, s in zip(filtered, sigma_list)], axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * (image.ndim + 1)),
