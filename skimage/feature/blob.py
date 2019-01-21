@@ -362,13 +362,13 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     pool = mp.Pool()
     filtered = []
-    for sigma in sigma_list:
-        filtered.append(pool.apply_async(gaussian_laplace, args=(image, sigma)))
+    for s in sigma_list:
+        filtered.append(pool.apply_async(gaussian_laplace, args=(image, s)))
 
     # computing gaussian laplace
     # s**2 provides scale invariance
-    image_cube = np.stack([-s ** 2 * result.get()
-                           for result, s in zip(filtered, sigma_list)], axis=-1)
+    image_cube = np.stack([-s ** 2 * res.get()
+                           for res, s in zip(filtered, sigma_list)], axis=-1)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3,) * (image.ndim + 1)),
