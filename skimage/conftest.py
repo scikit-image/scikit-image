@@ -8,7 +8,7 @@ if Version(np.__version__) >= Version('1.14'):
     np.set_printoptions(legacy='1.13')
 
 # List of files that pytest should ignore
-collect_ignore = ["io/_plugins",]
+collect_ignore = ["io/_plugins"]
 try:
     import visvis
 except ImportError:
