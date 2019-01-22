@@ -74,14 +74,14 @@ class TestMaxtree(TestCase):
 
         for img_type in [np.uint8, np.uint16, np.uint32, np.uint64]:
             img = img.astype(img_type)
-            P, S = max_tree(img)
+            P, S = max_tree(img, connectivity=2)
             assert_array_equal(P, P_exp)
             assert_array_equal(S, S_exp)
 
         for img_type in [np.int8, np.int16, np.int32, np.int64]:
             img = img.astype(img_type)
             img_shifted = img - 9
-            P, S = max_tree(img_shifted)
+            P, S = max_tree(img_shifted, connectivity=2)
             assert_array_equal(P, P_exp)
             assert_array_equal(S, S_exp)
 
@@ -89,7 +89,7 @@ class TestMaxtree(TestCase):
         img_float = (img_float - 8) / 2.0
         for img_type in [np.float32, np.float64]:
             img_float = img_float.astype(img_type)
-            P, S = max_tree(img_float)
+            P, S = max_tree(img_float, connectivity=2)
             assert_array_equal(P, P_exp)
             assert_array_equal(S, S_exp)
 
@@ -147,10 +147,10 @@ class TestMaxtree(TestCase):
             dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, expected_2, area_closing)
-        _full_type_test(img, 4, expected_4, area_closing)
+        _full_type_test(img, 2, expected_2, area_closing, connectivity=2)
+        _full_type_test(img, 4, expected_4, area_closing, connectivity=2)
 
-        P, S = max_tree(invert(img))
+        P, S = max_tree(invert(img), connectivity=2)
         _full_type_test(img, 4, expected_4, area_closing,
                         parent=P, tree_traverser=S)
 
@@ -227,10 +227,10 @@ class TestMaxtree(TestCase):
                               dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, expected_2, area_opening)
-        _full_type_test(img, 4, expected_4, area_opening)
+        _full_type_test(img, 2, expected_2, area_opening, connectivity=2)
+        _full_type_test(img, 4, expected_4, area_opening, connectivity=2)
 
-        P, S = max_tree(img)
+        P, S = max_tree(img, connectivity=2)
         _full_type_test(img, 4, expected_4, area_opening,
                         parent=P, tree_traverser=S)
 
@@ -279,10 +279,10 @@ class TestMaxtree(TestCase):
                        dtype=np.uint8)
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, ex2, diameter_closing)
-        _full_type_test(img, 4, ex4, diameter_closing)
+        _full_type_test(img, 2, ex2, diameter_closing, connectivity=2)
+        _full_type_test(img, 4, ex4, diameter_closing, connectivity=2)
 
-        P, S = max_tree(invert(img))
+        P, S = max_tree(invert(img), connectivity=2)
         _full_type_test(img, 4, ex4, diameter_opening,
                         parent=P, tree_traverser=S)
 
@@ -328,10 +328,10 @@ class TestMaxtree(TestCase):
                         [7, 10, 11, 13, 14, 14, 15, 14, 14, 13, 11, 10]])
 
         # _full_type_test makes a test with many image types.
-        _full_type_test(img, 2, ex2, diameter_opening)
-        _full_type_test(img, 4, ex4, diameter_opening)
+        _full_type_test(img, 2, ex2, diameter_opening, connectivity=2)
+        _full_type_test(img, 4, ex4, diameter_opening, connectivity=2)
 
-        P, S = max_tree(img)
+        P, S = max_tree(img, connectivity=2)
         _full_type_test(img, 4, ex4, diameter_opening,
                         parent=P, tree_traverser=S)
 
@@ -362,7 +362,7 @@ class TestMaxtree(TestCase):
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
 
             test_data = data.astype(dtype)
-            out = max_tree_local_maxima(test_data)
+            out = max_tree_local_maxima(test_data, connectivity=2)
             out_bin = out > 0
             assert_array_equal(expected_result, out_bin)
             assert out.dtype == expected_result.dtype
@@ -415,7 +415,7 @@ class TestMaxtree(TestCase):
                                    dtype=np.uint8)
 
         # test for local maxima
-        out = max_tree_local_maxima(data)
+        out = max_tree_local_maxima(data, connectivity=2)
         out_bin = out > 0
         assert_array_equal(expected_result, out_bin)
         assert np.max(out) == 6

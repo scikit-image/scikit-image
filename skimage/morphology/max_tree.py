@@ -144,7 +144,7 @@ def max_tree(image, connectivity=1):
     return parent, tree_traverser
 
 
-def area_opening(image, area_threshold=25, connectivity=1,
+def area_opening(image, area_threshold=64, connectivity=1,
                  parent=None, tree_traverser=None):
     """Perform an area opening of the image.
 
@@ -171,7 +171,8 @@ def area_opening(image, area_threshold=25, connectivity=1,
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
     area_threshold: unsigned int
-        The size parameter (number of pixels). The default value is arbitrary.
+        The size parameter (number of pixels). The default value is arbitrarily
+        chosen to be 64.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
@@ -254,7 +255,7 @@ def area_opening(image, area_threshold=25, connectivity=1,
     return output
 
 
-def diameter_opening(image, diameter_threshold=5, connectivity=1,
+def diameter_opening(image, diameter_threshold=8, connectivity=1,
                      parent=None, tree_traverser=None):
     """Perform a diameter opening of the image.
 
@@ -274,7 +275,8 @@ def diameter_opening(image, diameter_threshold=5, connectivity=1,
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
     diameter_threshold: unsigned int
-        The maximal extension parameter. The default value is arbitrary.
+        The maximal extension parameter (number of pixels). The default value
+        is 8.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
@@ -345,7 +347,7 @@ def diameter_opening(image, diameter_threshold=5, connectivity=1,
     return output
 
 
-def area_closing(image, area_threshold=25, connectivity=1,
+def area_closing(image, area_threshold=64, connectivity=1,
                  parent=None, tree_traverser=None):
     """Perform an area closing of the image.
 
@@ -371,7 +373,8 @@ def area_closing(image, area_threshold=25, connectivity=1,
         The input image for which the area_closing is to be calculated.
         This image can be of any type.
     area_threshold: unsigned int
-        The size parameter (number of pixels). The default value is arbitrary.
+        The size parameter (number of pixels). The default value is arbitrarily
+        chosen to be 64.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
@@ -470,7 +473,7 @@ def area_closing(image, area_threshold=25, connectivity=1,
     return output
 
 
-def diameter_closing(image, diameter_threshold=5, connectivity=1,
+def diameter_closing(image, diameter_threshold=8, connectivity=1,
                      parent=None, tree_traverser=None):
     """Perform a diameter closing of the image.
 
@@ -490,7 +493,8 @@ def diameter_closing(image, diameter_threshold=5, connectivity=1,
         The input image for which the diameter_closing is to be calculated.
         This image can be of any type.
     diameter_threshold: unsigned int
-        The maximal extension. The default value is arbitrary.
+        The maximal extension parameter (number of pixels). The default value
+        is 8.
     connectivity: unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
