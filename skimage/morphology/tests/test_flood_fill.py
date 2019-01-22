@@ -91,7 +91,7 @@ def test_wraparound():
     # If the borders (or neighbors) aren't correctly accounted for, this fails,
     # because the algorithm uses an ravelled array.
     test = np.zeros((5, 7), dtype=np.float64)
-    test[:,3] = 100
+    test[:, 3] = 100
 
     expected = np.array([[-1., -1., -1., 100., 0., 0., 0.],
                          [-1., -1., -1., 100., 0., 0., 0.],
@@ -105,7 +105,7 @@ def test_wraparound():
 def test_neighbors():
     # This test will only pass if the neighbors are exactly correct
     test = np.zeros((5, 7), dtype=np.float64)
-    test[:,3] = 100
+    test[:, 3] = 100
 
     expected = np.array([[0, 0, 0, 255, 0, 0, 0],
                          [0, 0, 0, 255, 0, 0, 0],

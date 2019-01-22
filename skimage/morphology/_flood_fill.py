@@ -25,7 +25,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.  Integer a convenience for 1-D.
+        The index into `image` to start filling.  Integer a convenience for 1D.
     new_value : `image` type
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
@@ -115,16 +115,13 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
             output = image.copy()
         else:
             output = image
-        output[flood(image, seed_point, selem=selem,
-                               connectivity=connectivity,
-                               tolerance=tolerance)] = new_value
+        output[flood(image, seed_point, selem=selem, connectivity=connectivity,
+                     tolerance=tolerance)] = new_value
         return output
     else:  # inplace
-        image[flood(image, seed_point, selem=selem,
-                              connectivity=connectivity,
-                              tolerance=tolerance)] = new_value
+        image[flood(image, seed_point, selem=selem, connectivity=connectivity,
+                    tolerance=tolerance)] = new_value
         return image
-
 
 
 def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
@@ -138,7 +135,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.  Integer a convenience for 1-D.
+        The index into `image` to start filling.  Integer a convenience for 1D.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must contain only 1's and 0's, have the same number
@@ -218,9 +215,9 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     """
     # Correct start point in ravelled image - only copy if non-contiguous
     image = np.asarray(image)
-    if image.flags.f_contiguous == True:
+    if image.flags.f_contiguous is True:
         order = 'F'
-    elif image.flags.c_contiguous == True:
+    elif image.flags.c_contiguous is True:
         order = 'C'
     else:
         warnings.warn('Non-contiguous array passed as `image`; this will be '
