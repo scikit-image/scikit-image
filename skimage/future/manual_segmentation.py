@@ -1,8 +1,5 @@
 from functools import reduce
 import numpy as np
-import matplotlib
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 from ..draw import polygon
 
 
@@ -64,6 +61,9 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     >>> io.imshow(mask)  # doctest: +SKIP
     >>> io.show()  # doctest: +SKIP
     """
+    import matplotlib
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
 
     list_of_vertex_lists = []
@@ -176,6 +176,9 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     >>> io.imshow(mask)  # doctest: +SKIP
     >>> io.show()  # doctest: +SKIP
     """
+    import matplotlib
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
 
     list_of_vertex_lists = []
