@@ -38,20 +38,18 @@ ax[1].axis('off')
 
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
 
-Advanced example
-----------------
-
-Because standard flood filling requires the neighbors to be strictly equal,
-its use is limited on real-world images with color gradients and noise.
-The `tolerance` keyword argument widens the permitted range about the initial
-value, allowing use on real-world images.
-
-Here we will experiment a bit on the cameraman.  First, turning his coat from
-dark to light.
-"""
+##############################################################################
+# Advanced example
+# ----------------
+#
+# Because standard flood filling requires the neighbors to be strictly equal,
+# its use is limited on real-world images with color gradients and noise.
+# The `tolerance` keyword argument widens the permitted range about the initial
+# value, allowing use on real-world images.
+#
+# Here we will experiment a bit on the cameraman.  First, turning his coat from
+# dark to light.
 
 cameraman = data.camera()
 
@@ -71,19 +69,17 @@ ax[1].axis('off')
 plt.show()
 
 
-"""
-.. image:: PLOT2RST.current_figure
+##############################################################################
+# Because the cameraman is dark haired it also changed his hair, as well as
+# parts of the tripod.
+#
+# Experimentation with tolerance
+# ------------------------------
+#
+# To get a better intuitive understanding of how the tolerance parameter
+# works, here is a set of images progressively increasing the parameter with
+# seed point in the upper left corner.
 
-Because the cameraman is dark haired it also changed his hair, as well as
-parts of the tripod.
-
-Experimentation with tolerance
-------------------------------
-
-To get a better intuitive understanding of how the tolerance parameter works,
-here is a set of images progressively increasing the parameter with seed
-point in the upper left corner.
-"""
 
 output = []
 
@@ -99,8 +95,7 @@ ax[0, 0].axis('off')
 
 # Plot all eight different tolerances for comparison.
 for i in range(8):
-    n = (1 + i)%3
-    m = (1 + i)//3
+    m, n = np.unravel_index(i, (3, 3))
     ax[m, n].imshow(output[i], cmap=plt.cm.gray)
     ax[m, n].set_title('Tolerance {0}'.format(str(5 + 20*i)))
     ax[m, n].axis('off')
@@ -108,13 +103,40 @@ for i in range(8):
 fig.tight_layout()
 plt.show()
 
-"""
-.. image:: PLOT2RST.current_figure
 
-Flood as mask
--------------
+##############################################################################
+# Flood as mask
+# -------------
+#
+# A sister function, `flood`, is available which returns a mask identifying
+# the flood rather than modifying the image itself.  This is useful for
+# segmentation purposes and more advanced analysis pipelines.
+#
+# Here we segment the nose of a cat.  However, multi-channel images are not
+# supported by flood[_fill].  Instead we Sobel filter the red channel to
+# enhance edges, then flood the nose with a tolerance.
 
-A sister function, `flood`, is available which returns a mask identifying the
-flood rather than modifying the image itself.  This is useful for
-segmentation purposes and more advanced analysis pipelines.
-"""
+import skimage.filters as filters
+
+cat = data.chelsea()
+cat_sobel = filters.sobel(cat[..., 0])
+cat_nose = flood(cat_sobel, (240, 265), tolerance=0.03)
+
+fig, ax = plt.subplots(nrows=3, figsize=(10, 20))
+
+ax[0].imshow(cat)
+ax[0].set_title('Original')
+ax[0].axis('off')
+
+ax[1].imshow(cat_sobel)
+ax[1].set_title('Sobel filtered')
+ax[1].axis('off')
+
+ax[2].imshow(cat)
+ax[2].imshow(cat_nose, cmap=plt.cm.gray, alpha=0.3)
+ax[2].plot(265, 240, 'wo') # seed point
+ax[2].set_title('Nose segmented with `flood`')
+ax[2].axis('off')
+
+fig.tight_layout()
+plt.show()
