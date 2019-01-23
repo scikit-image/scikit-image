@@ -1,7 +1,7 @@
-from ...external.tifffile import TiffFile, imsave
+from ...external.tifffile import TiffFile, imsave, parse_kwargs
 
-
-def imread(fname, dtype=None, **kwargs):
+                 
+def imread(fname, **kwargs):
     """Load a tiff image from file.
 
     Parameters
@@ -26,5 +26,13 @@ def imread(fname, dtype=None, **kwargs):
     """
     if 'img_num' in kwargs:
         kwargs['key'] = kwargs.pop('img_num')
-    with TiffFile(fname) as tif:
+        
+    # separate TiffFile kwargs from other kwargs
+    tiff_keys = ['multifile', 'multifile_close', 'pages', 'fastij', 'is_ome',
+                 'pattern']
+    kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
+    for key in tiff_keys:
+        kwargs.pop(key,None)
+
+    with TiffFile(fname, **kwargs_tiff) as tif:
         return tif.asarray(**kwargs)
