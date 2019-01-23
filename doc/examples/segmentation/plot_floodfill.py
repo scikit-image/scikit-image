@@ -16,6 +16,7 @@ First, a basic example where we will change a checkerboard square from white
 to mid-gray.
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.segmentation import flood_fill
