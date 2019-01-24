@@ -24,7 +24,6 @@ ctypedef np.uint64_t DTYPE_UINT64_t
 ctypedef np.int64_t DTYPE_INT64_t
 ctypedef np.uint8_t DTYPE_BOOL_t
 ctypedef np.uint8_t DTYPE_UINT8_t
-ctypedef np.int8_t DTYPE_INT8_t
 
 ctypedef fused dtype_t:
     np.uint8_t
@@ -40,7 +39,7 @@ ctypedef fused dtype_t:
 
 
 cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent,
-                                       DTYPE_INT64_t index):
+                             DTYPE_INT64_t index):
     """Get the root of the current tree through a recursive algorithm.
 
     This function modifies the tree in-place through path compression, which
@@ -62,7 +61,7 @@ cdef DTYPE_INT64_t find_root_recursive(DTYPE_INT64_t[::1] parent,
         The root found from ``index``.
     """
     if parent[index] != index:
-        parent[index] = find_root_recursive(parent, parent[index])
+        parent[index] = find_root(parent, parent[index])
     return parent[index]
 
 
