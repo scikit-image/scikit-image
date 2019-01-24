@@ -31,6 +31,14 @@ Version 0.16
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
   arguments.
 * In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
+* In ``skimage.filters.median``, change default from ``behavior='rank'`` to
+  ``behavior='ndimage'``.
+
+Version 0.17
+------------
+
+* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
+  and ``shift_y``.
 
 Other
 -----

@@ -17,8 +17,8 @@ from .._shared.utils import assert_nD
 
 def _compute_disk_overlap(d, r1, r2):
     """
-    Compute surface overlap between two disks of radii ``r1`` and ``r2``,
-    with centers separated by a distance ``d``.
+    Compute fraction of surface overlap between two disks of radii
+    ``r1`` and ``r2``, with centers separated by a distance ``d``.
 
     Parameters
     ----------
@@ -31,8 +31,8 @@ def _compute_disk_overlap(d, r1, r2):
 
     Returns
     -------
-    vol: float
-        Volume of the overlap between the two disks.
+    fraction: float
+        Fraction of area of the overlap between the two disks.
     """
 
     ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
@@ -54,8 +54,8 @@ def _compute_disk_overlap(d, r1, r2):
 
 def _compute_sphere_overlap(d, r1, r2):
     """
-    Compute volume overlap between two spheres of radii ``r1`` and ``r2``,
-    with centers separated by a distance ``d``.
+    Compute volume overlap fraction between two spheres of radii
+    ``r1`` and ``r2``, with centers separated by a distance ``d``.
 
     Parameters
     ----------
@@ -68,8 +68,8 @@ def _compute_sphere_overlap(d, r1, r2):
 
     Returns
     -------
-    vol: float
-        Volume of the overlap between the two spheres.
+    fraction: float
+        Fraction of volume of the overlap between the two spheres.
 
     Notes
     -----

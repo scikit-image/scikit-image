@@ -57,15 +57,15 @@ matrix:
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode10.1
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode10.1
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode10.1
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
 
@@ -82,7 +82,9 @@ before_install:
     - which python; python --version
     - pip list
     - tools/build_versions.py
-    - tools/check_sdist.py
+    - python setup.py sdist
+    - SDIST_NAME=dist/`python setup.py --fullname`.tar.gz
+    - tools/check_sdist.py $SDIST_NAME
 
 install:
     - python setup.py develop

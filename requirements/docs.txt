@@ -6,3 +6,6 @@ sphinx-gallery
 sphinx-copybutton
 pytest-runner
 scikit-learn
+dask[array]>=0.9.0
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1

@@ -586,10 +586,12 @@ def perimeter(image, neighbourhood=4):
 
     Parameters
     ----------
-    image : array
-        Binary image.
+    image : (N, M) ndarray
+        2D binary image.
     neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination.
+        Neighborhood connectivity for border pixel determination. It is used to
+        compute the contour. A higher neighbourhood widens the border on which
+        the perimeter is computed.
 
     Returns
     -------
@@ -601,7 +603,23 @@ def perimeter(image, neighbourhood=4):
     .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> # coins image (binary)
+    >>> img_coins = data.coins() > 110
+    >>> # total perimeter of all objects in the image
+    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    7796.867...
+    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    8806.268...
+
     """
+    if image.ndim != 2:
+        raise NotImplementedError('`perimeter` supports 2D images only')
+
     if neighbourhood == 4:
         strel = STREL_4
     else:
@@ -636,7 +654,7 @@ def _parse_docs():
     doc = regionprops.__doc__ or ''
     matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
-    prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
+    prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
 
