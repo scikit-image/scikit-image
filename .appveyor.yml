@@ -67,7 +67,7 @@ test_script:
   -  echo backend:Agg > matplotlibrc
 
   # Run unit tests with pytest
-  - pytest -v --pyargs skimage
+  - pytest --doctest-modules -v --pyargs skimage
 
 #artifacts:
 #  # Archive the generated wheel package in the ci.appveyor.com build report.
