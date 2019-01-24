@@ -18,7 +18,7 @@ section_end "List.installed.dependencies"
 section "Test"
 # Change to a random directory for testing
 tmp_test_dir=`mktemp -d`
-(cd %{tmp_test_dir} && pytest $TEST_ARGS --pyargs skimage)
+(cd ${tmp_test_dir} && pytest $TEST_ARGS --pyargs skimage)
 section_end "Test"
 
 section "Flake8.test"
