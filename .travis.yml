@@ -89,6 +89,10 @@ before_install:
 install:
     - ccache --show-stats
     # Test installing without cython using the sdist
+    # --no-build-isolation ensures even in the presense of a pyproject.toml
+    # pip will not create a virtual environment, just for building the package
+    # This is problematic because the version of numpy of that virtual environment
+    # may be higher than the version we want to test with.
     - if [[ $INSTALL_FROM_SDIST ]]; then
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
