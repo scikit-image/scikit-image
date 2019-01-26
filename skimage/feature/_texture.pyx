@@ -61,8 +61,8 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
             angle = angles[a_idx]
             for d_idx in range(distances.shape[0]):
                 distance = distances[d_idx]
-                offset_row = <int>round(sin(angle) * distance)
-                offset_col = <int>round(cos(angle) * distance)
+                offset_row = round(sin(angle) * distance)
+                offset_col = round(cos(angle) * distance)
                 start_row = max(0, -offset_row)
                 end_row = min(rows, rows - offset_row)
                 start_col = max(0, -offset_col)
