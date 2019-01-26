@@ -1,3 +1,4 @@
+dask[array]>=1.0.0
 PySide; python_version <= '3.4'
 imread
 SimpleITK; python_version < '3.7'
