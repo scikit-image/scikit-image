@@ -13,6 +13,19 @@ except NameError:
         pass
 
 
+def _compiled_filename(f):
+    """Check for the presence of a .pyx[.in] file as a .c or .cpp."""
+    basename = f.replace('.in', '').replace('.pyx', '')
+    for ext in ('.c', '.cpp'):
+        filename = basename + ext
+        if os.path.exists(filename):
+            return filename
+    else:
+        raise RuntimeError('Cython >= %s is required to build '
+                           'scikit-image from git checkout' %
+                           CYTHON_VERSION)
+
+
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
 
@@ -34,15 +47,12 @@ def cython(pyx_files, working_path=''):
         from Cython.Build import cythonize
     except ImportError:
         # If cython is not found, the build will make use of
-        # the distributed .c files if present
-        c_files = [f.replace('.pyx.in', '.c').replace('.pyx', '.c') for f in pyx_files]
-        for cfile in [os.path.join(working_path, f) for f in c_files]:
-            if not os.path.isfile(cfile):
-                raise RuntimeError('Cython >= %s is required to build scikit-image from git checkout' \
-                                   % CYTHON_VERSION)
+        # the distributed .c or .cpp files if present
+        c_files_used = [_compiled_filename(os.path.join(working_path, f))
+                        for f in pyx_files]
 
         print("Cython >= %s not found; falling back to pre-built %s" \
-              % (CYTHON_VERSION, " ".join(c_files)))
+              % (CYTHON_VERSION, " ".join(c_files_used)))
     else:
         pyx_files = [os.path.join(working_path, f) for f in pyx_files]
         for i, pyxfile in enumerate(pyx_files):

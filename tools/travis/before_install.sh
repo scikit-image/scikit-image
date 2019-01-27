@@ -29,7 +29,7 @@ export WHEELHOUSE
 export DISPLAY=:99.0
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
-# codecov will combine different paths
+
 export TEST_ARGS="--doctest-modules --cov=skimage"
 
 retry () {
