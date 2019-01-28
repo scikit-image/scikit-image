@@ -1,4 +1,4 @@
-import collections as coll
+import collections.abc as coll
 import numpy as np
 from scipy import ndimage as ndi
 
