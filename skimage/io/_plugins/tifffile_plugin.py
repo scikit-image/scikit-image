@@ -1,7 +1,7 @@
 from ...external.tifffile import TiffFile, imsave, parse_kwargs
 
 
-def imread(fname, **kwargs):
+def imread(fname, dtype=None, **kwargs):
     """Load a tiff image from file.
 
     Parameters
