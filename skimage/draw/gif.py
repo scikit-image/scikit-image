@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import animation
-from skimage.transform import resize
+from ..transform import resize
 
 
 def resized(images):
