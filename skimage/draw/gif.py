@@ -1,3 +1,5 @@
+__all__ = ['register_affine']
+
 from matplotlib import pyplot as plt
 from matplotlib import animation
 from ..transform import resize
