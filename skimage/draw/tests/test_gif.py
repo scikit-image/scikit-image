@@ -16,7 +16,7 @@ def verify_gif(file_name):
     # note: in order to reach 26 bytes, the gif needs to be
     #       one image, one pixel and the maker of the gif
     #       needs to remove optional common practices.
-    assert 26 <= os.stat(file_name).st_size
+    assert 24 <= os.stat(file_name).st_size
 
 
 def test(image_num=5, file_name="test_gif.gif"):
