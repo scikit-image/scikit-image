@@ -1,6 +1,4 @@
-import sys
-sys.path.append('..')
-from gif import _animate
+from skimage.draw import _animate
 from skimage import data
 import numpy as np
 from scipy import ndimage as ndi
