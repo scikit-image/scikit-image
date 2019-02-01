@@ -1,11 +1,11 @@
-__all__ = ['register_affine']
+__all__ = ['animate']
 
 from matplotlib import pyplot as plt
 from matplotlib import animation
-from ..transform import resize
+from skimage.transform import resize
 
 
-def resized(images):
+def _resized(images):
     """
     Resize all images to the largest width and height
 
@@ -28,7 +28,7 @@ def resized(images):
     return modified_images
 
 
-def _animate(images, frames_per_second=2, file_name=None, delay=0,
+def animate(images, frames_per_second=2, file_name=None, delay=0,
              title='', xlabel='', ylabel=''):
     """
     Animate a gif out of an array of images
@@ -60,7 +60,7 @@ def _animate(images, frames_per_second=2, file_name=None, delay=0,
         The animation created.
     """
 
-    images = resized(images)
+    images = _resized(images)
 
     fig = plt.figure()
     if title:
