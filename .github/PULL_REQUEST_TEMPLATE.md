@@ -5,6 +5,7 @@
 
 
 ## Checklist
+
 <!-- It's fine to submit PRs which are a work in progress! -->
 <!-- But before they are merged, all PRs should provide: -->
 - [ ] [Docstrings for all functions](https://github.com/numpy/numpy/blob/master/doc/example.py)
@@ -18,8 +19,7 @@
 <!-- the scikit-image contribution guidelines. -->
 <!-- https://scikit-image.org/docs/dev/contribute.html -->
 
-## For reviewersreviewers
-
+## For reviewers
 
 <!-- Don't remove the checklist below. -->
 - [ ] Check that the PR title is short, concise, and will make sense 1 year
