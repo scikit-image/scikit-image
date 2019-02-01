@@ -5,6 +5,15 @@ import skimage.graph.heap as heap
 from skimage._shared.testing import test_parallel
 
 
+# Lower versions of python don't have perf_counter
+# Python 3.7 will issue a warning if clock is used as it was
+# considered deprecated in 3.3
+try:
+    from time import perf_counter
+except ImportError:
+    from time import clock as perf_counter
+
+
 @test_parallel()
 def test_heap():
     _test_heap(100000, True)
@@ -17,7 +26,7 @@ def _test_heap(n, fast_update):
     a = [random.uniform(1.0, 100.0) for i in range(n // 2)]
     a = a + a
 
-    t0 = time.perf_counter()
+    t0 = perf_counter()
 
     # insert in heap with random removals
     if fast_update:
@@ -41,7 +50,7 @@ def _test_heap(n, fast_update):
         except IndexError:
             break
 
-    t1 = time.perf_counter()
+    t1 = perf_counter()
 
     # verify
     for i in range(1, len(b)):
