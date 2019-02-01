@@ -202,7 +202,8 @@ cdef class BinaryHeap:
         if values is NULL or references is NULL:
             free(values)
             free(references)
-            raise MemoryError()
+            with gil:
+                raise MemoryError()
 
         # init arrays
         for i in range(number * 2):
