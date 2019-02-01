@@ -1,4 +1,4 @@
-from skimage.draw import _animate
+from skimage.draw import animate
 from skimage import data
 import numpy as np
 from scipy import ndimage as ndi
@@ -35,7 +35,7 @@ def test(image_num=5, file_name="test_gif.gif"):
 
         images[i] = ndi.affine_transform(images[i-1], matrix)
 
-    _animate(images, file_name=file_name)
+    animate(images, file_name=file_name)
     verify_gif(file_name)
 
 
