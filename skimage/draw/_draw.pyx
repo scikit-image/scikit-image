@@ -299,10 +299,10 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef double dceil_prev = 0
 
     cdef char cmethod
-    if method == b'bresenham':
+    if method == 'bresenham':
         d = 3 - 2 * radius
         cmethod = b'b'
-    elif method == b'andres':
+    elif method == 'andres':
         d = radius - 1
         cmethod = b'a'
     else:
