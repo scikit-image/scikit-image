@@ -403,6 +403,14 @@ def test_weighted_moments_normalized():
     assert_array_almost_equal(wnu, ref)
 
 
+def test_offset_features():
+    props = regionprops(SAMPLE)[0]
+    offset = np.array([1024, 2048])
+    props_offset = regionprops(SAMPLE, offset=offset)[0]
+
+    assert_allclose(props.centroid, props_offset.centroid - offset)
+
+
 def test_label_sequence():
     a = np.empty((2, 2), dtype=np.int)
     a[:, :] = 2
