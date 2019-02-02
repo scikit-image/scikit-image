@@ -99,7 +99,7 @@ class _RegionProperties(object):
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, coordinates):
+                 cache_active, coordinates, *, offset=None):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
@@ -107,6 +107,7 @@ class _RegionProperties(object):
                                  'same shape.')
 
         self.label = label
+        self.offset = offset or np.zeros((label_image.ndim,), dtype=int)
 
         self._slice = slice
         self.slice = slice
@@ -162,9 +163,8 @@ class _RegionProperties(object):
         return convex_hull_image(self.image)
 
     def coords(self):
-        indices = np.nonzero(self.image)
-        return np.vstack([indices[i] + self.slice[i].start
-                          for i in range(self._ndim)]).T
+        indices = np.argwhere(self.image)
+        return indices + self.offset
 
     @only2d
     def eccentricity(self):
@@ -359,7 +359,7 @@ class _RegionProperties(object):
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+                coordinates=None, *, offset=None):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -383,6 +383,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     coordinates : 'rc' or 'xy', optional
         Coordinate conventions for 2D images. (Only 'rc' coordinates are
         supported for 3D images.)
+    offset : array-like of int, shape `(label_image.ndim,)`, optional
+        Coordinates of the origin ("top-left" corner) of the label image.
+        Normally this is ([0, ]0, 0), but it might be different if one wants
+        to obtain regionprops of subvolumes within a much larger volume.
 
     Returns
     -------
@@ -565,6 +569,14 @@ def regionprops(label_image, intensity_image=None, cache=True,
     if not np.issubdtype(label_image.dtype, np.integer):
         raise TypeError('Label image must be of integer type.')
 
+    if offset is None:
+        offset_arr = np.zeros((label_image.ndim,), dtype=int)
+    else:
+        offset_arr = np.asarray(offset)
+        if offset_arr.ndim != 1 or offset_arr.size != label_image.ndim:
+            raise ValueError('Offset should be an array-like of integers '
+                             'of shape (label_image.ndim,); {} was provided.'
+                             .format(offset))
     regions = []
 
     objects = ndi.find_objects(label_image)
@@ -575,7 +587,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache, coordinates=coordinates)
+                                  cache, coordinates=coordinates,
+                                  offset=offset_arr)
         regions.append(props)
 
     return regions
