@@ -62,7 +62,8 @@ def cython(pyx_files, working_path=''):
 
         # Cython doesn't automatically choose a number of threads > 1
         # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
-        cythonize(pyx_files, nthreads=cpu_count())
+        cythonize(pyx_files, nthreads=cpu_count(),
+                  compiler_directives={'language_level': 3})
 
 
 def process_tempita_pyx(fromfile):
