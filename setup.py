@@ -122,9 +122,8 @@ def parse_requirements_file(filename):
 
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 extras_require = {
-    'docs': parse_requirements_file('requirements/docs.txt'),
-    'optional': parse_requirements_file('requirements/optional.txt'),
-    'test': parse_requirements_file('requirements/test.txt'),
+    dep : parse_requirements_file('requirements/' + dep + '.txt')
+    for dep in ['docs', 'optional', 'test']
 }
 
 # requirements for those browsing PyPI

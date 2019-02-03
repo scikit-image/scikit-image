@@ -118,6 +118,7 @@ install:
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
         pip install --retries 3 -r ./requirements/optional.txt $WHEELHOUSE
+        pip install --retries 3 -r ./requirements/extras.txt $WHEELHOUSE
       fi
     - tools/travis/install_qt.sh
 
