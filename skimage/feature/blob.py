@@ -262,7 +262,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         min_sigma = np.full(image.ndim, min_sigma, dtype=float)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=np.float)
+    min_sigma = np.asarray(min_sigma, dtype=float)
     max_sigma = np.asarray(max_sigma, dtype=np.float)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
