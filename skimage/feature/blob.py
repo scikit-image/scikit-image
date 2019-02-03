@@ -179,7 +179,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
-        the minimum standard deviation for Gaussian kernel. Keep this low to
+        The minimum standard deviation for Gaussian kernel. Keep this low to
         detect smaller blobs. The standard deviations of the Gaussian filter
         are given for each axis as a sequence, or as a single number, in
         which case it is equal for all axes.
