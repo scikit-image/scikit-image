@@ -92,12 +92,7 @@ install:
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
-    - |
-      if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-        export MPL_DIR=${HOME}/.matplotlib
-      else
-        export MPL_DIR=${HOME}/.config/matplotlib
-      fi
+    - export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
     - mkdir -p ${MPL_DIR}
     - touch ${MPL_DIR}/matplotlibrc
     # Install most of the optional packages
