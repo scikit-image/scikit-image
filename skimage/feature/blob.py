@@ -166,7 +166,7 @@ def _prune_blobs(blobs_array, overlap):
 
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
-             overlap=.5, exclude_border=False):
+             overlap=.5, *, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method [1]_.
