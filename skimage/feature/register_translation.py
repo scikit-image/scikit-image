@@ -4,7 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-import warnings
+
 
 def _upsampled_dft(data, upsampled_region_size,
                    upsample_factor=1, axis_offsets=None):
@@ -80,26 +80,21 @@ def _upsampled_dft(data, upsampled_region_size,
     elif data.ndim == 3:
         im2pi = 1j * 2 * np.pi
 
-        dim_kernels = []
-        for (n_items, ups_size, ax_offset) in zip(data.shape,
-                                                  upsampled_region_size,
-                                                  axis_offsets):
-            dim_kernels.append(
-                np.exp(np.dot(
+        # To compute the upsampled DFT across all spatial dimensions,
+        # a tensor product is computed
+        dim_properties = list(zip(data.shape,
+                                  upsampled_region_size,
+                                  axis_offsets))
+        for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
+            kernel = np.exp(np.dot(
                     (-im2pi / (n_items * upsample_factor)) *
                     (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
                     (np.fft.ifftshift(np.arange(n_items))[None, :]
-                     - n_items // 2))))
-
-            # To compute the upsampled DFT across all spatial dimensions,
-            # a tensor product is computed with einsum
-        try:
-            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels,
-                         optimize=True)
-        except TypeError:
-            warnings.warn("Subpixel registration of 3D images will be very slow"
-                          " if your numpy version is earlier than 1.12")
-            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels)
+                     - n_items // 2)))
+            # Equivalent to
+            #   data[i, j, k] = (kernel[i, :] * data[j, k, :]).sum()
+            data = np.tensordot(kernel, data, axes=(1, -1))
+        return data
 
     else:
         raise NotImplementedError("Upsampled registration for images of more"
