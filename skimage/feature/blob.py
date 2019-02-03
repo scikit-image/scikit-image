@@ -259,7 +259,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     if isinstance(max_sigma, (int, float)):
         max_sigma = np.full(len(image.shape), max_sigma, dtype=np.float)
     if isinstance(min_sigma, (int, float)):
-        min_sigma = np.full(len(image.shape), min_sigma, dtype=np.float)
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
 
     # Convert sequence types to array
     min_sigma = np.asarray(min_sigma, dtype=np.float)
