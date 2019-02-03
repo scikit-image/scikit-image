@@ -254,16 +254,21 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     """
     image = img_as_float(image)
 
+    # if both min and max sigma are scalar, function returns only one sigma
+    scalar_sigma = (
+        True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
+    )
+
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
-    if isinstance(max_sigma, (int, float)):
+    if np.isscalar(max_sigma):
         max_sigma = np.full(image.ndim, max_sigma, dtype=float)
-    if isinstance(min_sigma, (int, float)):
+    if np.isscalar(min_sigma):
         min_sigma = np.full(image.ndim, min_sigma, dtype=float)
 
     # Convert sequence types to array
     min_sigma = np.asarray(min_sigma, dtype=float)
-    max_sigma = np.asarray(max_sigma, dtype=np.float)
+    max_sigma = np.asarray(max_sigma, dtype=float)
 
     # k such that min_sigma*(sigma_ratio**k) > max_sigma
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
@@ -299,7 +304,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     # if the gaussian is isotropic, the stdev across dimensions are
     # identical, so return only the stdev deviation of the first dimension
-    if np.unique(min_sigma).shape == (1,) and np.unique(max_sigma).shape == (1,):
+    if scalar_sigma:
         sigmas_of_peaks = sigmas_of_peaks[:, 0][:, None]
 
     # Remove sigma index and replace with sigmas
@@ -396,16 +401,21 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     """
     image = img_as_float(image)
 
+    # if both min and max sigma are scalar, function returns only one sigma
+    scalar_sigma = (
+        True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
+    )
+
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
-    if isinstance(max_sigma, (int, float)):
-        max_sigma = np.full(len(image.shape), max_sigma, dtype=np.float)
-    if isinstance(min_sigma, (int, float)):
-        min_sigma = np.full(len(image.shape), min_sigma, dtype=np.float)
+    if np.isscalar(max_sigma):
+        max_sigma = np.full(image.ndim, max_sigma, dtype=float)
+    if np.isscalar(min_sigma):
+        min_sigma = np.full(image.ndim, min_sigma, dtype=float)
 
     # Convert sequence types to array
-    min_sigma = np.asarray(min_sigma, dtype=np.float)
-    max_sigma = np.asarray(max_sigma, dtype=np.float)
+    min_sigma = np.asarray(min_sigma, dtype=float)
+    max_sigma = np.asarray(max_sigma, dtype=float)
 
     if log_scale:
         start, stop = np.log10(min_sigma)[:, None], np.log10(max_sigma)[:, None]
@@ -441,7 +451,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # if the gaussian is isotropic, the stdev across dimensions are
     # identical, so return only the stdev deviation of the first dimension
-    if np.unique(min_sigma).shape == (1,) and np.unique(max_sigma).shape == (1,):
+    if scalar_sigma:
         sigmas_of_peaks = sigmas_of_peaks[:, 0][:, None]
 
     # Remove sigma index and replace with sigmas
