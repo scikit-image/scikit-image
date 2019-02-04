@@ -17,6 +17,8 @@ def _mask_from_vertices(vertices, shape, label):
 
 
 def _draw_polygon(ax, vertices, alpha=0.4):
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
 
     polygon = Polygon(vertices, closed=True)
