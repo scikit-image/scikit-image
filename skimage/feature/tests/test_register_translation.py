@@ -127,15 +127,6 @@ def test_4d_input_subpixel():
                                                     space="fourier")
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
-
-def test_no_4D():
-    # Dimensionality mismatch
-    image = np.ones((5, 5, 5, 5))
-    template = np.ones((5, 5, 5, 5))
-    with testing.raises(NotImplementedError):
-        register_translation(template, image, upsample_factor=5)
-
-
 def test_mismatch_upsampled_region_size():
     with testing.raises(ValueError):
         _upsampled_dft(
