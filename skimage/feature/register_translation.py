@@ -77,7 +77,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
         return row_kernel.dot(data).dot(col_kernel)
 
-    elif data.ndim == 3:
+    elif data.ndim > 2:
         im2pi = 1j * 2 * np.pi
 
         # To compute the upsampled DFT across all spatial dimensions,
@@ -91,14 +91,10 @@ def _upsampled_dft(data, upsampled_region_size,
                     (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
                     (np.fft.ifftshift(np.arange(n_items))[None, :]
                      - n_items // 2)))
-            # Equivalent to
+            # Equivalent to:
             #   data[i, j, k] = (kernel[i, :] * data[j, k, :]).sum()
             data = np.tensordot(kernel, data, axes=(1, -1))
         return data
-
-    else:
-        raise NotImplementedError("Upsampled registration for images of more"
-                                  " than 3 dimensions is not implemented")
 
 
 def _compute_phasediff(cross_correlation_max):
@@ -186,11 +182,6 @@ def register_translation(src_image, target_image, upsample_factor=1,
     if src_image.shape != target_image.shape:
         raise ValueError("Error: images must be same size for "
                          "register_translation")
-
-    # only 2D data makes sense right now
-    if src_image.ndim > 3 and upsample_factor > 1:
-        raise NotImplementedError("Error: register_translation only supports "
-                                  "subpixel registration for 2D and 3D images")
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
