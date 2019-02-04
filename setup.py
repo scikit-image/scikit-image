@@ -56,9 +56,12 @@ import builtins
 builtins.__SKIMAGE_SETUP__ = True
 
 # Support for openmp
-
-compile_flags = ['-fopenmp']
-link_flags = ['-fopenmp']
+if sys.platform == 'win32':
+    compile_flags = ['/openmp']
+    link_flags = []
+else:
+    compile_flags = ['-fopenmp']
+    link_flags = ['-fopenmp']
 
 code = """#include <omp.h>
 int main(int argc, char** argv) { return(0); }"""
