@@ -479,3 +479,41 @@ def test_corner_orientations_square():
     expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
+
+
+def test_segfaulter():
+    segfaulter = np.array(
+        [[ 0. ,  2.5],
+         [ 0. ,  3.5],
+         [ 0. ,  4.5],
+         [ 0. ,  1.5],
+         [ 2. ,  5.5],
+         [ 2. ,  6.5],
+         [ 2. ,  0.5],
+         [ 2. , -0.5],
+         [ 2.5,  0. ],
+         [ 2.5,  6. ],
+         [ 3.5,  0. ],
+         [ 3.5,  6. ],
+         [ 4. ,  5.5],
+         [ 4. ,  6.5],
+         [ 4. ,  0.5],
+         [ 4. , -0.5],
+         [ 4.5,  0. ],
+         [ 4.5,  6. ],
+         [ 5.5,  2. ],
+         [ 5.5,  4. ],
+         [ 6. ,  2.5],
+         [ 6. ,  3.5],
+         [ 6. ,  4.5],
+         [ 6. ,  1.5],
+         [ 6.5,  2. ],
+         [ 6.5,  4. ],
+         [ 0.5,  2. ],
+         [ 0.5,  4. ],
+         [-0.5,  2. ],
+         [-0.5,  4. ],
+         [ 1.5,  0. ],
+         [ 1.5,  6. ]], dtype)
+    from scipy.spatial import ConvexHull
+    ConvexHull(segfaulter)
