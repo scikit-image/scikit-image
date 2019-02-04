@@ -27,7 +27,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Parameters
     ----------
-    data : 2D or 3D ndarray
+    data : nD ndarray
         The input data array (DFT of original data) to upsample.
     upsampled_region_size : integer or tuple of integers, optional
         The size of the region to be sampled.  If one integer is provided, it
@@ -40,7 +40,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Returns
     -------
-    output : 2D or 3D ndarray
+    output : nD ndarray
             The upsampled DFT of the specified region.
     """
     # if people pass in an integer, expand it to a list of equal-sized sections
@@ -77,14 +77,15 @@ def _upsampled_dft(data, upsampled_region_size,
 
         return row_kernel.dot(data).dot(col_kernel)
 
+    # For the general nD case, use sequential calls to tensordot to calculate
+    # the DFT
     elif data.ndim > 2:
         im2pi = 1j * 2 * np.pi
 
-        # To compute the upsampled DFT across all spatial dimensions,
-        # a tensor product is computed
         dim_properties = list(zip(data.shape,
                                   upsampled_region_size,
                                   axis_offsets))
+
         for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
             kernel = np.exp(np.dot(
                     (-im2pi / (n_items * upsample_factor)) *
