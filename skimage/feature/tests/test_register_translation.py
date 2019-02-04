@@ -115,6 +115,19 @@ def test_4d_input_pixel():
                                                     space="fourier")
     assert_allclose(result, -np.array(shift), atol=0.05)
 
+
+def test_4d_input_subpixel():
+    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    reference_image = np.fft.fftn(phantom)
+    subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
+    shifted_image = fourier_shift(reference_image, subpixel_shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    10,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
+
+
 def test_no_4D():
     # Dimensionality mismatch
     image = np.ones((5, 5, 5, 5))
