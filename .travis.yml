@@ -88,6 +88,7 @@ before_install:
     - tools/check_sdist.py
 
 install:
+    - python run_segfaulter.py
     - python setup.py develop
     # Install testing requirements
     - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
