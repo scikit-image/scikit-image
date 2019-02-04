@@ -69,9 +69,9 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.std(line), 0.229, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    # Maptlotlib 2.2.3 seems to use np.asscalar which issues a warning
+    # Matplotlib 2.2.3 seems to use np.asscalar which issues a warning
     # with numpy 1.16
-    # Matplotlib 2.2.3 is the last supported version for python 2.7
+    # Matplotlib 2.2.3 is the last supported version for Python 2.7
     with expected_warnings(['precision loss', r'np.asscalar|\A\Z']):
         viewer.image = skimage.img_as_float(median(image,
                                                    selem=disk(radius=3)))
