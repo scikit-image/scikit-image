@@ -13,6 +13,7 @@ from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal,
                                      assert_almost_equal)
+from skimage._shared.testing import xfail
 
 
 # Test integer histograms
@@ -191,6 +192,8 @@ def test_rescale_uint14_limits():
 # Test adaptive histogram equalization
 # ====================================
 
+@xfail(reason='This raises a divide by 0 error sometimes. '
+              'See: https://github.com/scikit-image/scikit-image/issues/3684')
 def test_adapthist_grayscale():
     """Test a grayscale float image
     """
@@ -205,6 +208,8 @@ def test_adapthist_grayscale():
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
+@xfail(reason='This raises a divide by 0 error sometimes. '
+              'See: https://github.com/scikit-image/scikit-image/issues/3684')
 def test_adapthist_color():
     """Test an RGB color uint16 image
     """
@@ -225,6 +230,8 @@ def test_adapthist_color():
     return data, adapted
 
 
+@xfail(reason='This raises a divide by 0 error sometimes. '
+              'See: https://github.com/scikit-image/scikit-image/issues/3684')
 def test_adapthist_alpha():
     """Test an RGBA color image
     """

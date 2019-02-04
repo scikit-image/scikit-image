@@ -11,6 +11,16 @@ export PIP_DEFAULT_TIMEOUT=60
 EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
 WHEELHOUSE="--find-links=$EXTRA_WHEELS"
 
+
+# Starting xvfb this way is only valid for ubuntu 14.04
+# On ubuntu 16.04 (xenial), the appropriate command is
+#   sudo systemctl start xvfb
+# which is done by travis with `services: -xvfb` in .travis.yml
+if [[ -f /etc/init.d/xvfb ]]; then
+    sh -e /etc/init.d/xvfb start
+    export DISPLAY=:99.0
+fi
+
 if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
     # This one is for wheels we can only build on the travis precise container.
     # As of 14 Jan 2017, this is only pyside.  Also on Rackspace, see above.
@@ -25,7 +35,6 @@ if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
 fi
 export WHEELHOUSE
 
-export DISPLAY=:99.0
 # This causes way too many internal warnings within python.
 # export PYTHONWARNINGS="d,all:::skimage"
 export TEST_ARGS="--doctest-modules"

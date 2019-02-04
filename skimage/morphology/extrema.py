@@ -236,10 +236,10 @@ def _set_edge_values_inplace(image, value):
         sl = [slice(None)] * image.ndim
         # Set edge in front
         sl[axis] = 0
-        image[sl] = value
+        image[tuple(sl)] = value
         # Set edge to the end
         sl[axis] = -1
-        image[sl] = value
+        image[tuple(sl)] = value
 
 
 def _fast_pad(image, value):

@@ -1,8 +1,15 @@
-dask[array]>=1.0.0
 PySide; python_version <= '3.4'
 imread
-SimpleITK; python_version < '3.7'
+SimpleITK
 astropy
 tifffile
 imageio
 qtpy
+dask[array]>=1.0.0; python_version >= '3.5'
+dask[array]>=1.0.0; python_version == '2.7'
+# Dask 1.0 is only required for better numpy 1.16 compatibility.
+# That said, numpy 1.16 isn't released on pypi for Python 3.4
+# And we still support 3.4
+dask[array]>=0.9.0; python_version == '3.4'
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1

@@ -625,7 +625,8 @@ def test_cycle_spinning_multichannel():
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for shift_steps in valid_steps:
-            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_FOUND_WARNING]):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=2,
                                                shift_steps=shift_steps,
