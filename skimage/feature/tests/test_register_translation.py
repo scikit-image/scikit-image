@@ -105,6 +105,15 @@ def test_wrong_input():
     with testing.raises(ValueError):
         register_translation(template, image)
 
+def test_4d_input_pixel():
+    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    reference_image = np.fft.fftn(phantom)
+    shift = (-2., 1., 5., -3)
+    shifted_image = fourier_shift(reference_image, shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(shift), atol=0.05)
 
 def test_no_4D():
     # Dimensionality mismatch
