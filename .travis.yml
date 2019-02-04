@@ -53,6 +53,8 @@ matrix:
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
+      services:
+        - xvfb
     - os: linux
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
@@ -68,10 +70,6 @@ matrix:
       osx_image: xcode10.1
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
-  allow_failures:
-    # python 3.7 is failing and it is out of our control for now.
-    # remove when scikit-image tests actually start running.
-    - python: 3.7
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
