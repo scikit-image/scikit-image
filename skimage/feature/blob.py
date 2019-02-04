@@ -255,9 +255,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     image = img_as_float(image)
 
     # if both min and max sigma are scalar, function returns only one sigma
-    scalar_sigma = (
-        True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
-    )
+    scalar_sigma = np.isscalar(max_sigma) and np.isscalar(min_sigma)
 
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
@@ -302,10 +300,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # sigma that produced the maximum intensity value, into the sigma
     sigmas_of_peaks = sigma_list[local_maxima[:, -1]]
 
-    # if the gaussian is isotropic, the stdev across dimensions are
-    # identical, so return only the stdev deviation of the first dimension
     if scalar_sigma:
-        sigmas_of_peaks = sigmas_of_peaks[:, 0][:, None]
+        # select one sigma column, keeping dimension
+        sigmas_of_peaks = sigmas_of_peaks[:, 0:1]
 
     # Remove sigma index and replace with sigmas
     lm = np.hstack([lm[:, :-1], sigmas_of_peaks])
@@ -449,10 +446,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # sigma that produced the maximum intensity value, into the sigma
     sigmas_of_peaks = sigma_list[local_maxima[:, -1]]
 
-    # if the gaussian is isotropic, the stdev across dimensions are
-    # identical, so return only the stdev deviation of the first dimension
     if scalar_sigma:
-        sigmas_of_peaks = sigmas_of_peaks[:, 0][:, None]
+        # select one sigma column, keeping dimension
+        sigmas_of_peaks = sigmas_of_peaks[:, 0:1]
 
     # Remove sigma index and replace with sigmas
     lm = np.hstack([lm[:, :-1], sigmas_of_peaks])
