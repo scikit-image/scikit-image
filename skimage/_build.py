@@ -54,7 +54,7 @@ def cython(pyx_files, working_path=''):
                 process_tempita_pyx(pyxfile)
                 pyxfile = pyxfile.replace('.pyx.in', '.pyx')
 
-            cythonize(pyxfile, language_level='2')
+            cythonize(pyxfile, language_level=2)
 
 
 def _md5sum(f):
