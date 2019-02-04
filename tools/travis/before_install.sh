@@ -71,7 +71,7 @@ for requirement in matplotlib scipy pillow; do
 done
 # cython is not in the default.txt requirements
 WHEELS="$WHEELS $(grep -i cython requirements/build.txt)"
-pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
+# pip install --retries 3 -q $PIP_FLAGS $WHEELHOUSE $WHEELS
 
 # Install build time requirements
 pip install --retries 3 -q $PIP_FLAGS -r requirements/build.txt
