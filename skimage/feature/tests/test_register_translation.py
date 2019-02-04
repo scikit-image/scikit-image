@@ -10,6 +10,7 @@ from skimage._shared import testing
 
 from distutils.version import LooseVersion
 
+
 def test_correlation():
     reference_image = np.fft.fftn(camera())
     shift = (-7, 12)
@@ -105,6 +106,7 @@ def test_wrong_input():
     with testing.raises(ValueError):
         register_translation(template, image)
 
+
 def test_4d_input_pixel():
     phantom = img_as_float(binary_blobs(length=32, n_dim=4))
     reference_image = np.fft.fftn(phantom)
@@ -126,6 +128,7 @@ def test_4d_input_subpixel():
                                                     10,
                                                     space="fourier")
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
+
 
 def test_mismatch_upsampled_region_size():
     with testing.raises(ValueError):
