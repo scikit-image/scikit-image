@@ -31,6 +31,6 @@ segfaulter = np.array(
          [-0.5,  2. ],
          [-0.5,  4. ],
          [ 1.5,  0. ],
-         [ 1.5,  6. ]], dtype)
+         [ 1.5,  6. ]], dtype=np.float64)
 from scipy.spatial import ConvexHull
 ConvexHull(segfaulter)
