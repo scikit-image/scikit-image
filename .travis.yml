@@ -85,7 +85,7 @@ before_install:
     - source tools/travis/before_install.sh
     - which python; python --version
     - tools/build_versions.py
-    - tools/check_sdist.py
+    #- tools/check_sdist.py
 
 install:
     - python run_segfaulter.py
