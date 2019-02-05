@@ -55,10 +55,61 @@ def test_blob_dog():
                           sigma_ratio=1.2, threshold=0.1)
     b = blobs[0]
 
+    assert b.shape == (4,)
     assert b[0] == r + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
     assert abs(math.sqrt(3) * b[3] - r) < 1
+
+    # Testing 3D anisotropic
+    r = 10
+    pad = 10
+    im3 = ellipsoid(r / 2, r, r)
+    im3 = util.pad(im3, pad, mode='constant')
+
+    blobs = blob_dog(
+        im3,
+        min_sigma=[1.5, 3, 3],
+        max_sigma=[5, 10, 10],
+        sigma_ratio=1.2,
+        threshold=0.1
+    )
+    b = blobs[0]
+
+    assert b.shape == (6,)
+    assert b[0] == r / 2 + pad + 1
+    assert b[1] == r + pad + 1
+    assert b[2] == r + pad + 1
+    assert abs(math.sqrt(3) * b[3] - r / 2) < 1
+    assert abs(math.sqrt(3) * b[4] - r) < 1
+    assert abs(math.sqrt(3) * b[5] - r) < 1
+
+    # Testing exclude border
+
+    # image where blob is 5 px from borders, radius 5
+    img = np.ones((512, 512))
+    xs, ys = circle(5, 5, 5)
+    img[xs, ys] = 255
+
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+    )
+    assert blobs.shape[0] == 1
+    b = blobs[0]
+    assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
+
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        sigma_ratio=1.2,
+        exclude_border=5
+    )
+    msg = "zero blobs should be detected, as only blob is 5 px from border"
+    assert blobs.shape[0] == 0, msg
 
 
 def test_blob_log():
@@ -144,10 +195,57 @@ def test_blob_log():
     blobs = blob_log(im3, min_sigma=3, max_sigma=10)
     b = blobs[0]
 
+    assert b.shape == (4,)
     assert b[0] == r + pad + 1
     assert b[1] == r + pad + 1
     assert b[2] == r + pad + 1
     assert abs(math.sqrt(3) * b[3] - r) < 1
+
+    # Testing 3D anisotropic
+    r = 6
+    pad = 10
+    im3 = ellipsoid(r / 2, r, r)
+    im3 = util.pad(im3, pad, mode='constant')
+
+    blobs = blob_log(
+        im3,
+        min_sigma=[1, 2, 2],
+        max_sigma=[5, 10, 10],
+    )
+
+    b = blobs[0]
+    assert b.shape == (6,)
+    assert b[0] == r / 2 + pad + 1
+    assert b[1] == r + pad + 1
+    assert b[2] == r + pad + 1
+    assert abs(math.sqrt(3) * b[3] - r / 2) < 1
+    assert abs(math.sqrt(3) * b[4] - r) < 1
+    assert abs(math.sqrt(3) * b[5] - r) < 1
+
+    # Testing exclude border
+
+    # image where blob is 5 px from borders, radius 5
+    img = np.ones((512, 512))
+    xs, ys = circle(5, 5, 5)
+    img[xs, ys] = 255
+
+    blobs = blob_log(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+    )
+    assert blobs.shape[0] == 1
+    b = blobs[0]
+    assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
+
+    blobs = blob_dog(
+        img,
+        min_sigma=1.5,
+        max_sigma=5,
+        exclude_border=5
+    )
+    msg = "zero blobs should be detected, as only blob is 5 px from border"
+    assert blobs.shape[0] == 0, msg
 
 
 def test_blob_doh():
