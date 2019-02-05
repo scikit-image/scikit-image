@@ -27,7 +27,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Parameters
     ----------
-    data : nD ndarray
+    data : array
         The input data array (DFT of original data) to upsample.
     upsampled_region_size : integer or tuple of integers, optional
         The size of the region to be sampled.  If one integer is provided, it
@@ -40,7 +40,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Returns
     -------
-    output : nD ndarray
+    output : ndarray
             The upsampled DFT of the specified region.
     """
     # if people pass in an integer, expand it to a list of equal-sized sections
@@ -117,9 +117,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     Parameters
     ----------
-    src_image : ndarray
+    src_image : array
         Reference image.
-    target_image : ndarray
+    target_image : array
         Image to register.  Must be same dimensionality as ``src_image``.
     upsample_factor : int, optional
         Upsampling factor. Images will be registered to within
