@@ -188,6 +188,8 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
                    (sizeof(Histogram) + sizeof(PixelCount)) +
                    sizeof(Histograms) + 64)
     ptr = malloc(memory_size)
+    if ptr == NULL:
+        return NULL
     memset(ptr, 0, memory_size)
     # align ph.accumulator to 32-byte boundary
     roundoff = (<Py_ssize_t> ptr + 31) % 32
