@@ -64,12 +64,16 @@ matrix:
     - os: linux
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
+    # For smooth deployment, the osx_image here should match
+    # what we set in the wheel generation travis images.
+    # If not set, it will use the default version from Travis
+    # https://docs.travis-ci.com/user/reference/osx/#xcode-version
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode9.4
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.5
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode9.4
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
 
