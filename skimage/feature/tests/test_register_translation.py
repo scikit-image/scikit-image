@@ -8,8 +8,6 @@ from scipy.ndimage import fourier_shift
 from skimage import img_as_float
 from skimage._shared import testing
 
-from distutils.version import LooseVersion
-
 
 def test_correlation():
     reference_image = np.fft.fftn(camera())
@@ -73,16 +71,13 @@ def test_3d_input():
 
     # subpixel precision now available for 3-D data
 
-    # skip the test for numpy older than 1.12, which does not have
-    # einsum optimization
-    if LooseVersion(np.__version__) >= LooseVersion("1.12"):
-        subpixel_shift = (-2.3, 1.7, 5.4)
-        shifted_image = fourier_shift(reference_image, subpixel_shift)
-        result, error, diffphase = register_translation(reference_image,
-                                                        shifted_image,
-                                                        100,
-                                                        space="fourier")
-        assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
+    subpixel_shift = (-2.3, 1.7, 5.4)
+    shifted_image = fourier_shift(reference_image, subpixel_shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    100,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
 def test_unknown_space_input():
