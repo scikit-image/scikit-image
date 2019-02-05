@@ -63,13 +63,12 @@ def _upsampled_dft(data, upsampled_region_size,
     dim_properties = list(zip(data.shape, upsampled_region_size, axis_offsets))
 
     for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
-        kernel = np.exp(np.dot(
-                (-im2pi / (n_items * upsample_factor)) *
-                (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
-                (np.fft.ifftshift(np.arange(n_items))[None, :] - n_items // 2)))
+        kernel = np.fft.fftfreq(n_items, upsample_factor)[:, None] *\
+                 (np.arange(upsampled_region_size[0]) - ax_offset)
+        kernel = np.exp(-im2pi * kernel)
         # Equivalent to:
-        #   data[i, j, k] = (kernel[i, :] * data[j, k, :]).sum()
-        data = np.tensordot(kernel, data, axes=(1, -1))
+        #   data[i, j, k] = kernel[:, i] @ data[j, k].T
+        data = np.tensordot(kernel, data, axes=(0, -1))
     return data
 
 
