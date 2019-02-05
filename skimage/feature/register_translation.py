@@ -58,44 +58,19 @@ def _upsampled_dft(data, upsampled_region_size,
             raise ValueError("number of axis offsets must be equal to input "
                              "data's number of dimensions.")
 
-    # For the 2D case, it is more efficient to use the well-optimized
-    # dot product instead of einsum
-    if data.ndim == 2:
-        col_kernel = np.exp(
-            (-1j * 2 * np.pi / (data.shape[1] * upsample_factor)) *
-            (np.fft.ifftshift(np.arange(data.shape[1]))[:, None] -
-             np.floor(data.shape[1] / 2)).dot(
-                np.arange(upsampled_region_size[1])[None, :] - axis_offsets[1])
-        )
-        row_kernel = np.exp(
-            (-1j * 2 * np.pi / (data.shape[0] * upsample_factor)) *
-            (np.arange(upsampled_region_size[0])[:, None] -
-             axis_offsets[0]).dot(
-                np.fft.ifftshift(np.arange(data.shape[0]))[None, :] -
-                np.floor(data.shape[0] / 2))
-        )
+    im2pi = 1j * 2 * np.pi
 
-        return row_kernel.dot(data).dot(col_kernel)
+    dim_properties = list(zip(data.shape, upsampled_region_size, axis_offsets))
 
-    # For the general nD case, use sequential calls to tensordot to calculate
-    # the DFT
-    elif data.ndim > 2:
-        im2pi = 1j * 2 * np.pi
-
-        dim_properties = list(zip(data.shape,
-                                  upsampled_region_size,
-                                  axis_offsets))
-
-        for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
-            kernel = np.exp(np.dot(
-                    (-im2pi / (n_items * upsample_factor)) *
-                    (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
-                    (np.fft.ifftshift(np.arange(n_items))[None, :]
-                     - n_items // 2)))
-            # Equivalent to:
-            #   data[i, j, k] = (kernel[i, :] * data[j, k, :]).sum()
-            data = np.tensordot(kernel, data, axes=(1, -1))
-        return data
+    for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
+        kernel = np.exp(np.dot(
+                (-im2pi / (n_items * upsample_factor)) *
+                (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
+                (np.fft.ifftshift(np.arange(n_items))[None, :] - n_items // 2)))
+        # Equivalent to:
+        #   data[i, j, k] = (kernel[i, :] * data[j, k, :]).sum()
+        data = np.tensordot(kernel, data, axes=(1, -1))
+    return data
 
 
 def _compute_phasediff(cross_correlation_max):
