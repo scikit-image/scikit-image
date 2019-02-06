@@ -29,8 +29,7 @@ def imread(fname, dtype=None, **kwargs):
         kwargs['key'] = kwargs.pop('img_num')
 
     # separate TiffFile kwargs from other kwargs
-    tiff_keys = ['multifile', 'multifile_close', 'pages', 'fastij', 'is_ome',
-                 'pattern']
+    tiff_keys = ['multifile', 'multifile_close', 'pages', 'fastij', 'is_ome']
     kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
     for key in tiff_keys:
         kwargs.pop(key, None)
