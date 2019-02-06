@@ -187,7 +187,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
         if return_error:
             src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
             target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
-            CCmax = cross_correlation.max()
+            CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
@@ -205,16 +205,15 @@ def register_translation(src_image, target_image, upsample_factor=1,
                                            sample_region_offset).conj()
         cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
-        maxima = np.array(np.unravel_index(
-                              np.argmax(np.abs(cross_correlation)),
-                              cross_correlation.shape),
-                          dtype=np.float64)
-        maxima -= dftshift
+        maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
+                                  cross_correlation.shape)
+        CCmax = cross_correlation[maxima]
+
+        maxima = np.array(maxima, dtype=np.float64) - dftshift
 
         shifts = shifts + maxima / upsample_factor
 
         if return_error:
-            CCmax = cross_correlation.max()
             src_amp = _upsampled_dft(src_freq * src_freq.conj(),
                                      1, upsample_factor)[0, 0]
             src_amp /= normalization
