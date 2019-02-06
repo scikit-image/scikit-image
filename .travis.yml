@@ -43,9 +43,6 @@ matrix:
       python: 3.5
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
     - os: linux
-      python: 3.5
-      env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
-    - os: linux
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
     - os: linux
@@ -53,6 +50,15 @@ matrix:
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
+    - os: linux
+      python: "nightly"
+      env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
+      addons:
+        apt:
+          packages:
+            - liblapack-dev
+            - libblas-dev
+            - gfortran
     - os: linux
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
@@ -68,6 +74,8 @@ matrix:
       osx_image: xcode10.1
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
+  allow_failures:
+    - python: "nightly"
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
