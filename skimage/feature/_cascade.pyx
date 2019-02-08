@@ -820,6 +820,10 @@ cdef class Cascade:
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
+            free(features_carr)
+            free(stumps_carr)
+            free(stages_carr)
+            free(LUTs_carr)
             raise MemoryError("Failed to allocate memory while parsing XML.")
 
         # Parse and load features in memory.
