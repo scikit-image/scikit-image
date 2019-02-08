@@ -3,7 +3,7 @@ from .dtype import (img_as_float32, img_as_float64, img_as_float,
                     img_as_bool, dtype_limits)
 from .shape import view_as_blocks, view_as_windows
 from .noise import random_noise
-from .apply_parallel import apply_parallel
+from .apply_parallel import apply_parallel, check_parallel
 
 from .arraycrop import crop
 from ._regular_grid import regular_grid, regular_seeds
@@ -34,5 +34,6 @@ __all__ = ['img_as_float32',
            'regular_grid',
            'regular_seeds',
            'apply_parallel',
+           'check_parallel',
            'invert',
            'unique_rows']
