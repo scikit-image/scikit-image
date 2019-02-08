@@ -6,6 +6,7 @@ data.
 from __future__ import print_function
 
 import time
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def main(select=3, **kwargs):
         vol = vv.aVolume(20, 128)
         isovalue = kwargs.pop('level', 0.2)
     elif select == 3:
-        with Timer('computing donuts'):
+        with timer('computing donuts'):
             vol = donuts()
         isovalue = kwargs.pop('level', 0.0)
         # Uncommenting the line below will yield different results for
@@ -46,10 +47,10 @@ def main(select=3, **kwargs):
         raise ValueError('invalid selection')
 
     # Get surface meshes
-    with Timer('finding surface lewiner'):
+    with timer('finding surface lewiner'):
         vertices1, faces1 = marching_cubes_lewiner(vol, isovalue, **kwargs)[:2]
 
-    with Timer('finding surface classic'):
+    with timer('finding surface classic'):
         vertices2, faces2 = marching_cubes_classic(vol, isovalue, **kwargs)
 
     # Show
@@ -99,21 +100,13 @@ def donuts():
     return vol
 
 
-class Timer(object):
+@contextmanager
+def timer(message):
     """Context manager for timing execution speed of body."""
-
-    def __init__(self, message):
-        """Initialize timer."""
-        print(message, end=' ')
-        self.start = 0
-
-    def __enter__(self):
-        """Enter timer context."""
-        self.start = time.time()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit timer context."""
-        print('took %1.0f ms' % (1000 * (time.time() - self.start)))
+    print(message, end=' ')
+    start = time.time()
+    yield
+    print('took {:1.0f} ms'.format(1000 * (time.time() - start)))
 
 
 if __name__ == '__main__':
