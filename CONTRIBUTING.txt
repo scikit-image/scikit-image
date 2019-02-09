@@ -204,7 +204,8 @@ When using conda, you may find the following bash commands useful::
   conda create --name skimage-dev
   # Activate it
   conda activate skimage-dev
-  # Install all development and runtime dependencies of scikit-image
+  # Install major development and runtime dependencies of scikit-image
+  # (the rest can be installed from conda-forge or pip, if needed)
   conda install `for i in requirements/{default,build}.txt; do echo -n " --file $i "; done`
   # Install minimal testing dependencies
   conda install pytest
