@@ -8,7 +8,6 @@ from scipy.ndimage import fourier_shift
 from skimage import img_as_float
 from skimage._shared import testing
 
-from distutils.version import LooseVersion
 
 def test_correlation():
     reference_image = np.fft.fftn(camera())
@@ -72,16 +71,13 @@ def test_3d_input():
 
     # subpixel precision now available for 3-D data
 
-    # skip the test for numpy older than 1.12, which does not have
-    # einsum optimization
-    if LooseVersion(np.__version__) >= LooseVersion("1.12"):
-        subpixel_shift = (-2.3, 1.7, 5.4)
-        shifted_image = fourier_shift(reference_image, subpixel_shift)
-        result, error, diffphase = register_translation(reference_image,
-                                                        shifted_image,
-                                                        100,
-                                                        space="fourier")
-        assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
+    subpixel_shift = (-2.3, 1.7, 5.4)
+    shifted_image = fourier_shift(reference_image, subpixel_shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    100,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
 def test_unknown_space_input():
@@ -106,12 +102,27 @@ def test_wrong_input():
         register_translation(template, image)
 
 
-def test_no_4D():
-    # Dimensionality mismatch
-    image = np.ones((5, 5, 5, 5))
-    template = np.ones((5, 5, 5, 5))
-    with testing.raises(NotImplementedError):
-        register_translation(template, image, upsample_factor=5)
+def test_4d_input_pixel():
+    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    reference_image = np.fft.fftn(phantom)
+    shift = (-2., 1., 5., -3)
+    shifted_image = fourier_shift(reference_image, shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(shift), atol=0.05)
+
+
+def test_4d_input_subpixel():
+    phantom = img_as_float(binary_blobs(length=32, n_dim=4))
+    reference_image = np.fft.fftn(phantom)
+    subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
+    shifted_image = fourier_shift(reference_image, subpixel_shift)
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    10,
+                                                    space="fourier")
+    assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
 def test_mismatch_upsampled_region_size():
