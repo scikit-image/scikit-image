@@ -28,11 +28,10 @@ def imread(fname, dtype=None, **kwargs):
     if 'img_num' in kwargs:
         kwargs['key'] = kwargs.pop('img_num')
 
-    # separate TiffFile kwargs from other kwargs
+    # parse_kwargs will extract keyword arguments intended for the TiffFile 
+    # class and remove them from the kwargs dictionary in-place
     tiff_keys = ['multifile', 'multifile_close', 'pages', 'fastij', 'is_ome']
     kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
-    for key in tiff_keys:
-        kwargs.pop(key, None)
 
     # read and return tiff as numpy array
     with TiffFile(fname, **kwargs_tiff) as tif:
