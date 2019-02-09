@@ -221,8 +221,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
 
-    # Return for every pixel the value of the (sigma) scale with the maximum
-    # output pixel value
+    # Return for every pixel the maximum value over all (sigma) scales
     return np.max(filtered_array, axis=0)
 
 
@@ -270,9 +269,6 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
 
-    # Get image dimensions
-    ndim = image.ndim
-
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
         image = invert(image)
@@ -285,38 +281,17 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='val')
+        lamba1, *lambdas = compute_hessian_eigenvalues(image, sigma,
+                                                       sorting='val')
 
-        if ndim == 2:
+        # Compute tubeness, see  equation (9) in reference [1]_.
+        # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
+        filtered = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
 
-            # Get Hessian eigenvalues
-            (lambda1, lambda2) = eigenvalues
+        # Remove background and store results in (n+1)D matrices
+        filtered_array[i] = np.where(lambdas[-1] > 0, filtered, 0)
 
-            # Compute tubeness
-            filtered = np.abs(lambda2)
-
-            # Remove background
-            filtered = np.where(lambda2 > 0, filtered, 0)
-
-            # Store results in (n+1)D matrices
-            filtered_array[i] = filtered
-
-        elif ndim == 3:
-
-            # Get Hessian eigenvalues
-            (lambda1, lambda2, lambda3) = eigenvalues
-
-            # Compute filtered image
-            filtered = np.sqrt(np.abs(lambda2 * lambda3))
-
-            # Remove background
-            filtered = np.where(lambda3 > 0, filtered, 0)
-
-            # Store results in (n+1)D matrices
-            filtered_array[i] = filtered
-
-    # Return for every pixel the value of the (sigma) scale with the maximum
-    # output pixel value
+    # Return for every pixel the maximum value over all (sigma) scales
     return np.max(filtered_array, axis=0)
 
 
@@ -411,7 +386,6 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
     # Get image dimensions
     ndim = image.ndim
-    shape = image.shape
 
     # Invert image to detect dark ridges on light background
     if black_ridges:
@@ -426,56 +400,34 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (abs sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
+        lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
+                                                        sorting='abs')
 
-        if ndim == 2:
+        # Compute sensitivity to deviation from a plate-like structure
+        # see equations (11) and (15) in reference [1]_
+        r_a = np.inf if ndim == 2 else _divide_nonzero(*lambdas) ** 2
 
-            # Get Hessian eigenvalues
-            (lambda1, lambda2) = eigenvalues
+        # Compute sensitivity to deviation from a blob-like structure,
+        # see equations (10) and (15) in reference [1]_,
+        # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
+        filtered_raw = np.abs(np.multiply.reduce(lambdas)) ** (1/len(lambdas))
+        r_b = _divide_nonzero(lambda1, filtered_raw) ** 2
 
-            # Compute sensitivity to deviation from a blob-like structure
-            r_b = _divide_nonzero(lambda1, lambda2) ** 2
+        # Compute sensitivity to areas of high variance/texture/structure,
+        # see equation (12)in reference [1]_
+        r_g = sum([lambda1 ** 2] + [lambdai ** 2 for lambdai in lambdas])
 
-            # Compute sensitivity to areas of high variance/texture/structure
-            r_g = lambda1 ** 2 + lambda2 ** 2
-
-            # Compute output image for given (sigma) scale
-            filtered = (np.exp(-r_b / beta_sq)
-                        * (np.ones(shape) - np.exp(-r_g / gamma_sq)))
-
-            # Store results in (2+1)D matrices
-            filtered_array[i] = filtered
-            lambdas_array[i] = lambda2
-
-        elif ndim == 3:
-
-            # Get Hessian eigenvalues
-            (lambda1, lambda2, lambda3) = eigenvalues
-
-            # Compute sensitivity to deviation from a plate-like structure
-            r_a = _divide_nonzero(lambda2, lambda3) ** 2
-
-            # Compute sensitivity to deviation from a blob-like structure
-            r_b = _divide_nonzero(lambda1,
-                                  np.sqrt(np.abs(lambda2 * lambda3))) ** 2
-
-            # Compute sensitivity to areas of high variance/texture/structure
-            r_g = lambda1 ** 2 + lambda2 ** 2 + lambda3 ** 2
-
-            # Compute output image for given (sigma) scale
-            filtered = ((np.ones(shape) - np.exp(-r_a / alpha_sq))
-                        * np.exp(-r_b / beta_sq)
-                        * (np.ones(shape) - np.exp(-r_g / gamma_sq)))
-
-            # Store results in (n+1)D matrices
-            filtered_array[i] = filtered
-            lambdas_array[i] = np.max([lambda2, lambda3], axis=0)
+        # Compute output image for given (sigma) scale and store results in
+        # (n+1)D matrices, see equations (13) and (15) in reference [1]_
+        filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
+                             * np.exp(-r_b / beta_sq)
+                             * (1 - np.exp(-r_g / gamma_sq)))
+        lambdas_array[i] = np.max(lambdas, axis=0)
 
     # Remove background
     filtered_array[lambdas_array > 0] = 0
 
-    # Return for every pixel the value of the (sigma) scale with the maximum
-    # output pixel value
+    # Return for every pixel the maximum value over all (sigma) scales
     return np.max(filtered_array, axis=0)
 
 
