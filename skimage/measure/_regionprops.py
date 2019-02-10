@@ -17,7 +17,7 @@ XY_TO_RC_DEPRECATION_MESSAGE = (
     'regionprops and image moments (including moments, normalized moments, '
     'central moments, and inertia tensor) of 2D images will change from xy '
     'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
+    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
     'for details on how to avoid this message.'
 )
 STREL_4 = np.array([[0, 1, 0],
@@ -340,7 +340,7 @@ class _RegionProperties(object):
         value = getattr(self, key, None)
         if value is not None:
             return value
-        else:  # backwards compatability
+        else:  # backwards compatibility
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
@@ -395,7 +395,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     The following properties can be accessed as attributes or keys:
 
     **area** : int
-        Number of pixels of region.
+        Number of pixels of the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
@@ -405,7 +405,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
-        Number of pixels of convex hull image.
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
@@ -425,7 +426,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
     **filled_area** : int
-        Number of pixels of filled region.
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the filled_image.
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
@@ -539,7 +541,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -584,10 +586,12 @@ def perimeter(image, neighbourhood=4):
 
     Parameters
     ----------
-    image : array
-        Binary image.
+    image : (N, M) ndarray
+        2D binary image.
     neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination.
+        Neighborhood connectivity for border pixel determination. It is used to
+        compute the contour. A higher neighbourhood widens the border on which
+        the perimeter is computed.
 
     Returns
     -------
@@ -599,7 +603,23 @@ def perimeter(image, neighbourhood=4):
     .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> # coins image (binary)
+    >>> img_coins = data.coins() > 110
+    >>> # total perimeter of all objects in the image
+    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    7796.867...
+    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    8806.268...
+
     """
+    if image.ndim != 2:
+        raise NotImplementedError('`perimeter` supports 2D images only')
+
     if neighbourhood == 4:
         strel = STREL_4
     else:
@@ -631,10 +651,10 @@ def _parse_docs():
     import re
     import textwrap
 
-    doc = regionprops.__doc__
-    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+    doc = regionprops.__doc__ or ''
+    matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
-    prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
+    prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
 
@@ -648,4 +668,6 @@ def _install_properties_docs():
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
-_install_properties_docs()
+if __debug__:
+    # don't install docstrings when in optimized/non-debug mode
+    _install_properties_docs()

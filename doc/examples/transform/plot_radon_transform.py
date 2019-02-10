@@ -35,7 +35,7 @@ For further information on tomographic reconstruction, see
        IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
 
 .. [2] Wikipedia, Radon transform,
-       http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
+       https://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
 
 .. [3] S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer
        Gleichungen", Bulletin International de l'Academie Polonaise

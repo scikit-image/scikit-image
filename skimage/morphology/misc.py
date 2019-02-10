@@ -8,12 +8,12 @@ from .selem import _default_selem
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
 funcs = ('erosion', 'dilation', 'opening', 'closing')
-skimage2ndimage = dict((x, 'grey_' + x) for x in funcs)
+skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
 funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
          'binary_closing', 'black_tophat', 'white_tophat')
-skimage2ndimage.update(dict((x, x) for x in funcs))
+skimage2ndimage.update({x: x for x in funcs})
 
 
 def default_selem(func):
@@ -141,7 +141,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
                        min_size=None):
-    """Remove continguous holes smaller than the specified size.
+    """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------

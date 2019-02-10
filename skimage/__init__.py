@@ -68,9 +68,6 @@ dtype_limits
 
 """
 
-import imp
-import functools
-import warnings
 import sys
 
 
@@ -90,7 +87,7 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-http://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/install.html """
 
 
 def _raise_build_error(e):
@@ -105,6 +102,7 @@ def _raise_build_error(e):
     raise ImportError("""%s
 It seems that scikit-image has not been built correctly.
 %s""" % (e, msg))
+
 
 try:
     # This variable is injected in the __builtins__ by the build
@@ -137,4 +135,4 @@ else:
     from .data import data_dir
     from .util.lookfor import lookfor
 
-del warnings, functools, imp, sys
+del sys

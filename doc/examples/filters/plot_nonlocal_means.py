@@ -9,24 +9,24 @@ average of a selection of other pixels values: small patches centered on the
 other pixels are compared to the patch centered on the pixel of interest, and
 the average is performed only for pixels that have patches close to the current
 patch. As a result, this algorithm can restore well textures, that would be
-blurred by other denoising algoritm.
+blurred by other denoising algorithm.
 
-When the `fast_mode` argument is `False`, a spatial Gaussian weighting is
-applied to the patches when computing patch distances.  When `fast_mode` is
-`True` a faster algorithm employing uniform spatial weighting on the patches
+When the ``fast_mode`` argument is ``False``, a spatial Gaussian weighting is
+applied to the patches when computing patch distances.  When ``fast_mode`` is
+``True`` a faster algorithm employing uniform spatial weighting on the patches
 is applied.
 
-For either of these cases, if the noise standard deviation, `sigma`, is
+For either of these cases, if the noise standard deviation, ``sigma``, is
 provided, the expected noise variance is subtracted out when computing patch
 distances.  This can lead to a modest improvement in image quality.
 
-The `estimate_sigma` function can provide a good starting point for setting
-the `h` (and optionally, `sigma`) parameters for the non-local means algorithm.
-`h` is a constant that controls the decay in patch weights as a function of the
-distance between patches.  Larger `h` allows more smoothing between disimilar
+The ``estimate_sigma`` function can provide a good starting point for setting
+the ``h`` (and optionally, ``sigma``) parameters for the non-local means algorithm.
+``h`` is a constant that controls the decay in patch weights as a function of the
+distance between patches.  Larger ``h`` allows more smoothing between disimilar
 patches.
 
-In this demo, `h`, was hand-tuned to give the approximate best-case performance
+In this demo, ``h``, was hand-tuned to give the approximate best-case performance
 of each variant.
 
 """
@@ -36,14 +36,14 @@ import matplotlib.pyplot as plt
 from skimage import data, img_as_float
 from skimage.restoration import denoise_nl_means, estimate_sigma
 from skimage.measure import compare_psnr
+from skimage.util import random_noise
 
 
 astro = img_as_float(data.astronaut())
 astro = astro[30:180, 150:300]
 
 sigma = 0.08
-noisy = astro + sigma * np.random.standard_normal(astro.shape)
-noisy = np.clip(noisy, 0, 1)
+noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
 sigma_est = np.mean(estimate_sigma(noisy, multichannel=True))

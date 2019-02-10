@@ -18,6 +18,13 @@ if (Version(np.__version__) >= '1.15.0' and
 else:
     PYWAVELET_ND_INDEXING_WARNING = None
 
+try:
+    import dask
+except ImportError:
+    DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
+else:
+    DASK_NOT_INSTALLED_WARNING = None
+
 
 np.random.seed(1234)
 
@@ -234,7 +241,7 @@ def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
     # This is in fact an optional warning for our test suite.
     # Python 3.5 will not trigger a warning.
-    with expected_warnings(['invalid|\A\Z']):
+    with expected_warnings([r'invalid|\A\Z']):
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
@@ -473,13 +480,22 @@ def test_wavelet_denoising_levels():
     # multi-level case should outperform single level case
     assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
 
-    # invalid number of wavelet levels results in a ValueError
+    # invalid number of wavelet levels results in a ValueError or UserWarning
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
-    with testing.raises(ValueError):
-        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+    if Version(pywt.__version__) < '1.0.0':
+        # exceeding max_level raises a ValueError in PyWavelets 0.4-0.5.2
+        with testing.raises(ValueError):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+                restoration.denoise_wavelet(
+                    noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+    else:
+        # exceeding max_level raises a UserWarning in PyWavelets >= 1.0.0
+        with expected_warnings([
+                'all coefficients will experience boundary effects']):
             restoration.denoise_wavelet(
                 noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+
     with testing.raises(ValueError):
         with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
             restoration.denoise_wavelet(
@@ -595,7 +611,8 @@ def test_cycle_spinning_multichannel():
         func_kw = dict(sigma=sigma, multichannel=multichannel)
 
         # max_shifts=0 is equivalent to just calling denoise_func
-        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                DASK_NOT_INSTALLED_WARNING]):
             dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
                                            func_kw=func_kw,
                                            multichannel=multichannel)
@@ -604,7 +621,8 @@ def test_cycle_spinning_multichannel():
 
         # denoising with cycle spinning will give better PSNR than without
         for max_shifts in valid_shifts:
-            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
@@ -612,7 +630,8 @@ def test_cycle_spinning_multichannel():
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for shift_steps in valid_steps:
-            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=2,
                                                shift_steps=shift_steps,
@@ -644,11 +663,13 @@ def test_cycle_spinning_num_workers():
     denoise_func = restoration.denoise_wavelet
     func_kw = dict(sigma=sigma, multichannel=True)
 
+    # same results are expected whether using 1 worker or multiple workers
     with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
-        # same result whether using 1 worker or multiple workers
         dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, multichannel=False,
                                         num_workers=1)
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                            DASK_NOT_INSTALLED_WARNING]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, multichannel=False,
                                         num_workers=4)

@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
-from ..util import img_as_float
+from ..util import img_as_float64
 from ..color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
@@ -34,7 +34,7 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
     References
     ----------
     .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -62,7 +62,7 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
-    cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float(image))
+    cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float64(image))
     cdef double[:, ::1] out = np.zeros(image.shape, dtype=np.double)
 
     cdef double msum, min_msum, t
@@ -139,22 +139,22 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
                     circle_intensities[k] = image[i + rp[k], j + cp[k]]
                     if circle_intensities[k] > upper_threshold:
                         # Brighter pixel
-                        bins[k] = 'b'
+                        bins[k] = b'b'
                     elif circle_intensities[k] < lower_threshold:
                         # Darker pixel
-                        bins[k] = 'd'
+                        bins[k] = b'd'
                     else:
                         # Similar pixel
-                        bins[k] = 's'
+                        bins[k] = b's'
 
                 # High speed test for n >= 12
                 if n >= 12:
                     speed_sum_b = 0
                     speed_sum_d = 0
                     for k in range(0, 16, 4):
-                        if bins[k] == 'b':
+                        if bins[k] == b'b':
                             speed_sum_b += 1
-                        elif bins[k] == 'd':
+                        elif bins[k] == b'd':
                             speed_sum_d += 1
                     if speed_sum_d < 3 and speed_sum_b < 3:
                         continue
@@ -162,13 +162,13 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
                 # Test for bright pixels
                 curr_response = \
                     _corner_fast_response(curr_pixel, circle_intensities,
-                                          bins, 'b', n)
+                                          bins, b'b', n)
 
                 # Test for dark pixels
                 if curr_response == 0:
                     curr_response = \
                         _corner_fast_response(curr_pixel, circle_intensities,
-                                              bins, 'd', n)
+                                              bins, b'd', n)
 
                 corner_response[i, j] = curr_response
 
@@ -239,7 +239,7 @@ def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
 
     """
 
-    image = _prepare_grayscale_input_2D(image)
+    image = img_as_float64(_prepare_grayscale_input_2D(image))
 
     if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
         raise ValueError("Size of mask must be uneven.")

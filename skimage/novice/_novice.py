@@ -10,12 +10,10 @@ from ..color import color_dict
 from ..io.util import file_or_url_context, is_url
 from ..io.collection import ImageCollection
 
-from urllib.request import urlopen
-
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
-color_dict = dict((name, tuple(int(255 * c + 0.5) for c in rgb))
-                  for name, rgb in color_dict.items())
+color_dict = {name: tuple(int(255 * c + 0.5) for c in rgb)
+              for name, rgb in color_dict.items()}
 colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 

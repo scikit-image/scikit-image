@@ -69,11 +69,10 @@ def get_user(login):
     return user
 
 
-def get_merged_pulls(user, repo, date, page=1, results=0):
+def get_merged_pulls(user, repo, date, page=1, results=0, branch='master'):
     # See https://developer.github.com/v3/search/#search-issues
     # See https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates
-    query = 'repo:{user}/{repo} merged:>{date} sort:created-asc'
-    query = query.format(user=user, repo=repo, date=date)
+    query = f'repo:{user}/{repo} merged:>{date} sort:created-asc base:{branch}'
     url = 'https://api.github.com/search/issues'
     merges = request(url, query=dict(q=query, page=page, per_page=100))
 
@@ -82,48 +81,54 @@ def get_merged_pulls(user, repo, date, page=1, results=0):
     if results < merges['total_count']:
         merges['items'] += get_merged_pulls(user, repo, date,
                                             page=page + 1,
-                                            results=results + count)['items']
+                                            results=results + count,
+                                            branch=branch)['items']
 
     return merges
 
 
 def get_reviews(user, repo, pull):
     # See https://developer.github.com/v3/pulls/reviews/
-    url = ('https://api.github.com/repos/{}/{}/pulls/{}/reviews'
-           .format(user, repo, pull)
+    url = f'https://api.github.com/repos/{user}/{repo}/pulls/{pull}/reviews'
     reviews = request(url)
     return reviews
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument('tag', nargs='?', default='latest',
-                   help='Tag of the previous release')
+    p.add_argument('last_release_tag', help='Tag of the previous release; can be `last`')
+    p.add_argument('--dev-branch', default='master',
+                   help='Name of the branch for this release against which PRs '
+                        'were made.')
     args = p.parse_args()
     return args
 
 
 if __name__ == '__main__':
     args = parse_args()
-    tag = args.tag
-    
-    if GH_TOKEN is None:
-        print("It is recommended that the environment variable `GH_TOKEN` "
-              "be set to avoid running into problems with rate limiting. "
-              "One can be acquired at https://github.com/settings/tokens.\n\n")
+    last_release_tag = args.last_release_tag
+    dev_branch = args.dev_branch
 
-    if tag == 'latest':
-        tag = call('git tag -l v*.*.* --sort="-version:refname"')[0]
-        if tag == '':
-            tag = call('git rev-list HEAD')[-1]
+    if GH_TOKEN is None:
+        print("! It is recommended that the environment variable `GH_TOKEN` \n"
+              "  be set to avoid running into problems with rate limiting.\n\n"
+              "  One can be acquired at https://github.com/settings/tokens.\n\n"
+              "  You do not need to select any permission boxes while generating"
+              "  the token.\n\n")
+
+    if last_release_tag == 'last':
+        last_release_tag = call('git tag -l v*.*.* --sort="-version:refname"')[0]
+        if last_release_tag == '':
+            last_release_tag = call('git rev-list HEAD')[-1]
 
     # See https://git-scm.com/docs/pretty-formats - '%cI' is strict ISO-8601 format
-    tag_date = call("git log -n1 --format='%cI' {}".format(tag))[0]
-    num_commits = call("git rev-list {}..HEAD --count".format(tag))[0]
-    committers = call("git log --since='{}' --format=%aN".format(tag_date))
+    tag_date = call(f"git log -n1 --format='%cI' {last_release_tag}")[0]
+    num_commits = call(f"git rev-list {last_release_tag}..HEAD --count")[0]
+    committers = call(f"git log --since='{tag_date}' --format=%aN")
     committers = {c.strip() for c in committers if c.strip()}
 
-    merges = get_merged_pulls(GH_USER, GH_REPO, tag_date)
+    merges = get_merged_pulls(GH_USER, GH_REPO, tag_date,
+                              branch=dev_branch)
     num_merges = merges['total_count']
 
     reviewers = set()
@@ -176,28 +181,25 @@ if __name__ == '__main__':
         if len(name) > 0:
             return name[-1]
 
-    print('Release {} was on {}\n'.format(tag, tag_date))
-    print('A total of {} changes have been committed.\n'.format(num_commits))
+    print(f'Release {last_release_tag} was on {tag_date}\n')
+    print(f'A total of {num_commits} changes have been committed.\n')
 
-    print('Made by the following {} committers [alphabetical by last name]:'
-          .format(len(committers)))
-    for c in sorted(committers, key=key):
-        print('- {}'.format(c))
+    print(f'Made by the following {len(committers)} committers [alphabetical by last name]:')
+    for committer in sorted(committers, key=key):
+        print(f'- {committer}')
     print()
 
-    print('It contained the following {} merged pull requests:'.format(num_merges))
+    print(f'It contained the following {num_merges} merged pull requests:')
     for pull in pulls:
-        print('- {} (#{})'.format(pull['title'], pull['number']))
+        print(f'- {pull["title"]} (#{pull["number"]})')
     print()
 
-    print('Created by the following {} authors [alphabetical by last name]:'
-          .format(len(authors)))
-    for a in sorted(authors, key=key):
-        print('- {}'.format(a))
+    print(f'Created by the following {len(authors)} authors [alphabetical by last name]:')
+    for author in sorted(authors, key=key):
+        print(f'- {author}')
     print()
 
-    print('Reviewed by the following {} reviewers [alphabetical by last name]:'
-          .format(len(reviewers)))
-    for r in sorted(reviewers, key=key):
-        print('- {}'.format(r))
+    print(f'Reviewed by the following {len(reviewers)} reviewers [alphabetical by last name]:')
+    for reviewer in sorted(reviewers, key=key):
+        print(f'- {reviewer}')
     print()

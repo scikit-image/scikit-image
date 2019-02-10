@@ -39,7 +39,7 @@ def test_range(dtype, f_and_dt):
 
     f, dt = f_and_dt
 
-    with expected_warnings(['precision loss|sign loss|\A\Z']):
+    with expected_warnings([r'precision loss|sign loss|\A\Z']):
         y = f(x)
 
     omin, omax = dtype_range[dt]
@@ -72,7 +72,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    with expected_warnings(['precision loss|sign loss|\A\Z']):
+    with expected_warnings([r'precision loss|sign loss|\A\Z']):
         y = convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
@@ -95,6 +95,11 @@ def test_float_out_of_range():
     too_low = np.array([-2], dtype=np.float32)
     with testing.raises(ValueError):
         img_as_int(too_low)
+
+
+def test_float_float_all_ranges():
+    arr_in = np.array([[-10., 10., 1e20]], dtype=np.float32)
+    np.testing.assert_array_equal(img_as_float(arr_in), arr_in)
 
 
 def test_copy():
@@ -127,9 +132,9 @@ def test_clobber():
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
 
-            with warnings.catch_warnings():
-                # UserWarning for possible precision loss, expected
-                warnings.simplefilter('ignore', UserWarning)
+            # UserWarning for possible precision loss, expected
+            with expected_warnings([r'Possible precision loss|\A\Z',
+                                    r'Possible sign loss|\A\Z']):
                 img_in = func_input_type(img)
                 img_in_before = img_in.copy()
                 img_out = func_output_type(img_in)

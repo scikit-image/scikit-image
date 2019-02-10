@@ -18,7 +18,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
         coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
     else:
         coord = np.column_stack(coord)
-    # Higest peak first
+    # Highest peak first
     return coord[::-1]
 
 
@@ -31,8 +31,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
-    If peaks are flat (i.e. multiple adjacent pixels have identical
-    intensities), the coordinates of all such pixels are returned.
+    If there are multiple local maxima with identical pixel intensities
+    inside the region defined with `min_distance`,
+    the coordinates of all such pixels are returned.
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
     of the two is chosen as the minimum intensity threshold of peaks.
@@ -51,9 +52,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         the minimum intensity of the image.
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
-    exclude_border : int, optional
-        If nonzero, `exclude_border` excludes peaks from
+    exclude_border : int or bool, optional
+        If nonzero int, `exclude_border` excludes peaks from
         within `exclude_border`-pixels of the border of the image.
+	If True, takes the `min_distance` parameter as value.
+	If zero or False, peaks are identified regardless of their
+	distance from the border.
     indices : bool, optional
         If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as

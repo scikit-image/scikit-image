@@ -17,28 +17,28 @@ thresholding segmentation is not sufficient.
 
 ::
 
-    >>> import numpy as np
     >>> from skimage import data
+    >>> from skimage.exposure import histogram
     >>> coins = data.coins()
-    >>> histo = np.histogram(coins, bins=np.arange(0, 256))
+    >>> hist, hist_centers = histogram(coins)
 
 Simply thresholding the image leads either to missing significant parts
 of the coins, or to merging parts of the background with the
-coins. This is due to the inhomogeneous lighting of the image. 
+coins. This is due to the inhomogeneous lighting of the image.
 
 .. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_002.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
    :align: center
 
 A first idea is to take advantage of the local contrast, that is, to
-use the gradients rather than the grey values. 
+use the gradients rather than the grey values.
 
 Edge-based segmentation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Let us first try to detect edges that enclose the coins. For edge
 detection, we use the `Canny detector 
-<http://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
+<https://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
 
 ::
 
@@ -81,7 +81,7 @@ function to remove objects smaller than a small threshold.
 However, the segmentation is not very satisfying, since one of the coins
 has not been segmented correctly at all. The reason is that the contour
 that we got from the Canny detector was not completely closed, therefore
-the filling function did not fill the inner part of the coin. 
+the filling function did not fill the inner part of the coin.
 
 .. image:: ../auto_examples/xx_applications/images/sphx_glr_plot_coins_segmentation_005.png
    :target: ../auto_examples/xx_applications/plot_coins_segmentation.html
@@ -108,7 +108,7 @@ histogram of grey values:
    
 We will use these markers in a watershed segmentation. The name watershed
 comes from an analogy with hydrology. The `watershed transform
-<http://en.wikipedia.org/wiki/Watershed_%28image_processing%29>`_ floods
+<https://en.wikipedia.org/wiki/Watershed_%28image_processing%29>`_ floods
 an image of elevation starting from markers, in order to determine the catchment
 basins of these markers. Watershed lines separate these catchment basins,
 and correspond to the desired segmentation.
@@ -154,7 +154,7 @@ Let us now compute the watershed transform::
 
 With this method, the result is satisfying for all coins. Even if the
 markers for the background were not well distributed, the barriers in the
-elevation map were high enough for these markers to flood the entire 
+elevation map were high enough for these markers to flood the entire
 background.
 
 We remove a few small holes with mathematical morphology::

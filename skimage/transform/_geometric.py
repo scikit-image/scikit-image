@@ -492,7 +492,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
 
 class ProjectiveTransform(GeometricTransform):
-    """Projective transformation.
+    r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
 

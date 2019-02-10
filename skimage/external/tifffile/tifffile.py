@@ -62,7 +62,7 @@ For command line usage run `python tifffile.py --help`
 
 Requirements
 ------------
-* `CPython 2.7 or 3.5 <http://www.python.org>`_ (64-bit recommended)
+* `CPython 2.7 or 3.5 <https://www.python.org>`_ (64-bit recommended)
 * `Numpy 1.11 <http://www.numpy.org>`_
 * `Matplotlib 1.5 <http://www.matplotlib.org>`_ (optional for plotting)
 * `Tifffile.c 2017.01.10 <http://www.lfd.uci.edu/~gohlke/>`_
@@ -70,6 +70,12 @@ Requirements
 
 Revisions
 ---------
+2018.10.08
+    No longer use numpy.fromstring just use numpy.frombuffer.
+    Note that this has been fixed upstream in 2018.02.18.
+    Unfortunately, upstream code claims to depend on Numpy 1.14.
+    To not bump the minimum version requirements of scikit-image,
+    this targetted fix was added to the vendored version.
 2017.01.12
     Read Zeiss SEM metadata.
     Read OME-TIFF with invalid references to external files.
@@ -2539,13 +2545,13 @@ class TiffPage(object):
                         # needs the raw byte order
                         typecode = dtype
                     try:
-                        return numpy.fromstring(x, typecode)
+                        return numpy.frombuffer(x, typecode)
                     except ValueError as e:
                         # strips may be missing EOI
                         warnings.warn("unpack: %s" % e)
                         xlen = ((len(x) // (bits_per_sample // 8)) *
                                 (bits_per_sample // 8))
-                        return numpy.fromstring(x[:xlen], typecode)
+                        return numpy.frombuffer(x[:xlen], typecode)
 
             elif isinstance(bits_per_sample, tuple):
                 def unpack(x):
@@ -3600,7 +3606,7 @@ class FileHandle(object):
                             offset=self._offset + offset,
                             shape=shape, order=order)
 
-    def read_array(self, dtype, count=-1, sep=""):
+    def read_array(self, dtype, count=-1):
         """Return numpy array from file.
 
         Work around numpy issue #2230, "numpy.fromfile does not accept
@@ -3608,14 +3614,14 @@ class FileHandle(object):
 
         """
         try:
-            return numpy.fromfile(self._fh, dtype, count, sep)
+            return numpy.fromfile(self._fh, dtype, count)
         except IOError:
             if count < 0:
                 size = self._size
             else:
                 size = count * numpy.dtype(dtype).itemsize
             data = self._fh.read(size)
-            return numpy.fromstring(data, dtype, count, sep)
+            return numpy.frombuffer(data, dtype, count)
 
     def read_record(self, dtype, shape=1, byteorder=None):
         """Return numpy record from file."""
@@ -4143,7 +4149,7 @@ def imagej_metadata(data, bytecounts, byteorder):
 
     def read_bytes(data, byteorder):
         #return struct.unpack('b' * len(data), data)
-        return numpy.fromstring(data, 'uint8')
+        return numpy.frombuffer(data, 'uint8')
 
     metadata_types = {  # big endian
         b'info': ('info', read_string),
@@ -4534,7 +4540,7 @@ def unpack_ints(data, dtype, itemsize, runlen=0):
 
     """
     if itemsize == 1:  # bitarray
-        data = numpy.fromstring(data, '|B')
+        data = numpy.frombuffer(data, '|B')
         data = numpy.unpackbits(data)
         if runlen % 8:
             data = data.reshape(-1, runlen + (8 - runlen % 8))
@@ -4543,7 +4549,7 @@ def unpack_ints(data, dtype, itemsize, runlen=0):
 
     dtype = numpy.dtype(dtype)
     if itemsize in (8, 16, 32, 64):
-        return numpy.fromstring(data, dtype)
+        return numpy.frombuffer(data, dtype)
     if itemsize < 1 or itemsize > 32:
         raise ValueError("itemsize out of range: %i" % itemsize)
     if dtype.kind not in "biu":
@@ -4619,7 +4625,7 @@ def unpack_rgb(data, dtype='<B', bitspersample=(5, 6, 5), rescale=True):
     if not (bits <= 32 and all(i <= dtype.itemsize*8 for i in bitspersample)):
         raise ValueError("sample size not supported %s" % str(bitspersample))
     dt = next(i for i in 'BHI' if numpy.dtype(i).itemsize*8 >= bits)
-    data = numpy.fromstring(data, dtype.byteorder+dt)
+    data = numpy.frombuffer(data, dtype.byteorder+dt)
     result = numpy.empty((data.size, len(bitspersample)), dtype.char)
     for i, bps in enumerate(bitspersample):
         t = data >> int(numpy.sum(bitspersample[i+1:]))
@@ -4663,7 +4669,7 @@ def reverse_bitorder(data):
         b'\xef\x1f\x9f_\xdf?\xbf\x7f\xff')
     try:
         view = data.view('uint8')
-        numpy.take(numpy.fromstring(table, dtype='uint8'), view, out=view)
+        numpy.take(numpy.frombuffer(table, dtype='uint8'), view, out=view)
     except AttributeError:
         return data.translate(table)
     except ValueError:

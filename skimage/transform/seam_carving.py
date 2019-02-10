@@ -44,7 +44,7 @@ def seam_carve(image, energy_map, mode, num, border=1, force_copy=True):
     ----------
     .. [1] Shai Avidan and Ariel Shamir
            "Seam Carving for Content-Aware Image Resizing"
-           http://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
+           https://www.cs.jhu.edu/~misha/ReadingSeminar/Papers/Avidan07.pdf
     """
 
     utils.assert_nD(image, (2, 3))
