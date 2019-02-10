@@ -77,20 +77,20 @@ def donuts():
     b = -1.25 * 8.0
     c = 16.0 - 1.85 * 1.85
     d = 64.0
-    
+
     i = np.arange(n, dtype=int)
     ia_plus_b = i * a + b
     ia_plus_b_square = ia_plus_b ** 2
     z = ia_plus_b_square[:, np.newaxis, np.newaxis]
     zc = z + c
-    
+
     y1 = ((ia_plus_b - 2) ** 2)[np.newaxis, :, np.newaxis]
     y2 = ((ia_plus_b + 2) ** 2)[np.newaxis, :, np.newaxis]
-    
+
     x = ia_plus_b_square[np.newaxis, np.newaxis, :]
     x1 = (x + y1 + zc) ** 2
     x2 = (x + y2 + zc) ** 2
-    
+
     return ((x1 - d * (x + y1)) * (x2 - d * (z + y2))) + 1025
 
 
