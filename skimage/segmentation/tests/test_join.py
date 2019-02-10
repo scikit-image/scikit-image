@@ -109,7 +109,7 @@ def test_relabel_sequential_int_dtype_stability(data_already_sequential,
 
 def test_relabel_sequential_int_dtype_overflow():
     ar = np.array([1, 3, 0, 2, 5, 4], dtype=np.uint8)
-    offset = 255
+    offset = 254
     ar_relab, fw, inv = relabel_sequential(ar, offset=offset)
     assert all(a.dtype == np.uint16 for a in (ar_relab, fw, inv))
     ar_relab_ref = ar.astype(np.int, copy=True)
