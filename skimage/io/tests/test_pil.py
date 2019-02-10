@@ -203,6 +203,10 @@ def test_imsave_incorrect_dimension():
         with testing.raises(ValueError):
             with expected_warnings([fname + ' is a low contrast image']):
                 imsave(fname, np.zeros((2, 3, 2)))
+        # test that low contrast check is ignored
+        with testing.raises(ValueError):
+            with expected_warnings([]):
+                imsave(fname, np.zeros((2, 3, 2)), check_contrast=False)
 
 
 def test_imsave_filelike():
