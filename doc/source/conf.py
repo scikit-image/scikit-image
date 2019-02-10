@@ -113,7 +113,7 @@ sphinx_gallery_conf = {
 =======
     'reference_url'     : {
             'skimage': None,},
-    'image_scrapers' : ('matplotlib', 'mayavi', ImageFileScraper())
+    'image_scrapers' : ('matplotlib', ImageFileScraper())
     }
 >>>>>>> getting ready for config check
 
