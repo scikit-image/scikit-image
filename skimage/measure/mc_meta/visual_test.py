@@ -77,27 +77,21 @@ def donuts():
     b = -1.25 * 8.0
     c = 16.0 - 1.85 * 1.85
     d = 64.0
-    vol = np.empty((n, n, n), 'float32')
-    for iz in range(n):
-        z = iz * a + b
-        z *= z
-        zc = z + c
-        for iy in range(n):
-            y = iy * a + b
-            y1 = y - 2
-            y1 *= y1
-            y2 = y + 2
-            y2 *= y2
-            for ix in range(n):
-                x = ix * a + b
-                x *= x
-                x1 = x + y1 + zc
-                x1 *= x1
-                x2 = x + y2 + zc
-                x2 *= x2
-                vol[iz, iy, ix] = ((x1 - d * (x + y1)) * (x2 - d * (z + y2)))
-    vol += 1025.0
-    return vol
+    
+    i = np.arange(n, dtype=int)
+    ia_plus_b = i * a + b
+    ia_plus_b_square = ia_plus_b ** 2
+    z = ia_plus_b_square[:, np.newaxis, np.newaxis]
+    zc = z + c
+    
+    y1 = ((ia_plus_b - 2) ** 2)[np.newaxis, :, np.newaxis]
+    y2 = ((ia_plus_b + 2) ** 2)[np.newaxis, :, np.newaxis]
+    
+    x = ia_plus_b_square[np.newaxis, np.newaxis, :]
+    x1 = (x + y1 + zc) ** 2
+    x2 = (x + y2 + zc) ** 2
+    
+    return ((x1 - d * (x + y1)) * (x2 - d * (z + y2))) + 1025
 
 
 @contextmanager
