@@ -8,7 +8,7 @@ from skimage.viewer.canvastools import (
 from skimage.viewer.canvastools.base import CanvasToolBase
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal
+from skimage._shared.testing import assert_equal, parametrize
 
 try:
     from matplotlib.testing.decorators import cleanup
@@ -160,8 +160,8 @@ def test_rect_tool():
 
 @cleanup
 @testing.skipif(not has_qt, reason="Qt not installed")
-def test_paint_tool():
-    img = data.astronaut()
+@parametrize('img', [data.moon(), data.astronaut()])
+def test_paint_tool(img):
     viewer = ImageViewer(img)
 
     tool = PaintTool(viewer, img.shape)
