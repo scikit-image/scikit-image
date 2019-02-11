@@ -12,7 +12,7 @@ if [[ "${QT}" == "PyQt5" ]]; then
         # presence of PyQt before MPL 2.2.3
         pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.11"
     else
-        pip install --retries 3 -q $PIP_FLAGS "pyqt5!=5.12.0"
+        pip install --retries 3 -q $PIP_FLAGS pyqt5
     fi
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
