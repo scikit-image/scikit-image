@@ -119,7 +119,7 @@ def relabel_sequential(label_field, offset=1):
     offset = int(offset)
     if offset <= 0:
         raise ValueError("Offset must be strictly positive.")
-    if int(label_field.min()) < 0:
+    if np.min(label_field) < 0:
         raise ValueError("Cannot relabel array that contains negative values.")
     m = label_field.max()
     if not np.issubdtype(label_field.dtype, np.integer):
