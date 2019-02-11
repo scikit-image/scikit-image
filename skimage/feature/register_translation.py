@@ -105,7 +105,7 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
 
 
 def register_translation(src_image, target_image, upsample_factor=1,
-                         space="real", return_error=True):
+                         space="real", return_error=True, axes=None):
     """
     Efficient subpixel image translation registration by cross-correlation.
 
@@ -133,6 +133,10 @@ def register_translation(src_image, target_image, upsample_factor=1,
     return_error : bool, optional
         Returns error and phase difference if on,
         otherwise only shifts are returned
+    axes : int or tuple of int, optional
+        Register the first (or last) ``n`` axes of the images. If positive,
+        register the first ``n`` axes. If negative, register the last ``n`` axes.
+        Default None (regiseter all axes)
 
     Returns
     -------
