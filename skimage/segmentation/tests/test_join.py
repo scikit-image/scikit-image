@@ -112,8 +112,7 @@ def test_relabel_sequential_int_dtype_overflow():
     offset = 254
     ar_relab, fw, inv = relabel_sequential(ar, offset=offset)
     assert all(a.dtype == np.uint16 for a in (ar_relab, fw, inv))
-    ar_relab_ref = ar.astype(np.int, copy=True)
-    ar_relab_ref[ar_relab_ref > 0] += offset - 1
+    ar_relab_ref = np.where(ar > 0, ar.astype(np.int) + offset - 1, 0)
     assert_array_equal(ar_relab, ar_relab_ref)
 
 
@@ -143,6 +142,5 @@ def test_relabel_sequential_already_sequential(offset, with0):
     else:
         ar = np.array([1, 3, 2, 5, 4])
     ar_relab, fw, inv = relabel_sequential(ar, offset=offset)
-    ar_relab_ref = ar.copy()
-    ar_relab_ref[ar_relab_ref > 0] += offset - 1
+    ar_relab_ref = np.where(ar > 0, ar + offset - 1, 0)
     assert_array_equal(ar_relab, ar_relab_ref)
