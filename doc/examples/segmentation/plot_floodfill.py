@@ -16,9 +16,10 @@ First, a basic example where we will change a checkerboard square from white
 to mid-gray.
 """
 
+import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data
-from skimage.segmentation import flood_fill
+from skimage import data, filters
+from skimage.segmentation import flood, flood_fill
 
 
 checkers = data.checkerboard()
@@ -115,8 +116,6 @@ plt.show()
 # Here we segment the nose of a cat.  However, multi-channel images are not
 # supported by flood[_fill].  Instead we Sobel filter the red channel to
 # enhance edges, then flood the nose with a tolerance.
-
-import skimage.filters as filters
 
 cat = data.chelsea()
 cat_sobel = filters.sobel(cat[..., 0])

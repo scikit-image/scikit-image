@@ -1,7 +1,7 @@
 import numpy as np
 from pytest import raises
 
-from skimage.morphology import flood_fill
+from skimage.morphology import flood, flood_fill
 
 eps = 1e-12
 
@@ -15,7 +15,7 @@ def test_empty_input():
     assert flood(np.empty(0), ()).dtype == np.bool
 
     # Maintain shape, even with zero size present
-    assert flood(np.empty((20, 0, 4)), ()).shape = (20, 0, 4)
+    assert flood(np.empty((20, 0, 4)), ()).shape == (20, 0, 4)
 
 
 def test_float16():
@@ -74,11 +74,11 @@ def test_inplace_float():
 
     flood_fill(image, (0, 0), 5, inplace=True)
 
-    expected = array([[5., 5., 5., 5., 5., 5., 5.],
-                      [5., 1., 1., 5., 2., 2., 5.],
-                      [5., 1., 1., 5., 2., 2., 5.],
-                      [1., 5., 5., 5., 5., 5., 3.],
-                      [5., 1., 1., 1., 3., 3., 4.]], dtype=float32)
+    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [5., 1., 1., 5., 2., 2., 5.],
+                         [1., 5., 5., 5., 5., 5., 3.],
+                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
 
     np.testing.assert_allclose(image, expected)
 
@@ -95,13 +95,13 @@ def test_inplace_noncontiguous():
 
     flood_fill(image, (0, 0), 5, inplace=True)
 
-    expected = array([[5, 5, 5, 1, 5],
-                      [5, 1, 1, 5, 1],
-                      [5, 1, 1, 5, 1],
-                      [5, 5, 5, 5, 1],
-                      [5, 2, 2, 5, 3],
-                      [5, 2, 2, 5, 3],
-                      [5, 5, 5, 3, 4]])
+    expected = np.array([[5, 5, 5, 1, 5],
+                         [5, 1, 1, 5, 1],
+                         [5, 1, 1, 5, 1],
+                         [5, 5, 5, 5, 1],
+                         [5, 2, 2, 5, 3],
+                         [5, 2, 2, 5, 3],
+                         [5, 5, 5, 3, 4]])
 
     np.testing.assert_allclose(image, expected)
 
