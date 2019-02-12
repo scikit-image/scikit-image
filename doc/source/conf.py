@@ -15,6 +15,7 @@ import sys
 import os
 import skimage
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.gen_rst import figure_rst
 
 import shutil
 import time
@@ -28,7 +29,7 @@ class ImageFileScraper(object):
         self.start_time = time.time()
         warnings.warn("init")
     def __call__(self, block, block_vars, gallery_conf):
-        warnings.want("call")
+        warnings.warn("call")
         # Find all image files in the current directory.
         path_example = os.path.dirname(block_vars['src_file'])
         image_files = _find_images(path_example)
