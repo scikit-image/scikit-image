@@ -91,17 +91,23 @@ def test_inplace_noncontiguous():
                       [0, 1, 1, 1, 3, 3, 4]])
 
     # Transpose is noncontiguous
-    image = image.T
+    image2 = image[::2, ::2]
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    flood_fill(image2, (0, 0), 5, inplace=True)
 
-    expected = np.array([[5, 5, 5, 1, 5],
-                         [5, 1, 1, 5, 1],
-                         [5, 1, 1, 5, 1],
-                         [5, 5, 5, 5, 1],
-                         [5, 2, 2, 5, 3],
-                         [5, 2, 2, 5, 3],
-                         [5, 5, 5, 3, 4]])
+    # The inplace modified result
+    expected2 = np.array([[5, 5, 5, 5],
+                          [5, 1, 2, 5],
+                          [5, 1, 3, 4]])
+
+    np.testing.assert_allclose(image2, expected2)
+
+    # Projected back through the view, `image` also modified
+    expected = np.array([[5, 0, 5, 0, 5, 0, 5],
+                         [0, 1, 1, 0, 2, 2, 0],
+                         [5, 1, 1, 0, 2, 2, 5],
+                         [1, 0, 0, 0, 0, 0, 3],
+                         [5, 1, 1, 1, 3, 3, 4]])
 
     np.testing.assert_allclose(image, expected)
 

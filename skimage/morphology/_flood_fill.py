@@ -99,13 +99,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    if inplace and not image.flags.contiguous:
-        # Flood fill requires some sort of contiguity - this makes a copy
-        _image = np.ascontiguousarray(image)
-    else:
-        _image = image
-
-    mask = flood(_image, seed_point, selem=selem, connectivity=connectivity,
+    mask = flood(image, seed_point, selem=selem, connectivity=connectivity,
                  tolerance=tolerance)
 
     if not inplace:
