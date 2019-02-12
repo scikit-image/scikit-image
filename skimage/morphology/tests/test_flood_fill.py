@@ -7,8 +7,15 @@ eps = 1e-12
 
 
 def test_empty_input():
+    # Test shortcut
     output = flood_fill(np.empty(0), (), 2)
     assert output.size == 0
+
+    # Boolean output type
+    assert flood(np.empty(0), ()).dtype == np.bool
+
+    # Maintain shape, even with zero size present
+    assert flood(np.empty((20, 0, 4)), ()).shape = (20, 0, 4)
 
 
 def test_float16():
@@ -63,15 +70,38 @@ def test_inplace_float():
                       [0, 1, 1, 0, 2, 2, 0],
                       [0, 1, 1, 0, 2, 2, 0],
                       [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]])
+                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
 
     flood_fill(image, (0, 0), 5, inplace=True)
 
-    expected = np.array([[5, 5, 5, 5, 5, 5, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [1, 5, 5, 5, 5, 5, 3],
-                         [5, 1, 1, 1, 3, 3, 4]])
+    expected = array([[5., 5., 5., 5., 5., 5., 5.],
+                      [5., 1., 1., 5., 2., 2., 5.],
+                      [5., 1., 1., 5., 2., 2., 5.],
+                      [1., 5., 5., 5., 5., 5., 3.],
+                      [5., 1., 1., 1., 3., 3., 4.]], dtype=float32)
+
+    np.testing.assert_allclose(image, expected)
+
+
+def test_inplace_noncontiguous():
+    image = np.array([[0, 0, 0, 0, 0, 0, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [0, 1, 1, 0, 2, 2, 0],
+                      [1, 0, 0, 0, 0, 0, 3],
+                      [0, 1, 1, 1, 3, 3, 4]])
+
+    # Transpose is noncontiguous
+    image = image.T
+
+    flood_fill(image, (0, 0), 5, inplace=True)
+
+    expected = array([[5, 5, 5, 1, 5],
+                      [5, 1, 1, 5, 1],
+                      [5, 1, 1, 5, 1],
+                      [5, 5, 5, 5, 1],
+                      [5, 2, 2, 5, 3],
+                      [5, 2, 2, 5, 3],
+                      [5, 5, 5, 3, 4]])
 
     np.testing.assert_allclose(image, expected)
 

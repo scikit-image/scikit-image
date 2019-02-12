@@ -25,7 +25,8 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.  Integer a convenience for 1D.
+        The point in `image` used as the starting point for the flood fill.  If
+        the image is 1D, this point may be given as an integer.
     new_value : `image` type
         New value to set the entire fill.  This must be chosen in agreement
         with the dtype of `image`.
@@ -82,7 +83,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [0, 5, 5, 0, 2, 2, 0],
            [5, 0, 0, 0, 0, 0, 3]])
 
-    Fill connected ones with 5, with only cardinal direction connectivity:
+    Fill connected ones with 5, excluding diagonal points (connectivity 1):
 
     >>> flood_fill(image, (1, 1), 5, connectivity=1)
     array([[0, 0, 0, 0, 0, 0, 0],
@@ -98,30 +99,20 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    # Correct start point in ravelled image - only copy if non-contiguous
-    image = np.asarray(image)
-    copied = False
+    if inplace and not image.flags.contiguous:
+        # Flood fill requires some sort of contiguity - this makes a copy
+        _image = np.ascontiguousarray(image)
+    else:
+        _image = image
 
-    if not image.flags.contiguous:
-        if inplace:
-            warnings.warn('Non-contiguous array passed as `image`; this will '
-                          'be converted to a contiguous array as a copy.')
-            # Flood fill requires some sort of contiguity - this makes a copy
-            image = np.ascontiguousarray(image)
-            copied = True
+    mask = flood(_image, seed_point, selem=selem, connectivity=connectivity,
+                 tolerance=tolerance)
 
     if not inplace:
-        if not copied:
-            output = image.copy()
-        else:
-            output = image
-        output[flood(image, seed_point, selem=selem, connectivity=connectivity,
-                     tolerance=tolerance)] = new_value
-        return output
-    else:  # inplace
-        image[flood(image, seed_point, selem=selem, connectivity=connectivity,
-                    tolerance=tolerance)] = new_value
-        return image
+        image = image.copy()
+
+    image[mask] = new_value
+    return image
 
 
 def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
@@ -135,7 +126,8 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     image : ndarray
         An n-dimensional array.
     seed_point : tuple or int
-        The index into `image` to start filling.  Integer a convenience for 1D.
+        The point in `image` used as the starting point for the flood fill.  If
+        the image is 1D, this point may be given as an integer.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel. It must contain only 1's and 0's, have the same number
@@ -193,7 +185,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
            [0, 5, 5, 0, 2, 2, 0],
            [5, 0, 0, 0, 0, 0, 3]])
 
-    Fill connected fives with 1, with only cardinal direction connectivity:
+    Fill connected ones with 5, excluding diagonal points (connectivity 1):
 
     >>> mask = flood(image, (1, 1), connectivity=1)
     >>> image[mask] = 1
@@ -220,16 +212,14 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     elif image.flags.c_contiguous is True:
         order = 'C'
     else:
-        warnings.warn('Non-contiguous array passed as `image`; this will be '
-                      'converted to a contiguous array as a copy.')
         image = np.ascontiguousarray(image)
         order = 'C'
 
     seed_value = image[seed_point]
 
     # Shortcut for rank zero
-    if image.size == 0:
-        return np.array([], dtype=np.uint8)
+    if 0 in image.shape:
+        return np.zeros(image.shape, dtype=np.bool)
 
     # Convenience for 1d input
     try:
