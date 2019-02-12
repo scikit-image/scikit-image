@@ -53,13 +53,13 @@ class ImageFileScraper(object):
             return ''
         else:
             return figure_rst(image_names, gallery_conf['src_dir'])
-    def _find_images(path, image_extensions=['jpg', 'jpeg', 'png', 'gif']):
-        """Find all unique image paths for a set of extensions."""
-        image_files = set()
-        for ext in image_extensions:
-            this_ext_files = set(glob(os.path.join(path, '*.'+ext)))
-            image_files = image_files.union(this_ext_files)
-        return image_files
+def _find_images(path, image_extensions=['jpg', 'jpeg', 'png', 'gif']):
+    """Find all unique image paths for a set of extensions."""
+    image_files = set()
+    for ext in image_extensions:
+        this_ext_files = set(glob(os.path.join(path, '*.'+ext)))
+        image_files = image_files.union(this_ext_files)
+    return image_files
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
