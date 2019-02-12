@@ -20,6 +20,9 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+    # this became necessary to use matplotlib and qt5.12
+    # https://github.com/matplotlib/matplotlib/pull/13412
+    - qtbase5-dev
 
 env:
   global:
