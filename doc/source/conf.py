@@ -19,14 +19,16 @@ from sphinx_gallery.sorting import ExplicitOrder
 import shutil
 import time
 from glob import glob
-
+import warnings
 
 class ImageFileScraper(object):
     def __init__(self):
         """Scrape image files that are already present in current folder."""
         self.embedded_images = {}
         self.start_time = time.time()
+        warnings.warn("init")
     def __call__(self, block, block_vars, gallery_conf):
+        warnings.want("call")
         # Find all image files in the current directory.
         path_example = os.path.dirname(block_vars['src_file'])
         image_files = _find_images(path_example)
@@ -34,7 +36,6 @@ class ImageFileScraper(object):
         image_names = []
         image_path_iterator = block_vars['image_path_iterator']
         for path_orig in image_files:
-            print('a')
             # If we already know about this image and it hasn't been modified
             # since starting, then skip it
             mod_time = os.stat(path_orig).st_mtime
