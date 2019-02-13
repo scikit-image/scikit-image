@@ -113,7 +113,7 @@ sphinx_gallery_conf = {
     'reference_url'     : {
             'skimage': None,
     },
-    'image_scrapers' : ('matplotlib', ImageFileScraper())
+    'image_scrapers' : ('matplotlib', ImageFileScraper)
 }
 
 # Determine if the matplotlib has a recent enough version of the
