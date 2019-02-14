@@ -171,6 +171,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     register_axes = np.arange(image_dim - axes, image_dim)
     register_shape = image_shape[register_axes]
     broadcast_shape = image_shape[:image_dim - axes]
+    register_axes = tuple(register_axes)
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
@@ -178,8 +179,8 @@ def register_translation(src_image, target_image, upsample_factor=1,
         target_freq = target_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = np.fft.fftn(src_image)
-        target_freq = np.fft.fftn(target_image)
+        src_freq = np.fft.fftn(src_image, axes=register_axes)
+        target_freq = np.fft.fftn(target_image, axes=register_axes)
     else:
         raise ValueError("Error: register_translation only knows the \"real\" "
                          "and \"fourier\" values for the ``space`` argument.")
@@ -187,20 +188,22 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = np.fft.ifftn(image_product)
+    cross_correlation = np.fft.ifftn(image_product, axes=register_axes)
 
     # Locate maximum
-    maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
-                              cross_correlation.shape)
-    midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
+    flattened_CC = np.abs(cross_correlation).reshape(*broadcast_shape,
+                                                    np.product(register_shape))
+    maxima = np.unravel_index(np.argmax(flattened_CC, axis=-1), register_shape)
+    maxima = np.stack(maxima, axis=-1)
+    midpoints = np.array([np.fix(axis_size / 2) for axis_size in register_shape])
 
-    shifts = np.array(maxima, dtype=np.float64)
-    shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
-
+    shifts = maxima - np.array(register_shape) * (maxima > midpoints)
     if upsample_factor == 1:
         if return_error:
-            src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
-            target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
+            src_amp = np.sum(np.abs(src_freq) ** 2, axis=register_axes) \
+                             / src_freq.size
+            target_amp = np.sum(np.abs(target_freq) ** 2, axis=register_axes) \
+                                / target_freq.size
             CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
