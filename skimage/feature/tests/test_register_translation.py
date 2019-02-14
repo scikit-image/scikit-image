@@ -136,3 +136,17 @@ def test_mismatch_offsets_size():
     with testing.raises(ValueError):
         _upsampled_dft(np.ones((4, 4)), 3,
                        axis_offsets=[3, 2, 1, 4])
+
+
+def test_negative_axes_pixel():
+    reference_image = np.fft.fftn(camera())
+    shifts = np.array([[2, -15], [20, -5], [-7, -10]])
+    image_stack = np.tile(reference_image, (3, 1, 1))
+    shifted_image_stack = np.zeros_like(image_stack)
+    for i, shift in enumerate(shifts):
+        shifted_image_stack[i] = fourier_shift(reference_image, shift)
+    result, error, diffphase = register_translation(shifted_image_stack,
+                                                    image_stack,
+                                                    space="fourier",
+                                                    axes=-2)
+    assert_allclose(result, shifts)                                            
