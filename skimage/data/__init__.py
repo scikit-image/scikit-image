@@ -38,6 +38,7 @@ __all__ = ['data_dir',
            'moon',
            'page',
            'text',
+           'retina',
            'rocket',
            'stereo_motorcycle']
 
@@ -317,6 +318,27 @@ def hubble_deep_field():
         Hubble deep field image.
     """
     return load("hubble_deep_field.jpg")
+
+
+def retina():
+    """Human retina.
+
+    This image of a retina is useful for demonstrations requiring circular
+    images.
+
+    Notes
+    -----
+    This image was downloaded from
+    `wikimedia <https://commons.wikimedia.org/wiki/File:Fundus_photograph_of_normal_left_eye.jpg>`.
+    This file is made available under the Creative Commons CC0 1.0 Universal
+    Public Domain Dedication.
+
+    Returns
+    -------
+    retina : (1411, 1411, 3) uint8 ndarray
+        Retina image in RGB.
+    """
+    return load("retina.jpg")
 
 
 def rocket():
