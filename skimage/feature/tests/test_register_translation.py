@@ -138,7 +138,7 @@ def test_mismatch_offsets_size():
                        axis_offsets=[3, 2, 1, 4])
 
 
-def test_negative_axes_pixel():
+def test_axes_pixel():
     reference_image = np.fft.fftn(camera())
     shifts = np.array([[2, -15], [20, -5], [-7, -10]])
     image_stack = np.tile(reference_image, (3, 1, 1))
@@ -148,5 +148,5 @@ def test_negative_axes_pixel():
     result, error, diffphase = register_translation(shifted_image_stack,
                                                     image_stack,
                                                     space="fourier",
-                                                    axes=-2)
+                                                    axes=2)
     assert_allclose(result, shifts)                                            
