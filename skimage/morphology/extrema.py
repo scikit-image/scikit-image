@@ -317,7 +317,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         selem = ndi.generate_binary_structure(ndim, connectivity)
     else:
         # Validate custom structured element
-        selem = np.asarray(selem, dtype=bool)
+        selem = np.asarray(selem, dtype=np.bool)
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(
@@ -345,9 +345,9 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood.
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If not
+        given, all adjacent pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or
@@ -507,9 +507,9 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
-        considered as part of the neighborhood.
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If not
+        given, all adjacent pixels are considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or

@@ -293,20 +293,27 @@ class TestLocalMaxima(unittest.TestCase):
         assert_equal(result_conn3, self.expected_default)
 
     def test_selem(self):
-        """Test results if selem is an array."""
-        selem_cross = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+        """Test results if selem is given."""
+        selem_cross = np.array(
+            [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.bool)
         result_selem_cross = extrema.local_maxima(
             self.image, selem=selem_cross)
         assert result_selem_cross.dtype == np.bool
         assert_equal(result_selem_cross, self.expected_cross)
 
-        selem_square = np.ones((3, 3), dtype=np.uint8)
-        result_selem_square = extrema.local_maxima(
-            self.image, selem=selem_square)
-        assert result_selem_square.dtype == np.bool
-        assert_equal(result_selem_square, self.expected_default)
+        for selem in [
+            ((True,) * 3,) * 3,
+            np.ones((3, 3), dtype=np.float64),
+            np.ones((3, 3), dtype=np.uint8),
+            np.ones((3, 3), dtype=np.bool),
+        ]:
+            # Test different dtypes for selem which expects a boolean array but
+            # will accept and convert other types if possible
+            result_selem_square = extrema.local_maxima(self.image, selem=selem)
+            assert result_selem_square.dtype == np.bool
+            assert_equal(result_selem_square, self.expected_default)
 
-        selem_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+        selem_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]], dtype=np.bool)
         expected_selem_x = np.array(
             [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
              [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -453,15 +460,19 @@ class TestLocalMaxima(unittest.TestCase):
         """Test if input validation triggers correct exceptions."""
         # Mismatching number of dimensions
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(self.image, selem=np.ones((3, 3, 3)))
+            extrema.local_maxima(
+                self.image, selem=np.ones((3, 3, 3), dtype=np.bool))
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(self.image, selem=np.ones((3,)))
+            extrema.local_maxima(
+                self.image, selem=np.ones((3,), dtype=np.bool))
 
         # All dimensions in selem must be of size 3
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(self.image, selem=np.ones((2, 3)))
+            extrema.local_maxima(
+                self.image, selem=np.ones((2, 3), dtype=np.bool))
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(self.image, selem=np.ones((5, 5)))
+            extrema.local_maxima(
+                self.image, selem=np.ones((5, 5), dtype=np.bool))
 
         with raises(TypeError, match="float16 which is not supported"):
             extrema.local_maxima(np.empty(1, dtype=np.float16))
