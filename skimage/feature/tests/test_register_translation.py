@@ -149,4 +149,4 @@ def test_axes_pixel():
                                                     image_stack,
                                                     space="fourier",
                                                     axes=2)
-    assert_allclose(result, shifts)                                            
+    assert_allclose(result, shifts)

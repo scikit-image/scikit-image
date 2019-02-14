@@ -191,20 +191,20 @@ def register_translation(src_image, target_image, upsample_factor=1,
     cross_correlation = np.fft.ifftn(image_product, axes=register_axes)
 
     # Locate maximum
-    flattened_CC = np.abs(cross_correlation).reshape(*broadcast_shape,
-                                                    np.product(register_shape))
-    maxima = np.unravel_index(np.argmax(flattened_CC, axis=-1), register_shape)
-    maxima = np.stack(maxima, axis=-1)
+    flat_CC = np.abs(cross_correlation).reshape(*broadcast_shape,
+                                                np.product(register_shape))
+    flat_maxima = np.argmax(flat_CC, axis=-1)
+    maxima = np.stack(np.unravel_index(flat_maxima, register_shape), axis=-1)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in register_shape])
 
     shifts = maxima - np.array(register_shape) * (maxima > midpoints)
     if upsample_factor == 1:
         if return_error:
             src_amp = np.sum(np.abs(src_freq) ** 2, axis=register_axes) \
-                             / src_freq.size
+                / np.product(register_shape)
             target_amp = np.sum(np.abs(target_freq) ** 2, axis=register_axes) \
-                                / target_freq.size
-            CCmax = cross_correlation[maxima]
+                / np.product(register_shape)
+            CCmax = flat_CC[..., flat_maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
