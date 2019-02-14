@@ -37,14 +37,14 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
-        equal to `connectivity` are considered neighbors. Ignored if
-        `selem` is not None.
+        Adjacent pixels whose squared distance from the center is less than or
+        equal to `connectivity` are considered neighbors. Ignored if `selem` is
+        not None.
     tolerance : float or int, optional
         If None (default), adjacent values must be strictly equal to the
-        initial value of `image` at `seed_point`.  This is fastest.  If a value
-        is given, a comparison will be done at every point and this tolerance
-        on each side of the initial value will also be filled (inclusive).
+        value of `image` at `seed_point` to be filled.  This is fastest.
+        If a tolerance is provided, adjacent points with values within plus or
+        minus tolerance from the seed point are filled (inclusive).
     inplace : bool, optional
         If True, flood filling is applied to `image` inplace.  If False, the
         flood filled result is returned without modifying the input `image`
@@ -53,8 +53,9 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
     Returns
     -------
     filled : ndarray
-        An array with the same shape as `image` is returned with values equal
-        to (or within tolerance of) the seed point set to `new_value`.
+        An array with the same shape as `image` is returned, with values in
+        areas connected to and equal (or within tolerance of) the seed point
+        replaced with `new_value`.
 
     Notes
     -----

@@ -34,6 +34,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(filled_checkers, cmap=plt.cm.gray, interpolation='none')
+ax[1].plot(76, 76, 'wo') # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -64,6 +65,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(light_coat, cmap=plt.cm.gray)
+ax[1].plot(100, 200, 'wo') # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -96,10 +98,11 @@ ax[0, 0].axis('off')
 
 # Plot all eight different tolerances for comparison.
 for i in range(8):
-    m, n = np.unravel_index(i, (3, 3))
+    m, n = np.unravel_index(i+1, (3, 3))
     ax[m, n].imshow(output[i], cmap=plt.cm.gray)
     ax[m, n].set_title('Tolerance {0}'.format(str(5 + 20*i)))
     ax[m, n].axis('off')
+    ax[m, n].plot(0, 0, 'bo') # seed point
 
 fig.tight_layout()
 plt.show()
