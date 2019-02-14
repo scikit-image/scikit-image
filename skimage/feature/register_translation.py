@@ -134,9 +134,8 @@ def register_translation(src_image, target_image, upsample_factor=1,
         Returns error and phase difference if on,
         otherwise only shifts are returned
     axes : int or tuple of int, optional
-        Register the first (or last) ``n`` axes of the images. If positive,
-        register the first ``n`` axes. If negative, register the last ``n`` axes.
-        Default None (regiseter all axes)
+        Register the last ``n`` axes of the images. Default None (register all
+         axes)
 
     Returns
     -------
@@ -162,6 +161,16 @@ def register_translation(src_image, target_image, upsample_factor=1,
     if src_image.shape != target_image.shape:
         raise ValueError("Error: images must be same size for "
                          "register_translation")
+
+    image_dim = src_image.ndim
+    image_shape = np.array(src_image.shape)
+
+    if axes is None:
+        axes = image_dim
+
+    register_axes = np.arange(image_dim - axes, image_dim)
+    register_shape = image_shape[register_axes]
+    broadcast_shape = image_shape[:image_dim - axes]
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
