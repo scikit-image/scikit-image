@@ -300,7 +300,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # unsigned int -> unsigned int
             return _scale(image, 8 * itemsize_in, 8 * itemsize_out)
 
-        # signed int -> unsigned int
+    # signed int -> unsigned int
+    if kind_out == 'u':
         image = _scale(image, 8 * itemsize_in - 1, 8 * itemsize_out)
         result = np.empty(image.shape, dtype_out)
         np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
