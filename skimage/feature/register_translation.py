@@ -218,7 +218,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     else:
         # Initial shift estimate in upsampled grid
         shifts = np.round(shifts * upsample_factor) / upsample_factor
-        upsampled_region_size = np.ceil(upsample_factor * 1.5)
+        upsampled_region_size = np.ceil(upsample_factor * 1.5).astype(np.int)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         upsample_factor = np.array(upsample_factor, dtype=np.float64)
@@ -228,23 +228,27 @@ def register_translation(src_image, target_image, upsample_factor=1,
         cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
-                                           sample_region_offset).conj()
+                                           sample_region_offset,
+                                           axes=register_axes).conj()
         cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
-        maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
-                                  cross_correlation.shape)
-        CCmax = cross_correlation[maxima]
+        flat_CC = np.abs(cross_correlation).reshape(*broadcast_shape,
+                                                    upsampled_region_size
+                                                    ** len(register_axes))
+        flat_maxima = np.argmax(flat_CC, axis=-1)
+        CCmax = flat_CC[..., flat_maxima]
+        maxima = np.stack(np.unravel_index(flat_maxima,
+                                           (upsampled_region_size,)*axes),
+                          axis=-1)
 
-        maxima = np.array(maxima, dtype=np.float64) - dftshift
-
-        shifts = shifts + maxima / upsample_factor
+        shifts = shifts + (maxima - dftshift) / upsample_factor
 
         if return_error:
             src_amp = _upsampled_dft(src_freq * src_freq.conj(),
-                                     1, upsample_factor)[0, 0]
+                                     1, upsample_factor, axes=register_axes)[0, 0]
             src_amp /= normalization
             target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                        1, upsample_factor)[0, 0]
+                                        1, upsample_factor, axes=register_axes)[0, 0]
             target_amp /= normalization
 
     # If its only one row or column the shift along that dimension has no
