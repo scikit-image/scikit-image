@@ -161,10 +161,11 @@ def plot_tree(graph, positions, ax, *, title='', labels=None,
     nx.draw_networkx(graph, pos=positions, ax=ax,
                      node_size=40, node_shape='s', node_color='white',
                      font_size=font_size, labels=labels)
+    xlimit = ax.get_xlim()
     for v in range(image_rav.min(), image_rav.max() + 1):
-        ax.hlines(v - 0.5, *ax.get_xlim(), linestyles='dotted')
+        ax.hlines(v - 0.5, -3, 10, linestyles='dotted')
         ax.text(-3, v - 0.15, "val: %i" % v, fontsize=text_size)
-    ax.hlines(v + 0.5, *ax.get_xlim(), linestyles='dotted')
+    ax.hlines(v + 0.5, -3, 10, linestyles='dotted')
     ax.set_xlim(-3, 10)
     ax.set_title(title)
     ax.set_axis_off()
@@ -278,7 +279,7 @@ pos_mt = dict(zip(nx_max_tree.nodes, [pos_cmt[node]
                                       for node in nx_max_tree.nodes]))
 
 # plot the trees with networkx and matplotlib
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(7, 18))
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(20, 8))
 
 plot_tree(nx_max_tree, pos_mt, ax1, title='Component tree',
           labels=labels_ct, font_size=6, text_size=8)
