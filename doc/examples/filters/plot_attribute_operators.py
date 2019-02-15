@@ -26,7 +26,7 @@ from skimage.morphology import square
 datasets = {
     'retina': {'image': data.microaneurysms().T,
                'figsize': (15, 9),
-               'diameter': 12,
+               'diameter': 10,
                'title': 'Detection of microaneurysm'},
     'page': {'image': data.page(),
              'figsize': (15, 7),
@@ -53,7 +53,7 @@ for dataset in datasets.values():
     # Diameter closing : we remove all dark structures with a maximal
     # extension of less than <diameter> (12 or 23). I.e. in closed_attr, all
     # local minima have at least a maximal extension of <diameter>.
-    closed_attr = diameter_closing(image, diameter)
+    closed_attr = diameter_closing(image, diameter, connectivity=2)
 
     # We then calculate the difference to the original image.
     tophat_attr = closed_attr - image
