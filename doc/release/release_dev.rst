@@ -43,6 +43,9 @@ Bugfixes
 - ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
   no longer raise an error if any dimension of the image is smaller 3 and
   the keyword ``allow_borders`` was false.
+- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
+  will return a boolean array instead of an array of 0s and 1s if the
+  parameter ``indices`` was false.
 
 
 Deprecations
