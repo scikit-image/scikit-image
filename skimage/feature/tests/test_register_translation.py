@@ -150,3 +150,18 @@ def test_axes_pixel():
                                                     space="fourier",
                                                     axes=2)
     assert_allclose(result, shifts)
+
+
+def test_axes_subpixel():
+    reference_image = np.fft.fftn(camera())
+    shifts = np.array([[2.7, -15.3], [20.1, -5.9], [-7.5, -10.4]])
+    image_stack = np.tile(reference_image, (3, 1, 1))
+    shifted_image_stack = np.zeros_like(image_stack)
+    for i, shift in enumerate(shifts):
+        shifted_image_stack[i] = fourier_shift(reference_image, shift)
+    result, error, diffphase = register_translation(shifted_image_stack,
+                                                    image_stack,
+                                                    10,
+                                                    space="fourier",
+                                                    axes=2)
+    assert_allclose(result, shifts, atol=0.05)
