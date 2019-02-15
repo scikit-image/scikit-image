@@ -7,7 +7,7 @@ import numpy as np
 
 
 def _upsampled_dft(data, upsampled_region_size,
-                   upsample_factor=1, axis_offsets=None):
+                   upsample_factor=1, axis_offsets=None, axes=None):
     """
     Upsampled DFT by matrix multiplication.
 
@@ -43,33 +43,42 @@ def _upsampled_dft(data, upsampled_region_size,
     output : ndarray
             The upsampled DFT of the specified region.
     """
+    if axes is None:
+        axes = np.arange(data.ndim)
     # if people pass in an integer, expand it to a list of equal-sized sections
     if not hasattr(upsampled_region_size, "__iter__"):
-        upsampled_region_size = [upsampled_region_size, ] * data.ndim
+        upsampled_region_size = np.asarray([upsampled_region_size, ] * len(axes))
     else:
-        if len(upsampled_region_size) != data.ndim:
+        if len(upsampled_region_size) != len(axes):
             raise ValueError("shape of upsampled region sizes must be equal "
                              "to input data's number of dimensions.")
 
     if axis_offsets is None:
-        axis_offsets = [0, ] * data.ndim
+        axis_offsets = np.array([0, ] * len(axes), dtype=np.int)
     else:
-        if len(axis_offsets) != data.ndim:
+        axis_offsets = np.array(axis_offsets)
+        if axis_offsets.shape[-1] != len(axes):
             raise ValueError("number of axis offsets must be equal to input "
                              "data's number of dimensions.")
 
     im2pi = 1j * 2 * np.pi
 
-    dim_properties = list(zip(data.shape, upsampled_region_size, axis_offsets))
+    dim_properties = zip(np.array(data.shape)[np.array(axes)],
+                         upsampled_region_size,
+                         axis_offsets.T)
 
-    for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
-        kernel = ((np.arange(ups_size) - ax_offset)[:, None]
+    for (n_items, ups_size, ax_offset) in dim_properties:
+        kernel = (np.arange(ups_size)[:, None]
                   * np.fft.fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
 
+        shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)[:, None]
+        shifts = np.exp(-im2pi * np.squeeze(shifts.T))
+        data *= shifts[(..., *(None,) * (len(axes)-1))]
+
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
-        data = np.tensordot(kernel, data, axes=(1, -1))
+        data = np.tensordot(data, kernel, axes=((data.ndim - len(axes)), -1))
     return data
 
 
