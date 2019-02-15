@@ -33,6 +33,9 @@ Version 0.16
 * In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
 * In ``skimage.filters.median``, change default from ``behavior='rank'`` to
   ``behavior='ndimage'``.
+* Remove ``skimage.transform.seam_carve``, including the source code file, the
+  import and ``__all__`` listing in ``skimage/transform/__init__.py``, and
+  the test file in ``skimage/transform/tests``.
 
 Version 0.17
 ------------
