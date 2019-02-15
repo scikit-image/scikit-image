@@ -42,11 +42,11 @@ for dataset in datasets.values():
 
     fig, ax = plt.subplots(2, 3, figsize=figsize)
     # Original image
-    ax[0, 0].imshow(image, cmap='gray', aspect='equal')
+    ax[0, 0].imshow(image, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[0, 0].set_title('Original', fontsize=16)
     ax[0, 0].axis('off')
 
-    ax[1, 0].imshow(image, cmap='gray', aspect='equal')
+    ax[1, 0].imshow(image, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[1, 0].set_title('Original', fontsize=16)
     ax[1, 0].axis('off')
 
@@ -58,11 +58,11 @@ for dataset in datasets.values():
     # We then calculate the difference to the original image.
     tophat_attr = closed_attr - image
 
-    ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal')
+    ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[0, 1].set_title('Diameter Closing', fontsize=16)
     ax[0, 1].axis('off')
 
-    ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal')
+    ax[0, 2].imshow(tophat_attr, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[0, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[0, 2].axis('off')
 
@@ -73,11 +73,11 @@ for dataset in datasets.values():
     # Again we calculate the difference to the original image.
     tophat = closed - image
 
-    ax[1, 1].imshow(closed, cmap='gray', aspect='equal')
+    ax[1, 1].imshow(closed, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[1, 1].set_title('Morphological Closing', fontsize=16)
     ax[1, 1].axis('off')
 
-    ax[1, 2].imshow(tophat, cmap='gray', aspect='equal')
+    ax[1, 2].imshow(tophat, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
     ax[1, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[1, 2].axis('off')
     fig.suptitle(dataset['title'], fontsize=18)
