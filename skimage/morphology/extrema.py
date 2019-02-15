@@ -346,8 +346,9 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If not
-        given, all adjacent pixels are considered as part of the neighborhood.
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
+        considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or
@@ -508,8 +509,9 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
-        boolean array and have the same number of dimensions as `image`. If not
-        given, all adjacent pixels are considered as part of the neighborhood.
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
+        considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is larger or
