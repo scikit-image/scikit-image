@@ -333,6 +333,12 @@ def retina():
     This file is made available under the Creative Commons CC0 1.0 Universal
     Public Domain Dedication.
 
+    References
+    ----------
+    .. [1] Häggström, Mikael (2014). "Medical gallery of Mikael Häggström 2014".
+           WikiJournal of Medicine 1 (2). :DOI:`10.15347/wjm/2014.008`.
+           ISSN 2002-4436. Public Domain
+
     Returns
     -------
     retina : (1411, 1411, 3) uint8 ndarray
