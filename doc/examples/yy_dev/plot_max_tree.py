@@ -278,7 +278,7 @@ pos_mt = dict(zip(nx_max_tree.nodes, [pos_cmt[node]
                                       for node in nx_max_tree.nodes]))
 
 # plot the trees with networkx and matplotlib
-fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharey=True, figsize=(7, 18))
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(7, 18))
 
 plot_tree(nx_max_tree, pos_mt, ax1, title='Component tree',
           labels=labels_ct, font_size=6, text_size=8)

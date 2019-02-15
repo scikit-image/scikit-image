@@ -137,7 +137,7 @@ def max_tree(image, connectivity=1):
 
     # call of cython function.
     _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                        flat_neighborhood,
+                        flat_neighborhood, offset.astype(np.int32),
                         np.array(image.shape, dtype=np.int32),
                         parent.ravel(), tree_traverser)
 

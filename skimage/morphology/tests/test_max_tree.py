@@ -362,7 +362,7 @@ class TestMaxtree(TestCase):
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
 
             test_data = data.astype(dtype)
-            out = max_tree_local_maxima(test_data, connectivity=2)
+            out = max_tree_local_maxima(test_data, connectivity=1)
             out_bin = out > 0
             assert_array_equal(expected_result, out_bin)
             assert out.dtype == expected_result.dtype
@@ -415,7 +415,7 @@ class TestMaxtree(TestCase):
                                    dtype=np.uint8)
 
         # test for local maxima
-        out = max_tree_local_maxima(data, connectivity=2)
+        out = max_tree_local_maxima(data, connectivity=1)
         out_bin = out > 0
         assert_array_equal(expected_result, out_bin)
         assert np.max(out) == 6
