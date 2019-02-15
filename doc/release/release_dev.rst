@@ -66,6 +66,8 @@ API Changes
   and ``skimage.transform.rescale`` has been set to ``True``.
 - Removed the ``skimage.test`` function. This functionality can be achieved
   by calling ``pytest`` directly.
+- ``skimage.transform.seam_carve`` has been removed because the algorithm is
+  patented.
 
 
 Bugfixes
