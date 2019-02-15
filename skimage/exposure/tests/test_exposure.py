@@ -276,9 +276,8 @@ def test_adapthist_grayscale():
     img = util.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with expected_warnings(['non-contiguous input']):
-        adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
-                                              clip_limit=0.01, nbins=128)
+    adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
+                                          clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 102.078, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
