@@ -76,7 +76,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
         shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)[:, None]
         shifts = np.squeeze(np.exp(-im2pi * shifts.T))
-        data *= shifts.reshape(*shifts.shape, *(1, )*(nreg - 1))
+        data *= shifts.reshape(*shifts.shape, *(1, ) * (nreg - 1))
 
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
@@ -240,7 +240,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
         flat_maxima = np.argmax(flat_CC, axis=-1)
         CCmax = flat_CC[..., flat_maxima]
         maxima = np.stack(np.unravel_index(flat_maxima,
-                                           (upsampled_region_size,)*axes),
+                                           (upsampled_region_size,) * axes),
                           axis=-1)
 
         shifts = shifts + (maxima - dftshift) / upsample_factor
