@@ -45,19 +45,21 @@ def _upsampled_dft(data, upsampled_region_size,
     """
     if axes is None:
         axes = np.arange(data.ndim)
+
+    nreg = len(axes)
     # if people pass in an integer, expand it to a list of equal-sized sections
     if not hasattr(upsampled_region_size, "__iter__"):
-        upsampled_region_size = np.asarray([upsampled_region_size, ] * len(axes))
+        upsampled_region_size = np.asarray([upsampled_region_size, ] * nreg)
     else:
-        if len(upsampled_region_size) != len(axes):
+        if len(upsampled_region_size) != nreg:
             raise ValueError("shape of upsampled region sizes must be equal "
                              "to input data's number of dimensions.")
 
     if axis_offsets is None:
-        axis_offsets = np.array([0, ] * len(axes), dtype=np.int)
+        axis_offsets = np.array([0, ] * nreg, dtype=np.int)
     else:
         axis_offsets = np.array(axis_offsets)
-        if axis_offsets.shape[-1] != len(axes):
+        if axis_offsets.shape[-1] != nreg:
             raise ValueError("number of axis offsets must be equal to input "
                              "data's number of dimensions.")
 
@@ -73,12 +75,12 @@ def _upsampled_dft(data, upsampled_region_size,
         kernel = np.exp(-im2pi * kernel)
 
         shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)[:, None]
-        shifts = np.exp(-im2pi * np.squeeze(shifts.T))
-        data *= shifts[(..., *(None,) * (len(axes)-1))]
+        shifts = np.squeeze(np.exp(-im2pi * shifts.T))
+        data *= shifts.reshape(*shifts.shape, *(1, )*(nreg - 1))
 
         # Equivalent to:
         #   data[i, j, k] = kernel[i, :] @ data[j, k].T
-        data = np.tensordot(data, kernel, axes=((data.ndim - len(axes)), -1))
+        data = np.tensordot(data, kernel, axes=(data.ndim - nreg, -1))
     return data
 
 
