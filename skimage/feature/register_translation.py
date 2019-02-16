@@ -45,8 +45,12 @@ def _upsampled_dft(data, upsampled_region_size,
     """
     if axes is None:
         axes = np.arange(data.ndim)
-
+    else:
+        axes = np.array(axes)
+    data_shape = np.array(data.shape)
+    register_shape = data_shape[axes]
     nreg = len(axes)
+    broadcast_shape = data_shape[:data.ndim - nreg]
     # if people pass in an integer, expand it to a list of equal-sized sections
     if not hasattr(upsampled_region_size, "__iter__"):
         upsampled_region_size = np.asarray([upsampled_region_size, ] * nreg)
@@ -56,7 +60,7 @@ def _upsampled_dft(data, upsampled_region_size,
                              "to input data's number of dimensions.")
 
     if axis_offsets is None:
-        axis_offsets = np.array([0, ] * nreg, dtype=np.int)
+        axis_offsets = np.zeros((*broadcast_shape, nreg), dtype=np.int)
     else:
         axis_offsets = np.array(axis_offsets)
         if axis_offsets.shape[-1] != nreg:
@@ -65,7 +69,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     im2pi = 1j * 2 * np.pi
 
-    dim_properties = zip(np.array(data.shape)[np.array(axes)],
+    dim_properties = zip(register_shape,
                          upsampled_region_size,
                          axis_offsets.T)
 
@@ -73,9 +77,9 @@ def _upsampled_dft(data, upsampled_region_size,
         kernel = (np.arange(ups_size)[:, None]
                   * np.fft.fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
-
-        shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)[:, None]
-        shifts = np.squeeze(np.exp(-im2pi * shifts.T))
+        ax_offset = ax_offset.reshape(*broadcast_shape, 1)
+        shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)
+        shifts = np.exp(-im2pi * shifts)
         data *= shifts.reshape(*shifts.shape, *(1, ) * (nreg - 1))
 
         # Equivalent to:
@@ -247,15 +251,15 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
         if return_error:
             src_amp = _upsampled_dft(src_freq * src_freq.conj(),
-                                     1, upsample_factor, axes=register_axes)[0, 0]
+                                     1, upsample_factor, axes=register_axes)
             src_amp /= normalization
             target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                        1, upsample_factor, axes=register_axes)[0, 0]
+                                        1, upsample_factor, axes=register_axes)
             target_amp /= normalization
 
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.
-    for dim in range(src_freq.ndim):
+    for dim in register_axes:
         if shape[dim] == 1:
             shifts[dim] = 0
 
