@@ -190,7 +190,6 @@ def test_paint_tool(img):
 
     tool.overlay = tool.overlay * 0
     assert_equal(tool.overlay.sum(), 0)
-
     assert_equal(tool.cmap.N, tool._overlay_plot.norm.vmax)
 
 
