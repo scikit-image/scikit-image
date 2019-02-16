@@ -181,6 +181,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     register_axes = np.arange(image_dim - axes, image_dim)
     register_shape = image_shape[register_axes]
+    register_size = np.product(register_shape)
     broadcast_shape = image_shape[:image_dim - axes]
     register_axes = tuple(register_axes)
 
@@ -202,8 +203,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     cross_correlation = np.fft.ifftn(image_product, axes=register_axes)
 
     # Locate maximum
-    flat_CC = np.abs(cross_correlation).reshape(*broadcast_shape,
-                                                np.product(register_shape))
+    flat_CC = np.abs(cross_correlation).reshape(*broadcast_shape, register_size)
     flat_maxima = np.argmax(flat_CC, axis=-1)
     maxima = np.stack(np.unravel_index(flat_maxima, register_shape), axis=-1)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in register_shape])
@@ -212,9 +212,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
     if upsample_factor == 1:
         if return_error:
             src_amp = np.sum(np.abs(src_freq) ** 2, axis=register_axes) \
-                / np.product(register_shape)
+                / register_size
             target_amp = np.sum(np.abs(target_freq) ** 2, axis=register_axes) \
-                / np.product(register_shape)
+                / register_size
             CCmax = flat_CC[..., flat_maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
