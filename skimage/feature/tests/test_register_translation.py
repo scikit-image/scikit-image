@@ -165,3 +165,16 @@ def test_axes_subpixel():
                                                     space="fourier",
                                                     axes=2)
     assert_allclose(result, shifts, atol=0.05)
+
+
+def test_length_1_unregistered_axis_subpixel():
+    reference_image = np.fft.fftn(camera())
+    shift = np.array([[2.7, -15.3]])
+    image_stack = reference_image[None, :, :]
+    shifted_image_stack = fourier_shift(reference_image, shift[0])[None, :, :]
+    result, error, diffphase = register_translation(shifted_image_stack,
+                                                    image_stack,
+                                                    10,
+                                                    space="fourier",
+                                                    axes=2)
+    assert_allclose(result, shift, atol=0.05)
