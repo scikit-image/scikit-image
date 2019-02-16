@@ -11,8 +11,12 @@ if [[ "${QT}" == "PyQt5" ]]; then
         # Which conflicts with how matplotlib detects the
         # presence of PyQt before MPL 2.2.3
         pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.11"
+    elif [[ `lsb_release  -r -s` == "14.04" ]]; then
+        # Apparently Qt 5.12 is only supported by ubuntu 16.04
+        # https://github.com/scikit-image/scikit-image/pull/3744#issuecomment-463450663
+        pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.12"
     else
-        pip install --retries 3 -q $PIP_FLAGS "pyqt5!=5.12.0"
+        pip install --retries 3 -q $PIP_FLAGS pyqt5
     fi
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
