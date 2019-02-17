@@ -34,7 +34,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(filled_checkers, cmap=plt.cm.gray, interpolation='none')
-ax[1].plot(76, 76, 'wo') # seed point
+ax[1].plot(76, 76, 'wo')  # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -65,7 +65,7 @@ ax[0].set_title('Original')
 ax[0].axis('off')
 
 ax[1].imshow(light_coat, cmap=plt.cm.gray)
-ax[1].plot(100, 200, 'wo') # seed point
+ax[1].plot(100, 200, 'wo')  # seed point
 ax[1].set_title('After flood fill')
 ax[1].axis('off')
 
@@ -102,7 +102,7 @@ for i in range(8):
     ax[m, n].imshow(output[i], cmap=plt.cm.gray)
     ax[m, n].set_title('Tolerance {0}'.format(str(5 + 20*i)))
     ax[m, n].axis('off')
-    ax[m, n].plot(0, 0, 'bo') # seed point
+    ax[m, n].plot(0, 0, 'bo')  # seed point
 
 fig.tight_layout()
 plt.show()
@@ -136,7 +136,7 @@ ax[1].axis('off')
 
 ax[2].imshow(cat)
 ax[2].imshow(cat_nose, cmap=plt.cm.gray, alpha=0.3)
-ax[2].plot(265, 240, 'wo') # seed point
+ax[2].plot(265, 240, 'wo')  # seed point
 ax[2].set_title('Nose segmented with `flood`')
 ax[2].axis('off')
 

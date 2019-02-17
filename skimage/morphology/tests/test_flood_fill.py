@@ -21,7 +21,7 @@ def test_empty_input():
 def test_float16():
     image = np.array([9., 0.1, 42], dtype=np.float16)
     with raises(TypeError, match="dtype of `image` is float16"):
-            flood_fill(image, 0, 1)
+        flood_fill(image, 0, 1)
 
 
 def test_overrange_tolerance_int():
@@ -158,6 +158,39 @@ def test_neighbors():
     output2 = flood_fill(test, (2, 3), 255)
 
     np.testing.assert_equal(output2, expected)
+
+
+def test_selem():
+    # Basic tests for nonstandard structuring elements
+    selem = np.array([[0, 1, 1],
+                      [0, 1, 1],
+                      [0, 0, 0]])  # Cannot grow left or down
+
+    output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (3, 1), 255,
+                        selem=selem)
+
+    expected = np.array([[0, 255, 255, 255, 255, 255],
+                         [0, 255, 255, 255, 255, 255],
+                         [0, 255, 255, 255, 255, 255],
+                         [0, 255, 255, 255, 255, 255],
+                         [0,   0,   0,   0,   0,   0]], dtype=np.uint8)
+
+    np.testing.assert_equal(output, expected)
+
+    selem = np.array([[0, 0, 0],
+                      [1, 1, 0],
+                      [1, 1, 0]])  # Cannot grow right or up
+
+    output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
+                        selem=selem)
+
+    expected = np.array([[  0,   0,   0,   0,   0,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0],
+                         [255, 255, 255, 255, 255,   0]], dtype=np.uint8)
+
+    np.testing.assert_equal(output, expected)
 
 
 if __name__ == "__main__":
