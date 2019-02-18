@@ -24,11 +24,6 @@ from skimage.morphology import closing
 from skimage.morphology import square
 
 datasets = {
-    'retina': {'image': data.microaneurysms().T,
-               'figsize': (15, 9),
-               'diameter': 10,
-               'vis_factor': 2,
-               'title': 'Detection of microaneurysm'},
     'page': {'image': data.page(),
              'figsize': (15, 7),
              'diameter': 23,
