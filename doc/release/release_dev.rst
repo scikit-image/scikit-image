@@ -66,6 +66,8 @@ API Changes
   and ``skimage.transform.rescale`` has been set to ``True``.
 - Removed the ``skimage.test`` function. This functionality can be achieved
   by calling ``pytest`` directly.
+- ``skimage.transform.seam_carve`` has been removed because the algorithm is
+  patented.
 
 
 Bugfixes
@@ -82,8 +84,7 @@ Bugfixes
 Deprecations
 ------------
 
-- Python 2 support has been dropped in the development version. Users of the
-  development version should have Python >= 3.5.
+- Python 2 support has been dropped. Users should have Python >= 3.5.
 - ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
