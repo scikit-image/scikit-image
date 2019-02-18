@@ -69,7 +69,7 @@ class PaintTool(CanvasToolBase):
         self.alpha = alpha
         self.cmap = LABELS_CMAP
         self._overlay_plot = None
-        self.shape = overlay_shape
+        self.shape = overlay_shape[:2]
 
         self._cursor = plt.Rectangle((0, 0), 0, 0, **props)
         self._cursor.set_visible(False)
@@ -118,7 +118,8 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.NoNorm(), animated=True)
+                         norm=mcolors.NoNorm(vmin=0, vmax=self.cmap.N),
+                         animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)

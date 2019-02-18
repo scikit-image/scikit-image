@@ -279,7 +279,7 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Pixel value at given position.
 
     """
-    if mode == 'C':
+    if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
@@ -312,7 +312,7 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Pixel value at given position.
 
     """
-    if mode == 'C':
+    if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
@@ -337,7 +337,7 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
         coordinate if `coord` falls outside [0, dim).
     """
     cdef Py_ssize_t cmax = dim - 1
-    if mode == 'S': # symmetric
+    if mode == b'S': # symmetric
         if coord < 0:
             coord = -coord - 1
         if coord > cmax:
@@ -345,17 +345,17 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
                 return <Py_ssize_t>(cmax - (coord % dim))
             else:
                 return <Py_ssize_t>(coord % dim)
-    elif mode == 'W': # wrap
+    elif mode == b'W': # wrap
         if coord < 0:
             return <Py_ssize_t>(cmax - ((-coord - 1) % dim))
         elif coord > cmax:
             return <Py_ssize_t>(coord % dim)
-    elif mode == 'E': # edge
+    elif mode == b'E': # edge
         if coord < 0:
             return 0
         elif coord > cmax:
             return cmax
-    elif mode == 'R': # reflect (mirror)
+    elif mode == b'R': # reflect (mirror)
         if dim == 1:
             return 0
         elif coord < 0:

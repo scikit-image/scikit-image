@@ -104,7 +104,7 @@ def imread_collection(load_pattern, conserve_memory=True,
                        plugin=plugin, **plugin_args)
 
 
-def imsave(fname, arr, plugin=None, **plugin_args):
+def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     """Save an image to file.
 
     Parameters
@@ -113,11 +113,13 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Target filename.
     arr : ndarray of shape (M,N) or (M,N,3) or (M,N,4)
         Image data.
-    plugin : str
+    plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
         tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
+    check_contrast : bool, optional
+        Check for low contrast and print warning (default: True).
 
     Other parameters
     ----------------
@@ -135,7 +137,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
-    if is_low_contrast(arr):
+    if check_contrast and is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
     if arr.dtype == bool:
         warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
