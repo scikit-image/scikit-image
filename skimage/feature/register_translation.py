@@ -69,23 +69,32 @@ def _upsampled_dft(data, upsampled_region_size,
 
     im2pi = 1j * 2 * np.pi
 
-    dim_properties = zip(register_shape,
+    dim_properties = list(zip(register_shape,
                          upsampled_region_size,
-                         axis_offsets.T)
+                         axis_offsets.T))
 
-    for (n_items, ups_size, ax_offset) in dim_properties:
-        kernel = (np.arange(ups_size)[:, None]
-                  * np.fft.fftfreq(n_items, upsample_factor))
+    for i, (n_items, ups_size, ax_offset) in enumerate(dim_properties[::-1]):
+        kernel = (np.arange(ups_size)
+                  * np.fft.fftfreq(n_items, upsample_factor)[:, None])
         kernel = np.exp(-im2pi * kernel)
         ax_offset = ax_offset.reshape(*broadcast_shape, 1)
         shifts = -ax_offset * np.fft.fftfreq(n_items, upsample_factor)
         shifts = np.exp(-im2pi * shifts)
-        data *= shifts.reshape(*shifts.shape, *(1, ) * (nreg - 1))
+        shifts = shifts.reshape(*(1, ) * i,
+                                *shifts.shape[:-1],
+                                *(1, ) * (nreg - i - 1),
+                                shifts.shape[-1])
+        data *= shifts
 
-        # Equivalent to:
-        #   data[i, j, k] = kernel[i, :] @ data[j, k].T
-        data = np.tensordot(data, kernel, axes=(data.ndim - nreg, -1))
-    return data
+        s_fixed = 1
+        for dim in data.shape[:-1]:
+            s_fixed *= dim
+        data = (data.reshape(s_fixed, data.shape[-1])
+                    .dot(kernel)
+                    .reshape(*data.shape[:-1], kernel.shape[-1])
+                    .transpose(range(-1, data.ndim-1)))
+    return_order = tuple(range(nreg, data.ndim)) + tuple(range(nreg))
+    return data.transpose(return_order)
 
 
 def _compute_phasediff(cross_correlation_max):
