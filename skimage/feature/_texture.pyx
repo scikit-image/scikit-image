@@ -7,7 +7,6 @@ cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
-import cython
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
