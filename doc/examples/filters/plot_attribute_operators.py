@@ -24,6 +24,11 @@ from skimage.morphology import closing
 from skimage.morphology import square
 
 datasets = {
+    'retina': {'image': data.microaneurysms(),
+               'figsize': (15, 9),
+               'diameter': 10,
+               'vis_factor': 3,
+               'title': 'Detection of microaneurysm'},
     'page': {'image': data.page(),
              'figsize': (15, 7),
              'diameter': 23,
@@ -90,24 +95,24 @@ plt.show()
 
 
 #####################################################################
-#References
-#----------
-#.. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
-#       Connected Operators for Image and Sequence Processing.
-#       IEEE Transactions on Image Processing, 7(4), 555-570.
-#       :DOI:`10.1109/83.663500`
-#.. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
-#       Component Tree Computation Algorithms. IEEE Transactions on Image
-#       Processing, 23(9), 3885-3895.
-#       :DOI:`10.1109/TIP.2014.2336551`
-#.. [3] Vincent L., Proc. "Grayscale area openings and closings,
-#       their efficient implementation and applications",
-#       EURASIP Workshop on Mathematical Morphology and its
-#       Applications to Signal Processing, Barcelona, Spain, pp.22-27,
-#       May 1993.
-#.. [4] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
-#       Microaneurysms in Color Fundus Images of the Human Retina by Means
-#       of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
-#       A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
-#       Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-#       :DOI:`10.1007/3-540-36104-9_23`
+# References
+# ----------
+# .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+#        Connected Operators for Image and Sequence Processing.
+#        IEEE Transactions on Image Processing, 7(4), 555-570.
+#        :DOI:`10.1109/83.663500`
+# .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+#        Component Tree Computation Algorithms. IEEE Transactions on Image
+#        Processing, 23(9), 3885-3895.
+#        :DOI:`10.1109/TIP.2014.2336551`
+# .. [3] Vincent L., Proc. "Grayscale area openings and closings,
+#        their efficient implementation and applications",
+#        EURASIP Workshop on Mathematical Morphology and its
+#        Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+#        May 1993.
+# .. [4] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+#        Microaneurysms in Color Fundus Images of the Human Retina by Means
+#        of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
+#        A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
+#        Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+#        :DOI:`10.1007/3-540-36104-9_23`
