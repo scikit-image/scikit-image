@@ -64,6 +64,7 @@ sphinx_gallery_conf = {
         '../examples/features_detection',
         '../examples/segmentation',
         '../examples/xx_applications',
+        '../examples/yy_dev',
     ]),
 }
 
