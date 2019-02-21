@@ -136,9 +136,11 @@ def test_object():
     with testing.raises(ValueError):
         convex_hull_object(image, 7)
 
+
 def test_f_contiguous():
-    image = np.ones((2,2), order='F', dtype=bool)
+    image = np.ones((2, 2), order='F', dtype=bool)
     assert_array_equal(convex_hull_image(image), image)
+
 
 @testing.fixture
 def images2d3d():
