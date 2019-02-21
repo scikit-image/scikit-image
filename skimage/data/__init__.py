@@ -35,6 +35,7 @@ __all__ = ['data_dir',
            'lbp_frontal_face_cascade_filename',
            'lfw_subset',
            'logo',
+           'microaneurysms',
            'moon',
            'page',
            'text',
@@ -174,6 +175,30 @@ def logo():
         Logo image.
     """
     return load("logo.png")
+
+
+def microaneurysms():
+        """Gray-level "microaneurysms" image.
+
+        Detail from an image of the retina (green channel).
+        The image is a crop of image 07_dr.JPG from the
+        High-Resolution Fundus (HRF) Image Database:
+        https://www5.cs.fau.de/research/data/fundus-images/
+
+        Returns
+        -------
+        microaneurysms : (102, 102) uint8 ndarray
+            Retina image with lesions.
+
+        References
+        ----------
+        .. [1] Budai, A., Bock, R, Maier, A., Hornegger, J.,
+               Michelson, G. (2013).  Robust Vessel Segmentation in Fundus
+               Images. International Journal of Biomedical Imaging, vol. 2013,
+               2013.
+               :DOI:`10.1155/2013/154860`
+        """
+        return load("microaneurysms.png")
 
 
 def moon():
