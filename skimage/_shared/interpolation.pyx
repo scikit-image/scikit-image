@@ -1,4 +1,4 @@
-from interpolation cimport coord_map
+from .interpolation cimport coord_map
 
 
 def coord_map_py(dim, coord, mode):
