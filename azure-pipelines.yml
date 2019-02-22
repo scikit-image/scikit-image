@@ -46,6 +46,8 @@ jobs:
     displayName: 'Add Python paths to PATH'
 
   - script: |
+      @echo on
+
       :: Update pip
       python -m pip install --retries 3 -U pip setuptools
 
@@ -62,6 +64,8 @@ jobs:
     displayName: 'Pre-installation'
 
   - script: |
+      @echo on
+
       :: Get stdint headers needed by tifffile.c
       curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
       curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
@@ -75,12 +79,16 @@ jobs:
     displayName: 'Installation'
 
   - script: |
+      @echo on
+
       :: Install the test dependencies
       pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
       pip list
     displayName: 'Pre-testing'
 
   - script: |
+      @echo on
+
       :: Default working directory, where the source code is located,
       :: is D:\a\1\s or similar. In order to run the tests on the installed
       :: version of skimage, a different working directory is used.
