@@ -1,4 +1,4 @@
-from skimage.transform.distance_transform import multidimensional as md
+from skimage.transform.distance_transform import generalized_distance_transform as md
 import numpy as np
 
 def test_1d():
