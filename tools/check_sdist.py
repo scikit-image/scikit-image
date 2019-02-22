@@ -26,7 +26,7 @@ ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './azure-pipelines.yml',
-                './.pep8speaks.yml', './asv.conf.json',
+                './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
                 './.codecov.yml',
                 './skimage/filters/rank/README.rst', './.meeseeksdev.yml']
 
