@@ -1,7 +1,7 @@
 from skimage.transform.distance_transform import multidimensional as md
 import numpy as np
 
-def t()est_1d:
+def test_1d():
     case = [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0]
     out = [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0]
     if np.array_equal(md(np.asarray(case)),np.asarray(out)):
@@ -30,15 +30,3 @@ def test_3d():
         print("failed")
         print(md(np.asarray(case)))
         print(np.asarray(out))
-
-
-
-
-
-
-
-
-
-
-
-
