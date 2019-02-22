@@ -1,0 +1,110 @@
+# Azure Pipelines configuration file for Continuous Integration
+# for building the package and running the tests under Windows.
+
+jobs:
+- job: 'Default'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    maxParallel: 10
+    matrix:
+      Python35-x64:
+        PYTHON_VERSION: '3.5'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python36:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python36-x64:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python37:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python37-x64:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+      Python37-x64-pre:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: '--pre'
+  continueOnError: false
+  timeoutInMinutes: 60
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(PYTHON_VERSION)'
+      architecture: '$(ARCH)'
+
+  - powershell: |
+      Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
+    displayName: 'Add Python paths to PATH'
+
+  - script: |
+      @echo on
+
+      :: Update pip
+      python -m pip install --retries 3 -U pip setuptools
+
+      :: Check that we have the expected version and architecture for Python
+      python --version
+      pip --version
+      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+      pip list
+
+      :: Install the build and runtime dependencies of the project
+      pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
+      pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
+      pip list
+    displayName: 'Pre-installation'
+
+  - script: |
+      @echo on
+
+      :: Get stdint headers needed by tifffile.c
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
+      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
+
+      :: Compile the package and build the wheel
+      python setup.py bdist_wheel 
+
+      :: Install the generated wheel package
+      dir dist
+      pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
+    displayName: 'Installation'
+
+  - script: |
+      @echo on
+
+      :: Install the test dependencies
+      pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
+      pip list
+    displayName: 'Pre-testing'
+
+  - script: |
+      @echo on
+
+      :: Default working directory, where the source code is located,
+      :: is D:\a\1\s or similar. In order to run the tests on the installed
+      :: version of skimage, a different working directory is used.
+
+      :: Use the Agg backend in Matplotlib
+      echo backend ^: Agg > matplotlibrc
+
+      echo "Running tests on the following version of scikit-image:"
+      python -c "import skimage; print(skimage.__path__)"
+      
+      :: Run unit tests with pytest
+      pytest -v --pyargs skimage
+
+      :: [For further consideration]
+      :: # -- Build the docs
+      :: # -- Publish the .whl artifacts
+      :: # -- Upload the content of dist/*.whl to a public wheelhouse
+    workingDirectory: $(Agent.ToolsDirectory)
+    displayName: 'Testing'
