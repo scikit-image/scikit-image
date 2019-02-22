@@ -30,7 +30,7 @@ def one_d(arr, f):
     return d
 
 
-def multidimensional(ndarr, f=False):
+def generalized_distance_transform(ndarr, f=False):
     if f == False:
         f = lambda p : 0 if p == 0 else np.finfo(np.float64).max
     
