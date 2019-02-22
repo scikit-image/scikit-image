@@ -63,8 +63,8 @@ sphinx_gallery_conf = {
         '../examples/filters',
         '../examples/features_detection',
         '../examples/segmentation',
-        '../examples/xx_applications',
-        '../examples/yy_dev',
+        '../examples/applications',
+        '../examples/developers',
     ]),
 }
 
