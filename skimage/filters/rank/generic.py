@@ -67,6 +67,11 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     assert_nD(image, 2)
     if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
@@ -101,7 +106,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     if n_bins > 2**10:
         warn("Bad rank filter performance is expected due to a "
              "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)))
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
 
     return image, selem, out, mask, n_bins
 
