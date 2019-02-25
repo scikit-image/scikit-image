@@ -15,6 +15,7 @@ matplotlib.rcParams['font.size'] = 18
 
 images = ('hubble_deep_field',
           'immunohistochemistry',
+          'microaneurysms',
           'moon',
           'retina',
           )
