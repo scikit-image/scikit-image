@@ -109,7 +109,7 @@ install:
         pip install --no-build-isolation .;
       fi
     # Install testing requirements
-    - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
+    - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
     - export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
     - mkdir -p ${MPL_DIR}
@@ -117,7 +117,7 @@ install:
     # Install most of the optional packages
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+        pip install --retries 3 -r ./requirements/optional.txt $WHEELHOUSE
       fi
     - tools/travis/install_qt.sh
 
