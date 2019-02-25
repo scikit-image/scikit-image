@@ -193,5 +193,21 @@ def test_selem():
     np.testing.assert_equal(output, expected)
 
 
+def test_basic_nd():
+    for dimension in (3, 4, 5):
+        shape = (5,) * dimension
+        hypercube = np.zeros(shape)
+        slice_mid = tuple(slice(1, -1, None) for dim in range(dimension))
+        hypercube[slice_mid] = 1  # sum is 3**dimension
+        filled = flood_fill(hypercube, (2,)*dimension, 2)
+
+        # Test that the middle sum is correct
+        assert filled.sum() == 3**dimension * 2
+
+        # Test that the entire array is as expected
+        np.testing.assert_equal(
+            filled, np.pad(np.ones((3,)*dimension) * 2, 1, 'constant'))
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

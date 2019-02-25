@@ -142,9 +142,9 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     Returns
     -------
     mask : ndarray
-        A Boolean array with the same shape as `image` is returned, with values
-        equal to 1 for areas connected to and equal (or within tolerance of)
-        the seed point.  All other values are zero.
+        A Boolean array with the same shape as `image` is returned, with True
+        values for areas connected to and equal (or within tolerance of) the
+        seed point.  All other values are False.
 
     Notes
     -----

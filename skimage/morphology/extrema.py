@@ -513,7 +513,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
+        Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
