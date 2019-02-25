@@ -197,7 +197,7 @@ class RAG(nx.Graph):
         """
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
-        neighbors = (src_nbrs | dst_nbrs) - set([src, dst])
+        neighbors = (src_nbrs | dst_nbrs) - {src, dst}
 
         if in_place:
             new = dst

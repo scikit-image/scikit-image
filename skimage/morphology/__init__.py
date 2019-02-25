@@ -13,7 +13,9 @@ from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import h_minima, h_maxima, local_maxima, local_minima
 from ._flood_fill import flood, flood_fill
-
+from .max_tree import (max_tree, area_opening, area_closing,
+                       diameter_opening, diameter_closing,
+                       max_tree_local_maxima)
 
 __all__ = ['binary_erosion',
            'binary_dilation',
@@ -51,4 +53,9 @@ __all__ = ['binary_erosion',
            'local_minima',
            'flood',
            'flood_fill',
-           ]
+           'max_tree',
+           'area_opening',
+           'area_closing',
+           'diameter_opening',
+           'diameter_closing',
+           'max_tree_local_maxima']
