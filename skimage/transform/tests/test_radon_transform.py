@@ -398,9 +398,9 @@ def test_iradon_sart():
         np.random.seed(1239867)
         shifts = np.random.uniform(-3, 3, sinogram.shape[1])
         x = np.arange(sinogram.shape[0])
-        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
-                                               sinogram[:, i])
-                                     for i in range(sinogram.shape[1])).T
+        sinogram_shifted = np.vstack([np.interp(x + shifts[i], x,
+                                                sinogram[:, i])
+                                      for i in range(sinogram.shape[1])]).T
         reconstructed = iradon_sart(sinogram_shifted, theta,
                                     projection_shifts=shifts)
         if debug:
