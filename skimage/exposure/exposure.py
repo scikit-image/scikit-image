@@ -74,16 +74,18 @@ def _bincount_histogram(image, source_range):
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range='image', normalize=False):
+def histogram(image, nbins=256, source_range='image', normalize=False, multichannel=False):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
 
-    The histogram is computed on the flattened image: for color images, the
-    function should be used separately on each channel to obtain a histogram
-    for each color channel.
+    If multichannel is not set, the histogram is computed on the flattened
+    image. For color or multichannel images, the function should either be
+    the function should be either be used separately on each
+    channel to obtain a histogram for each color channel with separate binning,
+    or by setting multichannel=True to use a common binning for all channels.
 
     Parameters
     ----------
@@ -98,6 +100,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
         of that data type.
     normalize : bool, optional
         If True, normalize the histogram by the sum of its values.
+    multichannel : bool, optional
+        If True, calculates the histogram for all the channels using the same
+        binning.
 
     Returns
     -------
@@ -120,10 +125,26 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     (array([107432, 154712]), array([ 0.25,  0.75]))
     """
     sh = image.shape
-    if len(sh) == 3 and sh[-1] < 4:
+    if len(sh) == 3 and sh[-1] < 4 and not multichannel:
         warn("This might be a color image. The histogram will be "
              "computed on the flattened image. You can instead "
-             "apply this function to each color channel.")
+             "apply this function to each color channel, or set "
+             "multichannel=True")
+
+    if multichannel:
+        channels = sh[-1]
+        hist = np.empty((channels, nbins))
+        bin_centers = np.empty((channels, nbins))
+        for chan in range(channels):
+            hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins)
+
+    else:
+        hist, bin_centers = _histogram(image, nbins)
+
+    return hist, bin_centers
+
+
+def _histogram(image, nbins):
 
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.
