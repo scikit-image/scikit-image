@@ -120,13 +120,16 @@ def test_normalize():
 
 def test_multichannel_hist_common_bins_uint8():
     """Check that all channels use the same binning."""
-    im = np.array([[0], [127]], dtype=np.int8)
-    frequencies, bin_centers = exposure.histogram(im, multichannel=True)
-    assert_array_equal(bin_centers, np.arange(0, 128))
-    assert frequencies[0, 0] == 1
-    assert frequencies[0, -1] == 0
-    assert frequencies[1, 0] == 0
-    assert frequencies[1, -1] == 1
+    # First channel contains zeros
+    # Second channel contains 255
+    im = np.array((np.zeros((5, 5)), np.ones((5, 5))*255), dtype=np.uint8)
+    im = np.moveaxis(im, source=0, destination=2)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype', multichannel=True)
+    assert_array_equal(bin_centers, np.arange(0, 256))
+    assert frequencies[0][0] == 25
+    assert frequencies[0][-1] == 0
+    assert frequencies[1][0] == 0
+    assert frequencies[1][-1] == 25
 
 
 # Test histogram equalization

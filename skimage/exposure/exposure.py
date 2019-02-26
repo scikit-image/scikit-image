@@ -133,11 +133,12 @@ def histogram(image, nbins=256, source_range='image', normalize=False, multichan
 
     if multichannel:
         channels = sh[-1]
-        hist = np.empty((channels, nbins))
-        bin_centers = np.empty((channels, nbins))
+        hist = []
+        bin_centers = []
         for chan in range(channels):
-            hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins, source_range, normalize)
-
+            h, bc = _histogram(image[..., chan], nbins, source_range, normalize)
+            hist.append(h)
+        bin_centers = bc
     else:
         hist, bin_centers = _histogram(image, nbins, source_range, normalize)
 
