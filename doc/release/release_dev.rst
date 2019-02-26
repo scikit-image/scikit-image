@@ -21,6 +21,7 @@ New Features
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
 - Image translation registration for masked data
   (``skimage.feature.masked_register_translation``)
+- Flood fill, fully n-dimensional with tolerance supported (#3245)
 
 
 Improvements
