@@ -136,15 +136,15 @@ def histogram(image, nbins=256, source_range='image', normalize=False, multichan
         hist = np.empty((channels, nbins))
         bin_centers = np.empty((channels, nbins))
         for chan in range(channels):
-            hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins)
+            hist[chan, :], bin_centers[chan, :] = _histogram(image, nbins, source_range, normalize)
 
     else:
-        hist, bin_centers = _histogram(image, nbins)
+        hist, bin_centers = _histogram(image, nbins, source_range, normalize)
 
     return hist, bin_centers
 
 
-def _histogram(image, nbins):
+def _histogram(image, nbins, source_range, normalize):
 
     image = image.flatten()
     # For integer types, histogramming with bincount is more efficient.
