@@ -1,5 +1,16 @@
 import numpy as np
 
+"""
+Note about customising distance function:
+
+If dist_func or dist_meet is changed, it is recommended that both of them are changed
+as the meeting point of graphs are depended on their equation. Sometimes graphs can be 
+parallel and will never touch, ie: |x-1| = |x-2|+10. In that case dist_func needs to  return
+np.finfo(np.float64).max if the first graph is at the top and np.finfo(np.float64).min if
+it is at the bottom.
+
+"""
+
 def f(p):
     if p == 0:
         return 0
