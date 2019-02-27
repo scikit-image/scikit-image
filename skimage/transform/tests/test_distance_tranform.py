@@ -1,5 +1,6 @@
-from skimage.transform.distance_transform import *
+from skimage.transform.distance_transform import generalized_distance_transform, manhattan_dist, manhattan_meet
 import numpy as np
+
 
 def test_1d():
     case = [1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0]

@@ -1,5 +1,3 @@
-import numpy as np
-
 """
 Note about customising distance function:
 
@@ -10,6 +8,10 @@ np.finfo(np.float64).max if the first graph is at the top and np.finfo(np.float6
 it is at the bottom.
 
 """
+
+
+import numpy as np
+
 
 def f(p):
     if p == 0:
@@ -58,7 +60,7 @@ def one_d(arr, f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
         z[k+1] = INF
 
     k=0
-    d = n*[None]
+    d = np.empty(n)
     for q in range(n):
         while z[k+1]<q:
             k+=1
@@ -73,27 +75,29 @@ def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_me
     mut_shape = list(shape)
     out = np.zeros(shape)
 
-    for i in range(len(shape)):
+    for i in range(ndarr.ndim):
         changed_shape = mut_shape[:]
         missing = changed_shape.pop(i)
+
+        def nd_recursion(c, temp, pre=False):
+            if c < len(changed_shape):
+                for j in range(changed_shape[c]):
+                    nd_recursion(c+1, temp+[j], pre=pre)
+            else:
+                temp.insert(i, range(missing))
+                temp = tuple(temp)
+                if isinstance(pre,bool):
+                    f2 = lambda x: f((ndarr[temp])[x])
+                else:
+                    f2 = lambda x: (pre[temp])[x]
+                out[temp] = one_d(ndarr[temp], f2, dist_func, dist_meet)
+
+
         if i == 0:
-            nd_recursion(f, ndarr, changed_shape, out, 0, i, missing, [], dist_func, dist_meet)
+            nd_recursion(0, [])
+            out2 = out
         else:
             out2 = np.zeros(shape)
-            nd_recursion(f, ndarr, changed_shape, out2, 0, i, missing, [], dist_func, dist_meet, pre=out)
-            out = out2
+            out, out2 = out2, out
+            nd_recursion(0, [], pre=out2)
     return out
-
-def nd_recursion(f, ndarr, shape, out, c, i, missing, temp, dist_func, dist_meet, pre=False):
-    if c <= len(shape)-1:
-        for j in range(shape[c]):
-                nd_recursion(f, ndarr, shape, out, c+1, i, missing, temp+[j], dist_func, dist_meet, pre=pre)
-    else:
-        temp.insert(i, range(missing))
-        temp = tuple(temp)
-        #print(temp)
-        if isinstance(pre,bool):
-            f2 = lambda x: f((ndarr[temp])[x])
-        else:
-            f2 = lambda x: (pre[temp])[x]
-        out[temp] = one_d(ndarr[temp], f2, dist_func, dist_meet)
