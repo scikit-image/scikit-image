@@ -527,8 +527,8 @@ def threshold_li(image, *, tolerance=None):
 
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
-        is less than this value. By default, this is the smallest difference
-        between intensity values in ``image``.
+        is less than this value. By default, this is half the smallest
+        difference between intensity values in ``image``.
 
     Returns
     -------
