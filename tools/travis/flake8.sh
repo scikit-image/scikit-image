@@ -7,10 +7,8 @@ set -ex
 # Therefore, it is best to run flake8 first, on a single build
 # with the oldest version of python we support
 section "Flake8.Test"
-if [[ $RUN_FLAKE8 == "1" ]]; then
-    pip install flake8
-    flake8
-fi
+pip install flake8
+flake8 --exit-zero 
 section_end "Flake8.Test"
 
 
