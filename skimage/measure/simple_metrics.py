@@ -3,7 +3,7 @@ import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
 from ..util import img_as_float
-from scipy.ndimage import maximum_filter, minimum_filter, max
+from scipy.ndimage import maximum_filter, minimum_filter
 
 
 __all__ = ['compare_mse',
