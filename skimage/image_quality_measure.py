@@ -53,14 +53,3 @@ def quality(image: np.ndarray,
                         minimum_filter(image, (size, size))+1)
     eme = np.mean(20*np.log(eme))
     return eme
-
-
-def test():
-    img = camera()
-    print("Image quality:\n")
-    print(f"\tbefore histogram equalization:{quality(img)}")
-    print(f"\tafter histogram equalization:{quality(equalize_hist(img))}")
-
-
-if __name__ == '__main__':
-    test()
