@@ -535,7 +535,8 @@ def laplace(image, ksize=3, mask=None):
 
     """
     image = img_as_float(image)
-    # Create the discrete Laplacian operator - We keep only the real part of the filter
+    # Create the discrete Laplacian operator - We keep only the real part of
+    # the filter
     _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
     result = convolve(image, laplace_op)
     return _mask_filter_result(result, mask)
@@ -571,11 +572,13 @@ def farid(image, mask=None):
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete multidimensional signals."
+    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
+    multidimensional signals."
         IEEE Transactions on image processing 13.4 (2004): 496-508.
 
 
-    .. [2] https://en.wikipedia.org/wiki/Image_derivatives#Farid_and_Simoncelli_Derivatives
+    .. [2] https://en.wikipedia.org/wiki/Image_derivatives
+    #Farid_and_Simoncelli_Derivatives
 
     Examples
     --------
@@ -591,7 +594,8 @@ def farid(image, mask=None):
 
 
 def farid_h(image, mask=None):
-    """Find the horizontal edges of an image using the Farid & Simoncelli transform.
+    """Find the horizontal edges of an image using the Farid & Simoncelli
+    transform.
 
     Parameters
     ----------
@@ -614,10 +618,13 @@ def farid_h(image, mask=None):
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete multidimensional signals."
+    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
+    multidimensional signals."
         IEEE Transactions on image processing 13.4 (2004): 496-508.
-    .. [2] Farid, Hany, and Eero P. Simoncelli. "Optimally rotation-equivariant directional derivative kernels."
-        International Conference on Computer Analysis of Images and Patterns. Springer, Berlin, Heidelberg, 1997.
+    .. [2] Farid, Hany, and Eero P. Simoncelli. "Optimally
+    rotation-equivariant directional derivative kernels."
+        International Conference on Computer Analysis of Images and Patterns.
+        Springer, Berlin, Heidelberg, 1997.
 
     """
     assert_nD(image, 2)
@@ -627,7 +634,8 @@ def farid_h(image, mask=None):
 
 
 def farid_v(image, mask=None):
-    """Find the vertical edges of an image using the Farid & Simoncelli transform.
+    """Find the vertical edges of an image using the Farid & Simoncelli
+    transform.
 
     Parameters
     ----------
@@ -650,7 +658,8 @@ def farid_v(image, mask=None):
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete multidimensional signals."
+    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
+    multidimensional signals."
         IEEE Transactions on image processing 13.4 (2004): 496-508.
 
     """
