@@ -465,10 +465,8 @@ def test_farid_v_horizontal():
     assert_allclose(result, 0, atol=1e-10)
 
 
-@testing.parametrize("grad_func", (
-        filters.prewitt_h, filters.sobel_h,
-        filters.scharr_h, filters.farid_h
-))
+@testing.parametrize("grad_func", (filters.prewitt_h, filters.sobel_h,
+                                   filters.scharr_h, filters.farid_h))
 def test_horizontal_mask_line(grad_func):
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
@@ -486,9 +484,7 @@ def test_horizontal_mask_line(grad_func):
 
 
 @testing.parametrize("grad_func", (
-        filters.prewitt_v, filters.sobel_v,
-        filters.scharr_v, filters.farid_v
-))
+    filters.prewitt_v, filters.sobel_v, filters.scharr_v, filters.farid_v))
 def test_vertical_mask_line(grad_func):
     """Vertical edge filters mask pixels surrounding input mask."""
     _, hgrad = np.mgrid[:1:11j, :1:11j]  # horizontal gradient with spacing 0.1

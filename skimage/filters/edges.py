@@ -567,8 +567,8 @@ def farid(image, mask=None):
     -----
     Take the square root of the sum of the squares of the horizontal and
     vertical derivatives to get a magnitude that is somewhat insensitive to
-    direction. Similar to the Scharr operator, this operator is designed with an
-    rotation invariance constraint.
+    direction. Similar to the Scharr operator, this operator is designed with
+    a rotation invariance constraint.
 
     References
     ----------
