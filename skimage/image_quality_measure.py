@@ -1,5 +1,3 @@
-from skimage.data import camera
-from skimage.exposure import equalize_hist
 from skimage.util import img_as_float
 import numpy as np
 from scipy.ndimage import maximum_filter, minimum_filter
@@ -46,10 +44,10 @@ def quality(image: np.ndarray,
     image = img_as_float(image)
     eme = np.zeros_like(image)
     if len(image.shape) > 2:
-        eme = np.divide(maximum_filter(image, (size, size, size))+1,
-                        minimum_filter(image, (size, size, size))+1)
+        eme = np.divide(maximum_filter(image, (size, size, size)) + 1,
+                        minimum_filter(image, (size, size, size)) + 1)
     else:
-        eme = np.divide(maximum_filter(image, (size, size))+1,
-                        minimum_filter(image, (size, size))+1)
-    eme = np.mean(20*np.log(eme))
+        eme = np.divide(maximum_filter(image, (size, size)) + 1,
+                        minimum_filter(image, (size, size)) + 1)
+    eme = np.mean(20 * np.log(eme))
     return eme
