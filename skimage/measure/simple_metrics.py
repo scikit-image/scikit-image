@@ -2,6 +2,9 @@
 import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
+from ..util import img_as_float
+from scipy.ndimage import maximum_filter, minimum_filter, max
+
 
 __all__ = ['compare_mse',
            'compare_nrmse',
@@ -142,3 +145,50 @@ def compare_psnr(im_true, im_test, data_range=None):
 
     err = compare_mse(im_true, im_test)
     return 10 * np.log10((data_range ** 2) / err)
+
+
+def enhancement_measure(image: np.ndarray,
+                        size: int = 3) -> float:
+    """
+        The image enhancement measure called EME based on [1]_.
+
+        Parameters
+        ----------
+        image : array
+            Input image of which the quality should be assessed.
+            Can be either 3-channel RGB or 1-channel grayscale.
+            The function converts pixel intensities into floats by default.
+        size : int
+            Size of the window. Default value is 3.
+
+        Returns
+        -------
+        eme : float
+            The number describing image quality.
+
+        References
+        ----------
+        .. [1] Agaian, Sos S., Karen Panetta, and Artyom M. Grigoryan.
+               "A new measure of image enhancement."
+               IASTED International Conference on Signal Processing
+               & Communication. Citeseer, 2000.
+        Examples
+        --------
+        >>> from skimage.data import camera
+        >>> from skimage.exposure import equalize_hist
+        >>> img = camera()
+        >>> print("Image quality:\n")
+            Image quality:
+        >>> print(f"\tbefore: {quality(img)}")
+                before: 0.9096745071475523
+        >>> print(f"\tafter: {quality(equalize_hist(img))}")
+                after: 1.299327371881219
+
+    """
+    image = img_as_float(image)
+    eme = np.zeros_like(image)
+    footprint = tuple([size] * len(image.shape))
+    eme = np.divide(maximum_filter(image, footprint=footprint) + 1,
+                    minimum_filter(image, footprint=footprint) + 1)
+    eme = np.mean(20 * np.log(eme))
+    return eme
