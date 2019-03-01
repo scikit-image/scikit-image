@@ -35,10 +35,10 @@ def quality(image: np.ndarray,
         >>> img = camera()
         >>> print("Image quality:\n")
             Image quality:
-        >>> print(f"\tbefore histogram equalization: {quality(img)}")
-                before histogram equalization: 0.9096745071475523
-        >>> print(f"\tafter histogram equalization:{quality(equalize_hist(img))}")
-                after histogram equalization: 1.299327371881219
+        >>> print(f"\tbefore: {quality(img)}")
+                before: 0.9096745071475523
+        >>> print(f"\tafter: {quality(equalize_hist(img))}")
+                after: 1.299327371881219
 
     """
     image = img_as_float(image)
