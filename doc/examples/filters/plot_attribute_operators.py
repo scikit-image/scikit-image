@@ -24,10 +24,10 @@ from skimage.morphology import closing
 from skimage.morphology import square
 
 datasets = {
-    'retina': {'image': data.microaneurysms().T,
+    'retina': {'image': data.microaneurysms(),
                'figsize': (15, 9),
                'diameter': 10,
-               'vis_factor': 2, 
+               'vis_factor': 3,
                'title': 'Detection of microaneurysm'},
     'page': {'image': data.page(),
              'figsize': (15, 7),
@@ -45,12 +45,12 @@ for dataset in datasets.values():
     fig, ax = plt.subplots(2, 3, figsize=figsize)
     # Original image
     ax[0, 0].imshow(image, cmap='gray', aspect='equal',
-                    vmin = 0, vmax = 255)
+                    vmin=0, vmax=255)
     ax[0, 0].set_title('Original', fontsize=16)
     ax[0, 0].axis('off')
 
     ax[1, 0].imshow(image, cmap='gray', aspect='equal',
-                    vmin = 0, vmax = 255)
+                    vmin=0, vmax=255)
     ax[1, 0].set_title('Original', fontsize=16)
     ax[1, 0].axis('off')
 
@@ -63,12 +63,12 @@ for dataset in datasets.values():
     tophat_attr = closed_attr - image
 
     ax[0, 1].imshow(closed_attr, cmap='gray', aspect='equal',
-                    vmin = 0, vmax = 255)
+                    vmin=0, vmax=255)
     ax[0, 1].set_title('Diameter Closing', fontsize=16)
     ax[0, 1].axis('off')
 
     ax[0, 2].imshow(dataset['vis_factor'] * tophat_attr, cmap='gray',
-                    aspect='equal', vmin = 0, vmax = 255)
+                    aspect='equal', vmin=0, vmax=255)
     ax[0, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[0, 2].axis('off')
 
@@ -79,12 +79,13 @@ for dataset in datasets.values():
     # Again we calculate the difference to the original image.
     tophat = closed - image
 
-    ax[1, 1].imshow(closed, cmap='gray', aspect='equal', vmin = 0, vmax = 255)
+    ax[1, 1].imshow(closed, cmap='gray', aspect='equal',
+                    vmin=0, vmax=255)
     ax[1, 1].set_title('Morphological Closing', fontsize=16)
     ax[1, 1].axis('off')
 
     ax[1, 2].imshow(dataset['vis_factor'] * tophat, cmap='gray',
-                    aspect='equal', vmin = 0, vmax = 255)
+                    aspect='equal', vmin=0, vmax=255)
     ax[1, 2].set_title('Tophat (Difference)', fontsize=16)
     ax[1, 2].axis('off')
     fig.suptitle(dataset['title'], fontsize=18)
@@ -94,25 +95,24 @@ plt.show()
 
 
 #####################################################################
-#References
-#----------
-#.. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
-#       Connected Operators for Image and Sequence Processing.
-#       IEEE Transactions on Image Processing, 7(4), 555-570.
-#       :DOI:`10.1109/83.663500`
-#.. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
-#       Component Tree Computation Algorithms. IEEE Transactions on Image
-#       Processing, 23(9), 3885-3895.
-#       :DOI:`10.1109/TIP.2014.2336551`
-#.. [3] Vincent L., Proc. "Grayscale area openings and closings,
-#       their efficient implementation and applications",
-#       EURASIP Workshop on Mathematical Morphology and its
-#       Applications to Signal Processing, Barcelona, Spain, pp.22-27,
-#       May 1993.
-#.. [4] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
-#       Microaneurysms in Color Fundus Images of the Human Retina by Means
-#       of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
-#       A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
-#       Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
-#       :DOI:`10.1007/3-540-36104-9_23`
-
+# References
+# ----------
+# .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
+#        Connected Operators for Image and Sequence Processing.
+#        IEEE Transactions on Image Processing, 7(4), 555-570.
+#        :DOI:`10.1109/83.663500`
+# .. [2] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
+#        Component Tree Computation Algorithms. IEEE Transactions on Image
+#        Processing, 23(9), 3885-3895.
+#        :DOI:`10.1109/TIP.2014.2336551`
+# .. [3] Vincent L., Proc. "Grayscale area openings and closings,
+#        their efficient implementation and applications",
+#        EURASIP Workshop on Mathematical Morphology and its
+#        Applications to Signal Processing, Barcelona, Spain, pp.22-27,
+#        May 1993.
+# .. [4] Walter, T., & Klein, J.-C. (2002). Automatic Detection of
+#        Microaneurysms in Color Fundus Images of the Human Retina by Means
+#        of the Bounding Box Closing. In A. Colosimo, P. Sirabella,
+#        A. Giuliani (Eds.), Medical Data Analysis. Lecture Notes in Computer
+#        Science, vol 2526, pp. 210-220. Springer Berlin Heidelberg.
+#        :DOI:`10.1007/3-540-36104-9_23`

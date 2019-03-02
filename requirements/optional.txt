@@ -1,6 +1,5 @@
-imread
 SimpleITK
-astropy
+astropy>=1.2.0
 tifffile
 qtpy
 pyamg
