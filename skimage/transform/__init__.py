@@ -1,3 +1,4 @@
+from .histogram_matching import match_histograms
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
                               hough_circle_peaks, hough_ellipse)
@@ -18,7 +19,8 @@ from .pyramids import (pyramid_reduce, pyramid_expand,
 from .seam_carving import seam_carve
 
 
-__all__ = ['hough_circle',
+__all__ = ['match_histograms',
+           'hough_circle',
            'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',

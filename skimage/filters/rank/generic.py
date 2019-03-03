@@ -514,6 +514,11 @@ def median(image, selem=None, out=None, mask=None,
     out : 2-D array (same dtype as input image)
         Output image.
 
+    See also
+    --------
+    skimage.filters.median : Implementation of a median filtering which handles
+        images with floating precision.
+
     Examples
     --------
     >>> from skimage import data

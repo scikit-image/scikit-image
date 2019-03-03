@@ -120,7 +120,7 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
-def _offsets_to_raveled_neighbors(image_shape, structure, center):
+def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
     """Compute offsets to a samples neighbors if the image would be raveled.
 
     Parameters
@@ -147,8 +147,9 @@ def _offsets_to_raveled_neighbors(image_shape, structure, center):
     structure = structure.copy()  # Don't modify original input
     structure[tuple(center)] = 0  # Ignore the center; it's not a neighbor
     connection_indices = np.transpose(np.nonzero(structure))
-    offsets = (np.ravel_multi_index(connection_indices.T, image_shape) -
-               np.ravel_multi_index(center, image_shape))
+    offsets = (np.ravel_multi_index(connection_indices.T, image_shape,
+                                    order=order) -
+               np.ravel_multi_index(center, image_shape, order=order))
     squared_distances = np.sum((connection_indices - center) ** 2, axis=1)
     return offsets[np.argsort(squared_distances)]
 

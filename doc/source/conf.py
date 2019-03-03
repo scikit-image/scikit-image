@@ -14,6 +14,8 @@
 import sys
 import os
 import skimage
+from sphinx_gallery.sorting import ExplicitOrder
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -45,15 +47,26 @@ autosummary_generate = True
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
-    'doc_module'        : ('skimage',),
+    'doc_module': ('skimage',),
     # path to your examples scripts
-    'examples_dirs' : '../examples',
+    'examples_dirs': '../examples',
     # path where to save gallery generated examples
-    'gallery_dirs'  : 'auto_examples',
+    'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
-    'reference_url'     : {
-            'skimage': None,}
-    }
+    'reference_url': {'skimage': None},
+    'subsection_order': ExplicitOrder([
+        '../examples/data',
+        '../examples/numpy_operations',
+        '../examples/color_exposure',
+        '../examples/edges',
+        '../examples/transform',
+        '../examples/filters',
+        '../examples/features_detection',
+        '../examples/segmentation',
+        '../examples/applications',
+        '../examples/developers',
+    ]),
+}
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.

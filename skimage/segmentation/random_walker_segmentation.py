@@ -50,7 +50,7 @@ import functools
 if Version(scipy.__version__) >= Version('1.1'):
     cg = functools.partial(cg, atol=0)
 
-#-----------Laplacian--------------------
+# -----------Laplacian--------------------
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
@@ -209,7 +209,28 @@ def _check_isolated_seeds(labels):
     return inds, values
 
 
-#----------- Random walker algorithm --------------------------------
+def _unchanged_labels(labels, return_full_prob=False):
+    """
+    Return the input array of labels, unless ``return_full_prob`` is True,
+    in which case a mask of pixels is returned for each unique label, with the
+    last dimension corresponding to unique labels.
+    """
+    if return_full_prob:
+        # Find and iterate over valid labels
+        unique_labels = np.unique(labels)
+        unique_labels = unique_labels[unique_labels > 0]
+
+        out_labels = np.empty(labels.shape + (len(unique_labels),),
+                              dtype=np.bool)
+        for n, i in enumerate(unique_labels):
+            out_labels[..., n] = (labels == i)
+
+    else:
+        out_labels = labels
+    return out_labels
+
+
+# ----------- Random walker algorithm --------------------------------
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
@@ -236,7 +257,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels are consecutive. In the multichannel case, `labels` should have
         the same shape as a single channel of `data`, i.e. without the final
         dimension denoting channels.
-    beta : float
+    beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
     mode : string, available options {'cg_mg', 'cg', 'bf'}
@@ -258,20 +279,20 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
 
-    tol : float
+    tol : float, optional
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
-    copy : bool
+    copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
-    multichannel : bool, default False
+    multichannel : bool, optional
         If True, input data is parsed as multichannel data (see 'data' above
-        for proper input format in this case)
-    return_full_prob : bool, default False
+        for proper input format in this case).
+    return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-    spacing : iterable of floats
+    spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
 
@@ -300,9 +321,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     data points are spaced differently in one or more spatial dimensions.
     Anisotropic data is commonly encountered in medical imaging.
 
-    The algorithm was first proposed in *Random walks for image
-    segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
-    2006 Nov;28(11):1768-83.
+    The algorithm was first proposed in [1]_.
 
     The algorithm solves the diffusion equation at infinite times for
     sources placed on markers of each phase in turn. A pixel is labeled with
@@ -336,6 +355,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     where x_m = 1 on markers of the given phase, and 0 on other markers.
     This linear system is solved in the algorithm using a direct method for
     small images, and an iterative method for larger images.
+
+    References
+    ----------
+    .. [1] Leo Grady, Random walks for image segmentation, IEEE Trans Pattern
+        Anal Mach Intell. 2006 Nov;28(11):1768-83.
+        :DOI:`10.1109/TPAMI.2006.233`.
 
     Examples
     --------
@@ -383,19 +408,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
              'labels == 0. No zero valued areas in labels were '
              'found. Returning provided labels.')
 
-        if return_full_prob:
-            # Find and iterate over valid labels
-            unique_labels = np.unique(labels)
-            unique_labels = unique_labels[unique_labels > 0]
-
-            out_labels = np.empty(labels.shape + (len(unique_labels),),
-                                  dtype=np.bool)
-            for n, i in enumerate(unique_labels):
-                out_labels[..., n] = (labels == i)
-
-        else:
-            out_labels = labels
-        return out_labels
+        return _unchanged_labels(labels, return_full_prob)
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
@@ -404,13 +417,13 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # The following block ensures valid input and coerces it to the correct
     # form.
     if not multichannel:
-        if data.ndim < 2 or data.ndim > 3:
+        if data.ndim not in (2, 3):
             raise ValueError('For non-multichannel input, data must be of '
                              'dimension 2 or 3.')
         dims = data.shape  # To reshape final labeled result
         data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
-        if data.ndim < 3:
+        if data.ndim not in (3, 4):
             raise ValueError('For multichannel input, data must have 3 or 4 '
                              'dimensions.')
         dims = data[..., 0].shape  # To reshape final labeled result
@@ -452,6 +465,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         del filled
     labels = np.atleast_3d(labels)
 
+    # No unlabeled pixel, so nothing to do
+    if (labels == 0).sum() == 0:
+        labels = np.squeeze(labels)
+        labels[inds_isolated_seeds] = isolated_values
+        warn('Random walker only segments unlabeled areas, where '
+             'labels == 0. No zero valued areas in labels were '
+             'found. Returning provided labels.')
+        return _unchanged_labels(labels, return_full_prob)
 
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,

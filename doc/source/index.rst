@@ -19,11 +19,12 @@ Sections
    api_changes
    install
    user_guide
+   glossary
    contribute
    license
    auto_examples/index
    release_notes_and_installation
-
+   core_developer
 
 .. list-table::
    :class: contentstable
@@ -44,19 +45,23 @@ Sections
 
        Usage guidelines.
 
-   * - `Contribute <contribute.html>`_
+   * - `Glossary <glossary.html>`_
 
-       Take part in development.
+       Definitions of common terms.
 
-     - `License Info <license.html>`_
+     - `Contribute <contribute.html>`_
 
-       Conditions on the use and redistribution of this package.
+       Take part in development.  Core developers, please `read your guide
+       <core_developer.html>`_.
+
 
    * - `Examples <auto_examples/index.html>`_
 
        Introductory examples
 
-     -
+     - `License Info <license.html>`_
+
+       Conditions on the use and redistribution of this package.
 
 
 

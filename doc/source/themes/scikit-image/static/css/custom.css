@@ -321,3 +321,15 @@ a.copybtn {
     background: #3F556B !important;
     z-index: 100 !important;
 }
+
+dl.glossary dt { 
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+
+dl.glossary dd { 
+  margin-bottom: 0.5em;
+}
+
+

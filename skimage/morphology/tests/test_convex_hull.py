@@ -137,6 +137,18 @@ def test_object():
         convex_hull_object(image, 7)
 
 
+def test_non_c_contiguous():
+    # 2D Fortran-contiguous
+    image = np.ones((2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D Fortran-contiguous
+    image = np.ones((2, 2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D non-contiguous
+    image = np.transpose(np.ones((2, 2, 2), dtype=bool), [0, 2, 1])
+    assert_array_equal(convex_hull_image(image), image)
+
+
 @testing.fixture
 def images2d3d():
     from ...measure.tests.test_regionprops import SAMPLE as image

@@ -5,5 +5,3 @@ networkx>=2.0
 pillow>=4.3.0
 imageio>=2.0.1
 PyWavelets>=0.4.0
-dask[array]>=0.9.0
-cloudpickle>=0.2.1

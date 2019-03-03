@@ -5,7 +5,6 @@
 import numpy as np
 from scipy import ndimage as ndi
 
-cimport cython
 cimport numpy as cnp
 from ..measure._ccomp cimport find_root, join_trees
 
