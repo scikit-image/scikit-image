@@ -1,3 +1,25 @@
+"""Generate the release notes automatically from Github PRs.
+
+
+Usage:
+
+Generate yourself a public repo github token to test this.
+
+Install PyGithub and tqdm (only one of the lines below).
+```
+# conda
+conda install pygithub tqdm
+# pip
+pip install pygithub tqdm
+```
+
+```
+python generate_release_notes.py | tee releast_notes_temp.rst
+```
+
+References
+https://github.com/scikit-image/scikit-image/issues/3404
+"""
 import os
 from datetime import datetime
 from collections import OrderedDict
@@ -28,9 +50,9 @@ g = Github(GH_TOKEN)
 repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
 
 
-version = '0.14.1'
+version = '0.15.0'
 previous_tag_name = 'v0.14.0'
-interested_branch = 'v0.14.x'
+interested_branch = 'master'
 
 
 for tag in repository.get_tags():
@@ -65,11 +87,26 @@ for commit in tqdm(all_commits, desc='Getting commiters and authors'):
         if commit.committer.login not in users:
             users[commit.committer.login] = commit.committer.name
         committers.add(users[commit.committer.login])
-    if commit.author.login not in users:
-        users[commit.author.login] = commit.author.name
-    authors.add(users[commit.author.login])
+    if commit.author is None:
+        author_login = commit.sha
+        author_name = 'Author of commit: ' + commit.sha
+    else:
+        author_login = commit.author.login
+        author_name = commit.author.name
+    # otherwise we get a None in the authors
+    if author_login == 'azure-pipelines[bot]':
+        author_name = 'Azure Pipelines Bot'
+    if author_login not in users:
+        users[author_login] = author_name
+    authors.add(users[author_login])
+    if None in authors:
+        import pdb; pdb.set_trace()
+        print('Why do I get here')
 # this gets found as a commiter
 committers.discard('GitHub Web Flow')
+authors.discard('Azure Pipelines Bot')
+assert None not in authors
+assert None not in committers
 
 highlights = OrderedDict()
 
