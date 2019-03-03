@@ -216,15 +216,17 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
+    # This computation lessens artifacts and removes a small bias as 
+    # explained in [1], Chap 3. Equation 61
     n1 = np.arange(0, projection_size_padded / 2 + 1, dtype=np.int)
     n2 = np.arange(projection_size_padded / 2 - 1, 0, -1, dtype=np.int)
     n = np.concatenate((n1, n2))
     f = np.zeros(projection_size_padded)
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
-
-    omega = 2 * np.pi * fftfreq(projection_size_padded)
+    
     fourier_filter = 2 * np.real(fft(f))         # ramp filter
+    omega = 2 * np.pi * fftfreq(projection_size_padded)
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
