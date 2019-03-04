@@ -529,11 +529,6 @@ def threshold_li(image):
     image : ndarray
         Input image.
 
-    tolerance : float, optional
-        Finish the computation when the change in the threshold in an iteration
-        is less than this value. By default, this is half of the range of the
-        input image, divided by 256.
-
     Returns
     -------
     threshold : float
@@ -582,8 +577,7 @@ def threshold_li(image):
     # Li's algorithm requires positive image (because of log(mean))
     image_min = np.min(image)
     image -= image_min
-    image_range = np.max(image)
-    tolerance = 0.5 * image_range / 256
+    tolerance = np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate
     t_curr = np.mean(image)
