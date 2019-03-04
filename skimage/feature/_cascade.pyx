@@ -16,8 +16,8 @@ from skimage._shared.transform cimport integrate
 from skimage._shared.interpolation cimport round, fmax, fmin
 
 from cython.parallel import prange
-from skimage.color import rgb2gray
-from skimage.transform import integral_image
+from ..color import rgb2gray
+from ..transform import integral_image
 import xml.etree.ElementTree as ET
 from ._texture cimport _multiblock_lbp
 import math
@@ -820,6 +820,10 @@ cdef class Cascade:
 
         # Check if memory was allocated.
         if not (features_carr and stumps_carr and stages_carr and LUTs_carr):
+            free(features_carr)
+            free(stumps_carr)
+            free(stages_carr)
+            free(LUTs_carr)
             raise MemoryError("Failed to allocate memory while parsing XML.")
 
         # Parse and load features in memory.
