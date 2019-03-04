@@ -24,6 +24,7 @@ import os
 from datetime import datetime
 from collections import OrderedDict
 import string
+from warnings import warn
 
 from github import Github
 try:
@@ -81,24 +82,27 @@ reviewers = set()
 committers = set()
 users = dict()  # keep track of known usernames
 
+def add_to_users(users, new_user):
+    if new_user.login not in users:
+        if new_user.name is None:
+            users[new_user.login] = new_user.login
+        else:
+            users[new_user.login] = new_user.name
+
 for commit in tqdm(all_commits, desc='Getting commiters and authors'):
     # committer can be None?
     if commit.committer:
-        if commit.committer.login not in users:
-            users[commit.committer.login] = commit.committer.name
+        add_to_users(users, commit.committer)
         committers.add(users[commit.committer.login])
+
+    # Users that deleted their accounts will appear as None
+    # So annoying
     if commit.author is None:
-        author_login = commit.sha
-        author_name = 'Author of commit: ' + commit.sha
-    else:
-        author_login = commit.author.login
-        author_name = commit.author.name
-    # otherwise we get a None in the authors
-    if author_login == 'azure-pipelines[bot]':
-        author_name = 'Azure Pipelines Bot'
-    if author_login not in users:
-        users[author_login] = author_name
-    authors.add(users[author_login])
+        warn('Could not find author of commit :' + commit.sha)
+        continue
+
+    add_to_users(users, commit.author)
+    authors.add(users[commit.author.login])
     if None in authors:
         import pdb; pdb.set_trace()
         print('Why do I get here')
