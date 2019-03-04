@@ -116,7 +116,7 @@ highlights = OrderedDict()
 
 highlights['New Feature'] = {}
 highlights['Improvement'] = {}
-highlights['Bugfixes'] = {}
+highlights['Bugfix'] = {}
 highlights['API Change'] = {}
 highlights['Deprecations'] = {}
 highlights['Build Tool'] = {}
