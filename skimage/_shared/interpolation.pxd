@@ -71,7 +71,7 @@ cdef inline void nearest_neighbour_interpolation(
 cdef inline void bilinear_interpolation(
         np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
         np_floats r, np_floats c, char mode, np_real_numeric cval,
-        np_real_numeric_out out[0]) nogil:
+        np_real_numeric_out* out) nogil:
     """Bilinear interpolation at a given position in the image.
 
     Parameters
