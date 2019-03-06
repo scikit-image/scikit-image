@@ -110,22 +110,33 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t cols = img.shape[1]
 
-    cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
-                               char, double) nogil
+    cdef void (*transform_func)(double, double, double*, double*, double*) nogil
+    if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
+        if M[0, 1] == 0 and M[1, 0] == 0:
+            transform_func = _transform_metric
+        else:
+            transform_func = _transform_affine
+    else:
+        transform_func = _transform_projective
+
+    cdef void (*interp_func)(double*, Py_ssize_t , Py_ssize_t ,
+                             double, double, char, double, double*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation
+        interp_func = nearest_neighbour_interpolation[cnp.float64_t, double, double]
     elif order == 1:
-        interp_func = bilinear_interpolation
+        interp_func = bilinear_interpolation[cnp.float64_t, double, double]
     elif order == 2:
-        interp_func = biquadratic_interpolation
+        interp_func = biquadratic_interpolation[cnp.float64_t, double, double]
     elif order == 3:
-        interp_func = bicubic_interpolation
+        interp_func = bicubic_interpolation[cnp.float64_t, double, double]
+    else:
+        raise ValueError("Unsupported interpolation order", order)
 
     with nogil:
         for tfr in range(out_r):
             for tfc in range(out_c):
-                _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
-                out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
-                                            mode_c, cval)
+                transform_func(tfc, tfr, &M[0, 0], &c, &r)
+                interp_func(&img[0, 0], rows, cols, r, c,
+                            mode_c, cval, &out[tfr, tfc])
 
     return np.asarray(out)
