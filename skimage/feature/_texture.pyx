@@ -11,15 +11,8 @@ from .._shared.transform cimport integrate
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
-ctypedef fused any_int:
-    cnp.uint8_t
-    cnp.uint16_t
-    cnp.uint32_t
-    cnp.uint64_t
-    cnp.int8_t
-    cnp.int16_t
-    cnp.int32_t
-    cnp.int64_t
+from .._shared.fused_numerics cimport np_anyint as any_int
+from .._shared.fused_numerics cimport np_real_numeric
 
 
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
@@ -152,9 +145,9 @@ def _local_binary_pattern(double[:, ::1] image,
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
                 for i in range(P):
-                    texture[i] = bilinear_interpolation(&image[0, 0], rows, cols,
-                                                        r + rp[i], c + cp[i],
-                                                        b'C', 0)
+                    bilinear_interpolation[cnp.float64_t, double, double](
+                            &image[0, 0], rows, cols, r + rp[i], c + cp[i],
+                            b'C', 0, &texture[i])
                 # signed / thresholded texture
                 for i in range(P):
                     if texture[i] - image[r, c] >= 0:
