@@ -73,14 +73,11 @@ def one_d(tuple_arr, dist_func=euclidean_dist, dist_meet=euclidean_meet):
     return d
 
 def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
-    warnings.warn('\n'+str(ndarr))
     for i in range(ndarr.ndim):
         if i == 0:
             out = apply_along_axis(one_d, 0, (ndarr,))
-            warnings.warn('\n'+str(out))
         else:
             out = apply_along_axis(one_d, i, (ndarr, out))
-            warnings.warn('\n'+str(out))
     return out
 
 # new np.applyalongaxis ###higher priority###
