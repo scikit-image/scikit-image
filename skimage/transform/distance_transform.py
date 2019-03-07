@@ -1,17 +1,16 @@
 """
 Note about customising distance function:
-
 If dist_func or dist_meet is changed, it is recommended that both of them are changed
 as the meeting point of graphs are depended on their equation. Sometimes graphs can be 
 parallel and will never touch, ie: |x-1| = |x-2|+10. In that case dist_func needs to  return
 np.finfo(np.float64).max if the first graph is at the top and np.finfo(np.float64).min if
 it is at the bottom.
-
 """
 
 
 import numpy as np
-
+from skimage.util.along_axis import apply_along_axis
+import warnings
 
 def f(p):
     if p == 0:
@@ -38,13 +37,19 @@ def manhattan_meet(a,b,f):
         return np.finfo(np.float64).max
     return np.finfo(np.float64).min
 
-def one_d(arr, f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
-    INF = np.inf
+
+def one_d(tuple_arr, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+    arr = tuple_arr[0]
+    if len(tuple_arr) > 1:
+        f = lambda x : tuple_arr[1][x]
+    else:
+        f = lambda x : 0 if arr[x] == 0 else np.finfo(np.float64).max
+
     k=0
     n=len(arr)
-    z = (n+1)*[None]
-    z[0] = -INF
-    z[1] = INF
+    z = np.empty(n+1)
+    z[0] = -np.inf
+    z[1] = np.inf
     v = [None]*n
     v[0]=0
     
@@ -57,7 +62,7 @@ def one_d(arr, f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
         k+=1
         v[k]=q
         z[k]=s
-        z[k+1] = INF
+        z[k+1] = np.inf
 
     k=0
     d = np.empty(n)
@@ -67,37 +72,20 @@ def one_d(arr, f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
         d[q] = dist_func(q,v[k],f(v[k]))
     return d
 
-
 def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
-    if len(ndarr.shape)==1:
-        one_d(ndarr,f)
-    shape = ndarr.shape
-    mut_shape = list(shape)
-    out = np.zeros(shape)
-
+    warnings.warn('\n'+str(ndarr))
     for i in range(ndarr.ndim):
-        changed_shape = mut_shape[:]
-        missing = changed_shape.pop(i)
-
-        def nd_recursion(c, temp, pre=False):
-            if c < len(changed_shape):
-                for j in range(changed_shape[c]):
-                    nd_recursion(c+1, temp+[j], pre=pre)
-            else:
-                temp.insert(i, range(missing))
-                temp = tuple(temp)
-                if isinstance(pre,bool):
-                    f2 = lambda x: f((ndarr[temp])[x])
-                else:
-                    f2 = lambda x: (pre[temp])[x]
-                out[temp] = one_d(ndarr[temp], f2, dist_func, dist_meet)
-
-
         if i == 0:
-            nd_recursion(0, [])
-            out2 = out
+            out = apply_along_axis(one_d, 0, (ndarr,))
+            warnings.warn('\n'+str(out))
         else:
-            out2 = np.zeros(shape)
-            out, out2 = out2, out
-            nd_recursion(0, [], pre=out2)
+            out = apply_along_axis(one_d, i, (ndarr, out))
+            warnings.warn('\n'+str(out))
     return out
+
+# new np.applyalongaxis ###higher priority###
+# convert remaining lists to arrays
+# try to find a way to generalise the loops
+# low priority : make temp less awkeward
+# fix inf ###high priority###
+# itertools/np.applyalongaxis
