@@ -1,16 +1,20 @@
-Announcement: scikit-image 0.X.0
-================================
+Announcement: scikit-image 0.15.0
+=================================
 
-We're happy to announce the release of scikit-image v0.X.0!
+We're happy to announce the release of scikit-image v0.15.0! This one's a
+treat. ;)
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
-for segmentation, geometric transformations, color space manipulation,
+for segmentation, geometric transformations, color space mani pulation,
 analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
+0.15 is the first scikit-image release that is only compatible with Python 3.5
+and above. Python 2.7 users should strongly consider upgrading to Python 3.5+,
+or use the 0.14 long term support releases.
 
 
 New Features
@@ -18,30 +22,40 @@ New Features
 
 - unsharp mask filtering (#2772)
 - New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
+  ``skimage.morphology.local_maxima`` and ``local_minima``. (#3022)
 - Image translation registration for masked data
   (``skimage.feature.masked_register_translation``)
-- Frangi (vesselness) filter for 3D data
-- Meijering (neuriteness) filter for nD data
-- Sato (tubeness) filter for 2D and 3D data
-- Flood fill, fully n-dimensional with tolerance supported (#3245)
+- Frangi (vesselness), Meijering (neuriteness), and Sato (tubeness) filters
+  (#3515)
+- N-dimensional flood fill, with tolerance (#3245)
+- Attribute operators (#2680)
+- Extension of register_translation to enable subpixel precision in 3D and
+  optionally disable error calculation (#2880)
+- Allow float->float conversion of any range (#3052)
+- Let lower precision float arrays pass through ``img_as_float`` (#3110)
+- Lazy apply_parallel (#3121)
 
 
 Improvements
 ------------
 
-- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
-  improved with a new Cython-based implementation. #3022
+- Replace ``morphology.local_maxima`` with faster flood-fill based Cython
+  version (#3022)
 - ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
   new optional dependency).
 - Performance is now monitored by
   `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
   results will appear at https://pandas.pydata.org/speed/
+- Speed up inner loop of GLCM (#3378)
+- Allow tuple to define kernel in threshold_niblack and threshold_sauvola (#3596)
+- Add support for anisotropic blob detection in blob_log and blob_dog (#3690)
 
 
 API Changes
 -----------
 
+- ``skimage.transform.seam_carve`` has been removed because the algorithm is
+  patented. (#3751)
 - Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
   removed. Use parameter ``data_range`` instead.
 - imageio is now the preferred plugin for reading and writing images.
@@ -70,8 +84,7 @@ API Changes
   and ``skimage.transform.rescale`` has been set to ``True``.
 - Removed the ``skimage.test`` function. This functionality can be achieved
   by calling ``pytest`` directly.
-- ``skimage.transform.seam_carve`` has been removed because the algorithm is
-  patented.
+- ``morphology.local_maxima`` now returns a boolean array (#3749)
 
 
 Bugfixes
@@ -84,19 +97,29 @@ Bugfixes
 - ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
   will return a boolean array instead of an array of 0s and 1s if the
   parameter ``indices`` was false.
-- When `compare_ssim` is used with `gaussian_weights` set to True, the boundary
-  crop used when computing the mean structural similarity will now exactly
-  match the width of the Gaussian used. The Gaussian filter window is also now
-  truncated at 3.5 rather than 4.0 standard deviations to exactly match the
-  original publication on the SSIM. These changes should produce only a very
+- When ``compare_ssim`` is used with ``gaussian_weights`` set to True, the
+  boundary crop used when computing the mean structural similarity will now
+  exactly match the width of the Gaussian used. The Gaussian filter window is
+  also now truncated at 3.5 rather than 4.0 standard deviations to exactly match
+  the original publication on the SSIM. These changes should produce only a very
   small change in the computed SSIM value. There is no change to the existing
-  behavior when `gaussian_weights` is False.
+  behavior when ``gaussian_weights`` is False. (#3802)
+- an index needs to be an integer not an float in CollectionViewer (#3288)
+- erroneous use of cython wrap around (#3481)
+- handle correctly the maximum number of lines in hough transform (#3514)
+- Speed up block reduce by providing the appropriate parameters to numpy (#3522)
+- Add urllib.request again (#3766)
+- Repeat pixels in reflect mode when image has dimension 1 (#3174)
+- Fix background indexing in _label2rgb_avg (#3280)
+- Fix skimage.measure.regionprops 1x1 image bug  (#3284)
+- Fix incorrect inertia tensor (#3303)
+- Improve Li thresholding (#3402)
 
 
 Deprecations
 ------------
 
-- Python 2 support has been dropped. Users should have Python >= 3.5.
+- Python 2 support has been dropped. Users should have Python >= 3.5. (#3000)
 - ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
 - ``skimage.novice`` is deprecated and will be removed in 0.16.
 - ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
@@ -118,25 +141,9 @@ Deprecations
   behavior (i.e., ``mask``, ``shift_x``, ``shift_y``) will be removed.
 
 
-Contributors to this release
-----------------------------
-Announcement: scikit-image 0.15.0
-=================================
-
-We're happy to announce the release of scikit-image v0.15.0!
-
-scikit-image is an image processing toolbox for SciPy that includes algorithms
-for segmentation, geometric transformations, color space manipulation,
-analysis, filtering, morphology, feature detection, and more.
-
-
-For more information, examples, and documentation, please visit our website:
-
-http://scikit-image.org
-
-
 Improvements
-************
+------------
+
 - MNT: handle a deprecation warning for np.linspace and floats for the num parameter (#3453)
 - TST: numpy empty arrays are not inherently Falsy (#3455)
 -  handle warning in scipy cdist for unused parameters (#3456)
@@ -146,11 +153,11 @@ Improvements
 - Cython touchups to use float32 and float64 (#3493)
 - rank_filters: Change how the bitdepth and max_bin are computed to ensure exact warnings. (#3501)
 - Early stop rank kernel noise filter as intended (#3503)
-- RANK: Optimize OTSU filter (#3504)
+- Rank: Optimize OTSU filter (#3504)
 - Rank - Fix rank entropy and OTSU tests (#3506)
 - delay importing pyplot in manual segmentation (#3533)
 - Get rid of the requirements-parser dependency (#3534)
-- filter warning from `correct_mesh_orientation` in tests (#3549)
+- filter warning from ``correct_mesh_orientation`` in tests (#3549)
 - cloudpickle is really a doc dependency, not a core one (#3634)
 - optional dependencies on pip (#3645)
 - Fewer test warnings in 3.7 (#3687)
@@ -160,40 +167,28 @@ Improvements
 - Use language level to 3 in cython for future compatibility (#3707)
 - Update ISSUE_TEMPLATE.md with info about numpy and skimage versions (#3730)
 - Use relative imports for many cython modules (#3759)
-Bugfixs
-*******
-- an index needs to be an integer not an float in CollectionViewer (#3288)
-- erroneous use of cython wrap around (#3481)
-- handle correctly the maximum number of lines in hough transform (#3514)
-- Speed up block reduce by providing the appropriate parameters to numpy (#3522)
-- Add urllib.request again (#3766)
-Build Tools
-***********
 - Pass tests that don't raise floating point exceptions on arm with soft-fp (#3337)
-Other Pull Requests
-*******************
+
+
+Other improvements
+------------------
+
 - ENH: add range option for histogram. (#2479)
 - BUG: Fix greycoprops correlation always returning 1 (#2532)
-- Add section on API discovery via `skimage.lookfor` (#2539)
-- Attribute operators (#2680)
+- Add section on API discovery via ``skimage.lookfor`` (#2539)
 - Better document remove_small_objects behaviour: int vs bool (#2830)
-- Extension of register_translation to enable subpixel precision in 3D and optionally disable error calculation (#2880)
 - Speedup 2D warping for affine transformations (#2902)
 - Credit Reviewers in Release Notes (#2927)
 - Added small galleries in the API (#2940)
 - Use skimage gaussian filter to avoid integer rounding artifacts (#2983)
 - Remove Python 2 compatibility (#3000)
-- Replace morphology.local_maxima with faster flood-fill based Cython version (#3022)
-- Allow float->float conversion of any range (#3052)
-- Add `rectangle_perimeter` feature to `skimage.draw` (#3069)
-- Use proper axis indexing in `adapt_rgb` `each_channel` (#3097)
+- Add ``rectangle_perimeter`` feature to ``skimage.draw`` (#3069)
+- Use proper axis indexing in ``adapt_rgb`` ``each_channel`` (#3097)
 - Linking preserve_range parameter calls to docs (#3109)
-- Let lower precision float arrays pass through `img_as_float` (#3110)
 - Update installation instructions to reference existing requirements specification (#3113)
 - Updated release notes with pre 0.13.1 phase (#3114)
 - Release guidelines update (#3115)
 - Ensure we are installing with / running on Python 3 (#3119)
-- Lazy apply_parallel (#3121)
 - Prefer imageio over PIL for file manipulations. (#3126)
 - Update the documentation regarding datalocality (#3127)
 - Hide warnings in test_unsharp_mask (#3130)
@@ -203,29 +198,28 @@ Other Pull Requests
 - Supress warnings for flatten during io testing (#3143)
 - Bugfix separate stains log10 (#3146)
 - Recover from exceptions in filters.try_all_threshold() (#3149)
-- Fix  skimage.test() to run the unittests (#3152)
+- Fix skimage.test() to run the unittests (#3152)
 - skivi: Use qtpy to handle different Qt versions (#3157)
-- Refractor python version checking. (#3160)
-- moved data_dir to within `data/__init__.py` (#3161)
-- Moved the definition of lookfor out of __init__.py (#3162)
-- Normalized the package number to PEP440 (#3163)
+- Refactor python version checking. (#3160)
+- Move data_dir to within ``data/__init__.py`` (#3161)
+- Move the definition of lookfor out of __init__.py (#3162)
+- Normalize the package number to PEP440 (#3163)
 - Remove skimage.test as it was never used. (#3164)
 - Added a message about qtpy to the INSTALL.rst (#3168)
 - Regression fix: Travis should fail if tests fail (#3170)
-- Set minimum cython version to `0.23.4` (#3171)
-- Repeat pixels in reflect mode when image has dimension 1 (#3174)
+- Set minimum cython version to ``0.23.4`` (#3171)
 - Add rgba2rgb to API docs (#3175)
-- Minor docs formatting fixes in video.rst (#3176)
+- Minor doc formatting fixes in video.rst (#3176)
 - Decrease the verbosity of the testing (#3182)
 - Speedup rgb2gray using matrix multiply (#3187)
 - Update docs: specify conda-forge channel for scikit-image conda install (#3189)
-- Added instructions for meeseeksdev to PR template (#3194)
+- Add instructions for meeseeksdev to PR template (#3194)
 - Remove installation instructions for video packages (#3197)
 - Big image labeling fix (#3202)
 - Handle dask deprecation in cycle_spin (#3205)
 - Fix Qt viewer painttool indexing (#3210)
 - build_versions.py is no longer hard coded. (#3211)
-- Removed dtype constructor call in exposure.rescale_intensity (#3213)
+- Remove dtype constructor call in exposure.rescale_intensity (#3213)
 - Various updates to the ASV benchmarks (#3215)
 - Add a link to stack overflow on github README (#3217)
 - MAINT: remove encoding information in file headers (python 3) (#3219)
@@ -234,10 +228,9 @@ Other Pull Requests
 - Respect input array type in apply_parallel by default (#3225)
 - Travis cleanup pip commands (#3227)
 - Add benchmarks for morphology.watershed (#3234)
-- Corrected docstring formatting so that code block is displayed as code (#3236)
+- Correcte docstring formatting so that code block is displayed as code (#3236)
 - numpy: Handle multidimentional indexing in 1.15 (#3238)
 - pytest: Numpy 1 15 warnings (#3242)
-- FEAT: Flood fill in n-dimensions (#3245)
 - Defer skimage.io import of matplotlib.pyplot until needed (#3243)
 - Add benchmark for Sobel filters (#3249)
 - Remove cython md5 hashing since it breaks the build process (#3254)
@@ -248,8 +241,6 @@ Other Pull Requests
 - Add benchmark suite for canny (#3271)
 - improve segmentation.felzenszwalb document #3264 (#3272)
 - Update _canny.py (#3276)
-- Fix background indexing in _label2rgb_avg (#3280)
-- Fix skimage.measure.regionprops 1x1 image bug  (#3284)
 - Add benchmark suite for histogram equalization (#3285)
 - fix link to equalist_hist blog reference (#3287)
 - .gitignore: novice: Ignore save-demo.jpg (#3289)
@@ -258,17 +249,15 @@ Other Pull Requests
 - Replace scipy.sparse.*.todense() with toarray() (#3292)
 - BUILD: Add pyproject.toml to ensure cython is present (#3295)
 - Handle intersphinx and mpl deprecation warnings in docs (#3300)
-- Fix incorrect inertia tensor (#3303)
 - Minor PEP8 fixes (#3305)
 - cython: check for presence of cpp files during install from sdist (#3311)
-- Remove deprecated `dynamic_range` in `measure.compare_psnr` (#3313)
+- Remove deprecated ``dynamic_range`` in ``measure.compare_psnr`` (#3313)
 - appveyor: don't upload any artifacts (#3315)
 - Add benchmark suite for hough_line() (#3319)
 - Novice skip url test (#3320)
 - Remove benchmarks from wheel (#3321)
 - Add license file to the wheel (binary) distribution (#3322)
 - codecov: ignore build scripts in coverage and don't comment on PRs (#3326)
-- Implementation of masked image translation registration (#3334)
 - Correct rotate method's center parameter doc (#3341)
 - Matplotlib 2.2.3 +  PyQt5.11 (#3345)
 - Allow @hmaarrfk to mention MeeseeksDev to backport. (#3357)
@@ -276,17 +265,15 @@ Other Pull Requests
 - Fix deprecated keyword from dask (#3366)
 - Turn DOIs into web links in docstrings (#3367)
 - Incompatible modes with anti-aliasing in skimage.transform.resize (#3368)
--  Missing cval parameter in threshold_local (#3370)
+- Missing cval parameter in threshold_local (#3370)
 - add comma to measure init (#3374)
-- Speed up inner loop of GLCM (#3378)
 - Avoid Sphinx 1.7.8 (#3381)
 - Show our data in the gallery (#3388)
 - Minor updates to grammar in numpy images page (#3389)
-- assert_all_close doesn't exist, make it `assert_array_equal` (#3391)
+- assert_all_close doesn't exist, make it ``assert_array_equal`` (#3391)
 - Better behavior of Gaussian filter for arrays with a large number of dimensions (#3394)
 - Allow import/execution with -OO (#3398)
 - Mark tests known to fail on 32bit architectures with xfail (#3399)
-- Improve Li thresholding (#3402)
 - Hardcode the inputs to test_ssim_grad (#3403)
 - TST: make test_wavelet_denoising_levels compatible with PyWavelets 1.0 (#3406)
 - Allow tifffile.py to handle I/O. (#3409)
@@ -301,13 +288,13 @@ Other Pull Requests
 - MAINT: Use upstream colormaps now that matplotlib has been upgraded (#3429)
 - Build tools: Make pyamg an optional dependency and remove custom logic (#3431)
 - Build tools: Fix PyQt installed in minimum requirements build (#3432)
-- MNT: multiprocessing should always be avaible since we depend on python >=2.7 (#3434)
+- MNT: multiprocessing should always be available since we depend on python >=2.7 (#3434)
 - MAINT Use np.full instead of cst*np.ones (#3440)
--  DOC: Fix LaTeX build via `make latexpdf`  (#3441)
+- DOC: Fix LaTeX build via ``make latexpdf``  (#3441)
 - Update instructions et al for releases after 0.14.1 (#3442)
 - Remove code specific to python 2 (#3443)
-- Fix default value of `methods` in `_try_all` to avoid exception (#3444)
--  Fix morphology.local_maxima for input with any dimension < 3 (#3447)
+- Fix default value of ``methods`` in ``_try_all`` to avoid exception (#3444)
+- Fix morphology.local_maxima for input with any dimension < 3 (#3447)
 - Use raw strings to avoid unknown escape symbol warnings (#3450)
 - Speed up xyz2rgb by clipping output in place (#3451)
 - MNT; handle deprecation warnings in tifffile (#3452)
@@ -327,18 +314,17 @@ Other Pull Requests
 - Random walker bug fix: no error should be raised when there is nothing to do (#3500)
 - Various minor edits for active contour (#3508)
 - Fix range for uint32 dtype in user guide (#3512)
-- Extension of Frangi filter to 3D data and other ridge detection filters (#3515)
 - Raise meaningful exception in warping when image is empty (#3518)
 - DOC: Development installation instructions for Ubuntu are missing tkinter (#3520)
 - Better gallery examples and tests for masked translation registration (#3528)
 - DOC: make more docstrings compliant with our standards (#3529)
 - Add copybutton (#3530)
 - Build tools: Remove restriction on simpleitk for python 3.7 (#3535)
-- Speedup and add benchmark for `skeletonize_3d` (#3536)
+- Speedup and add benchmark for ``skeletonize_3d`` (#3536)
 - Update requirements/README.md on justification of matplotlib 3.0.0 in favor of #3476 (#3542)
 - Doc enhancements around denoising features. (#3553)
 - DOC: Improve the RANSAC gallery example (#3554)
-- Handle deprecation of numpy `_validate_lengths` (#3556)
+- Handle deprecation of numpy ``_validate_lengths`` (#3556)
 - Use 'getconf _NPROCESSORS_ONLN' as fallback for nproc in Makefile of docs (#3563)
 - Fix matplotlib set_*lim API deprecations (#3564)
 - Add histogram matching (#3568)
@@ -349,21 +335,20 @@ Other Pull Requests
 - Turn dask to an optional requirement (#3582)
 - _marching_cubes_lewiner_cy: mark char as signed (#3587)
 - Hyperlink DOIs to preferred resolver (#3589)
-- Missing parameter description in `morphology.reconstruction() docstring #3581 (#3591)
-- EHN: allow tuple to define kernel in threshold_niblack and threshold_sauvola (#3596)
+- Missing parameter description in ``morphology.reconstruction`` docstring #3581 (#3591)
 - Update chat location (#3598)
-- DOC: "feature.peak_local_max" : explanation of multiple same-intensity peaks returned by the function; added details on `exclude_border` parameter  (#3600)
-- Removed orphan code (skimage/filters/_ctmf.pyx). (#3601)
-- [MRG] update documentation for regionprops (#3602)
+- DOC: "feature.peak_local_max" : explanation of multiple same-intensity peaks returned by the function; added details on ``exclude_border`` parameter  (#3600)
+- Remove orphan code (skimage/filters/_ctmf.pyx). (#3601)
+- Update documentation for regionprops (#3602)
 - More explicit example title, better list rendering in plot_cycle_spinning.py (#3606)
 - Add rgb to hsv example in the gallery (#3607)
-- [MRG] Update documentation of `perimeter` and add input validation (#3608)
+- Update documentation of ``perimeter`` and add input validation (#3608)
 - Additionnal mask option to clear_border (#3610)
 - Set up CI with Azure Pipelines (#3612)
 - [MRG] EHN: median filters will accept floating image (#3616)
 - Update Travis-CI to xcode 10.1 (#3617)
 - Minor tweaks to _mean_std code (#3619)
-- WIP: Reduce the default tolerance in threshold_li (#3622)
+- Reduce the default tolerance in threshold_li (#3622)
 - Added glossary to the doc (#3626)
 - Add explicit ordering of gallery sections (#3627)
 - Delete broken links (#3628)
@@ -386,9 +371,8 @@ Other Pull Requests
 - Remove wrong cast of Py_ssize_t to int (#3682)
 - Build tools: allow python 3.7 to fail, but travis to continue (#3683)
 - Build tools: remove pyproject.toml (#3688)
-- Add support for anisotropic blob detection in blob_log and blob_dog (#3690)
 - Fix ValueError: not enough values to unpack (#3703)
-- ENH: several fixes for heap.pyx (#3704)
+- Several fixes for heap.pyx (#3704)
 - Enable the faulthandler module during testing (#3708)
 - Build tools: Fix Python 3.7 builds on travis (#3709)
 - Replace np.einsum with np.tensordot in _upsampled_dft (#3710)
@@ -403,8 +387,6 @@ Other Pull Requests
 - Blacklist PyQt 5.12.0 on Travis (#3743)
 - Build tools: Fix matplotlib + qt 5.12 the same way upstream does it (#3744)
 - Add image of retina to our data (#3748)
-- Make local_maxima return a boolean array (#3749)
-- Remove seam carving (#3751)
 - gallery: remove xx or yy  sorted directory names (#3761)
 - Allow for f-contiguous 2D arrays in convex_hull_image (#3762)
 - Add microaneurysms() to gallery (#3765)
@@ -413,22 +395,21 @@ Other Pull Requests
 - Set CC0 for microaneurysms (#3778)
 - Unify LICENSE files for easier interpretation (#3791)
 - Readme: Remove expectation for future fix from matplotlib (#3794)
-- Improved documentation/test in `flood()` (#3796)
+- Improved documentation/test in ``flood()`` (#3796)
 - Use ssize_t in denoise cython (#3800)
-- compare_ssim: fix window size of Gaussian filter (#3802)
 - Removed non-existent parameter in docstring (#3803)
 - Remove redundant point in draw.polygon docstring example (#3806)
 - Ensure watershed auto-markers respect mask (#3809)
 
-79 authors added to this release [alphabetical by first name or login]
+
+75 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
+
 - Abhishek Arya
 - Adrian Roth
-- alexis-cvetkov (Alexis CVETKOV-ILIEV)
-- alexis-cvetkov (alexis-cvetkov)
+- alexis-cvetkov (Alexis Cvetkov-Iliev)
 - Ambrose J Carr
 - Arthur Imbert
-- azure-pipelines[bot] (azure-pipelines[bot])
 - blochl (Leonid Bloch)
 - Brian Smith
 - Casper da Costa-Luis
@@ -439,20 +420,19 @@ Other Pull Requests
 - David Breuer
 - Egor Panfilov
 - Emmanuelle Gouillart
-- fivemok (fivemok)
+- fivemok
 - François Boulogne
-- François COKELAER
+- François Cokelaer
 - François-Michel De Rainville
 - Genevieve Buckley
 - Gregory R. Lee
 - Gregory Starck
 - Guillaume Lemaitre
 - Hugo
-- jakirkham (jakirkham)
 - jakirkham (John Kirkham)
 - Jan
 - Jan Eglinger
-- Jathrone (Jathrone)
+- Jathrone
 - Jeremy Metz
 - Jesse Pangburn
 - Johannes Schönberger
@@ -462,29 +442,29 @@ Other Pull Requests
 - Juan Nunez-Iglesias
 - Justin
 - Katrin Leinweber
-- KimNewell (Kim Newell)
+- Kim Newell
 - Kira Evans
 - Kirill Klimov
 - Lars Grueter
 - Laurent P. René de Cotret
-- Legodev (Legodev)
-- mamrehn (mamrehn)
+- Legodev
+- mamrehn
 - Marcel Beining
 - Mark Harfouche
 - Matt McCormick
 - Matthias Bussonnier
-- mrastgoo (mrastgoo)
+- mrastgoo
 - Nehal J Wani
 - Nelle Varoquaux
 - Onomatopeia
 - Oscar Javier Hernandez
-- Page-David (Page-David)
-- PeterJackNaylor (PeterJackNaylor)
-- PinkFloyded (PinkFloyded)
+- Page-David
+- PeterJackNaylor
+- PinkFloyded
 - R S Nikhil Krishna
 - ratijas
 - Rob
-- robroooh (robroooh)
+- robroooh
 - Roman Yurchak
 - Sarkis Dallakian
 - Scott Staniewicz
@@ -497,14 +477,14 @@ Other Pull Requests
 - Tom Augspurger
 - Tommy Löfstedt
 - Tony Tung
-- vilim
 - Vilim Štih
-- yangfl (yangfl)
+- yangfl
 - Zhanwen "Phil" Chen
 
 
 46 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
+
 - Abhishek Arya
 - Adrian Roth
 - Alexandre de Siqueira
@@ -518,7 +498,7 @@ Other Pull Requests
 - Emmanuelle Gouillart
 - Evan Putra Limanto
 - François Boulogne
-- François COKELAER
+- François Cokelaer
 - Gregory R. Lee
 - Grégory Starck
 - Guillaume Lemaitre
@@ -551,4 +531,3 @@ Other Pull Requests
 - Tomas Kazmar
 - Tommy Löfstedt
 - Vilim Štih
-
