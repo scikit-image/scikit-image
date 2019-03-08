@@ -1,3 +1,82 @@
+Announcement: scikit-image 0.14.3
+=================================
+
+We're happy to announce the release of scikit-image v0.14.3!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+As a reminder, 0.14 is the last major release with official support for Python
+2.7. Future releases will be developed using Python 3-only syntax.
+
+However, 0.14 is a long-term support (LTS) release and will receive bug fixes
+and backported features deemed important (by community demand) until January
+1st 2020 (end of maintenance for Python 2.7; see PEP 373 for details).
+
+0.14.3 contains a number of critical bug fixes from 0.14.2, described below.
+
+For more information, examples, and documentation, please visit our website:
+
+http://scikit-image.org
+
+API Changes
+-----------
+- Backport PR #3749 on branch v0.14.x (Make local_maxima return a boolean array) (#3752)
+
+
+Bug Fixes
+---------
+- backport: _marching_cubes_lewiner_cy: mark char as signed #3587  (#3678)
+- Fix potential use of NULL pointer (#3696)
+- pypi: explicitly exclude Python 3.1, 3.2, and 3.3 (#3726)
+- Backport: Reduce default tolerance in threshold_li (#3622) (#3781)
+
+Other Pull Requests
+-------------------
+
+- BLD: pin cython's language_level (#3716)
+- Build tools: Upgrade xcode to 9.4 on v0.14.x branch (#3724)
+- Get rid of the requirements-parser dependency -- Backport of 3534 (#3727)
+- Backport PR #2940 on branch v0.14.x (Added small galleries in the API) (#3728)
+- Backport PR #3656 on branch v0.14.x (Correctly ignore release notes auto-generated for docs) (#3737)
+- Fix qt 5.12 for 0.14. Backport of #3744 (#3753)
+- Backport PR #3767 on branch v0.14.x (Set astropy minimum requirement to 1.2 to help the CIs.) (#3770)
+- Backport PR #3768 on branch v0.14.x (Avoid NumPy warning while stacking arrays.) (#3771)
+- Fix human readable error message on a bad build. (#3223) (#3790)
+- Backport PR #3791 on branch v0.14.x (Unify LICENSE files for easier interpretation) (#3792)
+
+11 authors added to this release [alphabetical by last name]
+------------------------------------------------------------
+- François Boulogne
+- Matthew Bowden
+- Thomas A Caswell
+- Christoph Gohlke
+- Lars Grueter
+- Mark Harfouche
+- Juan Nunez-Iglesias
+- Egor Panfilov
+- Nelle Varoquaux
+- Stefan van der Walt
+- Nehal J Wani
+
+... and, as always, a special mention to Matthias Bussonnier's Meeseeks Box,
+which remains invaluable for our backports.
+
+3 committers added to this release [alphabetical by last name]
+--------------------------------------------------------------
+- Mark Harfouche
+- Stefan van der Walt
+- Josh Warner
+
+4 reviewers added to this release [alphabetical by last name]
+-------------------------------------------------------------
+- François Boulogne
+- Mark Harfouche
+- Juan Nunez-Iglesias
+- Stefan van der Walt
+
+
 Announcement: scikit-image 0.14.2
 =================================
 
