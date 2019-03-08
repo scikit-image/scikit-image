@@ -1,6 +1,7 @@
 include setup*.py
 include conftest.py
 include MANIFEST.in
+include LICENSE.txt
 include *.txt
 include *.rst
 recursive-include requirements *.txt
