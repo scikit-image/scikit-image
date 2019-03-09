@@ -103,17 +103,14 @@ cdef inline void bilinear_interpolation(
     dr = r - minr
     dc = c - minc
 
-    cdef np.float64_t top
-    cdef np.float64_t bottom
-
     cdef np_real_numeric top_left = get_pixel2d(image, rows, cols, minr, minc, mode, cval)
     cdef np_real_numeric top_right = get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
     cdef np_real_numeric bottom_left = get_pixel2d(image, rows, cols, maxr, minc, mode, cval)
     cdef np_real_numeric bottom_right = get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
 
-    top = (1 - dc) * top_left + dc * top_right
-    bottom = (1 - dc) * bottom_left + dc * bottom_right
-    out[0] = <np_real_numeric_out> ((1 - dr) * top + dr * bottom)
+    out[0] = <np_real_numeric_out> (
+        (1 - dr) * ((1 - dc) * top_left + dc * top_right) +
+        dr * ((1 - dc) * bottom_left + dc * bottom_right))
 
 cdef inline np_floats quadratic_interpolation(np_floats x,
                                               np_real_numeric[3] f) nogil:
