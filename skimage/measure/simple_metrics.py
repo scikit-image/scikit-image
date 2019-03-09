@@ -9,6 +9,7 @@ from scipy.ndimage import maximum_filter, minimum_filter
 __all__ = ['compare_mse',
            'compare_nrmse',
            'compare_psnr',
+           'enhancement_measure'
            ]
 
 
@@ -177,18 +178,15 @@ def enhancement_measure(image: np.ndarray,
         >>> from skimage.data import camera
         >>> from skimage.exposure import equalize_hist
         >>> img = camera()
-        >>> print("Image quality:\n")
-            Image quality:
-        >>> print(f"\tbefore: {quality(img)}")
-                before: 0.9096745071475523
-        >>> print(f"\tafter: {quality(equalize_hist(img))}")
-                after: 1.299327371881219
+        >>> quality(img) # before
+            0.9096745071475523
+        >>> quality(equalize_hist(img))
+            1.299327371881219
 
     """
     image = img_as_float(image)
     eme = np.zeros_like(image)
-    footprint = tuple([size] * len(image.shape))
-    eme = np.divide(maximum_filter(image, footprint=footprint) + 1,
-                    minimum_filter(image, footprint=footprint) + 1)
+    eme = np.divide(maximum_filter(image, tuple([size]*len(image.shape))) + 1,
+                    minimum_filter(image, tuple([size]*len(image.shape))) + 1)
     eme = np.mean(20 * np.log(eme))
     return eme
