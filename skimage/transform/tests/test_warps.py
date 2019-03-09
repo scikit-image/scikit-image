@@ -12,7 +12,7 @@ from skimage.color import rgb2gray
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
+                                     test_parallel, parametrize)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -523,3 +523,12 @@ def test_zero_image_size():
     with testing.raises(ValueError):
         warp(np.zeros((10, 10, 0)),
              SimilarityTransform())
+
+
+@parametrize('dtype', [np.float32, np.float64])
+def test_warp_floats(dtype):
+    x = np.zeros((5, 5), dtype=dtype)
+    tform = SimilarityTransform(scale=1)
+
+    x_tform = warp(x, tform, order=1)
+    assert x_tform.dtype == x.dtype
