@@ -103,7 +103,8 @@ def radon(image, theta=None, circle=True):
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
-        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
+        rotated = np.zeros_like(padded_image)
+        _warp_fast(padded_image, build_rotation(theta[i]), out=rotated)
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 

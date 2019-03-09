@@ -8,19 +8,19 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)
+from .._shared.fused_numerics cimport np_real_numeric, np_floats
 
-
-cdef inline void _transform_metric(double x, double y, double* H,
-                                   double *x_, double *y_) nogil:
+cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
+                                   np_floats *x_, np_floats *y_) nogil:
     """Apply a metric transformation to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : float32 or float64
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *float32 or *float64
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *float32 or *float64
         Output coordinate.
 
     """
@@ -28,17 +28,17 @@ cdef inline void _transform_metric(double x, double y, double* H,
     y_[0] = H[4] * y + H[5]
 
 
-cdef inline void _transform_affine(double x, double y, double* H,
-                                   double *x_, double *y_) nogil:
+cdef inline void _transform_affine(np_floats x, np_floats y, np_floats* H,
+                                   np_floats *x_, np_floats *y_) nogil:
     """Apply an affine transformation to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : float32 or float64
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *float32 or *float64
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *float32 or *float64
         Output coordinate.
 
     """
@@ -46,28 +46,34 @@ cdef inline void _transform_affine(double x, double y, double* H,
     y_[0] = H[3] * x + H[4] * y + H[5]
 
 
-cdef inline void _transform_projective(double x, double y, double* H,
-                                       double *x_, double *y_) nogil:
+cdef inline void _transform_projective(np_floats x, np_floats y, np_floats* H,
+                                       np_floats *x_, np_floats *y_) nogil:
     """Apply a homography to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : float32 or float64
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *float32 or *float64
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *float32 or *float64
         Output coordinate.
 
     """
-    cdef double z_
+    cdef np_floats z_
     z_ = H[6] * x + H[7] * y + H[8]
     x_[0] = (H[0] * x + H[1] * y + H[2]) / z_
     y_[0] = (H[3] * x + H[4] * y + H[5]) / z_
 
 
-def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
-               int order=1, mode='constant', double cval=0):
+# Without these definitions, it assumes that
+# H, and out have the same dtype
+ctypedef fused np_floats_H:
+    np_floats
+
+def _warp_fast(np_floats[:, :] image, np_floats_H[:, :] H,
+               np_floats[:, ::1] out,
+               int order=1, mode='constant', np_floats cval=0):
     """Projective transformation (homography).
 
     Perform a projective transformation (homography) of a
@@ -90,12 +96,12 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     Parameters
     ----------
-    image : 2-D array
+    image : 2-D array (float32 or float64)
         Input image.
     H : array of shape ``(3, 3)``
         Transformation matrix H that defines the homography.
-    output_shape : tuple (rows, cols), optional
-        Shape of the output image generated (default None).
+    out : 2-D array (float32 or float64)
+        THe buffer where to store the output image.
     order : {0, 1, 2, 3}, optional
         Order of interpolation::
         * 0: Nearest-neighbor
@@ -105,7 +111,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
-    cval : string, optional (default 0)
+    cval : np_floats_out, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
 
@@ -119,30 +125,23 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     """
 
-    cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
-    cdef double[:, ::1] M = np.ascontiguousarray(H)
+    cdef np_floats[:, ::1] img = np.ascontiguousarray(image)
+    cdef np_floats_H[:, ::1] M = np.ascontiguousarray(H)
 
     if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
                          "`edge`, `wrap`, `reflect` or `symmetric`.")
     cdef char mode_c = ord(mode[0].upper())
 
-    cdef Py_ssize_t out_r, out_c
-    if output_shape is None:
-        out_r = int(img.shape[0])
-        out_c = int(img.shape[1])
-    else:
-        out_r = int(output_shape[0])
-        out_c = int(output_shape[1])
-
-    cdef double[:, ::1] out = np.zeros((out_r, out_c), dtype=np.double)
+    cdef Py_ssize_t out_r = out.shape[0]
+    cdef Py_ssize_t out_c = out.shape[1]
 
     cdef Py_ssize_t tfr, tfc
-    cdef double r, c
+    cdef np_floats_H r, c
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t cols = img.shape[1]
 
-    cdef void (*transform_func)(double, double, double*, double*, double*) nogil
+    cdef void (*transform_func)(np_floats_H, np_floats_H, np_floats_H*, np_floats_H*, np_floats_H*) nogil
     if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
         if M[0, 1] == 0 and M[1, 0] == 0:
             transform_func = _transform_metric
@@ -151,16 +150,19 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     else:
         transform_func = _transform_projective
 
-    cdef void (*interp_func)(double*, Py_ssize_t , Py_ssize_t ,
-                             double, double, char, double, double*) nogil
+    cdef void (*interp_func)(np_floats*,
+                             Py_ssize_t , Py_ssize_t ,
+                             np_floats_H, np_floats_H,
+                             char,
+                             np_floats, np_floats*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation[cnp.float64_t, double, double]
+        interp_func = nearest_neighbour_interpolation
     elif order == 1:
-        interp_func = bilinear_interpolation[cnp.float64_t, double, double]
+        interp_func = bilinear_interpolation
     elif order == 2:
-        interp_func = biquadratic_interpolation[cnp.float64_t, double, double]
+        interp_func = biquadratic_interpolation
     elif order == 3:
-        interp_func = bicubic_interpolation[cnp.float64_t, double, double]
+        interp_func = bicubic_interpolation
     else:
         raise ValueError("Unsupported interpolation order", order)
 
@@ -170,5 +172,3 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
                 transform_func(tfc, tfr, &M[0, 0], &c, &r)
                 interp_func(&img[0, 0], rows, cols, r, c,
                             mode_c, cval, &out[tfr, tfc])
-
-    return np.asarray(out)

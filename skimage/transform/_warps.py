@@ -860,15 +860,17 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         if matrix is not None:
             matrix = matrix.astype(np.double)
             if image.ndim == 2:
-                warped = _warp_fast(image, matrix,
-                                    output_shape=output_shape,
-                                    order=order, mode=mode, cval=cval)
+                warped = np.empty(shape=output_shape, dtype=image.dtype)
+                _warp_fast(image, matrix,
+                           out=warped, order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
-                    dims.append(_warp_fast(image[..., dim], matrix,
-                                           output_shape=output_shape,
-                                           order=order, mode=mode, cval=cval))
+                    warped = np.empty(shape=output_shape[:2],
+                                      dtype=image.dtype)
+                    _warp_fast(image[..., dim], matrix,
+                               out=warped, order=order, mode=mode, cval=cval)
+                    dims.append(warped)
                 warped = np.dstack(dims)
 
     if warped is None:
