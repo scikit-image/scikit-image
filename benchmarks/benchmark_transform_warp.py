@@ -20,9 +20,10 @@ class WarpSuite:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", "Possible precision loss")
             self.image = convert(np.random.random((N, N)), dtype=dtype_in)
+
         tform = SimilarityTransform(scale=1, rotation=np.pi / 10,
                                     translation=(0, 4))
-        tform.params = tform.params.astype('float32')
+        tform.params = tform.params.astype(dtype_in)
         order = order
 
         self.warp = functools.partial(
