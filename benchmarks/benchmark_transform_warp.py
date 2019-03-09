@@ -30,7 +30,7 @@ class WarpSuite:
             order=order, preserve_range=True)
 
     # def time_same_type(self, dtype_in, N, order, dtype_tform):
-    def time_same_type(self, dtype_in, N, order):
+    def time_warp(self, dtype_in, N, order):
         """Test the case where the users wants to preserve their same low
         precision data type."""
         result = self.warp(self.image)
@@ -38,8 +38,3 @@ class WarpSuite:
         # convert back to input type, no-op if same type
         result = result.astype(dtype_in, copy=False)
 
-    # def time_to_float64(self, dtype_in, N, order, dtype_form):
-    def time_to_float64(self, dtype_in, N, order):
-        """Test the case where want to upvert to float64 for continued
-        transformations."""
-        result = self.warp(self.image)
