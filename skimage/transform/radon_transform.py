@@ -4,6 +4,7 @@ from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from warnings import warn
+from .._shared.utils import convert_to_float
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
@@ -103,6 +104,12 @@ def radon(image, theta=None, circle=True):
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
+        if not np.issubdtype(padded_image.dtype, np.floating):
+            # prior to this, img_as_float was never called.
+            # Numpy casting means that preserve_range was implicitely
+            # set to True
+            # https://github.com/scikit-image/scikit-image/issues/3799
+            padded_image = convert_to_float(padded_image, preserve_range=True)
         rotated = np.zeros_like(padded_image)
         _warp_fast(padded_image, build_rotation(theta[i]), out=rotated)
         radon_image[:, i] = rotated.sum(0)
