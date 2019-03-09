@@ -7,7 +7,7 @@ import inspect
 
 
 class WarpSuite:
-    params = ([np.uint8, np.uint16, np.float32, np.float64],
+    params = ([np.float32, np.float64],
               [128, 1024, 4096],
               [0, 1, 3],
               # [np.float32, np.float64]
@@ -20,24 +20,20 @@ class WarpSuite:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", "Possible precision loss")
             self.image = convert(np.random.random((N, N)), dtype=dtype_in)
-        self.tform = SimilarityTransform(scale=1, rotation=np.pi / 10,
-                                         translation=(0, 4))
-        self.tform.params = self.tform.params.astype('float32')
-        self.order = order
+        tform = SimilarityTransform(scale=1, rotation=np.pi / 10,
+                                    translation=(0, 4))
+        tform.params = tform.params.astype('float32')
+        order = order
 
-        if 'dtype' in inspect.signature(warp).parameters:
-            self.warp = functools.partial(warp, dtype=self.image.dtype)
-        else:
-            # Keep a call to functools to have the same number of python
-            # function calls
-            self.warp = functools.partial(warp)
+        self.warp = functools.partial(
+            warp, inverse_map=tform,
+            order=order, preserve_range=True)
 
     # def time_same_type(self, dtype_in, N, order, dtype_tform):
     def time_same_type(self, dtype_in, N, order):
         """Test the case where the users wants to preserve their same low
         precision data type."""
-        result = self.warp(self.image, self.tform, order=self.order,
-                           preserve_range=True)
+        result = self.warp(self.image)
 
         # convert back to input type, no-op if same type
         result = result.astype(dtype_in, copy=False)
@@ -46,5 +42,4 @@ class WarpSuite:
     def time_to_float64(self, dtype_in, N, order):
         """Test the case where want to upvert to float64 for continued
         transformations."""
-        result = warp(self.image, self.tform, order=self.order,
-                      preserve_range=True)
+        result = self.warp(self.image)
