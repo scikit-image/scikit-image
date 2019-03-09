@@ -858,7 +858,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = np.linalg.inv(inverse_map.__self__.params)
 
         if matrix is not None:
-            matrix = matrix.astype(np.double)
+            if not np.issubdtype(image.dtype, np.floating):
+                matrix = matrix.astype(np.double)
             if image.ndim == 2:
                 warped = np.empty(shape=output_shape, dtype=image.dtype)
                 _warp_fast(image, matrix,
