@@ -5,11 +5,12 @@ import numpy as np
 from skimage import data_dir
 from skimage.io import imread
 from skimage.transform import radon, iradon, iradon_sart, rescale
+from skimage import img_as_float64
 
 from skimage._shared import testing
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import test_parallel, parametrize
 from skimage._shared._warnings import expected_warnings
-
+from numpy.testing import assert_allclose
 
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
                  as_gray=True)[::2, ::2]
@@ -43,6 +44,39 @@ def _rescale_intensity(x):
     x -= x.min()
     x /= x.max()
     return x
+
+
+@parametrize('circle', [True, False])
+@parametrize('dtype', [np.float32, np.float64])
+def test_warp_floats(dtype, circle):
+    shape = (16, 16)
+    image = np.zeros(shape, dtype=dtype)
+    image[(shape[0] // 2, shape[1] // 2)] = 1.
+
+    sinogram = radon(image, circle=circle)
+    # warp doesn't respect float types yet
+    # assert x_tform.dtype == x.dtype
+
+    sinogram_float64 = radon(img_as_float64(image), circle=circle)
+    assert_allclose(sinogram_float64, sinogram, rtol=1E-6)
+
+
+@parametrize('circle', [True, False])
+@parametrize('dtype', [np.uint8, np.uint16, np.uint32,
+                       np.int8, np.int16, np.int32])
+def test_warp_ints(dtype, circle):
+    shape = (16, 16)
+    image = np.zeros(shape, dtype=dtype)
+    image[(shape[0] // 2, shape[1] // 2)] = 1.
+
+    sinogram = radon(image, circle=circle)
+
+    # prior to this, img_as_float was never called.
+    # Numpy casting means that preserve_range was implicitely set to True
+    # https://github.com/scikit-image/scikit-image/issues/3799
+    # sinogram_float64 = radon(img_as_float64(image), circle=circle)
+    sinogram_float64 = radon(image.astype('float64'), circle=circle)
+    assert_allclose(sinogram_float64, sinogram)
 
 
 def check_radon_center(shape, circle):
