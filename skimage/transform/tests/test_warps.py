@@ -14,6 +14,7 @@ from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel, parametrize)
 from skimage._shared._warnings import expected_warnings
+from numpy.testing import assert_allclose
 
 
 np.random.seed(0)
@@ -528,7 +529,18 @@ def test_zero_image_size():
 @parametrize('dtype', [np.float32, np.float64])
 def test_warp_floats(dtype):
     x = np.zeros((5, 5), dtype=dtype)
+    x[0, 0] = 1
     tform = SimilarityTransform(scale=1)
 
     x_tform = warp(x, tform, order=1)
     assert x_tform.dtype == x.dtype
+    assert_allclose(x, x_tform)
+
+@parametrize('dtype', [np.uint8, np.uint16, np.uint32,
+                       np.int8, np.int16, np.int32])
+def test_warp_ints(dtype):
+    x = np.zeros((5, 5), dtype=dtype)
+    x[0, 0] = 1
+    tform = SimilarityTransform(scale=1)
+    x_tform = warp(x, tform, order=1)
+    assert_allclose(img_as_float(x), x_tform)
