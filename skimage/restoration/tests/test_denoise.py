@@ -463,13 +463,8 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     multichannel = x.shape[-1] == 3
 
     if estimate_sigma:
-        if convert2ycbcr:
-            # YCbCr expects a sigma appropriate to data in the range [0, 1]
-            sigma_est = restoration.estimate_sigma(noisy/x.max(),
-                                                   multichannel=multichannel)
-        else:
-            sigma_est = restoration.estimate_sigma(noisy,
-                                                   multichannel=multichannel)
+        sigma_est = restoration.estimate_sigma(noisy,
+                                               multichannel=multichannel)
     else:
         sigma_est = None
 
