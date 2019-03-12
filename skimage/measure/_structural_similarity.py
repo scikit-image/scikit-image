@@ -17,16 +17,16 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     Parameters
     ----------
     X, Y : ndarray
-        Image.  Any dimensionality.
+        Image. Any dimensionality.
     win_size : int or None
-        The side-length of the sliding window used in comparison.  Must be an
-        odd value.  If `gaussian_weights` is True, this is ignored and the
+        The side-length of the sliding window used in comparison. Must be an
+        odd value. If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to Y.
     data_range : float, optional
         The data range of the input image (distance between minimum and
-        maximum possible values).  By default, this is estimated from the image
+        maximum possible values). By default, this is estimated from the image
         data-type.
     multichannel : bool, optional
         If True, treat the last dimension of the array as channels. Similarity
@@ -41,14 +41,14 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     Other Parameters
     ----------------
     use_sample_covariance : bool
-        if True, normalize covariances by N-1 rather than, N where N is the
+        If True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
     K1 : float
-        algorithm parameter, K1 (small constant, see [1]_)
+        Algorithm parameter, K1 (small constant, see [1]_).
     K2 : float
-        algorithm parameter, K2 (small constant, see [1]_)
+        Algorithm parameter, K2 (small constant, see [1]_).
     sigma : float
-        sigma for the Gaussian when `gaussian_weights` is True.
+        Standard deviation for the Gaussian when `gaussian_weights` is True.
 
     Returns
     -------
