@@ -153,11 +153,11 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     ndim = X.ndim
 
     if gaussian_weights:
-        # sigma = 1.5 to approximately match filter in Wang et. al. 2004
-        # this ends up giving a 13-tap rather than 11-tap Gaussian
+        # sigma = 1.5 as used in Wang et. al. 2004. Setting truncate to
+        # 3.5 gives an 11-tap filter as used in the publication.
         filter_func = gaussian_filter
-        filter_args = {'sigma': sigma}
-
+        truncate = 3.5
+        filter_args = {'sigma': sigma, 'truncate': truncate}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
