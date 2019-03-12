@@ -105,8 +105,6 @@ cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
     neighbor_offsets : ndarray
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
-    queue_ptr :
-        Pointer to initialized queue.
     start_index : int
         Start position for the flood-fill.
     seed_value :
