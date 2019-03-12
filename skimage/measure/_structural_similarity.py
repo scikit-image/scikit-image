@@ -129,9 +129,16 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         raise ValueError("sigma must be positive")
     use_sample_covariance = kwargs.pop('use_sample_covariance', True)
 
+    if gaussian_weights:
+        # Set to give an 11-tap filter with the default sigma of 1.5 to match
+        # Wang et. al. 2004.
+        truncate = 3.5
+
     if win_size is None:
         if gaussian_weights:
-            win_size = 11  # 11 to match Wang et. al. 2004
+            # set win_size used by crop to match the filter size
+            r = int(truncate * sigma + 0.5)  # radius as in ndimage
+            win_size = 2 * r + 1
         else:
             win_size = 7   # backwards compatibility
 
@@ -153,10 +160,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     ndim = X.ndim
 
     if gaussian_weights:
-        # sigma = 1.5 as used in Wang et. al. 2004. Setting truncate to
-        # 3.5 gives an 11-tap filter as used in the publication.
         filter_func = gaussian_filter
-        truncate = 3.5
         filter_args = {'sigma': sigma, 'truncate': truncate}
     else:
         filter_func = uniform_filter
