@@ -122,6 +122,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         np_floats rmse = DBL_MAX
         np_floats norm = (weight + 4 * lam)
 
+        Py_ssize_t out_rows, out_cols
     out_rows, out_cols = out.shape[:2]
     out[1:out_rows-1, 1:out_cols-1] = image
 
