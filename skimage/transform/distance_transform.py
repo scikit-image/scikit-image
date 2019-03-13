@@ -10,7 +10,7 @@ it is at the bottom.
 
 import numpy as np
 from skimage.util.along_axis import apply_along_axis
-import warnings
+from functools import partial 
 
 def f(p):
     if p == 0:
@@ -38,7 +38,7 @@ def manhattan_meet(a,b,f):
     return np.finfo(np.float64).min
 
 
-def one_d(tuple_arr, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+def one_d(tuple_arr, dist_func, dist_meet):
     arr = tuple_arr[0]
     if len(tuple_arr) > 1:
         f = lambda x : tuple_arr[1][x]
@@ -73,11 +73,12 @@ def one_d(tuple_arr, dist_func=euclidean_dist, dist_meet=euclidean_meet):
     return d
 
 def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+    partial_one_d = partial(one_d, dist_func=dist_func, dist_meet=dist_meet)
     for i in range(ndarr.ndim):
         if i == 0:
-            out = apply_along_axis(one_d, 0, (ndarr,))
+            out = apply_along_axis(partial_one_d, 0, (ndarr,))
         else:
-            out = apply_along_axis(one_d, i, (ndarr, out))
+            out = apply_along_axis(partial_one_d, i, (ndarr, out))
     return out
 
 # new np.applyalongaxis ###higher priority###
@@ -85,4 +86,3 @@ def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_me
 # try to find a way to generalise the loops
 # low priority : make temp less awkeward
 # fix inf ###high priority###
-# itertools/np.applyalongaxis

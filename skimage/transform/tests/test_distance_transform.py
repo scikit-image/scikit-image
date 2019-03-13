@@ -10,7 +10,7 @@ def test_1d():
     out_euc = [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0]
     out_man = [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0]
     np.testing.assert_allclose(generalized_distance_transform(np.asarray(case)),np.asarray(out_euc))
-    # np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
+    np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
 
 
 def test_2d():
@@ -18,7 +18,7 @@ def test_2d():
     out_euc = [[5.0, 2.0, 1.0, 1.0, 1.0], [4.0, 1.0, 0.0, 0.0, 0.0], [2.0, 1.0, 1.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0, 1.0], [0.0, 0.0, 1.0, 1.0, 2.0]]
     out_man = [[3.0, 2.0, 1.0, 1.0, 1.0], [2.0, 1.0, 0.0, 0.0, 0.0], [2.0, 1.0, 1.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0, 1.0], [0.0, 0.0, 1.0, 1.0, 2.0]]
     np.testing.assert_allclose(generalized_distance_transform(np.asarray(case)),np.asarray(out_euc))
-    # np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
+    np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
 
 
 def test_3d():
@@ -26,4 +26,4 @@ def test_3d():
     out_euc = [[[1.0, 0.0, 1.0], [1.0, 1.0, 2.0], [0.0, 0.0, 1.0]], [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [0.0, 1.0, 2.0]], [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [0.0, 1.0, 4.0]]]
     out_man = [[[1.0, 0.0, 1.0], [1.0, 1.0, 2.0], [0.0, 0.0, 1.0]], [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [0.0, 1.0, 2.0]], [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [0.0, 1.0, 2.0]]]
     np.testing.assert_allclose(generalized_distance_transform(np.asarray(case)),np.asarray(out_euc))
-    # np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
+    np.testing.assert_allclose(generalized_distance_transform(np.asarray(case), dist_func=manhattan_dist, dist_meet=manhattan_meet),np.asarray(out_man))
