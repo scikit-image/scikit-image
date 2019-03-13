@@ -81,8 +81,6 @@ def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_me
             out = apply_along_axis(partial_one_d, i, (ndarr, out))
     return out
 
-# new np.applyalongaxis ###higher priority###
 # convert remaining lists to arrays
 # try to find a way to generalise the loops
-# low priority : make temp less awkeward
 # fix inf ###high priority###
