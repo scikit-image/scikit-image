@@ -84,6 +84,13 @@ Bugfixes
 - ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
   will return a boolean array instead of an array of 0s and 1s if the
   parameter ``indices`` was false.
+- When `compare_ssim` is used with `gaussian_weights` set to True, the boundary
+  crop used when computing the mean structural similarity will now exactly
+  match the width of the Gaussian used. The Gaussian filter window is also now
+  truncated at 3.5 rather than 4.0 standard deviations to exactly match the
+  original publication on the SSIM. These changes should produce only a very
+  small change in the computed SSIM value. There is no change to the existing
+  behavior when `gaussian_weights` is False.
 
 
 Deprecations

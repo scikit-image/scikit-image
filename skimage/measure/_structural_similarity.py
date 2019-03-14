@@ -17,16 +17,16 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     Parameters
     ----------
     X, Y : ndarray
-        Image.  Any dimensionality.
+        Image. Any dimensionality.
     win_size : int or None
-        The side-length of the sliding window used in comparison.  Must be an
-        odd value.  If `gaussian_weights` is True, this is ignored and the
+        The side-length of the sliding window used in comparison. Must be an
+        odd value. If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
     gradient : bool, optional
         If True, also return the gradient with respect to Y.
     data_range : float, optional
         The data range of the input image (distance between minimum and
-        maximum possible values).  By default, this is estimated from the image
+        maximum possible values). By default, this is estimated from the image
         data-type.
     multichannel : bool, optional
         If True, treat the last dimension of the array as channels. Similarity
@@ -41,14 +41,14 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     Other Parameters
     ----------------
     use_sample_covariance : bool
-        if True, normalize covariances by N-1 rather than, N where N is the
+        If True, normalize covariances by N-1 rather than, N where N is the
         number of pixels within the sliding window.
     K1 : float
-        algorithm parameter, K1 (small constant, see [1]_)
+        Algorithm parameter, K1 (small constant, see [1]_).
     K2 : float
-        algorithm parameter, K2 (small constant, see [1]_)
+        Algorithm parameter, K2 (small constant, see [1]_).
     sigma : float
-        sigma for the Gaussian when `gaussian_weights` is True.
+        Standard deviation for the Gaussian when `gaussian_weights` is True.
 
     Returns
     -------
@@ -129,9 +129,16 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         raise ValueError("sigma must be positive")
     use_sample_covariance = kwargs.pop('use_sample_covariance', True)
 
+    if gaussian_weights:
+        # Set to give an 11-tap filter with the default sigma of 1.5 to match
+        # Wang et. al. 2004.
+        truncate = 3.5
+
     if win_size is None:
         if gaussian_weights:
-            win_size = 11  # 11 to match Wang et. al. 2004
+            # set win_size used by crop to match the filter size
+            r = int(truncate * sigma + 0.5)  # radius as in ndimage
+            win_size = 2 * r + 1
         else:
             win_size = 7   # backwards compatibility
 
@@ -153,11 +160,8 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     ndim = X.ndim
 
     if gaussian_weights:
-        # sigma = 1.5 to approximately match filter in Wang et. al. 2004
-        # this ends up giving a 13-tap rather than 11-tap Gaussian
         filter_func = gaussian_filter
-        filter_args = {'sigma': sigma}
-
+        filter_args = {'sigma': sigma, 'truncate': truncate}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}

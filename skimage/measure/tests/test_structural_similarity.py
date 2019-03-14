@@ -176,7 +176,7 @@ def test_gaussian_mssim_vs_author_ref():
     mssim_matlab = 0.327314295673357
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
+    assert_almost_equal(mssim, mssim_matlab, decimal=10)
 
 
 def test_gaussian_mssim_and_gradient_vs_Matlab():
