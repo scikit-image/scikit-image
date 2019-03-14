@@ -50,8 +50,7 @@ def one_d(tuple_arr, dist_func, dist_meet):
     z = np.empty(n+1)
     z[0] = -np.inf
     z[1] = np.inf
-    v = [None]*n
-    v[0]=0
+    v = np.zeros(n,dtype=int)
     
     for q in range(1,n):
         s = dist_meet(q,v[k],f)
@@ -81,6 +80,5 @@ def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_me
             out = apply_along_axis(partial_one_d, i, (ndarr, out))
     return out
 
-# convert remaining lists to arrays
 # try to find a way to generalise the loops
 # fix inf ###high priority###
