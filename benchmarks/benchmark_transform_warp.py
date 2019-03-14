@@ -30,8 +30,15 @@ class WarpSuite:
             warp, inverse_map=tform,
             order=order, preserve_range=True)
 
-    # def time_same_type(self, dtype_in, N, order, dtype_tform):
     def time_warp(self, dtype_in, N, order):
+        """Test the case where the users wants to preserve their same low
+        precision data type."""
+        result = self.warp(self.image)
+
+        # convert back to input type, no-op if same type
+        result = result.astype(dtype_in, copy=False)
+
+    def peakmem_warp(self, dtype_in, N, order):
         """Test the case where the users wants to preserve their same low
         precision data type."""
         result = self.warp(self.image)
