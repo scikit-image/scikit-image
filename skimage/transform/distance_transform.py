@@ -38,47 +38,47 @@ def manhattan_meet(a,b,f):
     return np.finfo(np.float64).min
 
 
-def one_d(tuple_arr, dist_func, dist_meet):
+def _generalized_distance_transform_1d(tuple_arr, dist_func, dist_meet):
     arr = tuple_arr[0]
     if len(tuple_arr) > 1:
-        f = lambda x : tuple_arr[1][x]
+        cost_func = lambda x : tuple_arr[1][x]
     else:
-        f = lambda x : 0 if arr[x] == 0 else np.finfo(np.float64).max
+        cost_func = lambda x : 0 if arr[x] == 0 else np.finfo(np.float64).max
 
-    k=0
-    n=len(arr)
-    z = np.empty(n+1)
-    z[0] = -np.inf
-    z[1] = np.inf
-    v = np.zeros(n,dtype=int)
+    rightmost = 0
+    length = len(arr)
+    domains = np.empty(length+1)
+    domains[0] = -np.inf
+    domains[1] = np.inf
+    centers = np.zeros(length,dtype=int)
     
-    for q in range(1,n):
-        s = dist_meet(q,v[k],f)
-        while s <= z[k]:
-            k-=1
-            s = dist_meet(q,v[k],f)
+    for i in range(1,length):
+        intersection = dist_meet(i,centers[rightmost],cost_func)
+        while intersection <= domains[rightmost]:
+            rightmost-=1
+            intersection = dist_meet(i,centers[rightmost],cost_func)
 
-        k+=1
-        v[k]=q
-        z[k]=s
-        z[k+1] = np.inf
+        rightmost+=1
+        centers[rightmost]=i
+        domains[rightmost]=intersection
+        domains[rightmost+1] = np.inf
 
-    k=0
-    d = np.empty(n)
-    for q in range(n):
-        while z[k+1]<q:
-            k+=1
-        d[q] = dist_func(q,v[k],f(v[k]))
-    return d
+    current_domain = 0
+    out = np.empty(length)
+    for i in range(length):
+        while domains[current_domain+1]<i:
+            current_domain += 1
+        out[i] = dist_func(i,centers[current_domain],cost_func(centers[current_domain]))
+    return out
 
-def generalized_distance_transform(ndarr, f=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
-    partial_one_d = partial(one_d, dist_func=dist_func, dist_meet=dist_meet)
-    for i in range(ndarr.ndim):
-        if i == 0:
-            out = apply_along_axis(partial_one_d, 0, (ndarr,))
+def generalized_distance_transform(ndarr, cost_func=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+    gdt1d = partial(_generalized_distance_transform_1d, dist_func=dist_func, dist_meet=dist_meet)
+    for dimension in range(ndarr.ndim):
+        if dimension == 0:
+            out = apply_along_axis(gdt1d, 0, (ndarr,))
         else:
-            out = apply_along_axis(partial_one_d, i, (ndarr, out))
+            out = apply_along_axis(gdt1d, dimension, (ndarr, out))
     return out
 
 # try to find a way to generalise the loops
-# fix inf ###high priority###
+# fix inf ###low priority###

@@ -1,7 +1,6 @@
 from skimage.transform.distance_transform import (generalized_distance_transform,
                                                   manhattan_dist,
-                                                  manhattan_meet,
-                                                  one_d)
+                                                  manhattan_meet)
 import numpy as np
 
 
