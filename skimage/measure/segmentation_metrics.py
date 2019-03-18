@@ -1,13 +1,9 @@
 import numpy as np
-import multiprocessing
 from .simple_metrics import _assert_compatible
 import scipy.sparse as sparse
-from scipy.ndimage.measurements import label
 
-__all__ = [ 'compare_adapted_rand_error',
-            'compare_split_variation_of_information',
-            'compare_variation_of_information',
-          ]
+__all__ = ['compare_adapted_rand_error',
+           'compare_variation_of_information']
 
 def compare_adapted_rand_error(im_true, im_test):
     """Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
@@ -68,56 +64,25 @@ def compare_adapted_rand_error(im_true, im_test):
 
     return are, precision, recall
 
-def compare_variation_of_information(im_true, im_test, *, weights=np.ones(2)):
-    """Return the variation of information between two segmentations.
 
-    VI(X, Y) = H(X | Y) + H(Y | X), where H(.|.) denotes the conditional
-    entropy.
-
-    Parameters
-    ----------
-    im_true, im_test : ndarray of int
-        Image.  Any dimensionality.
-    weights : ndarray of float, shape (2,), optional
-        The weights of the conditional entropies of `im_true` and `im_test`. Equal weights
-        are the default.
-
-    Returns
-    -------
-    v : float
-        The variation of information between `im_true` and `im_test`.
-
-    References
-    ----------
-    .. [1] Meila, M. (2007). Comparing clusterings - an information
-           based distance. Journal of Multivariate Analysis 98, 873-895.
-           :DOI:`10.1016/j.jmva.2006.11.013`
-    """
-    return weights @ compare_split_variation_of_information(im_true, im_test)
-
-
-def compare_split_variation_of_information(im_true, im_test):
+def compare_variation_of_information(im_true, im_test):
     """Return the symmetric conditional entropies associated with the VI.
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
-    as the amount of under-segmentation of Y and H(X|Y) is then the amount
-    of over-segmentation.  In other words, a perfect over-segmentation
+    as the amount of under-segmentation of Y and H(X|Y) as the amount
+    of over-segmentation. In other words, a perfect over-segmentation
     will have H(Y|X)=0 and a perfect under-segmentation will have H(X|Y)=0.
 
     Parameters
     ----------
     im_true, im_test : ndarray of int
-        Image.  Any dimensionality.
+        Label images / segmentations.
 
     Returns
     -------
-    sv : ndarray of float, shape (2,)
+    vi : ndarray of float, shape (2,)
         The conditional entropies of im_test|im_true and im_true|im_test.
-
-    See Also
-    --------
-    compare_variation_of_information
     """
     hxgy, hygx = _vi_tables(im_true, im_test)
     # false splits, false merges
@@ -248,20 +213,18 @@ def _divide_columns(matrix, row):
 
 
 def _vi_tables(im_true, im_test):
-    """Return probability tables used for calculating VI.
+    """Compute probability tables used for calculating VI.
 
     Parameters
     ----------
     im_true, im_test : ndarray of int
-        Image.  Any dimensionality.
+        Input label images, any dimensionality.
 
     Returns
     -------
-    pxy : sparse.csc_matrix of float
-        The normalized contingency table.
     hxgy, hygx : ndarray of float
-        the per-segment conditional entropies of `im_true`
-         given `im_test` and vice-versa
+        Per-segment conditional entropies of ``im_true`` given ``im_test`` and
+        vice-versa.
     """
     # normalize, since it is an identity op if already done
     pxy = sparse.coo_matrix((np.full(im_true.size, 1/im_true.size), 
@@ -285,7 +248,7 @@ def _vi_tables(im_true, im_test):
 
 
 def _invert_nonzero(arr):
-    """Returns the inverse of the non-zero elements of arr
+    """Compute the inverse of the non-zero elements of arr, not changing 0.
 
     Parameters
     ----------
@@ -294,7 +257,8 @@ def _invert_nonzero(arr):
     Returns
     -------
     arr_inv : ndarray
-         the inverse of the non-zero elements of arr
+        Array containing the inverse of the non-zero elements of arr, and
+        zero elsewhere.
     """
     arr_inv = arr.copy()
     nz = np.nonzero(arr)
