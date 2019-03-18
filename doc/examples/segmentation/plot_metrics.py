@@ -84,36 +84,43 @@ im_test3 = morphological_geodesic_active_contour(gradient, iterations=100,
                                                  threshold=0.69)
 im_test3 = label(im_test3)
 
+method_names = ['Compact watershed', 'Canny filter',
+                'Morphological Geodesic Active Contours']
+short_method_names = ['Compact WS', 'Canny', 'GAC']
+
 precision_list = []
 recall_list = []
 split_list = []
 merge_list = []
-for im_test in [im_test1, im_test2, im_test3]:
+for name, im_test in zip(method_names, [im_test1, im_test2, im_test3]):
     error, precision, recall = compare_adapted_rand_error(im_true, im_test)
     splits, merges = compare_variation_of_information(im_true, im_test)
     split_list.append(splits)
     merge_list.append(merges)
     precision_list.append(precision)
     recall_list.append(recall)
-    print('Adapted Rand error: %f' % error)
-    print('Adapted Rand precision: %f' % precision)
-    print('Adapted Rand recall: %f' % recall)
-    print('False Splits: %f' % splits)
-    print('False Merges: %f' % merges)
+    print('\n## Method: {}'.format(name))
+    print('Adapted Rand error: {}'.format(error))
+    print('Adapted Rand precision: {}'.format(precision))
+    print('Adapted Rand recall: {}'.format(recall))
+    print('False Splits: {}'.format(splits))
+    print('False Merges: {}'.format(merges))
 
-fig, axes = plt.subplots(3, 2, figsize=(4, 6), constrained_layout=True)
+fig, axes = plt.subplots(2, 3, figsize=(4, 6), constrained_layout=True)
 ax = axes.ravel()
 
 ax[0].scatter(merge_list, split_list)
-for i, txt in enumerate(['Compact', 'Edge', 'GAC']):
-    ax[0].annotate(txt, (merge_list[i], split_list[i]))
+for i, txt in enumerate(short_method_names):
+    ax[0].annotate(txt, (merge_list[i], split_list[i]),
+                   verticalalignment='center')
 ax[0].set_xlabel('False Merges (bits)')
 ax[0].set_ylabel('False Splits (bits)')
 ax[0].set_title('Split Variation of Information')
 
 ax[1].scatter(precision_list, recall_list)
-for i, txt in enumerate(['Compact', 'Edge', 'GAC']):
-    ax[1].annotate(txt, (precision_list[i], recall_list[i]))
+for i, txt in enumerate(short_method_names):
+    ax[1].annotate(txt, (precision_list[i], recall_list[i]),
+                   verticalalignment='center')
 ax[1].set_xlabel('Precision')
 ax[1].set_ylabel('Recall')
 ax[1].set_title('Adapted Rand precision vs. recall')
