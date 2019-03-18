@@ -51,8 +51,8 @@ def compare_adapted_rand_error(im_true, im_test):
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=0).A.ravel()
-    b_i = p_ij.sum(axis=1).A.ravel()
+    a_i = p_ij.sum(axis=1).A.ravel()
+    b_i = p_ij.sum(axis=0).A.ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
@@ -124,7 +124,7 @@ def compare_split_variation_of_information(im_true, im_test):
     return np.array([hygx.sum(), hxgy.sum()])
 
 
-def _contingency_table(im_true, im_test):
+def _contingency_table(im_true, im_test, *, ignore_labels=[]):
     """Return the contingency table for all regions in matched segmentations.
 
     Parameters
@@ -133,21 +133,24 @@ def _contingency_table(im_true, im_test):
         Ground-truth label image.
     im_test : ndarray of int
         Test image.
+    ignore_labels : list of int, optional
+        Labels to ignore. Any part of the true image labeled with any of these
+        values will not be counted in the score.
 
     Returns
     -------
     cont : scipy.sparse.csr_matrix
         A contingency table. `cont[i, j]` will equal the number of voxels
-        labeled `i` in `im_test` and `j` in `im_true`.
+        labeled `i` in `im_true` and `j` in `im_test`.
     """
     im_test_r = im_test.ravel()
     im_true_r = im_true.ravel()
-    ignored = np.zeros(im_test_r.shape, np.bool)
+    ignored = np.zeros(im_true_r.shape, np.bool)
+    for label in ignore_labels:
+        ignored[im_true_r == label] = True
     data = np.ones(im_true_r.shape)
-    ignored[im_test_r == 0] = True
-    ignored[im_true_r == 0] = True
     data[ignored] = 0
-    cont = sparse.coo_matrix((data, (im_test_r, im_true_r))).tocsr()
+    cont = sparse.coo_matrix((data, (im_true_r, im_test_r))).tocsr()
     return cont
 
 
