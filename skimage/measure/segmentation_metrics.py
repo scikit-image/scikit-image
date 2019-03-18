@@ -10,10 +10,7 @@ __all__ = [ 'compare_adapted_rand_error',
           ]
 
 def compare_adapted_rand_error(im_true, im_test):
-    """Compute Adapted Rand error as defined by the SNEMI3D contest [1]
-
-    Formula is given as 1 - the maximal F-score of the Rand index
-    (excluding the zero component of the original labels).
+    """Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
     ----------
@@ -28,9 +25,17 @@ def compare_adapted_rand_error(im_true, im_test):
         The adapted Rand error; equal to $1 - \frac{2pr}{p + r}$,
         where $p$ and $r$ are the precision and recall described below.
     prec : float
-        The adapted Rand precision.
+        The adapted Rand precision: this is the number of pairs of pixels that
+        have the same label in the test label image *and* in the true image,
+        divided by the number in the test image.
     rec : float
-        The adapted Rand recall.
+        The adapted Rand recall: this is the number of pairs of pixels that
+        have the same label in the test label image *and* in the true image,
+        divided by the number in the true image.
+
+    Notes
+    -----
+    Pixels with label 0 in the true segmentation are ignored in the score.
 
     References
     ----------
@@ -41,36 +46,27 @@ def compare_adapted_rand_error(im_true, im_test):
     """
     _assert_compatible(im_true, im_test)
 
-    # segA is query, segB is truth
-    segA = im_test
-    segB = im_true
-
-    n = segA.size
-
-    # This is the contingency table obtained from segA and segB, we obtain
-    # the marginal probabilities from the table.
-    p_ij = _contingency_table(segB, segA)
+    p_ij = _contingency_table(im_true, im_test, ignore_labels=[0])
 
     # Sum of the joint distribution squared
-    sum_p_ij = p_ij.data @ p_ij.data
+    sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    # These are the axix-wise sums (np.sumaxis)
     a_i = p_ij.sum(axis=0).A.ravel()
     b_i = p_ij.sum(axis=1).A.ravel()
 
-    # Sum of the segment labeled 'A'
-    sum_a = a_i @ a_i
-    # Sum of the segment labeled 'B'
-    sum_b = b_i @ b_i
+    # Sum of squares of the test segment sizes (this is 2x the number of pairs
+    # of pixels with the same label in im_test)
+    sum_a2 = a_i @ a_i - a_i.sum()
+    # Same for im_true
+    sum_b2 = b_i @ b_i - b_i.sum()
 
-    precision = (sum_p_ij - n)/ (sum_a - n)
-    recall = (sum_p_ij - n)/ (sum_b - n)
+    precision = sum_p_ij2 / sum_a2
+    recall = sum_p_ij2 / sum_b2
 
     fscore = 2. * precision * recall / (precision + recall)
     are = 1. - fscore
 
-    return (are, precision, recall)
-
+    return are, precision, recall
 
 def compare_variation_of_information(im_true, im_test, *, weights=np.ones(2)):
     """Return the variation of information between two segmentations.
