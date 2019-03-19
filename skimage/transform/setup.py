@@ -16,7 +16,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_hough_transform.pyx',
             '_warps_cy.pyx',
             '_radon_transform.pyx',
-            '_seam_carving.pyx'], working_path=base_path)
+            '_seam_carving.pyx',
+            '_distance_transform.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -29,6 +30,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_seam_carving', sources=['_seam_carving.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_distance_transform', sources=['_distance_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
     return config
 
