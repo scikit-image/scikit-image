@@ -728,7 +728,6 @@ class ProjectiveTransform(GeometricTransform):
         lines = npstring[1:].split('\n ')
         indented_lines = ['    ' + p for p in lines]
         paramstr = 'matrix=[\n' + '\n'.join(indented_lines)
-        print(paramstr)
         return paramstr
 
     def __repr__(self):

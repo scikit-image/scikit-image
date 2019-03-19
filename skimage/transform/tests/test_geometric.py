@@ -9,6 +9,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+import textwrap
 
 
 SRC = np.array([
@@ -471,3 +472,27 @@ def test_degenerate():
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
+
+
+def test_projective_repr():
+    tform = ProjectiveTransform()
+    want = re.escape(textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=[
+            [1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]]) at
+        ''').strip()) + ' 0x[a-f0-9]+' + re.escape('>')
+    assert re.match(want, repr(tform))
+
+
+def test_projective_str():
+    tform = ProjectiveTransform()
+    want = textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=[
+            [1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]])>
+        ''').strip()
+    assert str(tform) == want
