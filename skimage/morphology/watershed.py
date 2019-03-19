@@ -31,7 +31,7 @@ from . import _watershed
 from ..util import crop, regular_seeds
 
 
-def _validate_inputs(image, markers, mask):
+def _validate_inputs(image, markers, mask, connectivity):
     """Ensure that all inputs to watershed have matching shapes and types.
 
     Parameters
@@ -42,6 +42,8 @@ def _validate_inputs(image, markers, mask):
         The marker image.
     mask : array, or None
         A boolean mask, True where we want to compute the watershed.
+    connectivity : int in {1, ..., image.ndim}
+        The connectivity of the neighborhood of a pixel.
 
     Returns
     -------
@@ -66,7 +68,11 @@ def _validate_inputs(image, markers, mask):
             message = ("`mask` (shape {}) must have same shape as "
                        "`image` (shape {})".format(mask.shape, image.shape))
             raise ValueError(message)
-    if not isinstance(markers, (np.ndarray, list, tuple)):
+    if markers is None:
+        from .extrema import local_minima
+        markers_bool = local_minima(image, connectivity=connectivity) * mask
+        markers = ndi.label(markers_bool)[0]
+    elif not isinstance(markers, (np.ndarray, list, tuple)):
         # not array-like, assume int
         # given int, assume that number of markers *within mask*.
         markers = regular_seeds(image.shape,
@@ -166,7 +172,7 @@ def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
     return offsets[np.argsort(squared_distances)]
 
 
-def watershed(image, markers, connectivity=1, offset=None, mask=None,
+def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
               compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
 
@@ -174,9 +180,11 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     ----------
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
-    markers: int, or ndarray of int, same shape as `image`
+    markers: int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
-        values to be assigned in the label matrix. Zero means not a marker.
+        values to be assigned in the label matrix. Zero means not a marker. If
+        no markers are given, the local minima of the image are used as
+        markers.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
@@ -273,7 +281,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    image, markers, mask = _validate_inputs(image, markers, mask)
+    image, markers, mask = _validate_inputs(image, markers, mask, connectivity)
     connectivity, offset = _validate_connectivity(image.ndim, connectivity,
                                                   offset)
 

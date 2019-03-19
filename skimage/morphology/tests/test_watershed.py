@@ -487,5 +487,12 @@ def test_markers_in_mask():
     assert np.all(out[~mask] == 0)
 
 
+def test_no_markers():
+    data = blob
+    mask = (data != 255)
+    out = watershed(data, mask=mask)
+    assert np.max(out) == 2
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
