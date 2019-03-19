@@ -55,17 +55,27 @@ def _validate_inputs(image, markers, mask):
     ValueError
         If the shapes of the given arrays don't match.
     """
-    if not isinstance(markers, (np.ndarray, list, tuple)):
-        # not array-like, assume int
-        markers = regular_seeds(image.shape, markers)
-    elif markers.shape != image.shape:
-        raise ValueError("`markers` (shape {}) must have same shape "
-                         "as `image` (shape {})".format(markers.shape, image.shape))
+    n_pixels = image.size
     if mask is not None and mask.shape != image.shape:
-        raise ValueError("`mask` must have same shape as `image`")
+        raise ValueError("`mask` (shape {}) must have same shape as `image` "
+                         "(shape {})".format(mask.shape, image.shape))
     if mask is None:
         # Use a complete `True` mask if none is provided
         mask = np.ones(image.shape, bool)
+    else:
+        n_pixels = np.sum(mask)
+    if not isinstance(markers, (np.ndarray, list, tuple)):
+        # not array-like, assume int
+        # given int, assume that number of markers *within mask*.
+        markers = regular_seeds(image.shape,
+                                int(markers / (n_pixels / image.size)))
+        markers *= mask
+    else:
+        markers = np.asanyarray(markers) * mask
+        if markers.shape != image.shape:
+            message = ("`markers` (shape {}) must have same shape as "
+                       "`image` (shape {})".format(markers.shape, image.shape))
+            raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
             mask.astype(np.int8))
