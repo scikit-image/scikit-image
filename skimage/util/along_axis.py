@@ -27,7 +27,7 @@ def apply_along_axis(func1d, axis, tuple_arr, *args, **kwargs):
         ind0 = next(inds)
     except StopIteration:
         raise ValueError('Cannot apply_along_axis when any iteration dimensions are 0')
-    res = asanyarray(func1d(tuple([inarr_view[ind0] for inarr_view in inarr_views]), *args, **kwargs))
+    res = asanyarray(func1d(*([inarr_view[ind0] for inarr_view in inarr_views]), *args, **kwargs))
 
     # build a buffer for storing evaluations of func1d.
     # remove the requested axis, and add the new ones on the end.
@@ -49,7 +49,7 @@ def apply_along_axis(func1d, axis, tuple_arr, *args, **kwargs):
     # save the first result, then compute and save all remaining results
     buff[ind0] = res
     for ind in inds:
-        buff[ind] = asanyarray(func1d(tuple([inarr_view[ind] for inarr_view in inarr_views]), *args, **kwargs))
+        buff[ind] = asanyarray(func1d(*([inarr_view[ind] for inarr_view in inarr_views]), *args, **kwargs))
 
     # wrap the array, to preserve subclasses
     buff = res.__array_wrap__(buff)

@@ -32,18 +32,16 @@ cdef manhattan_meet(double a, double b, np.ndarray[double, ndim=1] f):
         return np.finfo(np.float64).max
     return np.finfo(np.float64).min
 
-cdef _generalized_distance_transform_1d_euclidean(tuple tuple_arr,
+cdef _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
                                        bint isfirst, np.ndarray[double, ndim=1] domains,
                                        np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef np.ndarray[long, ndim=1] arr = tuple_arr[0]
-    cdef np.ndarray[double, ndim=1] cost_arr = tuple_arr[1]
     cdef short length = len(arr)
     cdef short i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
         for i in range(length):
-            cost_arr[i] = f(arr[i])
+            cost_arr[i] = f(<bint>arr[i])
 
     rightmost = 0
     domains[0] = -np.inf
@@ -68,18 +66,16 @@ cdef _generalized_distance_transform_1d_euclidean(tuple tuple_arr,
         out[i] = euclidean_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-cdef _generalized_distance_transform_1d_manhattan(tuple tuple_arr,
+cdef _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
                                        bint isfirst, np.ndarray[double, ndim=1] domains,
                                        np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef np.ndarray[long, ndim=1] arr = tuple_arr[0]
-    cdef np.ndarray[double, ndim=1] cost_arr = tuple_arr[1]
     cdef short length = len(arr)
     cdef short i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
         for i in range(length):
-            cost_arr[i] = f(arr[i])
+            cost_arr[i] = f(<bint>arr[i])
 
     rightmost = 0
     domains[0] = -np.inf
@@ -104,19 +100,17 @@ cdef _generalized_distance_transform_1d_manhattan(tuple tuple_arr,
         out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-cdef _generalized_distance_transform_1d_slow(tuple tuple_arr,
+cdef _generalized_distance_transform_1d_slow(double[:] arr, double[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
                                        bint isfirst, np.ndarray[double, ndim=1] domains,
                                        np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef np.ndarray[long, ndim=1] arr = tuple_arr[0]
-    cdef np.ndarray[double, ndim=1] cost_arr = tuple_arr[1]
     cdef short length = len(arr)
     cdef short i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
         for i in range(length):
-            cost_arr[i] = cost_func(arr[i])
+            cost_arr[i] = cost_func(<bint>arr[i])
 
     rightmost = 0
     domains[0] = -np.inf
