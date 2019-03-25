@@ -1,12 +1,31 @@
+import itertools
 import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
-from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
+
+
+def _gaussian_weight(sigma_sqr, value):
+    return np.exp(-0.5 * value * value / sigma_sqr)
+
+
+def _compute_color_lut(bins, sigma, max_value, dtype):
+    color_lut = _gaussian_weight(sigma**2, np.linspace(0, max_value/bins, bins,
+                                                       endpoint=False))
+    return color_lut
+
+
+def _compute_range_lut(win_size, sigma):
+    grid_points = np.arange(-win_size, win_size + 1)
+    rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
+    d = np.hypot(rr, cc)
+    range_lut = _gaussian_weight(sigma**2, d).ravel()
+    return range_lut
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -109,8 +128,43 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)
 
-    return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
-                              bins, mode, cval)
+    min_value = image.min()
+    max_value = image.max()
+
+    if min_value == max_value:
+        return image
+
+    # if image.max() is 0, then dist_scale can have an unverified value
+    # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
+    # so we verify we have a positive image and that the max is not 0.0.
+    if min_value < 0.0:
+        raise ValueError("Image must contain only positive values")
+
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
+
+    sigma_color = sigma_color or image.std()
+
+    color_lut = _compute_color_lut(bins, sigma_color, max_value, image.dtype)
+
+    range_lut = _compute_range_lut(win_size, sigma_spatial)
+
+    out = np.empty(image.shape, dtype=image.dtype)
+
+    dims = image.shape[2]
+
+    # There are a number of arrays needed in the Cython function.
+    # It's easier to allocate them outside of Cython so that all
+    # arrays are in the same type, then just copy the empty array
+    # where needed within Cython.
+    empty_dims = np.empty(dims, dtype=image.dtype)
+
+    return _denoise_bilateral(image, image.max(), win_size, sigma_color,
+                              sigma_spatial, bins, mode, cval, color_lut,
+                              range_lut, empty_dims, out)
 
 
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
@@ -157,7 +211,18 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     .. [4] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
-    return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
+    image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
+
+    rows = image.shape[0]
+    cols = image.shape[1]
+    dims = image.shape[2]
+
+    shape_ext = (rows + 2, cols + 2, dims)
+
+    out = np.zeros(shape_ext, image.dtype)
+    _denoise_tv_bregman(image, weight, max_iter, eps, isotropic, out)
+    return np.squeeze(out[1:-1, 1:-1])
 
 
 def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):

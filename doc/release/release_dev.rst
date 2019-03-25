@@ -21,6 +21,9 @@ New Features
   ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
 - Image translation registration for masked data
   (``skimage.feature.masked_register_translation``)
+- Frangi (vesselness) filter for 3D data
+- Meijering (neuriteness) filter for nD data
+- Sato (tubeness) filter for 2D and 3D data
 - Flood fill, fully n-dimensional with tolerance supported (#3245)
 
 
@@ -74,12 +77,20 @@ API Changes
 Bugfixes
 --------
 
+- Correct bright ridge detection for Frangi filter (#2700)
 - ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
   no longer raise an error if any dimension of the image is smaller 3 and
   the keyword ``allow_borders`` was false.
 - ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
   will return a boolean array instead of an array of 0s and 1s if the
   parameter ``indices`` was false.
+- When `compare_ssim` is used with `gaussian_weights` set to True, the boundary
+  crop used when computing the mean structural similarity will now exactly
+  match the width of the Gaussian used. The Gaussian filter window is also now
+  truncated at 3.5 rather than 4.0 standard deviations to exactly match the
+  original publication on the SSIM. These changes should produce only a very
+  small change in the computed SSIM value. There is no change to the existing
+  behavior when `gaussian_weights` is False.
 
 
 Deprecations
