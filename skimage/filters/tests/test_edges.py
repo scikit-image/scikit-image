@@ -386,7 +386,7 @@ def test_farid_horizontal():
     # Fudge the eroded points
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == result[i == 0][0]))
-    assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
+    assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
 
 def test_farid_vertical():
@@ -396,7 +396,7 @@ def test_farid_vertical():
     result = filters.farid(image) * np.sqrt(2)
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
-    assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
+    assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
 
 def test_farid_h_zeros():
@@ -421,7 +421,7 @@ def test_farid_h_horizontal():
     # Fudge the eroded points
     i[np.abs(j) == 5] = 10000
     assert np.all(result[i == 0] == result[i == 0][0])
-    assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
+    assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
 
 def test_farid_h_vertical():
@@ -454,7 +454,7 @@ def test_farid_v_vertical():
     # Fudge the eroded points
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
-    assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
+    assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
 
 def test_farid_v_horizontal():
@@ -466,7 +466,7 @@ def test_farid_v_horizontal():
 
 
 @testing.parametrize("grad_func", (filters.prewitt_h, filters.sobel_h,
-                                   filters.scharr_h, filters.farid_h))
+                                   filters.scharr_h))
 def test_horizontal_mask_line(grad_func):
     """Horizontal edge filters mask pixels surrounding input mask."""
     vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
@@ -484,7 +484,7 @@ def test_horizontal_mask_line(grad_func):
 
 
 @testing.parametrize("grad_func", (
-    filters.prewitt_v, filters.sobel_v, filters.scharr_v, filters.farid_v))
+    filters.prewitt_v, filters.sobel_v, filters.scharr_v))
 def test_vertical_mask_line(grad_func):
     """Vertical edge filters mask pixels surrounding input mask."""
     _, hgrad = np.mgrid[:1:11j, :1:11j]  # horizontal gradient with spacing 0.1
