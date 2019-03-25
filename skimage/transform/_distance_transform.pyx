@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 cimport numpy as np
 
 cdef f(bint p):
@@ -6,6 +7,7 @@ cdef f(bint p):
     if p == 0:
         out = 0
     out = np.finfo(np.float64).max
+    print(warnings.warn(p,out))
     return out
 
 cdef euclidean_dist(double a, double b, double c):
@@ -29,14 +31,14 @@ cdef manhattan_meet(double a, double b, np.ndarray[double, ndim=1] f):
     if manhattan_dist(a,s,f[a])==manhattan_dist(b,s,f[b]):
         return s
     if manhattan_dist(a,a,f[a]) > manhattan_dist(b,a,f[b]):
-        return np.finfo(np.float64).max
-    return np.finfo(np.float64).min
+        return <double>np.finfo(np.float64).max
+    return <double>np.finfo(np.float64).min
 
-cdef _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
-                                       bint isfirst, np.ndarray[double, ndim=1] domains,
-                                       np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef short length = len(arr)
-    cdef short i, rightmost, current_domain
+def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
+                                       bint isfirst, double[::1] domains,
+                                       Py_ssize_t[::1] centers, double[::1] out):
+    cdef Py_ssize_t length = len(arr)
+    cdef Py_ssize_t i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
@@ -66,11 +68,11 @@ cdef _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_
         out[i] = euclidean_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-cdef _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
-                                       bint isfirst, np.ndarray[double, ndim=1] domains,
-                                       np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef short length = len(arr)
-    cdef short i, rightmost, current_domain
+def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
+                                       bint isfirst, double[::1] domains,
+                                       Py_ssize_t[::1] centers, double[::1] out):
+    cdef Py_ssize_t length = len(arr)
+    cdef Py_ssize_t i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
@@ -100,12 +102,17 @@ cdef _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_
         out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-cdef _generalized_distance_transform_1d_slow(double[:] arr, double[:] cost_arr,
+"""
+def _generalized_distance_transform_1d_slow(double[:] arr, double[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
-                                       bint isfirst, np.ndarray[double, ndim=1] domains,
-                                       np.ndarray[int, ndim=1] centers, np.ndarray[double, ndim=1] out):
-    cdef short length = len(arr)
-    cdef short i, rightmost, current_domain
+                                       bint isfirst, double[::1] domains,
+                                       Py_ssize_t[::1] centers, double[::1] out):"""
+def _generalized_distance_transform_1d_slow(arr,cost_arr,
+                                       cost_func, dist_func, dist_meet,
+                                       bint isfirst, domains,
+                                       centers, out):
+    cdef Py_ssize_t length = len(arr)
+    cdef Py_ssize_t i, rightmost, current_domain
     cdef double intersection
 
     if isfirst:
@@ -132,5 +139,5 @@ cdef _generalized_distance_transform_1d_slow(double[:] arr, double[:] cost_arr,
     for i in range(length):
         while domains[current_domain+1]<i:
             current_domain += 1
-        out[i] = dist_func(i,centers[current_domain],cost_arr[centers[current_domain]])
+        out[i] = <double>dist_func(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out

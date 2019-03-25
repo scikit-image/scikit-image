@@ -7,9 +7,10 @@ np.finfo(np.float64).max if the first graph is at the top and np.finfo(np.float6
 it is at the bottom.
 """
 
-
+import warnings
 import numpy as np
 from ..util.along_axis import apply_along_axis
+from ..util import img_as_float64
 from functools import partial 
 from ._distance_transform import (_generalized_distance_transform_1d_euclidean,
                                   _generalized_distance_transform_1d_manhattan,
@@ -40,20 +41,22 @@ def manhattan_meet(a,b,f):
         return np.finfo(np.float64).max
     return np.finfo(np.float64).min
 
-def generalized_distance_transform(ndarr, func='slow', cost_func=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+def generalized_distance_transform(ndarr_in, func='slow', cost_func=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+    ndarr = ndarr_in.astype(np.double)
     if func == 'euclidean':
         gdt1d = _generalized_distance_transform_1d_euclidean
     elif func == "manhattan":
         gdt1d = _generalized_distance_transform_1d_manhattan
     else:
         gdt1d = partial(_generalized_distance_transform_1d_slow, cost_func=cost_func, dist_func=dist_func, dist_meet=dist_meet)
+        warnings.warn("slow")
     
     output = np.empty(ndarr.shape)
     for dimension in range(ndarr.ndim):
         length = ndarr.shape[dimension]
-        domains_buffer =np.empty(length+1)
+        domains_buffer =np.empty(length+1, dtype=np.double)
         centers_buffer = np.zeros(length,dtype=np.intp)
-        out_buffer = np.empty(length)
+        out_buffer = np.empty(length, dtype=np.double)
         
         if dimension == 0:
             output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer)
