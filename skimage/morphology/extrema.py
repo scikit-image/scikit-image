@@ -18,7 +18,7 @@ from scipy import ndimage as ndi
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
 from . import greyreconstruct
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
 
 

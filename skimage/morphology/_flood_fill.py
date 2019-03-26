@@ -9,7 +9,7 @@ import warnings
 
 from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
                       _fast_pad)
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _offsets_to_raveled_neighbors
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 

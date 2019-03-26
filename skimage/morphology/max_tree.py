@@ -39,8 +39,7 @@ References:
 
 import numpy as np
 
-from .watershed import _validate_connectivity
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import invert
 
 from . import _max_tree
