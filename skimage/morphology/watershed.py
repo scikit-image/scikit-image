@@ -28,6 +28,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from . import _watershed
+from .extrema import local_minima
 from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import crop, regular_seeds
 
@@ -70,7 +71,6 @@ def _validate_inputs(image, markers, mask, connectivity):
                        "`image` (shape {})".format(mask.shape, image.shape))
             raise ValueError(message)
     if markers is None:
-        from .extrema import local_minima
         markers_bool = local_minima(image, connectivity=connectivity) * mask
         markers = ndi.label(markers_bool)[0]
     elif not isinstance(markers, (np.ndarray, list, tuple)):
