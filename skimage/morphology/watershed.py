@@ -101,7 +101,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     markers: int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
-        no markers are given, the local minima of the image are used as
+        ``None`` (no markers given), the local minima of the image are used as
         markers.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
