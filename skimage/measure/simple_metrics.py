@@ -3,6 +3,7 @@ import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
 from ..util import img_as_float
+from ..exposure import rescale_intensity
 from scipy.ndimage import maximum_filter, minimum_filter
 
 
@@ -149,7 +150,7 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 
 def enhancement_measure(image: np.ndarray,
-                        eps: float = 1e-3,
+                        eps: float = 1e-7,
                         size: int = 3) -> float:
     """
         The image enhancement measure called EME based on [1]_.
@@ -163,7 +164,7 @@ def enhancement_measure(image: np.ndarray,
         size : int
             Size of the window. Default value is 3.
         eps : float
-            Parameter to avoid division by zero.
+            Parameter to avoid division by zero. Default value is 1e-7.
         Returns
         -------
         eme : float
@@ -188,6 +189,7 @@ def enhancement_measure(image: np.ndarray,
     """
 
     image = img_as_float(image)
+    image = rescale_intensity(image, out_range=(0., 1.))
     eme = np.zeros_like(image)
     eme = np.divide(maximum_filter(image, size=size),
                     minimum_filter(image, size=size) + eps)
