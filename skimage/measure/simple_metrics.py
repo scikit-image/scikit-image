@@ -149,6 +149,7 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 
 def enhancement_measure(image: np.ndarray,
+                        eps: float = 1e-3,
                         size: int = 3) -> float:
     """
         The image enhancement measure called EME based on [1]_.
@@ -184,9 +185,10 @@ def enhancement_measure(image: np.ndarray,
             1.299327371881219
 
     """
+
     image = img_as_float(image)
     eme = np.zeros_like(image)
-    eme = np.divide(maximum_filter(image, tuple([size]*len(image.shape))) + 1,
-                    minimum_filter(image, tuple([size]*len(image.shape))) + 1)
+    eme = np.divide(maximum_filter(image, size=size),
+                    minimum_filter(image, size=size) + eps)
     eme = np.mean(20 * np.log(eme))
     return eme
