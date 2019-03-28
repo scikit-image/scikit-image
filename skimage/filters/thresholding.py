@@ -19,7 +19,6 @@ __all__ = ['try_all_threshold',
            'threshold_minimum',
            'threshold_mean',
            'threshold_triangle',
-           'threshold_multiotsu',
            'threshold_niblack',
            'threshold_sauvola',
            'apply_hysteresis_threshold']
