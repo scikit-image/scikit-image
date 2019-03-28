@@ -124,7 +124,9 @@ the corresponding release branch.
    twine upload dist/scikit-image-<major>.<minor>.0.tar.gz
 
 - Update the web frontpage:
-  The webpage is kept in a separate repo: scikit-image-web
+  The webpage source is kept in a separate repo: scikit-image-web. The
+  live webpage lives in a second repo, scikit-image.github.com, that you only
+  interact with via the ``make`` command within scikit-image-web.
 
   - Sync your branch with the remote repo: ``git pull``.
     If you try to ``make gh-pages`` when your branch is out of sync, it
@@ -132,8 +134,10 @@ the corresponding release branch.
   - Add release date to ``index.rst`` under "News".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
-  - Build using ``make gh-pages``.
-  - Push upstream: ``git push origin master`` in ``gh-pages``.
+  - Commit and push back to master. (Nothing is being served at this stage.)
+  - Build using ``make gh-pages``. (This checks out a copy of the
+    scikit-image.github.com repository in the ``gh-pages`` directory.)
+  - Push the built site: ``cd gh-pages`` and ``git push origin master``.
 
 - Post release notes on mailing lists, blog, Twitter, etc.
 

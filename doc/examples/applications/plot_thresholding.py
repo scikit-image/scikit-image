@@ -26,7 +26,7 @@ mechanisms.
 
 .. seealso::
    Presentation on
-   :ref:`sphx_glr_auto_examples_xx_applications_plot_rank_filters.py`.
+   :ref:`sphx_glr_auto_examples_applications_plot_rank_filters.py`.
 """
 import matplotlib.pyplot as plt
 

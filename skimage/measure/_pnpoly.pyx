@@ -47,9 +47,10 @@ def _grid_points_in_poly(shape, verts):
     cdef cnp.ndarray[dtype=cnp.uint8_t, ndim=2, mode="c"] out = \
          np.zeros((M, N), dtype=np.uint8)
 
-    for m in range(M):
-        for n in range(N):
-            out[m, n] = point_in_polygon(V, &vx[0], &vy[0], m, n)
+    with nogil:
+        for m in range(M):
+            for n in range(N):
+                out[m, n] = point_in_polygon(V, &vx[0], &vy[0], m, n)
 
     return out.view(bool)
 
@@ -94,4 +95,3 @@ def _points_in_poly(points, verts):
                       <unsigned char*>out.data)
 
     return out.astype(bool)
-

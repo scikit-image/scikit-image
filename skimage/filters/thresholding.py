@@ -3,6 +3,7 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from collections import OrderedDict
+from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
@@ -279,7 +280,7 @@ def threshold_otsu(image, nbins=256):
                          "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -334,7 +335,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
@@ -406,7 +407,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -527,8 +528,8 @@ def threshold_li(image, *, tolerance=None):
 
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
-        is less than this value. By default, this is half of the range of the
-        input image, divided by 256.
+        is less than this value. By default, this is half the smallest
+        difference between intensity values in ``image``.
 
     Returns
     -------
@@ -578,8 +579,7 @@ def threshold_li(image, *, tolerance=None):
     # Li's algorithm requires positive image (because of log(mean))
     image_min = np.min(image)
     image -= image_min
-    image_range = np.max(image)
-    tolerance = tolerance or 0.5 * image_range / 256
+    tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate
     t_curr = np.mean(image)
@@ -662,7 +662,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
     smooth_hist = np.copy(hist).astype(np.float64)
 
@@ -750,7 +750,7 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins)
+    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
@@ -792,152 +792,47 @@ def threshold_triangle(image, nbins=256):
     return bin_centers[arg_level]
 
 
-def threshold_multiotsu(image, classes=3, bins=255):
-    """Generates multiple thresholds for an input image.
-    Based on the Multi-Otsu approach by Liao, Chen and Chung.
+def _validate_window_size(axis_sizes):
+    """Ensure all sizes in ``axis_sizes`` are odd.
 
     Parameters
     ----------
-    image : (N, M) ndarray
-        Grayscale input image.
-    classes : int, optional
-        Number of classes to be thresholded, i.e. the number of resulting
-        regions. Accepts an integer from 2 to 5. Default is 3.
-    bins : int, optional
-        Number of bins used to calculate the histogram. Default is 255.
+    axis_sizes : iterable of int
 
-    Returns
-    -------
-    idx_thresh : array
-        Array containing the threshold values for the desired classes.
-
-    References
-    ----------
-    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
-           multilevel thresholding", Journal of Information Science and
-           Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-    .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
-           Available at:
-           <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
-
-    Examples
-    --------
-    >>> from skimage.color import label2rgb
-    >>> from skimage import data
-    >>> image = data.camera()
-    >>> thresh = threshold_multiotsu(image)
-    >>> regions = np.digitize(image, bins=thresh)
-    >>> regions_colorized = label2rgb(regions)
+    Raises
+    ------
+    ValueError
+        If any given axis size is even.
     """
-    # receiving minimum and maximum values for the image type.
-    type_min, type_max = dtype_limits(image)
-
-    # calculating the histogram and the probability of each gray level.
-    hist, _ = np.histogram(image.ravel(), bins=bins,
-                           range=(type_min, type_max))
-    prob = hist / image.size
-
-    max_sigma = 0
-    momP, momS, var_btwcls = [np.zeros((bins, bins)) for n in range(3)]
-
-    # building the lookup tables.
-    # step 1: calculating the diagonal.
-    for u in range(1, bins):
-        momP[u, u] = prob[u]
-        momS[u, u] = u * prob[u]
-
-    # step 2: calculating the first row.
-    for u in range(1, bins-1):
-        momP[1, u+1] = momP[1, u] + prob[u+1]
-        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
-
-    # step 3: calculating the other rows recursively.
-    for u in range(2, bins):
-        for v in range(u+1, bins):
-            momP[u, v] = momP[1, v] - momP[1, u-1]
-            momS[u, v] = momS[1, v] - momS[1, u-1]
-
-    # step 4: calculating the between class variance.
-    for u in range(1, bins):
-        for v in range(u+1, bins):
-            if (momP[u, v] != 0):
-                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
-            else:
-                var_btwcls[u, v] = 0
-
-    # finding max threshold candidates, depending on classes.
-    # number of thresholds is equal to number of classes - 1.
-    if classes == 2:
-        for idx in range(1, bins - classes):
-            part_sigma = var_btwcls[1, idx] + var_btwcls[idx+1, bins-1]
-            if max_sigma < part_sigma:
-                aux_thresh = idx
-                max_sigma = part_sigma
-
-    elif classes == 3:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                part_sigma = var_btwcls[1, idx1] + \
-                            var_btwcls[idx1+1, idx2] + \
-                            var_btwcls[idx2+1, bins-1]
-
-                if max_sigma < part_sigma:
-                    aux_thresh = idx1, idx2
-                    max_sigma = part_sigma
-
-    elif classes == 4:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                for idx3 in range(idx2+1, bins - classes+2):
-                    part_sigma = var_btwcls[1, idx1] + \
-                                var_btwcls[idx1+1, idx2] + \
-                                var_btwcls[idx2+1, idx3] + \
-                                var_btwcls[idx3+1, bins-1]
-
-                    if max_sigma < part_sigma:
-                        aux_thresh = idx1, idx2, idx3
-                        max_sigma = part_sigma
-
-    elif classes == 5:
-        for idx1 in range(1, bins - classes):
-            for idx2 in range(idx1+1, bins - classes+1):
-                for idx3 in range(idx2+1, bins - classes+2):
-                    for idx4 in range(idx3+1, bins - classes+3):
-                        part_sigma = var_btwcls[1, idx1] + \
-                            var_btwcls[idx1+1, idx2] + \
-                            var_btwcls[idx2+1, idx3] + \
-                            var_btwcls[idx3+1, idx4] + \
-                            var_btwcls[idx4+1, bins-1]
-
-                        if max_sigma < part_sigma:
-                            aux_thresh = idx1, idx2, idx3, idx4
-                            max_sigma = part_sigma
-
-    # correcting values according to minimum and maximum values.
-    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / bins
-
-    return idx_thresh
+    for axis_size in axis_sizes:
+        if axis_size % 2 == 0:
+            msg = ('Window size for `threshold_sauvola` or '
+                   '`threshold_niblack` must not be even on any dimension. '
+                   'Got {}'.format(axis_sizes))
+            raise ValueError(msg)
 
 
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
-    neighborhood defined by a rectangular window with size w times w.
+    neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation. This is
-    used by threshold_niblack and threshold_sauvola.
+    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    w : int
-        Odd window size (e.g. 3, 5, 7, ..., 21, ...).
+    w : int, or iterable of int
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
 
     Returns
     -------
-    m : 2-D array of same size of image with local mean values.
-    s : 2-D array of same size of image with local standard
-        deviation values.
+    m : ndarray of float, same shape as ``image``
+        Local mean of the image.
+    s : ndarray of float, same shape as ``image``
+        Local standard deviation of the image.
 
     References
     ----------
@@ -947,27 +842,27 @@ def _mean_std(image, w):
            Retrieval XV, (San Jose, USA), Jan. 2008.
            :DOI:`10.1117/12.767755`
     """
-    if w == 1 or w % 2 == 0:
-        raise ValueError(
-            "Window size w = %s must be odd and greater than 1." % w)
+    if not isinstance(w, Iterable):
+        w = (w,) * image.ndim
+    _validate_window_size(w)
 
-    left_pad = w // 2 + 1
-    right_pad = w // 2
-    padded = np.pad(image.astype('float'), (left_pad, right_pad),
+    pad_width = tuple((k // 2 + 1, k // 2) for k in w)
+    padded = np.pad(image.astype('float'), pad_width,
                     mode='reflect')
     padded_sq = padded * padded
 
     integral = integral_image(padded)
     integral_sq = integral_image(padded_sq)
 
-    kern = np.zeros((w + 1,) * image.ndim)
+    kern = np.zeros(tuple(k + 1 for k in w))
     for indices in itertools.product(*([[0, -1]] * image.ndim)):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
+    total_window_size = np.prod(w)
     sum_full = ndi.correlate(integral, kern, mode='constant')
-    m = crop(sum_full, (left_pad, right_pad)) / (w ** image.ndim)
+    m = crop(sum_full, pad_width) / total_window_size
     sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, (left_pad, right_pad)) / (w ** image.ndim)
+    g2 = crop(sum_sq_full, pad_width) / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
@@ -989,10 +884,12 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    image: ndarray
+        Input image.
+    window_size : int, or iterable of int, optional
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of parameter k in threshold formula.
 
@@ -1038,10 +935,12 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        Grayscale input image.
-    window_size : int, optional
-        Odd size of pixel neighborhood window (e.g. 3, 5, 7...).
+    image: ndarray
+        Input image.
+    window_size : int, or iterable of int, optional
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional

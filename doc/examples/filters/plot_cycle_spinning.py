@@ -1,7 +1,7 @@
 """
-=================
-Wavelet denoising
-=================
+=================================
+Shift-invariant wavelet denoising
+=================================
 
 The discrete wavelet transform is not `shift-invariant`_.  Shift invariance can
 be achieved through an undecimated wavelet transform (also called stationary
@@ -12,9 +12,9 @@ transform is to use the technique known as "cycle spinning".  This involves
 averaging the results of the following 3-step procedure for multiple spatial
 shifts, n:
 
-1.) (circularly) shift the signal by an amount, n
-2.) apply denoising
-3.) apply the inverse shift
+1. (circularly) shift the signal by an amount, n
+2. apply denoising
+3. apply the inverse shift
 
 For 2D image denoising, we demonstrate here that such cycle-spinning can
 provide a substantial increase in quality, with much of the gain being

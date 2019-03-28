@@ -35,9 +35,11 @@ __all__ = ['data_dir',
            'lbp_frontal_face_cascade_filename',
            'lfw_subset',
            'logo',
+           'microaneurysms',
            'moon',
            'page',
            'text',
+           'retina',
            'rocket',
            'stereo_motorcycle']
 
@@ -173,6 +175,34 @@ def logo():
         Logo image.
     """
     return load("logo.png")
+
+
+def microaneurysms():
+    """Gray-level "microaneurysms" image.
+
+    Detail from an image of the retina (green channel).
+    The image is a crop of image 07_dr.JPG from the
+    High-Resolution Fundus (HRF) Image Database:
+    https://www5.cs.fau.de/research/data/fundus-images/
+
+    Notes
+    -----
+    No copyright restrictions. CC0 given by owner (Andreas Maier).
+
+    Returns
+    -------
+    microaneurysms : (102, 102) uint8 ndarray
+        Retina image with lesions.
+
+    References
+    ----------
+    .. [1] Budai, A., Bock, R, Maier, A., Hornegger, J.,
+           Michelson, G. (2013).  Robust Vessel Segmentation in Fundus
+           Images. International Journal of Biomedical Imaging, vol. 2013,
+           2013.
+           :DOI:`10.1155/2013/154860`
+    """
+    return load("microaneurysms.png")
 
 
 def moon():
@@ -317,6 +347,33 @@ def hubble_deep_field():
         Hubble deep field image.
     """
     return load("hubble_deep_field.jpg")
+
+
+def retina():
+    """Human retina.
+
+    This image of a retina is useful for demonstrations requiring circular
+    images.
+
+    Notes
+    -----
+    This image was downloaded from
+    `wikimedia <https://commons.wikimedia.org/wiki/File:Fundus_photograph_of_normal_left_eye.jpg>`.
+    This file is made available under the Creative Commons CC0 1.0 Universal
+    Public Domain Dedication.
+
+    References
+    ----------
+    .. [1] Häggström, Mikael (2014). "Medical gallery of Mikael Häggström 2014".
+           WikiJournal of Medicine 1 (2). :DOI:`10.15347/wjm/2014.008`.
+           ISSN 2002-4436. Public Domain
+
+    Returns
+    -------
+    retina : (1411, 1411, 3) uint8 ndarray
+        Retina image in RGB.
+    """
+    return load("retina.jpg")
 
 
 def rocket():

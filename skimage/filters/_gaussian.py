@@ -1,4 +1,4 @@
-import collections as coll
+from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -125,7 +125,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         raise ValueError("Sigma values less than zero are not valid")
     if multichannel:
         # do not filter across channels
-        if not isinstance(sigma, coll.Iterable):
+        if not isinstance(sigma, Iterable):
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))

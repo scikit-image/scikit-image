@@ -432,8 +432,8 @@ def polygon(r, c, shape=None):
     --------
     >>> from skimage.draw import polygon
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> r = np.array([1, 2, 8, 1])
-    >>> c = np.array([1, 7, 4, 1])
+    >>> r = np.array([1, 2, 8])
+    >>> c = np.array([1, 7, 4])
     >>> rr, cc = polygon(r, c)
     >>> img[rr, cc] = 1
     >>> img
@@ -611,7 +611,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
 
-    Note that the positions of `ellipse` without specified `shape` can have 
+    Note that the positions of `ellipse` without specified `shape` can have
     also, negative values, as this is correct on the plane. On the other hand
     using these ellipse positions for an image afterwards may lead to appearing
     on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
@@ -699,11 +699,16 @@ def rectangle(start, end=None, extent=None, shape=None):
         Origin point of the rectangle, e.g., ``([plane,] row, column)``.
     end : tuple
         End point of the rectangle ``([plane,] row, column)``.
+        For a 2D matrix, the slice defined by the rectangle is
+        ``[start:(end+1)]``.
         Either `end` or `extent` must be specified.
     extent : tuple
         The extent (size) of the drawn rectangle.  E.g.,
         ``([num_planes,] num_rows, num_cols)``.
         Either `end` or `extent` must be specified.
+        A negative extent is valid, and will result in a rectangle
+        going along the oposite direction. If extent is negative, the
+        `start` point is not included.
     shape : tuple, optional
         Image shape used to determine the maximum bounds of the output
         coordinates. This is useful for clipping rectangles that exceed
@@ -748,18 +753,132 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 1, 1, 1, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
 
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle
+    >>> img = np.zeros((6, 6), dtype=np.uint8)
+    >>> start = (3, 3)
+    >>>
+    >>> rr, cc = rectangle(start, extent=(2, 2))
+    >>> img[rr, cc] = 1
+    >>> rr, cc = rectangle(start, extent=(-2, 2))
+    >>> img[rr, cc] = 2
+    >>> rr, cc = rectangle(start, extent=(-2, -2))
+    >>> img[rr, cc] = 3
+    >>> rr, cc = rectangle(start, extent=(2, -2))
+    >>> img[rr, cc] = 4
+    >>> print(img)
+    [[0 0 0 0 0 0]
+     [0 3 3 2 2 0]
+     [0 3 3 2 2 0]
+     [0 4 4 1 1 0]
+     [0 4 4 1 1 0]
+     [0 0 0 0 0 0]]
+
     """
-    if extent is not None:
-        end = np.array(start) + np.array(extent)
-    elif end is None:
-        raise ValueError("Either `end` or `extent` must be given")
-    tl = np.minimum(start, end)
-    br = np.maximum(start, end)
-    if extent is None:
-        br += 1
+    tl, br = _rectangle_slice(start=start, end=end, extent=extent)
+
     if shape is not None:
         br = np.minimum(shape, br)
         tl = np.maximum(np.zeros_like(shape), tl)
     coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
                                                                tuple(br))])
     return coords
+
+
+def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
+    """Generate coordinates of pixels that are exactly around a rectangle.
+
+    Parameters
+    ----------
+    start : tuple
+        Origin point of the inner rectangle, e.g., ``(row, column)``.
+    end : tuple
+        End point of the inner rectangle ``(row, column)``.
+        For a 2D matrix, the slice defined by inner the rectangle is
+        ``[start:(end+1)]``.
+        Either `end` or `extent` must be specified.
+    extent : tuple
+        The extent (size) of the inner rectangle.  E.g.,
+        ``(num_rows, num_cols)``.
+        Either `end` or `extent` must be specified.
+        Negative extents are permitted. See `rectangle` to better
+        understand how they behave.
+    shape : tuple, optional
+        Image shape used to determine the maximum bounds of the output
+        coordinates. This is useful for clipping perimeters that exceed
+        the image size. By default, no clipping is done.
+    clip : bool, optional
+        Whether to clip the perimeter to the provided shape. If this is set
+        to True, the drawn figure will always be a closed polygon with all
+        edges visible.
+
+    Returns
+    -------
+    coords : array of int, shape (2, Npoints)
+        The coordinates of all pixels in the rectangle.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle_perimeter
+    >>> img = np.zeros((5, 6), dtype=np.uint8)
+    >>> start = (2, 3)
+    >>> end = (3, 4)
+    >>> rr, cc = rectangle_perimeter(start, end=end, shape=img.shape)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1],
+           [0, 0, 1, 0, 0, 1],
+           [0, 0, 1, 0, 0, 1],
+           [0, 0, 1, 1, 1, 1]], dtype=uint8)
+
+    >>> img = np.zeros((5, 5), dtype=np.uint8)
+    >>> r, c = rectangle_perimeter(start, (10, 10), shape=img.shape, clip=True)
+    >>> img[r, c] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1],
+           [0, 0, 1, 0, 1],
+           [0, 0, 1, 0, 1],
+           [0, 0, 1, 1, 1]], dtype=uint8)
+
+    """
+    top_left, bottom_right = _rectangle_slice(start=start,
+                                              end=end,
+                                              extent=extent)
+
+    top_left -= 1
+    r = [top_left[0], top_left[0], bottom_right[0], bottom_right[0],
+         top_left[0]]
+    c = [top_left[1], bottom_right[1], bottom_right[1], top_left[1],
+         top_left[1]]
+    return polygon_perimeter(r, c, shape=shape, clip=clip)
+
+
+def _rectangle_slice(start, end=None, extent=None):
+    """Return the slice ``(top_left, bottom_right)`` of the rectangle.
+
+    Returns
+    =======
+    (top_left, bottomm_right)
+        The slice you would need to select the region in the rectangle defined
+        by the parameters.
+        Select it like:
+
+        ``rect[top_left[0]:bottom_right[0], top_left[1]:bottom_right[1]]``
+    """
+    if end is None and extent is None:
+        raise ValueError("Either `end` or `extent` must be given.")
+    if end is not None and extent is not None:
+        raise ValueError("Cannot provide both `end` and `extent`.")
+
+    if extent is not None:
+        end = np.asarray(start) + np.asarray(extent)
+    top_left = np.minimum(start, end)
+    bottom_right = np.maximum(start, end)
+
+    if extent is None:
+        bottom_right += 1
+
+    return (top_left, bottom_right)

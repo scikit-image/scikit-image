@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage.measure import compare_psnr
@@ -17,6 +18,13 @@ if (Version(np.__version__) >= '1.15.0' and
     PYWAVELET_ND_INDEXING_WARNING = 'non-tuple sequence for multidimensional'
 else:
     PYWAVELET_ND_INDEXING_WARNING = None
+
+try:
+    import dask
+except ImportError:
+    DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
+else:
+    DASK_NOT_INSTALLED_WARNING = None
 
 
 np.random.seed(1234)
@@ -180,6 +188,18 @@ def test_denoise_bilateral_2d():
     # make sure noise is reduced in the checkerboard cells
     assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
+
+
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.double])
+def test_denoise_bilateral_types(dtype):
+    img = checkerboard_gray.copy()[:50, :50]
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1)
+
+    # check that we can process multiple float types
+    out = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                        sigma_spatial=10, multichannel=False)
 
 
 def test_denoise_bilateral_zeros():
@@ -604,7 +624,8 @@ def test_cycle_spinning_multichannel():
         func_kw = dict(sigma=sigma, multichannel=multichannel)
 
         # max_shifts=0 is equivalent to just calling denoise_func
-        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                DASK_NOT_INSTALLED_WARNING]):
             dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
                                            func_kw=func_kw,
                                            multichannel=multichannel)
@@ -613,7 +634,8 @@ def test_cycle_spinning_multichannel():
 
         # denoising with cycle spinning will give better PSNR than without
         for max_shifts in valid_shifts:
-            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
@@ -621,7 +643,8 @@ def test_cycle_spinning_multichannel():
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for shift_steps in valid_steps:
-            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
                 dn_cc = restoration.cycle_spin(noisy, denoise_func,
                                                max_shifts=2,
                                                shift_steps=shift_steps,
@@ -653,11 +676,13 @@ def test_cycle_spinning_num_workers():
     denoise_func = restoration.denoise_wavelet
     func_kw = dict(sigma=sigma, multichannel=True)
 
+    # same results are expected whether using 1 worker or multiple workers
     with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
-        # same result whether using 1 worker or multiple workers
         dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, multichannel=False,
                                         num_workers=1)
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                            DASK_NOT_INSTALLED_WARNING]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, multichannel=False,
                                         num_workers=4)

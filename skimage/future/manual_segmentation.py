@@ -1,9 +1,5 @@
 from functools import reduce
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 from ..draw import polygon
 
 
@@ -21,6 +17,10 @@ def _mask_from_vertices(vertices, shape, label):
 
 
 def _draw_polygon(ax, vertices, alpha=0.4):
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
+    import matplotlib.pyplot as plt
+
     polygon = Polygon(vertices, closed=True)
     p = PatchCollection([polygon], match_original=True, alpha=alpha)
     polygon_object = ax.add_collection(p)
@@ -63,6 +63,11 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
     >>> io.imshow(mask)  # doctest: +SKIP
     >>> io.show()  # doctest: +SKIP
     """
+    import matplotlib
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
+    import matplotlib.pyplot as plt
+
     list_of_vertex_lists = []
     polygons_drawn = []
 
@@ -173,6 +178,11 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     >>> io.imshow(mask)  # doctest: +SKIP
     >>> io.show()  # doctest: +SKIP
     """
+    import matplotlib
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
+    import matplotlib.pyplot as plt
+
     list_of_vertex_lists = []
     polygons_drawn = []
 

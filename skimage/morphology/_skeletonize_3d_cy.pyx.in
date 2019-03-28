@@ -1,3 +1,5 @@
+# distutils: language = c++
+
 """
 This is an implementation of the 2D/3D thinning algorithm
 of [Lee94]_ of binary images, based on [IAC15]_.
@@ -28,12 +30,19 @@ References
 """
 
 from libc.string cimport memcpy
+from libcpp.vector cimport vector
 
 import numpy as np
 from numpy cimport npy_intp, npy_uint8, ndarray
 cimport cython
 
 ctypedef npy_uint8 pixel_type
+
+# struct to hold 3D coordinates
+cdef struct coordinate:
+    npy_intp p
+    npy_intp r
+    npy_intp c
 
 
 @cython.boundscheck(False)
@@ -63,51 +72,58 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
         npy_intp p, r, c
         bint no_change
 
-        list simple_border_points
+        # list simple_border_points
+        vector[coordinate] simple_border_points
+        coordinate point
+
         Py_ssize_t num_border_points, i, j
-        (npy_intp, npy_intp, npy_intp) point
 
         pixel_type neighb[27]
+
     # loop over the six directions in this order (for consistency with ImageJ)
     borders[:] = [4, 3, 2, 1, 5, 6]
 
-    # no need to worry about the z direction if the original image is 2D.
-    if img.shape[0] == 3:
-        num_borders = 4
-    else:
-        num_borders = 6
+    with nogil:
+        # no need to worry about the z direction if the original image is 2D.
+        if img.shape[0] == 3:
+            num_borders = 4
+        else:
+            num_borders = 6
 
-    # loop through the image several times until there is no change for all
-    # the six border types
-    while unchanged_borders < num_borders:
-        unchanged_borders = 0
-        for j in range(num_borders):
-            curr_border = borders[j]
+        # loop through the image several times until there is no change for all
+        # the six border types
+        while unchanged_borders < num_borders:
+            unchanged_borders = 0
+            for j in range(num_borders):
+                curr_border = borders[j]
 
-            simple_border_points = find_simple_point_candidates(img, curr_border)
+                find_simple_point_candidates(img, curr_border, simple_border_points)
 
-            # sequential re-checking to preserve connectivity when deleting
-            # in a parallel way
-            no_change = True
-            num_border_points = len(simple_border_points)
-            for i in range(num_border_points):
-                point = simple_border_points[i]
-                p, r, c = point
-                get_neighborhood(img, p, r, c, neighb)
-                if is_simple_point(neighb):
-                    img[p, r, c] = 0
-                    no_change = False
+                # sequential re-checking to preserve connectivity when deleting
+                # in a parallel way
+                no_change = True
+                num_border_points = simple_border_points.size()
+                for i in range(num_border_points):
+                    point = simple_border_points[i]
+                    p = point.p
+                    r = point.r
+                    c = point.c
+                    get_neighborhood(img, p, r, c, neighb)
+                    if is_simple_point(neighb):
+                        img[p, r, c] = 0
+                        no_change = False
 
-            if no_change:
-                unchanged_borders += 1
+                if no_change:
+                    unchanged_borders += 1
 
     return np.asarray(img)
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
-                        int curr_border):
+cdef void find_simple_point_candidates(pixel_type[:, :, ::1] img,
+                                       int curr_border,
+                                       vector[coordinate] & simple_border_points) nogil:
     """Inner loop of compute_thin_image.
 
     The algorithm of [Lee94]_ proceeds in two steps: (1) six directions are
@@ -118,19 +134,19 @@ cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
     for a given direction and assembles candidates for removal.
 
     """
-    # This routine looks like it could be nogil, but actually it cannot be,
-    # because of `simple_border_points` being a python list which is being
-    # mutated.
     cdef:
-        list simple_border_points = []
+        cdef coordinate point
+
         pixel_type neighborhood[27]
         npy_intp p, r, c
         bint is_border_pt
-        (npy_intp, npy_intp, npy_intp) point
 
         # rebind a global name to avoid lookup. The table is filled in
         # at import time.
         int[::1] Euler_LUT = LUT
+
+    # clear the output vector
+    simple_border_points.clear();
 
     # loop through the image
     # NB: each loop is from 1 to size-1: img is padded from all sides
@@ -166,16 +182,17 @@ cdef list find_simple_point_candidates(pixel_type[:, :, ::1] img,
                     continue
 
                 # ok, add (p, r, c) to the list of simple border points
-                point = p, r, c
-                simple_border_points.append(point)
-    return simple_border_points
+                point.p = p
+                point.r = r
+                point.c = c
+                simple_border_points.push_back(point)
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void get_neighborhood(pixel_type[:, :, ::1] img,
                            npy_intp p, npy_intp r, npy_intp c,
-                           pixel_type neighborhood[]):
+                           pixel_type neighborhood[]) nogil:
     """Get the neighborhood of a pixel.
 
     Assume zero boundary conditions.
@@ -260,7 +277,7 @@ _neighb_idx = [[2, 1, 11, 10, 5, 4, 14],      # NEB
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef bint is_Euler_invariant(pixel_type neighbors[],
-                             int[::1] lut):
+                             int[::1] lut) nogil:
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristic for each octant and sum up.
@@ -293,7 +310,7 @@ cdef bint is_Euler_invariant(pixel_type neighbors[],
     return euler_char == 0
 
 
-cdef inline bint is_endpoint(pixel_type neighbors[]):
+cdef inline bint is_endpoint(pixel_type neighbors[]) nogil:
     """An endpoint has exactly one neighbor in the 26-neighborhood.
     """
     # The center pixel is counted, thus r.h.s. is 2
@@ -303,7 +320,7 @@ cdef inline bint is_endpoint(pixel_type neighbors[]):
     return s == 2
 
 
-cdef bint is_simple_point(pixel_type neighbors[]):
+cdef bint is_simple_point(pixel_type neighbors[]) nogil:
     """Check is a point is a Simple Point.
 
     A point is simple iff its deletion does not change connectivity in
@@ -391,7 +408,7 @@ _octree = [
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef void octree_labeling(int octant, int label, pixel_type cube[]):
+cdef void octree_labeling(int octant, int label, pixel_type cube[]) nogil:
     """This is a recursive method that calculates the number of connected
     components in the 3D neighborhood after the center pixel would
     have been removed.
