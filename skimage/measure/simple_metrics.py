@@ -162,7 +162,8 @@ def enhancement_measure(image: np.ndarray,
             The function converts pixel intensities into floats by default.
         size : int
             Size of the window. Default value is 3.
-
+        eps : float
+            Parameter to avoid division by zero.
         Returns
         -------
         eme : float
