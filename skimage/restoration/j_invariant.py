@@ -20,18 +20,18 @@ def interpolate_image(x, multichannel=False):
     return x_interp
 
 
-def generate_mask(shape, idx, grid_width=3):
+def generate_mask(shape, idx, stride=3):
     m = np.zeros(shape)
 
-    phasex = idx % grid_width
-    phasey = (idx // grid_width) % grid_width
+    phasex = idx % stride
+    phasey = (idx // stride) % stride
 
-    m[phasex::grid_width, phasey::grid_width] = 1
+    m[phasex::stride, phasey::stride] = 1
     return m
 
 
-def invariant_denoise(image, denoise_function, denoiser_kwargs, grid_width):
-    n_masks = grid_width*grid_width
+def invariant_denoise(image, denoise_function, denoiser_kwargs, stride):
+    n_masks = stride * stride
 
     interp = interpolate_image(image)
 
@@ -41,7 +41,7 @@ def invariant_denoise(image, denoise_function, denoiser_kwargs, grid_width):
         denoiser_kwargs = {}
 
     for i in range(n_masks):
-        m = generate_mask(image.shape, i, grid_width=grid_width)
+        m = generate_mask(image.shape, i, stride=stride)
         input_image = m*interp + (1 - m)*image
         input_image = input_image.astype(image.dtype)
         output += m*denoise_function(input_image, **denoiser_kwargs)
@@ -55,19 +55,19 @@ def selections_from_dict(dictionary):
 
 
 def calibrate_denoiser(image, denoising_function, parameter_ranges,
-                       grid_width=4, return_invariant=False, full_loss=False):
+                       stride=4, return_invariant=False, full_loss=False):
     image = img_as_float(image)
     parameters_tested = list(selections_from_dict(parameter_ranges))
     losses = []
 
     for parameters in parameters_tested:
         if full_loss:
-            denoised = invariant_denoise(image, denoising_function, parameters, grid_width)
+            denoised = invariant_denoise(image, denoising_function, parameters, stride)
             loss = compare_mse(denoised, image)
         else:
-            n_masks = grid_width*grid_width
+            n_masks = stride * stride
 
-            m = generate_mask(image.shape, n_masks//2, grid_width=grid_width)
+            m = generate_mask(image.shape, n_masks // 2, stride=stride)
             interp = interpolate_image(image)
 
             input_image = m*interp + (1 - m)*image
@@ -82,7 +82,7 @@ def calibrate_denoiser(image, denoising_function, parameter_ranges,
     best_parameters = parameters_tested[idx]
 
     if return_invariant:
-        denoised = invariant_denoise(image, denoising_function, best_parameters, grid_width)
+        denoised = invariant_denoise(image, denoising_function, best_parameters, stride)
     else:
         denoised = denoising_function(image, **best_parameters)
 
