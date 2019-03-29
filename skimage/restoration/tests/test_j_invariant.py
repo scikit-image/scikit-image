@@ -1,7 +1,4 @@
-from os.path import abspath, dirname, join as pjoin
-
 import numpy as np
-from scipy.signal import convolve2d
 
 from skimage.data import camera, chelsea
 from skimage.data import binary_blobs
