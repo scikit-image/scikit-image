@@ -55,7 +55,7 @@ def selections_from_dict(dictionary):
 
 
 def calibrate_denoiser(image, denoising_function, parameter_ranges,
-                       stride=4, return_invariant=False, full_loss=False):
+                       stride=4, full_loss=False):
     image = img_as_float(image)
     parameters_tested = list(selections_from_dict(parameter_ranges))
     losses = []
@@ -81,9 +81,6 @@ def calibrate_denoiser(image, denoising_function, parameter_ranges,
     best_loss = losses[idx]
     best_parameters = parameters_tested[idx]
 
-    if return_invariant:
-        denoised = invariant_denoise(image, denoising_function, best_parameters, stride)
-    else:
-        denoised = denoising_function(image, **best_parameters)
+    denoised = invariant_denoise(image, denoising_function, best_parameters, stride)
 
     return denoised, best_parameters, best_loss, parameters_tested, losses
