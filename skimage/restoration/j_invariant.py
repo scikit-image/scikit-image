@@ -1,21 +1,23 @@
 import numpy as np
 from itertools import product
-from scipy.signal import convolve2d
+from scipy import ndimage as ndi
 from ..measure import compare_mse
 from ..util import img_as_float
 
 
-def interpolate_image(x, conv_filter=None):
-    if conv_filter is None:
-        conv_filter = np.array([[0, 0.25, 0], [0.25, 0, 0.25], [0, 0.25, 0]])
-    if len(x.shape) == 2:
-        return convolve2d(x, conv_filter, mode = 'same')
-    else:
-        assert (len(x.shape) == 3) & (x.shape[2] == 3)
+def interpolate_image(x, multichannel=False):
+    spatialdims = x.ndim if not multichannel else x.ndim - 1
+    conv_filter = ndi.generate_binary_structure(spatialdims, 1)
+    conv_filter.ravel()[conv_filter.size // 2] = 0
+    conv_filter /= conv_filter.sum()
+
+    if multichannel:
         x_interp = np.zeros(x.shape)
-        for i in range(3):
-            x_interp[:,:,i] = convolve2d(x[:,:,i], conv_filter, mode = 'same')
-        return x_interp
+        for i in range(x.shape[-1]):
+            x_interp[..., i] = ndi.convolve(x[..., i], conv_filter, mode='reflect')
+    else:
+        x_interp = ndi.convolve(x, conv_filter, mode='reflect')
+    return x_interp
 
 
 def generate_mask(shape, idx, grid_width=3):
