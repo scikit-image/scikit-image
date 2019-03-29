@@ -61,13 +61,12 @@ def _bincount_histogram(image, source_range):
     if source_range not in ['image', 'dtype']:
         raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
-        image_min = np.min(image).astype(np.int64)
-        image_max = np.max(image).astype(np.int64)
+        image_min = int(np.min(image).astype(np.int64))
+        image_max = int(np.max(image).astype(np.int64))
     elif source_range == 'dtype':
         image_min, image_max = dtype_limits(image, clip_negative=False)
     image, offset = _offset_array(image, image_min, image_max)
-    hist = np.bincount(image.ravel(),
-                       minlength=int(image_max) - int(image_min) + 1)
+    hist = np.bincount(image.ravel(), minlength=image_max - image_min + 1)
     bin_centers = np.arange(image_min, image_max + 1)
     if source_range == 'image':
         idx = max(image_min, 0)
