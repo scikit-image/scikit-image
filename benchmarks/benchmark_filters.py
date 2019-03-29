@@ -15,3 +15,39 @@ class FiltersSuite:
         result = filters.sobel(self.image)
 
 
+class ThresholdingSuite:
+    """Benchmark for image thresholding routines in scikit-image."""
+    def setup(self):
+        self.image = np.random.random((4000, 4000))
+        self.image[:2000, :2000] += 1
+        self.image[3000:, 3000] += 0.5
+
+    def time_threshold_local(self):
+        result = filters.threshold_local(self.image, 11)
+
+    def time_threshold_otsu(self):
+        result = filters.threshold_otsu(self.image)
+
+    def time_threshold_yen(self):
+        result = filters.threshold_yen(self.image)
+
+    def time_threshold_isodata(self):
+        result = filters.threshold_isodata(self.image)
+
+    def time_threshold_li(self):
+        result = filters.threshold_li(self.image)
+
+    def time_threshold_minimum(self):
+        result = filters.threshold_minimum(self.image)
+
+    def time_threshold_mean(self):
+        result = filters.threshold_mean(self.image)
+
+    def time_threshold_triangle(self):
+        result = filters.threshold_triangle(self.image)
+
+    def time_threshold_niblack(self):
+        result = filters.threshold_niblack(self.image)
+
+    def time_threshold_sauvola(self):
+        result = filters.threshold_sauvola(self.image)
