@@ -231,7 +231,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     return thresh_image - offset
 
 
-def threshold_otsu(image, nbins=256):
+def threshold_otsu(image, nbins=256, source_range='image'):
     """Return threshold value based on Otsu's method.
 
     Parameters
@@ -241,6 +241,11 @@ def threshold_otsu(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    source_range : 'image' or 'dtype' (default value is 'image').
+    source_range : string, optional
+        'image' (default) determines the histogram range from the input image.
+        'dtype' determines the histogram range from the expected range of the
+        images of that data type.
 
     Returns
     -------
@@ -279,7 +284,8 @@ def threshold_otsu(image, nbins=256):
                          "having more than one color. The input image seems "
                          "to have just one color {0}.".format(image.min()))
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.ravel(), nbins,
+                                  source_range=source_range)
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -299,7 +305,7 @@ def threshold_otsu(image, nbins=256):
     return threshold
 
 
-def threshold_yen(image, nbins=256):
+def threshold_yen(image, nbins=256, source_range='image'):
     """Return threshold value based on Yen's method.
 
     Parameters
@@ -309,6 +315,10 @@ def threshold_yen(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    source_range : string, optional
+        'image' (default) determines the histogram range from the input image.
+        'dtype' determines the histogram range from the expected range of the
+        images of that data type.
 
     Returns
     -------
@@ -334,7 +344,8 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.ravel(), nbins,
+                                  source_range=source_range)
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
@@ -353,7 +364,7 @@ def threshold_yen(image, nbins=256):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image, nbins=256, return_all=False):
+def threshold_isodata(image, nbins=256, source_range='image', return_all=False):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
@@ -376,6 +387,10 @@ def threshold_isodata(image, nbins=256, return_all=False):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    source_range : string, optional
+        'image' (default) determines the histogram range from the input image.
+        'dtype' determines the histogram range from the expected range of the
+        images of that data type.
     return_all: bool, optional
         If False (default), return only the lowest threshold that satisfies
         the above equality. If True, return all valid thresholds.
@@ -406,7 +421,8 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.ravel(), nbins,
+                                  source_range=source_range)
 
     # image only contains one unique value
     if len(bin_centers) == 1:
@@ -599,7 +615,7 @@ def threshold_li(image, *, tolerance=None):
     return threshold
 
 
-def threshold_minimum(image, nbins=256, max_iter=10000):
+def threshold_minimum(image, nbins=256, source_range='image', max_iter=10000):
     """Return threshold value based on minimum method.
 
     The histogram of the input `image` is computed and smoothed until there are
@@ -612,6 +628,10 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    source_range : string, optional
+        'image' (default) determines the histogram range from the input image.
+        'dtype' determines the histogram range from the expected range of the
+        images of that data type.
     max_iter: int, optional
         Maximum number of iterations to smooth the histogram.
 
@@ -661,7 +681,8 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
         return maximum_idxs
 
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.ravel(), nbins,
+                                  source_range=source_range)
 
     smooth_hist = np.copy(hist).astype(np.float64)
 
@@ -714,7 +735,7 @@ def threshold_mean(image):
     return np.mean(image)
 
 
-def threshold_triangle(image, nbins=256):
+def threshold_triangle(image, nbins=256, source_range='image'):
     """Return threshold value based on the triangle algorithm.
 
     Parameters
@@ -724,6 +745,10 @@ def threshold_triangle(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    source_range : string, optional
+        'image' (default) determines the histogram range from the input image.
+        'dtype' determines the histogram range from the expected range of the
+        images of that data type.
 
     Returns
     -------
@@ -749,7 +774,8 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
+    hist, bin_centers = histogram(image.ravel(), nbins,
+                                  source_range=source_range)
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
