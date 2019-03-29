@@ -364,7 +364,8 @@ def threshold_yen(image, nbins=256, source_range='image'):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image, nbins=256, source_range='image', return_all=False):
+def threshold_isodata(image, nbins=256, source_range='image',
+                      return_all=False):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
