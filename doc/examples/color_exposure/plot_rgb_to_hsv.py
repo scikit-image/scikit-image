@@ -7,16 +7,17 @@ This example illustrates how RGB to HSV (Hue, Saturation, Value) conversion
 [1]_ can be used to facilitate segmentation processes.
 
 Usually, objects in images have distinct colors (hues) and luminosities, so
-that these features can be used to separate different areas of the image.
-In the RGB representation the hue and the luminosity are expressed as a linear
+that these features can be used to separate different areas of the image. In
+the RGB representation the hue and the luminosity are expressed as a linear
 combination of the R,G,B channels, whereas they correspond to single channels
-of the HSV image (the Hue and the Value channels). A simple segmentation of the
-image can then be effectively performed by a mere thresholding of the HSV
+of the HSV image (the Hue and the Value channels). A simple segmentation of
+the image can then be effectively performed by a mere thresholding of the HSV
 channels.
 
 .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
 We first load the RGB image and extract the Hue and Value channels.
+
 """
 import matplotlib.pyplot as plt
 from skimage import data
