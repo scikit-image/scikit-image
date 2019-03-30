@@ -14,11 +14,11 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 """
 
 ######################################################################
-# We illustrate how to apply one of these thresholding algorithms.
-# Otsu's method [2]_ calculates an "optimal" threshold (marked by a red line in the
+# We illustrate how to apply one of these thresholding algorithms. Otsu's
+# method [2]_ calculates an "optimal" threshold (marked by a red line in the
 # histogram below) by maximizing the variance between two classes of pixels,
-# which are separated by the threshold. Equivalently, this threshold minimizes
-# the intra-class variance.
+# which are separated by the threshold. Equivalently, this threshold
+# minimizes the intra-class variance.
 #
 # .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
