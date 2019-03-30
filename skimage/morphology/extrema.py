@@ -9,16 +9,13 @@ provides the related functions h-maxima and h-minima.
 Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
 """
-
-from __future__ import absolute_import
-
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
 from . import greyreconstruct
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
 
 
