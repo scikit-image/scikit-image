@@ -16,7 +16,7 @@ channels.
 
 .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
-We first load the RGB image and extract the Hue and Value channels:
+We first load the RGB image and extract the Hue and Value channels.
 """
 import matplotlib.pyplot as plt
 from skimage import data
