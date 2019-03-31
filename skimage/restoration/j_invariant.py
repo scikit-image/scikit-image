@@ -14,9 +14,9 @@ def interpolate_image(image, multichannel=False):
     if multichannel:
         interp = np.zeros(image.shape)
         for i in range(image.shape[-1]):
-            interp[..., i] = ndi.convolve(image[..., i], conv_filter, mode='reflect')
+            interp[..., i] = ndi.convolve(image[..., i], conv_filter, mode='mirror')
     else:
-        interp = ndi.convolve(image, conv_filter, mode='reflect')
+        interp = ndi.convolve(image, conv_filter, mode='mirror')
     return interp
 
 
