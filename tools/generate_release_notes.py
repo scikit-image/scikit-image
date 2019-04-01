@@ -1,25 +1,35 @@
-"""Generate the release notes automatically from Github PRs.
+"""Generate the release notes automatically from Github pull requests.
 
-Usage:
+Start with:
+```
+export GH_TOKEN=<your-gh-api-token>
+```
 
-Generate yourself a public repo github token to test this.
+Then, for a major release:
+```
+python /path/to/generate_release_notes.py v0.14.0 master --version 0.15.0
+```
 
-Requires PyGitHub and tqdm:
+For a minor release:
+```
+python /path/to/generate_release_notes.py v.14.2 v0.14.x --version 0.14.3
+```
 
+You should probably redirect the output with:
+```
+python /path/to/generate_release_notes.py [args] | tee release_notes.rst
+```
+
+You'll require PyGitHub and tqdm, which you can install with:
 ```
 pip install -r requirements/_release_tools.txt
 ```
 
-Within the scikit-image repo, run this script with:
-```
-python /path/to/generate_release_notes.py | tee releast_notes_temp.rst
-```
-
 References
 https://github.com/scikit-image/scikit-image/issues/3404
+https://github.com/scikit-image/scikit-image/issues/3405
 """
 import os
-import sys
 import argparse
 from datetime import datetime
 from collections import OrderedDict
