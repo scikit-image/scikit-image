@@ -1,6 +1,5 @@
 """Generate the release notes automatically from Github PRs.
 
-
 Usage:
 
 Generate yourself a public repo github token to test this.
@@ -54,14 +53,13 @@ g = Github(GH_TOKEN)
 repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
 
 
-parser = argparse.ArgumentParser(__doc__)
-parser.add_argument('from-commit', help='The starting tag.', default='0.14.0')
-parser.add_argument('to-commit', help='The head branch.', default='master')
+parser = argparse.ArgumentParser(usage=__doc__)
+parser.add_argument('from_commit', help='The starting tag.')
+parser.add_argument('to_commit', help='The head branch.')
 parser.add_argument('--version', help="Version you're about to release.",
-                    default='0.15.0')
+                    nargs=1, default='0.15.0')
 
-args = parser.parse_args(sys.argv)
-
+args = parser.parse_args()
 
 for tag in repository.get_tags():
     if tag.name == args.from_commit:
@@ -78,7 +76,7 @@ previous_tag_date = datetime.strptime(github_commit.last_modified,
 
 
 all_commits = list(tqdm(repository.get_commits(sha=args.to_commit,
-                                               since=args.from_commit),
+                                               since=previous_tag_date),
                         desc=f'Getting all commits between {args.from_commit} '
                              f'and {args.to_commit}'))
 all_hashes = set(c.sha for c in all_commits)
