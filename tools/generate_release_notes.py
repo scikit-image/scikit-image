@@ -20,6 +20,8 @@ References
 https://github.com/scikit-image/scikit-image/issues/3404
 """
 import os
+import sys
+import argparse
 from datetime import datetime
 from collections import OrderedDict
 import string
@@ -44,23 +46,29 @@ if GH_TOKEN is None:
     raise RuntimeError(
         "It is necessary that the environment variable `GH_TOKEN` "
         "be set to avoid running into problems with rate limiting. "
-        "One can be acquired at https://github.com/settings/tokens.")
+        "One can be acquired at https://github.com/settings/tokens.\n\n"
+        "You do not need to select any permission boxes while generating "
+        "the token.")
 
 g = Github(GH_TOKEN)
 repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
 
 
-version = '0.15.0'
-previous_tag_name = 'v0.14.0'
-interested_branch = 'master'
+parser = argparse.ArgumentParser(__doc__)
+parser.add_argument('from-commit', help='The starting tag.', default='0.14.0')
+parser.add_argument('to-commit', help='The head branch.', default='master')
+parser.add_argument('--version', help="Version you're about to release.",
+                    default='0.15.0')
+
+args = parser.parse_args(sys.argv)
 
 
 for tag in repository.get_tags():
-    if tag.name == previous_tag_name:
+    if tag.name == args.from_commit:
         previous_tag = tag
         break
 else:
-    raise RuntimeError(f'Desired tag ({previous_tag_name}) not found')
+    raise RuntimeError(f'Desired tag ({args.from_commit}) not found')
 
 # For some reason, go get the github commit from the commit to get
 # the correct date
@@ -69,12 +77,11 @@ previous_tag_date = datetime.strptime(github_commit.last_modified,
                                       '%a, %d %b %Y %H:%M:%S %Z')
 
 
-all_commits = [c
-               for c in tqdm(
-                   repository.get_commits(sha=interested_branch,
-                                          since=previous_tag_date),
-                   desc='Getting all commits')]
-all_commit_sha = set(c.sha for c in all_commits)
+all_commits = list(tqdm(repository.get_commits(sha=args.to_commit,
+                                               since=args.from_commit),
+                        desc=f'Getting all commits between {args.from_commit} '
+                             f'and {args.to_commit}'))
+all_hashes = set(c.sha for c in all_commits)
 
 authors = set()
 reviewers = set()
@@ -124,9 +131,9 @@ other_pull_requests = {}
 for pull in tqdm(g.search_issues(f'repo:{GH_USER}/{GH_REPO} '
                                  f'merged:>{previous_tag_date.isoformat()} '
                                  'sort:created-asc'),
-                 desc='Iterating through for Pull Requests'):
+                 desc='Iterating through Pull Requests'):
     pr = repository.get_pull(pull.number)
-    if pr.merge_commit_sha in all_commit_sha:
+    if pr.merge_commit_sha in all_hashes:
         summary = pull.title
         for r in pr.get_reviews():
             if r.user.login not in users:
@@ -156,19 +163,19 @@ def name_sorting_key(name):
 
 
 # Now generate the release notes
-announcement_title = "Announcement: scikit-image {}".format(version)
+announcement_title = "Announcement: scikit-image {}".format(args.version)
 print(announcement_title)
 print("="*len(announcement_title))
 
-print("""
-We're happy to announce the release of scikit-image v{version}!
+print(f"""
+We're happy to announce the release of scikit-image v{args.version}!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and moreself.
-""".format(version=version))
+""")
 
-if version.startswith('0.14'):
+if args.version.startswith('0.14'):
     print("""
 This is the last major release with official support for Python 2.7. Future
 releases will be developed using Python 3-only syntax.
@@ -205,11 +212,10 @@ contributors['reviewers'] = reviewers
 
 for section_name, contributor_set in contributors.items():
     print()
-    commiter_str = (
-        '{num} {section_name} added to this release [alphabetical by last name]'
-        .format(num=len(committers), section_name=section_name))
-    print(commiter_str)
-    print('-'*len(commiter_str))
+    committer_str = (f'{len(committers)} {section_name} added to this release '
+                     ' [alphabetical by last name]')
+    print(committer_str)
+    print('-'*len(committer_str))
     for c in sorted(contributor_set, key=name_sorting_key):
-        print('- {}'.format(c))
+        print(f'- {c}')
     print()
