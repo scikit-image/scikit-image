@@ -5,16 +5,15 @@ Usage:
 
 Generate yourself a public repo github token to test this.
 
-Install PyGithub and tqdm (only one of the lines below).
-```
-# conda
-conda install pygithub tqdm
-# pip
-pip install pygithub tqdm
-```
+Requires PyGitHub and tqdm:
 
 ```
-python generate_release_notes.py | tee releast_notes_temp.rst
+pip install -r requirements/_release_tools.txt
+```
+
+Within the scikit-image repo, run this script with:
+```
+python /path/to/generate_release_notes.py | tee releast_notes_temp.rst
 ```
 
 References
