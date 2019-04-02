@@ -5,7 +5,7 @@ We're happy to announce the release of scikit-image v0.15.0! This one's a
 treat. ;)
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
-for segmentation, geometric transformations, color space mani pulation,
+for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
@@ -20,20 +20,22 @@ or use the 0.14 long term support releases.
 New Features
 ------------
 
-- unsharp mask filtering (#2772)
-- New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``local_minima``. (#3022)
-- Image translation registration for masked data
-  (``skimage.feature.masked_register_translation``)
-- Frangi (vesselness), Meijering (neuriteness), and Sato (tubeness) filters
-  (#3515)
 - N-dimensional flood fill, with tolerance (#3245)
 - Attribute operators (#2680)
 - Extension of register_translation to enable subpixel precision in 3D and
   optionally disable error calculation (#2880)
+- unsharp mask filtering (#2772)
+- New options ``connectivity``, ``indices`` and ``allow_borders`` for
+  ``skimage.morphology.local_maxima`` and ``local_minima``. (#3022)
+- Image translation registration for masked data
+  (``skimage.feature.masked_register_translation``) (#3334)
+- Frangi (vesselness), Meijering (neuriteness), and Sato (tubeness) filters
+  (#3515)
 - Allow float->float conversion of any range (#3052)
 - Let lower precision float arrays pass through ``img_as_float`` (#3110)
-- Lazy apply_parallel (#3121)
+- Lazy apply_parallel (allows optimization of dask array operations) (#3121)
+- Add range option for histogram. (#2479)
+- Add histogram matching (#3568)
 
 
 Improvements
@@ -45,7 +47,7 @@ Improvements
   new optional dependency).
 - Performance is now monitored by
   `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
-  results will appear at https://pandas.pydata.org/speed/
+  results will appear at https://pandas.pydata.org/speed/ (#3137)
 - Speed up inner loop of GLCM (#3378)
 - Allow tuple to define kernel in threshold_niblack and threshold_sauvola (#3596)
 - Add support for anisotropic blob detection in blob_log and blob_dog (#3690)
@@ -57,13 +59,13 @@ API Changes
 - ``skimage.transform.seam_carve`` has been removed because the algorithm is
   patented. (#3751)
 - Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
-  removed. Use parameter ``data_range`` instead.
-- imageio is now the preferred plugin for reading and writing images.
-- imageio is now a dependency of scikit-image.
-- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
-  with numpy 1.15
+  removed. Use parameter ``data_range`` instead. (#3313)
+- imageio is now the preferred plugin for reading and writing images. (#3126)
+- imageio is now a dependency of scikit-image. (#3126)
+- ``regular_grid`` now returns a tuple instead of a list for compatibility
+  with numpy 1.15 (#3238)
 - ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
-  base10 instead of the natural logarithm as discussed in issue #2995.
+  base10 instead of the natural logarithm as discussed in issue #2995. (#3146)
 - Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
   has been set to ``False``.
 - Default value of ``circle`` parameter in ``skimage.transform.radon``
@@ -141,6 +143,24 @@ Deprecations
   behavior (i.e., ``mask``, ``shift_x``, ``shift_y``) will be removed.
 
 
+Documentation improvements
+--------------------------
+
+- Correct rotate method's center parameter doc (#3341)
+- Add Sphinx copybutton (#3530)
+- Add glossary to the documentation (#3626)
+- Add image of retina to our data (#3748)
+- Add microaneurysms() to gallery (#3765)
+- Better document remove_small_objects behaviour: int vs bool (#2830)
+- Linking preserve_range parameter calls to docs (#3109)
+- Update the documentation regarding datalocality (#3127)
+- Specify conda-forge channel for scikit-image conda install (#3189)
+- Turn DOIs into web links in docstrings (#3367)
+- Update documentation for regionprops (#3602)
+- DOC: Improve the RANSAC gallery example (#3554)
+- DOC: "feature.peak_local_max" : explanation of multiple same-intensity peaks returned by the function; added details on ``exclude_border`` parameter  (#3600)
+
+
 Improvements
 ------------
 
@@ -173,10 +193,8 @@ Improvements
 Other improvements
 ------------------
 
-- ENH: add range option for histogram. (#2479)
 - BUG: Fix greycoprops correlation always returning 1 (#2532)
 - Add section on API discovery via ``skimage.lookfor`` (#2539)
-- Better document remove_small_objects behaviour: int vs bool (#2830)
 - Speedup 2D warping for affine transformations (#2902)
 - Credit Reviewers in Release Notes (#2927)
 - Added small galleries in the API (#2940)
@@ -184,19 +202,15 @@ Other improvements
 - Remove Python 2 compatibility (#3000)
 - Add ``rectangle_perimeter`` feature to ``skimage.draw`` (#3069)
 - Use proper axis indexing in ``adapt_rgb`` ``each_channel`` (#3097)
-- Linking preserve_range parameter calls to docs (#3109)
 - Update installation instructions to reference existing requirements specification (#3113)
 - Updated release notes with pre 0.13.1 phase (#3114)
 - Release guidelines update (#3115)
 - Ensure we are installing with / running on Python 3 (#3119)
-- Prefer imageio over PIL for file manipulations. (#3126)
-- Update the documentation regarding datalocality (#3127)
 - Hide warnings in test_unsharp_mask (#3130)
 - Process 0.15 deprecations (#3132)
 - Documentation: always use dev branch javascript (#3136)
 - Add initial airspeed velocity (asv) framework (#3137)
 - Supress warnings for flatten during io testing (#3143)
-- Bugfix separate stains log10 (#3146)
 - Recover from exceptions in filters.try_all_threshold() (#3149)
 - Fix skimage.test() to run the unittests (#3152)
 - skivi: Use qtpy to handle different Qt versions (#3157)
@@ -212,7 +226,6 @@ Other improvements
 - Minor doc formatting fixes in video.rst (#3176)
 - Decrease the verbosity of the testing (#3182)
 - Speedup rgb2gray using matrix multiply (#3187)
-- Update docs: specify conda-forge channel for scikit-image conda install (#3189)
 - Add instructions for meeseeksdev to PR template (#3194)
 - Remove installation instructions for video packages (#3197)
 - Big image labeling fix (#3202)
@@ -251,19 +264,16 @@ Other improvements
 - Handle intersphinx and mpl deprecation warnings in docs (#3300)
 - Minor PEP8 fixes (#3305)
 - cython: check for presence of cpp files during install from sdist (#3311)
-- Remove deprecated ``dynamic_range`` in ``measure.compare_psnr`` (#3313)
 - appveyor: don't upload any artifacts (#3315)
 - Add benchmark suite for hough_line() (#3319)
 - Novice skip url test (#3320)
 - Remove benchmarks from wheel (#3321)
 - Add license file to the wheel (binary) distribution (#3322)
 - codecov: ignore build scripts in coverage and don't comment on PRs (#3326)
-- Correct rotate method's center parameter doc (#3341)
 - Matplotlib 2.2.3 +  PyQt5.11 (#3345)
 - Allow @hmaarrfk to mention MeeseeksDev to backport. (#3357)
 - Add Python 3.7 to the test matrix (#3359)
 - Fix deprecated keyword from dask (#3366)
-- Turn DOIs into web links in docstrings (#3367)
 - Incompatible modes with anti-aliasing in skimage.transform.resize (#3368)
 - Missing cval parameter in threshold_local (#3370)
 - add comma to measure init (#3374)
@@ -318,16 +328,13 @@ Other improvements
 - DOC: Development installation instructions for Ubuntu are missing tkinter (#3520)
 - Better gallery examples and tests for masked translation registration (#3528)
 - DOC: make more docstrings compliant with our standards (#3529)
-- Add copybutton (#3530)
 - Build tools: Remove restriction on simpleitk for python 3.7 (#3535)
 - Speedup and add benchmark for ``skeletonize_3d`` (#3536)
 - Update requirements/README.md on justification of matplotlib 3.0.0 in favor of #3476 (#3542)
 - Doc enhancements around denoising features. (#3553)
-- DOC: Improve the RANSAC gallery example (#3554)
 - Handle deprecation of numpy ``_validate_lengths`` (#3556)
 - Use 'getconf _NPROCESSORS_ONLN' as fallback for nproc in Makefile of docs (#3563)
 - Fix matplotlib set_*lim API deprecations (#3564)
-- Add histogram matching (#3568)
 - Switched from np.power to np.cbrt (#3570)
 - Filtered out DeprecationPendingWarning for matrix subclass (#3572)
 - Add RGB to grayscale example to gallery (#3574)
@@ -337,9 +344,7 @@ Other improvements
 - Hyperlink DOIs to preferred resolver (#3589)
 - Missing parameter description in ``morphology.reconstruction`` docstring #3581 (#3591)
 - Update chat location (#3598)
-- DOC: "feature.peak_local_max" : explanation of multiple same-intensity peaks returned by the function; added details on ``exclude_border`` parameter  (#3600)
 - Remove orphan code (skimage/filters/_ctmf.pyx). (#3601)
-- Update documentation for regionprops (#3602)
 - More explicit example title, better list rendering in plot_cycle_spinning.py (#3606)
 - Add rgb to hsv example in the gallery (#3607)
 - Update documentation of ``perimeter`` and add input validation (#3608)
@@ -349,7 +354,6 @@ Other improvements
 - Update Travis-CI to xcode 10.1 (#3617)
 - Minor tweaks to _mean_std code (#3619)
 - Reduce the default tolerance in threshold_li (#3622)
-- Added glossary to the doc (#3626)
 - Add explicit ordering of gallery sections (#3627)
 - Delete broken links (#3628)
 - Build tools: Fix test_mpl_imshow for matplotlib 2.2.3 and numpy 1.16 (#3635)
@@ -386,10 +390,8 @@ Other improvements
 - Add image.sc forum badge to README (#3738)
 - Blacklist PyQt 5.12.0 on Travis (#3743)
 - Build tools: Fix matplotlib + qt 5.12 the same way upstream does it (#3744)
-- Add image of retina to our data (#3748)
 - gallery: remove xx or yy  sorted directory names (#3761)
 - Allow for f-contiguous 2D arrays in convex_hull_image (#3762)
-- Add microaneurysms() to gallery (#3765)
 - Build tools: Set astropy minimum requirement to 1.2 to help the CIs. (#3767)
 - Avoid NumPy warning while stacking arrays. (#3768)
 - Set CC0 for microaneurysms (#3778)
