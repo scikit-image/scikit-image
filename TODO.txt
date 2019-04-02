@@ -1,14 +1,10 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-
-Version 0.15
-------------
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
-
-
 Version 0.16
 ------------
+
+* Update RELEASE.txt regarding Azure Pipelines after making changes to
+  scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
