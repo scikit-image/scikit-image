@@ -96,7 +96,7 @@ reviewers = set()
 committers = set()
 users = dict()  # keep track of known usernames
 
-def find_users(commit):
+def find_author_info(commit):
     """Return committer and author of a commit.
 
     Parameters
@@ -114,10 +114,12 @@ def find_users(commit):
     committer = None
     if commit.committer is not None:
         committer = commit.committer.name or commit.committer.login
+    git_author = commit.raw_data['commit']['author']['name']
     if commit.author is not None:
-        author = commit.author.name or commit.author.login
+        author = commit.author.name or commit.author.login + f' ({git_author})'
     else:
-        author = commit.raw_data['commit']['author']['name']
+        # Users that deleted their accounts will appear as None
+        author = git_author
     return committer, author
 
 
@@ -129,20 +131,16 @@ def add_to_users(users, new_user):
             users[new_user.login] = new_user.name
 
 for commit in tqdm(all_commits, desc='Getting commiters and authors'):
-    # committer can be None?
-    if commit.committer:
+    committer, author = find_author_info(commit)
+    if committer is not None:
+        committers.add(committer)
+        # users maps github ids to a unique name.
         add_to_users(users, commit.committer)
         committers.add(users[commit.committer.login])
 
-    # Users that deleted their accounts will appear as None
-    # So annoying
-    if commit.author is None:
-        name = commit.raw_data['commit']['author']['name']
-        warn('Could not find author of commit :' + commit.sha)
-        continue
-
-    add_to_users(users, commit.author)
-    authors.add(users[commit.author.login])
+    if commit.author is not None:
+        add_to_users(users, commit.author)
+    authors.add(author)
 
 # this gets found as a commiter
 committers.discard('GitHub Web Flow')
