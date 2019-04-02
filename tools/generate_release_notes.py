@@ -96,6 +96,31 @@ reviewers = set()
 committers = set()
 users = dict()  # keep track of known usernames
 
+def find_users(commit):
+    """Return committer and author of a commit.
+
+    Parameters
+    ----------
+    commit : Github commit
+        The commit to query.
+
+    Returns
+    -------
+    committer : str or None
+        The git committer.
+    author : str
+        The git author.
+    """
+    committer = None
+    if commit.committer is not None:
+        committer = commit.committer.name or commit.committer.login
+    if commit.author is not None:
+        author = commit.author.name or commit.author.login
+    else:
+        author = commit.raw_data['commit']['author']['name']
+    return committer, author
+
+
 def add_to_users(users, new_user):
     if new_user.login not in users:
         if new_user.name is None:
