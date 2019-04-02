@@ -45,7 +45,7 @@ def _hog_channel_gradient(channel):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
+        block_norm='L2-Hys', visualize=False, visualise=None, transform_sqrt=False,
         feature_vector=True, multichannel=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -71,7 +71,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         Block normalization method:
 
         ``L1``
-           Normalization using L1-norm. (default)
+           Normalization using L1-norm.
         ``L1-sqrt``
            Normalization using L1-norm, followed by square root.
         ``L2``
@@ -79,7 +79,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         ``L2-Hys``
            Normalization using L2-norm, followed by limiting the
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
-           renormalization using L2-norm.
+           renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
 
     visualize : bool, optional
@@ -140,14 +140,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     ``True``, the function computes the square root of each color channel
     and then applies the hog algorithm to the image.
     """
-
-    if block_norm is None:
-        block_norm = 'L1'
-        warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15. To suppress this message '
-             'specify explicitly the normalization method.',
-             skimage_deprecation)
-
     image = np.atleast_2d(image)
 
     if multichannel is None:
