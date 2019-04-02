@@ -91,20 +91,19 @@ plt.show()
 
 ######################################################################
 # As in the example above, we illustrate the rotational invariance
-# of the filters in this example. We see an rotationally invariant image
-# along with the angle of its analytical gradient in the top row.
+# of the filters in this example. The top row shows a
+# rotationally invariant image along with the angle of its analytical gradient.
 # The other two rows contain the difference between the different gradient
-# approximations (Sobel, Prewitt, Scharr & Farid) and the analytical gradient
-# Farid & Simoncelli derivative filters are most rotationally invariant, but
-# require a 5x5 kernel for this advantage to unfold.
+# approximations (Sobel, Prewitt, Scharr & Farid) and analytical gradient.
 #
-# .. [1] https://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+# Farid & Simoncelli derivative filters have the closest to rotationall
+# invariance, but require a 5x5 kernel, which is computationall more intensive.
 #
-# .. [2] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
+# .. [4] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
 #     multidimensional signals."
 #     IEEE Transactions on image processing 13.4 (2004): 496-508.
 #
-# .. [3] https://en.wikipedia.org/wiki/Image_derivatives
+# .. [5] https://en.wikipedia.org/wiki/Image_derivatives
 # #Farid_and_Simoncelli_Derivatives
 
 
@@ -114,7 +113,11 @@ img = np.sin(x ** 2 + y ** 2)
 imgx = 2 * x * np.cos(x ** 2 + y ** 2)
 imgy = 2 * y * np.cos(x ** 2 + y ** 2)
 
-angle = lambda dx, dy: np.mod(np.arctan2(dy, dx), np.pi)
+
+def angle(dx, dy):
+    return np.mod(np.arctan2(dy, dx), np.pi)
+
+
 true_angle = angle(imgx, imgy)
 
 angle_farid = angle(farid_h(img), farid_v(img))
@@ -122,10 +125,16 @@ angle_sobel = angle(sobel_h(img), sobel_v(img))
 angle_scharr = angle(scharr_h(img), scharr_v(img))
 angle_prewitt = angle(prewitt_h(img), prewitt_v(img))
 
-diff_farid = np.abs(true_angle - angle_farid)
-diff_sobel = np.abs(true_angle - angle_sobel)
-diff_scharr = np.abs(true_angle - angle_scharr)
-diff_prewitt = np.abs(true_angle - angle_prewitt)
+
+def diff_angle(angle_1, angle_2):
+    return np.minimum(np.pi - np.abs(angle_1 - angle_2),
+                      np.abs(angle_1 - angle_2))
+
+
+diff_farid = diff_angle(true_angle, angle_farid)
+diff_sobel = diff_angle(true_angle, angle_sobel)
+diff_scharr = diff_angle(true_angle, angle_scharr)
+diff_prewitt = diff_angle(true_angle, angle_prewitt)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, sharex=True, sharey=True,
                          figsize=(8, 8))
@@ -137,24 +146,23 @@ ax[0].set_title('Original image')
 ax[1].imshow(true_angle, cmap=plt.cm.hsv)
 ax[1].set_title('Analytical gradient angle')
 
-ax[2].imshow(diff_sobel, cmap=plt.cm.jet, vmin=0, vmax=0.02)
-ax[2].set_title('Sobel')
+ax[2].imshow(diff_sobel, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
+ax[2].set_title('Sobel error')
 
-ax[3].imshow(diff_prewitt, cmap=plt.cm.jet, vmin=0, vmax=0.02)
-ax[3].set_title('Prewitt')
+ax[3].imshow(diff_prewitt, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
+ax[3].set_title('Prewitt error')
 
-ax[4].imshow(diff_scharr, cmap=plt.cm.jet, vmin=0, vmax=0.02)
-ax[4].set_title('Scharr')
+ax[4].imshow(diff_scharr, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
+ax[4].set_title('Scharr error')
 
-cax = ax[5].imshow(diff_farid, cmap=plt.cm.jet, vmin=0, vmax=0.02)
-ax[5].set_title('Farid')
+cax = ax[5].imshow(diff_farid, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
+ax[5].set_title('Farid error')
 
 fig.subplots_adjust(right=0.8)
-cbar_ax = fig.add_axes([0.85, 0.10, 0.05, 0.50])
-fig.colorbar(cax, cax=cbar_ax)
+cbar_ax = fig.add_axes([0.90, 0.10, 0.02, 0.50])
+fig.colorbar(cax, cax=cbar_ax, ticks=[0, 0.01, 0.02], aspect=10)
 
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
 plt.show()

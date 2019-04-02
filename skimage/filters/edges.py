@@ -38,12 +38,15 @@ ROBERTS_PD_WEIGHTS = np.array([[1, 0],
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
                                [-1, 0]], dtype=np.double)
 
+# These filter weights can be found in Farid & Simoncelli (2004),
+# Table 1 (3rd and 4th row). Additional decimal places were computed
+# using the code found at https://www.cs.dartmouth.edu/farid/
 p = np.array([[0.0376593171958126, 0.249153396177344, 0.426374573253687,
                0.249153396177344, 0.0376593171958126]])
 d1 = np.array([[0.109603762960254, 0.276690988455557, 0, -0.276690988455557,
                 -0.109603762960254]])
 HFARID_WEIGHTS = d1.T * p
-VFARID_WEIGHTS = HFARID_WEIGHTS.T
+VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
 
 def _mask_filter_result(result, mask):
