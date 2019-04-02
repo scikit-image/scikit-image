@@ -137,19 +137,16 @@ for commit in tqdm(all_commits, desc='Getting commiters and authors'):
     # Users that deleted their accounts will appear as None
     # So annoying
     if commit.author is None:
+        name = commit.raw_data['commit']['author']['name']
         warn('Could not find author of commit :' + commit.sha)
         continue
 
     add_to_users(users, commit.author)
     authors.add(users[commit.author.login])
-    if None in authors:
-        import pdb; pdb.set_trace()
-        print('Why do I get here')
+
 # this gets found as a commiter
 committers.discard('GitHub Web Flow')
 authors.discard('Azure Pipelines Bot')
-assert None not in authors
-assert None not in committers
 
 highlights = OrderedDict()
 
@@ -164,14 +161,14 @@ other_pull_requests = {}
 for pull in tqdm(g.search_issues(f'repo:{GH_USER}/{GH_REPO} '
                                  f'merged:>{previous_tag_date.isoformat()} '
                                  'sort:created-asc'),
-                 desc='Iterating through Pull Requests'):
+                 desc='Pull Requests...'):
     pr = repository.get_pull(pull.number)
     if pr.merge_commit_sha in all_hashes:
         summary = pull.title
-        for r in pr.get_reviews():
-            if r.user.login not in users:
-                users[r.user.login] = r.user.name
-            reviewers.add(users[r.user.login])
+        for review in pr.get_reviews():
+            if review.user.login not in users:
+                users[review.user.login] = review.user.name
+            reviewers.add(users[review.user.login])
         for key, key_dict in highlights.items():
             pr_title_prefix = (key + ': ').lower()
             if summary.lower().startswith(pr_title_prefix):
@@ -196,26 +193,16 @@ def name_sorting_key(name):
 
 
 # Now generate the release notes
-announcement_title = "Announcement: scikit-image {}".format(args.version)
+announcement_title = f'Announcement: scikit-image {args.version}'
 print(announcement_title)
-print("="*len(announcement_title))
+print('=' * len(announcement_title))
 
 print(f"""
 We're happy to announce the release of scikit-image v{args.version}!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
-analysis, filtering, morphology, feature detection, and moreself.
-""")
-
-if args.version.startswith('0.14'):
-    print("""
-This is the last major release with official support for Python 2.7. Future
-releases will be developed using Python 3-only syntax.
-
-However, 0.14 is a long-term support (LTS) release and will receive bug fixes
-and backported features deemed important (by community demand) until January
-1st 2020 (end of maintenance for Python 2.7; see PEP 373 for details).
+analysis, filtering, morphology, feature detection, and more.
 """)
 
 print("""
@@ -229,26 +216,23 @@ http://scikit-image.org
 for section, pull_request_dicts in highlights.items():
     if not pull_request_dicts:
         continue
-    print("""
-{section}
-{key_underline}
-""".format(section=section+"s", key_underline='-'*(len(section)+1)))
+    print(f'{section}s\n{"*" * (len(section)+1)}')
     for number, pull_request_info in pull_request_dicts.items():
-        print('- {} (#{})'.format(pull_request_info['summary'], number))
+        print(f'- {pull_request_info["summary"]} (#{number})')
 
 
 contributors = OrderedDict()
 
 contributors['authors'] = authors
-contributors['committers'] = committers
+#contributors['committers'] = committers
 contributors['reviewers'] = reviewers
 
 for section_name, contributor_set in contributors.items():
     print()
-    committer_str = (f'{len(committers)} {section_name} added to this release '
-                     ' [alphabetical by last name]')
+    committer_str = (f'{len(contributor_set)} {section_name} added to this '
+                     'release [alphabetical by first name or login]')
     print(committer_str)
-    print('-'*len(committer_str))
-    for c in sorted(contributor_set, key=name_sorting_key):
+    print('-' * len(committer_str))
+    for c in sorted(contributor_set, key=str.lower):
         print(f'- {c}')
     print()
