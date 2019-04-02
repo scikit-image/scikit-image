@@ -22,7 +22,7 @@ the corresponding release branch.
   1. Review and cleanup ``doc/release/release_dev.txt``.
 
   2. Make a list of merges, contributors, and reviewers by running
-     ``doc/release/contribs.py <tag of previous release>``.
+     ``tools/generate_release_notes.py -h`` and following that file's usage.
 
   3. Paste this list at the end of the ``release_dev.txt``.
 
