@@ -124,11 +124,10 @@ def find_author_info(commit):
 
 
 def add_to_users(users, new_user):
-    if new_user.login not in users:
-        if new_user.name is None:
-            users[new_user.login] = new_user.login
-        else:
-            users[new_user.login] = new_user.name
+    if new_user.name is None:
+        users[new_user.login] = new_user.login
+    else:
+        users[new_user.login] = new_user.name
 
 for commit in tqdm(all_commits, desc='Getting commiters and authors'):
     committer, author = find_author_info(commit)
