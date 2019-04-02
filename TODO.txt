@@ -3,8 +3,6 @@ Remember to list any API changes below in `doc/source/api_changes.txt`.
 
 Version 0.15
 ------------
-* Finalize ``skimage.future.graph`` API.
-* Finalize ``skimage.future.manual_segmentation`` API.
 * Change the default value of `block_norm` in ``skimage.feature.hog` to L2-Hys,
   update the reference .npy in ``skimage.data`` and `skimage/feature/tests/test_hog.py`.
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
@@ -15,6 +13,8 @@ Version 0.15
 
 Version 0.16
 ------------
+* Finalize ``skimage.future.graph`` API.
+* Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
   ``skimage.transform.pyramid_laplacian``,
   ``skimage.transform.pyramid_gaussian``,
