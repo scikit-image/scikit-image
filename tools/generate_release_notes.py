@@ -67,7 +67,7 @@ parser = argparse.ArgumentParser(usage=__doc__)
 parser.add_argument('from_commit', help='The starting tag.')
 parser.add_argument('to_commit', help='The head branch.')
 parser.add_argument('--version', help="Version you're about to release.",
-                    nargs=1, default='0.15.0')
+                    default='0.15.0')
 
 args = parser.parse_args()
 
