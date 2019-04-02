@@ -170,7 +170,8 @@ for pull in tqdm(g.search_issues(f'repo:{GH_USER}/{GH_REPO} '
             pr_title_prefix = (key + ': ').lower()
             if summary.lower().startswith(pr_title_prefix):
                 key_dict[pull.number] = {
-                    'summary': summary[len(pr_title_prefix):]}
+                    'summary': summary[len(pr_title_prefix):]
+                }
                 break
         else:
             other_pull_requests[pull.number] = {
@@ -180,13 +181,6 @@ for pull in tqdm(g.search_issues(f'repo:{GH_USER}/{GH_REPO} '
 
 # add Other PRs to the ordered dict to make doc generation easier.
 highlights['Other Pull Request'] = other_pull_requests
-
-
-
-def name_sorting_key(name):
-    name = [v for v in name.split() if v[0] in string.ascii_letters]
-    if len(name) > 0:
-        return name[-1]
 
 
 # Now generate the release notes
