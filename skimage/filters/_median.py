@@ -86,12 +86,12 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         if mode != 'nearest' or not np.isclose(cval, 0.0):
             warn("Change 'behavior' to 'ndimage' if you want to use the "
                  "parameters 'mode' or 'cval'. They will be discarded "
-                 "otherwise.")
+                 "otherwise.", stacklevel=3)
         return generic.median(image, selem=selem, out=out, mask=mask,
                               shift_x=shift_x, shift_y=shift_y)
     if mask is not None or shift_x or shift_y:
         warn("Change 'behavior' to 'rank' if you want to use the "
              "parameters 'mask', 'shift_x', 'shift_y'. They will be "
-             "discarded otherwise.")
+             "discarded otherwise.", stacklevel=3)
     return ndi.median_filter(image, footprint=selem, output=out, mode=mode,
                              cval=cval)
