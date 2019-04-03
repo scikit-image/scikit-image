@@ -470,7 +470,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels[inds_isolated_seeds] = isolated_values
         warn('Random walker only segments unlabeled areas, where '
              'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.')
+             'found. Returning provided labels.', stacklevel=2)
         return _unchanged_labels(labels, return_full_prob)
 
     if np.any(labels < 0):
