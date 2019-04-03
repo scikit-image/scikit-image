@@ -1,8 +1,7 @@
 Announcement: scikit-image 0.15.0
 =================================
 
-We're happy to announce the release of scikit-image v0.15.0! This one's a
-treat. ;)
+We're happy to announce the release of scikit-image v0.15.0!
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
