@@ -24,6 +24,11 @@ from pathlib import Path
 import ast
 import tokenize
 
+file_whitelist = [
+    "_shared/tests/test_warnings.py", # this file
+    "conftest.py",
+]
+
 class ParseCall(ast.NodeVisitor):
     def __init__(self):
         self.ls = []
@@ -38,7 +43,7 @@ class ParseCall(ast.NodeVisitor):
 class FindFuncs(ast.NodeVisitor):
     def __init__(self, filename):
         super().__init__()
-        self.__filename = filename
+        self._filename = filename
         self.bad_filters = []
         self.bad_stacklevels = []
 
@@ -47,17 +52,15 @@ class FindFuncs(ast.NodeVisitor):
         p.visit(node.func)
         ast.NodeVisitor.generic_visit(self, node)
 
+        if str(self._filename) in file_whitelist:
+            return
         if p.ls[-1] == 'simplefilter' or p.ls[-1] == 'filterwarnings':
             if node.args[0].s == "ignore":
                 self.bad_filters.append(
-                    "{}:{}".format(self.__filename, node.lineno))
+                    "{}:{}".format(self._filename, node.lineno))
 
         if p.ls[-1] == 'warn' and (
                 len(p.ls) == 1 or p.ls[-2] == 'warnings'):
-
-            if self.__filename == "_shared/tests/test_warnings.py":
-                # This file
-                return
 
             # See if stacklevel exists:
             if len(node.args) == 3:
@@ -65,7 +68,7 @@ class FindFuncs(ast.NodeVisitor):
             args = {kw.arg for kw in node.keywords}
             if "stacklevel" not in args:
                 self.bad_stacklevels.append(
-                    "{}:{}".format(self.__filename, node.lineno))
+                    "{}:{}".format(self._filename, node.lineno))
 
 
 @pytest.fixture(scope="session")
