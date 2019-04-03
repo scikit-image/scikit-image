@@ -1,6 +1,6 @@
 from itertools import product
 import numpy as np
-from .._shared.utils import warn
+from warnings import warn
 
 try:
     import dask
@@ -153,7 +153,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         warn('The optional dask dependency is not installed. '
              'The number of workers is set to 1. To silence '
              'this warning, install dask or explicitly set `num_workers=1` '
-             'when calling the `cycle_spin` function')
+             'when calling the `cycle_spin` function', stacklevel=2)
     # compute a running average across the cycle shifts
     if num_workers == 1:
         # serial processing
