@@ -12,7 +12,7 @@ transformation, when applied to the target image, aligns it to the
 reference image [1]_.
 
 .. [1] Juan Nunez-Iglesias, Stefan van der Walt, and Harriet Dashnow. Elegant
-        SciPy: The Art of Scientic Python. 1st. O'Reilly Media, Inc.,
+        SciPy: The Art of Scientific Python. 1st. O'Reilly Media, Inc.,
         2017. isbn: 1491922877, 9781491922873.
 
 """
@@ -39,7 +39,7 @@ matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
 image = camera()
 target = ndi.affine_transform(image, matrix_transform)
 register_matrix = register_affine(
-    image, target, iter_callback=save_intermediate_alignments)
+    image, target, cost=lambda a, b: -normalized_mutual_information(a, b), iter_callback=save_intermediate_alignments)
 _, ax = plt.subplots(1, 6)
 
 ax[0].set_title('reference')

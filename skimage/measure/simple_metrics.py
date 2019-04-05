@@ -1,11 +1,13 @@
 
 import numpy as np
+from scipy.stats import entropy
 from ..util.dtype import dtype_range
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 
 __all__ = ['compare_mse',
            'compare_nrmse',
            'compare_psnr',
+           'compare_nmi',
            ]
 
 
@@ -142,3 +144,37 @@ def compare_psnr(im_true, im_test, data_range=None):
 
     err = compare_mse(im_true, im_test)
     return 10 * np.log10((data_range ** 2) / err)
+
+
+def compare_nmi(im_true, im_test, bins=100):
+    """Compute the normalized mutual information.
+
+    The normalized mutual information is given by:
+
+                H(A) + H(B)
+      Y(A, B) = -----------
+                  H(A, B)
+
+    where H(X) is the entropy ``- sum(x log x) for x in X``.
+
+    Parameters
+    ----------
+    im_true, im_test : ndarray
+        Images to be compared.
+    bins : int or sequence of int, optional
+        The number of bins along each axis of the joint histogram.
+
+    Returns
+    -------
+    nmi : float
+        The normalized mutual information between the two arrays, computed at
+        the granularity given by ``bins``.
+    """
+    hist, bin_edges = np.histogramdd([np.ravel(im_true), np.ravel(im_test)],
+                                     bins=bins, density=True)
+
+    H_im_true = entropy(np.sum(hist, axis=0))
+    H_im_test = entropy(np.sum(hist, axis=1))
+    H_true_test = entropy(np.ravel(hist))
+
+    return (H_im_true + H_im_test) / H_true_test
