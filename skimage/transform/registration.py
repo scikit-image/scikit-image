@@ -55,7 +55,7 @@ def _matrix_to_parameter_vector(matrix):
 
 
 def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
-                    multichannel=False,
+                    multichannel=False, inverse=True,
                     iter_callback=lambda img, matrix: None):
     """
     Returns a matrix which registers the target image to the reference image
@@ -66,26 +66,27 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
     ----------
     reference : ndimage
         A reference image to compare against the target
-
     target : ndimage
         Our target for registration. Transforming this image using the
         return value `matrix` aligns it with the reference.
-
     cost : function, optional
         A cost function which takes two images and returns a score which is
         at a minimum when images are aligned. Uses the mean square error as
         default.
-
     nlevels : integer, optional
         Change the maximum height we use for creating the Gaussian pyramid.
         By default we take a guess based on the resolution of the image,
         as extremely low resolution images may hinder registration.
-
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. By default, this is False.
-
-    iter_callback : function, optional
+    inverse : bool, optional
+        Whether to return the inverse transform, which converts coordinates
+        in the reference space to coordinates in the target space. For
+        technical reasons, this is the transform expected by
+        ``scipy.ndimage.affine_transform`` to map the target image to the
+        reference space.
+    iter_callback : callable, optional
         If given, this function is called once per pyramid level with the
         current downsampled image and transformation matrix guess as the only
         arguments. This is useful for debugging or for plotting intermediate
@@ -99,10 +100,9 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
 
     Example
     -------
-    >>> import numpy as np
     >>> from skimage.data import camera
     >>> reference_image = camera()
-    >>> r = 0.12
+    >>> r = 0.42  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
     >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
@@ -138,5 +138,9 @@ def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
                 parameter_vector, num_dims))
 
     matrix = _parameter_vector_to_matrix(parameter_vector, num_dims)
+
+    if not inverse:
+        # estimated is already inverse, so we invert for forward transform
+        matrix = np.linalg.inv(matrix)
 
     return matrix
