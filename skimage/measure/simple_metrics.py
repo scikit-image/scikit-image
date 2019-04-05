@@ -157,6 +157,9 @@ def compare_nmi(im_true, im_test, bins=100):
 
     where H(X) is the entropy ``- sum(x log x) for x in X``.
 
+    It was proposed to be useful in registering images by Colin Studholme and
+    colleagues [1]_.
+
     Parameters
     ----------
     im_true, im_test : ndarray
@@ -169,6 +172,13 @@ def compare_nmi(im_true, im_test, bins=100):
     nmi : float
         The normalized mutual information between the two arrays, computed at
         the granularity given by ``bins``.
+
+    References
+    ----------
+    .. [1] C. Studholme, D.L.G. Hill, & D.J. Hawkes (1999). An overlap
+           invariant entropy measure of 3D medical image alignment.
+           Pattern Recognition 32(1):71-86
+           :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     hist, bin_edges = np.histogramdd([np.ravel(im_true), np.ravel(im_test)],
                                      bins=bins, density=True)
