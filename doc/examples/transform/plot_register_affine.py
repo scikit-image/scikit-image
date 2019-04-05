@@ -38,8 +38,13 @@ matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
 
 image = camera()
 target = ndi.affine_transform(image, matrix_transform)
+
+def nmi_cost(image0, image1):
+    """Normalized mutual information cost to be minimized by registration."""
+    return -measure.compare_nmi(image0, image1)
+
 register_matrix = register_affine(
-    image, target, cost=lambda a, b: -normalized_mutual_information(a, b), iter_callback=save_intermediate_alignments)
+    image, target, cost=nmi_cost, iter_callback=save_intermediate_alignments)
 _, ax = plt.subplots(1, 6)
 
 ax[0].set_title('reference')
@@ -49,8 +54,8 @@ ax[0].set_xticks(np.arange(x / 5, x, x / 5), minor=True)
 ax[0].set_yticks(np.arange(y / 5, y, y / 5), minor=True)
 ax[0].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
-err = measure.compare_mse(image, target)
-ax[1].set_title('target, mse %d' % int(err))
+nmi = measure.compare_nmi(image, target)
+ax[1].set_title('target, nmi {.3}'.format(nmi))
 ax[1].imshow(target, cmap='gray')
 y, x = target.shape
 ax[1].set_xticks(np.arange(x / 5, x, x / 5), minor=True)
@@ -62,9 +67,9 @@ for a in ax:
     a.set_yticklabels([])
 
 for i, iter_num in enumerate([1, 2, 4]):
-    err = measure.compare_mse(
+    nmi = measure.compare_nmi(
         image, ndi.affine_transform(target, intermediates_list[iter_num][1]))
-    ax[i + 2].set_title('iter %d, mse %d' % (iter_num, int(err)))
+    ax[i + 2].set_title('iter {}, nmi {.3}'.format(iter_num, nmi))
     ax[i + 2].imshow(
         ndi.affine_transform(
             intermediates_list[iter_num][0],
@@ -79,8 +84,8 @@ for i, iter_num in enumerate([1, 2, 4]):
     ax[i + 2].set_yticks(np.arange(y / 5, y, y / 5), minor=True)
     ax[i + 2].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
-err = measure.compare_mse(image, ndi.affine_transform(target, register_matrix))
-ax[5].set_title('final correction, mse %d' % int(err))
+nmi = measure.compare_nmi(image, ndi.affine_transform(target, register_matrix))
+ax[5].set_title('final correction, nmi {.3}'.format(nmi))
 ax[5].imshow(
     ndi.affine_transform(target, register_matrix),
     cmap='gray',
