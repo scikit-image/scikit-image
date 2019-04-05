@@ -55,7 +55,7 @@ ax[0].set_yticks(np.arange(y / 5, y, y / 5), minor=True)
 ax[0].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
 nmi = measure.compare_nmi(image, target)
-ax[1].set_title('target, nmi {.3}'.format(nmi))
+ax[1].set_title('target, nmi {:.3}'.format(nmi))
 ax[1].imshow(target, cmap='gray')
 y, x = target.shape
 ax[1].set_xticks(np.arange(x / 5, x, x / 5), minor=True)
@@ -69,7 +69,7 @@ for a in ax:
 for i, iter_num in enumerate([1, 2, 4]):
     nmi = measure.compare_nmi(
         image, ndi.affine_transform(target, intermediates_list[iter_num][1]))
-    ax[i + 2].set_title('iter {}, nmi {.3}'.format(iter_num, nmi))
+    ax[i + 2].set_title('iter {}, nmi {:.3}'.format(iter_num, nmi))
     ax[i + 2].imshow(
         ndi.affine_transform(
             intermediates_list[iter_num][0],
@@ -85,7 +85,7 @@ for i, iter_num in enumerate([1, 2, 4]):
     ax[i + 2].grid(which='minor', color='w', linestyle='-', linewidth=1)
 
 nmi = measure.compare_nmi(image, ndi.affine_transform(target, register_matrix))
-ax[5].set_title('final correction, nmi {.3}'.format(nmi))
+ax[5].set_title('final correction, nmi {:.3}'.format(nmi))
 ax[5].imshow(
     ndi.affine_transform(target, register_matrix),
     cmap='gray',
