@@ -3,7 +3,7 @@ from scipy.optimize import minimize
 from scipy import ndimage as ndi
 
 from .pyramids import pyramid_gaussian
-from ..measure import compare_mse
+from ..measure import compare_nmi
 
 __all__ = ['register_affine']
 
@@ -54,7 +54,29 @@ def _matrix_to_parameter_vector(matrix):
     return matrix[:-1, :].ravel()
 
 
-def register_affine(reference, target, *, cost=compare_mse, nlevels=None,
+def cost_nmi(image0, image1, *, bins=100):
+    """Negative of the normalized mutual information.
+
+    See :func:`skimage.measure.compare_nmi` for more info.
+
+    Parameters
+    ----------
+    image0, image1 : array
+        The images to be compared. They should have the same shape.
+    bins : int or sequence of int, optional
+        The granularity of the histogram with which to compare the images.
+        If it's a sequence, each number is the number of bins for that image.
+
+    Returns
+    -------
+    cnmi : float
+        The negative of the normalized mutual information between ``image0``
+        and ``image1``.
+    """
+    return -compare_nmi(image0, image1, bins=bins)
+
+
+def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
                     multichannel=False, inverse=True,
                     iter_callback=lambda img, matrix: None):
     """

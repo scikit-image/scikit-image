@@ -146,7 +146,7 @@ def compare_psnr(im_true, im_test, data_range=None):
     return 10 * np.log10((data_range ** 2) / err)
 
 
-def compare_nmi(im_true, im_test, bins=100):
+def compare_nmi(im_true, im_test, *, bins=100):
     """Compute the normalized mutual information.
 
     The normalized mutual information is given by:
