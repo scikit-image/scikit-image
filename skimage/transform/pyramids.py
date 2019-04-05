@@ -1,9 +1,8 @@
 import math
 import numpy as np
 from scipy import ndimage as ndi
-from ..transform import resize
 from ..util import img_as_float
-from ._warps import _multichannel_default
+from ._warps import _multichannel_default, resize
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):

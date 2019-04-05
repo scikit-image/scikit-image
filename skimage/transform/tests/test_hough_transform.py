@@ -1,94 +1,11 @@
 import numpy as np
 
-from skimage import transform
-from skimage import data
-from skimage.feature import canny
+from skimage.transform import hough_line_peaks, hough_circle, hough_ellipse
+from skimage.transform_xy import hough_line, hough_circle_peaks
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
 
-from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel)
-
-
-@test_parallel()
-def test_hough_line():
-    # Generate a test image
-    img = np.zeros((100, 150), dtype=int)
-    rr, cc = line(60, 130, 80, 10)
-    img[rr, cc] = 1
-
-    out, angles, d = transform.hough_line(img)
-
-    y, x = np.where(out == out.max())
-    dist = d[y[0]]
-    theta = angles[x[0]]
-
-    assert_almost_equal(dist, 80.723, 1)
-    assert_almost_equal(theta, 1.41, 1)
-
-
-def test_hough_line_angles():
-    img = np.zeros((10, 10))
-    img[0, 0] = 1
-
-    out, angles, d = transform.hough_line(img, np.linspace(0, 360, 10))
-
-    assert_equal(len(angles), 10)
-
-
-def test_hough_line_bad_input():
-    img = np.zeros(100)
-    img[10] = 1
-
-    # Expected error, img must be 2D
-    with testing.raises(ValueError):
-        transform.hough_line(img, np.linspace(0, 360, 10))
-
-
-def test_probabilistic_hough():
-    # Generate a test image
-    img = np.zeros((100, 100), dtype=int)
-    for i in range(25, 75):
-        img[100 - i, i] = 100
-        img[i, i] = 100
-
-    # decrease default theta sampling because similar orientations may confuse
-    # as mentioned in article of Galambos et al
-    theta = np.linspace(0, np.pi, 45)
-    lines = transform.probabilistic_hough_line(
-        img, threshold=10, line_length=10, line_gap=1, theta=theta)
-    # sort the lines according to the x-axis
-    sorted_lines = []
-    for line in lines:
-        line = list(line)
-        line.sort(key=lambda x: x[0])
-        sorted_lines.append(line)
-
-    assert([(25, 75), (74, 26)] in sorted_lines)
-    assert([(25, 25), (74, 74)] in sorted_lines)
-
-    # Execute with default theta
-    transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
-
-
-def test_probabilistic_hough_seed():
-    # Load image that is likely to give a randomly varying number of lines
-    image = data.checkerboard()
-
-    # Use constant seed to ensure a deterministic output
-    lines = transform.probabilistic_hough_line(image, threshold=50,
-                                               line_length=50, line_gap=1,
-                                               seed=1234)
-    assert len(lines) == 65
-
-
-def test_probabilistic_hough_bad_input():
-    img = np.zeros(100)
-    img[10] = 1
-
-    # Expected error, img must be 2D
-    with testing.raises(ValueError):
-        transform.probabilistic_hough_line(img)
 
 
 def test_hough_line_peaks():
@@ -96,9 +13,9 @@ def test_hough_line_peaks():
     rr, cc = line(60, 130, 80, 10)
     img[rr, cc] = 1
 
-    out, angles, d = transform.hough_line(img)
+    out, angles, d = hough_line(img)
 
-    out, theta, dist = transform.hough_line_peaks(out, angles, d)
+    out, theta, dist = hough_line_peaks(out, angles, d)
 
     assert_equal(len(dist), 1)
     assert_almost_equal(dist[0], 80.723, 1)
@@ -114,9 +31,9 @@ def test_hough_line_peaks_ordered():
     testim[15:35, 50] = True
     testim[1:-1, 58] = True
 
-    hough_space, angles, dists = transform.hough_line(testim)
+    hough_space, angles, dists = hough_line(testim)
 
-    hspace, _, _ = transform.hough_line_peaks(hough_space, angles, dists)
+    hspace, _, _ = hough_line_peaks(hough_space, angles, dists)
     assert hspace[0] > hspace[1]
 
 
@@ -124,11 +41,11 @@ def test_hough_line_peaks_dist():
     img = np.zeros((100, 100), dtype=np.bool_)
     img[:, 30] = True
     img[:, 40] = True
-    hspace, angles, dists = transform.hough_line(img)
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_distance=5)[0]) == 2
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_distance=15)[0]) == 1
+    hspace, angles, dists = hough_line(img)
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_distance=5)[0]) == 2
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_distance=15)[0]) == 1
 
 
 def test_hough_line_peaks_angle():
@@ -140,46 +57,46 @@ def check_hough_line_peaks_angle():
     img[:, 0] = True
     img[0, :] = True
 
-    hspace, angles, dists = transform.hough_line(img)
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=45)[0]) == 2
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=90)[0]) == 1
+    hspace, angles, dists = hough_line(img)
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=45)[0]) == 2
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=90)[0]) == 1
 
     theta = np.linspace(0, np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=45)[0]) == 2
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=90)[0]) == 1
+    hspace, angles, dists = hough_line(img, theta)
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=45)[0]) == 2
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=90)[0]) == 1
 
     theta = np.linspace(np.pi / 3, 4. / 3 * np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=45)[0]) == 2
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_angle=90)[0]) == 1
+    hspace, angles, dists = hough_line(img, theta)
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=45)[0]) == 2
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_angle=90)[0]) == 1
 
 
 def test_hough_line_peaks_num():
     img = np.zeros((100, 100), dtype=np.bool_)
     img[:, 30] = True
     img[:, 40] = True
-    hspace, angles, dists = transform.hough_line(img)
-    assert len(transform.hough_line_peaks(hspace, angles, dists,
-                                          min_distance=0, min_angle=0,
-                                          num_peaks=1)[0]) == 1
+    hspace, angles, dists = hough_line(img)
+    assert len(hough_line_peaks(hspace, angles, dists,
+                                min_distance=0, min_angle=0,
+                                num_peaks=1)[0]) == 1
 
 
 def test_hough_line_peaks_zero_input():
     # Test to make sure empty input doesn't cause a failure
     img = np.zeros((100, 100), dtype='uint8')
     theta = np.linspace(0, np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
-    h, a, d = transform.hough_line_peaks(hspace, angles, dists)
+    hspace, angles, dists = hough_line(img, theta)
+    h, a, d = hough_line_peaks(hspace, angles, dists)
     assert_equal(a, np.array([]))
-    
-    
+
+
 @test_parallel()
 def test_hough_circle():
     # Prepare picture
@@ -189,10 +106,10 @@ def test_hough_circle():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x, y] = 1
 
-    out1 = transform.hough_circle(img, radius)
-    out2 = transform.hough_circle(img, [radius])
+    out1 = hough_circle(img, radius)
+    out2 = hough_circle(img, [radius])
     assert_equal(out1, out2)
-    out = transform.hough_circle(img, np.array([radius], dtype=np.intp))
+    out = hough_circle(img, np.array([radius], dtype=np.intp))
     assert_equal(out, out1)
     x, y = np.where(out[0] == out[0].max())
     assert_equal(x[0], x_0)
@@ -208,8 +125,8 @@ def test_hough_circle_extended():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x[np.where(x > 0)], y[np.where(x > 0)]] = 1
 
-    out = transform.hough_circle(img, np.array([radius], dtype=np.intp),
-                                 full_output=True)
+    out = hough_circle(img, np.array([radius], dtype=np.intp),
+                       full_output=True)
 
     x, y = np.where(out[0] == out[0].max())
     # Offset for x_0, y_0
@@ -228,11 +145,11 @@ def test_hough_circle_peaks():
     img[x, y] = 1
 
     radii = [rad_0, rad_1]
-    hspaces = transform.hough_circle(img, radii)
-    out = transform.hough_circle_peaks(hspaces, radii, min_xdistance=1,
-                                       min_ydistance=1, threshold=None,
-                                       num_peaks=np.inf,
-                                       total_num_peaks=np.inf)
+    hspaces = hough_circle(img, radii)
+    out = hough_circle_peaks(hspaces, radii, min_xdistance=1,
+                             min_ydistance=1, threshold=None,
+                             num_peaks=np.inf,
+                             total_num_peaks=np.inf)
     s = np.argsort(out[3])  # sort by radii
     assert_equal(out[1][s], np.array([y_0, y_1]))
     assert_equal(out[2][s], np.array([x_0, x_1]))
@@ -251,10 +168,10 @@ def test_hough_circle_peaks_total_peak():
     img[x, y] = 1
 
     radii = [rad_0, rad_1]
-    hspaces = transform.hough_circle(img, radii)
-    out = transform.hough_circle_peaks(hspaces, radii, min_xdistance=1,
-                                       min_ydistance=1, threshold=None,
-                                       num_peaks=np.inf, total_num_peaks=1)
+    hspaces = hough_circle(img, radii)
+    out = hough_circle_peaks(hspaces, radii, min_xdistance=1,
+                             min_ydistance=1, threshold=None,
+                             num_peaks=np.inf, total_num_peaks=1)
     assert_equal(out[1][0], np.array([y_1, ]))
     assert_equal(out[2][0], np.array([x_1, ]))
     assert_equal(out[3][0], np.array([rad_1, ]))
@@ -269,7 +186,7 @@ def test_hough_ellipse_zero_angle():
     angle = 0
     rr, cc = ellipse_perimeter(y0, x0, ry, rx)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=9)
+    result = hough_ellipse(img, threshold=9)
     best = result[-1]
     assert_equal(best[1], y0)
     assert_equal(best[2], x0)
@@ -294,7 +211,7 @@ def test_hough_ellipse_non_zero_posangle1():
     angle = np.pi / 1.35
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     assert_almost_equal(best[1] / 100., y0 / 100., decimal=1)
@@ -320,7 +237,7 @@ def test_hough_ellipse_non_zero_posangle2():
     angle = np.pi / 1.35
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     assert_almost_equal(best[1] / 100., y0 / 100., decimal=1)
@@ -346,7 +263,7 @@ def test_hough_ellipse_non_zero_posangle3():
     angle = np.pi / 1.35 + np.pi / 2.
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -367,7 +284,7 @@ def test_hough_ellipse_non_zero_posangle4():
     angle = np.pi / 1.35 + np.pi
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -388,7 +305,7 @@ def test_hough_ellipse_non_zero_negangle1():
     angle = - np.pi / 1.35
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -409,7 +326,7 @@ def test_hough_ellipse_non_zero_negangle2():
     angle = - np.pi / 1.35
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -430,7 +347,7 @@ def test_hough_ellipse_non_zero_negangle3():
     angle = - np.pi / 1.35 - np.pi / 2.
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -451,7 +368,7 @@ def test_hough_ellipse_non_zero_negangle4():
     angle = - np.pi / 1.35 - np.pi
     rr, cc = ellipse_perimeter(y0, x0, ry, rx, orientation=angle)
     img[rr, cc] = 1
-    result = transform.hough_ellipse(img, threshold=15, accuracy=3)
+    result = hough_ellipse(img, threshold=15, accuracy=3)
     result.sort(order='accumulator')
     best = result[-1]
     # Check if I re-draw the ellipse, points are the same!
@@ -463,4 +380,4 @@ def test_hough_ellipse_non_zero_negangle4():
 
 
 def test_hough_ellipse_all_black_img():
-    assert(transform.hough_ellipse(np.zeros((100, 100))).shape == (0, 6))
+    assert(hough_ellipse(np.zeros((100, 100))).shape == (0, 6))

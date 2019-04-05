@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
-from ._warps_cy import _warp_fast
+from ..transform_xy._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from warnings import warn
 
