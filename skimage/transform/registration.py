@@ -78,7 +78,7 @@ def cost_nmi(image0, image1, *, bins=100):
 
 def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
                     multichannel=False, inverse=True,
-                    iter_callback=lambda img, matrix: None):
+                    iter_callback=lambda x: None):
     """
     Returns a matrix which registers the target image to the reference image
 
@@ -109,10 +109,10 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
         ``scipy.ndimage.affine_transform`` to map the target image to the
         reference space.
     iter_callback : callable, optional
-        If given, this function is called once per pyramid level with the
-        current downsampled image and transformation matrix guess as the only
-        arguments. This is useful for debugging or for plotting intermediate
-        results during the iterative processs.
+        If given, this function is called once per pyramid level with a tuple
+        containing the current downsampled image, transformation matrix, and
+        cost as the argument. This is useful for debugging or for plotting
+        intermediate results during the iterative processs.
 
     Returns
     -------
@@ -133,7 +133,7 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
 
     """
 
-    num_dims = reference.ndim
+    ndim = reference.ndim
 
     if nlevels is None:
         min_dim = min(reference.shape)
@@ -145,21 +145,21 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1,
         multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
-    parameter_vector = _matrix_to_parameter_vector(np.identity(num_dims + 1))
+    parameter_vector = _matrix_to_parameter_vector(np.identity(ndim + 1))
 
-    for (ref, tgt) in image_pairs:
+    for ref, tgt in image_pairs:
         def _cost(param):
-            transformation = _parameter_vector_to_matrix(param, num_dims)
+            transformation = _parameter_vector_to_matrix(param, ndim)
             transformed = ndi.affine_transform(tgt, transformation, order=1)
             return cost(ref, transformed)
 
         result = minimize(_cost, parameter_vector, method='Powell')
         parameter_vector = result.x
-        iter_callback(
-            tgt, _parameter_vector_to_matrix(
-                parameter_vector, num_dims))
+        iter_callback((tgt,
+                       _parameter_vector_to_matrix(parameter_vector, ndim),
+                       result.fun))
 
-    matrix = _parameter_vector_to_matrix(parameter_vector, num_dims)
+    matrix = _parameter_vector_to_matrix(parameter_vector, ndim)
 
     if not inverse:
         # estimated is already inverse, so we invert for forward transform
