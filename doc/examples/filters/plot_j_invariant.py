@@ -12,18 +12,23 @@ version of any denoising algorithm.
 # Calibrating a wavelet denoiser
 
 import numpy as np
-from skimage.data import chelsea
+from matplotlib import pyplot as plt
+from matplotlib import gridspec
+
+from skimage.data import chelsea, hubble_deep_field
+from skimage.measure import compare_mse as mse
+from skimage.measure import compare_psnr as psnr
 from skimage.restoration import (calibrate_denoiser, calibrate_denoiser_search,
                                  invariant_denoise, denoise_wavelet,
                                  denoise_tv_chambolle, denoise_nl_means,
                                  estimate_sigma)
 from skimage.util import img_as_float, random_noise
-from skimage.measure import compare_mse as mse
-from matplotlib import pyplot as plt
+from skimage.color import rgb2gray
+
 
 image = img_as_float(chelsea())
 sigma = 0.3
-noisy = random_noise(image, var=sigma**2)
+noisy = random_noise(image, var=sigma ** 2)
 
 sigma_range = np.arange(0.05, 0.5, 0.05)
 
@@ -37,22 +42,20 @@ default_output = denoise_wavelet(noisy, multichannel=True)
 calibrated_denoiser = calibrate_denoiser(noisy,
                                          denoise_wavelet,
                                          parameter_ranges,
-                                         multichannel = True)
+                                         multichannel=True)
 
 calibrated_output = calibrated_denoiser(noisy)
 
 fig, axes = plt.subplots(1, 3, sharey=True, figsize=(15, 5))
 
 for ax, img, title in zip(axes,
-                         [noisy, default_output, calibrated_output],
-                         ["Noisy Image", "Denoised (Default)", "Denoised (Calibrated)"]):
-
+                          [noisy, default_output, calibrated_output],
+                          ["Noisy Image", "Denoised (Default)",
+                           "Denoised (Calibrated)"]):
     ax.imshow(img)
     ax.set_title(title)
     ax.set_yticks([])
     ax.set_xticks([])
-
-
 
 #####################################################################
 # The Self-Supervised Loss and J-Invariance
@@ -72,9 +75,9 @@ for ax, img, title in zip(axes,
 # difference between the denoised image and the original clean image, the
 # _ground-truth loss_ (up to a constant).
 #
-# This means that the best (J-invariant) denoiser for a given image can
+# This means that the best J-invariant denoiser for a given image can
 # be found using the noisy data alone, by selecting the denoiser minimizing
-# the self-supervised loss. Below, we demonstrate that this relationship holds
+# the self-supervised loss. Below, we demonstrate that this
 # for a family of wavelet denoisers with varying `sigma` parameter. The
 # self-supervised loss (solid blue line) and the ground-truth loss (dashed
 # blue line) have the same shape and the same minimizer.
@@ -98,8 +101,6 @@ plot_idx = [0, 3, 8]
 get_inset = lambda x: x[25:225, 100:300]
 
 plt.figure(figsize=(10, 12))
-
-import matplotlib.gridspec as gridspec
 
 gs = gridspec.GridSpec(3, 3)
 ax1 = plt.subplot(gs[0, :])
@@ -136,7 +137,6 @@ for spine in ax_image[1].spines.values():
     spine.set_edgecolor('red')
     spine.set_linewidth(5)
 
-
 #####################################################################
 # Conversion to J-invariance
 # =========================================
@@ -151,7 +151,7 @@ for spine in ax_image[1].spines.values():
 # or worse. In the plot below, we see that, for the test image of a cat,
 # the J-invariant version of a wavelet denoiser is significantly better
 # than the original at small values of variance-reduction `sigma` and
-# imperceptably worse at larger values.
+# imperceptibly worse at larger values.
 #
 
 parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
@@ -169,12 +169,16 @@ ground_truth_loss_original = [mse(img, image) for img in denoised_original]
 
 fig, ax = plt.subplots(figsize=(10, 4))
 
-ax.plot(sigma_range, ground_truth_loss_invariant, color='C0', linestyle='--', label = 'J-invariant')
-ax.plot(sigma_range, ground_truth_loss_original, color='C1', linestyle='--', label = 'Original')
+ax.plot(sigma_range, ground_truth_loss_invariant, color='C0', linestyle='--',
+        label='J-invariant')
+ax.plot(sigma_range, ground_truth_loss_original, color='C1', linestyle='--',
+        label='Original')
 ax.scatter(sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.001,
-            marker = "v", color = 'red')
+           marker="v", color='red')
 ax.legend()
-ax.set_title("J-Invariant Denoiser Has Comparable Or Better Performance At Same Parameters")
+ax.set_title(
+    "J-Invariant Denoiser Has Comparable Or "
+    "Better Performance At Same Parameters")
 ax.set_ylabel("MSE")
 ax.set_xlabel("sigma")
 
@@ -182,30 +186,27 @@ ax.set_xlabel("sigma")
 # Comparing Different Classes of Denoiser
 # =========================================
 # The self-supervised loss can be used to compare different classes of
-# denoiser in addition to calibrating a single class. This allows the user
-# to, in an unbiased way, choose the best parameters for the best class
-# of denoiser for a given image.
+# denoiser in addition to choosing parameters for a single class.
+# This allows the user to, in an unbiased way, choose the best parameters
+# for the best class of denoiser for a given image.
 #
 # Below, we show this for an image of the hubble deep field with significant
 # speckle noise added. In this case, the J-invariant calibrated denoiser is
-# better than the default denoiser for each of three families of denoisers --
-# Non-local means, wavelet, and TV-norm. Additionally, the self-supervised
-# loss shows that the TV-norm denoiser is the best for this noisy image.
+# better than the default denoiser in each of three families of denoisers --
+# Non-local means, wavelet, and TV norm. Additionally, the self-supervised
+# loss shows that the TV norm denoiser is the best for this noisy image.
 #
 
-from skimage.data import hubble_deep_field
-from skimage.color import rgb2gray
 image = rgb2gray(img_as_float(hubble_deep_field()[100:250, 50:300]))
 
 sigma = 0.4
-noisy = random_noise(image, mode='speckle', var=sigma**2)
-
-from skimage.measure import compare_psnr as psnr
+noisy = random_noise(image, mode='speckle', var=sigma ** 2)
 
 parameter_ranges_tv = {'weight': np.arange(0.01, 0.3, 0.02)}
-parameters_tested_tv, losses_tv = calibrate_denoiser_search(noisy,
-                                                            denoise_tv_chambolle,
-                                                            parameter_ranges_tv)
+parameters_tested_tv, losses_tv = calibrate_denoiser_search(
+                                    noisy,
+                                    denoise_tv_chambolle,
+                                    parameter_ranges_tv)
 print("Minimum self-supervised loss TV: {:.4f}".format(np.min(losses_tv)))
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
@@ -217,11 +218,16 @@ psnr_calibrated_tv = psnr(denoised_calibrated_tv, image)
 psnr_default_tv = psnr(denoised_default_tv, image)
 
 parameter_ranges_wavelet = {'sigma': np.arange(0.01, 0.3, 0.03)}
-parameters_tested_wavelet, losses_wavelet = calibrate_denoiser_search(noisy, denoise_wavelet, parameter_ranges_wavelet)
-print("Minimum self-supervised loss wavelet: {:.4f}".format(np.min(losses_wavelet)))
+parameters_tested_wavelet, losses_wavelet = calibrate_denoiser_search(
+                                                noisy,
+                                                denoise_wavelet,
+                                                parameter_ranges_wavelet)
+print("Minimum self-supervised loss wavelet: {:.4f}".format(
+    np.min(losses_wavelet)))
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
-denoised_calibrated_wavelet = invariant_denoise(noisy, denoise_wavelet, denoiser_kwargs=best_parameters_wavelet)
+denoised_calibrated_wavelet = invariant_denoise(noisy, denoise_wavelet,
+                                                denoiser_kwargs=best_parameters_wavelet)
 denoised_default_wavelet = denoise_wavelet(noisy, **best_parameters_wavelet)
 
 psnr_calibrated_wavelet = psnr(denoised_calibrated_wavelet, image)
@@ -229,15 +235,18 @@ psnr_default_wavelet = psnr(denoised_default_wavelet, image)
 
 sigma_est = estimate_sigma(noisy)
 
-parameter_ranges_nl = {'sigma': np.arange(0.6, 1.4, 0.2)*sigma_est,
-                        'h': np.arange(0.6, 1.2, 0.2)*sigma_est}
+parameter_ranges_nl = {'sigma': np.arange(0.6, 1.4, 0.2) * sigma_est,
+                       'h': np.arange(0.6, 1.2, 0.2) * sigma_est}
 
 parameter_ranges_nl = {'sigma': np.arange(0.01, 0.3, 0.03)}
-parameters_tested_nl, losses_nl = calibrate_denoiser_search(noisy, denoise_nl_means, parameter_ranges_nl)
+parameters_tested_nl, losses_nl = calibrate_denoiser_search(noisy,
+                                                            denoise_nl_means,
+                                                            parameter_ranges_nl)
 print("Minimum self-supervised loss NL means: {:.4f}".format(np.min(losses_nl)))
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
-denoised_calibrated_nl = invariant_denoise(noisy, denoise_nl_means, denoiser_kwargs=best_parameters_nl)
+denoised_calibrated_nl = invariant_denoise(noisy, denoise_nl_means,
+                                           denoiser_kwargs=best_parameters_nl)
 denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 
 psnr_calibrated_nl = psnr(denoised_calibrated_nl, image)
@@ -259,28 +268,27 @@ plt.title("Noisy Image")
 
 get_inset = lambda x: x[0:100, -140:]
 
-fig, axes = plt.subplots(ncols = 3, nrows = 2, figsize = (15, 8))
+fig, axes = plt.subplots(ncols=3, nrows=2, figsize=(15, 8))
 
 for ax in axes.ravel():
     ax.set_xticks([])
     ax.set_yticks([])
 
-axes[0,0].imshow(get_inset(denoised_default_nl), cmap='Greys_r')
-axes[0,0].set_title("NL Means Default")
-axes[0,0].set_xlabel("PSNR: 0.4")
-axes[1,0].imshow(get_inset(denoised_calibrated_nl), cmap='Greys_r')
-axes[1,0].set_title("NL Means Calibrated")
-axes[0,1].imshow(get_inset(denoised_default_wavelet), cmap='Greys_r')
-axes[0,1].set_title("Wavelet Default")
-axes[1,1].imshow(get_inset(denoised_calibrated_wavelet), cmap='Greys_r')
-axes[1,1].set_title("Wavelet Calibrated")
-axes[0,2].imshow(get_inset(denoised_default_tv), cmap='Greys_r')
-axes[0,2].set_title("TV Norm Default")
-axes[1,2].imshow(get_inset(denoised_calibrated_tv), cmap='Greys_r')
-axes[1,2].set_title("TV Norm Calibrated")
+axes[0, 0].imshow(get_inset(denoised_default_nl), cmap='Greys_r')
+axes[0, 0].set_title("NL Means Default")
+axes[1, 0].imshow(get_inset(denoised_calibrated_nl), cmap='Greys_r')
+axes[1, 0].set_title("NL Means Calibrated")
+axes[0, 1].imshow(get_inset(denoised_default_wavelet), cmap='Greys_r')
+axes[0, 1].set_title("Wavelet Default")
+axes[1, 1].imshow(get_inset(denoised_calibrated_wavelet), cmap='Greys_r')
+axes[1, 1].set_title("Wavelet Calibrated")
+axes[0, 2].imshow(get_inset(denoised_default_tv), cmap='Greys_r')
+axes[0, 2].set_title("TV Norm Default")
+axes[1, 2].imshow(get_inset(denoised_calibrated_tv), cmap='Greys_r')
+axes[1, 2].set_title("TV Norm Calibrated")
 
 for spine in axes[1, 2].spines.values():
-        spine.set_edgecolor('red')
-        spine.set_linewidth(5)
+    spine.set_edgecolor('red')
+    spine.set_linewidth(5)
 
 plt.show()
