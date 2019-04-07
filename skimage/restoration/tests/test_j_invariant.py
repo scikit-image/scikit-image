@@ -41,7 +41,7 @@ def test_invariant_denoise_3d():
     assert_(denoised_mse < original_mse)
 
 
-def test_calibrate_denoiser():
+def test_calibrate_denoiser_search():
     parameter_ranges = {'sigma': np.random.random(5) / 2}
     parameters_tested, losses = calibrate_denoiser_search(noisy_img,
                                                           denoise_wavelet,
@@ -54,6 +54,16 @@ def test_calibrate_denoiser():
     ground_truth_losses = [mse(img, test_img) for img in all_denoised]
 
     assert_(np.argmin(losses) == np.argmin(ground_truth_losses))
+
+
+def test_calibrate_denoiser():
+    parameter_ranges = {'sigma': np.random.random(5) / 2}
+
+    denoiser = calibrate_denoiser(noisy_img, denoise_wavelet, parameter_ranges)
+
+    denoised_mse = mse(denoiser(noisy_img), test_img)
+    original_mse = mse(noisy_img, test_img)
+    assert_(denoised_mse < original_mse)
 
 
 def test_input_image_not_modified():
