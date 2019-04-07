@@ -71,9 +71,9 @@ for ax, img, title in zip(axes,
 # The pixel-wise error of a J-invariant denoiser is uncorrelated
 # to the noise, so long as the noise in each pixel is independent.
 # Consequently, the average difference between the denoised image and the
-# noisy image, the _self-supervised loss_, is the same as the
+# noisy image, the *self-supervised loss*, is the same as the
 # difference between the denoised image and the original clean image, the
-# _ground-truth loss_ (up to a constant).
+# *ground-truth loss* (up to a constant).
 #
 # This means that the best J-invariant denoiser for a given image can
 # be found using the noisy data alone, by selecting the denoiser minimizing
