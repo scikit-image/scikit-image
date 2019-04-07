@@ -32,8 +32,8 @@ noisy = random_noise(image, var=sigma ** 2)
 
 sigma_range = np.arange(0.05, 0.5, 0.05)
 
-parameter_ranges = {'sigma': np.arange(0.1, 0.4, 0.02),
-                    'wavelet': ['db1', 'db2', 'sym9'],
+parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
+                    'wavelet': ['db1', 'db2'],
                     'convert2ycbcr': [True, False],
                     'multichannel': [True]}
 
@@ -83,20 +83,21 @@ for ax, img, title in zip(axes,
 # blue line) have the same shape and the same minimizer.
 #
 
-sigma_range = np.arange(0.12, 0.32, 0.02)
+sigma_range = np.arange(0.12, 0.26, 0.03)
 
-parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
-                      'wavelet': 'db2', 'multichannel': True}
+parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
+                      'multichannel': True}
                      for sigma in sigma_range]
 
-denoised = [invariant_denoise(noisy, denoise_wavelet, denoiser_kwargs=params)
-            for params in parameters_tested]
+denoised_invariant = [invariant_denoise(noisy, denoise_wavelet,
+                                        denoiser_kwargs=params)
+                      for params in parameters_tested]
 
-self_supervised_loss = [mse(img, noisy) for img in denoised]
-ground_truth_loss = [mse(img, image) for img in denoised]
+self_supervised_loss = [mse(img, noisy) for img in denoised_invariant]
+ground_truth_loss = [mse(img, image) for img in denoised_invariant]
 
 opt_idx = np.argmin(self_supervised_loss)
-plot_idx = [0, 3, 8]
+plot_idx = [0, 2, 4]
 
 get_inset = lambda x: x[25:225, 100:300]
 
@@ -130,7 +131,7 @@ for i in range(3):
     ax = ax_image[i]
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.imshow(get_inset(denoised[plot_idx[i]]))
+    ax.imshow(get_inset(denoised_invariant[plot_idx[i]]))
     ax.set_xlabel("sigma = " + str(np.round(sigma_range[plot_idx[i]], 2)))
 
 for spine in ax_image[1].spines.values():
@@ -158,9 +159,6 @@ parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
                       'wavelet': 'db2', 'multichannel': True}
                      for sigma in sigma_range]
 
-denoised_invariant = [invariant_denoise(noisy, denoise_wavelet,
-                                        denoiser_kwargs=params)
-                      for params in parameters_tested]
 denoised_original = [denoise_wavelet(noisy, **params)
                      for params in parameters_tested]
 
