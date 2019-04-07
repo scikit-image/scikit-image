@@ -15,7 +15,7 @@ else:
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False):
+                           allow_degenerate=True, use_classic=False, mask:np.ndarray = None):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -57,6 +57,10 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         produce a topologically correct result. The results with using
         this option are *not* generally the same as the
         ``marching_cubes_classic()`` function.
+    mask : (M, N, P) array
+        Bool array. The marching cube algorith will be computed only on
+        True elements. This may save computational time when interfaces
+        are located and also may work to compute finite surfaces.
 
     Returns
     -------
@@ -147,8 +151,13 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     L = _get_mc_luts()
 
     # Apply algorithm
-    func = _marching_cubes_lewiner_cy.marching_cubes
-    vertices, faces , normals, values = func(volume, level, L, step_size, use_classic)
+    # Check if a mask array is passed
+    if mask is not None:
+        func = _marching_cubes_lewiner_cy.marching_cubes_masked
+        vertices, faces, normals, values = func(volume, level, L, step_size, use_classic, mask.astype('int32'))
+    else:
+        func = _marching_cubes_lewiner_cy.marching_cubes
+        vertices, faces, normals, values = func(volume, level, L, step_size, use_classic)
 
     if not len(vertices):
         raise RuntimeError('No surface found at the given iso value.')
