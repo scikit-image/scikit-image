@@ -9,7 +9,7 @@ from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
 from ._cycle_spin import cycle_spin
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
-from .j_invariant import calibrate_denoiser, invariant_denoise
+from .j_invariant import calibrate_denoiser, calibrate_denoiser_search, invariant_denoise
 
 
 __all__ = ['wiener',
