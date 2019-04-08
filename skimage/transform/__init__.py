@@ -16,7 +16,10 @@ from ._warps import (swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
+
 from .seam_carving import seam_carve
+from .steerable import build_steerable, recon_steerable
+
 
 
 __all__ = ['match_histograms',
@@ -55,4 +58,6 @@ __all__ = ['match_histograms',
            'pyramid_expand',
            'pyramid_gaussian',
            'pyramid_laplacian',
-           'seam_carve']
+           'seam_carve',
+           'build_steerable',
+           'recon_steerable']
