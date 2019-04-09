@@ -106,11 +106,10 @@ class _RegionProperties(object):
                 raise ValueError('Label and intensity image must have the'
                                  'same shape.')
 
-        self.label = label
-
+        self._image = label_image[slice] == label # Pre-slice on init so original labeled image does not need to be retained
+        
+        self._label = label
         self._slice = slice
-        self.slice = slice
-        self._label_image = label_image
         self._intensity_image = intensity_image
 
         self._cache_active = cache_active
@@ -131,7 +130,13 @@ class _RegionProperties(object):
         else:
             raise ValueError('Incorrect value for regionprops coordinates: %s.'
                              ' Possible values are: "rc", "xy", or None')
-
+    
+    def label(self):
+        return self._label
+    
+    def slice(self):
+        return self._slice
+    
     @_cached
     def area(self):
         return np.sum(self.image)
@@ -198,7 +203,7 @@ class _RegionProperties(object):
 
     @_cached
     def image(self):
-        return self._label_image[self.slice] == self.label
+        return self._image
 
     @_cached
     def inertia_tensor(self):

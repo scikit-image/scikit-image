@@ -457,23 +457,30 @@ def test_iterate_all_props():
     p1 = {p: region[p] for p in region}
 
     assert len(p0) < len(p1)
-
-
-def test_cache():
-    region = regionprops(SAMPLE)[0]
+    
+def test_cache_on():
+    region = regionprops(SAMPLE, cache=True)[0]
     f0 = region.filled_image
-    region._label_image[:10] = 1
+    
+    # Make sure object is put into cache
+    assert 'filled_image' in region._cache
+    
+    f1 = region._cache['filled_image']
+    assert_array_equal( f0, f1 )
+    assert f0 is f1
+
+def test_cache_off():
+    region = regionprops(SAMPLE, cache=False)[0]
+    items_before = len(region._cache)
+    
+    f0 = region.filled_image
     f1 = region.filled_image
-
-    # Changed underlying image, but cache keeps result the same
-    assert_array_equal(f0, f1)
-
-    # Now invalidate cache
-    region._cache_active = False
-    f1 = region.filled_image
-
-    assert np.any(f0 != f1)
-
+    
+    items_after = len(region._cache)
+    
+    assert items_before != items_after
+    assert not f0 is f1
+    assert_array_equal( f0, f1 )
 
 def test_docstrings_and_props():
     def foo():
