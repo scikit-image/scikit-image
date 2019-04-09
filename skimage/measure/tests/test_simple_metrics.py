@@ -1,12 +1,11 @@
 import numpy as np
 
 import skimage.data
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse
-
+from skimage.measure import compare_psnr, compare_nrmse, compare_mse, enhancement_measure
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_equal, assert_almost_equal, assert_greater, assert_less
 from skimage._shared._warnings import expected_warnings
-
+from skimage.exposure import equalize_hist, adjust_gamma
 
 np.random.seed(5)
 cam = skimage.data.camera()
@@ -49,9 +48,9 @@ def test_PSNR_errors():
 def test_NRMSE():
     x = np.ones(4)
     y = np.asarray([0., 2., 2., 2.])
-    assert_equal(compare_nrmse(y, x, 'mean'), 1/np.mean(y))
-    assert_equal(compare_nrmse(y, x, 'Euclidean'), 1/np.sqrt(3))
-    assert_equal(compare_nrmse(y, x, 'min-max'), 1/(y.max()-y.min()))
+    assert_equal(compare_nrmse(y, x, 'mean'), 1 / np.mean(y))
+    assert_equal(compare_nrmse(y, x, 'Euclidean'), 1 / np.sqrt(3))
+    assert_equal(compare_nrmse(y, x, 'min-max'), 1 / (y.max() - y.min()))
 
     # mixed precision inputs are allowed
     assert_almost_equal(compare_nrmse(y, np.float32(x), 'min-max'),
@@ -75,3 +74,25 @@ def test_NRMSE_errors():
     # invalid normalization name
     with testing.raises(ValueError):
         compare_nrmse(x, x, 'foo')
+
+
+def test_EME_greyscale():
+    orig = cam
+    enhanced = equalize_hist(orig)
+    assert_less(enhancement_measure(orig),
+                enhancement_measure(enhanced))
+
+    assert_less(enhancement_measure(orig, size=5),
+                enhancement_measure(enhanced, size=5))
+
+    assert_less(enhancement_measure(orig, size=11),
+                enhancement_measure(enhanced, size=11))
+
+def test_EME_color():
+    orig = skimage.data.astronaut()
+    enhanced = adjust_gamma(orig, gamma=5)
+
+    assert_less(enhancement_measure(orig, size=3),
+                enhancement_measure(enhanced, size=3, eps=1))
+    assert_less(enhancement_measure(orig, size=7),
+                enhancement_measure(enhanced, size=7))

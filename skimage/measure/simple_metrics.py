@@ -1,11 +1,9 @@
-
 import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
 from ..util import img_as_float
 from ..exposure import rescale_intensity
 from scipy.ndimage import maximum_filter, minimum_filter
-
 
 __all__ = ['compare_mse',
            'compare_nrmse',
@@ -91,7 +89,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
 
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true*im_true), dtype=np.float64))
+        denom = np.sqrt(np.mean((im_true * im_true), dtype=np.float64))
     elif norm_type == 'min-max':
         denom = im_true.max() - im_true.min()
     elif norm_type == 'mean':
@@ -150,7 +148,7 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 
 def enhancement_measure(image: np.ndarray,
-                        eps: float = 1e-7,
+                        eps: float = 1e-6,
                         size: int = 3) -> float:
     """ The image enhancement measure called EME based on [1]_.
 
@@ -188,8 +186,7 @@ def enhancement_measure(image: np.ndarray,
     """
     image = img_as_float(image)
     image = rescale_intensity(image, out_range=(0., 1.))
-    eme = np.zeros_like(image)
     eme = np.divide(maximum_filter(image, size=size),
                     minimum_filter(image, size=size) + eps)
-    eme = np.mean(20 * np.log(eme))
+    eme = np.mean(20 * np.log(eme + eps))
     return eme
