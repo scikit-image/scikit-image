@@ -81,7 +81,6 @@ def test_EME_greyscale():
     enhanced = equalize_hist(orig)
     assert_less(enhancement_measure(orig),
                 enhancement_measure(enhanced))
-
     assert_less(enhancement_measure(orig, size=5),
                 enhancement_measure(enhanced, size=5))
 
@@ -91,7 +90,6 @@ def test_EME_greyscale():
 def test_EME_color():
     orig = skimage.data.astronaut()
     enhanced = adjust_gamma(orig, gamma=5)
-
     assert_less(enhancement_measure(orig, size=3),
                 enhancement_measure(enhanced, size=3, eps=1))
     assert_less(enhancement_measure(orig, size=7),
