@@ -1056,8 +1056,8 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority_filter(image, selem, out=None, mask=None,
-                    shift_x=False, shift_y=False, n_bins=None):
+def majority_filter(image, selem, out=None, mask=None, shift_x=False,
+                    shift_y=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
 
@@ -1076,9 +1076,6 @@ def majority_filter(image, selem, out=None, mask=None,
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
-    n_bins : int or None
-        The number of histogram bins. Will default to ``image.max() + 1``
-        if None is passed.
 
     Returns
     -------

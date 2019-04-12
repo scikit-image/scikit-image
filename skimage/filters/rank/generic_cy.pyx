@@ -443,14 +443,17 @@ cdef inline void _kernel_majority(dtype_t_out* out, Py_ssize_t odepth,
                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
     cdef Py_ssize_t i
-    cdef Py_ssize_t vote = 0
+    cdef Py_ssize_t votes
+    cdef Py_ssize_t candidate = 0
 
     if pop:
-        for i in range(n_bins):
-            if histo[i] > vote:
-                vote = i
+        votes = histo[0]
+        for i in range(1, n_bins):
+            if histo[i] > votes:
+                candidate = i
+                votes = histo[i]
 
-    out[0] = dtype_t_out>(vote)
+    out[0] = <dtype_t_out>(candidate)
 
 
 def _autolevel(dtype_t[:, ::1] image,
