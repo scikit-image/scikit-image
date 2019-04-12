@@ -435,6 +435,27 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
             out[i] = <dtype_t_out>0
 
 
+cdef inline void _kernel_majority(dtype_t_out* out, Py_ssize_t odepth,
+                                  Py_ssize_t* histo,
+                                  double pop, dtype_t g,
+                                  Py_ssize_t n_bins, Py_ssize_t mid_bin,
+                                  double p0, double p1,
+                                  Py_ssize_t s0, Py_ssize_t s1) nogil:
+
+    cdef Py_ssize_t i
+    cdef Py_ssize_t votes
+    cdef Py_ssize_t candidate = 0
+
+    if pop:
+        votes = histo[0]
+        for i in range(1, n_bins):
+            if histo[i] > votes:
+                candidate = i
+                votes = histo[i]
+
+    out[0] = <dtype_t_out>(candidate)
+
+
 def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
@@ -632,4 +653,14 @@ def _windowed_hist(dtype_t[:, ::1] image,
                    signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
 
     _core(_kernel_win_hist[dtype_t_out, dtype_t], image, selem, mask, out,
+          shift_x, shift_y, 0, 0, 0, 0, n_bins)
+
+
+def _majority(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask,
+              dtype_t_out[:, :, ::1] out,
+              signed char shift_x, signed char shift_y, Py_ssize_t n_bins):
+
+    _core(_kernel_majority[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
