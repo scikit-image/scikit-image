@@ -16,7 +16,12 @@ MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
 URL = 'https://scikit-image.org'
 LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'https://github.com/scikit-image/scikit-image'
+DOWNLOAD_URL = 'https://scikit-image.org/download.html'
+PROJECT_URLS = {
+    "Bug Tracker": 'https://github.com/scikit-image/scikit-image/issues',
+    "Documentation": 'https://scikit-image.org/docs/stable/',
+    "Source Code": 'https://github.com/scikit-image/scikit-image'
+}
 
 import os
 import sys
@@ -198,6 +203,7 @@ if __name__ == "__main__":
         url=URL,
         license=LICENSE,
         download_url=DOWNLOAD_URL,
+        project_urls=PROJECT_URLS,
         version=VERSION,
 
         classifiers=[
