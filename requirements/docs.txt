@@ -1,5 +1,5 @@
 sphinx>=2.0
-numpydoc>=0.7
+numpydoc==0.7
 sphinx-gallery
 sphinx-copybutton
 pytest-runner
