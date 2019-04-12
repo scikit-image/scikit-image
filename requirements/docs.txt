@@ -1,6 +1,6 @@
 sphinx>=2.0
 numpydoc>=0.7
-sphinx-gallery>=0.3
+sphinx-gallery
 sphinx-copybutton
 pytest-runner
 scikit-learn
