@@ -34,6 +34,8 @@ API Changes
   ``skimage.feature.hog``. Use ``visualize`` instead.¨
 - ``skimage.transform.seam_carve`` has been completely removed from the
   library due to licensing restrictions.
+- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
+  ``skimage.io.imread``. Use ``as_gray`` instead.
 
 Bugfixes
 --------
