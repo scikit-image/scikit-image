@@ -24,6 +24,12 @@ Improvements
 API Changes
 -----------
 - Deprecated subpackage ``skimage.novice`` has been removed.
+- Default value of ``multichannel`` parameters has been set to False in
+  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``, and
+  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
+  anymore, so, please, make sure that the parameter is fixed to a proper value.
 
 
 Bugfixes

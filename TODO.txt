@@ -7,11 +7,6 @@ Version 0.16
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``,
-  ``skimage.transform.pyramid_expandset``, set default value of
-  ``multichannel`` to False
 * Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
   longer call it from within the ``resize`` or ``pyramid_*`` transforms.
 * Remove checks for the ``multichannel`` deprecation warnings in several tests

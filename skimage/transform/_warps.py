@@ -198,7 +198,7 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
 
 
 def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=None,
+            preserve_range=False, multichannel=False,
             anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
@@ -242,9 +242,7 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. By default, is set to True for
-        3D (2D+color) inputs, and False for others. Starting in release 0.16,
-        this will always default to False.
+        channels or another spatial dimension.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
