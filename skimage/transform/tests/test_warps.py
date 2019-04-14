@@ -231,17 +231,14 @@ def test_rescale_multichannel_multiscale():
 
 
 def test_rescale_multichannel_defaults():
-    # ensure multichannel=None matches the previous default behaviour
-
-    # 2D: multichannel should default to False
+    # multichannel should always default to False as of 0.16
     x = np.zeros((8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
-    # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
     scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 16, 3))
+    assert_equal(scaled.shape, (16, 16, 6))
 
 
 def test_resize2d():
