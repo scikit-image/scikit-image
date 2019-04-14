@@ -36,6 +36,8 @@ API Changes
   library due to licensing restrictions.
 - Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
   ``skimage.io.imread``. Use ``as_gray`` instead.
+- Parameter ``min_size`` has been removed from
+  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
 
 Bugfixes
 --------

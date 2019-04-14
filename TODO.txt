@@ -12,7 +12,6 @@ Version 0.16
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
   arguments.
-* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
 * In ``skimage.filters.median``, change default from ``behavior='rank'`` to
   ``behavior='ndimage'``.
 
