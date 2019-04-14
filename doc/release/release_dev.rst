@@ -32,7 +32,8 @@ API Changes
   anymore, so, please, make sure that the parameter is fixed to a proper value.
 - Deprecated argument ``visualise`` has been removed from
   ``skimage.feature.hog``. Use ``visualize`` instead.¨
-
+- ``skimage.transform.seam_carve`` has been completely removed from the
+  library due to licensing restrictions.
 
 Bugfixes
 --------
