@@ -160,7 +160,7 @@ ax[5].set_title('Farid error')
 
 fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.90, 0.10, 0.02, 0.50])
-fig.colorbar(cax, cax=cbar_ax, ticks=[0, 0.01, 0.02], aspect=10)
+fig.colorbar(cax, cax=cbar_ax, ticks=[0, 0.01, 0.02])
 
 for a in ax:
     a.axis('off')
