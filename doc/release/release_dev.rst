@@ -23,6 +23,7 @@ Improvements
 
 API Changes
 -----------
+- Deprecated subpackage ``skimage.novice`` has been removed.
 
 
 Bugfixes
