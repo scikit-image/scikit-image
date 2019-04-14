@@ -14,8 +14,7 @@ image_gray = image[..., 0]
 
 def test_pyramid_reduce_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['The default multichannel']):
-        out = pyramids.pyramid_reduce(image, downscale=2)
+    out = pyramids.pyramid_reduce(image, downscale=2, multichannel=True)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
 
