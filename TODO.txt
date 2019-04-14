@@ -7,11 +7,6 @@ Version 0.16
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
-  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
-* Remove checks for the ``multichannel`` deprecation warnings in several tests
-  in ``skimage.transform.tests.test_pyramids.py`` and
-  ``skimage.transform.tests.test_warps.py``.
 * Remove `flatten` for `imread` in ``skimage.io._io.py``.
 * Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
 * Remove deprecated argument ``visualise`` from function skimage.feature.hog

@@ -3,12 +3,10 @@ import numpy as np
 from scipy import ndimage as ndi
 from ..transform import resize
 from ..util import img_as_float
-from ._warps import _multichannel_default
 
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
     """Return image with each channel smoothed by the Gaussian filter."""
-    multichannel = _multichannel_default(multichannel, image.ndim)
     smoothed = np.empty(image.shape, dtype=np.double)
 
     # apply Gaussian filter to all channels independently
@@ -60,7 +58,6 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     image = img_as_float(image)
@@ -116,7 +113,6 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
-    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(upscale)
 
     image = img_as_float(image)
@@ -264,7 +260,6 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     .. [2] http://sepwww.stanford.edu/data/media/public/sep/morgan/texturematch/paper_html/node3.html
 
     """
-    multichannel = _multichannel_default(multichannel, image.ndim)
     _check_factor(downscale)
 
     # cast to float for consistent data type in pyramid

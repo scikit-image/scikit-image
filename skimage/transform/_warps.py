@@ -16,20 +16,6 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
-def _multichannel_default(multichannel, ndim):
-    if multichannel is not None:
-        return multichannel
-    else:
-        warn('The default multichannel argument (None) is deprecated.  Please '
-             'specify either True or False explicitly.  multichannel will '
-             'default to False starting with release 0.16.')
-        # utility for maintaining previous color image default behavior
-        if ndim == 3:
-            return True
-        else:
-            return False
-
-
 def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
            preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
@@ -271,7 +257,6 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
     (256, 256)
 
     """
-    multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
     if len(scale) > 1:
         if ((not multichannel and len(scale) != image.ndim) or
