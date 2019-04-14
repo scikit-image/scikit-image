@@ -30,6 +30,8 @@ API Changes
   ``skimage.transform.pyramid_gaussian``, and
   ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
   anymore, so, please, make sure that the parameter is fixed to a proper value.
+- Deprecated argument ``visualise`` has been removed from
+  ``skimage.feature.hog``. Use ``visualize`` instead.¨
 
 
 Bugfixes
