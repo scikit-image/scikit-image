@@ -77,3 +77,10 @@ class TestSave(TestCase):
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
+
+
+def test_return_class():
+    testing.assert_equal(
+        type(imread(os.path.join(data_dir, 'color.png'))),
+        np.ndarray
+    )
