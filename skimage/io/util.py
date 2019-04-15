@@ -28,6 +28,8 @@ def file_or_url_context(resource_name):
                 f.write(u.read())
             # f must be closed before yielding
             yield f.name
+        except OSError:
+            raise ValueError('unreachable URL: {}'.format(resource_name))
         finally:
             os.remove(f.name)
     else:
