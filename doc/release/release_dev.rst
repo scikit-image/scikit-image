@@ -15,6 +15,7 @@ https://scikit-image.org
 
 New Features
 ------------
+- Added majority rank filter - ``filters.rank.majority``.
 
 
 Improvements

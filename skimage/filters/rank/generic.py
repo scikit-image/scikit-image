@@ -1056,8 +1056,7 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority_filter(image, selem, out=None, mask=None, shift_x=False,
-                    shift_y=False):
+def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
 
@@ -1085,10 +1084,10 @@ def majority_filter(image, selem, out=None, mask=None, shift_x=False,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.filters.rank import majority_filter
+    >>> from skimage.filters.rank import majority
     >>> from skimage.morphology import disk
     >>> img = data.camera()
-    >>> maj_img = majority_filter(img, disk(5))
+    >>> maj_img = majority(img, disk(5))
 
     """
 
