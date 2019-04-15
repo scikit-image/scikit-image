@@ -13,6 +13,11 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 """
 
+
+import matplotlib.pyplot as plt
+from skimage import data
+from skimage.filters import threshold_otsu
+
 ######################################################################
 # We illustrate how to apply one of these thresholding algorithms.
 # Otsu's method [2]_ calculates an "optimal" threshold (marked by a red line in the
@@ -22,11 +27,6 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 #
 # .. [2] http://en.wikipedia.org/wiki/Otsu's_method
 #
-
-import matplotlib.pyplot as plt
-from skimage import data
-from skimage.filters import threshold_otsu
-
 
 image = data.camera()
 thresh = threshold_otsu(image)
