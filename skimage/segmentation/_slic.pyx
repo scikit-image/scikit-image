@@ -15,7 +15,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
-                 bint slic_zero):
+                 bint slic_zero,
+                 bint only_dist):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -34,6 +35,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         k-means clustering.
     slic_zero : bool
         True to run SLIC-zero, False to run original SLIC.
+    only_dist : bool
+        True to only update centroid positions.
 
     Returns
     -------
@@ -139,7 +142,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             if slic_zero:
                                 dist_center += dist_color / max_dist_color[k]
                             else:
-                                dist_center += dist_color
+                                if not only_dist:
+                                    dist_center += dist_color
 
                             if distance[z, y, x] > dist_center:
                                 nearest_segments[z, y, x] = k
