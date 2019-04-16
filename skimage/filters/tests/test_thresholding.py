@@ -499,3 +499,18 @@ def test_niblack_sauvola_pathological_image():
     value = 0.03082192 + 2.19178082e-09
     src_img = np.full((4, 4), value).astype(np.float64)
     assert not np.any(np.isnan(threshold_niblack(src_img)))
+
+
+@pytest.mark.parametrize("thresholding, lower, upper", [
+    (threshold_otsu, 86, 88),
+    (threshold_yen, 197, 199),
+    (threshold_isodata, 86, 88),
+    (threshold_mean, 117, 119),
+    (threshold_triangle, 21, 23),
+    (threshold_minimum, 75, 77),
+])
+def test_thresholds_dask_compatibility(thresholding, lower, upper):
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    dask_camera = da.from_array(skimage.data.camera(), chunks=(256, 256))
+    assert lower < float(thresholding(dask_camera)) < upper
