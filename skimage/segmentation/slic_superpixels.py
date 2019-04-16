@@ -1,6 +1,7 @@
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
+from scipy.spatial.distance import pdist, squareform
 
 from ..util import img_as_float, regular_grid
 from ..segmentation._slic import (_slic_cython,
@@ -8,10 +9,55 @@ from ..segmentation._slic import (_slic_cython,
 from ..color import rgb2lab
 
 
+def get_mask_segments(mask, n_segments):
+    coord = np.asarray(np.nonzero(mask))
+    bbox = coord.min(-1), coord.max(-1)+1
+    roi = mask[bbox[0][0]: bbox[1][0],
+               bbox[0][1]: bbox[1][1],
+               bbox[0][2]: bbox[1][2]].copy()
+
+    segments = np.repeat([bbox[0]], n_segments, axis=0)
+
+    for idx in range(n_segments):
+        dist_map = ndi.distance_transform_edt(roi)
+
+        pts = dist_map.argmax()
+        roi.ravel()[pts] = 0
+
+        segments[idx, :] += np.unravel_index(pts, roi.shape)
+
+    dist = squareform(pdist(segments))
+    np.fill_diagonal(dist, np.inf)
+    step = dist.min(-1).mean()
+
+    return segments, step
+
+
+def get_grid_segments(image, n_segments):
+
+    depth, height, width = image.shape[:3]
+
+    # initialize cluster centroids for desired number of segments
+    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
+    slices = regular_grid(image.shape[:3], n_segments)
+
+    segments_z = grid_z[slices]
+    segments_y = grid_y[slices]
+    segments_x = grid_x[slices]
+
+    segments = np.concatenate([segments_z[..., np.newaxis],
+                               segments_y[..., np.newaxis],
+                               segments_x[..., np.newaxis]],
+                              axis=-1).reshape(-1, 3)
+
+    step = max([float(s.step) if s.step is not None else 1.0 for s in slices])
+    return segments, step
+
+
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False):
+         slic_zero=False, mask=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -145,26 +191,31 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     depth, height, width = image.shape[:3]
 
-    # initialize cluster centroids for desired number of segments
-    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
-    slices = regular_grid(image.shape[:3], n_segments)
-    step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
-                              for s in slices]
-    segments_z = grid_z[slices]
-    segments_y = grid_y[slices]
-    segments_x = grid_x[slices]
+    if mask is None:
+        segments, step = get_grid_segments(image, n_segments)
+    else:
+        segments, step = get_mask_segments(image, n_segments)
 
-    segments_color = np.zeros(segments_z.shape + (image.shape[3],))
-    segments = np.concatenate([segments_z[..., np.newaxis],
-                               segments_y[..., np.newaxis],
-                               segments_x[..., np.newaxis],
-                               segments_color],
-                              axis=-1).reshape(-1, 3 + image.shape[3])
-    segments = np.ascontiguousarray(segments)
+    # # initialize cluster centroids for desired number of segments
+    # grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
+    # slices = regular_grid(image.shape[:3], n_segments)
+    # step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
+    #                           for s in slices]
+    # segments_z = grid_z[slices]
+    # segments_y = grid_y[slices]
+    # segments_x = grid_x[slices]
 
-    # we do the scaling of ratio in the same way as in the SLIC paper
-    # so the values have the same meaning
-    step = float(max((step_z, step_y, step_x)))
+    # segments_color = np.zeros(segments_z.shape + (image.shape[3],))
+    # segments = np.concatenate([segments_z[..., np.newaxis],
+    #                            segments_y[..., np.newaxis],
+    #                            segments_x[..., np.newaxis],
+    #                            segments_color],
+    #                           axis=-1).reshape(-1, 3 + image.shape[3])
+    # segments = np.ascontiguousarray(segments)
+
+    # # we do the scaling of ratio in the same way as in the SLIC paper
+    # # so the values have the same meaning
+    # step = float(max((step_z, step_y, step_x)))
     ratio = 1.0 / compactness
 
     image = np.ascontiguousarray(image * ratio)
