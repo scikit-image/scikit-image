@@ -1,5 +1,6 @@
 import urllib.parse
 import urllib.request
+from urllib.error import URLError, HTTPError
 
 import os
 import re
@@ -28,7 +29,7 @@ def file_or_url_context(resource_name):
                 f.write(u.read())
             # f must be closed before yielding
             yield f.name
-        except OSError:
+        except (OSError, URLError, HTTPError):
             raise ValueError('unreachable URL: {}'.format(resource_name))
         finally:
             os.remove(f.name)
