@@ -53,3 +53,6 @@ def test_imread_http_url(httpserver):
     # by extension
     image = io.imread(httpserver.url + '/test.jpg' + '?' + 's' * 266)
     assert image.shape == (1, 1)
+
+def test_imread_unreachable_url_handle():
+    io.imread('http://fake_url.com/image.jpg')
