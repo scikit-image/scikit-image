@@ -151,6 +151,10 @@ def enhancement_measure(image: np.ndarray,
                         eps: float = 1e-6,
                         size: int = 3) -> float:
     """ The image enhancement measure called EME based on [1]_.
+        It is a way of quantifying improvement of the image after enhancement.
+
+        The function uses a sliding window of user-provided size to measure
+        the mean of log of maximal and minimal intensity ratio within the window.
 
         Parameters
         ----------
