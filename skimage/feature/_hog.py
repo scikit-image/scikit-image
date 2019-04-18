@@ -1,6 +1,5 @@
 import numpy as np
 from . import _hoghistogram
-from .._shared.utils import skimage_deprecation, warn
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -45,7 +44,7 @@ def _hog_channel_gradient(channel):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm='L2-Hys', visualize=False, visualise=None, transform_sqrt=False,
+        block_norm='L2-Hys', visualize=False, transform_sqrt=False,
         feature_vector=True, multichannel=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -233,10 +232,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     # now compute the histogram for each cell
     hog_image = None
 
-    if visualise is not None:
-        visualize = visualise
-        warn('Argument `visualise` is deprecated and will '
-             'be changed to `visualize` in v0.16', skimage_deprecation)
     if visualize:
         from .. import draw
 
