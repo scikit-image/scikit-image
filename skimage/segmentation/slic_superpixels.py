@@ -1,3 +1,4 @@
+import warnings
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
@@ -8,13 +9,28 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def get_mask_centroids(mask, n_centroids, min_distance=None):
-    """
+def get_mask_centroids(mask, n_centroids, spacing=None):
+    """Find regularly spaced centroids on a mask.
+
+    Parameters
+    ----------
+    mask : 3D ndarray
+        The mask where the centroids must be positioned.
+    n_centroids : int
+        The number of centroids to be returned.
+    spacing : sequence of same, optional,
+        Spacing of elements along each dimension.
+
+    Returns
+    -------
+    centroids : 2D ndarray
+        The coordinates of the centroids with shape (n_centroids, 3).
+    step : int
+        The approximate distance between the centroids.
 
     """
-    if min_distance is None:
-        mask_area = mask.sum()
-        min_distance = np.ceil(np.sqrt(mask_area/(n_centroids*np.pi)))
+    if spacing is None:
+        spacing = np.ones(3)
 
     coord = np.asarray(np.nonzero(mask))
     bbox = coord.min(-1), coord.max(-1)+1
@@ -25,40 +41,51 @@ def get_mask_centroids(mask, n_centroids, min_distance=None):
     centroids = np.repeat([bbox[0]], n_centroids, axis=0)
 
     for idx in range(n_centroids):
-        dist_map = ndi.distance_transform_edt(roi)
+        dist_map = ndi.distance_transform_edt(roi, sampling=spacing)
 
-        pts = dist_map.argmax()
-        max_dist = roi.ravel()[pts]
-        if max_dist < min_distance:
-            break
-        roi.ravel()[pts] = 0
+        coord = dist_map.argmax()
+        roi.ravel()[coord] = 0
 
-        centroids[idx, :] += np.unravel_index(pts, roi.shape)
+        centroids[idx, :] += np.unravel_index(coord, roi.shape)
 
     dist = squareform(pdist(centroids))
     np.fill_diagonal(dist, np.inf)
-    step = dist.min(-1).mean()
+    closest_pts = dist.argmin(-1)
+    step = max(abs(centroids - centroids[closest_pts, :]).mean(0))
 
     return centroids, step
 
 
 def get_grid_centroids(image, n_centroids):
-    """
-    """
-    depth, height, width = image.shape[:3]
+    """Find regularly spaced centroids on the image.
 
-    # initialize cluster centroids for desired number of centroids
-    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
+    Parameters
+    ----------
+    image : 2D, 3D or 4D ndarray
+        Input image, which can be 2D or 3D, and grayscale or
+        multichannel.
+    n_centroids : int
+        The (approximate) number of centroids to be returned.
+
+    Returns
+    -------
+    centroids : 2D ndarray
+        The coordinates of the centroids with shape (~n_centroids, 3).
+    step : int
+        The approximate distance between the centroids.
+
+    """
+    d, h, w = image.shape[:3]
+
+    grid_z, grid_y, grid_x = np.mgrid[:d, :h, :w]
     slices = regular_grid(image.shape[:3], n_centroids)
 
-    centroids_z = grid_z[slices]
-    centroids_y = grid_y[slices]
-    centroids_x = grid_x[slices]
+    centroids_z = grid_z[slices].ravel()[..., np.newaxis]
+    centroids_y = grid_y[slices].ravel()[..., np.newaxis]
+    centroids_x = grid_x[slices].ravel()[..., np.newaxis]
 
-    centroids = np.concatenate([centroids_z[..., np.newaxis],
-                                centroids_y[..., np.newaxis],
-                                centroids_x[..., np.newaxis]],
-                               axis=-1).reshape(-1, 3)
+    centroids = np.concatenate([centroids_z, centroids_y, centroids_x],
+                               axis=-1)
 
     step = max([float(s.step) if s.step is not None else 1.0 for s in slices])
     return centroids, step
@@ -116,6 +143,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         in most of the cases.
     slic_zero: bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
+    mask : 2D ndarray, optional
+        if provided, seed points are placed following the strategy
+        described in [3]_
 
     Returns
     -------
@@ -150,6 +180,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
     .. [2] http://ivrg.epfl.ch/research/superpixels#SLICO
+    .. [3] https://arxiv.org/pdf/1606.09518.pdf
 
     Examples
     --------
@@ -165,7 +196,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     """
 
     image = img_as_float(image)
+    use_mask = mask is not None
+
     is_2d = False
+
     if image.ndim == 2:
         # 2D grayscale image
         image = image[np.newaxis, ..., np.newaxis]
@@ -177,6 +211,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif image.ndim == 3 and not multichannel:
         # Add channel as single last dimension
         image = image[..., np.newaxis]
+
+    if use_mask and not is_2d:
+        warnings.warn("SLIC, mask is not supported for 3D data.")
+        use_mask = False
 
     if spacing is None:
         spacing = np.ones(3)
@@ -199,55 +237,50 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         elif image.shape[-1] == 3:
             image = rgb2lab(image)
 
-    depth, height, width = image.shape[:3]
+    d, h, w = image.shape[:3]
 
-    if mask is None:
-        centroids, step = get_grid_centroids(image, n_segments)
+    # initialize cluster centroids for desired number of segments
+    update_centroids = False
+    if use_mask:
+        mask = np.asarray(mask, dtype=np.int32)
+        if mask.ndim == 2:
+            mask = mask[np.newaxis, ...]
+        if not mask.shape[1:3] == (h, w):
+            raise ValueError("image and mask should have the same width "
+                             "and height.")
+        centroids, step = get_mask_centroids(mask, n_segments, spacing)
+        update_centroids = True
     else:
-        centroids, step = get_mask_centroids(image, n_segments)
+        centroids, step = get_grid_centroids(image, n_segments)
+        mask = np.ones((0, 1, 1), dtype=np.int32)
 
+    n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(
-        [centroids, np.zeros((centroids.shape[0], image.shape[3]))],
+        [centroids, np.zeros((n_centroids, image.shape[3]))],
         axis=-1))
 
-    if mask is not None:
-        _ = _slic_cython(image, segments, step, max_iter, spacing,
-                         slic_zero, True)
-
-    # # initialize cluster centroids for desired number of segments
-    # grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
-    # slices = regular_grid(image.shape[:3], n_segments)
-    # step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
-    #                           for s in slices]
-    # segments_z = grid_z[slices]
-    # segments_y = grid_y[slices]
-    # segments_x = grid_x[slices]
-
-    # segments_color = np.zeros(segments_z.shape + (image.shape[3],))
-    # segments = np.concatenate([segments_z[..., np.newaxis],
-    #                            segments_y[..., np.newaxis],
-    #                            segments_x[..., np.newaxis],
-    #                            segments_color],
-    #                           axis=-1).reshape(-1, 3 + image.shape[3])
-    # segments = np.ascontiguousarray(segments)
-
-    # # we do the scaling of ratio in the same way as in the SLIC paper
-    # # so the values have the same meaning
-    # step = float(max((step_z, step_y, step_x)))
+    # Scaling of ratio in the same way as in the SLIC paper so the
+    # values have the same meaning
     ratio = 1.0 / compactness
 
-    image = np.ascontiguousarray(image * ratio)
+    image = np.ascontiguousarray(image * ratio, dtype=np.double)
 
-    labels = _slic_cython(image, segments, step, max_iter, spacing,
-                          slic_zero, False)
+    if update_centroids:
+        _slic_cython(image, mask, segments, step, max_iter, spacing,
+                     slic_zero, True)
+
+    labels = _slic_cython(image, mask, segments, step, max_iter,
+                          spacing, slic_zero, False)
 
     if enforce_connectivity:
-        segment_size = depth * height * width / n_segments
+        if use_mask:
+            segment_size = d * mask.sum() / n_centroids
+        else:
+            segment_size = d * h * w / n_centroids
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
-        labels = _enforce_label_connectivity_cython(labels,
-                                                    min_size,
-                                                    max_size)
+        labels = _enforce_label_connectivity_cython(labels, mask,
+                                                    min_size, max_size)
 
     if is_2d:
         labels = labels[0]
