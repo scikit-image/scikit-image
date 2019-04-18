@@ -1,7 +1,6 @@
 from itertools import product
 
 import numpy as np
-import pytest
 from skimage.segmentation import slic
 
 from skimage._shared import testing
@@ -226,7 +225,7 @@ def test_color_2d_mask():
     seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
                mask=msk)
 
-    # we expect 4 segments + non masked area
+    # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
@@ -255,7 +254,7 @@ def test_multichannel_2d_mask():
     seg = slic(img, n_segments=4, enforce_connectivity=False,
                mask=msk)
 
-    # we expect 4 segments + non masked area
+    # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
@@ -378,7 +377,7 @@ def test_slic_zero_mask():
     seg = slic(img, n_segments=4, sigma=0, slic_zero=True,
                mask=msk)
 
-    # we expect 4 segments + non masked area
+    # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
@@ -409,14 +408,11 @@ def test_more_segments_than_pixels_mask():
     assert np.all(seg[2:-2, 2:-2].ravel() == np.arange(seg[2:-2, 2:-2].size))
 
 
-@pytest.mark.filterwarnings("ignore:SLIC")
-def test_3d_mask():
-    # The feature is not supported: user is warned and mask is ignored
+def test_color_3d_mask():
 
-    msk = np.zeros((21, 22))
-    msk[2:-2, 2:-2] = 1
+    msk = np.zeros((20, 21, 22))
+    msk[2:-2, 2:-2, 2:-2] = 1
 
-    # test_color_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22, 3))
     slices = []
@@ -428,15 +424,21 @@ def test_3d_mask():
     for s, c in zip(slices, colors):
         img[s] = c
     img += 0.01 * rnd.normal(size=img.shape)
-    img[img > 1] = 1
-    img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=8, mask=msk)
+    np.clip(img, 0, 1, out=img)
 
-    assert_equal(len(np.unique(seg)), 8)
+    seg = slic(img, sigma=0, n_segments=8, spacing=[2, 1, 1], mask=msk)
+
+    # we expect 8 segments + masked area
+    assert_equal(len(np.unique(seg)), 9)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c)
+        assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
 
-    # test_gray_3d():
+
+def test_gray_3d_mask():
+
+    msk = np.zeros((20, 21, 22))
+    msk[2:-2, 2:-2, 2:-2] = 1
+
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22))
     slices = []
@@ -448,11 +450,11 @@ def test_3d_mask():
     for s, sh in zip(slices, shades):
         img[s] = sh
     img += 0.001 * rnd.normal(size=img.shape)
-    img[img > 1] = 1
-    img[img < 0] = 0
+    np.clip(img, 0, 1, out=img)
     seg = slic(img, sigma=0, n_segments=8, compactness=1,
                multichannel=False, convert2lab=False, mask=msk)
 
-    assert_equal(len(np.unique(seg)), 8)
+    # we expect 8 segments + masked area
+    assert_equal(len(np.unique(seg)), 9)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c)
+        assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
