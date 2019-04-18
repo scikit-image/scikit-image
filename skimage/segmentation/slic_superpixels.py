@@ -9,7 +9,7 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def get_mask_centroids(mask, n_centroids, spacing=None):
+def _get_mask_centroids(mask, n_centroids, spacing=None):
     """Find regularly spaced centroids on a mask.
 
     Parameters
@@ -25,8 +25,8 @@ def get_mask_centroids(mask, n_centroids, spacing=None):
     -------
     centroids : 2D ndarray
         The coordinates of the centroids with shape (n_centroids, 3).
-    step : int
-        The approximate distance between the centroids.
+    steps : 1D ndarray
+        The approximate distance between two seeds in all dimensions.
 
     """
     if spacing is None:
@@ -51,12 +51,12 @@ def get_mask_centroids(mask, n_centroids, spacing=None):
     dist = squareform(pdist(centroids))
     np.fill_diagonal(dist, np.inf)
     closest_pts = dist.argmin(-1)
-    step = max(abs(centroids - centroids[closest_pts, :]).mean(0))
+    steps = abs(centroids - centroids[closest_pts, :]).mean(0)
 
-    return centroids, step
+    return centroids, steps
 
 
-def get_grid_centroids(image, n_centroids):
+def _get_grid_centroids(image, n_centroids):
     """Find regularly spaced centroids on the image.
 
     Parameters
@@ -71,8 +71,8 @@ def get_grid_centroids(image, n_centroids):
     -------
     centroids : 2D ndarray
         The coordinates of the centroids with shape (~n_centroids, 3).
-    step : int
-        The approximate distance between the centroids.
+    steps : 1D ndarray
+        The approximate distance between two seeds in all dimensions.
 
     """
     d, h, w = image.shape[:3]
@@ -87,8 +87,9 @@ def get_grid_centroids(image, n_centroids):
     centroids = np.concatenate([centroids_z, centroids_y, centroids_x],
                                axis=-1)
 
-    step = max([float(s.step) if s.step is not None else 1.0 for s in slices])
-    return centroids, step
+    steps = np.asarray([float(s.step) if s.step is not None else 1.0
+                        for s in slices])
+    return centroids, steps
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
@@ -245,13 +246,16 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         mask = np.asarray(mask, dtype=np.int32)
         if mask.ndim == 2:
             mask = mask[np.newaxis, ...]
+        else:
+            raise ValueError(
+                "mask should be a 2D array (mask.ndim = {})".format(mask.ndim))
         if not mask.shape[1:3] == (h, w):
             raise ValueError("image and mask should have the same width "
                              "and height.")
-        centroids, step = get_mask_centroids(mask, n_segments, spacing)
+        centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
         update_centroids = True
     else:
-        centroids, step = get_grid_centroids(image, n_segments)
+        centroids, steps = _get_grid_centroids(image, n_segments)
         mask = np.ones((0, 1, 1), dtype=np.int32)
 
     n_centroids = centroids.shape[0]
@@ -261,6 +265,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     # Scaling of ratio in the same way as in the SLIC paper so the
     # values have the same meaning
+    step = max(steps)
     ratio = 1.0 / compactness
 
     image = np.ascontiguousarray(image * ratio, dtype=np.double)
