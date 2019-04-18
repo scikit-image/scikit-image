@@ -32,7 +32,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
         spacing = np.ones(3)
 
     coord = np.asarray(np.nonzero(mask))
-    bbox = coord.min(-1), coord.max(-1)+1
+    bbox = coord.min(-1), coord.max(-1) + 1
     roi = mask[bbox[0][0]: bbox[1][0],
                bbox[0][1]: bbox[1][1],
                bbox[0][2]: bbox[1][2]].copy()
