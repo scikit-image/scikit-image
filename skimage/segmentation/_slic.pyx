@@ -83,7 +83,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                               for s in slices]
 
     cdef int[:, :, ::1] nearest_segments \
-        = np.empty((depth, height, width), dtype=np.int32)
+        = np.full((depth, height, width), -1, dtype=np.int32)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
     cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
@@ -135,7 +135,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         for x in range(x_min, x_max):
 
                             if (mask.shape[0] != 0) and (mask[z, y, x] == 0):
-                                nearest_segments[z, y, x] = -1
                                 continue
 
                             dx = sx * (cx - x)

@@ -1,4 +1,3 @@
-import warnings
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
@@ -213,10 +212,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         # Add channel as single last dimension
         image = image[..., np.newaxis]
 
-    if use_mask and not is_2d:
-        warnings.warn("SLIC, mask is not supported for 3D data.")
-        use_mask = False
-
     if spacing is None:
         spacing = np.ones(3)
     elif isinstance(spacing, (list, tuple)):
@@ -238,20 +233,14 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         elif image.shape[-1] == 3:
             image = rgb2lab(image)
 
-    d, h, w = image.shape[:3]
-
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.asarray(mask, dtype=np.int32)
+        mask = np.asarray(mask, dtype=bool).astype(np.int32)
         if mask.ndim == 2:
             mask = mask[np.newaxis, ...]
-        else:
-            raise ValueError(
-                "mask should be a 2D array (mask.ndim = {})".format(mask.ndim))
-        if not mask.shape[1:3] == (h, w):
-            raise ValueError("image and mask should have the same width "
-                             "and height.")
+        if not mask.shape == image.shape[:3]:
+            raise ValueError("image and mask should have the same shape.")
         centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
         update_centroids = True
     else:
@@ -279,9 +268,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     if enforce_connectivity:
         if use_mask:
-            segment_size = d * mask.sum() / n_centroids
+            segment_size = mask.sum() / n_centroids
         else:
-            segment_size = d * h * w / n_centroids
+            segment_size = np.prod(image.shape[:3]) / n_centroids
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(labels, mask,
