@@ -7,7 +7,6 @@ Version 0.16
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* Remove `flatten` for `imread` in ``skimage.io._io.py``.
 
 Version 0.17
 ------------

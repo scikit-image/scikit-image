@@ -45,6 +45,8 @@ API Changes
   row-column coordinates. Old x-y interface is not longer available.
 - Default value of ``behavior`` parameter has been set to ``ndimage`` in
   ``skimage.filters.median``.
+- Parameter ``flatten`` in `skimage.io.imread` has been removed in
+  favor of ``as_gray``.
 
 
 Bugfixes
