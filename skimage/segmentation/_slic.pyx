@@ -11,19 +11,21 @@ from ..util import regular_grid
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 int[:, :, ::1] mask,
+                 cnp.ndarray[cnp.uint8_t, ndim=3, cast=True] mask,
                  double[:, ::1] segments,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
                  bint slic_zero,
-                 bint only_dist=False):
+                 bint ignore_color=False):
     """Helper function for SLIC segmentation.
 
     Parameters
     ----------
     image_zyx : 4D array of double, shape (Z, Y, X, C)
         The input image.
+    mask : 3D array of bool, shape (Z, Y, X), optional
+        The input mask.
     segments : 2D array of double, shape (N, 3 + C)
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
     step : double
@@ -36,8 +38,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         k-means clustering.
     slic_zero : bool
         True to run SLIC-zero, False to run original SLIC.
-    only_dist : bool
-        True to only update centroid positions.
+    ignore_color : bool
+        True to update centroid positions without considering pixels
+        color.
 
     Returns
     -------
@@ -64,6 +67,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     and get back a contiguous block of memory. This is better both for
     performance and for readability.
+
     """
 
     # initialize on grid
@@ -105,6 +109,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     # The reference implementation (Achanta et al.) calls this invxywt
     cdef double spatial_weight = float(1) / (step * step)
 
+    # Add mask support
+    cdef int mask_size = mask.size
+
     with nogil:
         for i in range(max_iter):
             change = 0
@@ -134,7 +141,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dy *= dy
                         for x in range(x_min, x_max):
 
-                            if (mask.shape[0] != 0) and (mask[z, y, x] == 0):
+                            if mask_size > 0 and mask[z, y, x] == 0:
                                 continue
 
                             dx = sx * (cx - x)
@@ -148,7 +155,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             if slic_zero:
                                 dist_color /= max_dist_color[k]
 
-                            if not only_dist:
+                            if not ignore_color:
                                 dist_center += dist_color
 
                             if distance[z, y, x] > dist_center:
@@ -169,8 +176,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for y in range(height):
                     for x in range(width):
 
-                        if (mask.shape[0] != 0):
-                            if (mask[z, y, x] == 0):
+                        if mask_size > 0:
+                            if mask[z, y, x] == 0:
                                 continue
 
                             if nearest_segments[z, y, x] == -1:
@@ -195,8 +202,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                     for y in range(height):
                         for x in range(width):
 
-                            if (mask.shape[0] != 0):
-                                if (mask[z, y, x] == 0):
+                            if mask_size > 0:
+                                if mask[z, y, x] == 0:
                                     continue
 
                                 if nearest_segments[z, y, x] == -1:
@@ -218,7 +225,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
 
 def _enforce_label_connectivity_cython(int[:, :, ::1] segments,
-                                       int[:, :, ::1] mask,
                                        Py_ssize_t min_size,
                                        Py_ssize_t max_size):
     """ Helper function to remove small disconnected regions from the labels
@@ -270,7 +276,7 @@ def _enforce_label_connectivity_cython(int[:, :, ::1] segments,
             for y in range(height):
                 for x in range(width):
 
-                    if (mask.shape[0] != 0) and (mask[z, y, x] == 0):
+                    if segments[z, y, x] == -1:
                         continue
 
                     if connected_segments[z, y, x] >= 0:

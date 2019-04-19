@@ -215,7 +215,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     if spacing is None:
         spacing = np.ones(3)
     elif isinstance(spacing, (list, tuple)):
-        spacing = np.array(spacing, dtype=np.double)
+        spacing = np.ascontiguousarray(spacing, dtype=np.double)
 
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma], dtype=np.double)
@@ -236,16 +236,17 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
-        mask = np.asarray(mask, dtype=bool).astype(np.int32)
+        mask = np.asarray(mask, dtype=np.bool)
         if mask.ndim == 2:
-            mask = mask[np.newaxis, ...]
+            mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if not mask.shape == image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
+        # Step 1 of the algorithm [3]_
         centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
-        mask = np.ones((0, 1, 1), dtype=np.int32)
+        mask = np.ones((0, 1, 1), dtype=np.bool)
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(
@@ -260,6 +261,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     image = np.ascontiguousarray(image * ratio, dtype=np.double)
 
     if update_centroids:
+        # Step 2 of the algorithm [3]_
         _slic_cython(image, mask, segments, step, max_iter, spacing,
                      slic_zero, True)
 
@@ -273,8 +275,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             segment_size = np.prod(image.shape[:3]) / n_centroids
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
-        labels = _enforce_label_connectivity_cython(labels, mask,
-                                                    min_size, max_size)
+        labels = _enforce_label_connectivity_cython(labels, min_size, max_size)
 
     if is_2d:
         labels = labels[0]
