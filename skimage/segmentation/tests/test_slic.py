@@ -1,5 +1,6 @@
 from itertools import product
 
+import pytest
 import numpy as np
 from skimage.segmentation import slic
 
@@ -8,6 +9,7 @@ from skimage._shared.testing import test_parallel, assert_equal
 
 
 @test_parallel()
+@pytest.mark.filterwarnings("ignore:labels")
 def test_color_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 3))
@@ -28,6 +30,7 @@ def test_color_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_multichannel_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 20, 8))
@@ -48,6 +51,7 @@ def test_multichannel_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_gray_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))
@@ -68,6 +72,7 @@ def test_gray_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_color_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22, 3))
@@ -89,6 +94,7 @@ def test_color_3d():
         assert_equal(seg[s], c)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_gray_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22))
@@ -111,6 +117,7 @@ def test_gray_3d():
         assert_equal(seg[s], c)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_list_sigma():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0, 0],
@@ -122,6 +129,7 @@ def test_list_sigma():
     assert_equal(seg_sigma, result_sigma)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_spacing():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0],
@@ -139,6 +147,7 @@ def test_spacing():
     assert_equal(seg_spaced, result_spaced)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
@@ -146,6 +155,7 @@ def test_invalid_lab_conversion():
         slic(img, multichannel=True, convert2lab=True)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_enforce_connectivity():
     img = np.array([[0, 0, 0, 1, 1, 1],
                     [1, 0, 0, 1, 1, 0],
@@ -177,6 +187,7 @@ def test_enforce_connectivity():
     assert_equal(segments_connected_low_max, result_connected)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_slic_zero():
     # Same as test_color_2d but with slic_zero=True
     rnd = np.random.RandomState(0)
@@ -198,6 +209,7 @@ def test_slic_zero():
     assert_equal(seg[10:, 10:], 3)
 
 
+@pytest.mark.filterwarnings("ignore:labels")
 def test_more_segments_than_pixels():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))
@@ -229,15 +241,15 @@ def test_color_2d_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
-    assert_equal(seg[2:10, 2:10], 1)
-    assert_equal(seg[10:-2, 2:10], 3)
-    assert_equal(seg[2:10, 10:-2], 2)
-    assert_equal(seg[10:-2, 10:-2], 0)
+    assert_equal(seg[2:10, 2:10], 2)
+    assert_equal(seg[10:-2, 2:10], 4)
+    assert_equal(seg[2:10, 10:-2], 3)
+    assert_equal(seg[10:-2, 10:-2], 1)
     # non masked area
-    assert_equal(seg[:2, :], -1)
-    assert_equal(seg[-2:, :], -1)
-    assert_equal(seg[:, :2], -1)
-    assert_equal(seg[:, -2:], -1)
+    assert_equal(seg[:2, :], 0)
+    assert_equal(seg[-2:, :], 0)
+    assert_equal(seg[:, :2], 0)
+    assert_equal(seg[:, -2:], 0)
 
 
 def test_multichannel_2d_mask():
@@ -258,15 +270,15 @@ def test_multichannel_2d_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
-    assert_equal(seg[2:10, 2:10], 1)
-    assert_equal(seg[10:-2, 2:10], 3)
-    assert_equal(seg[2:10, 10:-2], 2)
-    assert_equal(seg[10:-2, 10:-2], 0)
+    assert_equal(seg[2:10, 2:10], 2)
+    assert_equal(seg[10:-2, 2:10], 4)
+    assert_equal(seg[2:10, 10:-2], 3)
+    assert_equal(seg[10:-2, 10:-2], 1)
     # non masked area
-    assert_equal(seg[:2, :], -1)
-    assert_equal(seg[-2:, :], -1)
-    assert_equal(seg[:, :2], -1)
-    assert_equal(seg[:, -2:], -1)
+    assert_equal(seg[:2, :], 0)
+    assert_equal(seg[-2:, :], 0)
+    assert_equal(seg[:, :2], 0)
+    assert_equal(seg[:, -2:], 0)
 
 
 def test_gray_2d_mask():
@@ -285,15 +297,15 @@ def test_gray_2d_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape)
     # segments
-    assert_equal(seg[2:10, 2:10], 0)
-    assert_equal(seg[10:-2, 2:10], 2)
-    assert_equal(seg[2:10, 10:-2], 1)
-    assert_equal(seg[10:-2, 10:-2], 3)
+    assert_equal(seg[2:10, 2:10], 1)
+    assert_equal(seg[10:-2, 2:10], 3)
+    assert_equal(seg[2:10, 10:-2], 2)
+    assert_equal(seg[10:-2, 10:-2], 4)
     # non masked area
-    assert_equal(seg[:2, :], -1)
-    assert_equal(seg[-2:, :], -1)
-    assert_equal(seg[:, :2], -1)
-    assert_equal(seg[:, -2:], -1)
+    assert_equal(seg[:2, :], 0)
+    assert_equal(seg[-2:, :], 0)
+    assert_equal(seg[:, :2], 0)
+    assert_equal(seg[:, -2:], 0)
 
 
 def test_list_sigma_mask():
@@ -304,7 +316,7 @@ def test_list_sigma_mask():
                     [0, 0, 0, 1, 1, 1]], np.float)
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[-1, 0, 0, 1, 1, -1],
-                             [-1, 0, 0, 1, 1, -1]], np.int)
+                             [-1, 0, 0, 1, 1, -1]], np.int) + 1
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
                      multichannel=False, mask=msk)
     assert_equal(seg_sigma, result_sigma)
@@ -317,9 +329,9 @@ def test_spacing_mask():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float)
     result_non_spaced = np.array([[-1, 0, 0, 1, -1],
-                                  [-1, 0, 1, 1, -1]], np.int)
+                                  [-1, 0, 1, 1, -1]], np.int) + 1
     result_spaced = np.array([[-1, 0, 0, 0, -1],
-                              [-1, 1, 1, 1, -1]], np.int)
+                              [-1, 1, 1, 1, -1]], np.int) + 1
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0, mask=msk)
@@ -352,11 +364,11 @@ def test_enforce_connectivity_mask():
 
     result_connected = np.array([[-1, 0, 0, 1, 1, -1],
                                  [-1, 0, 0, 1, 1, -1],
-                                 [-1, 0, 0, 1, 1, -1]], np.float)
+                                 [-1, 0, 0, 1, 1, -1]], np.float) + 1
 
     result_disconnected = np.array([[-1, 1, 1, 0, 0, -1],
                                     [-1, 1, 1, 0, 0, -1],
-                                    [-1, 1, 1, 0, 0, -1]], np.float)
+                                    [-1, 1, 1, 0, 0, -1]], np.float) + 1
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
@@ -381,15 +393,15 @@ def test_slic_zero_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
-    assert_equal(seg[2:10, 2:10], 0)
-    assert_equal(seg[10:-2, 2:10], 2)
-    assert_equal(seg[2:10, 10:-2], 1)
-    assert_equal(seg[10:-2, 10:-2], 3)
+    assert_equal(seg[2:10, 2:10], 1)
+    assert_equal(seg[10:-2, 2:10], 3)
+    assert_equal(seg[2:10, 10:-2], 2)
+    assert_equal(seg[10:-2, 10:-2], 4)
     # non masked area
-    assert_equal(seg[:2, :], -1)
-    assert_equal(seg[-2:, :], -1)
-    assert_equal(seg[:, :2], -1)
-    assert_equal(seg[:, -2:], -1)
+    assert_equal(seg[:2, :], 0)
+    assert_equal(seg[-2:, :], 0)
+    assert_equal(seg[:, :2], 0)
+    assert_equal(seg[:, -2:], 0)
 
 
 def test_more_segments_than_pixels_mask():
@@ -430,7 +442,7 @@ def test_color_3d_mask():
 
     # we expect 8 segments + masked area
     assert_equal(len(np.unique(seg)), 9)
-    for s, c in zip(slices, range(8)):
+    for s, c in zip(slices, range(1, 9)):
         assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
 
 
@@ -456,5 +468,5 @@ def test_gray_3d_mask():
 
     # we expect 8 segments + masked area
     assert_equal(len(np.unique(seg)), 9)
-    for s, c in zip(slices, range(8)):
+    for s, c in zip(slices, range(1, 9)):
         assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
