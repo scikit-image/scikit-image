@@ -13,6 +13,11 @@ class SegmentationSuite:
     def time_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False)
 
+    def time_mask_slic(self):
+        msk = np.zeros((400, 400, 100))
+        msk[10:-10, 10:-10, 10:-10] = 1
+        segmentation.slic(self.image, enforce_connectivity=False, mask=msk)
+
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
 
