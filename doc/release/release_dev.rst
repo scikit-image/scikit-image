@@ -41,6 +41,8 @@ API Changes
   ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
 - Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
   removed.
+- ``skimage.measure._regionprops`` has been completely switched to using
+  row-column coordinates. Old x-y interface is not longer available.
 
 
 Bugfixes
