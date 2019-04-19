@@ -43,6 +43,8 @@ API Changes
   removed.
 - ``skimage.measure._regionprops`` has been completely switched to using
   row-column coordinates. Old x-y interface is not longer available.
+- Default value of ``behavior`` parameter has been set to ``ndimage`` in
+  ``skimage.filters.median``.
 
 
 Bugfixes

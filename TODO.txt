@@ -8,8 +8,6 @@ Version 0.16
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
 * Remove `flatten` for `imread` in ``skimage.io._io.py``.
-* In ``skimage.filters.median``, change default from ``behavior='rank'`` to
-  ``behavior='ndimage'``.
 
 Version 0.17
 ------------

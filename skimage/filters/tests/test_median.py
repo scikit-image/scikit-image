@@ -24,9 +24,8 @@ def image():
      (None, 1, None, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (None, None, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (True, 1, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (None, False, False, 'constant', 0.0, 'rank', 2, (DeprecationWarning,
-                                                       UserWarning,)),
-     (None, False, False, 'nearest', 0.0, 'rank', 1, (DeprecationWarning,)),
+     (None, False, False, 'constant', 0.0, 'rank', 2, (UserWarning,)),
+     (None, False, False, 'nearest', 0.0, 'rank', 1, []),
      (None, False, False, 'nearest', 0.0, 'ndimage', 0, [])]
 )
 def test_median_warning(image, mask, shift_x, shift_y, mode, cval, behavior,
@@ -48,7 +47,6 @@ def test_median_warning(image, mask, shift_x, shift_y, mode, cval, behavior,
     [('ndimage', ndimage.median_filter, {'size': (3, 3)}),
      ('rank', rank.median, {'selem': np.ones((3, 3), dtype=np.uint8)})]
 )
-@pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
 def test_median_behavior(image, behavior, func, params):
     assert_allclose(median(image, behavior=behavior), func(image, **params))
 
@@ -61,7 +59,6 @@ def test_median_preserve_dtype(image, dtype):
     assert median_image.dtype == dtype
 
 
-@pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
 def test_median_error_ndim():
     img = np.random.randint(0, 10, size=(5, 5, 5), dtype=np.uint8)
     with pytest.raises(ValueError):
@@ -74,6 +71,5 @@ def test_median_error_ndim():
      (np.random.randint(0, 10, size=(3, 3), dtype=np.uint8), 'ndimage'),
      (np.random.randint(0, 10, size=(3, 3, 3), dtype=np.uint8), 'ndimage')]
 )
-@pytest.mark.filterwarnings("ignore:Default 'behavior' will change")
 def test_median(img, behavior):
     median(img, behavior=behavior)
