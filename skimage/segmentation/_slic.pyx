@@ -86,8 +86,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
                               for s in slices]
 
-    cdef int[:, :, ::1] nearest_segments \
-        = np.full((depth, height, width), -1, dtype=np.int32)
+    cdef Py_ssize_t[:, :, ::1] nearest_segments \
+        = np.full((depth, height, width), -1, dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
     cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
@@ -141,7 +141,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dy *= dy
                         for x in range(x_min, x_max):
 
-                            if mask_size > 0 and mask[z, y, x] == 0:
+                            if (mask_size > 0) and (mask[z, y, x] == 0):
                                 continue
 
                             dx = sx * (cx - x)
@@ -224,7 +224,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     return np.asarray(nearest_segments)
 
 
-def _enforce_label_connectivity_cython(int[:, :, ::1] segments,
+def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                        Py_ssize_t min_size,
                                        Py_ssize_t max_size):
     """ Helper function to remove small disconnected regions from the labels
