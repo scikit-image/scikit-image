@@ -1,3 +1,4 @@
+import warnings
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
@@ -244,9 +245,17 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         # Step 1 of the algorithm [3]_
         centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
         update_centroids = True
+        start_label = 1
+        masked_value = 0
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
         mask = np.ones((0, 1, 1), dtype=np.bool)
+        start_label = 0
+        masked_value = -1
+        if start_label == 0:
+            warnings.warn("labels' indexing start from 0. " +
+                          "In future version it will start from 1.",
+                          DeprecationWarning)
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(
@@ -263,10 +272,12 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     if update_centroids:
         # Step 2 of the algorithm [3]_
         _slic_cython(image, mask, segments, step, max_iter, spacing,
-                     slic_zero, True)
+                     slic_zero, ignore_color=True,
+                     start_label=start_label, masked_value=masked_value)
 
     labels = _slic_cython(image, mask, segments, step, max_iter,
-                          spacing, slic_zero, False)
+                          spacing, slic_zero, ignore_color=False,
+                          start_label=start_label, masked_value=masked_value)
 
     if enforce_connectivity:
         if use_mask:
@@ -275,7 +286,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             segment_size = np.prod(image.shape[:3]) / n_centroids
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
-        labels = _enforce_label_connectivity_cython(labels, min_size, max_size)
+        labels = _enforce_label_connectivity_cython(
+            labels, min_size, max_size, start_label=start_label,
+            masked_value=masked_value)
 
     if is_2d:
         labels = labels[0]

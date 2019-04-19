@@ -17,6 +17,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
                  bint slic_zero,
+                 Py_ssize_t start_label=0,
+                 Py_ssize_t masked_value=-1,
                  bint ignore_color=False):
     """Helper function for SLIC segmentation.
 
@@ -87,7 +89,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                               for s in slices]
 
     cdef Py_ssize_t[:, :, ::1] nearest_segments \
-        = np.full((depth, height, width), -1, dtype=np.intp)
+        = np.full((depth, height, width), masked_value, dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
     cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
@@ -110,7 +112,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double spatial_weight = float(1) / (step * step)
 
     # Add mask support
-    cdef int mask_size = mask.size
+    cdef bint use_mask = <bint> (mask.size > 0)
 
     with nogil:
         for i in range(max_iter):
@@ -141,7 +143,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dy *= dy
                         for x in range(x_min, x_max):
 
-                            if (mask_size > 0) and (mask[z, y, x] == 0):
+                            if use_mask and (mask[z, y, x] == 0):
                                 continue
 
                             dx = sx * (cx - x)
@@ -159,7 +161,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                                 dist_center += dist_color
 
                             if distance[z, y, x] > dist_center:
-                                nearest_segments[z, y, x] = k
+                                nearest_segments[z, y, x] = k+start_label
                                 distance[z, y, x] = dist_center
                                 change = 1
 
@@ -176,14 +178,14 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for y in range(height):
                     for x in range(width):
 
-                        if mask_size > 0:
+                        if use_mask:
                             if mask[z, y, x] == 0:
                                 continue
 
-                            if nearest_segments[z, y, x] == -1:
+                            if nearest_segments[z, y, x] == masked_value:
                                 continue
 
-                        k = nearest_segments[z, y, x]
+                        k = nearest_segments[z, y, x]-start_label
                         n_segment_elems[k] += 1
                         segments[k, 0] += z
                         segments[k, 1] += y
@@ -202,14 +204,14 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                     for y in range(height):
                         for x in range(width):
 
-                            if mask_size > 0:
+                            if use_mask:
                                 if mask[z, y, x] == 0:
                                     continue
 
-                                if nearest_segments[z, y, x] == -1:
+                                if nearest_segments[z, y, x] == masked_value:
                                     continue
 
-                            k = nearest_segments[z, y, x]
+                            k = nearest_segments[z, y, x]-start_label
                             dist_color = 0
 
                             for c in range(3, n_features):
@@ -226,7 +228,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
 def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                        Py_ssize_t min_size,
-                                       Py_ssize_t max_size):
+                                       Py_ssize_t max_size,
+                                       Py_ssize_t start_label=0,
+                                       Py_ssize_t masked_value=-1):
     """ Helper function to remove small disconnected regions from the labels
 
     Parameters
@@ -257,10 +261,10 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     # new object with connected segments initialized to -1
     cdef Py_ssize_t[:, :, ::1] connected_segments \
-        = np.full_like(segments, -1, dtype=np.intp)
+        = np.full_like(segments, masked_value, dtype=np.intp)
 
     cdef Py_ssize_t current_new_label = 0
-    cdef Py_ssize_t label = 0
+    cdef Py_ssize_t label = start_label
 
     # variables for the breadth first search
     cdef Py_ssize_t current_segment_size = 1
@@ -276,10 +280,10 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
             for y in range(height):
                 for x in range(width):
 
-                    if segments[z, y, x] == -1:
+                    if segments[z, y, x] == masked_value:
                         continue
 
-                    if connected_segments[z, y, x] >= 0:
+                    if connected_segments[z, y, x] != masked_value:
                         continue
 
                     # find the component size
@@ -303,7 +307,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                     0 <= yy < height and
                                     0 <= zz < depth):
                                 if (segments[zz, yy, xx] == label and
-                                        connected_segments[zz, yy, xx] == -1):
+                                    connected_segments[zz, yy, xx] == masked_value):
                                     connected_segments[zz, yy, xx] = \
                                         current_new_label
                                     coord_list[current_segment_size, 0] = zz
