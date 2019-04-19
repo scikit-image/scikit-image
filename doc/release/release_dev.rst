@@ -47,6 +47,10 @@ API Changes
   ``skimage.filters.median``.
 - Parameter ``flatten`` in `skimage.io.imread` has been removed in
   favor of ``as_gray``.
+- Parameters ``Hxx, Hxy, Hyy`` have been removed from
+  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
+- Default value of ``order`` parameter has been set to ``rc`` in
+  ``skimage.feature.hessian_matrix``.
 
 
 Bugfixes
