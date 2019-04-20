@@ -27,8 +27,6 @@ import matplotlib.pyplot as plt
 from skimage.feature import haar_like_feature_coord
 from skimage.feature import draw_haar_like_feature
 
-print(__doc__)
-
 ###############################################################################
 # Different types of Haar-like feature descriptors
 ###############################################################################
@@ -64,7 +62,7 @@ plt.show()
 
 ###############################################################################
 # The value of the descriptor is equal to the difference between the sum of the
-# intensity values in the green rectangle and the red one.  the red area is
+# intensity values in the green rectangle and the red one. The red area is
 # subtracted to the sum of the pixel intensities of the green In practice, the
 # Haar-like features will be placed in all possible location of an image and a
 # feature value will be computed for each of these locations.
