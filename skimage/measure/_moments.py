@@ -38,9 +38,8 @@ def moments_coords(coords, order=3):
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)], dtype=np.double)
     >>> M = moments_coords(coords)
-    >>> centroid_row = M[1, 0] / M[0, 0]
-    >>> centroid_col = M[0, 1] / M[0, 0]
-    >>> centroid_row, centroid_col
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 15.5)
     """
     return moments_coords_central(coords, 0, order=order)
@@ -184,9 +183,8 @@ def moments(image, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> cr, cc
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 14.5)
     """
     return moments_central(image, (0,) * image.ndim, order=order)
@@ -232,9 +230,8 @@ def moments_central(image, center=None, order=3, **kwargs):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> moments_central(image, (cr, cc))
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> moments_central(image, centroid)
     array([[ 16.,   0.,  20.,   0.],
            [  0.,   0.,   0.,   0.],
            [ 20.,   0.,  25.,   0.],
@@ -287,9 +284,8 @@ def moments_normalized(mu, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> m = moments(image)
-    >>> cr = m[0, 1] / m[0, 0]
-    >>> cc = m[1, 0] / m[0, 0]
-    >>> mu = moments_central(image, cr, cc)
+    >>> centroid = (m[0, 1] / m[0, 0], m[1, 0] / m[0, 0])
+    >>> mu = moments_central(image, centroid)
     >>> moments_normalized(mu)
     array([[        nan,         nan,  0.078125  ,  0.        ],
            [        nan,  0.        ,  0.        ,  0.        ],
