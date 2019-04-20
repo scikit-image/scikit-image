@@ -268,7 +268,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     cdef Py_ssize_t[:, :, ::1] connected_segments \
         = np.full_like(segments, mask_label, dtype=np.intp)
 
-    cdef Py_ssize_t current_new_label = 0
+    cdef Py_ssize_t current_new_label = start_label
     cdef Py_ssize_t label = start_label
 
     # variables for the breadth first search
@@ -321,7 +321,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                     current_segment_size += 1
                                     if current_segment_size >= max_size:
                                         break
-                                elif (connected_segments[zz, yy, xx] >= 0 and
+                                elif (connected_segments[zz, yy, xx] > mask_label and
                                       connected_segments[zz, yy, xx] != current_new_label):
                                     adjacent = connected_segments[zz, yy, xx]
                         bfs_visited += 1

@@ -417,7 +417,8 @@ def test_more_segments_than_pixels_mask():
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
                multichannel=False, convert2lab=False, mask=msk)
 
-    assert np.all(seg[2:-2, 2:-2].ravel() == np.arange(seg[2:-2, 2:-2].size))
+    expected = np.arange(seg[2:-2, 2:-2].size) + 1
+    assert np.all(seg[2:-2, 2:-2].ravel() == expected)
 
 
 def test_color_3d_mask():
