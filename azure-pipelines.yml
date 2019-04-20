@@ -16,10 +16,12 @@ jobs:
         PYTHON_VERSION: '3.6'
         ARCH: 'x86'
         PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
       Python36-x64:
         PYTHON_VERSION: '3.6'
         ARCH: 'x64'
         PIP_FLAGS: ''
+        BUILD_DOCS: 'true'
       Python37:
         PYTHON_VERSION: '3.7'
         ARCH: 'x86'
@@ -28,6 +30,7 @@ jobs:
         PYTHON_VERSION: '3.7'
         ARCH: 'x64'
         PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
       Python37-x64-pre:
         PYTHON_VERSION: '3.7'
         ARCH: 'x64'
@@ -45,66 +48,108 @@ jobs:
       Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
     displayName: 'Add Python paths to PATH'
 
-  - script: |
-      @echo on
+  - bash: |
+      set -x
 
-      :: Update pip
+      # Update pip
       python -m pip install --retries 3 -U pip setuptools
 
-      :: Check that we have the expected version and architecture for Python
+      # Check that we have the expected version and architecture for Python
       python --version
       pip --version
       python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
       pip list
 
-      :: Install the build and runtime dependencies of the project
-      pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
-      pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
+      # Install the build and runtime dependencies of the project
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/default.txt
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/build.txt
       pip list
     displayName: 'Pre-installation'
 
-  - script: |
-      @echo on
+  - bash: |
+      set -x
 
-      :: Get stdint headers needed by tifffile.c
+      # Get stdint headers needed by tifffile.c
       curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
       curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
 
-      :: Compile the package and build the wheel
+      # Compile the package and build the wheel
       python setup.py bdist_wheel 
 
-      :: Install the generated wheel package
-      dir dist
-      pip install %PIP_FLAGS% --no-index --find-links dist/ scikit-image
+      # Install the generated wheel package
+      ls dist
+      pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
     displayName: 'Installation'
 
-  - script: |
-      @echo on
+  - bash: |
+      set -x
 
-      :: Install the test dependencies
-      pip install %PIP_FLAGS% --retries 3 -r requirements/test.txt
+      # Install the test dependencies
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
       pip list
+
+      # Set non-UI Matplotlib backend
+      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+      echo "backend : Agg" > matplotlibrc
+      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+      cd ${BUILD_SOURCESDIRECTORY}  # D:\a\1\s
     displayName: 'Pre-testing'
 
-  - script: |
-      @echo on
+  - bash: |
+      set -x
 
-      :: Default working directory, where the source code is located,
-      :: is D:\a\1\s or similar. In order to run the tests on the installed
-      :: version of skimage, a different working directory is used.
+      # Change the working directory in order to run the tests
+      # on the installed version of skimage
+      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
 
-      :: Use the Agg backend in Matplotlib
-      echo backend ^: Agg > matplotlibrc
-
-      echo "Running tests on the following version of scikit-image:"
+      # Show the info about the installed scikit-image
       python -c "import skimage; print(skimage.__path__)"
-      
-      :: Run unit tests with pytest
-      pytest -v --pyargs skimage
 
-      :: [For further consideration]
-      :: # -- Build the docs
-      :: # -- Publish the .whl artifacts
-      :: # -- Upload the content of dist/*.whl to a public wheelhouse
-    workingDirectory: $(Agent.ToolsDirectory)
-    displayName: 'Testing'
+      # Set non-UI Matplotlib backend
+      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+
+      # Run unit tests with pytest
+      # We don't test docstring examples (--doctest-modules) on
+      # Windows due to inconsistent ndarray formatting in `numpy`.
+      # For more details, see https://github.com/numpy/numpy/issues/13468
+      export TEST_ARGS="-v --cov=skimage"
+      pytest ${TEST_ARGS} --pyargs skimage
+    displayName: 'Package testing'
+
+  - bash: |
+      set -x
+
+      # Install the doc dependencies
+      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
+      pip list
+
+      # Build the documentation
+      export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
+      make html
+    condition: eq(variables['BUILD_DOCS'], 'true')
+    displayName: 'Documentation testing'
+
+  - bash: |
+      set -x
+
+      # Install the doc dependencies
+      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
+      pip list
+
+      # Set non-UI Matplotlib backend
+      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+
+      # Run example applications
+      for f in doc/examples/*/*.py; do
+        python "${f}"
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+      done
+    condition: eq(variables['TEST_EXAMPLES'], 'true')
+    displayName: 'Gallery testing'
+
+#  - bash: |
+#      # -- Publish the .whl artifacts
+#      # -- Upload the content of dist/*.whl to a public wheelhouse
+#    displayName: 'Further consideration'
