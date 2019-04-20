@@ -24,8 +24,8 @@ def image():
      (None, 1, None, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (None, None, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
      (True, 1, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (None, False, False, 'constant', 0.0, 'rank', 2, (UserWarning,)),
-     (None, False, False, 'nearest', 0.0, 'rank', 1, []),
+     (None, False, False, 'constant', 0.0, 'rank', 1, (UserWarning,)),
+     (None, False, False, 'nearest', 0.0, 'rank', 0, []),
      (None, False, False, 'nearest', 0.0, 'ndimage', 0, [])]
 )
 def test_median_warning(image, mask, shift_x, shift_y, mode, cval, behavior,
