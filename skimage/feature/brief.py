@@ -64,7 +64,7 @@ class BRIEF(DescriptorExtractor):
     >>> import numpy as np
     >>> square1 = np.zeros((8, 8), dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
-    >>> square1
+    >>> square1  # doctest: +SKIP
     array([[0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 0, 0],
@@ -75,7 +75,7 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 0, 0, 0, 0, 0, 0]])
     >>> square2 = np.zeros((9, 9), dtype=np.int32)
     >>> square2[2:7, 2:7] = 1
-    >>> square2
+    >>> square2  # doctest: +SKIP
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],

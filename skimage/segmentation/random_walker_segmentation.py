@@ -370,7 +370,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     >>> b = np.zeros_like(a)
     >>> b[3, 3] = 1  # Marker for first phase
     >>> b[6, 6] = 2  # Marker for second phase
-    >>> random_walker(a, b)
+    >>> random_walker(a, b)  # doctest: +SKIP
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
