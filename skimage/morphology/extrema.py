@@ -416,7 +416,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [ True, False, False, False, False, False,  True]], dtype=bool)
-    >>> local_maxima(image, indices=True)
+    >>> local_maxima(image, indices=True)  # doctest: +SKIP
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
     Find local maxima without comparing to diagonal pixels (connectivity 1):
@@ -573,7 +573,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [ True, False, False, False, False, False,  True]], dtype=bool)
-    >>> local_minima(image, indices=True)
+    >>> local_minima(image, indices=True)  # doctest: +SKIP
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
     Find local minima without comparing to diagonal pixels (connectivity 1):

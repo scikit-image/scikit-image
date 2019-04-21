@@ -121,7 +121,7 @@ def safe_as_int(val, atol=1e-3):
     >>> safe_as_int(7.0)
     7
 
-    >>> safe_as_int([9, 4, 2.9999999999])
+    >>> safe_as_int([9, 4, 2.9999999999])  # doctest: +SKIP
     array([9, 4, 3])
 
     >>> safe_as_int(53.1)

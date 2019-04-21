@@ -93,17 +93,17 @@ class BRIEF(DescriptorExtractor):
     >>> extractor.extract(square2, keypoints2)
     >>> descriptors2 = extractor.descriptors
     >>> matches = match_descriptors(descriptors1, descriptors2)
-    >>> matches
+    >>> matches  # doctest: +SKIP
     array([[0, 0],
            [1, 1],
            [2, 2],
            [3, 3]])
-    >>> keypoints1[matches[:, 0]]
+    >>> keypoints1[matches[:, 0]]  # doctest: +SKIP
     array([[2, 2],
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> keypoints2[matches[:, 1]]
+    >>> keypoints2[matches[:, 1]]  # doctest: +SKIP
     array([[2, 2],
            [2, 6],
            [6, 2],

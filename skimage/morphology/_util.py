@@ -72,7 +72,7 @@ def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
 
     Examples
     --------
-    >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
+    >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))  # doctest: +SKIP
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
     structure = structure.copy()  # Don't modify original input

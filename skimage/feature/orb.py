@@ -93,7 +93,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> detector_extractor2.detect_and_extract(img2)
     >>> matches = match_descriptors(detector_extractor1.descriptors,
     ...                             detector_extractor2.descriptors)
-    >>> matches
+    >>> matches  # doctest: +SKIP
     array([[0, 0],
            [1, 1],
            [2, 2],

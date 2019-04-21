@@ -165,7 +165,7 @@ class CENSURE(FeatureDetector):
     >>> img = rgb2gray(astronaut()[100:300, 100:300])
     >>> censure = CENSURE()
     >>> censure.detect(img)
-    >>> censure.keypoints
+    >>> censure.keypoints  # doctest: +SKIP
     array([[  4, 148],
            [ 12,  73],
            [ 21, 176],
@@ -189,7 +189,7 @@ class CENSURE(FeatureDetector):
            [154, 156],
            [155, 151],
            [184,  63]])
-    >>> censure.scales
+    >>> censure.scales  # doctest: +SKIP
     array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
 
     """

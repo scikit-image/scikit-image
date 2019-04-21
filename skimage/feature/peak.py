@@ -105,16 +105,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
 
-    >>> peak_local_max(img1, min_distance=1)
+    >>> peak_local_max(img1, min_distance=1)  # doctest: +SKIP
     array([[3, 4],
            [3, 2]])
 
-    >>> peak_local_max(img1, min_distance=2)
+    >>> peak_local_max(img1, min_distance=2)  # doctest: +SKIP
     array([[3, 2]])
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
-    >>> peak_local_max(img2, exclude_border=0)
+    >>> peak_local_max(img2, exclude_border=0)  # doctest: +SKIP
     array([[10, 10, 10]])
 
     """
