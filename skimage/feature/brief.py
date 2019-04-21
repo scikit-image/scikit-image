@@ -72,7 +72,7 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
+           [0, 0, 0, 0, 0, 0, 0, 0]])
     >>> square2 = np.zeros((9, 9), dtype=np.int32)
     >>> square2[2:7, 2:7] = 1
     >>> square2
@@ -84,7 +84,7 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
     >>> extractor = BRIEF(patch_size=5)

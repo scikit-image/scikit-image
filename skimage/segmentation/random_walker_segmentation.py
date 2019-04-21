@@ -380,7 +380,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
            [1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
     """
     # Parse input data
