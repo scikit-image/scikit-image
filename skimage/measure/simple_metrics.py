@@ -163,7 +163,7 @@ def enhancement_measure(image: np.ndarray,
             Can be either 3-channel RGB or 1-channel grayscale.
         size : int
             Size of the window.
-        eps : float
+        eps : float, optional
             Parameter to avoid division by zero.
 
         Returns
