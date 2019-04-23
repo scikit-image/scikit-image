@@ -148,8 +148,8 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 
 def enhancement_measure(image: np.ndarray,
-                        eps: float = 1e-6,
-                        size: int = 3) -> float:
+                        size: int = 3,
+                        eps: float = 1e-6) -> float:
     """ The image enhancement measure called EME based on [1]_.
         It is a way of quantifying improvement of the image after enhancement.
 
@@ -161,7 +161,7 @@ def enhancement_measure(image: np.ndarray,
         image : array
             Input image of which the quality should be assessed.
             Can be either 3-channel RGB or 1-channel grayscale.
-        size : int
+        size : int, optional
             Size of the window.
         eps : float, optional
             Parameter to avoid division by zero.
@@ -176,7 +176,8 @@ def enhancement_measure(image: np.ndarray,
         .. [1] Agaian, Sos S., Karen Panetta, and Artyom M. Grigoryan.
                "A new measure of image enhancement."
                IASTED International Conference on Signal Processing
-               & Communication. Citeseer, 2000.
+               & Communication. Citeseer, 2000,
+               :DOI:10.1.1.35.4021
 
         Examples
         --------

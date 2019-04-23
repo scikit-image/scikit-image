@@ -13,8 +13,6 @@ This function was defined to quantify improvement of the image after processing.
 """
 
 import numpy as np
-import matplotlib
-matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import gaussian
@@ -62,4 +60,5 @@ compare_eme(before=img_rgb, transform=equalize_adapthist, kwargs={'nbins':256*3}
 # .. [1] Agaian, Sos S., Karen Panetta, and Artyom M. Grigoryan.
 # "A new measure of image enhancement."
 # IASTED International Conference on Signal Processing
-# & Communication. Citeseer, 2000.
+# & Communication. Citeseer, 2000,
+# :DOI:10.1.1.35.4021
