@@ -30,7 +30,7 @@ def file_or_url_context(resource_name):
             # f must be closed before yielding
             yield f.name
         except (OSError, URLError, HTTPError):
-            raise ValueError('unreachable URL: {}'.format(resource_name))
+            raise
         finally:
             os.remove(f.name)
     else:
