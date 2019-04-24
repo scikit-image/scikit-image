@@ -39,6 +39,9 @@ API Changes
   ``skimage.io.imread``. Use ``as_gray`` instead.
 - Parameter ``min_size`` has been removed from
   ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
+- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
+  removed.
+
 
 Bugfixes
 --------
