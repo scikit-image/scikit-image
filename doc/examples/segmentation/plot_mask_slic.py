@@ -43,8 +43,8 @@ slic = segmentation.slic(img, n_segments=200)
 m_slic = segmentation.slic(img, n_segments=100, mask=mask)
 
 # Display result
-fig = plt.figure(figsize=(10, 10))
-ax1, ax2, ax3, ax4 = fig.subplots(2, 2, sharex=True, sharey=True).ravel()
+fig, ax_arr = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(10, 10))
+ax1, ax2, ax3, ax4 = ax_arr.ravel()
 
 ax1.imshow(img)
 ax1.set_axis_off()
