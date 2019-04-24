@@ -1,6 +1,6 @@
 import os
+from urllib.error import URLError
 
-import pytest
 import numpy as np
 from skimage import io, data_dir
 
@@ -22,6 +22,7 @@ one_by_one_jpeg = (
     b'\x00\x00\x00\x00\x00\x00\xff\xda\x00\x08\x01\x01\x00'
     b'\x00?\x00*\x9f\xff\xd9'
 )
+
 
 def test_stack_basic():
     x = np.arange(12).reshape(3, 4)
@@ -56,5 +57,5 @@ def test_imread_http_url(httpserver):
 
 
 def test_imread_unreachable_url_handle():
-    with testing.raises(ValueError):
+    with testing.raises(URLError):
         io.imread('http://fake_url.com/image.jpg')
