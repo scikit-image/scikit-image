@@ -19,11 +19,12 @@ def _match_cumulative_cdf(source, template):
     return interp_a_values[src_unique_indices].reshape(source.shape)
 
 
-
 def match_histograms(image, reference, multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
+    Using RGB image, assume converting input image to some "continues" color space.
+    See: https://www.researchgate.net/post/Histogram_matching_for_color_images
 
     Parameters
     ----------
@@ -51,9 +52,6 @@ def match_histograms(image, reference, multichannel=False):
     .. [1] http://paulbourke.net/miscellaneous/equalisation/
 
     """
-    shape = image.shape
-    image_dtype = image.dtype
-
     if image.ndim != reference.ndim:
         raise ValueError('Image and reference must have the same number of channels.')
 
