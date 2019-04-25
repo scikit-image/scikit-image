@@ -24,7 +24,6 @@ def match_histograms(image, reference, multichannel=False):
 
     The adjustment is applied separately for each channel.
     Using RGB image, assume converting input image to some "continues" color space.
-    See: https://www.researchgate.net/post/Histogram_matching_for_color_images
 
     Parameters
     ----------
