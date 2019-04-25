@@ -23,7 +23,8 @@ def match_histograms(image, reference, multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
-    Using RGB image, assume converting input image to some "continues" color space.
+    Using RGB image, assume converting input image to some "continuous" color 
+    space [2]_.
 
     Parameters
     ----------
