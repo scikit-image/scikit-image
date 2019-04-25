@@ -184,7 +184,7 @@ def enhancement_measure(image: np.ndarray,
         >>> from skimage.data import camera
         >>> from skimage.exposure import equalize_hist
         >>> img = camera()
-        >>> before = enhancement_measure(img) # before
+        >>> before = enhancement_measure(img)  # before
         >>> after = enhancement_measure(equalize_hist(img))
         >>> before < after
         True
