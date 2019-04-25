@@ -173,7 +173,7 @@ def enhancement_measure(image: np.ndarray,
 
         References
         ----------
-        .. [1] Agaian, Sos S., Karen Panetta, and Artyom M. Grigoryan.
+        .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan.
                "A new measure of image enhancement."
                IASTED International Conference on Signal Processing
                & Communication. Citeseer, 2000,
