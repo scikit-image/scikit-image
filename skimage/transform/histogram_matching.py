@@ -49,7 +49,8 @@ def match_histograms(image, reference, multichannel=False):
 
     References
     ----------
-    .. [1] http://paulbourke.net/miscellaneous/equalisation/
+     .. [1] http://paulbourke.net/miscellaneous/equalisation/
+     .. [2] https://www.researchgate.net/post/Histogram_matching_for_color_images
 
     """
     if image.ndim != reference.ndim:
