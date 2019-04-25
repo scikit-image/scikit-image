@@ -8,7 +8,7 @@ to an image using a measure called EME [1]_.
 
 It is defined as a log of the ratio of local maximum to local minimum
 within a sliding window of given size.
-This function was defined to quantify improvement of the image after processing.
+This measure aims to provide a perceptual estimate of image quality, useful when comparing image enhancement algorithms.
 
 """
 
