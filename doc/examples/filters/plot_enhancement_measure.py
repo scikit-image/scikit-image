@@ -13,7 +13,8 @@ This function was defined to quantify improvement of the image
 after processing.
 =======
 within a sliding window of given size.
-This measure aims to provide a perceptual estimate of image quality, useful when comparing image enhancement algorithms.
+This measure aims to provide a perceptual estimate of image quality,
+useful when comparing image enhancement algorithms.
 >>>>>>> e223b0bc6ca9c425ab5ad543947b197df99edeb1
 
 """
