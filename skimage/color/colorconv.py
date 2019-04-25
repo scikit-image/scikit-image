@@ -1394,7 +1394,7 @@ def separate_stains(rgb, conv_matrix):
 
     References
     ----------
-    .. [1] http://mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
@@ -1450,7 +1450,7 @@ def combine_stains(stains, conv_matrix):
 
     References
     ----------
-    .. [1] http://mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 
     Examples
