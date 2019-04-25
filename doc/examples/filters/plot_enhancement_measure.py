@@ -4,7 +4,7 @@ Quantitative Measure of Image Enhancement
 =========================================
 
 In this example, we will quantify the effect of applying contrast enhancement
-to the image. We will use a measure called EME [1]_.
+to an image using a measure called EME [1]_.
 
 It is defined as a log of the ratio of local maximum to local minimum
 within a sliding window of given size.
