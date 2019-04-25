@@ -7,7 +7,7 @@ In this example, we will quantify the effect of applying contrast enhancement
 to the image. We will use a measure called EME [1]_.
 
 It is defined as a log of the ratio of local maximum to local minimum
-within a sliding window. The code allows the user to choose the window size.
+within a sliding window of given size.
 This function was defined to quantify improvement of the image after processing.
 
 """
