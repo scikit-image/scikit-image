@@ -8,7 +8,6 @@ from skimage import img_as_float
 from skimage import draw
 from skimage._shared.testing import assert_almost_equal
 from skimage._shared import testing
-from skimage._shared.testing import expected_warnings
 
 
 def test_hog_output_size():

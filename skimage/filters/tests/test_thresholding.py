@@ -503,20 +503,17 @@ def test_niblack_sauvola_pathological_image():
     assert not np.any(np.isnan(threshold_niblack(src_img)))
 
 
-def test_bimodal_multiotsu_hist():
-    image = data.camera()
-    thr_otsu = threshold_otsu(image)
-    thr_multi, _ = threshold_multiotsu(image, nclass=2)
-    assert thr_otsu == thr_multi
+@pytest.mark.parametrize("thresholding, lower, upper", [
+    (threshold_otsu, 86, 88),
+    (threshold_yen, 197, 199),
+    (threshold_isodata, 86, 88),
+    (threshold_mean, 117, 119),
+    (threshold_triangle, 21, 23),
+    (threshold_minimum, 75, 77),
+])
+def test_thresholds_dask_compatibility(thresholding, lower, upper):
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    dask_camera = da.from_array(skimage.data.camera(), chunks=(256, 256))
+    assert lower < float(thresholding(dask_camera)) < upper
 
-
-def test_check_multiotsu_results():
-    image = 0.25 * np.array([[0, 1, 2, 3, 4],
-                             [0, 1, 2, 3, 4],
-                             [0, 1, 2, 3, 4],
-                             [0, 1, 2, 3, 4]])
-
-    for idx in range(3, 6):
-        thr_multi, _ = threshold_multiotsu(image,
-                                           nclass=idx)
-        assert len(thr_multi) == idx-1

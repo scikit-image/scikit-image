@@ -43,10 +43,6 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
-    if 'as_grey' in plugin_args.keys():
-        as_gray = plugin_args.pop('as_grey', as_gray)
-        warn('`as_grey` has been deprecated in favor of `as_gray`')
-
     # Backward compatibility
     if flatten is not None:
         as_gray = flatten

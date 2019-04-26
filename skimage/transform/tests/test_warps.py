@@ -231,19 +231,14 @@ def test_rescale_multichannel_multiscale():
 
 
 def test_rescale_multichannel_defaults():
-    # ensure multichannel=None matches the previous default behaviour
-
-    # 2D: multichannel should default to False
+    # multichannel should always default to False as of 0.16
     x = np.zeros((8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
-    # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 16, 3))
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    assert_equal(scaled.shape, (16, 16, 6))
 
 
 def test_resize2d():
@@ -494,17 +489,17 @@ def test_slow_warp_nonint_oshape():
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
     out = rescale(image, 2, preserve_range=False, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image, 2, preserve_range=True, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                  mode='constant', multichannel='False', anti_aliasing=False,
+                  mode='constant', multichannel=False, anti_aliasing=False,
                   clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0

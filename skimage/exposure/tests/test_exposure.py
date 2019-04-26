@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+import pytest
 import skimage
 from skimage import data
 from skimage import exposure
@@ -557,3 +558,17 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+# Test Dask Compatibility
+# =======================
+
+def test_dask_histogram():
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    dask_array = da.from_array(np.array([[0, 1], [1, 2]]), chunks=(1, 2))
+    output_hist, output_bins = exposure.histogram(dask_array)
+    expected_bins = [0, 1, 2]
+    expected_hist = [1, 2, 1]
+    assert np.allclose(expected_bins, output_bins)
+    assert np.allclose(expected_hist, output_hist)
