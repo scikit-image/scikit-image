@@ -4,7 +4,6 @@ from scipy import ndimage as ndi
 import skimage
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage.color import rgb2gray
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
                                           threshold_li,
@@ -13,7 +12,6 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_niblack,
                                           threshold_sauvola,
                                           threshold_mean,
-                                          threshold_multiotsu,
                                           threshold_triangle,
                                           threshold_minimum,
                                           try_all_threshold,
@@ -516,4 +514,3 @@ def test_thresholds_dask_compatibility(thresholding, lower, upper):
     import dask.array as da
     dask_camera = da.from_array(skimage.data.camera(), chunks=(256, 256))
     assert lower < float(thresholding(dask_camera)) < upper
-

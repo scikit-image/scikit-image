@@ -18,9 +18,9 @@ __all__ = ['try_all_threshold',
            'threshold_local',
            'threshold_minimum',
            'threshold_mean',
-           'threshold_triangle',
            'threshold_niblack',
            'threshold_sauvola',
+           'threshold_triangle',
            'apply_hysteresis_threshold']
 
 
@@ -755,7 +755,7 @@ def threshold_triangle(image, nbins=256):
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
-    arg_low_level, arg_high_level = np.where(hist > 0)[0][[0, -1]]
+    arg_low_level, arg_high_level = np.where(hist>0)[0][[0, -1]]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
