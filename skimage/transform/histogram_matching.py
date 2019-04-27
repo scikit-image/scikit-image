@@ -26,9 +26,9 @@ def match_histograms(image, reference, multichannel=False):
 
     For color image assume to use another colour space then RGB since the colour
     transitions are not very smooth. For example having red source image
-    and green template image will not produce expected result. Therefor convert
-    your images to "continuous" color space like HSV first and after histogram
-    matching back to RGB. [2]
+    and green template image may not produce expected result. Therefore you may
+    get better results by first converting your images to "continuous" color
+    space like HSV and after histogram matching converting back to RGB. [2]
 
     Parameters
     ----------
