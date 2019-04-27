@@ -15,7 +15,7 @@
 // All these inline directives are necessary for us to stay compatible with
 // as many compilers as possible.
 // See discussion https://github.com/scikit-image/scikit-image/issues/3866
-__inline double inline __attribute__((always_inline)) fast_exp (double y)
+double inline __attribute__((always_inline)) fast_exp (double y)
 {
     union
     {
