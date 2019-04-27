@@ -15,7 +15,14 @@
 // All these inline directives are necessary for us to stay compatible with
 // as many compilers as possible.
 // See discussion https://github.com/scikit-image/scikit-image/issues/3866
-double inline __attribute__((always_inline)) fast_exp (double y)
+#ifdef _MSC_VER
+#define INLINE_PREFIX_DIRECTIVE __inline
+#define INLINE_SUFFIX_DIRECTIVE
+#else
+#define INLINE_PREFIX_DIRECTIVE
+#define INLINE_SUFFIX_DIRECTIVE inline __attribute__((always inline))
+#endif
+INLINE_PREFIX_DIRECTIVE double INLINE_SUFFIX_DIRECTIVE fast_exp (double y)
 {
     union
     {
