@@ -88,7 +88,7 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------
@@ -205,7 +205,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------
