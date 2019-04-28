@@ -149,13 +149,14 @@ def compare_psnr(im_true, im_test, data_range=None):
 def compare_nmi(im_true, im_test, *, bins=100):
     """Compute the normalized mutual information.
 
-    The normalized mutual information is given by:
+    The normalized mutual information is given by::
 
-                H(A) + H(B)
-      Y(A, B) = -----------
-                  H(A, B)
+    ..math::
 
-    where H(X) is the entropy ``- sum(x log x) for x in X``.
+        Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
+
+    where :math:`H(X)` is the entropy,
+    :math:`- \sum_{x \in X}{x \log x}.`
 
     It was proposed to be useful in registering images by Colin Studholme and
     colleagues [1]_.
