@@ -8,6 +8,7 @@ from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from ..util import crop, dtype_limits
+from ..filters._multiotsu import _find_threshold_multiotsu
 
 
 __all__ = ['try_all_threshold',
@@ -21,7 +22,8 @@ __all__ = ['try_all_threshold',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'apply_hysteresis_threshold']
+           'apply_hysteresis_threshold',
+           'threshold_multiotsu']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -1022,3 +1024,88 @@ def apply_hysteresis_threshold(image, low, high):
     connected_to_high = sums > 0
     thresholded = connected_to_high[labels_low]
     return thresholded
+
+
+def threshold_multiotsu(image, classes=3, bins=255):
+    """Generates multiple thresholds for an input image.
+    Based on the Multi-Otsu approach by Liao, Chen and Chung.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Grayscale input image.
+    classes : int, optional
+        Number of classes to be thresholded, i.e. the number of resulting
+        regions. Accepts an integer from 2 to 5. Default is 3.
+    bins : int, optional
+        Number of bins used to calculate the histogram. Default is 255.
+
+    Returns
+    -------
+    idx_thresh : array
+        Array containing the threshold values for the desired classes.
+
+    References
+    ----------
+    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
+           multilevel thresholding", Journal of Information Science and
+           Engineering 17 (5): 713-727, 2001. Available at:
+           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+    .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
+           Available at:
+           <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
+
+    Examples
+    --------
+    >>> from skimage.color import label2rgb
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> thresh = threshold_multiotsu(image)
+    >>> regions = np.digitize(image, bins=thresh)
+    >>> regions_colorized = label2rgb(regions)
+    """
+    # receiving minimum and maximum values for the image type.
+    type_min, type_max = dtype_limits(image)
+
+    # calculating the histogram and the probability of each gray level.
+    hist, _ = np.histogram(image.ravel(), bins=bins,
+                           range=(type_min, type_max))
+    prob = hist / image.size
+
+    momP, momS, var_btwcls = [np.zeros((bins, bins)) for n in range(3)]
+
+    # building the lookup tables.
+    # step 1: calculating the diagonal.
+    for u in range(1, bins):
+        momP[u, u] = prob[u]
+        momS[u, u] = u * prob[u]
+
+    # step 2: calculating the first row.
+    for u in range(1, bins-1):
+        momP[1, u+1] = momP[1, u] + prob[u+1]
+        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
+
+    # step 3: calculating the other rows recursively.
+    for u in range(2, bins):
+        for v in range(u+1, bins):
+            momP[u, v] = momP[1, v] - momP[1, u-1]
+            momS[u, v] = momS[1, v] - momS[1, u-1]
+
+    # step 4: calculating the between class variance.
+    for u in range(1, bins):
+        for v in range(u+1, bins):
+            if (momP[u, v] != 0):
+                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
+            else:
+                var_btwcls[u, v] = 0
+
+    # finding max threshold candidates, depending on classes.
+    # number of thresholds is equal to number of classes - 1.
+    aux_thresh = np.zeros(classes - 1)
+    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, bins,
+                                           aux_thresh)
+
+    # correcting values according to minimum and maximum values.
+    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / bins
+
+    return idx_thresh
