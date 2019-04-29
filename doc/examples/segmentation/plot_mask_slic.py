@@ -47,23 +47,21 @@ fig, ax_arr = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(10, 10))
 ax1, ax2, ax3, ax4 = ax_arr.ravel()
 
 ax1.imshow(img)
-ax1.set_axis_off()
 ax1.set_title("Origin image")
 
 ax2.imshow(mask, cmap="gray")
-ax2.set_axis_off()
 ax2.set_title("Considered mask")
 
 ax3.imshow(segmentation.mark_boundaries(img, slic))
 ax3.contour(mask, colors='red', linewidths=1)
-ax3.set_axis_off()
 ax3.set_title("SLIC")
 
 ax4.imshow(segmentation.mark_boundaries(img, m_slic))
 ax4.contour(mask, colors='red', linewidths=1)
-ax4.set_axis_off()
 ax4.set_title("maskSLIC")
 
-fig.set_tight_layout(True)
+for ax in ax_arr.ravel():
+    ax.set_axis_off()
 
+plt.tight_layout()
 plt.show()
