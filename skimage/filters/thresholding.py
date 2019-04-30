@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
-from ..util import crop, dtype_limits
+from ..util import crop, dtype_limits, img_as_float
 
 
 __all__ = ['try_all_threshold',
@@ -21,6 +21,7 @@ __all__ = ['try_all_threshold',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
+           'threshold_bradley',
            'apply_hysteresis_threshold']
 
 
@@ -1022,3 +1023,68 @@ def apply_hysteresis_threshold(image, low, high):
     connected_to_high = sums > 0
     thresholded = connected_to_high[labels_low]
     return thresholded
+
+
+def threshold_bradley(image, block_size=None, bright_perc=15):
+    """Applies the adaptive Bradley threshold on an input image.
+    array IMAGE with Bradley method. The brief idea of the algorithm is
+    that every image's pixel is set to black if its brightness is T percent
+    lower than the average brightness of surrounding pixels in the window
+    of the specified size, otherwise it is set to white.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    block_size : int
+        Window size used for convolution. Default value is taken as `N/8`,
+        where N is the width of the image.
+    bright_perc : int
+        Brightness comparison parameter, given in percentage (should be
+        between 1-100). Default is 15.
+
+    Returns
+    -------
+    thresh_image : (N, M) ndarray
+        Thresholded binary image
+
+    Notes
+    -----
+        Bradley's threshold is an extension of Wellner's method which increases
+        robustness to strong illumination changes. The algorithm chooses a
+        threshold where pixels are thresholded if their brightness is lower
+        than the average brightness of surrounding pixels in the window of
+        given size.
+
+    References
+    ----------
+    .. [1] D. Bradley and G. Roth, "Adaptive thresholding using Integral Image"
+           Journal of Graphics Tools 12(2), pp. 13-21, 2007.
+    .. [2] P. D. Wellner, "Adaptive thresholding for the digitaldesk." Tech. Rep.
+           EPC-93-110, EuroPARC, 1993.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> thresh = threshold_bradley(image)
+    """
+    # setting the default value of block_size
+    if block_size is None:
+        block_size = image.shape[0] // 8  # needs int to calculate the mask
+
+    image = img_as_float(image)
+
+    # creating the mask of given size
+    mask = np.zeros((block_size, block_size))
+    mask[0, 0], mask[-1, -1], mask[0, -1], mask[-1, 0] = 1, 1, -1, -1
+
+    # calculating the integral image and convolving with the given mask
+    int_image = integral_image(image)
+    int_image = ndi.convolve(int_image, mask)
+
+    # checking condition for Bradley threshold
+    image = image * block_size ** 2
+    thresh_image = image - int_image * (100 - bright_perc) / 100
+    thresh_image = thresh_image > 0
+    return thresh_image
