@@ -35,8 +35,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
         If True, each patch has its mean and variance spatially weighted by a
         normalized Gaussian kernel of width sigma=1.5.
     full : bool, optional
-        If True, return the full structural similarity image instead of the
-        mean value.
+        If True, also return the full structural similarity image.
 
     Other Parameters
     ----------------
