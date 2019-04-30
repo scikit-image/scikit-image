@@ -62,7 +62,7 @@ compare_side_by_side(before=img_rgb, after=equalize_adapthist(nbins=256 * 3))
 # References
 # ----------
 # .. [1] Sos S. Agaian, Karen Panetta, and Artyom M. Grigoryan.
-# "A new measure of image enhancement."
+# "A new measure of image enhancement.",
 # IASTED International Conference on Signal Processing
-# & Communication. Citeseer, 2000,
+# & Communication, Citeseer, 2000,
 # :DOI:10.1.1.35.4021
