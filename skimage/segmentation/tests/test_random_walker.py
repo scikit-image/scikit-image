@@ -5,7 +5,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import xfail, arch32
 import scipy
-import numpy as np
 from distutils.version import LooseVersion as Version
 
 
@@ -15,7 +14,7 @@ SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 
-if (Version(np.__version__) >= '1.15.0'):
+if Version(np.__version__) >= '1.15.0' and Version(scipy.__version__) < '1.13':
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
     NUMPY_MATRIX_WARNING = None
@@ -352,7 +351,7 @@ def test_trivial_cases():
             output_labels = random_walker(img, markers)
     assert np.all(output_labels[markers == 1] == 1)
     # Here 0-labeled pixels could not be determined (no connexion to seed)
-    assert np.all(output_labels[markers == 0] == -1) 
+    assert np.all(output_labels[markers == 0] == -1)
     with expected_warnings(["Returning provided labels"]):
         test = random_walker(img, markers, return_full_prob=True)
 
