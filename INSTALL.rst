@@ -100,13 +100,13 @@ Build Requirements
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
 * `Cython >= 0.23.4 <http://www.cython.org/>`__
 
-Build Requirements (docs)
--------------------------
+Documentation Requirements
+--------------------------
 
 .. include:: ../../requirements/docs.txt
    :literal:
 
-Runtime requirements
+Runtime Requirements
 --------------------
 
 .. include:: ../../requirements/default.txt
@@ -135,14 +135,8 @@ functionality is only available with the following installed:
 * `imread <http://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
-Testing requirements
+Testing Requirements
 --------------------
 
 .. include:: ../../requirements/test.txt
-   :literal:
-
-Documentation requirements
---------------------------
-
-.. include:: ../../requirements/docs.txt
    :literal:
