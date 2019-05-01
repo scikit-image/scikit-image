@@ -1,7 +1,8 @@
 numpy>=1.11
 scipy>=0.17.0
 matplotlib>=2.0.0
-networkx>=1.8
+networkx>=1.8; python_version >= '3.5'
+networkx>=1.8,<2.3; python_version < '3.5'
 six>=1.10.0
 pillow>=4.3.0
 PyWavelets>=0.4.0
