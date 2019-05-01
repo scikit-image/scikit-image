@@ -10,8 +10,7 @@ ctypedef np.float64_t IMGDTYPE
 
 cdef double DISTANCE_CUTOFF = 5.0
 
-cdef extern from "fast_exp.h":
-    double fast_exp(double y) nogil
+from .._shared.fast_exp cimport fast_exp
 
 
 cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
