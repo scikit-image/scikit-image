@@ -3,9 +3,9 @@
 Multi-Otsu Thresholding
 =======================
 
-Multi-Otsu threshold [1]_ is used to separate the pixels of an input
-image into several different classes, each one obtained according to the
-intensity of the gray levels within the image.
+The multi-Otsu threshold [1]_ is a thresholding algorithm thatused to separate
+the pixels of an input image into several different classes, each one obtained
+according to the intensity of the gray levels within the image.
 
 Multi-Otsu calculates several thresholds, determined by the number of desired
 classes. The default number of classes is 3: for obtaining three classes, the
@@ -36,7 +36,7 @@ image = data.camera()
 thresholds = threshold_multiotsu(image)
 
 # Using the values on thresh, we generate the three regions.
-regions = np.digitize(image, bins=thresh)
+regions = np.digitize(image, bins=thresholds)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 3.5))
 
