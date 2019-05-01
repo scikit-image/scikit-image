@@ -15,7 +15,6 @@ after processing.
 within a sliding window of given size.
 This measure aims to provide a perceptual estimate of image quality,
 useful when comparing image enhancement algorithms.
->>>>>>> e223b0bc6ca9c425ab5ad543947b197df99edeb1
 
 """
 
@@ -47,8 +46,10 @@ def compare_side_by_side(before: np.ndarray, after: np.ndarray):
 # transforms.
 
 
-compare_side_by_side(before=img_gray, after=gaussian(img_gray, sigma=10))
-compare_side_by_side(before=img_rgb, after=equalize_adapthist(nbins=256 * 3))
+compare_side_by_side(before=img_gray, after=gaussian(image=img_gray,
+                                                     sigma=10))
+compare_side_by_side(before=img_rgb, after=equalize_adapthist(image=img_rgb,
+                                                              nbins=256 * 3))
 
 ############################################################################
 # You can see that the greyscale camera image is very blurred due to
