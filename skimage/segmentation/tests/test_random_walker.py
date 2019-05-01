@@ -15,7 +15,7 @@ SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 
-if (Version(np.__version__) >= '1.15.0'):
+if Version(np.__version__) >= '1.15.0' and Version(scipy.__version__) < 1.3:
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
     NUMPY_MATRIX_WARNING = None
