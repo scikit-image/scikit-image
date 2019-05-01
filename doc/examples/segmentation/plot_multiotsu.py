@@ -4,7 +4,7 @@ Multi-Otsu Thresholding
 =======================
 
 Multi-Otsu threshold [1]_ is used to separate the pixels of an input
-image into three different classes, each one obtained according to the
+image into several different classes, each one obtained according to the
 intensity of the gray levels within the image.
 
 Multi-Otsu calculates several thresholds, determined by the number of desired
@@ -25,7 +25,7 @@ import numpy as np
 from skimage import data
 from skimage.filters import threshold_multiotsu
 
-# Stablishing the font size for all plots.
+# Setting the font size for all plots.
 matplotlib.rcParams['font.size'] = 9
 
 # The input image.
@@ -33,7 +33,7 @@ image = data.camera()
 
 # Applying multi-Otsu threshold for the default value, generating
 # three classes.
-thresh = threshold_multiotsu(image)
+thresholds = threshold_multiotsu(image)
 
 # Using the values on thresh, we generate the three regions.
 regions = np.digitize(image, bins=thresh)
@@ -49,8 +49,8 @@ ax[0].axis('off')
 # multi-Otsu.
 ax[1].hist(image.ravel(), bins=255)
 ax[1].set_title('Histogram')
-for i in range(len(thresh)):
-    ax[1].axvline(thresh[i], color='r')
+for i in range(len(thresholds)):
+    ax[1].axvline(thresholds[i], color='r')
 
 # Plotting the Multi Otsu result.
 ax[2].imshow(regions, cmap='Accent')
