@@ -36,7 +36,7 @@ def compare_side_by_side(before: np.ndarray, after: np.ndarray):
         ax[idx].axis('off')
         ax[idx].set_title("EME = {:.2f} ".format(
             simple_metrics.enhancement_measure(image, size=3)))
-    plt.show()
+    fig.show()
 
 
 #####################################################################
