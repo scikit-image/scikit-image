@@ -5,17 +5,18 @@
 from numpy cimport ndarray
 from numpy.math cimport INFINITY
 
-cdef double f(double p):
-    cdef double out = 1.7976931348623157e+308 #largest number a float64 can take
+cdef Py_ssize_t f(double p):
+    cdef Py_ssize_t out = 9223372036854775807
+    #largest number a Py_ssize_t can take
     if p == 0:
         out = 0
     return out
 
-cdef double euclidean_dist(double a, double b, double c):
-    cdef double out = (a-b)**2+c
+cdef Py_ssize_t euclidean_dist(Py_ssize_t a, Py_ssize_t b, Py_ssize_t c):
+    cdef Py_ssize_t out = (a-b)**2+c
     return out
 
-cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
+cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, Py_ssize_t[:] f):
     cdef double fa = f[a]
     cdef double fb = f[b]
     cdef double top = (fa+a**2-fb-b**2)
@@ -23,14 +24,14 @@ cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
     cdef double out = top/bottom
     return out
 
-cdef manhattan_dist(double a, double b, double c):
-    cdef double out = (a-b)**2+c
+cdef Py_ssize_t manhattan_dist(Py_ssize_t a, double b, double c):
+    cdef Py_ssize_t out = <Py_ssize_t>((a-b)**2+c)
     return out
 
-cdef manhattan_meet(double a, double b, ndarray[double, ndim=1] f):
+cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, Py_ssize_t[:] f):
     cdef double s
-    cdef double fa = f[a]
-    cdef double fb = f[b]
+    cdef Py_ssize_t fa = f[a]
+    cdef Py_ssize_t fb = f[b]
     s = (a + fa + b - fb) / 2
     if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
         return s
@@ -38,12 +39,12 @@ cdef manhattan_meet(double a, double b, ndarray[double, ndim=1] f):
     if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return 1.7976931348623157e+308 #largest number a float64 can take
-    return -1.7976931348623157e+308 #smallest number a float64 can take
+        return 9223372036854775807 #largest number a Py_ssize_t can take
+    return -9223372036854775807 #smallest number a Py_ssize_t can take
 
-def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
+def _generalized_distance_transform_1d_euclidean(double[:] arr, Py_ssize_t[:] cost_arr,
                                        bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
+                                       Py_ssize_t[::1] centers, Py_ssize_t[::1] out):
     cdef Py_ssize_t length = len(arr)
     cdef Py_ssize_t i, rightmost, current_domain
     cdef double intersection
@@ -75,9 +76,9 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
         out[i] = euclidean_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
+def _generalized_distance_transform_1d_manhattan(double[:] arr, Py_ssize_t[:] cost_arr,
                                        bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
+                                       Py_ssize_t[::1] centers, Py_ssize_t[::1] out):
     cdef Py_ssize_t length = len(arr)
     cdef Py_ssize_t i, rightmost, current_domain
     cdef double intersection

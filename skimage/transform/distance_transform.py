@@ -45,18 +45,21 @@ def generalized_distance_transform(ndarr_in, func='slow', cost_func=f, dist_func
     ndarr = ndarr_in.astype(np.double)
     if func == "euclidean":
         gdt1d = _generalized_distance_transform_1d_euclidean
+        dtype = np.intp
     elif func == "manhattan":
         gdt1d = _generalized_distance_transform_1d_manhattan
+        dtype = np.intp
     else:
         gdt1d = partial(_generalized_distance_transform_1d_slow, cost_func=cost_func, dist_func=dist_func, dist_meet=dist_meet)
         warnings.warn("slow")
+        dtype = np.double
     
     output = np.empty(ndarr.shape)
     for dimension in range(ndarr.ndim):
         length = ndarr.shape[dimension]
         domains_buffer =np.empty(length+1, dtype=np.double)
         centers_buffer = np.zeros(length,dtype=np.intp)
-        out_buffer = np.empty(length, dtype=np.double)
+        out_buffer = np.empty(length, dtype=dtype)
         
         if dimension == 0:
             output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer)
