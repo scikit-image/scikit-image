@@ -18,7 +18,6 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
 
     Parameters
     ----------
-
     var_btwcls : 2-d array
         array of variance between classes
     classes : int
@@ -31,6 +30,7 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
     cdef Py_ssize_t idd
     cdef Py_ssize_t sh0, sh1
     cdef double part_sigma = 0
+    # max_sigma is the maximum variance between classes.
     cdef double max_sigma = 0
     cdef Py_ssize_t [:, ::1] _tmp = np.array(list(
                                 combinations(range(1, bins - 2), classes - 1)))
@@ -45,6 +45,7 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
         part_sigma = 0
         for idd in range(0, classes):
             part_sigma += var_btwcls[1 + idx_tuple[idd], idx_tuple[idd+1]]
+        # checking if partial sigma is higher than maximum sigma
         if max_sigma < part_sigma:
             for idd in range(0, classes - 1):
                 aux_thresh[idd] = idx_tuple[idd + 1]
