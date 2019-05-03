@@ -6,16 +6,9 @@ Quantitative Measure of Image Enhancement
 In this example, we will quantify the effect of applying contrast enhancement
 to an image using a measure called EME [1]_.
 
-It is defined as the log of the ratio of local maximum to minimum
-<<<<<<< HEAD
-within a sliding window. The code allows the user to choose the window size.
-This function was defined to quantify improvement of the image
-after processing.
-=======
-within a sliding window of given size.
-This measure aims to provide a perceptual estimate of image quality,
-useful when comparing image enhancement algorithms.
-
+It is defined as the log of the ratio of local maximum to minimum within a
+sliding window of given size. This measure aims to provide a perceptual
+estimate of image quality, useful when comparing image enhancement algorithms.
 """
 
 import numpy as np
