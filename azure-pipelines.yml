@@ -91,8 +91,6 @@ jobs:
       # Set non-UI Matplotlib backend
       cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
       echo "backend : Agg" > matplotlibrc
-      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
-      cd ${BUILD_SOURCESDIRECTORY}  # D:\a\1\s
     displayName: 'Pre-testing'
 
   - bash: |
@@ -105,7 +103,7 @@ jobs:
       # Show the info about the installed scikit-image
       python -c "import skimage; print(skimage.__path__)"
 
-      # Set non-UI Matplotlib backend
+      # Force matplotlib to use the prepared config
       export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
       # Run unit tests with pytest
@@ -136,7 +134,7 @@ jobs:
       pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
       pip list
 
-      # Set non-UI Matplotlib backend
+      # Force matplotlib to use the prepared config
       export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
       # Run example applications
