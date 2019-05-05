@@ -272,3 +272,7 @@
 
 - Taylor D. Scott
   Simplified _upsampled_dft and extended register_translation to nD images.
+
+- Leonid Bloch
+  Implement non-local means restoration.
+  Use fast exponent approximation for increased speedup.
