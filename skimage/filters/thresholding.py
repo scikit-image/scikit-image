@@ -902,10 +902,17 @@ def threshold_niblack(image, window_size=15, k=0.2):
     -----
     This algorithm is originally designed for text recognition.
 
+    The Bradley threshold is a particular case of the Niblack
+    one, being equivalent to
+    >>> threshold_niblack(image, k=0) * (1-q)
+    where q is a quantile. Bradley and Roth use q=100 [2]_.
+
     References
     ----------
     .. [1] Niblack, W (1986), An introduction to Digital Image
            Processing, Prentice-Hall.
+    .. [2] D. Bradley and G. Roth, "Adaptive thresholding using Integral Image"
+           Journal of Graphics Tools 12(2), pp. 13-21, 2007.
 
     Examples
     --------
