@@ -10,13 +10,13 @@ from skimage._shared._warnings import expected_warnings
 def test_marching_cubes_isotropic():
     ellipsoid_isotropic = ellipsoid(6, 10, 16, levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)
-    
+
     # Classic
     verts, faces = marching_cubes_classic(ellipsoid_isotropic, 0.)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
-    
+
     # Lewiner
     verts, faces = marching_cubes_lewiner(ellipsoid_isotropic, 0.)[:2]
     surf_calc = mesh_surface_area(verts, faces)
@@ -30,19 +30,26 @@ def test_marching_cubes_anisotropic():
     ellipsoid_anisotropic = ellipsoid(6, 10, 16, spacing=spacing,
                                       levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)
-    
+
     # Classic
     verts, faces = marching_cubes_classic(ellipsoid_anisotropic, 0.,
                                           spacing=spacing)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
-    
+
     # Lewiner
     verts, faces = marching_cubes_lewiner(
         ellipsoid_anisotropic, 0., spacing=spacing)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
+    assert surf > surf_calc and surf_calc > surf * 0.985
+
+    # Test marching cube with mask
+    verts, faces = marching_cubes_lewiner(
+        ellipsoid_anisotropic, 0., spacing=spacing,
+        mask=np.array([]))[:2]
+    surf_calc = mesh_surface_area(verts, faces)
     assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test spacing together with allow_degenerate=False
