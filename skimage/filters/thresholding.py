@@ -904,8 +904,8 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     The Bradley threshold is a particular case of the Niblack
     one, being equivalent to
-    >>> threshold_niblack(image, k=0) * (1-q)
-    where q is a quantile. Bradley and Roth use q=100 [2]_.
+
+    >>> threshold_niblack(image, k=0)
 
     References
     ----------
