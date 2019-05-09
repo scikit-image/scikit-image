@@ -1027,7 +1027,7 @@ def apply_hysteresis_threshold(image, low, high):
 
 
 def threshold_multiotsu(image, classes=3, bins=255):
-    """Generates multiple thresholds for an input image, chosen maximizing the
+    """Generates multiple thresholds for an input image, chosen to maximize the
     variance between the desired classes. Based on the Multi-Otsu approach by
     Liao, Chen and Chung.
 
