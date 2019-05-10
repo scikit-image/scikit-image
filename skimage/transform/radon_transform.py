@@ -225,6 +225,8 @@ def iradon(radon_image, theta=None, output_size=None,
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
     
+    # Computing the ramp filter from the fourier transform of is frequency domain representation
+    # lessens artifacts and removes a small bias as explained in [1], Chap 3. Equation 61
     fourier_filter = 2 * np.real(fft(f))         # ramp filter
     omega = 2 * np.pi * fftfreq(projection_size_padded)
     if filter == "ramp":
