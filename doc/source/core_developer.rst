@@ -22,7 +22,7 @@ All Contributors Are Treated The Same
 You now have the ability to push changes directly to the master
 branch, but should never do so; instead, continue making pull requests
 as before and in accordance with the `general contributor guide
-<http://scikit-image.org/docs/dev/contribute.html>`__.
+<https://scikit-image.org/docs/dev/contribute.html>`__.
 
 As a core contributor, you gain the ability to merge or approve
 other contributors' pull requests.  Much like nuclear launch keys, it
@@ -63,7 +63,7 @@ When reviewing, focus on the following:
    <https://en.wikipedia.org/wiki/Functional_programming>`__ (i.e. not
    carry state), consistent with other parts of the library, and
    should avoid modifying input variables.  Please familiarize
-   yourself with the project's `deprecation policy <http://scikit-image.org/docs/dev/contribute.html#deprecation-cycle>`__.
+   yourself with the project's `deprecation policy <https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle>`__.
 
 2. **Documentation:** Any new feature should have a gallery
    example, that not only illustrates but explains it.
@@ -123,7 +123,7 @@ As a core member, you should be familiar with community and developer
 resources such as:
 
 -  Our `contributor
-   guide <http://scikit-image.org/docs/stable/contribute.html>`__
+   guide <https://scikit-image.org/docs/stable/contribute.html>`__
 -  Our `community
    guidelines <https://scikit-image.org/community_guidelines.html>`__
 -  `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ for Python style
