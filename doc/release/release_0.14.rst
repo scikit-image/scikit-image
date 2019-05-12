@@ -31,33 +31,37 @@ Other Pull Requests
 - Unify LICENSE files for easier interpretation (#3791, #3792)
 
 
-11 authors added to this release [alphabetical by last name]
+12 authors added to this release [alphabetical by first name]
 ------------------------------------------------------------
-- François Boulogne
-- Thomas A Caswell
 - Christoph Gohlke
+- Egor Panfilov
+- François Boulogne
+- Johannes Schönberger
+- Juan Nunez-Iglesias
 - Lars Grueter
 - Mark Harfouche
-- Juan Nunez-Iglesias
-- Egor Panfilov
+- Matthew Bowden
+- Nehal J Wani
 - Nelle Varoquaux
 - Stefan van der Walt
-- Nehal J Wani
+- Thomas A Caswell
 
 ... and, as always, a special mention to Matthias Bussonnier's Meeseeks Box,
 which remains invaluable for our backports.
 
-3 committers added to this release [alphabetical by last name]
---------------------------------------------------------------
+4 committers added to this release [alphabetical by first name or login]
+------------------------------------------------------------------------
+- Josh Warner
+- Juan Nunez-Iglesias
 - Mark Harfouche
 - Stefan van der Walt
-- Josh Warner
 
-4 reviewers added to this release [alphabetical by last name]
--------------------------------------------------------------
+5 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Egor Panfilov
 - François Boulogne
-- Mark Harfouche
 - Juan Nunez-Iglesias
+- Mark Harfouche
 - Stefan van der Walt
 
 
