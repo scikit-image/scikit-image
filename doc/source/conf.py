@@ -15,7 +15,9 @@ import sys
 import os
 import skimage
 from sphinx_gallery.sorting import ExplicitOrder
-
+from warnings import filterwarnings
+filterwarnings('ignore', message="Matplotlib is currently using agg",
+               category=UserWarning)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
