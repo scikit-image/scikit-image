@@ -138,7 +138,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False, multichan
         for chan in range(channels):
             h, bc = _histogram(image[..., chan], nbins, source_range, normalize)
             hist.append(h)
-        bin_centers = bc
+        # Convert to numpy arrays
+        bin_centers = np.array(bc)
+        hist = np.array(hist)
     else:
         hist, bin_centers = _histogram(image, nbins, source_range, normalize)
 
