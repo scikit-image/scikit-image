@@ -101,7 +101,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False, multichan
     normalize : bool, optional
         If True, normalize the histogram by the sum of its values.
     multichannel : bool, optional
-        If True, calculates the histogram for all the channels using the same
+        If True, calculates an individiual histogram for each channel, using a common
         binning.
 
     Returns
