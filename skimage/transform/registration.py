@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.optimize import minimize
 from scipy import ndimage as ndi
+from scipy.optimize import minimize
 
 from .pyramids import pyramid_gaussian
 from ..measure import compare_nmi
@@ -131,11 +131,10 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
 
     """
 
-    ndim = reference.ndim
-
     # ignore the channels if present
-    spatial_dims = ndim if not multichannel else ndim - 1
-    min_dim = min(reference.shape[:spatial_dims])
+    ndim = reference.ndim if not multichannel else reference.ndim - 1
+
+    min_dim = min(reference.shape[:ndim])
     nlevels = int(np.floor(np.log2(min_dim) - np.log2(minimum_size)))
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels,
@@ -148,7 +147,14 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
     for ref, tgt in image_pairs:
         def _cost(param):
             transformation = _parameter_vector_to_matrix(param, ndim)
-            transformed = ndi.affine_transform(tgt, transformation, order=1)
+            if not multichannel:
+                transformed = ndi.affine_transform(tgt, transformation,
+                                                   order=1)
+            else:
+                transformed = np.empty_like(tgt)
+                for ch in range(tgt.shape[-1]):
+                    ndi.affine_transform(tgt[..., ch], transformation,
+                                         order=1, output=transformed[..., ch])
             return cost(ref, transformed)
 
         result = minimize(_cost, parameter_vector, method='Powell')

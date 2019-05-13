@@ -3,31 +3,36 @@ from scipy import ndimage as ndi
 
 from skimage import data
 from skimage.transform import registration
-from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal)
-from skimage._shared._warnings import expected_warnings
 
 
 def test_register_affine():
-    reference = data.camera()
-    inner_matrix = [[1.1, 0],
-                    [0, 1]]
-    right_matrix = np.zeros((2, 1))
-    bottom_matrix = [[0, 0, 1]]
-    matrix_transform = np.concatenate((inner_matrix, right_matrix), axis=1)
-    matrix_transform = np.concatenate(
-        (matrix_transform, bottom_matrix), axis=0)
+    reference = data.camera()[::4, ::4]  # speed things up a little
+    forward = np.array([[1.1, 0, 0],
+                        [0  , 1, 0],
+                        [0  , 0, 1]])
 
-    inverse_inner = np.linalg.inv(inner_matrix)
-    inverse_right = -np.matmul(inverse_inner, right_matrix)
-    inverse_transform = np.concatenate((inverse_inner, inverse_right), axis=1)
-    inverse_transform = np.concatenate(
-        (inverse_transform, bottom_matrix), axis=0)
+    inverse = np.linalg.inv(forward)
 
-    target = ndi.affine_transform(reference, matrix_transform)
+    target = ndi.affine_transform(reference, forward)
     matrix = registration.register_affine(reference, target)
-    assert_array_almost_equal(matrix, inverse_transform, decimal=0)
+    assert_array_almost_equal(matrix, inverse, decimal=1)
+
+
+def test_register_affine_multichannel():
+    reference = data.astronaut()[::4, ::4]  # speed things up a little
+    forward = np.array([[1.1, 0, 0],
+                        [0  , 1, 0],
+                        [0  , 0, 1]])
+    inverse = np.linalg.inv(forward)
+    target = np.empty_like(reference)
+    for ch in range(reference.shape[-1]):
+        ndi.affine_transform(reference[..., ch], forward,
+                             output=target[..., ch])
+    matrix = registration.register_affine(reference, target,
+                                          multichannel=True)
+    assert_array_almost_equal(matrix, inverse, decimal=1)
 
 
 def test_matrix_parameter_vector_conversion():
