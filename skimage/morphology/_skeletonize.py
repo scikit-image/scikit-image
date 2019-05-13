@@ -87,6 +87,7 @@ def skeletonize(image, *, method=None):
     else:
         raise ValueError('skeletonize requires a 2D or 3D image as input, '
                          'got {}D.'.format(image.ndim))
+    return skeleton
 
 
 def skeletonize_2d(image):
