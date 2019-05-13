@@ -200,7 +200,8 @@ def compare_nmi(im_true, im_test, *, bins=100):
     -------
     nmi : float
         The normalized mutual information between the two arrays, computed at
-        the granularity given by ``bins``.
+        the granularity given by ``bins``. Higher NMI implies more similar
+        input images.
 
     Raises
     ------
