@@ -39,7 +39,7 @@ fig.tight_layout()
 plt.show()
 
 ######################################################################
-# **skeletonize vs skeletonize 3d**
+# **Zhang's method vs Lee's method**
 #
 # ``skeletonize`` [Zha84]_ works by making successive passes of
 # the image, removing pixels on object borders. This continues until no
@@ -57,8 +57,9 @@ plt.show()
 # a list of candidates for removal is assembled; then pixels from this list
 # are rechecked sequentially, to better preserve connectivity of the image.
 #
-# Note that Lee's method [Lee94]_ is designed to be used mostly on 3-D images.
-# However, for illustrative purposes, we apply this algorithm on a 2-D image.
+# Note that Lee's method [Lee94]_ is designed to be used on 3-D images, and
+# is selected automatically for those. For illustrative purposes, we apply
+# this algorithm to a 2-D image.
 #
 # .. [Zha84] A fast parallel algorithm for thinning digital patterns,
 #            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
@@ -71,14 +72,14 @@ plt.show()
 #
 
 import matplotlib.pyplot as plt
-from skimage.morphology import skeletonize, skeletonize_3d
+from skimage.morphology import skeletonize
 from skimage.data import binary_blobs
 
 
 data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 
 skeleton = skeletonize(data)
-skeleton_lee = skeletonize_3d(data)
+skeleton_lee = skeletonize(data, method='lee')
 
 fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
@@ -92,7 +93,7 @@ ax[1].set_title('skeletonize')
 ax[1].axis('off')
 
 ax[2].imshow(skeleton_lee, cmap=plt.cm.gray, interpolation='nearest')
-ax[2].set_title('skeletonize_3d')
+ax[2].set_title('skeletonize (Lee 94)')
 ax[2].axis('off')
 
 fig.tight_layout()
@@ -113,10 +114,9 @@ plt.show()
 # the medial axis with this function. This gives an estimate of the local width
 # of the objects.
 #
-# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d``
-# should be preferred.
+# For a skeleton with fewer branches, ``skeletonize`` should be preferred.
 
-from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
+from skimage.morphology import medial_axis, skeletonize
 
 # Generate the data
 data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
