@@ -76,7 +76,7 @@ def cost_nmi(image0, image1, *, bins=100):
     return -compare_nmi(image0, image1, bins=bins)
 
 
-def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
+def register_affine(reference, target, *, cost=cost_nmi, minimum_size=4,
                     multichannel=False, inverse=True,
                     level_callback=lambda x: None):
     """Find a transformation matrix to register a target image to a reference.
@@ -92,10 +92,11 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
         A cost function which takes two images and returns a score which is
         at a minimum when images are aligned. Uses the mean square error as
         default.
-    nlevels : integer, optional
-        Change the maximum height we use for creating the Gaussian pyramid.
-        By default, we guess based on the resolution of the image, as extremely
-        low resolution images (i.e. too many levels) may hinder registration.
+    minimum_size : integer, optional
+        The smallest size for an image along any dimension. This value
+        determines the size of the image pyramid used. Choosing a smaller value
+        here can cause registration errors, but a larger value could speed up
+        registration when the alignment is easy.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. By default, this is False.
@@ -132,11 +133,10 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
 
     ndim = reference.ndim
 
-    if nlevels is None:
-        # ignore the channels if present
-        spatial_dims = ndim if not multichannel else ndim - 1
-        min_dim = min(reference.shape[:spatial_dims])
-        nlevels = int(np.log2(min_dim)) - 2
+    # ignore the channels if present
+    spatial_dims = ndim if not multichannel else ndim - 1
+    min_dim = min(reference.shape[:spatial_dims])
+    nlevels = int(np.floor(np.log2(min_dim) - np.log2(minimum_size)))
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1,
                                    multichannel=multichannel)
