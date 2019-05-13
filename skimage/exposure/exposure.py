@@ -74,7 +74,8 @@ def _bincount_histogram(image, source_range):
     return hist, bin_centers
 
 
-def histogram(image, nbins=256, source_range='image', normalize=False, multichannel=False):
+def histogram(image, nbins=256, source_range='image', normalize=False,
+              multichannel=False):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
