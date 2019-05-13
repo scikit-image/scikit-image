@@ -804,7 +804,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # choose random sample set
         samples = []
-        random_idxs = random_state.randint(0, num_samples, min_samples)
+        random_idxs = random_state.choice(num_samples, min_samples,
+                                          replace=False)
         for d in data:
             samples.append(d[random_idxs])
 
