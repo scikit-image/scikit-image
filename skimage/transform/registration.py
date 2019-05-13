@@ -76,7 +76,7 @@ def cost_nmi(image0, image1, *, bins=100):
     return -compare_nmi(image0, image1, bins=bins)
 
 
-def register_affine(reference, target, *, cost=cost_nmi, minimum_size=4,
+def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
                     multichannel=False, inverse=True,
                     level_callback=lambda x: None):
     """Find a transformation matrix to register a target image to a reference.
@@ -138,9 +138,9 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=4,
     min_dim = min(reference.shape[:spatial_dims])
     nlevels = int(np.floor(np.log2(min_dim) - np.log2(minimum_size)))
 
-    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1,
+    pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels,
                                    multichannel=multichannel)
-    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1,
+    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels,
                                    multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
     parameter_vector = _matrix_to_parameter_vector(np.identity(ndim + 1))
