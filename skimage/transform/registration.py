@@ -78,7 +78,7 @@ def cost_nmi(image0, image1, *, bins=100):
 
 def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
                     multichannel=False, inverse=True,
-                    iter_callback=lambda x: None):
+                    level_callback=lambda x: None):
     """
     Returns a matrix which registers the target image to the reference image
 
@@ -108,7 +108,7 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
         technical reasons, this is the transform expected by
         ``scipy.ndimage.affine_transform`` to map the target image to the
         reference space.
-    iter_callback : callable, optional
+    level_callback : callable, optional
         If given, this function is called once per pyramid level with a tuple
         containing the current downsampled image, transformation matrix, and
         cost as the argument. This is useful for debugging or for plotting
@@ -155,9 +155,9 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
 
         result = minimize(_cost, parameter_vector, method='Powell')
         parameter_vector = result.x
-        iter_callback((tgt,
-                       _parameter_vector_to_matrix(parameter_vector, ndim),
-                       result.fun))
+        level_callback((tgt,
+                        _parameter_vector_to_matrix(parameter_vector, ndim),
+                        result.fun))
 
     matrix = _parameter_vector_to_matrix(parameter_vector, ndim)
 

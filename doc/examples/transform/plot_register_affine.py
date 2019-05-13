@@ -58,7 +58,7 @@ target = ndi.affine_transform(image, matrix_transform)
 level_alignments = []
 
 register_matrix = register_affine(image, target,
-                                  iter_callback=level_alignments.append)
+                                  level_callback=level_alignments.append)
 
 ###############################################################################
 # Once we have the matrix, it's easy to transform the target image to match
