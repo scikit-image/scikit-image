@@ -37,9 +37,3 @@ def alpha_rooting(image: ndarray,
                 )
     out = rescale_intensity(out.real, out_range=(0., 1.))
     return out
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
