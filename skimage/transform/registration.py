@@ -121,7 +121,7 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
     -------
     >>> from skimage.data import camera
     >>> reference_image = camera()
-    >>> r = 0.42  # radians
+    >>> r = 0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
     >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
@@ -133,9 +133,10 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
     ndim = reference.ndim
 
     if nlevels is None:
-        min_dim = min(reference.shape)
-        max_level = max(int(np.log2([min_dim])[0]) - 2, 2)
-        nlevels = min(max_level, 7)
+        # ignore the channels if present
+        spatial_dims = ndim if not multichannel else ndim - 1
+        min_dim = min(reference.shape[:spatial_dims])
+        nlevels = int(np.log2(min_dim)) - 2
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1,
                                    multichannel=multichannel)
