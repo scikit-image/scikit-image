@@ -85,3 +85,9 @@ def test_nmi():
 
 def test_nmi_different_sizes():
     assert compare_nmi(cam[:, :400], cam[:400, :]) > 1
+
+
+def test_nmi_random():
+    random1 = np.random.random((100, 100))
+    random2 = np.random.random((100, 100))
+    assert_almost_equal(compare_nmi(random1, random2, bins=10), 1, decimal=2)
