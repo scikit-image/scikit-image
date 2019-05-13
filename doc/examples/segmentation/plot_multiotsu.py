@@ -3,7 +3,7 @@
 Multi-Otsu Thresholding
 =======================
 
-The multi-Otsu threshold [1]_ is a thresholding algorithm thatused to separate
+The multi-Otsu threshold [1]_ is a thresholding algorithm that is used to separate
 the pixels of an input image into several different classes, each one obtained
 according to the intensity of the gray levels within the image.
 
@@ -49,8 +49,8 @@ ax[0].axis('off')
 # multi-Otsu.
 ax[1].hist(image.ravel(), bins=255)
 ax[1].set_title('Histogram')
-for i in range(len(thresholds)):
-    ax[1].axvline(thresholds[i], color='r')
+for thresh in thresholds:
+    ax[1].axvline(thresh, color='r')
 
 # Plotting the Multi Otsu result.
 ax[2].imshow(regions, cmap='Accent')
