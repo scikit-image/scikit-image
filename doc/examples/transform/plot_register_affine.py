@@ -76,11 +76,11 @@ ax[0].set_title('reference')
 ax[0].imshow(image, cmap='gray')
 
 initial_nmi = measure.compare_nmi(image, target)
-ax[1].set_title('target, nmi {:.3}'.format(initial_nmi))
+ax[1].set_title('target, NMI {:.3}'.format(initial_nmi))
 ax[1].imshow(target, cmap='gray')
 
 final_nmi = measure.compare_nmi(image, registered)
-ax[2].set_title('final correction, nmi {:.3}'.format(final_nmi))
+ax[2].set_title('final correction, NMI {:.3}'.format(final_nmi))
 ax[2].imshow(registered, cmap='gray')
 
 ###############################################################################
@@ -102,13 +102,15 @@ for i in range(3):
 # Finally, we show the intermediate alignments with blurred images to
 # demonstrate how registration with Gaussian pyramids works:
 
-for i, iter_num in enumerate([1, 2, 4], start=3):
-    iter_target, matrix, nnmi = level_alignments[iter_num]
+for axis_num, level_num in enumerate([1, 2, 4], start=3):
+    iter_target, matrix, nnmi = level_alignments[level_num]
     transformed_target = ndi.affine_transform(iter_target, matrix)
-    iter_nmi = measure.compare_nmi(image, ndi.affine_transform(target, matrix))
-    ax[i].set_title('iter {}, nmi {:.3}'.format(iter_num, iter_nmi))
-    ax[i].imshow(transformed_target, cmap='gray', interpolation='gaussian',
-                 resample=True)
-    add_grid(ax[i], transformed_target)
+    # NMI is sensitive to image resolution, so must compare at top level
+    level_nmi = measure.compare_nmi(image,
+                                    ndi.affine_transform(target, matrix))
+    ax[axis_num].set_title('level {}, nmi {:.3}'.format(level_num, level_nmi))
+    ax[axis_num].imshow(transformed_target, cmap='gray',
+                        interpolation='gaussian', resample=True)
+    add_grid(ax[axis_num], transformed_target)
 
 plt.show()
