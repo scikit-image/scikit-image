@@ -79,26 +79,23 @@ def cost_nmi(image0, image1, *, bins=100):
 def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
                     multichannel=False, inverse=True,
                     level_callback=lambda x: None):
-    """
-    Returns a matrix which registers the target image to the reference image
-
-    Will only return an affine transformation matrix.
+    """Find a transformation matrix to register a target image to a reference.
 
     Parameters
     ----------
     reference : ndimage
-        A reference image to compare against the target
+        A reference image to compare against the target.
     target : ndimage
         Our target for registration. Transforming this image using the
-        return value `matrix` aligns it with the reference.
+        returned matrix aligns it with the reference.
     cost : function, optional
         A cost function which takes two images and returns a score which is
         at a minimum when images are aligned. Uses the mean square error as
         default.
     nlevels : integer, optional
         Change the maximum height we use for creating the Gaussian pyramid.
-        By default we take a guess based on the resolution of the image,
-        as extremely low resolution images may hinder registration.
+        By default, we guess based on the resolution of the image, as extremely
+        low resolution images (i.e. too many levels) may hinder registration.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. By default, this is False.
@@ -112,7 +109,7 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
         If given, this function is called once per pyramid level with a tuple
         containing the current downsampled image, transformation matrix, and
         cost as the argument. This is useful for debugging or for plotting
-        intermediate results during the iterative processs.
+        intermediate results during the iterative process.
 
     Returns
     -------
@@ -128,8 +125,8 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
     >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
-    >>> output_matrix = register_affine(reference_image, target_image)
-    >>> registered_target = ndi.affine_transform(target_image, output_matrix)
+    >>> matrix = register_affine(reference_image, target_image)
+    >>> registered_target = ndi.affine_transform(target_image, matrix)
 
     """
 
@@ -141,9 +138,9 @@ def register_affine(reference, target, *, cost=cost_nmi, nlevels=None,
         nlevels = min(max_level, 7)
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels - 1,
-        multichannel=multichannel)
+                                   multichannel=multichannel)
     pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels - 1,
-        multichannel=multichannel)
+                                   multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
     parameter_vector = _matrix_to_parameter_vector(np.identity(ndim + 1))
 
