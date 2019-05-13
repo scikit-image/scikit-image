@@ -81,3 +81,7 @@ def test_NRMSE_errors():
 def test_nmi():
     assert_almost_equal(compare_nmi(cam, cam), 2)
     assert compare_nmi(cam, cam_noisy) < compare_nmi(cam, cam)
+
+
+def test_nmi_different_sizes():
+    assert compare_nmi(cam[:, :400], cam[:400, :]) > 1
