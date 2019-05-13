@@ -50,14 +50,14 @@ plt.show()
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
 #
-# ``skeletonize_3d`` [Lee94]_ uses an octree data structure to examine a 3x3x3
-# neighborhood of a pixel. The algorithm proceeds by iteratively sweeping
-# over the image, and removing pixels at each iteration until the image
-# stops changing. Each iteration consists of two steps: first, a list of
-# candidates for removal is assembled; then pixels from this list are
-# rechecked sequentially, to better preserve connectivity of the image.
+# ``skeletonize(..., method='lee')`` [Lee94]_ uses an octree data structure
+# to examine a 3x3x3 neighborhood of a pixel. The algorithm proceeds by
+# iteratively sweeping over the image, and removing pixels at each iteration
+# until the image stops changing. Each iteration consists of two steps: first,
+# a list of candidates for removal is assembled; then pixels from this list
+# are rechecked sequentially, to better preserve connectivity of the image.
 #
-# Note that ``skeletonize_3d`` is designed to be used mostly on 3-D images.
+# Note that Lee's method [Lee94]_ is designed to be used mostly on 3-D images.
 # However, for illustrative purposes, we apply this algorithm on a 2-D image.
 #
 # .. [Zha84] A fast parallel algorithm for thinning digital patterns,
@@ -78,7 +78,7 @@ from skimage.data import binary_blobs
 data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 
 skeleton = skeletonize(data)
-skeleton3d = skeletonize_3d(data)
+skeleton_lee = skeletonize_3d(data)
 
 fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
@@ -91,7 +91,7 @@ ax[1].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
 ax[1].set_title('skeletonize')
 ax[1].axis('off')
 
-ax[2].imshow(skeleton3d, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(skeleton_lee, cmap=plt.cm.gray, interpolation='nearest')
 ax[2].set_title('skeletonize_3d')
 ax[2].axis('off')
 
@@ -126,7 +126,7 @@ skel, distance = medial_axis(data, return_distance=True)
 
 # Compare with other skeletonization algorithms
 skeleton = skeletonize(data)
-skeleton3d = skeletonize_3d(data)
+skeleton_lee = skeletonize(data, method='lee')
 
 # Distance to the background for pixels of the skeleton
 dist_on_skel = distance * skel
@@ -147,8 +147,8 @@ ax[2].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
 ax[2].set_title('skeletonize')
 ax[2].axis('off')
 
-ax[3].imshow(skeleton3d, cmap=plt.cm.gray, interpolation='nearest')
-ax[3].set_title('skeletonize_3d')
+ax[3].imshow(skeleton_lee, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].set_title("skeletonize (Lee 94)")
 ax[3].axis('off')
 
 fig.tight_layout()
