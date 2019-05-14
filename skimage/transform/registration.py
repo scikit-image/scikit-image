@@ -157,7 +157,7 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
                                          order=1, output=transformed[..., ch])
             return cost(ref, transformed)
 
-        result = minimize(_cost, parameter_vector, method='Powell')
+        result = minimize(_cost, x0=parameter_vector, method='Powell')
         parameter_vector = result.x
         level_callback((tgt,
                         _parameter_vector_to_matrix(parameter_vector, ndim),
