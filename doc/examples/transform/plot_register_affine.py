@@ -102,7 +102,10 @@ plt.show()
 
 ###############################################################################
 # Let's observe the Gaussian pyramid at work, as described above, using the
-# per-level alignments that we saved to a list using ``level_callback``.
+# per-level alignments that we saved to a list using ``level_callback``. We
+# show the intermediate alignments with blurred images to demonstrate how
+# registration with Gaussian pyramids works. For illustrative purposes only, we
+# have to recreate the Gaussian pyramid outside of the registration function.
 
 _, ax = plt.subplots(1, 6)
 
@@ -114,44 +117,10 @@ final_nmi = measure.compare_nmi(image, registered)
 ax[5].set_title('final correction, NMI {:.3}'.format(final_nmi))
 ax[5].imshow(overlay(image, registered))
 
-###############################################################################
-# We make a small function to add a grid to a displayed image for easy
-# reference to the alignment:
-
-
-def add_grid(ax, image):
-    r, c = image.shape
-    ax.set_xticks(np.arange(c / 5, c, c / 5), minor=True)
-    ax.set_yticks(np.arange(r / 5, r, r / 5), minor=True)
-    ax.grid(which='minor', color='w', linestyle='-', linewidth=1)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-
-###############################################################################
-# Finally, we show the intermediate alignments with blurred images to
-# demonstrate how registration with Gaussian pyramids works. For illustrative
-# purposes only, we have to recreate the Gaussian pyramid outside of the
-# registration function.
-
-
-def gaussian_sigma(level):
-    """Compute the equivalent blur to a given Gaussian pyramid level.
-
-    The blur at a single level is 2/3 * 2**level, because the sigma is 2/3
-    but the image at each level has been downsampled by a factor of 2.
-
-    The total blur at that level, though, includes all lower levels of blur.
-    Blurring by consecutive Gaussian filters is equivalent to blurring by
-    a single filter with sigma equal to the square root of the sum of squared
-    individual sigmas.
-    """
-    return np.sqrt(sum((2/3 * 2**curr_level)**2
-                       for curr_level in range(level)))
-
-
 num_levels = len(level_alignments)
-reference_pyramid = list(reversed(list(pyramid_gaussian(image, max_layer=num_levels-1))))
-for level_num in range(2, 6):
+
+reference_pyramid = list(pyramid_gaussian(image, max_layer=num_levels-1))[::-1]
+for axis_num, level_num in enumerate([0, 2, 4, 5], start=1):
     level = num_levels - level_num - 1  # 0 is original image
     iter_target, matrix, nnmi = level_alignments[level_num]
     transformed_full = ndi.affine_transform(target, matrix)
@@ -159,9 +128,9 @@ for level_num in range(2, 6):
     level_image = reference_pyramid[level_num]
     # NMI is sensitive to image resolution, so we must compare at top level
     level_nmi = measure.compare_nmi(image, transformed_full)
-    ax[level_num-1].set_title('level {}, NMI {:.3}'.format(level, level_nmi))
-    ax[level_num-1].imshow(overlay(level_image, transformed),
+    ax[axis_num].set_title('level {}, NMI {:.4}'.format(level, level_nmi))
+    ax[axis_num].imshow(overlay(level_image, transformed),
                            interpolation='bilinear')
-    ax[level_num-1].set_axis_off()
+    ax[axis_num].set_axis_off()
 
 plt.show()
