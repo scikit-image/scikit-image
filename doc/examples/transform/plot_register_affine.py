@@ -24,7 +24,7 @@ from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 
 from skimage.data import camera
-from skimage.transform import register_affine
+from skimage.transform import register_affine, pyramid_gaussian
 from skimage import measure
 
 
@@ -67,25 +67,57 @@ register_matrix = register_affine(image, target,
 registered = ndi.affine_transform(target, register_matrix)
 
 ###############################################################################
-# Looking at the results and the registration process:
+# Let's look at the results. First, we make a helper function to overlay two
+# grayscale images as yellow (reference) and cyan (target):
 
-_, axes = plt.subplots(2, 3)
-ax = axes.ravel()
 
-ax[0].set_title('reference')
-ax[0].imshow(image, cmap='gray')
+def overlay(image0, image1):
+    """Overlay two grayscale images as yellow and cyan channels.
+
+    The images must have the same shape.
+    """
+    zeros = np.zeros_like(image0)
+    image0_color = np.stack((image0, image0, zeros), axis=-1)
+    image1_color = np.stack((zeros, image1, image1), axis=-1)
+    image_overlay = np.maximum(image0_color, image1_color)
+    return image_overlay
+
+
+###############################################################################
+# Now we can look at the alignment. The reference image is in yellow, while the
+# target image is in cyan. Regions of perfect overlap become gray or black:
+
+_, ax = plt.subplots(1, 2)
+
+ax[0].set_title('initial alignment')
+ax[0].imshow(overlay(image, target))
+
+ax[1].set_title('registered')
+ax[1].imshow(overlay(image, registered))
+
+for a in ax:
+    a.set_axis_off()
+
+plt.show()
+
+###############################################################################
+# Let's observe the Gaussian pyramid at work, as described above, using the
+# per-level alignments that we saved to a list using ``level_callback``.
+
+_, ax = plt.subplots(1, 6)
 
 initial_nmi = measure.compare_nmi(image, target)
-ax[1].set_title('target, NMI {:.3}'.format(initial_nmi))
-ax[1].imshow(target, cmap='gray')
+ax[0].set_title('starting NMI {:.3}'.format(initial_nmi))
+ax[0].imshow(overlay(image, target))
 
 final_nmi = measure.compare_nmi(image, registered)
-ax[2].set_title('final correction, NMI {:.3}'.format(final_nmi))
-ax[2].imshow(registered, cmap='gray')
+ax[5].set_title('final correction, NMI {:.3}'.format(final_nmi))
+ax[5].imshow(overlay(image, registered))
 
 ###############################################################################
 # We make a small function to add a grid to a displayed image for easy
 # reference to the alignment:
+
 
 def add_grid(ax, image):
     r, c = image.shape
@@ -95,22 +127,41 @@ def add_grid(ax, image):
     ax.set_xticklabels([])
     ax.set_yticklabels([])
 
-for i in range(3):
-    add_grid(ax[i], image)
-
 ###############################################################################
 # Finally, we show the intermediate alignments with blurred images to
-# demonstrate how registration with Gaussian pyramids works:
+# demonstrate how registration with Gaussian pyramids works. For illustrative
+# purposes only, we have to recreate the Gaussian pyramid outside of the
+# registration function.
 
-for axis_num, level_num in enumerate([1, 2, 4], start=3):
+
+def gaussian_sigma(level):
+    """Compute the equivalent blur to a given Gaussian pyramid level.
+
+    The blur at a single level is 2/3 * 2**level, because the sigma is 2/3
+    but the image at each level has been downsampled by a factor of 2.
+
+    The total blur at that level, though, includes all lower levels of blur.
+    Blurring by consecutive Gaussian filters is equivalent to blurring by
+    a single filter with sigma equal to the square root of the sum of squared
+    individual sigmas.
+    """
+    return np.sqrt(sum((2/3 * 2**curr_level)**2
+                       for curr_level in range(level)))
+
+
+num_levels = len(level_alignments)
+reference_pyramid = list(reversed(list(pyramid_gaussian(image, max_layer=num_levels-1))))
+for level_num in range(2, 6):
+    level = num_levels - level_num - 1  # 0 is original image
     iter_target, matrix, nnmi = level_alignments[level_num]
-    transformed_target = ndi.affine_transform(iter_target, matrix)
-    # NMI is sensitive to image resolution, so must compare at top level
-    level_nmi = measure.compare_nmi(image,
-                                    ndi.affine_transform(target, matrix))
-    ax[axis_num].set_title('level {}, nmi {:.3}'.format(level_num, level_nmi))
-    ax[axis_num].imshow(transformed_target, cmap='gray',
-                        interpolation='gaussian', resample=True)
-    add_grid(ax[axis_num], transformed_target)
+    transformed_full = ndi.affine_transform(target, matrix)
+    transformed = ndi.affine_transform(iter_target, matrix)
+    level_image = reference_pyramid[level_num]
+    # NMI is sensitive to image resolution, so we must compare at top level
+    level_nmi = measure.compare_nmi(image, transformed_full)
+    ax[level_num-1].set_title('level {}, NMI {:.3}'.format(level, level_nmi))
+    ax[level_num-1].imshow(overlay(level_image, transformed),
+                           interpolation='bilinear')
+    ax[level_num-1].set_axis_off()
 
 plt.show()
