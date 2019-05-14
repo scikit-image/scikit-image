@@ -905,14 +905,19 @@ def threshold_niblack(image, window_size=15, k=0.2):
     The Bradley threshold is a particular case of the Niblack
     one, being equivalent to
 
-    >>> threshold_niblack(image, k=0)
+    >>> q = 1
+    >>> threshold_niblack(image, k=0) * q
+
+    for some value ``q``. By default, Bradley and Roth use ``q=1``.
+
 
     References
     ----------
-    .. [1] Niblack, W (1986), An introduction to Digital Image
-           Processing, Prentice-Hall.
-    .. [2] D. Bradley and G. Roth, "Adaptive thresholding using Integral Image"
-           Journal of Graphics Tools 12(2), pp. 13-21, 2007.
+    .. [1] W. Niblack, An introduction to Digital Image Processing,
+           Prentice-Hall, 1986.
+    .. [2] D. Bradley and G. Roth, "Adaptive thresholding using Integral
+           Image", Journal of Graphics Tools 12(2), pp. 13-21, 2007.
+           :DOI:`10.1080/2151237X.2007.10129236`
 
     Examples
     --------
