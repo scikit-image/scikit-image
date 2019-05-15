@@ -79,11 +79,11 @@ def skeletonize(image, *, method=None):
 
     if image.ndim == 2 and (method is None or method == 'zhang'):
         skeleton = skeletonize_2d(image)
-    elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
-        skeleton = skeletonize_3d(image)
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
+    elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
+        skeleton = skeletonize_3d(image)
     else:
         raise ValueError('skeletonize requires a 2D or 3D image as input, '
                          'got {}D.'.format(image.ndim))
