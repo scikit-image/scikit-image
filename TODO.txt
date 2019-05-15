@@ -47,3 +47,5 @@ Other
   environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
+* Check whether imread wheels are available, then re-enable testing imread
+  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
