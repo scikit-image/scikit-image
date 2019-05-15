@@ -519,6 +519,13 @@ In most cases, it is appropriate to set the ``stacklevel`` to ``2``, but cases
 when warnings originate from helper routines internal to the scikit-image
 library, it is may be more appropriate to set the ``stacklevel`` to ``3``.
 
+To test if your warning is being emitted correctly, try calling the function
+from an python console. You it should point you to the python console itself
+instead of being emitted by the files in the scikit-image library
+
+* **Good**: ``ipython:1: UserWarning: ...``
+* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
+
 Bugs
 ----
 
