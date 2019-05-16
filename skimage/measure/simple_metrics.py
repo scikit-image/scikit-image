@@ -23,6 +23,15 @@ def _as_floats(im1, im2):
     im2 = np.asarray(im2, dtype=float_type)
     return im1, im2
 
+def _prediction_measures(data_ref, data_test):
+    """Compares reference and test data to eturn true positive, true
+    negative, false positive, and false negative values.
+    """
+    true_pos = (data_ref & data_test).sum() / data_ref.size
+    true_neg = (~data_ref & ~data_test).sum() / data_ref.size
+    false_pos = (~data_ref & data_test).sum() / data_ref.size
+    false_neg = (data_ref & ~data_test).sum() / data_ref.size
+    return true_pos, true_neg, false_pos, false_neg
 
 def compare_mse(im1, im2):
     """Compute the mean-squared error between two images.
@@ -142,3 +151,61 @@ def compare_psnr(im_true, im_test, data_range=None):
 
     err = compare_mse(im_true, im_test)
     return 10 * np.log10((data_range ** 2) / err)
+
+
+def measure_accuracy(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    tr_pos, tr_neg, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    return (tr_pos + tr_neg) / (tr_pos + tr_neg + fl_pos + fl_neg)
+
+
+def measure_dice(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    tr_pos, _, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    return 2*tr_pos / (2*tr_pos + fl_pos + fl_neg)
+
+
+def measure_informedness(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    return recall(data_ref, data_test) + specificity(data_ref, data_test) - 1
+
+
+def measure_matthews(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    tr_pos, tr_neg, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    mcc = (tr_pos * tr_neg - fl_pos * fl_neg) / \
+           np.sqrt((tr_pos + fl_pos) * (tr_pos + fl_neg) *
+                   (tr_neg + fl_pos) * (tr_neg + fl_neg))
+    return mcc
+
+
+def precision(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    tr_pos, _, fl_pos, _ = _prediction_measures(data_ref, data_test)
+    return tr_pos / (tr_pos + fl_pos)
+
+
+def recall(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    tr_pos, _, _, fl_neg = _prediction_measures(data_ref, data_test)
+    return tr_pos / (tr_pos + fl_neg)
+
+
+def specificity(data_ref, data_test):
+    """
+    """
+    _assert_compatible(data_ref, data_test)
+    _, tr_neg, fl_pos, _ = _prediction_measures(data_ref, data_test)
+    return tr_neg / (tr_neg + fl_pos)
