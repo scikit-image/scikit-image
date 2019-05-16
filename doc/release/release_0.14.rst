@@ -25,6 +25,7 @@ Other Pull Requests
 - Add small galleries in the API (#2940, #3728)
 - Correctly ignore release notes auto-generated for docs (#3656, #3737)
 - Fix qt 5.12 for 0.14. (#3744, #3753)
+- Minor fixes to documentation and testing infrastructure - backports #3870 and #3869 (#3881)
 - Set astropy minimum requirement to 1.2 to help the CIs. (#3767, #3770)
 - Avoid NumPy warning while stacking arrays. (#3768, #3771)
 - Fix human readable error message on a bad build. (#3223, #3790)
