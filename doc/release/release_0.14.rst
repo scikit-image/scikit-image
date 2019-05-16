@@ -32,6 +32,7 @@ Other Pull Requests
 - Fix human readable error message on a bad build. (#3223, #3790)
 - Unify LICENSE files for easier interpretation (#3791, #3792)
 - Documentation formatting / compilation fixes - Backport of #3838 to v0.14.x (#3885)
+- Fix build by using latest ``wheel`` package (scikit-image/scikit-image-wheels#10)
 
 
 12 authors added to this release [alphabetical by first name]
@@ -48,6 +49,7 @@ Other Pull Requests
 - Nelle Varoquaux
 - Stefan van der Walt
 - Thomas A Caswell
+- Andrew Murray
 
 ... and, as always, a special mention to Matthias Bussonnier's Meeseeks Box,
 which remains invaluable for our backports.
