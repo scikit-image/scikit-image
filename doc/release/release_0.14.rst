@@ -15,6 +15,7 @@ Bug Fixes
 - Fix potential use of NULL pointer (#3696)
 - pypi: explicitly exclude Python 3.1, 3.2, and 3.3 (#3726)
 - Reduce default tolerance in threshold_li (#3622) (#3781)
+- Denoise now accepts float32 datatypes (#3449) (#3486) (#3880)
 
 Other Pull Requests
 -------------------
