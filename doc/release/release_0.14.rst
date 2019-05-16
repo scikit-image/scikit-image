@@ -15,7 +15,7 @@ Bug Fixes
 - Fix potential use of NULL pointer (#3696)
 - pypi: explicitly exclude Python 3.1, 3.2, and 3.3 (#3726)
 - Reduce default tolerance in threshold_li (#3622) (#3781)
-- Denoise now accepts float32 datatypes (#3449) (#3486) (#3880)
+- Denoising functions now accept float32 images (#3449) (#3486) (#3880)
 
 Other Pull Requests
 -------------------
@@ -25,7 +25,7 @@ Other Pull Requests
 - Get rid of the requirements-parser dependency (#3534, #3727)
 - Add small galleries in the API (#2940, #3728)
 - Correctly ignore release notes auto-generated for docs (#3656, #3737)
-- Fix qt 5.12 for 0.14. (#3744, #3753)
+- Fix qt 5.12 pinning for 0.14.x branch. (#3744, #3753)
 - Minor fixes to documentation and testing infrastructure - backports #3870 and #3869 (#3881)
 - Set astropy minimum requirement to 1.2 to help the CIs. (#3767, #3770)
 - Avoid NumPy warning while stacking arrays. (#3768, #3771)
