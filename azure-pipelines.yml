@@ -16,7 +16,6 @@ jobs:
         PYTHON_VERSION: '3.6'
         ARCH: 'x86'
         PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
       Python36-x64:
         PYTHON_VERSION: '3.6'
         ARCH: 'x64'

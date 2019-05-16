@@ -67,19 +67,14 @@ images = lfw_subset()
 # To speed up the example, extract the two types of features only
 feature_types = ['type-2-x', 'type-2-y']
 
-# Build a computation graph using dask. This allows the use of multiple
+# Build a computation graph using Dask. This allows the use of multiple
 # CPU cores later during the actual computation
 X = delayed(extract_feature_image(img, feature_types) for img in images)
 # Compute the result
 t_start = time()
-if sys.platform.startswith('win'):
-    # To run multiprocessing Dask tasks on Windows, one needs to write
-    # the code in a specific style. Check Dask documentation for more details.
-    # Here, for clarity of the example, we use a synchronous mode.
-    X = np.array(X.compute(scheduler='synchronous'))
-else:
-    X = np.array(X.compute(scheduler='processes'))
+X = np.array(X.compute(scheduler='threads'))
 time_full_feature_comp = time() - t_start
+
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0,
@@ -147,17 +142,9 @@ X = delayed(extract_feature_image(img, feature_type_sel, feature_coord_sel)
             for img in images)
 # Compute the result
 t_start = time()
-if sys.platform.startswith('win'):
-    X = np.array(X.compute(scheduler='synchronous'))
-else:
-    # When computing all the features, the Python GIL is acquired to process
-    # each ROI separately, and this is where most of the time is spent,
-    # so multiprocessing is faster. For this new small subset, most of the
-    # time is spent on the feature computation rather than the ROI scanning,
-    # and using threaded backend is *much* faster, because we avoid the
-    # overhead of launching a new process.
-    X = np.array(X.compute(scheduler='threads'))
+X = np.array(X.compute(scheduler='threads'))
 time_subs_feature_comp = time() - t_start
+
 y = np.array([1] * 100 + [0] * 100)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=150,
                                                     random_state=0,
