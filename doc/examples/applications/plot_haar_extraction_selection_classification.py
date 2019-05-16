@@ -67,7 +67,7 @@ images = lfw_subset()
 # To speed up the example, extract the two types of features only
 feature_types = ['type-2-x', 'type-2-y']
 
-# Build a computation graph using dask. This allows to utilize multiple
+# Build a computation graph using dask. This allows the use of multiple
 # CPU cores later during the actual computation
 X = delayed(extract_feature_image(img, feature_types) for img in images)
 # Compute the result
@@ -92,10 +92,10 @@ feature_coord, feature_type = \
 
 ###########################################################################
 # A random forest classifier can be trained in order to select the most
-# salient features, specifically, for face classification. The idea is to
-# determine which features are most oftenly used by the ensemble of trees.
-# By using only the most salient features in the subsequent steps, we can
-# drastically speed up the computation while retaining the accuracy.
+# salient features, specifically for face classification. The idea is to
+# determine which features are most often used by the ensemble of trees.
+# By using only the most salient features in subsequent steps, we can
+# drastically speed up the computation while retaining accuracy.
 
 # Train a random forest classifier and assess its performance
 clf = RandomForestClassifier(n_estimators=1000, max_depth=None,
@@ -124,7 +124,7 @@ fig.suptitle('The most important features')
 ###########################################################################
 # We can select the most important features by checking the cumulative sum
 # of the feature importance. In this example, we keep the features
-# representing 70% of the cumulative value (what corresponds to using only 3%
+# representing 70% of the cumulative value (which corresponds to using only 3%
 # of the total number of features).
 
 cdf_feature_importances = np.cumsum(clf.feature_importances_[idx_sorted])
