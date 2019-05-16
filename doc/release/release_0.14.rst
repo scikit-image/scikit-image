@@ -41,6 +41,7 @@ Other Pull Requests
 
 12 authors added to this release [alphabetical by first name]
 -------------------------------------------------------------
+- Andrew Murray
 - Christoph Gohlke
 - Egor Panfilov
 - François Boulogne
@@ -53,7 +54,6 @@ Other Pull Requests
 - Nelle Varoquaux
 - Stefan van der Walt
 - Thomas A Caswell
-- Andrew Murray
 
 ... and, as always, a special mention to Matthias Bussonnier's Meeseeks Box,
 which remains invaluable for our backports.
