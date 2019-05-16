@@ -30,6 +30,7 @@ Other Pull Requests
 - Avoid NumPy warning while stacking arrays. (#3768, #3771)
 - Fix human readable error message on a bad build. (#3223, #3790)
 - Unify LICENSE files for easier interpretation (#3791, #3792)
+- Documentation formatting / compilation fixes - Backport of #3838 to v0.14.x (#3885)
 
 
 12 authors added to this release [alphabetical by first name]
