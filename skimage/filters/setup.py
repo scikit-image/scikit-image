@@ -22,7 +22,7 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('rank.core_cy', sources=['rank/core_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_multiotsu', sources=['_multiotsu.c'],
-                         include_dirs=[get_numpy_include_dirs])
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('rank.generic_cy', sources=['rank/generic_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
