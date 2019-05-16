@@ -40,7 +40,7 @@ Other Pull Requests
 
 
 12 authors added to this release [alphabetical by first name]
-------------------------------------------------------------
+-------------------------------------------------------------
 - Christoph Gohlke
 - Egor Panfilov
 - François Boulogne
