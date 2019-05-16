@@ -1,6 +1,10 @@
 Announcement: scikit-image 0.14.3
 =================================
 
+As a reminder, 0.14.x is the final version of scikit-image with support for
+Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
+are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
 This is a bugfix release, and contains the following changes from v0.14.2:
 
 API Changes
