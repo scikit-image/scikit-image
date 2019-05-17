@@ -1044,7 +1044,7 @@ def marching_cubes_masked(float [:, :, :] im not None, double isovalue, LutProvi
             while x < Nx_bound:
                 x += st
                 x_st = x + st
-                if mask[x_st, y_st, z_st]:
+                if mask[z_st, y_st, x_st]:
                     # Initialize cell
                     cell.set_cube(isovalue, x, y, z, st,
                         im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],

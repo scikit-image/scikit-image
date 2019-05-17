@@ -15,7 +15,7 @@ else:
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False, mask:np.ndarray = None):
+                           allow_degenerate=True, use_classic=False, mask=None):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -58,9 +58,10 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         this option are *not* generally the same as the
         ``marching_cubes_classic()`` function.
     mask : (M, N, P) array
-        Bool array. The marching cube algorith will be computed only on
-        True elements. This may save computational time when interfaces
-        are located and also may work to compute finite surfaces.
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P and also
+        allow to compute finite surfaces.
 
     Returns
     -------
