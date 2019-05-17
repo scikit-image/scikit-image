@@ -361,7 +361,7 @@ def test_ransac_sample_duplicates():
             return True
 
         def residuals(self, data):
-            return np.ones_like(data, dtype=np.double)
+            return np.ones(len(data), dtype=np.double)
 
     # Create dataset with four unique points. Force 10 iterations
     # and check that there are no duplicated data points.
