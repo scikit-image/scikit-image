@@ -24,7 +24,7 @@ from skimage.transform import pyramid_gaussian
 
 
 img = data.astronaut()
-img_collection = tuple(pyramid_gaussian(img))
+img_collection = tuple(pyramid_gaussian(img, multichannel=True))
 
 view = CollectionViewer(img_collection)
 view.show()

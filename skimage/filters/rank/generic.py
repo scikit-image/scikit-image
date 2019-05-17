@@ -1054,3 +1054,43 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.double,
                                    pixel_size=n_bins)
+
+
+def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Majority filter assign to each pixel the most occuring value within
+    its neighborhood.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8, uint16 array).
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters.rank import majority
+    >>> from skimage.morphology import disk
+    >>> img = data.camera()
+    >>> maj_img = majority(img, disk(5))
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._majority, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)

@@ -7,32 +7,13 @@ Version 0.16
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.transform.resize``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``,
-  ``skimage.transform.pyramid_expandset``, set default value of
-  ``multichannel`` to False
-* Remove ``_multichannel_default`` from ``skimage.transform._warps.py``, and no
-  longer call it from within the ``resize`` or ``pyramid_*`` transforms.
-* Remove checks for the ``multichannel`` deprecation warnings in several tests
-  in ``skimage.transform.tests.test_pyramids.py`` and
-  ``skimage.transform.tests.test_warps.py``.
 * Remove `flatten` for `imread` in ``skimage.io._io.py``.
-* Remove `as_grey` for `load` in ``skimage.data.__init__.py``.
-* Remove deprecated argument ``visualise`` from function skimage.feature.hog
-* Remove deprecated module ``skimage.novice``
-  * Remove the ``save-demo.jpg`` line from ``.gitignore``
-  * Remove the warning filter from ``conftest.py``
 * In ``skimage.measure._regionprops``, remove all references to
   ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
 * In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
   arguments.
-* In ``skimage.morphology.remove_small_holes``, remove ``min_size`` argument.
 * In ``skimage.filters.median``, change default from ``behavior='rank'`` to
   ``behavior='ndimage'``.
-* Remove ``skimage.transform.seam_carve``, including the source code file, the
-  import and ``__all__`` listing in ``skimage/transform/__init__.py``, and
-  the test file in ``skimage/transform/tests``.
 
 Version 0.17
 ------------
@@ -66,3 +47,5 @@ Other
   environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
+* Check whether imread wheels are available, then re-enable testing imread
+  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
