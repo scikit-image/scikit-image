@@ -1108,6 +1108,6 @@ def threshold_multiotsu(image, classes=3, bins=256):
     aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, bins)
 
     # correcting values according to minimum and maximum values.
-    idx_thresh = np.asarray(aux_thresh) * (type_max-type_min) / bins
+    idx_thresh = aux_thresh * (type_max-type_min) / bins
 
     return idx_thresh
