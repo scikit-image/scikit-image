@@ -2,7 +2,6 @@ import numpy as np
 from .._shared.utils import assert_nD
 from . import _moments_cy
 import itertools
-from warnings import warn
 
 
 def moments_coords(coords, order=3):
@@ -39,9 +38,8 @@ def moments_coords(coords, order=3):
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)], dtype=np.double)
     >>> M = moments_coords(coords)
-    >>> centroid_row = M[1, 0] / M[0, 0]
-    >>> centroid_col = M[0, 1] / M[0, 0]
-    >>> centroid_row, centroid_col
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 15.5)
     """
     return moments_coords_central(coords, 0, order=order)
@@ -185,15 +183,14 @@ def moments(image, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> cr, cc
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> centroid
     (14.5, 14.5)
     """
     return moments_central(image, (0,) * image.ndim, order=order)
 
 
-def moments_central(image, center=None, cc=None, order=3, **kwargs):
+def moments_central(image, center=None, order=3, **kwargs):
     """Calculate all central image moments up to a certain order.
 
     The center coordinates (cr, cc) can be calculated from the raw moments as:
@@ -211,13 +208,6 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
         is not provided.
     order : int, optional
         The maximum order of moments computed.
-
-    Other Parameters
-    ----------------
-    cr : double
-        DEPRECATED: Center row coordinate for 2D image.
-    cc : double
-        DEPRECATED: Center column coordinate for 2D image.
 
     Returns
     -------
@@ -240,25 +230,13 @@ def moments_central(image, center=None, cc=None, order=3, **kwargs):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> M = moments(image)
-    >>> cr = M[1, 0] / M[0, 0]
-    >>> cc = M[0, 1] / M[0, 0]
-    >>> moments_central(image, (cr, cc))
+    >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
+    >>> moments_central(image, centroid)
     array([[ 16.,   0.,  20.,   0.],
            [  0.,   0.,   0.,   0.],
            [ 20.,   0.,  25.,   0.],
            [  0.,   0.,   0.,   0.]])
     """
-    if cc is not None:  # using deprecated interface
-        message = ('Using deprecated 2D-only, xy-coordinate interface to '
-                   'moments_central. This interface will be removed in '
-                   'scikit-image 0.16. Use '
-                   'moments_central(image, center=(cr, cc), order=3).')
-        warn(message)
-        if 'cr' in kwargs and center is None:
-            center = (kwargs['cr'], cc)
-        else:
-            center = (center, cc)
-        return moments_central(image, center=center, order=order).T
     if center is None:
         center = centroid(image)
     calc = image.astype(float)
@@ -306,9 +284,8 @@ def moments_normalized(mu, order=3):
     >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 1
     >>> m = moments(image)
-    >>> cr = m[0, 1] / m[0, 0]
-    >>> cc = m[1, 0] / m[0, 0]
-    >>> mu = moments_central(image, cr, cc)
+    >>> centroid = (m[0, 1] / m[0, 0], m[1, 0] / m[0, 0])
+    >>> mu = moments_central(image, centroid)
     >>> moments_normalized(mu)
     array([[        nan,         nan,  0.078125  ,  0.        ],
            [        nan,  0.        ,  0.        ,  0.        ],
