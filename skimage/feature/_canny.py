@@ -21,7 +21,7 @@ from .._shared.utils import assert_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels
+    """Smooth an image with a linear function, ignoring masked pixels.
 
     Parameters
     ----------
@@ -58,12 +58,12 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     -----------
     image : 2D array
         Grayscale input image to detect edges on; can be of any dtype.
-    sigma : float
+    sigma : float, optional
         Standard deviation of the Gaussian filter.
-    low_threshold : float
+    low_threshold : float, optional
         Lower bound for hysteresis thresholding (linking edges).
         If None, low_threshold is set to 10% of dtype's max.
-    high_threshold : float
+    high_threshold : float, optional
         Upper bound for hysteresis thresholding (linking edges).
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
@@ -108,6 +108,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     -----------
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
+           :DOI:`10.1109/TPAMI.1986.4767851`
     .. [2] William Green's Canny tutorial
            http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
