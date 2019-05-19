@@ -4,15 +4,13 @@ except ImportError:
     from ...external.tifffile import TiffFile, imsave, parse_kwargs
 
 
-def imread(fname, dtype=None, **kwargs):
+def imread(fname, **kwargs):
     """Load a tiff image from file.
 
     Parameters
     ----------
     fname : str or file
        File name or file-like-object.
-    dtype : numpy dtype object or string specifier
-       Specifies data type of array elements (Not currently used).
     kwargs : keyword pairs, optional
         Additional keyword arguments to pass through (see ``tifffile``'s
         ``imread`` function).

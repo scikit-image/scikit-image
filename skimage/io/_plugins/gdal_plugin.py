@@ -8,7 +8,7 @@ except ImportError:
                       "for further instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from file.
 
     """

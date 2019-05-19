@@ -14,16 +14,13 @@ except ImportError:
             "for further instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from a FITS file.
 
     Parameters
     ----------
     fname : string
         Image file name, e.g. ``test.fits``.
-    dtype : dtype, optional
-        For FITS, this argument is ignored because Stefan is planning on
-        removing the dtype argument from imread anyway.
 
     Returns
     -------
