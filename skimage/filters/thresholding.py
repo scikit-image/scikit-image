@@ -520,7 +520,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
-def threshold_li(image, *, tolerance=None):
+def threshold_li(image, *, tolerance=None, iter_callback=None):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
     Parameters
@@ -532,6 +532,10 @@ def threshold_li(image, *, tolerance=None):
         Finish the computation when the change in the threshold in an iteration
         is less than this value. By default, this is half the smallest
         difference between intensity values in ``image``.
+
+    iter_callback : Callable[[float], Any], optional
+        A function that will be called on the threshold at every iteration of
+        the algorithm.
 
     Returns
     -------
@@ -587,6 +591,10 @@ def threshold_li(image, *, tolerance=None):
     t_curr = np.mean(image)
     t_next = t_curr + 2 * tolerance
 
+    # Callback on initial iterations
+    if iter_callback is not None:
+        iter_callback(t_next + image_min)
+
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
     while abs(t_next - t_curr) > tolerance:
@@ -597,6 +605,9 @@ def threshold_li(image, *, tolerance=None):
 
         t_next = ((mean_back - mean_fore) /
                   (np.log(mean_back) - np.log(mean_fore)))
+
+        if iter_callback is not None:
+            iter_callback(t_next + image_min)
 
     threshold = t_next + image_min
     return threshold
