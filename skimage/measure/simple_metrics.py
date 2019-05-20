@@ -206,8 +206,40 @@ def measure_dice(conf_matrix):
     return 2*tr_pos / (2*tr_pos + fl_pos + fl_neg)
 
 
-def measure_informedness(conf_matrix):
-    """
+def measure_youden(conf_matrix):
+    """Calculate the Youden's index for a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_youden : float
+        Youden's index for the input confusion matrix.
+
+    Notes
+    -----
+    The Youden's index is also described as Youden's J statistic. When
+    generalized to the multiclass case, it is called informedness.
+
+    References
+    ----------
+    .. [1] Youden W. J. (1950) "Index for rating diagnostic tests."
+    Cancer, 3: 32-35, :DOI:`10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3`
+    .. [2] Powers, D. M. W. (2011) "Evaluation: From Precision, Recall and
+    F-Factor to ROC, Informedness, Markedness & Correlation." Journal of Machine
+    Learning Technologies,  2 (1): 37-63, :DOI:`10.9735/2229-3981`
+    .. [3] Wikipedia. "Youden's J Statistic." Available at:
+    https://en.wikipedia.org/wiki/Youden%27s_J_statistic
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_reference, data_test)
+    >>> coef_youden = measure_youden(conf_matrix)
     """
     return measure_recall(conf_matrix) + measure_specificity(conf_matrix) - 1
 
