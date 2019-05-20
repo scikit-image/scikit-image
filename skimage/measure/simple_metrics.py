@@ -23,15 +23,6 @@ def _as_floats(im1, im2):
     im2 = np.asarray(im2, dtype=float_type)
     return im1, im2
 
-def _prediction_measures(data_ref, data_test):
-    """Compares reference and test data to eturn true positive, true
-    negative, false positive, and false negative values.
-    """
-    true_pos = (data_ref & data_test).sum() / data_ref.size
-    true_neg = (~data_ref & ~data_test).sum() / data_ref.size
-    false_pos = (~data_ref & data_test).sum() / data_ref.size
-    false_neg = (data_ref & ~data_test).sum() / data_ref.size
-    return true_pos, true_neg, false_pos, false_neg
 
 def compare_mse(im1, im2):
     """Compute the mean-squared error between two images.
@@ -153,59 +144,100 @@ def compare_psnr(im_true, im_test, data_range=None):
     return 10 * np.log10((data_range ** 2) / err)
 
 
-def measure_accuracy(data_ref, data_test):
+def confusion_matrix(data_reference, data_test):
+    """Compares reference and test data to generate a confusion matrix.
+
+    Parameters
+    ----------
+    data_reference : ndarray
+        Reference binary data (ground truth).
+    data_test : ndarray
+        Test binary data.
+
+    Returns
+    -------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false negatives, and true negatives.
+
+    Notes
+    -----
+    The values true positive, false positive, false negative, and false
+    positive are events obtained in the comparison between data_reference
+    and data_test:
+
+                   data_reference:        True                False
+    data_test:
+                            True       True positive   |   False positive
+                                       ----------------------------------
+                            False      False negative  |    True negative
+
+    References
+    ----------
+    .. [1] Fawcett T. (2006) "An Introduction to ROC Analysis." Pattern
+    Recognition Letters, 27 (8): 861-874, :DOI:`10.1016/j.patrec.2005.10.010`
+
+    .. [2] Google Developers. "Machine Learning Crash Course with TensorFlow
+    APIs: Classification: True vs. False and Positive vs. Negative." Available
+    at: https://developers.google.com/machine-learning/crash-course/classification/true-false-positive-negative
+
+    """
+    _assert_compatible(data_reference, data_test)
+
+    true_pos = (data_reference & data_test).sum() / data_reference.size
+    false_pos = (~data_reference & data_test).sum() / data_reference.size
+    false_neg = (data_reference & ~data_test).sum() / data_reference.size
+    true_neg = (~data_reference & ~data_test).sum() / data_reference.size
+
+    return np.array([[true_pos, false_pos], [false_neg, true_neg]])
+
+
+def measure_accuracy(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    tr_pos, tr_neg, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     return (tr_pos + tr_neg) / (tr_pos + tr_neg + fl_pos + fl_neg)
 
 
-def measure_dice(data_ref, data_test):
+def measure_dice(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    tr_pos, _, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     return 2*tr_pos / (2*tr_pos + fl_pos + fl_neg)
 
 
-def measure_informedness(data_ref, data_test):
+def measure_informedness(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    return recall(data_ref, data_test) + specificity(data_ref, data_test) - 1
+    return measure_recall(conf_matrix) + measure_specificity(conf_matrix) - 1
 
 
-def measure_matthews(data_ref, data_test):
+def measure_matthews(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    tr_pos, tr_neg, fl_pos, fl_neg = _prediction_measures(data_ref, data_test)
+    tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     mcc = (tr_pos * tr_neg - fl_pos * fl_neg) / \
-           np.sqrt((tr_pos + fl_pos) * (tr_pos + fl_neg) *
-                   (tr_neg + fl_pos) * (tr_neg + fl_neg))
+        np.sqrt((tr_pos + fl_pos) * (tr_pos + fl_neg) *
+                (tr_neg + fl_pos) * (tr_neg + fl_neg))
     return mcc
 
 
-def precision(data_ref, data_test):
+def measure_precision(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    tr_pos, _, fl_pos, _ = _prediction_measures(data_ref, data_test)
+    tr_pos, fl_pos, _, _ = conf_matrix.ravel()
     return tr_pos / (tr_pos + fl_pos)
 
 
-def recall(data_ref, data_test):
+def measure_recall(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    tr_pos, _, _, fl_neg = _prediction_measures(data_ref, data_test)
+    tr_pos, _, fl_neg, _ = conf_matrix.ravel()
     return tr_pos / (tr_pos + fl_neg)
 
 
-def specificity(data_ref, data_test):
+def measure_specificity(conf_matrix):
     """
     """
-    _assert_compatible(data_ref, data_test)
-    _, tr_neg, fl_pos, _ = _prediction_measures(data_ref, data_test)
+    _, fl_pos, _, tr_neg = conf_matrix.ravel()
     return tr_neg / (tr_neg + fl_pos)
