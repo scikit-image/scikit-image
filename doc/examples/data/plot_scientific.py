@@ -19,6 +19,7 @@ images = ('hubble_deep_field',
           'moon',
           'retina',
           'shepp_logan_phantom',
+          'cell',
           )
 
 
