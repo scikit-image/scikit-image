@@ -44,7 +44,7 @@ entropies = [_cross_entropy(camera, t) for t in thresholds]
 
 optimal_camera_threshold = thresholds[np.argmin(entropies)]
 
-fig, ax = plt.subplots(1, 3)
+fig, ax = plt.subplots(1, 3, figsize=(8, 3))
 
 ax[0].imshow(camera, cmap='gray')
 ax[0].set_title('image')
@@ -54,18 +54,38 @@ ax[1].imshow(camera > optimal_camera_threshold, cmap='gray')
 ax[1].set_title('thresholded')
 ax[1].set_axis_off()
 
-ax[2].plot(thresholds, entropies, label='camera CE')
+ax[2].plot(thresholds, entropies)
 ax[2].set_xlabel('thresholds')
 ax[2].set_ylabel('cross-entropy')
 ax[2].vlines(optimal_camera_threshold,
              ymin=np.min(entropies) - 0.05 * np.ptp(entropies),
-             ymax=np.max(entropies) - 0.05 * np.ptp(entropies),
-             label='optimal')
-ax[2].legend(loc='upper right')
+             ymax=np.max(entropies) - 0.05 * np.ptp(entropies))
+ax[2].set_title('optimal threshold')
 
 fig.tight_layout()
 
-print('The brute force optimal threshold is: ', optimal_camera_threshold)
-print('The computed optimal threshold is: ', filters.threshold_li(camera))
+print('The brute force optimal threshold is:', optimal_camera_threshold)
+print('The computed optimal threshold is:', filters.threshold_li(camera))
+
+plt.show()
+
+###############################################################################
+# Next, let's use the ``iter_callback`` feature of ``threshold_li`` to examine
+# the optimization process as it happens.
+
+iter_thresholds = []
+
+optimal_threshold = filters.threshold_li(camera,
+                                         iter_callback=iter_thresholds.append)
+iter_entropies = [_cross_entropy(camera, t) for t in iter_thresholds]
+
+print('Only', len(iter_thresholds), 'examined.')
+
+fig, ax = plt.subplots()
+
+ax.plot(thresholds, entropies, label='all threshold entropies')
+ax.plot(iter_thresholds, iter_entropies, label='optimization path')
+ax.scatter(iter_thresholds, iter_entropies, c='C1')
+ax.legend(loc='upper right')
 
 plt.show()
