@@ -33,34 +33,39 @@ from skimage import filters
 from skimage.filters.thresholding import _cross_entropy
 
 cell = data.cell()
-coins = data.coins()
+camera = data.camera()
 
 ###############################################################################
-# First, we let's plot the cross entropy for the :func:`skimage.data.coins`
+# First, we let's plot the cross entropy for the :func:`skimage.data.camera`
 # image at all possible thresholds.
 
-thresholds = np.arange(np.min(coins) + 0.5, np.max(coins) - 0.5)
-entropies = [_cross_entropy(coins, t) for t in thresholds]
+thresholds = np.arange(np.min(camera) + 1.5, np.max(camera) - 1.5)
+entropies = [_cross_entropy(camera, t) for t in thresholds]
 
-optimal_coins_threshold = thresholds[np.argmin(entropies)]
+optimal_camera_threshold = thresholds[np.argmin(entropies)]
 
 fig, ax = plt.subplots(1, 3)
 
-ax[0].imshow(coins, cmap='gray')
+ax[0].imshow(camera, cmap='gray')
 ax[0].set_title('image')
+ax[0].set_axis_off()
 
-ax[1].plot(thresholds, entropies, label='coins')
-ax[1].set_xlabel('thresholds')
-ax[1].set_ylabel('cross-entropy')
-ax[1].vlines(optimal_coins_threshold,
+ax[1].imshow(camera > optimal_camera_threshold, cmap='gray')
+ax[1].set_title('thresholded')
+ax[1].set_axis_off()
+
+ax[2].plot(thresholds, entropies, label='camera CE')
+ax[2].set_xlabel('thresholds')
+ax[2].set_ylabel('cross-entropy')
+ax[2].vlines(optimal_camera_threshold,
              ymin=np.min(entropies) - 0.05 * np.ptp(entropies),
-             ymax=np.max(entropies),
-             label='optimal threshold')
-ax[1].legend()
-
-ax[2].imshow(coins > optimal_coins_threshold, cmap='gray')
-ax[2].set_title('thresholded')
+             ymax=np.max(entropies) - 0.05 * np.ptp(entropies),
+             label='optimal')
+ax[2].legend(loc='upper right')
 
 fig.tight_layout()
+
+print('The brute force optimal threshold is: ', optimal_camera_threshold)
+print('The computed optimal threshold is: ', filters.threshold_li(camera))
 
 plt.show()
