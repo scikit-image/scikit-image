@@ -229,7 +229,35 @@ def measure_accuracy(conf_matrix):
 
 
 def measure_dice(conf_matrix):
-    """
+    """Calculate the Dice coefficient for a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false negatives, and true negatives.
+
+    Returns
+    -------
+    coef_dice : float
+        Dice coefficient for the input confusion matrix.
+
+    Notes
+    -----
+    The Dice coefficient is known by several other names, such as F1 score,
+    Czekanowski's binary index Zijdenbos' similarity index, Sørensen-Dice
+    index, and others.
+
+    References
+    ----------
+    .. [1] Dice L. R. (1945) "Measures of the Amount of Ecologic Association
+    Between Species." Ecology, 26 (3): 297-302, :DOI:`10.2307/1932409`
+    .. [2] Sørensen T. (1948) "A method of establishing groups of equal
+    amplitude in plant sociology based on similarity of species and its
+    application to analyses of the vegetation on Danish commons." Kongelige
+    Danske Videnskabernes Selskab, 5 (4): 1-34.
+    .. [3] Wikipedia. "Sørensen-Dice coefficient." Available at:
+    https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
     """
     tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     return 2*tr_pos / (2*tr_pos + fl_pos + fl_neg)
