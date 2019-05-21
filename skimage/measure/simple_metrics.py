@@ -96,7 +96,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
 
 
 def compare_psnr(im_true, im_test, data_range=None):
-    """ Compute the peak signal to noise ratio (PSNR) for an image.
+    """Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
     ----------
@@ -244,7 +244,7 @@ def measure_dice(conf_matrix):
 
     Notes
     -----
-    The Dice coefficient is known by several other names, such as F1 score,
+    The Dice coefficient is known by several names, such as F1 score,
     Czekanowski's binary index Zijdenbos' similarity index, Sørensen-Dice
     index, and others.
 
@@ -258,6 +258,12 @@ def measure_dice(conf_matrix):
     Danske Videnskabernes Selskab, 5 (4): 1-34.
     .. [3] Wikipedia. "Sørensen-Dice coefficient." Available at:
     https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
+    >>> coef_dice = measure_dice(conf_matrix)
     """
     tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     return 2*tr_pos / (2*tr_pos + fl_pos + fl_neg)
@@ -280,7 +286,9 @@ def measure_youden(conf_matrix):
     Notes
     -----
     The Youden's index is also described as Youden's J statistic. When
-    generalized to the multiclass case, it is called informedness.
+    generalized to the multiclass case, it is called informedness: it
+    specifies the probability that the test data is informed in relation
+    to the reference data, when compared to chance.
 
     References
     ----------
@@ -354,7 +362,34 @@ def measure_precision(conf_matrix):
 
 
 def measure_recall(conf_matrix):
-    """
+    """Calculate the recall from a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_recall : float
+        Recall value for the input confusion matrix.
+
+    Notes
+    -----
+    Recall is also known as sensitivity, hit rate, and true positive rate. It
+    measures the proportion of actual positives that are correctly identified
+    in the comparison between reference and test data.
+
+    References
+    ----------
+    .. [1]
+    .. [2] Wikipedia. "Sensitivity and specificity." Available at:
+    https://en.wikipedia.org/wiki/Sensitivity_and_specificity
+
+    Examples
+    --------
+
     """
     tr_pos, _, fl_neg, _ = conf_matrix.ravel()
     return tr_pos / (tr_pos + fl_neg)
