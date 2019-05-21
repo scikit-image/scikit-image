@@ -229,7 +229,7 @@ def measure_youden(conf_matrix):
     ----------
     .. [1] Youden W. J. (1950) "Index for rating diagnostic tests."
     Cancer, 3: 32-35, :DOI:`10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3`
-    .. [2] Powers, D. M. W. (2011) "Evaluation: From Precision, Recall and
+    .. [2] Powers D. M. W. (2011) "Evaluation: From Precision, Recall and
     F-Factor to ROC, Informedness, Markedness & Correlation." Journal of Machine
     Learning Technologies,  2 (1): 37-63, :DOI:`10.9735/2229-3981`
     .. [3] Wikipedia. "Youden's J Statistic." Available at:
@@ -245,7 +245,42 @@ def measure_youden(conf_matrix):
 
 
 def measure_matthews(conf_matrix):
-    """
+    """Calculate the Matthews' correlation coefficient for a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_matthews : float
+        Matthews' correlation index for the input confusion matrix.
+
+    Notes
+    -----
+    Matthews correlation coefficient tends to be more informative than other
+    confusion matrix measures, such as Dice coefficient and accuracy, when
+    evaluating binary classification problems: it considers the balance ratios
+    of true positives, true negatives, false positives, and false negatives.
+
+    References
+    ----------
+    .. [1] Matthews B. W. (1975) "Comparison of the predicted and observed
+    secondary structure of T4 phage lysozyme." Biochimica et Biophysica Acta
+    (BBA) - Protein Structure, 405 (2): 442-451,
+    :DOI:`10.1016/0005-2795(75)90109-9`
+    .. [2] Chicco D. (2017) "Ten quick tips for machine learning in computational
+    biology." BioData Mining, 10 (35): 35, :DOI:`10.1186/s13040-017-0155-3`
+    .. [3] Wikipedia. "Matthews correlation coefficient." Available at:
+    https://en.wikipedia.org/wiki/Matthews_correlation_coefficient
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_reference, data_test)
+    >>> coef_matthews = measure_matthews(conf_matrix)
     """
     tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     mcc = (tr_pos * tr_neg - fl_pos * fl_neg) / \
