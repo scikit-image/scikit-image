@@ -36,7 +36,6 @@ def compare_mse(im1, im2):
     -------
     mse : float
         The mean-squared error (MSE) metric.
-
     """
     _assert_compatible(im1, im2)
     im1, im2 = _as_floats(im1, im2)
@@ -144,12 +143,12 @@ def compare_psnr(im_true, im_test, data_range=None):
     return 10 * np.log10((data_range ** 2) / err)
 
 
-def confusion_matrix(data_reference, data_test):
+def confusion_matrix(data_true, data_test):
     """Compares reference and test data to generate a confusion matrix.
 
     Parameters
     ----------
-    data_reference : ndarray
+    data_true : ndarray
         Reference binary data (ground truth).
     data_test : ndarray
         Test binary data.
@@ -163,10 +162,10 @@ def confusion_matrix(data_reference, data_test):
     Notes
     -----
     The values true positive, false positive, false negative, and false
-    positive are events obtained in the comparison between data_reference
-    and data_test:
+    positive are events obtained in the comparison between data_true and
+    data_test:
 
-                   data_reference:        True                False
+                   data_true:             True                False
     data_test:
                             True       True positive   |   False positive
                                        ----------------------------------
@@ -176,24 +175,54 @@ def confusion_matrix(data_reference, data_test):
     ----------
     .. [1] Fawcett T. (2006) "An Introduction to ROC Analysis." Pattern
     Recognition Letters, 27 (8): 861-874, :DOI:`10.1016/j.patrec.2005.10.010`
-
     .. [2] Google Developers. "Machine Learning Crash Course with TensorFlow
     APIs: Classification: True vs. False and Positive vs. Negative." Available
     at: https://developers.google.com/machine-learning/crash-course/classification/true-false-positive-negative
-
+    .. [3] Wikipedia. "Confusion matrix." Available at:
+    https://en.wikipedia.org/wiki/Confusion_matrix
     """
-    _assert_compatible(data_reference, data_test)
+    _assert_compatible(data_true, data_test)
 
-    true_pos = (data_reference & data_test).sum() / data_reference.size
-    false_pos = (~data_reference & data_test).sum() / data_reference.size
-    false_neg = (data_reference & ~data_test).sum() / data_reference.size
-    true_neg = (~data_reference & ~data_test).sum() / data_reference.size
+    true_pos = (data_true & data_test).sum() / data_true.size
+    false_pos = (~data_true & data_test).sum() / data_true.size
+    false_neg = (data_true & ~data_test).sum() / data_true.size
+    true_neg = (~data_true & ~data_test).sum() / data_true.size
 
     return np.array([[true_pos, false_pos], [false_neg, true_neg]])
 
 
 def measure_accuracy(conf_matrix):
-    """
+    """Calculate the accuracy measure for a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_accuracy : float
+        Accuracy measure for the input confusion matrix.
+
+    Notes
+    -----
+    Accuracy is the degree of closeness between the elements that generated the
+    confusion matrix. The name for the accuracy measure in the International
+    Organization for Standardization is trueness.
+
+    References
+    ----------
+    .. [1] Chicco D. (2017) "Ten quick tips for machine learning in computational
+    biology." BioData Mining, 10 (35): 35, :DOI:`10.1186/s13040-017-0155-3`
+    .. [2] Wikipedia. "Accuracy and precision." Available at:
+    https://en.wikipedia.org/wiki/Accuracy_and_precision
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
+    >>> coef_accuracy = measure_accuracy(conf_matrix)
     """
     tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
     return (tr_pos + tr_neg) / (tr_pos + tr_neg + fl_pos + fl_neg)
@@ -238,7 +267,7 @@ def measure_youden(conf_matrix):
     Examples
     --------
     >>> from skimage.measures import confusion_matrix
-    >>> conf_matrix = confusion_matrix(data_reference, data_test)
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
     >>> coef_youden = measure_youden(conf_matrix)
     """
     return measure_recall(conf_matrix) + measure_specificity(conf_matrix) - 1
@@ -279,7 +308,7 @@ def measure_matthews(conf_matrix):
     Examples
     --------
     >>> from skimage.measures import confusion_matrix
-    >>> conf_matrix = confusion_matrix(data_reference, data_test)
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
     >>> coef_matthews = measure_matthews(conf_matrix)
     """
     tr_pos, fl_pos, fl_neg, tr_neg = conf_matrix.ravel()
