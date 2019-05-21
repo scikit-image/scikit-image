@@ -30,7 +30,7 @@ def normalize_hsv(hsv):
     return ([179, 255, 1] * hsv).astype(np.uint8)
 
 
-def histogram_backproject(img1, img2, multichannel=True):
+def histogram_backprojection(img1, img2, multichannel=True):
     """Project the histogram of one image onto another
 
     Parameters

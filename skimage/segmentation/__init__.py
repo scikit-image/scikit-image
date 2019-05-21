@@ -12,6 +12,7 @@ from .morphsnakes import (morphological_geodesic_active_contour,
                           morphological_chan_vese, inverse_gaussian_gradient,
                           circle_level_set, checkerboard_level_set)
 from ..morphology import flood, flood_fill
+from .backproject import histogram_backprojection
 
 
 __all__ = ['random_walker',
@@ -30,6 +31,7 @@ __all__ = ['random_walker',
            'morphological_geodesic_active_contour',
            'morphological_chan_vese',
            'inverse_gaussian_gradient',
+           'histogram_backprojection'
            'circle_level_set',
            'checkerboard_level_set',
            'flood',

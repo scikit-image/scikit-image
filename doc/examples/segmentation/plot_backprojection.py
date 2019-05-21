@@ -29,7 +29,7 @@ and mask gives the segmented object.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.exposure import histogram_backproject
+from skimage.segmentation import histogram_backprojection
 from skimage import data
 from skimage.filters import threshold_otsu
 from skimage import img_as_ubyte
@@ -40,7 +40,7 @@ img1 = img_as_ubyte(img1)
 img2 = img1[:200, :200]
 
 # apply histogram backprojection
-bc = histogram_backproject(img1, img2)
+bc = histogram_backprojection(img1, img2)
 
 # threshold the image with otsu's thresholding
 thresh = threshold_otsu(bc)
