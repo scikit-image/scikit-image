@@ -246,7 +246,8 @@ def measure_dice(conf_matrix):
     -----
     The Dice coefficient is known by several names, such as F1 score,
     Czekanowski's binary index Zijdenbos' similarity index, Sørensen-Dice
-    index, and others.
+    index, and others. The Dice coefficient also represents the harmonic
+    mean of precision and recall.
 
     References
     ----------
@@ -355,7 +356,38 @@ def measure_matthews(conf_matrix):
 
 
 def measure_precision(conf_matrix):
-    """
+    """Calculate the precision from a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_precision : float
+        Precision value for the input confusion matrix.
+
+    Notes
+    -----
+    Precision is also known as confidence in data mining. It measures the
+    proportion of true and false positives in test data that are correct,
+    when compared to the reference data.
+
+    References
+    ----------
+    .. [1] Powers D. M. W. (2011) "Evaluation: From Precision, Recall and
+    F-Factor to ROC, Informedness, Markedness & Correlation." Journal of Machine
+    Learning Technologies,  2 (1): 37-63, :DOI:`10.9735/2229-3981`
+    .. [2] Wikipedia. "Precision and recall." Available at:
+    https://en.wikipedia.org/wiki/Precision_and_recall
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
+    >>> coef_precision = measure_precision(conf_matrix)
     """
     tr_pos, fl_pos, _, _ = conf_matrix.ravel()
     return tr_pos / (tr_pos + fl_pos)
@@ -383,20 +415,55 @@ def measure_recall(conf_matrix):
 
     References
     ----------
-    .. [1]
+    .. [1] Powers D. M. W. (2011) "Evaluation: From Precision, Recall and
+    F-Factor to ROC, Informedness, Markedness & Correlation." Journal of Machine
+    Learning Technologies,  2 (1): 37-63, :DOI:`10.9735/2229-3981`
     .. [2] Wikipedia. "Sensitivity and specificity." Available at:
     https://en.wikipedia.org/wiki/Sensitivity_and_specificity
 
     Examples
     --------
-
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
+    >>> coef_recall = measure_recall(conf_matrix)
     """
     tr_pos, _, fl_neg, _ = conf_matrix.ravel()
     return tr_pos / (tr_pos + fl_neg)
 
 
 def measure_specificity(conf_matrix):
-    """
+    """Calculate the specificity from a confusion matrix.
+
+    Parameters
+    ----------
+    conf_matrix : array
+        Matrix containing the number of true positives, false positives,
+    false_negatives, and true negatives.
+
+    Returns
+    -------
+    coef_specificity : float
+        Specificity value for the input confusion matrix.
+
+    Notes
+    -----
+    Specificity is also known as true negative rate. It measures the proportion
+    of actual negatives that are correctly identified in the comparison between
+    reference and test data.
+
+    References
+    ----------
+    .. [1] Powers D. M. W. (2011) "Evaluation: From Precision, Recall and
+    F-Factor to ROC, Informedness, Markedness & Correlation." Journal of Machine
+    Learning Technologies,  2 (1): 37-63, :DOI:`10.9735/2229-3981`
+    .. [2] Wikipedia. "Sensitivity and specificity." Available at:
+    https://en.wikipedia.org/wiki/Sensitivity_and_specificity
+
+    Examples
+    --------
+    >>> from skimage.measures import confusion_matrix
+    >>> conf_matrix = confusion_matrix(data_true, data_test)
+    >>> coef_specificity = measure_specificity(conf_matrix)
     """
     _, fl_pos, _, tr_neg = conf_matrix.ravel()
     return tr_neg / (tr_neg + fl_pos)
