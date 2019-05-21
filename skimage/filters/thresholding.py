@@ -905,8 +905,10 @@ def threshold_niblack(image, window_size=15, k=0.2):
     The Bradley threshold is a particular case of the Niblack
     one, being equivalent to
 
+    >>> from skimage import data
+    >>> image = data.page()
     >>> q = 1
-    >>> threshold_niblack(image, k=0) * q
+    >>> threshold_image = threshold_niblack(image, k=0) * q
 
     for some value ``q``. By default, Bradley and Roth use ``q=1``.
 
@@ -923,7 +925,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
+    >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
     return m - k * s

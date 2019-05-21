@@ -9,7 +9,7 @@ from .rank import generic
 
 @generic._default_selem
 def median(image, selem=None, out=None, mask=None, shift_x=False,
-           shift_y=False, mode='nearest', cval=0.0, behavior='rank'):
+           shift_y=False, mode='nearest', cval=0.0, behavior='ndimage'):
     """Return local median of an image.
 
     Parameters
@@ -51,7 +51,7 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
 
         .. versionadded:: 0.15
            ``cval`` was added in 0.15 is used when ``behavior='ndimage'``.
-    behavior : {'rank', 'ndimage'}, optional
+    behavior : {'ndimage', 'rank'}, optional
         Either to use the old behavior (i.e., < 0.15) or the new behavior.
         The old behavior will call the :func:`skimage.filters.rank.median`.
         The new behavior will call the :func:`scipy.ndimage.median_filter`.
@@ -59,8 +59,8 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
 
         .. versionadded:: 0.15
            ``behavior`` is introduced in 0.15
-        .. deprecated:: 0.15
-           Default ``behavior`` will change from 'rank' to 'ndimage' in 0.16
+        .. versionchanged:: 0.16
+           Default ``behavior`` has been changed from 'rank' to 'ndimage'
 
     Returns
     -------
@@ -83,8 +83,6 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
 
     """
     if behavior == 'rank':
-        warn("Default 'behavior' will change from 'rank' to 'ndimage' in 0.16",
-             DeprecationWarning)
         if mode != 'nearest' or not np.isclose(cval, 0.0):
             warn("Change 'behavior' to 'ndimage' if you want to use the "
                  "parameters 'mode' or 'cval'. They will be discarded "
