@@ -42,18 +42,29 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
 #    idx_tuples[:, sh1 + 1] = bins - 1
 #    cdef cnp.intp_t[::1] idx_tuple = np.zeros(classes-1, dtype=np.intp)
 
-    py_aux_thresh = np.empty(classes - 1)
-    cdef double[::1] aux_thresh = py_aux_thresh
+    # np.intp is the same dtype as Py_ssize_t. I'm not sure how to
+    # create numpy arrays of Py_ssize_t otherwise.
+    # I think you could alternatively use
+    # cdef cnp.intp[::1] array = ...
+    py_aux_thresh = np.empty(classes - 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] aux_thresh = py_aux_thresh
 
-    cdef cnp.intp_t[::1] idx_tuple = np.zeros(classes+1, dtype=np.intp)
+    cdef Py_ssize_t[::1] idx_tuple = np.zeros(classes+1, dtype=np.intp)
     idx_tuple[classes] = bins - 1
 
-    _find_best_rec(var_btwcls=var_btwcls, min_val=0, max_val=bins-1, idx_tuple=idx_tuple, divisions=classes-1, depth=0, max_sigma=0, aux_thresh=aux_thresh)
+    with nogil:
+        _find_best_rec(var_btwcls=var_btwcls, min_val=0,
+                       max_val=bins-1, idx_tuple=idx_tuple,
+                       divisions=classes-1, depth=0, max_sigma=0,
+                       aux_thresh=aux_thresh)
 
     return py_aux_thresh
 
 
-cdef _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val, cnp.intp_t max_val, cnp.intp_t[::1] idx_tuple, cnp.intp_t divisions, cnp.intp_t depth, double max_sigma, double[::1] aux_thresh):
+cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
+                           cnp.intp_t max_val, Py_ssize_t[::1] idx_tuple,
+                           cnp.intp_t divisions, cnp.intp_t depth,
+                           double max_sigma, Py_ssize_t[::1] aux_thresh) nogil:
     """"""
     cdef cnp.intp_t idx, idd
     cdef double part_sigma
@@ -67,13 +78,15 @@ cdef _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val, cnp.intp_t ma
                 part_sigma += var_btwcls[1 + idx_tuple[idd], idx_tuple[idd+1]]
                 # checking if partial sigma is higher than maximum sigma
                 if max_sigma < part_sigma:
-                    for idd in range(divisions):
-                        aux_thresh[idd] = idx_tuple[idd + 1]
+                    aux_thresh[:idd] = idx_tuple[1:idd + 1]
                     max_sigma = part_sigma
 
     else:
         for idx in range(min_val, max_val-divisions+depth):
             idx_tuple[depth+1] = idx
-            max_sigma = _find_best_rec(var_btwcls=var_btwcls, min_val=idx+1, max_val=max_val, idx_tuple=idx_tuple, divisions=divisions, depth=depth+1, max_sigma=max_sigma, aux_thresh=aux_thresh)
+            max_sigma = _find_best_rec(
+                var_btwcls=var_btwcls, min_val=idx+1, max_val=max_val,
+                idx_tuple=idx_tuple, divisions=divisions, depth=depth+1,
+                max_sigma=max_sigma, aux_thresh=aux_thresh)
 
     return max_sigma
