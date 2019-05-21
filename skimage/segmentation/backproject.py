@@ -1,6 +1,6 @@
 import numpy as np
 from skimage.color import rgb2hsv
-from skimage.exposure import rescale_intensity
+from skimage.exposure import rescale_intensity, histogram
 from scipy.ndimage import convolve
 
 # kernel for final convolution
@@ -82,8 +82,8 @@ def histogram_backprojection(image, template, multichannel=True):
     if isGray:
 
         # find histograms
-        hist1 = np.bincount(image.ravel(), minlength=256)
-        hist2 = np.bincount(template.ravel(), minlength=256)
+        hist1 = histogram(image, nbins=256, source_range='dtype')
+        hist2 = histogram(template, nbins=256, source_range='dtype')
 
         # find their ratio hist2/hist1
         R = np.float64(hist2) / (hist1 + 1)
@@ -107,10 +107,10 @@ def histogram_backprojection(image, template, multichannel=True):
         # find their color 2D histograms
         h1, s1, v1 = np.dsplit(hsv_image, (1, 2))
         hist1, _, _ = np.histogram2d(h1.ravel(), s1.ravel(),
-                                     [180, 256], [[0, 180], [0, 256]])
+                                     bins=[180, 256], range=[[0, 180], [0, 256]])
         h2, s2, v2 = np.dsplit(hsv_template, (1, 2))
         hist2, _, _ = np.histogram2d(h2.ravel(), s2.ravel(),
-                                     [180, 256], [[0, 180], [0, 256]])
+                                     bins=[180, 256], range=[[0, 180], [0, 256]])
 
         # find their ratio hist2/hist1
         R = hist2 / (hist1 + 1)
