@@ -79,7 +79,7 @@ optimal_threshold = filters.threshold_li(camera,
                                          iter_callback=iter_thresholds.append)
 iter_entropies = [_cross_entropy(camera, t) for t in iter_thresholds]
 
-print('Only', len(iter_thresholds), 'examined.')
+print('Only', len(iter_thresholds), 'thresholds examined.')
 
 fig, ax = plt.subplots()
 
@@ -87,5 +87,53 @@ ax.plot(thresholds, entropies, label='all threshold entropies')
 ax.plot(iter_thresholds, iter_entropies, label='optimization path')
 ax.scatter(iter_thresholds, iter_entropies, c='C1')
 ax.legend(loc='upper right')
+
+plt.show()
+
+###############################################################################
+# This is clearly much more efficient than the brute force approach. However,
+# in some images, the gradient of the cross-entropy becomes very shallow, and
+# the optimization can progress much more slowly.
+
+iter_thresholds2 = []
+
+
+def grad(image, t):
+    foreground = image > t
+    mean_fore = np.mean(image[foreground])
+    mean_back = np.mean(image[~foreground])
+    t_next = ((mean_back - mean_fore) /
+              (np.log(mean_back) - np.log(mean_fore)))
+    dt = t_next - t
+    return dt
+
+
+opt_threshold2 = filters.threshold_li(cell, tolerance=0.25,
+                                      iter_callback=iter_thresholds2.append)
+iter_entropies2 = [_cross_entropy(cell, t) for t in iter_thresholds2]
+print(len(iter_thresholds2), 'examined, optimum:', opt_threshold2)
+
+thresholds2 = np.arange(np.min(cell) + 1.5, np.max(cell) - 1.5)
+entropies2 = [_cross_entropy(cell, t) for t in thresholds2]
+gradients = [grad(cell, t) for t in thresholds2]
+
+fig, ax1 = plt.subplots()
+ax1.plot(thresholds2, entropies2)
+ax1.plot(iter_thresholds2, iter_entropies2)
+ax1.scatter(iter_thresholds2, iter_entropies2, c='C1')
+ax1.set_xlabel('threshold')
+ax1.set_ylabel('cross entropy', color='C0')
+ax1.tick_params(axis='y', labelcolor='C0')
+
+ax2 = ax1.twinx()
+ax2.plot(thresholds2, gradients, c='C3')
+ax2.hlines([0], xmin=thresholds2[0], xmax=thresholds2[-1],
+           colors='gray', linestyles='dashed')
+ax2.vlines(np.mean(cell), ymin=np.min(gradients), ymax=np.max(gradients),
+           colors='gray', linestyles='dashed')
+ax2.set_ylabel('$\Delta$(threshold)', color='C3')
+ax2.tick_params(axis='y', labelcolor='C3')
+
+fig.tight_layout()
 
 plt.show()
