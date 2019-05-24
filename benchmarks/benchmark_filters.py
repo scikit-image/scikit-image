@@ -18,7 +18,7 @@ class FiltersSuite:
 class MultiOtsu(object):
     """Benchmarks for MultiOtsu threshold."""
     param_names = ['classes']
-    params = [(3, 5)]
+    params = [3, 5]
 
     def setup(self, *args):
         self.image = data.camera()
