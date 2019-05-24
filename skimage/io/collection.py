@@ -122,7 +122,7 @@ class ImageCollection(object):
 
       x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
 
-    Another use of ``load_func`` would be to convert all images to ``uint8``:
+    Another use of ``load_func`` would be to convert all images to ``uint8``::
 
       def imread_convert(f):
           return imread(f).astype(np.uint8)
