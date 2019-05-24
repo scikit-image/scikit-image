@@ -144,7 +144,7 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = ioImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
     """
 
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
