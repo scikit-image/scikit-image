@@ -73,19 +73,13 @@ def alphanumeric_key(s):
 
 
 class ImageCollection(object):
-
     """Load and manage a collection of image files.
-
-    Note that files are always stored in alphabetical order. Also note that
-    slicing returns a new ImageCollection, *not* a view into the data.
 
     Parameters
     ----------
     load_pattern : str or list
         Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by os.pathsep,
-        e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
-        implementation notes below.
+        relative. Also see implementation notes below.
     conserve_memory : bool, optional
         If True, never keep more than one in memory at a specific
         time.  Otherwise, images will be cached once they are loaded.
@@ -104,6 +98,9 @@ class ImageCollection(object):
 
     Notes
     -----
+    Note that files are always stored in alphabetical order. Also note that
+    slicing returns a new ImageCollection, *not* a view into the data.
+
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
     `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
@@ -125,7 +122,7 @@ class ImageCollection(object):
 
       x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
 
-    Another use of ``load_func`` would be to convert all images to ``uint8``::
+    Another use of ``load_func`` would be to convert all images to ``uint8``:
 
       def imread_convert(f):
           return imread(f).astype(np.uint8)
@@ -147,24 +144,20 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
-
+    >>> ic = ioImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
     """
 
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, str):
-            load_pattern = load_pattern.split(os.pathsep)
-            self._files = []
-            for pattern in load_pattern:
-                self._files.extend(glob(pattern))
-            self._files = sorted(self._files, key=alphanumeric_key)
-            self._numframes = self._find_images()
-        else:
-            self._files = load_pattern
-            self._numframes = len(self._files)
-            self._frame_index = None
+        if not isinstance(load_pattern, str):
+            load_pattern = os.pathsep.join(load_pattern)
+        load_pattern = load_pattern.split(os.pathsep)
+        self._files = []
+        for pattern in load_pattern:
+            self._files.extend(glob(pattern))
+        self._files = sorted(self._files, key=alphanumeric_key)
+        self._numframes = self._find_images()
 
         if conserve_memory:
             memory_slots = 1
@@ -181,7 +174,6 @@ class ImageCollection(object):
             self.load_func = load_func
 
         self.load_func_kwargs = load_func_kwargs
-
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
