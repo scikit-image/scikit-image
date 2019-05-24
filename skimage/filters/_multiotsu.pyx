@@ -23,32 +23,15 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
         number of classes to be segmented
     bins : int
         number of bins used in the histogram
-    aux_thresh : array
-        thresholds to be returned
     """
     cdef Py_ssize_t idd
     cdef Py_ssize_t sh0, sh1
     cdef double part_sigma = 0
     # max_sigma is the maximum variance between classes.
     cdef double max_sigma = 0
-    #cdef Py_ssize_t [:, ::1] _tmp = np.array(list(
-    #    combinations(range(1, bins - 2), classes - 1)))
 
-#    sh0 = _tmp.shape[0]
-#    sh1 = _tmp.shape[1]
-#    cdef cnp.intp_t[:, ::1] idx_tuples = np.zeros((sh0, sh1 + 2),
-#                                                   dtype=np.intp)
-#    idx_tuples[:, 1:sh1 + 1] = _tmp[:]
-#    idx_tuples[:, sh1 + 1] = bins - 1
-#    cdef cnp.intp_t[::1] idx_tuple = np.zeros(classes-1, dtype=np.intp)
-
-    # np.intp is the same dtype as Py_ssize_t. I'm not sure how to
-    # create numpy arrays of Py_ssize_t otherwise.
-    # I think you could alternatively use
-    # cdef cnp.intp[::1] array = ...
     py_aux_thresh = np.empty(classes - 1, dtype=np.intp)
     cdef Py_ssize_t[::1] aux_thresh = py_aux_thresh
-
     cdef Py_ssize_t[::1] idx_tuple = np.zeros(classes+1, dtype=np.intp)
     idx_tuple[classes] = bins - 1
 
@@ -65,7 +48,9 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
                            cnp.intp_t max_val, Py_ssize_t[::1] idx_tuple,
                            cnp.intp_t divisions, cnp.intp_t depth,
                            double max_sigma, Py_ssize_t[::1] aux_thresh) nogil:
-    """"""
+    """
+    Recursive function for finding max_sigma.
+    """
     cdef cnp.intp_t idx, idd
     cdef double part_sigma
 
