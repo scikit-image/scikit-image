@@ -136,6 +136,7 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
 
     # ignore the channels if present
     ndim = reference.ndim if not multichannel else reference.ndim - 1
+    assert ndim > 0, 'input images must have at least 1 spatial dimension.'
 
     min_dim = min(reference.shape[:ndim])
     nlevels = int(np.floor(np.log2(min_dim) - np.log2(minimum_size)))
