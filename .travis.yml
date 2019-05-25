@@ -44,7 +44,7 @@ matrix:
   include:
     - os: linux
       python: 3.5
-      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1
+      env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1 PYTHONOPTIMIZE=2
     - os: linux
       python: 3.5
       env: PYTHONOPTIMIZE=2
