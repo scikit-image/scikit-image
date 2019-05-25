@@ -98,8 +98,12 @@ class ImageCollection(object):
 
     Notes
     -----
-    Note that files are always stored in alphabetical order. Also note that
-    slicing returns a new ImageCollection, *not* a view into the data.
+    Note that files are always stored in alphanumerical order. Also note
+    that slicing returns a new ImageCollection, *not* a view into the data.
+
+    If multiple patterns are entered as a single string, they should be
+    separated by os.pathsep, e.g. '/tmp/work/*.png:/tmp/other/*.jpg' in *nix,
+    or '/tmp/work/*.png;/tmp/other/*.jpg' in Windows.
 
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
@@ -145,13 +149,15 @@ class ImageCollection(object):
     (200, 200)
 
     >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+
+    >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
     """
 
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
         try:
-            if not isinstance(load_pattern, str):
+            if isinstance(load_pattern, (list, tuple)):
                 load_pattern = os.pathsep.join(load_pattern)
             load_pattern = load_pattern.split(os.pathsep)
             self._files = []
