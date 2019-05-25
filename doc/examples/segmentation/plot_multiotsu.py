@@ -35,7 +35,7 @@ image = data.camera()
 # three classes.
 thresholds = threshold_multiotsu(image)
 
-# Using the values on thresh, we generate the three regions.
+# Using the threshold values, we generate the three regions.
 regions = np.digitize(image, bins=thresholds)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 3.5))
