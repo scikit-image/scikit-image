@@ -40,7 +40,8 @@ References
        :DOI:`10.1007/978-3-319-16811-1_40`
 """
 
-from skimage.data import page
+from skimage import data
+from skimage import color
 from skimage.filters import meijering, sato, frangi, hessian
 import matplotlib.pyplot as plt
 
@@ -50,7 +51,7 @@ def identity(image, **kwargs):
     return image
 
 
-image = page()
+image = color.rgb2gray(data.retina())[300:700, 700:900]
 cmap = plt.cm.gray
 
 kwargs = {}
