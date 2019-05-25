@@ -8,28 +8,31 @@ from ..measure import compare_nmi
 __all__ = ['register_affine']
 
 
-def _parameter_vector_to_matrix(parameter_vector, N):
+def _parameter_vector_to_matrix(parameter_vector, ndim):
     """
     Converts the optimisation parameters to a 3x3 transformation matrix
 
     The optimisation paramters are known as the parameter_vector and are
-    composed of the first 2 rows of the transformation matrix, as that is
-    all that is used in an affine transformation.
+    composed of the first ``ndim`` rows of the transformation matrix, as
+    that is all that is used in an affine transformation.
 
     Parameters
     ----------
-    parameter_vector : (N*(N+1)) array
-        Input array giving the argument of the minimum function to
-        optimise against
+    parameter_vector : (ndim*(ndim+1)) array
+        Input array giving the argument for the minimize function to
+        optimise against.
+    ndim : int
+        The dimensionality of the space being transformed.
 
     Returns
     -------
-    matrix : (N+1, N+1) array
-        A transformation matrix used to obtain a new image
+    matrix : (ndim+1, ndim+1) array
+        A transformation matrix used to affine-map coordinates in an
+        ``ndim``-dimensional space.
     """
-
-    return np.concatenate(
-        (np.reshape(parameter_vector, (N, N + 1)), [[0] * N + [1]]), axis=0)
+    top_matrix = np.reshape(parameter_vector, (ndim, ndim+1))
+    bottom_row = np.array([[0] * ndim + [1]])
+    return np.concatenate((top_matrix, bottom_row), axis=0)
 
 
 def _matrix_to_parameter_vector(matrix):
@@ -90,8 +93,8 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
         returned matrix aligns it with the reference.
     cost : function, optional
         A cost function which takes two images and returns a score which is
-        at a minimum when images are aligned. Uses the mean square error as
-        default.
+        at a minimum when images are aligned. Uses the normalized mutual
+        information by default.
     minimum_size : integer, optional
         The smallest size for an image along any dimension. This value
         determines the size of the image pyramid used. Choosing a smaller value

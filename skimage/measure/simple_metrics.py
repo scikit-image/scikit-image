@@ -225,8 +225,7 @@ def compare_nmi(im_true, im_test, *, bins=100):
                          'Got {}D for `im_true` and {}D for `im_test`.'
                          .format(im_true.ndim, im_test.ndim))
     if im_true.shape != im_test.shape:
-        max_shape = [max(s1, s2)
-                     for s1, s2 in zip(im_true.shape, im_test.shape)]
+        max_shape = np.maximum(im_true.shape, im_test.shape)
         padded_true = _pad_to(im_true, max_shape)
         padded_test = _pad_to(im_test, max_shape)
     else:
