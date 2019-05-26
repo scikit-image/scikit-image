@@ -4,15 +4,8 @@ import skimage.io as io
 from skimage import data_dir
 from skimage._shared import testing
 
-
-fits_available = True
-
-try:
+if testing.pytest.importorskip('astropy'):
     from astropy.io import fits
-except ImportError:
-    fits_available = False
-
-if fits_available:
     import skimage.io._plugins.fits_plugin as fplug
 
 
@@ -23,16 +16,13 @@ def test_fits_plugin_import():
     try:
         io.use_plugin('fits')
     except ImportError:
-        assert not fits_available
-    else:
-        assert fits_available
+        raise()
 
 
 def teardown():
     io.reset_plugins()
 
 
-@testing.skipif(not fits_available, reason="fits not installed")
 def test_imread_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -40,7 +30,6 @@ def test_imread_MEF():
     assert np.all(img == fits.getdata(testfile, 1))
 
 
-@testing.skipif(not fits_available, reason="fits not available")
 def test_imread_simple():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'simple.fits')
@@ -48,7 +37,6 @@ def test_imread_simple():
     assert np.all(img == fits.getdata(testfile, 0))
 
 
-@testing.skipif(not fits_available, reason="fits not available")
 def test_imread_collection_single_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -59,7 +47,6 @@ def test_imread_collection_single_MEF():
     assert _same_ImageCollection(ic1, ic2)
 
 
-@testing.skipif(not fits_available, reason="fits not available")
 def test_imread_collection_MEF_and_simple():
     io.use_plugin('fits')
     testfile1 = os.path.join(data_dir, 'multi.fits')
