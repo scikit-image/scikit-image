@@ -4,6 +4,7 @@
 import os
 from glob import glob
 import re
+import typing
 from copy import copy
 
 import numpy as np
@@ -70,6 +71,17 @@ def alphanumeric_key(s):
     """
     k = [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
     return k
+
+
+def _is_multipattern(load_pattern):
+    """Helping function. Returns True if load_pattern contains a tuple, list,
+    or a string separated with os.pathsep."""
+    pattern = ((isinstance(load_pattern, str) and os.pathsep in load_pattern)
+               or (not isinstance(load_pattern, str) and
+                   isinstance(load_pattern, typing.Sequence) and
+                   all(isinstance(pattern, str) for pattern in load_pattern))
+               )
+    return pattern
 
 
 class ImageCollection(object):
@@ -156,19 +168,20 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        try:
-            if isinstance(load_pattern, (list, tuple)):
-                load_pattern = os.pathsep.join(load_pattern)
-            load_pattern = load_pattern.split(os.pathsep)
-            self._files = []
+        self._files = []
+        if _is_multipattern(load_pattern):
+            if isinstance(load_pattern, str):
+                load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
             self._numframes = self._find_images()
-        except TypeError:
-            self._files = load_pattern
-            self._numframes = len(self._files)
-            self._frame_index = None
+        elif isinstance(load_pattern, str):
+            self._files.extend(glob(pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
+            self._numframes = self._find_images()
+        else:
+            raise TypeError('Invalid pattern as input.')
 
         if conserve_memory:
             memory_slots = 1
