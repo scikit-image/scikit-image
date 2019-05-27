@@ -18,11 +18,16 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
     Parameters
     ----------
     var_btwcls : 2-d array
-        array of variance between classes
+        Array of variance between classes.
     classes : int
-        number of classes to be segmented
+        Number of classes to be segmented.
     bins : int
-        number of bins used in the histogram
+        Number of bins used in the histogram.
+
+    Returns
+    -------
+    py_aux_thresh : array
+        Thresholds returned by the multi-Otsu algorithm.
     """
     cdef Py_ssize_t idd
     cdef Py_ssize_t sh0, sh1
@@ -49,7 +54,32 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
                            cnp.intp_t divisions, cnp.intp_t depth,
                            double max_sigma, Py_ssize_t[::1] aux_thresh) nogil:
     """
-    Recursive function for finding max_sigma.
+    Recursive function for calculating max_sigma.
+
+    Parameters
+    ----------
+    var_btwcls : 2-d array
+        Array of variance between classes.
+    min_val : int
+        Minimum value of the checked intervals.
+    max_val : int
+        Maximum value of the checked intervals.
+    idx_tuple : array
+        number of bins used in the histogram
+    divisions : int
+        Number of divisions required to generate the desired classes.
+    depth : int
+        Controls the iterations the algorithm had, expanding the interval
+        when _find_best_rec() is called.
+    max_sigma : float
+        Maximum variance between classes.
+    aux_thresh : array
+        Values for multi-Otsu threshold.
+
+    Returns
+    -------
+    max_sigma : float
+        Maximum variance between classes.
     """
     cdef cnp.intp_t idx, idd
     cdef double part_sigma
@@ -65,7 +95,6 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
                 if max_sigma < part_sigma:
                     aux_thresh[:idd] = idx_tuple[1:idd + 1]
                     max_sigma = part_sigma
-
     else:
         for idx in range(min_val, max_val-divisions+depth):
             idx_tuple[depth+1] = idx
