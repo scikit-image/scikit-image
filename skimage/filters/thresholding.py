@@ -1064,6 +1064,17 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     between the desired classes. Based on the Multi-Otsu approach by
     Liao, Chen and Chung.
 
+    This implementation relies on a Cython function whose complexity
+    is O(combinations * variance_calc), and depends on the number of
+    bins and classes:
+
+    >>> import math
+    >>> combinations = nbins**(classes-1)/math.factorial(classes-1)
+    >>> variance_calc = classes + 1
+
+    Then, the required calculation time grows exponentially according
+    to the number of classes desired.
+
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
