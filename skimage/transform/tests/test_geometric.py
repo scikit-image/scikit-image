@@ -381,6 +381,25 @@ def test_geometric_tform():
     with testing.raises(NotImplementedError):
         tform.__add__(0)
 
+    # See gh-3926 for discussion details
+    for i in range(20):
+        # Generate random Homography
+        H = np.random.rand(3, 3) * 100
+        H[2, H[2] == 0] += np.finfo(float).eps
+        H /= H[2, 2]
+
+        # Craft some src coords
+        src = np.array([
+            [(H[2, 1] + 1) / -H[2, 0], 1],
+            [1, (H[2, 0] + 1) / -H[2, 1]],
+            [1, 1],
+        ])
+        # Prior to gh-3926, under the above circumstances,
+        # destination coordinates could be returned with nan/inf values.
+        tform = ProjectiveTransform(H)  # Construct the transform
+        dst = tform(src)  # Obtain the dst coords
+        # Ensure dst coords are finite numeric values
+        assert(np.isfinite(dst).all())
 
 def test_invalid_input():
     with testing.raises(ValueError):
@@ -438,3 +457,16 @@ def test_degenerate():
     tform = ProjectiveTransform()
     tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
+
+    # See gh-3926 for discussion details
+    tform = ProjectiveTransform()
+    for i in range(20):
+        # Some random coordinates
+        src = np.random.rand(4, 2) * 100
+        dst = np.random.rand(4, 2) * 100
+
+        # Degenerate the case by arranging points on a single line
+        src[:, 1] = np.random.rand()
+        # Prior to gh-3926, under the above circumstances,
+        # a transform could be returned with nan values.
+        assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
