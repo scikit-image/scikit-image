@@ -177,7 +177,7 @@ class ImageCollection(object):
             self._files = sorted(self._files, key=alphanumeric_key)
             self._numframes = self._find_images()
         elif isinstance(load_pattern, str):
-            self._files.extend(glob(pattern))
+            self._files.extend(glob(load_pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
             self._numframes = self._find_images()
         else:
