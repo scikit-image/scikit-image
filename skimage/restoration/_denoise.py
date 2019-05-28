@@ -222,7 +222,8 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
-    _denoise_tv_bregman(image, weight, max_iter, eps, isotropic, out)
+    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+                        isotropic, out)
     return np.squeeze(out[1:-1, 1:-1])
 
 

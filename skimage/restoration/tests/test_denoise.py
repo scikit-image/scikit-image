@@ -202,6 +202,18 @@ def test_denoise_bilateral_types(dtype):
                                         sigma_spatial=10, multichannel=False)
 
 
+@pytest.mark.parametrize('dtype', [np.float32, np.double])
+def test_denoise_bregman_types(dtype):
+    img = checkerboard_gray.copy()[:50, :50]
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1).astype(dtype)
+
+    # check that we can process multiple float types
+    out = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                        sigma_spatial=10, multichannel=False)
+
+
 def test_denoise_bilateral_zeros():
     img = np.zeros((10, 10))
     assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))

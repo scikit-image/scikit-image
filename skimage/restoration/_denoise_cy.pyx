@@ -96,7 +96,7 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
 
 
 def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
-                        int max_iter, np_floats eps,
+                        int max_iter, double eps,
                         char isotropic, np_floats[:, :, ::1] out):
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -119,7 +119,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         np_floats ux, uy, uprev, unew, bxx, byy, dxx, dyy, s, tx, ty
         int i = 0
         np_floats lam = 2 * weight
-        np_floats rmse = DBL_MAX
+        double rmse = DBL_MAX
         np_floats norm = (weight + 4 * lam)
 
         Py_ssize_t out_rows, out_cols
@@ -169,7 +169,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
 
                     # update root mean square error
                     tx = unew - uprev
-                    rmse += tx * tx
+                    rmse += <double>(tx * tx)
 
                     bxx = bx[r, c, k]
                     byy = by[r, c, k]
