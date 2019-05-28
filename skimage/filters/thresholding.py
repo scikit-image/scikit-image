@@ -1065,15 +1065,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     Liao, Chen and Chung.
 
     This implementation relies on a Cython function whose complexity
-    is O(combinations * variance_calc), and depends on the number of
-    bins and classes:
-
-    >>> import math
-    >>> combinations = nbins**(classes-1)/math.factorial(classes-1)
-    >>> variance_calc = classes + 1
-
-    Then, the required calculation time grows exponentially according
-    to the number of classes desired.
+    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is the number of histogram bins and :math:`C` is the number of
+    classes desired.
 
     References
     ----------
