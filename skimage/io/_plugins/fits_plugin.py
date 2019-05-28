@@ -1,6 +1,7 @@
 __all__ = ['imread', 'imread_collection']
 
 import skimage.io as io
+from warnings import warn
 
 try:
     from astropy.io import fits as pyfits
@@ -22,8 +23,8 @@ def imread(fname, dtype=None):
     fname : string
         Image file name, e.g. ``test.fits``.
     dtype : dtype, optional
-        For FITS, this argument is ignored because Stefan is planning on
-        removing the dtype argument from imread anyway.
+        Was always silently ignored.
+        Will be removed from version 0.17.
 
     Returns
     -------
@@ -43,6 +44,11 @@ def imread(fname, dtype=None):
     lazy loading) to get all the extensions at once.
 
     """
+    if 'dtype' is not None:
+        warn('The dtype argument was always silently ignored. It will be '
+             'removed from scikit-image version 0.17. To avoid this '
+             'warning, do not specify it in your function call.',
+             UserWarning, stacklevel=2)
 
     hdulist = pyfits.open(fname)
 
