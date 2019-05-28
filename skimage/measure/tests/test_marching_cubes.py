@@ -156,3 +156,13 @@ def test_masked_marching_cubes():
     area = mesh_surface_area(ver, faces)
 
     np.testing.assert_allclose(area, 299.56878662109375, rtol=.01)
+
+
+def test_masked_marching_cubes_empty():
+
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.array([])
+    ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
+    ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
+    area = mesh_surface_area(ver, faces)
+    print(area)

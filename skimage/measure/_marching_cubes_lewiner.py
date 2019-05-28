@@ -154,6 +154,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     # Apply algorithm
     # Check if a mask array is passed
     if mask is not None:
+        assert mask.shape == volume.shape, 'volume and mask must have the same shape.'
         func = _marching_cubes_lewiner_cy.marching_cubes_masked
         vertices, faces, normals, values = func(volume, level, L, step_size, use_classic, mask.astype('int32'))
     else:
