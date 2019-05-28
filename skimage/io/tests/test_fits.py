@@ -4,9 +4,9 @@ import skimage.io as io
 from skimage import data_dir
 from skimage._shared import testing
 
-if testing.pytest.importorskip('astropy'):
-    from astropy.io import fits
-    import skimage.io._plugins.fits_plugin as fplug
+testing.pytest.importorskip('astropy')
+from astropy.io import fits
+import skimage.io._plugins.fits_plugin as fplug
 
 
 def test_fits_plugin_import():
