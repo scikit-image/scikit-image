@@ -190,7 +190,7 @@ def test_denoise_bilateral_2d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
-@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.double])
+@pytest.mark.parametrize('dtype', [np.float32, np.double])
 def test_denoise_bilateral_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
