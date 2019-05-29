@@ -4,15 +4,12 @@ import skimage.io as io
 from warnings import warn
 
 try:
-    from astropy.io import fits as pyfits
+    from astropy.io import fits
 except ImportError:
-    try:
-        import pyfits
-    except ImportError:
-        raise ImportError(
-            "PyFITS could not be found. Please refer to\n"
-            "http://www.stsci.edu/resources/software_hardware/pyfits\n"
-            "for further instructions.")
+    raise ImportError(
+        "Astropy could not be found. It is needed to read FITS files.\n"
+        "Please refer to http://www.astropy.org for installation\n"
+        "instructions.")
 
 
 def imread(fname, dtype=None):
@@ -50,14 +47,14 @@ def imread(fname, dtype=None):
              'warning, do not specify it in your function call.',
              UserWarning, stacklevel=2)
 
-    hdulist = pyfits.open(fname)
+    hdulist = fits.open(fname)
 
     # Iterate over FITS image extensions, ignoring any other extension types
     # such as binary tables, and get the first image data array:
     img_array = None
     for hdu in hdulist:
-        if isinstance(hdu, pyfits.ImageHDU) or \
-           isinstance(hdu, pyfits.PrimaryHDU):
+        if isinstance(hdu, fits.ImageHDU) or \
+           isinstance(hdu, fits.PrimaryHDU):
             if hdu.data is not None:
                 img_array = hdu.data
                 break
@@ -98,16 +95,16 @@ def imread_collection(load_pattern, conserve_memory=True):
     # files and finding the image extensions in each one:
     ext_list = []
     for filename in load_pattern:
-        hdulist = pyfits.open(filename)
+        hdulist = fits.open(filename)
         for n, hdu in zip(range(len(hdulist)), hdulist):
-            if isinstance(hdu, pyfits.ImageHDU) or \
-               isinstance(hdu, pyfits.PrimaryHDU):
+            if isinstance(hdu, fits.ImageHDU) or \
+               isinstance(hdu, fits.PrimaryHDU):
                 # Ignore (primary) header units with no data (use '.size'
                 # rather than '.data' to avoid actually loading the image):
                 try:
+                    data_size = hdu.size  # size is int in Astropy 3.1.2
+                except TypeError:
                     data_size = hdu.size()
-                except TypeError:  # (size changed to int in PyFITS 3.1)
-                    data_size = hdu.size
                 if data_size > 0:
                     ext_list.append((filename, n))
         hdulist.close()
@@ -144,7 +141,7 @@ def FITSFactory(image_ext):
     if type(filename) is not str or type(extnum) is not int:
         raise ValueError("Expected a (filename, extension) tuple")
 
-    hdulist = pyfits.open(filename)
+    hdulist = fits.open(filename)
 
     data = hdulist[extnum].data
 
