@@ -50,7 +50,7 @@ jobs:
   - bash: |
       set -x
 
-      npm install -g azure-cli
+      pip install azure-cli
 
       # Update pip
       python -m pip install --retries 3 -U pip setuptools
@@ -127,7 +127,7 @@ jobs:
       make html
 
       # Try to upload the artifacts
-      npm install -g azure-cli
+      pip install azure-cli
 
       az artifacts universal publish \
         --organization "https://dev.azure.com/scikit-image/" \
