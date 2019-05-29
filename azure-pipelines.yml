@@ -72,13 +72,16 @@ jobs:
 
   - task: AzureCLI@1
     inputs:
-      azureSubscription:
+      azureSubscription: scikit-image
       scriptLocation: inlineScript
       inlineScript: |
         pip install azure-cli
+
+        az login --identity
+
         az extension add --name azure-devops
 
-        echo "test" > sample.txt
+        touch sample.txt
 
         az artifacts universal publish \
             --organization "https://dev.azure.com/scikit-image/" \
