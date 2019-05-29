@@ -1,9 +1,11 @@
-Announcement: scikit-image 0.14.3
+Announcement: scikit-image 0.14.4
 =================================
 
 As a reminder, 0.14.x is the final version of scikit-image with support for
 Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
 are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
+The 0.14.3 release was skipped for a last minute bugfix.
 
 This is a bugfix release, and contains the following changes from v0.14.2:
 
@@ -19,7 +21,7 @@ Bug Fixes
 - Fix potential use of NULL pointer (#3696)
 - pypi: explicitly exclude Python 3.1, 3.2, and 3.3 (#3726)
 - Reduce default tolerance in threshold_li (#3622) (#3781)
-- Denoising functions now accept float32 images (#3449) (#3486) (#3880)
+- Denoising functions now accept float32 images (#3449) (#3486) (#3880) (#3936)
 
 Other Pull Requests
 -------------------
@@ -41,6 +43,7 @@ Other Pull Requests
 
 12 authors added to this release [alphabetical by first name]
 -------------------------------------------------------------
+- Alexandre de Siqueira
 - Andrew Murray
 - Christoph Gohlke
 - Egor Panfilov
