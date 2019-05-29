@@ -8,32 +8,32 @@ jobs:
   strategy:
     maxParallel: 10
     matrix:
-      Python35-x64:
-        PYTHON_VERSION: '3.5'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-      Python36:
-        PYTHON_VERSION: '3.6'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
+#      Python35-x64:
+#        PYTHON_VERSION: '3.5'
+#        ARCH: 'x64'
+#        PIP_FLAGS: ''
+#      Python36:
+#        PYTHON_VERSION: '3.6'
+#        ARCH: 'x86'
+#        PIP_FLAGS: ''
       Python36-x64:
         PYTHON_VERSION: '3.6'
         ARCH: 'x64'
         PIP_FLAGS: ''
         BUILD_DOCS: 'true'
-      Python37:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x86'
-        PIP_FLAGS: ''
-      Python37-x64:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x64'
-        PIP_FLAGS: ''
-        TEST_EXAMPLES: 'true'
-      Python37-x64-pre:
-        PYTHON_VERSION: '3.7'
-        ARCH: 'x64'
-        PIP_FLAGS: '--pre'
+#      Python37:
+#        PYTHON_VERSION: '3.7'
+#        ARCH: 'x86'
+#        PIP_FLAGS: ''
+#      Python37-x64:
+#        PYTHON_VERSION: '3.7'
+#        ARCH: 'x64'
+#        PIP_FLAGS: ''
+#        TEST_EXAMPLES: 'true'
+#      Python37-x64-pre:
+#        PYTHON_VERSION: '3.7'
+#        ARCH: 'x64'
+#        PIP_FLAGS: '--pre'
   continueOnError: false
   timeoutInMinutes: 60
 
@@ -123,6 +123,15 @@ jobs:
       # Build the documentation
       export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
       make html
+
+      # Try to upload the artifacts
+      az artifacts universal publish \
+        --organization "https://dev.azure.com/scikit-image/" \
+        --feed "default_feed" \
+        --name "scikit-image_docs" \
+        --version "0.0.0" \
+        --description "My description" \
+        --path ./doc/build
     condition: eq(variables['BUILD_DOCS'], 'true')
     displayName: 'Documentation testing'
 
