@@ -52,6 +52,18 @@ jobs:
 
       pip install azure-cli
       az extension add --name azure-devops
+      az login --identity
+
+      echo "test" > sample.txt
+
+      az artifacts universal publish \
+              --organization "https://dev.azure.com/scikit-image/" \
+              --feed "default_feed" \
+              --name "scikit-image_docs" \
+              --version "0.0.0" \
+              --description "My description" \
+              --path ./sample.txt
+
 
       # Update pip
       python -m pip install --retries 3 -U pip setuptools
@@ -68,98 +80,98 @@ jobs:
       pip list
     displayName: 'Pre-installation'
 
-  - bash: |
-      set -x
-
-      # Get stdint headers needed by tifffile.c
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
-
-      # Compile the package and build the wheel
-      python setup.py bdist_wheel 
-
-      # Install the generated wheel package
-      ls dist
-      pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
-    displayName: 'Installation'
-
 #  - bash: |
 #      set -x
 #
-#      # Install the test dependencies
-#      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
+#      # Get stdint headers needed by tifffile.c
+#      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
+#      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
+#
+#      # Compile the package and build the wheel
+#      python setup.py bdist_wheel
+#
+#      # Install the generated wheel package
+#      ls dist
+#      pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
+#    displayName: 'Installation'
+#
+##  - bash: |
+##      set -x
+##
+##      # Install the test dependencies
+##      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
+##      pip list
+##
+##      # Set non-UI Matplotlib backend
+##      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+##      echo "backend : Agg" > matplotlibrc
+##    displayName: 'Pre-testing'
+#
+##  - bash: |
+##      set -x
+##
+##      # Change the working directory in order to run the tests
+##      # on the installed version of skimage
+##      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+##
+##      # Show the info about the installed scikit-image
+##      python -c "import skimage; print(skimage.__path__)"
+##
+##      # Force matplotlib to use the prepared config
+##      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+##
+##      # Run unit tests with pytest
+##      # We don't test docstring examples (--doctest-modules) on
+##      # Windows due to inconsistent ndarray formatting in `numpy`.
+##      # For more details, see https://github.com/numpy/numpy/issues/13468
+##      export TEST_ARGS="-v --cov=skimage"
+##      pytest ${TEST_ARGS} --pyargs skimage
+##    displayName: 'Package testing'
+#
+#  - bash: |
+#      set -x
+#
+#      # Install the doc dependencies
+#      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
 #      pip list
 #
-#      # Set non-UI Matplotlib backend
-#      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
-#      echo "backend : Agg" > matplotlibrc
-#    displayName: 'Pre-testing'
-
+#      # Build the documentation
+#      export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
+#      make html
+#
+#      # Try to upload the artifacts
+#      pip install azure-cli
+#      az extension add --name azure-devops
+#
+#      az artifacts universal publish \
+#        --organization "https://dev.azure.com/scikit-image/" \
+#        --feed "default_feed" \
+#        --name "scikit-image_docs" \
+#        --version "0.0.0" \
+#        --description "My description" \
+#        --path ./doc/build
+#    condition: eq(variables['BUILD_DOCS'], 'true')
+#    displayName: 'Documentation testing'
+#
 #  - bash: |
 #      set -x
 #
-#      # Change the working directory in order to run the tests
-#      # on the installed version of skimage
-#      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
-#
-#      # Show the info about the installed scikit-image
-#      python -c "import skimage; print(skimage.__path__)"
+#      # Install the doc dependencies
+#      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
+#      pip list
 #
 #      # Force matplotlib to use the prepared config
 #      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 #
-#      # Run unit tests with pytest
-#      # We don't test docstring examples (--doctest-modules) on
-#      # Windows due to inconsistent ndarray formatting in `numpy`.
-#      # For more details, see https://github.com/numpy/numpy/issues/13468
-#      export TEST_ARGS="-v --cov=skimage"
-#      pytest ${TEST_ARGS} --pyargs skimage
-#    displayName: 'Package testing'
-
-  - bash: |
-      set -x
-
-      # Install the doc dependencies
-      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
-      pip list
-
-      # Build the documentation
-      export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-      make html
-
-      # Try to upload the artifacts
-      pip install azure-cli
-      az extension add --name azure-devops
-
-      az artifacts universal publish \
-        --organization "https://dev.azure.com/scikit-image/" \
-        --feed "default_feed" \
-        --name "scikit-image_docs" \
-        --version "0.0.0" \
-        --description "My description" \
-        --path ./doc/build
-    condition: eq(variables['BUILD_DOCS'], 'true')
-    displayName: 'Documentation testing'
-
-  - bash: |
-      set -x
-
-      # Install the doc dependencies
-      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
-      pip list
-
-      # Force matplotlib to use the prepared config
-      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
-
-      # Run example applications
-      for f in doc/examples/*/*.py; do
-        python "${f}"
-        if [ $? -ne 0 ]; then
-          exit 1
-        fi
-      done
-    condition: eq(variables['TEST_EXAMPLES'], 'true')
-    displayName: 'Gallery testing'
+#      # Run example applications
+#      for f in doc/examples/*/*.py; do
+#        python "${f}"
+#        if [ $? -ne 0 ]; then
+#          exit 1
+#        fi
+#      done
+#    condition: eq(variables['TEST_EXAMPLES'], 'true')
+#    displayName: 'Gallery testing'
 
 #  - bash: |
 #      # -- Publish the .whl artifacts
