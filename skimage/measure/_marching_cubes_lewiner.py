@@ -60,8 +60,9 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     mask : (M, N, P) array
         Boolean array. The marching cube algorithm will be computed only on
         True elements. This will save computational time when interfaces
-        are located within certain region of the volume M, N, P and also
-        allow to compute finite surfaces.
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
 
     Returns
     -------
@@ -151,15 +152,16 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     # Get LutProvider class (reuse if possible)
     L = _get_mc_luts()
 
-    # Apply algorithm
     # Check if a mask array is passed
     if mask is not None:
-        assert mask.shape == volume.shape, 'volume and mask must have the same shape.'
-        func = _marching_cubes_lewiner_cy.marching_cubes_masked
-        vertices, faces, normals, values = func(volume, level, L, step_size, use_classic, mask.astype('int32'))
-    else:
-        func = _marching_cubes_lewiner_cy.marching_cubes
-        vertices, faces, normals, values = func(volume, level, L, step_size, use_classic)
+        print(mask.shape, volume.shape)
+        if not mask.shape == volume.shape:
+            raise AttributeError('volume and mask must have the same shape.')
+        mask = mask.astype('int32')
+
+    # Apply algorithm
+    func = _marching_cubes_lewiner_cy.marching_cubes
+    vertices, faces, normals, values = func(volume, level, L, step_size, use_classic, mask)
 
     if not len(vertices):
         raise RuntimeError('No surface found at the given iso value.')

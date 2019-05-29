@@ -929,83 +929,15 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-
-def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0):
-    """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
-    This is the main entry to apply marching cubes.
-    Returns (vertices, faces, normals, values)
-    """
-
-    # Get dimemsnions
-    cdef int Nx, Ny, Nz
-    Nx, Ny, Nz = im.shape[2], im.shape[1], im.shape[0]
-
-    # Create cell to use throughout
-    cdef Cell cell = Cell(luts, Nx, Ny, Nz)
-
-    # Typedef variables
-    cdef int x, y, z, x_st, y_st, z_st
-    cdef int nt
-    cdef int case, config, subconfig
-    # Unfortunately specifying a step in range() significantly degrades
-    # performance. Therefore we use a while loop.
-    # we have:  max_x = Nx_bound + st + st - 1
-    #       ->  Nx_bound = max_allowable_x + 1 - 2 * st
-    #       ->  Nx_bound = Nx - 2 * st
-    assert st > 0
-    cdef int Nx_bound, Ny_bound, Nz_bound
-    Nx_bound, Ny_bound, Nz_bound = Nx - 2 * st, Ny - 2 * st, Nz - 2 * st  # precalculated index range
-
-    z = -st
-    while z < Nz_bound:
-        z += st
-        z_st = z + st
-
-        cell.new_z_value()  # Indicate that we enter a new layer
-
-        y = -st
-        while y < Ny_bound:
-            y += st
-            y_st = y + st
-
-            x = -st
-            while x < Nx_bound:
-                x += st
-                x_st = x + st
-                # Initialize cell
-                cell.set_cube(isovalue, x, y, z, st,
-                    im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
-                    im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
-
-                # Do classic!
-                if classic:
-                    # Determine number of vertices
-                    nt = 0
-                    while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                        nt += 1
-                    # Add triangles
-                    if nt > 0:
-                        cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                else:
-                    # Get case, if non-nul, enter the big switch
-                    case = luts.CASES.get2(cell.index, 0)
-                    if case > 0:
-                        config = luts.CASES.get2(cell.index, 1)
-                        the_big_switch(luts, cell, case, config)
-
-    # Done
-    return cell.get_vertices(), cell.get_faces(), cell.get_normals(), cell.get_values()
-
-
-def marching_cubes_masked(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0,
+def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0,
                    int [:, :, :] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
+    This is the main entry to compute marching cubes.
     Masked version of marching cubes. This function will check a masking array (same size as im) to decide if the
     algorithm must be computed for a given voxel. This adds a small overhead that rapidly gets compensated by the
     fewer computed cubes
     Returns (vertices, faces, normals, values)
     """
-
     # Get dimemsnions
     cdef int Nx, Ny, Nz
     Nx, Ny, Nz = im.shape[2], im.shape[1], im.shape[0]
@@ -1034,7 +966,6 @@ def marching_cubes_masked(float [:, :, :] im not None, double isovalue, LutProvi
         z_st = z + st
 
         cell.new_z_value()  # Indicate that we enter a new layer
-
         y = -st
         while y < Ny_bound:
             y += st
@@ -1044,7 +975,29 @@ def marching_cubes_masked(float [:, :, :] im not None, double isovalue, LutProvi
             while x < Nx_bound:
                 x += st
                 x_st = x + st
-                if mask[z_st, y_st, x_st]:
+                if mask is None:
+                    # Initialize cell
+                    cell.set_cube(isovalue, x, y, z, st,
+                        im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
+                        im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
+
+                    # Do classic!
+                    if classic:
+                        # Determine number of vertices
+                        nt = 0
+                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
+                            nt += 1
+                        # Add triangles
+                        if nt > 0:
+                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
+                    else:
+                        # Get case, if non-nul, enter the big switch
+                        case = luts.CASES.get2(cell.index, 0)
+                        if case > 0:
+                            config = luts.CASES.get2(cell.index, 1)
+                            the_big_switch(luts, cell, case, config)
+
+                elif mask[z_st, y_st, x_st]:
                     # Initialize cell
                     cell.set_cube(isovalue, x, y, z, st,
                         im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],

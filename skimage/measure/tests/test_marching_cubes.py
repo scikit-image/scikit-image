@@ -5,7 +5,7 @@ from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
 from skimage._shared._warnings import expected_warnings
-
+import pytest
 
 def test_marching_cubes_isotropic():
     ellipsoid_isotropic = ellipsoid(6, 10, 16, levelset=True)
@@ -46,11 +46,12 @@ def test_marching_cubes_anisotropic():
     assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test marching cube with mask
-    verts, faces = marching_cubes_lewiner(
-        ellipsoid_anisotropic, 0., spacing=spacing,
-        mask=np.array([]))[:2]
-    surf_calc = mesh_surface_area(verts, faces)
-    assert surf > surf_calc and surf_calc > surf * 0.985
+    with pytest.raises(AttributeError):
+        verts, faces = marching_cubes_lewiner(
+            ellipsoid_anisotropic, 0., spacing=spacing,
+            mask=np.array([]))[:2]
+        surf_calc = mesh_surface_area(verts, faces)
+        assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test spacing together with allow_degenerate=False
     marching_cubes_lewiner(ellipsoid_anisotropic, 0, spacing=spacing,
@@ -159,10 +160,10 @@ def test_masked_marching_cubes():
 
 
 def test_masked_marching_cubes_empty():
+    with pytest.raises(AttributeError):
+        ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+        mask = np.array([])
+        ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
+        ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
+        area = mesh_surface_area(ver, faces)
 
-    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
-    mask = np.array([])
-    ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
-    ver, faces, _, _ = marching_cubes_lewiner(ellipsoid_scalar, 0, mask=mask)
-    area = mesh_surface_area(ver, faces)
-    print(area)
