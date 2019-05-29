@@ -51,6 +51,7 @@ jobs:
       set -x
 
       pip install azure-cli
+      az extension add --name azure-devops
 
       # Update pip
       python -m pip install --retries 3 -U pip setuptools
@@ -82,17 +83,17 @@ jobs:
       pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
     displayName: 'Installation'
 
-  - bash: |
-      set -x
-
-      # Install the test dependencies
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
-      pip list
-
-      # Set non-UI Matplotlib backend
-      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
-      echo "backend : Agg" > matplotlibrc
-    displayName: 'Pre-testing'
+#  - bash: |
+#      set -x
+#
+#      # Install the test dependencies
+#      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
+#      pip list
+#
+#      # Set non-UI Matplotlib backend
+#      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+#      echo "backend : Agg" > matplotlibrc
+#    displayName: 'Pre-testing'
 
 #  - bash: |
 #      set -x
@@ -128,6 +129,7 @@ jobs:
 
       # Try to upload the artifacts
       pip install azure-cli
+      az extension add --name azure-devops
 
       az artifacts universal publish \
         --organization "https://dev.azure.com/scikit-image/" \
