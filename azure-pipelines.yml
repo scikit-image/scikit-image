@@ -47,38 +47,47 @@ jobs:
       Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
     displayName: 'Add Python paths to PATH'
 
-  - bash: |
-      set -x
+#  - bash: |
+#      set -x
+#
+#      # XXX:
+#      pip install azure-cli
+#      az extension add --name azure-devops
+#
+#
+#      # Update pip
+#      python -m pip install --retries 3 -U pip setuptools
+#
+#      # Check that we have the expected version and architecture for Python
+#      python --version
+#      pip --version
+#      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+#      pip list
+#
+#      # Install the build and runtime dependencies of the project
+#      pip install ${PIP_FLAGS} --retries 3 -r requirements/default.txt
+#      pip install ${PIP_FLAGS} --retries 3 -r requirements/build.txt
+#      pip list
+#    displayName: 'Pre-installation'
 
-      pip install azure-cli
-      az extension add --name azure-devops
-      az login --identity
+  - task: AzureCLI@1
+    inputs:
+      azureSubscription:
+      scriptLocation: inlineScript
+      inlineScript: |
+        pip install azure-cli
+        az extension add --name azure-devops
 
-      echo "test" > sample.txt
+        echo "test" > sample.txt
 
-      az artifacts universal publish \
-              --organization "https://dev.azure.com/scikit-image/" \
-              --feed "default_feed" \
-              --name "scikit-image_docs" \
-              --version "0.0.0" \
-              --description "My description" \
-              --path ./sample.txt
-
-
-      # Update pip
-      python -m pip install --retries 3 -U pip setuptools
-
-      # Check that we have the expected version and architecture for Python
-      python --version
-      pip --version
-      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-      pip list
-
-      # Install the build and runtime dependencies of the project
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/default.txt
-      pip install ${PIP_FLAGS} --retries 3 -r requirements/build.txt
-      pip list
-    displayName: 'Pre-installation'
+        az artifacts universal publish \
+            --organization "https://dev.azure.com/scikit-image/" \
+            --feed "default_feed" \
+            --name "scikit-image_docs" \
+            --version "0.0.0" \
+            --description "My description" \
+            --path ./sample.txt
+    displayName: 'Azure CLI'
 
 #  - bash: |
 #      set -x
