@@ -11,17 +11,17 @@ import skimage.color as color
 import numbers
 
 
-def _gaussian_weight(sigma_sqr, value, *, dtype=float):
+def _gaussian_weight(sigma_sqr, value, dtype=float):
     return np.exp(-0.5 * value * value / sigma_sqr, dtype=dtype)
 
 
-def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
+def _compute_color_lut(bins, sigma, max_value, dtype=float):
     values = np.linspace(0, max_value / bins, bins, endpoint=False)
     color_lut = _gaussian_weight(sigma**2, values, dtype=dtype)
     return color_lut
 
 
-def _compute_range_lut(win_size, sigma, *, dtype=float):
+def _compute_range_lut(win_size, sigma, dtype=float):
     grid_points = np.arange(-win_size, win_size + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     d = np.hypot(rr, cc)
