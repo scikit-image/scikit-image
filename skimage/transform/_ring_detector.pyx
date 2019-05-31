@@ -87,7 +87,7 @@ cdef DTYPE_t cos_q_pi = cos(pi/8)
 ###   (r,i,j)  <->  rij   ###
 ## set maximal possible image size and circle radii
 #cdef RIJ_t max_rads=256, max_rows=1456, max_cols=1936
-DEF MaxRads = 256
+# DEF MaxRads = 256 ## commented out as not used in the code
 DEF MaxRows = 1456
 DEF MaxCols = 1936
 cdef RIJ_t shiftRows = <RIJ_t>(fround(ceil(log2(MaxCols))))
@@ -368,7 +368,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lxx,
                     r = r_+Rmin
                     ## do not need to check for above origin due to the unsign:
                     #if (x<0) | (x>=Nrows) | (y<0) | (y>=Ncols): break
-                    if (x>=Nrows) | (y>=Ncols): break
+                    if (x>=Nrows-1) | (y>=Ncols-1): break  ## avoid outer frame error
 
                     votes[counter] = coord2rij(r,x,y)
                     counter+=1
@@ -430,7 +430,7 @@ cpdef votes2rings(RIJ_t [:] votes,
         RIJ_t [:,:,:] hough_hotspots, hough_modified
         RIJ_t [:] hough_counter, hotspots_counter
         coord_t coords
-        DTYPE_t ksigma, kscale2x, value
+        DTYPE_t ksigma, rate, kscale2x, value
         RIJ_t ksize, kcentre
         DTYPE_t [:] kernel
         RIJ_t [:,:] rings 
@@ -442,7 +442,8 @@ cpdef votes2rings(RIJ_t [:] votes,
     Rmin-=1
     Rmax+=1
     ## prepare a general kernel array to work on
-    ksigma = .05*Rmax + .25
+    rate = .05 # 0.05 in the Afik (2015), SciRep; doi: 10.1038/srep13584 
+    ksigma = rate*Rmax + .25
     ## note that I take half the kernel size (for less computations):
     ksize = <RIJ_t>(4*ksigma + 1) | 1 # bitwise OR with 1 adds one to 
     # even int
@@ -488,7 +489,7 @@ cpdef votes2rings(RIJ_t [:] votes,
             # smooth the R plane of the Hough space.
             # TODO consider generating the gaussian kernel as a table a priori
             # (as a class attribute for many images analysis)
-            ksigma = .05*R + .25
+            ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
             #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
@@ -551,7 +552,7 @@ cpdef votes2rings(RIJ_t [:] votes,
             # smooth the R plane of the Hough space.
             # TODO consider generating the gaussian kernel as a table a priori
             # (as a class attribute for many images analysis)
-            ksigma = .05*R + .25
+            ksigma = rate*R + .25
             ## based on opencv: createGaussianFilter (smooth.cpp)
             ## NOTE: normalised such that the cntr is unity
             #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
@@ -628,7 +629,7 @@ cpdef votes2rings(RIJ_t [:] votes,
             rij = votes[n]
 
     ## smooth the Rmax+1 and find local maximum in Rmax, skip clean up:
-    ksigma = .05*R + .25
+    ksigma = rate*R + .25
     ## based on opencv: createGaussianFilter (smooth.cpp)
     ## NOTE: normalised such that the cntr is unity
     #cdef RIJ_t ksize = <RIJ_t>(8*sigma + 1) | 1 
