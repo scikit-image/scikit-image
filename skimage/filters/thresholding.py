@@ -1049,7 +1049,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
-        regions. Accepts an integer from 2 to 5.
+        regions.
     nbins : int, optional
         Number of bins used to calculate the histogram.
 
