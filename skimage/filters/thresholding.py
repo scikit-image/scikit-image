@@ -1051,7 +1051,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
         Number of classes to be thresholded, i.e. the number of resulting
         regions.
     nbins : int, optional
-        Number of bins used to calculate the histogram.
+        Number of bins used to calculate the histogram. This value is ignored
+        for integer arrays.
 
     Returns
     -------
@@ -1093,6 +1094,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
                                   nbins=nbins,
                                   source_range='image')
     prob = hist / image.size
+    # histogram ignores nbins for integer arrays.
+    nbins = len(bin_centers)
 
     # defining arrays to store the zeroth (momP, cumulative probability)
     # and first (momS, mean) moments, and the variance between classes
