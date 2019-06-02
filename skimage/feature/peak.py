@@ -127,6 +127,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     # operating on each label separately
     if labels is not None:
         label_values = np.unique(labels)
+        if np.issubdtype(label_values.dtype, np.bool):
+            label_values = label_values.astype(np.int8)
         # Reorder label values to have consecutive integers (no gaps)
         if np.any(np.diff(label_values) != 1):
             mask = labels >= 1
