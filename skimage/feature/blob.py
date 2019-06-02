@@ -415,10 +415,11 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     max_sigma = np.asarray(max_sigma, dtype=float)
 
     if log_scale:
-        start, stop = np.log10(min_sigma)[:, None], np.log10(max_sigma)[:, None]
-        space = np.concatenate(
-            [start, stop, np.full_like(start, num_sigma)], axis=1)
-        sigma_list = np.stack([np.logspace(*s) for s in space], axis=1)
+        start = np.log10(min_sigma)
+        stop = np.log10(max_sigma)
+        sigma_list = np.stack([np.logspace(_start, _stop, num_sigma)
+                               for _start, _stop in zip(start, stop)],
+                              axis=1)
     else:
         scale = np.linspace(0, 1, num_sigma)[:, None]
         sigma_list = scale * (max_sigma - min_sigma) + min_sigma
