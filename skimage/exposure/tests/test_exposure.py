@@ -564,7 +564,7 @@ def test_is_low_contrast():
 # =======================
 
 def test_dask_histogram():
-    pytest.importorskip('dask', reason="dask python library is not installed")
+    pytest.importorskip('dask')
     import dask.array as da
     dask_array = da.from_array(np.array([[0, 1], [1, 2]]), chunks=(1, 2))
     output_hist, output_bins = exposure.histogram(dask_array)
