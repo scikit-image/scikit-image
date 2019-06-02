@@ -54,6 +54,7 @@ plt.show()
 #        1999.
 #
 # .. [3] https://en.wikipedia.org/wiki/Prewitt_operator
+#
 
 x, y = np.ogrid[:100, :100]
 # Rotation-invariant image with different spatial frequencies
@@ -96,15 +97,15 @@ plt.show()
 # The other two rows contain the difference between the different gradient
 # approximations (Sobel, Prewitt, Scharr & Farid) and analytical gradient.
 #
-# Farid & Simoncelli derivative filters have the closest to rotationall
-# invariance, but require a 5x5 kernel, which is computationall more intensive.
+# The Farid & Simoncelli derivative filters [4]_, [5]_  are the most
+# rotationally invariant, but require a 5x5 kernel, which is computationally
+# more intensive than a 3x3 kernel.
 #
 # .. [4] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
 #     multidimensional signals."
 #     IEEE Transactions on image processing 13.4 (2004): 496-508.
 #
 # .. [5] https://en.wikipedia.org/wiki/Image_derivatives
-# #Farid_and_Simoncelli_Derivatives
 
 
 x, y = np.mgrid[-10:10:255j, -10:10:255j]
