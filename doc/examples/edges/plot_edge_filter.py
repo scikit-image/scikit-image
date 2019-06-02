@@ -54,7 +54,6 @@ plt.show()
 #        1999.
 #
 # .. [3] https://en.wikipedia.org/wiki/Prewitt_operator
-#
 
 x, y = np.ogrid[:100, :100]
 # Rotation-invariant image with different spatial frequencies
