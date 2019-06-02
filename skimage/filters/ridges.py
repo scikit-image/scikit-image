@@ -213,7 +213,11 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
             auxiliary = np.max(auxiliary, axis=0)
 
             # Rescale image intensity
-            filtered = np.abs(auxiliary) / np.abs(np.max(auxiliary))
+            denum = np.abs(np.max(auxiliary))
+            if denum == 0.:
+                filtered = np.zeros_like(auxiliary)
+            else:
+                filtered = np.abs(auxiliary) / denum
 
             # Remove background
             filtered = np.where(filtered > 0, filtered, 0)
