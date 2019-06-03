@@ -323,7 +323,7 @@ class _RegionProperties(object):
         return True
 
 def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
-    objects = {'image':1,'coords':1,'convex_image':1,'filled_image':1,'intensity_image':1}
+    objects = {'image','coords','convex_image','filled_image','intensity_image'}
 
     if all_axis is None:
         end = ''
@@ -355,7 +355,7 @@ def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
         else:
             for i in range(len(arr)):
                 arr[i] = regions[i][prop]
-            out[prop+end+end] = arr
+            out[prop+end+end] = arr[:]
     return out    
 
     
