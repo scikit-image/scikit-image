@@ -241,10 +241,10 @@ def test_color_2d_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
-    assert_equal(seg[2:10, 2:10], 2)
-    assert_equal(seg[10:-2, 2:10], 4)
-    assert_equal(seg[2:10, 10:-2], 3)
-    assert_equal(seg[10:-2, 10:-2], 1)
+    assert_equal(seg[2:10, 2:10], 1)
+    assert_equal(seg[10:-2, 2:10], 3)
+    assert_equal(seg[2:10, 10:-2], 2)
+    assert_equal(seg[10:-2, 10:-2], 4)
     # non masked area
     assert_equal(seg[:2, :], 0)
     assert_equal(seg[-2:, :], 0)
@@ -270,10 +270,10 @@ def test_multichannel_2d_mask():
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape[:-1])
     # segments
-    assert_equal(seg[2:10, 2:10], 2)
-    assert_equal(seg[10:-2, 2:10], 4)
-    assert_equal(seg[2:10, 10:-2], 3)
-    assert_equal(seg[10:-2, 10:-2], 1)
+    assert_equal(seg[2:10, 2:10], 1)
+    assert_equal(seg[10:-2, 2:10], 3)
+    assert_equal(seg[2:10, 10:-2], 2)
+    assert_equal(seg[10:-2, 10:-2], 4)
     # non masked area
     assert_equal(seg[:2, :], 0)
     assert_equal(seg[-2:, :], 0)
