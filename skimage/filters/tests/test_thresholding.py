@@ -3,6 +3,7 @@ import numpy as np
 from scipy import ndimage as ndi
 import skimage
 from skimage import data
+from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
                                           threshold_otsu,
@@ -519,6 +520,17 @@ def test_check_multiotsu_results():
         thr_multi = threshold_multiotsu(image,
                                         classes=idx)
         assert len(thr_multi) == idx-1
+
+
+def test_multiotsu_output():
+    image = np.zeros((100, 100), dtype='int')
+    coords = [(25, 25), (50, 50), (75, 75)]
+    values = [64, 128, 192]
+    for coor, val in zip(coords, values):
+        rr, cc = circle(coor[1], coor[0], 20)
+        image[rr, cc] = val
+    thresholds = [64, 128]
+    assert np.array_equal(thresholds, threshold_multiotsu(image))
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
