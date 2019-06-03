@@ -30,7 +30,7 @@ def imread(fname, dtype=None, **kwargs):
     .. [1] http://www.lfd.uci.edu/~gohlke/code/tifffile.py
 
     """
-    if 'dtype' is not None:
+    if dtype is not None:
         warn('The dtype argument was always silently ignored. It will be '
              'removed from scikit-image version 0.17. To avoid this '
              'warning, do not specify it in your function call.',
