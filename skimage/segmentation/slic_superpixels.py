@@ -31,6 +31,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
 
     """
 
+    # Get tight ROI around th emask to optimize
     coord = np.asarray(np.nonzero(mask))
     bbox = coord.min(-1), coord.max(-1) + 1
     roi = mask[bbox[0][0]: bbox[1][0],
@@ -38,26 +39,33 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
                bbox[0][2]: bbox[1][2]].copy()
 
     if spacing is None:
+        # Chamfer distance transform.
         dist_map = np.empty_like(roi, dtype=np.int32)
         update_dist_map = functools.partial(ndi.distance_transform_cdt,
                                             distances=dist_map)
     else:
+        # Exact euclidean distance transform.
         dist_map = np.empty_like(roi, dtype=np.float64)
-        spacing = np.ascontiguousarray(spacing, dtype=np.double)
+        spacing = np.ascontiguousarray(spacing, dtype=np.float64)
         update_dist_map = functools.partial(ndi.distance_transform_edt,
                                             distances=dist_map,
                                             sampling=spacing)
 
     centroids = np.repeat([bbox[0]], n_centroids, axis=0)
 
+    # Iteratively place centroids in teh mask
     for idx in range(n_centroids):
+        # Compute distance map
         update_dist_map(roi)
 
+        # Set the point of furthest distance to be a centroid
         coord = dist_map.argmax()
-        roi.ravel()[coord] = 0
-
         centroids[idx, :] += np.unravel_index(coord, roi.shape)
 
+        # Remove the detected centroid from the mask
+        roi.ravel()[coord] = 0
+
+    # Compute the minimum distance of each centroid to the others
     dist = squareform(pdist(centroids))
     np.fill_diagonal(dist, np.inf)
     closest_pts = dist.argmin(-1)
@@ -155,9 +163,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     slic_zero: bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
     mask : 2D ndarray, optional
-        if provided, superpixels are computed only where mask=True,
-        and seed points are placed following the strategy described in
-        [3]_, mitigating border effects at the border of the mask.
+        if provided, superpixels are computed only where mask is True,
+        and seed points are iteratively placed over the masked area to
+        ensure their homogeneous spacial distribution over the mask
+        (see [3]_ for more details).
 
     Returns
     -------
@@ -185,6 +194,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
       `multichannel=False`.
+
+    * If spacing is None and mask is provided, chamfer distance
+      transform is used to homogeneously place seed points over the
+      mask, otherwise, the exact euclidian distance transform is used.
 
     References
     ----------
