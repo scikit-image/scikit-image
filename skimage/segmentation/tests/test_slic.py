@@ -366,9 +366,9 @@ def test_enforce_connectivity_mask():
                                  [-1, 0, 0, 1, 1, -1],
                                  [-1, 0, 0, 1, 1, -1]], np.float) + 1
 
-    result_disconnected = np.array([[-1, 1, 1, 0, 0, -1],
-                                    [-1, 1, 1, 0, 0, -1],
-                                    [-1, 1, 1, 0, 0, -1]], np.float) + 1
+    result_disconnected = np.array([[-1, 0, 0, 1, 1, -1],
+                                    [-1, 0, 0, 1, 1, -1],
+                                    [-1, 0, 0, 1, 1, -1]], np.float) + 1
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
