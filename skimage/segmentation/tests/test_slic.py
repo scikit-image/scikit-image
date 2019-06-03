@@ -315,8 +315,8 @@ def test_list_sigma_mask():
     img = np.array([[1, 1, 1, 0, 0, 0],
                     [0, 0, 0, 1, 1, 1]], np.float)
     img += 0.1 * rnd.normal(size=img.shape)
-    result_sigma = np.array([[-1, 0, 0, 1, 1, -1],
-                             [-1, 0, 0, 1, 1, -1]], np.int) + 1
+    result_sigma = np.array([[0, 0, 0, 1, 1, 0],
+                             [0, 0, 0, 1, 1, 0]], np.int) + 1
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
                      multichannel=False, mask=msk)
     assert_equal(seg_sigma, result_sigma)
@@ -328,10 +328,10 @@ def test_spacing_mask():
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float)
-    result_non_spaced = np.array([[-1, 0, 0, 1, -1],
-                                  [-1, 0, 1, 1, -1]], np.int) + 1
-    result_spaced = np.array([[-1, 0, 0, 0, -1],
-                              [-1, 1, 1, 1, -1]], np.int) + 1
+    result_non_spaced = np.array([[0, 0, 0, 1, 0],
+                                  [0, 0, 1, 1, 0]], np.int) + 1
+    result_spaced = np.array([[0, 0, 0, 0, 0],
+                              [0, 1, 1, 1, 0]], np.int) + 1
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0, mask=msk)
@@ -362,13 +362,13 @@ def test_enforce_connectivity_mask():
                                       convert2lab=False,
                                       max_size_factor=0.8, mask=msk)
 
-    result_connected = np.array([[-1, 0, 0, 1, 1, -1],
-                                 [-1, 0, 0, 1, 1, -1],
-                                 [-1, 0, 0, 1, 1, -1]], np.float) + 1
+    result_connected = np.array([[0, 0, 0, 1, 1, 0],
+                                 [0, 0, 0, 1, 1, 0],
+                                 [0, 0, 0, 1, 1, 0]], np.float) + 1
 
-    result_disconnected = np.array([[-1, 1, 1, 0, 0, -1],
-                                    [-1, 1, 1, 0, 0, -1],
-                                    [-1, 1, 1, 0, 0, -1]], np.float) + 1
+    result_disconnected = np.array([[0, 1, 1, 0, 0, 0],
+                                    [0, 1, 1, 0, 0, 0],
+                                    [0, 1, 1, 0, 0, 0]], np.float) + 1
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
