@@ -6,6 +6,10 @@ maskSLIC Demonstration
 This example is about comparing the segmentations obtained using the
 plain SLIC method [1]_ and its masked version maskSLIC [2]_.
 
+The maskSLIC method is an extension of the SLIC method for the
+generation of superpixels in a region of interest. maskSLIC is able to
+overcome border problems that affects SLIC method, particularely in
+case of irregular mask.
 
 .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
     Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
@@ -50,7 +54,7 @@ ax1.imshow(img)
 ax1.set_title("Origin image")
 
 ax2.imshow(mask, cmap="gray")
-ax2.set_title("Considered mask")
+ax2.set_title("Mask")
 
 ax3.imshow(segmentation.mark_boundaries(img, slic))
 ax3.contour(mask, colors='red', linewidths=1)

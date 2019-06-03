@@ -1,4 +1,5 @@
 import warnings
+import functools
 import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
@@ -29,8 +30,6 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
         The approximate distance between two seeds in all dimensions.
 
     """
-    if spacing is None:
-        spacing = np.ones(3)
 
     coord = np.asarray(np.nonzero(mask))
     bbox = coord.min(-1), coord.max(-1) + 1
@@ -38,10 +37,21 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
                bbox[0][1]: bbox[1][1],
                bbox[0][2]: bbox[1][2]].copy()
 
+    if spacing is None:
+        dist_map = np.empty_like(roi, dtype=np.int32)
+        update_dist_map = functools.partial(ndi.distance_transform_cdt,
+                                            distances=dist_map)
+    else:
+        dist_map = np.empty_like(roi, dtype=np.float64)
+        spacing = np.ascontiguousarray(spacing, dtype=np.double)
+        update_dist_map = functools.partial(ndi.distance_transform_edt,
+                                            distances=dist_map,
+                                            sampling=spacing)
+
     centroids = np.repeat([bbox[0]], n_centroids, axis=0)
 
     for idx in range(n_centroids):
-        dist_map = ndi.distance_transform_edt(roi, sampling=spacing)
+        update_dist_map(roi)
 
         coord = dist_map.argmax()
         roi.ravel()[coord] = 0
@@ -145,8 +155,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     slic_zero: bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
     mask : 2D ndarray, optional
-        if provided, seed points are placed following the strategy
-        described in [3]_
+        if provided, superpixels are computed only where mask=True,
+        and seed points are placed following the strategy described in
+        [3]_, mitigating border effects at the border of the mask.
 
     Returns
     -------
@@ -213,21 +224,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         # Add channel as single last dimension
         image = image[..., np.newaxis]
 
-    if spacing is None:
-        spacing = np.ones(3)
-    elif isinstance(spacing, (list, tuple)):
-        spacing = np.ascontiguousarray(spacing, dtype=np.double)
-
-    if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
-        sigma /= spacing.astype(np.double)
-    elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, dtype=np.double)
-    if (sigma > 0).any():
-        # add zero smoothing for multichannel dimension
-        sigma = list(sigma) + [0]
-        image = ndi.gaussian_filter(image, sigma)
-
     if multichannel and (convert2lab or convert2lab is None):
         if image.shape[-1] != 3 and convert2lab:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
@@ -253,6 +249,21 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         warnings.warn("labels' indexing start from 0. " +
                       "In future version it will start from 1.",
                       DeprecationWarning)
+
+    if spacing is None:
+        spacing = np.ones(3)
+    elif isinstance(spacing, (list, tuple)):
+        spacing = np.ascontiguousarray(spacing, dtype=np.double)
+
+    if not isinstance(sigma, coll.Iterable):
+        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
+        sigma /= spacing.astype(np.double)
+    elif isinstance(sigma, (list, tuple)):
+        sigma = np.array(sigma, dtype=np.double)
+    if (sigma > 0).any():
+        # add zero smoothing for multichannel dimension
+        sigma = list(sigma) + [0]
+        image = ndi.gaussian_filter(image, sigma)
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(np.concatenate(
