@@ -322,6 +322,44 @@ class _RegionProperties(object):
 
         return True
 
+def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
+    objects = {'image':1,'coords':1,'convex_image':1,'filled_image':1,'intensity_image':1}
+
+    if all_axis is None:
+        end = ''
+    else:
+        end = seperator+all_axis
+    
+    if 'label' not in want:
+        want.insert(0, 'label')
+    if 'bbox' not in want:
+        want.insert(0, 'bbox')
+
+    out = {}
+    arr = len(regions)*[0]
+    for prop in want:
+        r = regions[0][prop]
+        if hasattr(r, "__len__") and prop not in objects:
+            if isinstance(r, np.ndarray) and len(regions[0][prop].shape)==2:
+                for i in range(regions[0][prop].shape[0]):
+                    for j in range(regions[0][prop].shape[1]):
+                        for k in range(len(arr)):
+                            arr[k] = regions[k][prop][i][j]
+                        out[prop+seperator+str(i)+seperator+str(j)] = arr
+            else:
+                for i in range(len(regions[0][prop])):
+                    for k in range(len(arr)):
+                        arr[k] = regions[k][prop][i]
+                    out[prop+seperator+str(i)+end] = arr    
+
+        else:
+            for i in range(len(arr)):
+                arr[i] = regions[i][prop]
+            out[prop+end+end] = arr
+    return out    
+
+    
+
 
 def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.

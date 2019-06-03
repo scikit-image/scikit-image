@@ -4,6 +4,8 @@ import functools
 import numpy as np
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs)
+from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          _parse_docs, to_dict)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
@@ -484,3 +486,16 @@ def test_docstrings_and_props():
         assert len(ds.split('\n')) > 3
     else:
         assert_equal(nr_docs_parsed, 0)
+
+
+def test_to_dict():
+    regions = regionprops(SAMPLE)
+    out = to_dict(regions)
+    assert 'label' in out
+    assert 'bbox-0' in out
+
+    regions = regionprops(SAMPLE)
+    out = to_dict(regions, ['area'], seperator='+', all_axis='0')
+    assert 'label+0+0' in out
+    assert 'bbox+1+0' in out
+    assert 'area+0+0' in out
