@@ -341,13 +341,13 @@ def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
         r = regions[0][prop]
         if hasattr(r, "__len__") and prop not in objects:
             if isinstance(r, np.ndarray) and len(regions[0][prop].shape)==2:
-                for i in range(regions[0][prop].shape[0]):
-                    for j in range(regions[0][prop].shape[1]):
+                for i in range(r.shape[0]):
+                    for j in range(r.shape[1]):
                         for k in range(len(arr)):
                             arr[k] = regions[k][prop][i][j]
                         out[prop+seperator+str(i)+seperator+str(j)] = arr
             else:
-                for i in range(len(regions[0][prop])):
+                for i in range(len(r)):
                     for k in range(len(arr)):
                         arr[k] = regions[k][prop][i]
                     out[prop+seperator+str(i)+end] = arr    
