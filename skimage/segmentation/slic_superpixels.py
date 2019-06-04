@@ -31,7 +31,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
 
     """
 
-    # Get tight ROI around th emask to optimize
+    # Get tight ROI around the mask to optimize
     coord = np.asarray(np.nonzero(mask))
     bbox = coord.min(-1), coord.max(-1) + 1
     roi = mask[bbox[0][0]: bbox[1][0],
@@ -39,7 +39,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
                bbox[0][2]: bbox[1][2]].copy()
 
     if spacing is None:
-        # Chamfer distance transform.
+        # Chamfer distance transform (faster then euclidean distance).
         dist_map = np.empty_like(roi, dtype=np.int32)
         update_dist_map = functools.partial(ndi.distance_transform_cdt,
                                             distances=dist_map)
@@ -53,7 +53,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
 
     centroids = np.repeat([bbox[0]], n_centroids, axis=0)
 
-    # Iteratively place centroids in teh mask
+    # Iteratively place centroids in the mask
     for idx in range(n_centroids):
         # Compute distance map
         update_dist_map(roi)
