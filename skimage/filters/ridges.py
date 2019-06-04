@@ -186,7 +186,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
         alpha = 1.0 / ndim
 
     # Invert image to detect bright ridges on dark background
-    if not black_ridges:
+    if black_ridges:
         image = invert(image)
 
     # Generate empty (n+1)D arrays for storing auxiliary images filtered at
@@ -197,7 +197,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='val')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
 
         if ndim > 1:
 
@@ -205,18 +205,18 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
             coefficients = [alpha] * ndim
             coefficients[0] = 1
 
-            # Compute auxiliary variables l_i = e_i + sum_{j!=i} alpha * e_j
+            # Compute normalized eigenvalues l_i = e_i + sum_{j!=i} alpha * e_j
             auxiliary = [np.sum([eigenvalues[i] * np.roll(coefficients, j)[i]
                          for j in range(ndim)], axis=0) for i in range(ndim)]
 
-            # Compute maximum over auxiliary variables
-            auxiliary = np.max(auxiliary, axis=0)
+            # Get maximum eigenvalues by magnitude
+            auxiliary = auxiliary[1]
 
-            # Rescale image intensity
-            filtered = np.abs(auxiliary) / np.abs(np.max(auxiliary))
+            # Rescale image intensity and avoid ZeroDivisionError
+            filtered = _divide_nonzero(auxiliary, np.min(auxiliary))
 
             # Remove background
-            filtered = np.where(filtered > 0, filtered, 0)
+            filtered = np.where(auxiliary < 0, filtered, 0)
 
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
