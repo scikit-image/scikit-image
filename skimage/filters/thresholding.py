@@ -604,8 +604,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = np.mean(image)
     elif callable(initial_guess):
         t_next = initial_guess(image)
-    else:  # assume float
-        t_next = initial_guess
+    else:  # assume float; convert to new, positive image range
+        t_next = initial_guess - image_min
 
     # initial value for t_curr must be different from t_next by at
     # least the tolerance. Since the image is positive, we ensure this
