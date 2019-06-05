@@ -322,15 +322,10 @@ class _RegionProperties(object):
 
         return True
 
-def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
+def to_dict(regions, want=['label','bbox'], separator='-'):
     objects = {'image','coords','convex_image','filled_image','intensity_image'}
-
-    if all_axis is None:
-        end = ''
-    else:
-        end = seperator+all_axis
     
-    if 'label' not in want:
+    if 'label' not in want: #add an offswitch (flag input)
         want.insert(0, 'label')
     if 'bbox' not in want:
         want.insert(0, 'bbox')
@@ -345,17 +340,17 @@ def to_dict(regions, want=['label','bbox'], seperator='-', all_axis=None):
                     for j in range(r.shape[1]):
                         for k in range(len(arr)):
                             arr[k] = regions[k][prop][i][j]
-                        out[prop+seperator+str(i)+seperator+str(j)] = arr
+                        out[prop+separator+str(i)+separator+str(j)] = arr[:]
             else:
                 for i in range(len(r)):
                     for k in range(len(arr)):
                         arr[k] = regions[k][prop][i]
-                    out[prop+seperator+str(i)+end] = arr    
+                    out[prop+separator+str(i)] = arr[:] 
 
         else:
             for i in range(len(arr)):
                 arr[i] = regions[i][prop]
-            out[prop+end+end] = arr[:]
+            out[prop+end] = arr[:]
     return out    
 
     
