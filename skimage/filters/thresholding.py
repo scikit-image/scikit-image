@@ -604,8 +604,12 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = np.mean(image)
     elif callable(initial_guess):
         t_next = initial_guess(image)
-    else:  # assume float; convert to new, positive image range
+    elif np.isscalar(initial_guess):  # convert to new, positive image range
         t_next = initial_guess - image_min
+    else:
+        raise TypeError('Incorrect type for `initial_guess`; should be '
+                        'a floating point value, or a function mapping an '
+                        'array to a floating point value.')
 
     # initial value for t_curr must be different from t_next by at
     # least the tolerance. Since the image is positive, we ensure this
