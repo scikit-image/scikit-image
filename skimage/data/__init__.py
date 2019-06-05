@@ -23,12 +23,15 @@ __all__ = ['data_dir',
            'load',
            'astronaut',
            'binary_blobs',
+           'brick',
            'camera',
            'checkerboard',
            'chelsea',
            'clock',
            'coffee',
            'coins',
+           'colorwheel',
+           'grass',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
@@ -41,6 +44,8 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
+           'rough_wall',
+           'shepp_logan_phantom',
            'stereo_motorcycle']
 
 
@@ -96,6 +101,42 @@ def astronaut():
     """
 
     return load("astronaut.png")
+
+
+def brick():
+    """Brick wall.
+
+    Returns
+    -------
+    brick: (512, 512) uint8 image
+        A small section of a brick wall.
+
+    """
+    return load("brick.png")
+
+
+def grass():
+    """Grass.
+
+    Returns
+    -------
+    grass: (512, 512) uint8
+        Some grass.
+
+    """
+    return load("grass.png")
+
+
+def rough_wall():
+    """Rough wall.
+
+    Returns
+    -------
+    rough_wall: (512, 512)
+        Some rough wall.
+
+    """
+    return load("rough-wall.png")
 
 
 def text():
@@ -364,6 +405,34 @@ def retina():
         Retina image in RGB.
     """
     return load("retina.jpg")
+
+
+def shepp_logan_phantom():
+    """Shepp Logan Phantom.
+
+    References
+    ----------
+    .. [1] L. A. Shepp and B. F. Logan, "The Fourier reconstruction of a head
+           section," in IEEE Transactions on Nuclear Science, vol. 21,
+           no. 3, pp. 21-43, June 1974. doi: 10.1109/TNS.1974.6499235
+
+    Returns
+    -------
+    phantom: (400, 400) float64 image
+        Image of the Shepp-Logan phantom in grayscale.
+    """
+    return load("phantom.png", as_gray=True)
+
+
+def colorwheel():
+    """Color Wheel.
+
+    Returns
+    -------
+    colorwheel: (370, 371, 3) uint8 image
+        A colorwheel.
+    """
+    return load("color.png")
 
 
 def rocket():
