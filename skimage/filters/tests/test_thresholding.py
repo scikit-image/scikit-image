@@ -299,6 +299,17 @@ def test_li_constant_image_with_nan():
     assert threshold_li(image) == 8
 
 
+def test_li_arbitrary_start_point():
+    cell = data.cell()
+    max_stationary_point = threshold_li(cell)
+    low_stationary_point = threshold_li(cell,
+                                        initial_guess=np.percentile(cell, 5))
+    optimum = threshold_li(cell, initial_guess=np.percentile(cell, 95))
+    assert 67 < max_stationary_point < 68
+    assert 48 < low_stationary_point < 49
+    assert 111 < optimum < 112
+
+
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
