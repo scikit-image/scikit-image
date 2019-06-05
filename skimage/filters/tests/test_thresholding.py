@@ -261,7 +261,7 @@ def test_li_coins_image():
     # threshold below that found by the iterative method. Not sure why that is
     # but `threshold_li` does find the stationary point of the function (ie the
     # tolerance can be reduced arbitrarily but the exact same threshold is
-    # found), so my guess some kind of histogram binning effect.
+    # found), so my guess is some kind of histogram binning effect.
     assert ce_actual < _cross_entropy(image, threshold - 2)
 
 
