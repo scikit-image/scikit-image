@@ -18,6 +18,7 @@ images = ('hubble_deep_field',
           'microaneurysms',
           'moon',
           'retina',
+          'shepp_logan_phantom',
           )
 
 

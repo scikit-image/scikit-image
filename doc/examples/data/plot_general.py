@@ -15,17 +15,21 @@ matplotlib.rcParams['font.size'] = 18
 
 images = ('astronaut',
           'binary_blobs',
+          'brick',
+          'colorwheel',
           'camera',
           'checkerboard',
           'chelsea',
           'clock',
           'coffee',
           'coins',
+          'grass',
           'horse',
           'logo',
           'page',
           'text',
           'rocket',
+          'rough_wall',
           )
 
 
