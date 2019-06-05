@@ -185,7 +185,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     if alpha is None:
         alpha = 1.0 / ndim
 
-    # Invert image to detect bright ridges on dark background
+    # Invert image to detect dark ridges on bright background
     if black_ridges:
         image = invert(image)
 
@@ -210,7 +210,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
                          for j in range(ndim)], axis=0) for i in range(ndim)]
 
             # Get maximum eigenvalues by magnitude
-            auxiliary = auxiliary[1]
+            auxiliary = auxiliary[-1]
 
             # Rescale image intensity and avoid ZeroDivisionError
             filtered = _divide_nonzero(auxiliary, np.min(auxiliary))
