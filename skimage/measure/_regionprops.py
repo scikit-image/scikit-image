@@ -323,6 +323,25 @@ class _RegionProperties(object):
         return True
 
 def to_dict(regions, want=['label','bbox'], separator='-'):
+    """Convert image regions properties into a dictionary
+
+    Parameters
+    ----------
+    regions : (N,) list
+        _RegionProperties
+    want : list, optional
+        str of a property the user wants to include
+    separator : str, optional
+        used in joininh coordinates
+
+
+    Output
+    ------
+    A dictionary with properties in accordance to the wanted properties
+
+    ####### add a test
+"""
+    
     objects = {'image','coords','convex_image','filled_image','intensity_image'}
     
     if 'label' not in want: #add an offswitch (flag input)
@@ -330,27 +349,20 @@ def to_dict(regions, want=['label','bbox'], separator='-'):
     if 'bbox' not in want:
         want.insert(0, 'bbox')
 
+    # add a docstring with examples
+    
     out = {}
     arr = len(regions)*[0]
     for prop in want:
         r = regions[0][prop]
-        if hasattr(r, "__len__") and prop not in objects:
-            if isinstance(r, np.ndarray) and len(regions[0][prop].shape)==2:
-                for i in range(r.shape[0]):
-                    for j in range(r.shape[1]):
-                        for k in range(len(arr)):
-                            arr[k] = regions[k][prop][i][j]
-                        out[prop+separator+str(i)+separator+str(j)] = arr[:]
-            else:
-                for i in range(len(r)):
+        if (not np.isscalar(r)) and prop not in objects:
+            if isinstance(r, np.ndarray):
+                for ind in np.ndindex(r.shape):
                     for k in range(len(arr)):
-                        arr[k] = regions[k][prop][i]
-                    out[prop+separator+str(i)] = arr[:] 
-
+                        arr[k] = regions[k][prop][ind]
+                    out[separator.join(map(str,(prop,)+ind))] = arr[:]
         else:
-            for i in range(len(arr)):
-                arr[i] = regions[i][prop]
-            out[prop+end] = arr[:]
+            out[prop+end] = [regions[i][prop] for i in range(len(arr))]
     return out    
 
     
@@ -361,16 +373,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     Parameters
     ----------
-    label_image : (N, M) ndarray
-        Labeled input image. Labels with value 0 are ignored.
-
-        .. versionchanged:: 0.14.1
-            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
-            so any number of singleton dimensions was allowed. This resulted in
-            inconsistent handling of images with singleton dimensions. To
-            recover the old behaviour, use
-            ``regionprops(np.squeeze(label_image), ...)``.
-    intensity_image : (N, M) ndarray, optional
+    regions : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
     cache : bool, optional
