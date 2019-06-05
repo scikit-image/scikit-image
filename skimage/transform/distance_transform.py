@@ -54,7 +54,7 @@ def generalized_distance_transform(ndarr_in, func='slow', cost_func=f, dist_func
         warnings.warn("slow")
         dtype = np.double
     
-    output = np.empty(ndarr.shape)
+    output = np.zeros(ndarr.shape, dtype=dtype)
     for dimension in range(ndarr.ndim):
         length = ndarr.shape[dimension]
         domains_buffer =np.empty(length+1, dtype=np.double)

@@ -3,10 +3,12 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 from numpy cimport ndarray
+import numpy as np
 from numpy.math cimport INFINITY
+from warnings import warn
 
 cdef Py_ssize_t f(double p):
-    cdef Py_ssize_t out = 9223372036854775807
+    cdef Py_ssize_t out = np.finfo(np.intp).max
     #largest number a Py_ssize_t can take
     if p == 0:
         out = 0
@@ -39,8 +41,8 @@ cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, Py_ssize_t[:] f):
     if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return 9223372036854775807 #largest number a Py_ssize_t can take
-    return -9223372036854775807 #smallest number a Py_ssize_t can take
+        return np.finfo(np.intp).max #largest number a Py_ssize_t can take
+    return np.finfo(np.intp).min #smallest number a Py_ssize_t can take
 
 def _generalized_distance_transform_1d_euclidean(double[:] arr, Py_ssize_t[:] cost_arr,
                                        bint isfirst, double[::1] domains,
