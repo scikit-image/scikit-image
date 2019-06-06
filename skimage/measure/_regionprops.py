@@ -339,7 +339,17 @@ def to_dict(regions, want=['label','bbox'], separator='-'):
     ------
     A dictionary with properties in accordance to the wanted properties
 
-    ####### add a test
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> from pandas.DataFrame import from_dict
+    >>> img = util.img_as_ubyte(data.coins()) > 110
+    >>> label_img = label(img, connectivity=img.ndim)
+    >>> props = regionprops(label_img)
+    >>> out = from_dict(to_dict(props))
+    
+
 """
     
     objects = {'image','coords','convex_image','filled_image','intensity_image'}
@@ -350,19 +360,23 @@ def to_dict(regions, want=['label','bbox'], separator='-'):
         want.insert(0, 'bbox')
 
     # add a docstring with examples
-    
     out = {}
     arr = len(regions)*[0]
     for prop in want:
         r = regions[0][prop]
-        if (not np.isscalar(r)) and prop not in objects:
-            if isinstance(r, np.ndarray):
-                for ind in np.ndindex(r.shape):
-                    for k in range(len(arr)):
-                        arr[k] = regions[k][prop][ind]
-                    out[separator.join(map(str,(prop,)+ind))] = arr[:]
+        if np.isscalar(r) or prop in objects:
+            out[prop] = [regions[i][prop] for i in range(len(arr))]
         else:
-            out[prop+end] = [regions[i][prop] for i in range(len(arr))]
+            if isinstance(r, np.ndarray):
+                shape = r.shape
+            else:
+                shape = (len(r),)
+                
+            for ind in np.ndindex(shape):
+                for k in range(len(arr)):
+                    arr[k] = regions[k][prop][ind if len(ind)>1 else ind[0]]
+                out[separator.join(map(str,(prop,)+ind))] = arr[:]            
+
     return out    
 
     

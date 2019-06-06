@@ -495,7 +495,7 @@ def test_to_dict():
     assert 'bbox-0' in out
 
     regions = regionprops(SAMPLE)
-    out = to_dict(regions, ['area'], seperator='+', all_axis='0')
-    assert 'label+0+0' in out
-    assert 'bbox+1+0' in out
-    assert 'area+0+0' in out
+    out = to_dict(regions, ['area'], separator='+')
+    assert 'label' in out
+    assert 'bbox+1' in out
+    assert 'area' in out
