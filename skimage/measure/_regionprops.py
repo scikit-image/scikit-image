@@ -364,7 +364,7 @@ def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
         want.insert(0, 'bbox')
 
     out = {}
-    arr = len(regions)*[0]
+    arr = len(regions) * [0]
     for prop in want:
         r = regions[0][prop]
         if np.isscalar(r) or prop in objects:
@@ -378,7 +378,7 @@ def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
             for ind in np.ndindex(shape):
                 for k in range(len(arr)):
                     arr[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
-                out[separator.join(map(str, (prop,)+ind))] = arr[:]
+                out[separator.join(map(str, (prop,) + ind))] = arr[:]
 
     return out
 
