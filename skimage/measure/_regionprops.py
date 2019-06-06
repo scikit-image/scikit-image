@@ -323,14 +323,14 @@ class _RegionProperties(object):
         return True
 
 
-def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
+def _props_to_dict(regions, want=('label', 'bbox'), separator='-', cancel_auto=False):
     """Convert image regions properties into a dictionary
 
     Parameters
     ----------
     regions : (N,) list
         _RegionProperties
-    want : list, optional
+    want : tuple, optional
         str of a property the user wants to include
     separator : str, optional
         used in joining coordinates
@@ -344,13 +344,21 @@ def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
 
     Examples
     --------
-    >>> from skimage import data, util
-    >>> from skimage.measure import label
-    >>> from pandas.DataFrame import from_dict
-    >>> img = util.img_as_ubyte(data.coins()) > 110
-    >>> label_img = label(img, connectivity=img.ndim)
-    >>> props = regionprops(label_img)
-    >>> out = from_dict(to_dict(props))
+    >>> from skimage import data, util, measure
+    >>> image = data.coins() > 110
+    >>> label_image = measure.label(image, connectivity=image.ndim)
+    >>> propslist = regionprops(label_image, image)
+    >>> props = to_dict(propslist, want=['label', 'inertia_tensor', 'inertia_tensor_eigvals'])
+    >>> props
+    <output here>
+
+    The resulting dictionary can be directly passed to pandas, if installed, to
+    obtain a clean DataFrame::
+
+    >>> import pandas as pd  # doctest: +SKIP
+    >>> data = pd.DataFrame(props)  # doctest: +SKIP
+    >>> data.head()  # doctest: +SKIP
+    <output of data.head()>
 
 
 """
@@ -359,9 +367,9 @@ def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
                'intensity_image'}
 
     if not cancel_auto and 'label' not in want:
-        want.insert(0, 'label')
+        want = ('label',) + want
     if not cancel_auto and 'bbox' not in want:
-        want.insert(0, 'bbox')
+        want = ('bbox',) + want
 
     out = {}
     arr = len(regions) * [0]
