@@ -356,7 +356,7 @@ def to_dict(regions, want=['label','bbox'], separator='-', cancel_auto=False):
     
     objects = {'image','coords','convex_image','filled_image','intensity_image'}
     
-    if not cancel_auto and 'label' not in want: #add an offswitch (flag input)
+    if not cancel_auto and 'label' not in want:
         want.insert(0, 'label')
     if not cancel_auto and 'bbox' not in want:
         want.insert(0, 'bbox')
