@@ -322,7 +322,7 @@ class _RegionProperties(object):
 
         return True
 
-def to_dict(regions, want=['label','bbox'], separator='-'):
+def to_dict(regions, want=['label','bbox'], separator='-', cancel_auto=False):
     """Convert image regions properties into a dictionary
 
     Parameters
@@ -332,7 +332,9 @@ def to_dict(regions, want=['label','bbox'], separator='-'):
     want : list, optional
         str of a property the user wants to include
     separator : str, optional
-        used in joininh coordinates
+        used in joining coordinates
+    cancel_auto : bool, optional
+        prevents autmatic adding of label and bbox
 
 
     Output
@@ -354,12 +356,11 @@ def to_dict(regions, want=['label','bbox'], separator='-'):
     
     objects = {'image','coords','convex_image','filled_image','intensity_image'}
     
-    if 'label' not in want: #add an offswitch (flag input)
+    if not cancel_auto and 'label' not in want: #add an offswitch (flag input)
         want.insert(0, 'label')
-    if 'bbox' not in want:
+    if not cancel_auto and 'bbox' not in want:
         want.insert(0, 'bbox')
 
-    # add a docstring with examples
     out = {}
     arr = len(regions)*[0]
     for prop in want:
