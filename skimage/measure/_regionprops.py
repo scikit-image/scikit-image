@@ -322,7 +322,8 @@ class _RegionProperties(object):
 
         return True
 
-def to_dict(regions, want=['label','bbox'], separator='-', cancel_auto=False):
+
+def to_dict(regions, want=['label', 'bbox'], separator='-', cancel_auto=False):
     """Convert image regions properties into a dictionary
 
     Parameters
@@ -350,12 +351,13 @@ def to_dict(regions, want=['label','bbox'], separator='-', cancel_auto=False):
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
     >>> out = from_dict(to_dict(props))
-    
+
 
 """
-    
-    objects = {'image','coords','convex_image','filled_image','intensity_image'}
-    
+
+    objects = {'image', 'coords', 'convex_image', 'filled_image',
+               'intensity_image'}
+
     if not cancel_auto and 'label' not in want:
         want.insert(0, 'label')
     if not cancel_auto and 'bbox' not in want:
@@ -372,15 +374,13 @@ def to_dict(regions, want=['label','bbox'], separator='-', cancel_auto=False):
                 shape = r.shape
             else:
                 shape = (len(r),)
-                
+
             for ind in np.ndindex(shape):
                 for k in range(len(arr)):
-                    arr[k] = regions[k][prop][ind if len(ind)>1 else ind[0]]
-                out[separator.join(map(str,(prop,)+ind))] = arr[:]            
+                    arr[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
+                out[separator.join(map(str, (prop,)+ind))] = arr[:]
 
-    return out    
-
-    
+    return out
 
 
 def regionprops(label_image, intensity_image=None, cache=True):
