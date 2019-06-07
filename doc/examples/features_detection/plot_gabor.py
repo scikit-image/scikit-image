@@ -54,9 +54,9 @@ for theta in range(4):
 
 
 shrink = (slice(0, None, 3), slice(0, None, 3))
-brick = img_as_float(data.load('brick.png'))[shrink]
-grass = img_as_float(data.load('grass.png'))[shrink]
-wall = img_as_float(data.load('rough-wall.png'))[shrink]
+brick = img_as_float(data.brick())[shrink]
+grass = img_as_float(data.grass())[shrink]
+wall = img_as_float(data.rough_wall())[shrink]
 image_names = ('brick', 'grass', 'wall')
 images = (brick, grass, wall)
 

@@ -101,7 +101,7 @@ def highlight_bars(bars, indexes):
         bars[i].set_facecolor('r')
 
 
-image = data.load('brick.png')
+image = data.brick()
 lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 
@@ -177,9 +177,9 @@ def match(refs, img):
     return best_name
 
 
-brick = data.load('brick.png')
-grass = data.load('grass.png')
-wall = data.load('rough-wall.png')
+brick = data.brick()
+grass = data.grass()
+wall = data.rough_wall()
 
 refs = {
     'brick': local_binary_pattern(brick, n_points, radius, METHOD),
