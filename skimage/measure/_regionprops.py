@@ -329,11 +329,13 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_includ
     Parameters
     ----------
     regions : (N,) list
-        _RegionProperties
+        List of _RegionProperties objects as returned by :func:`regionprops`
     want : tuple, optional
         str of a property the user wants to include
     separator : str, optional
-        used in joining coordinates
+        Each element of non-scalar properties and is not listed in objects will
+        be put into its own column, with the index of that element separated from
+        the name by this separator.
     always_include_label : bool, optional
         allows autmatic adding of label and bbox
 
