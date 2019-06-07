@@ -132,7 +132,7 @@ def rough_wall():
 
     Returns
     -------
-    rough_wall: (512, 512)
+    rough_wall: (512, 512) uint8 image
         Some rough wall.
 
     """
