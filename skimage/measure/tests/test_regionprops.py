@@ -494,7 +494,7 @@ def test_props_to_dict():
     assert 'bbox-0' in out
 
     regions = regionprops(SAMPLE)
-    out = _props_to_dict(regions, want=('area',), separator='+')
+    out = _props_to_dict(regions, properties=('area','bbox'), separator='+')
     assert 'label' in out
     assert 'bbox+1' in out
     assert 'area' in out
@@ -504,7 +504,7 @@ def test_regionprops_table():
     assert 'label' in out
     assert 'bbox-0' in out
 
-    out = regionprops_table(SAMPLE, want=('area',), separator='+')
+    out = regionprops_table(SAMPLE, properties=('area','bbox'), separator='+')
     assert 'label' in out
     assert 'bbox+1' in out
     assert 'area' in out

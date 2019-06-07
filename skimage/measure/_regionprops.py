@@ -323,21 +323,21 @@ class _RegionProperties(object):
         return True
 
 
-def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_include_label=True):
+def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_include_label=True):
     """Convert image regions properties into a dictionary
 
     Parameters
     ----------
     regions : (N,) list
         List of _RegionProperties objects as returned by :func:`regionprops`
-    want : tuple, optional
-        str of a property the user wants to include
+    properties : tuple, optional
+        properties which the output need to have
     separator : str, optional
-        Each element of non-scalar properties and is not listed in objects will
+        Each element of non-scalar properties and is not listed in object_columns will
         be put into its own column, with the index of that element separated from
         the name by this separator.
     always_include_label : bool, optional
-        allows autmatic adding of label and bbox
+        allows autmatic adding of label to the output
 
 
     Output
@@ -350,7 +350,7 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_includ
     >>> image = data.coins() > 110
     >>> label_image = measure.label(image, connectivity=image.ndim)
     >>> propslist = regionprops(label_image, image)
-    >>> props = to_dict(propslist, want=['label', 'inertia_tensor', 'inertia_tensor_eigvals'])
+    >>> props = to_dict(propslist, properties=['label', 'inertia_tensor', 'inertia_tensor_eigvals'])
     >>> props
     <output here>
 
@@ -365,19 +365,17 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_includ
 
 """
 
-    objects = {'image', 'coords', 'convex_image', 'filled_image',
+    object_columns = {'image', 'coords', 'convex_image', 'filled_image',
                'intensity_image'}
 
-    if always_include_label and 'label' not in want:
-        want = ('label',) + want
-    if always_include_label and 'bbox' not in want:
-        want = ('bbox',) + want
+    if always_include_label and 'label' not in properties:
+        properties = ('label',) + properties
 
     out = {}
     arr = len(regions) * [0]
-    for prop in want:
+    for prop in properties:
         r = regions[0][prop]
-        if np.isscalar(r) or prop in objects:
+        if np.isscalar(r) or prop in object_columns:
             out[prop] = [regions[i][prop] for i in range(len(arr))]
         else:
             if isinstance(r, np.ndarray):
@@ -394,14 +392,14 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_includ
 
 
 def regionprops_table(label_image, intensity_image=None, cache=True,
-                      want=('label', 'bbox'), separator='-',
+                      properties=('label', 'bbox'), separator='-',
                       always_include_label=True):
     """
     Refer to regionprops and _props_to_dict
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
                           cache=cache)
-    return _props_to_dict(regions, want=want, separator=separator,
+    return _props_to_dict(regions, properties=properties, separator=separator,
                           always_include_label=always_include_label)
 
 
