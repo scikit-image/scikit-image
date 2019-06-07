@@ -53,6 +53,7 @@ PROPS = {
     'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
+    'WeightedLocalCentroid': 'weighted_local_centroid',
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
@@ -96,6 +97,7 @@ COL_DTYPES = {
     'weighted_moments_central':'float',
     'weighted_centroid':'int',
     'weighted_moments_hu':'float',
+    'weighted_local_centroid':'int',
     'weighted_moments':'int',
     'weighted_moments_normalized':'float'
 }
