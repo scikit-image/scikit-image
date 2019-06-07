@@ -342,7 +342,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
 
     Output
     ------
-    A dictionary with properties in accordance to the wanted properties
+    out_dict : dict
+        Dictionary mapping property names to an array of values of that property, one per region.
+        This dictionary can be used as input to a pandas DataFrame, with keys mapping to columns.
 
     Examples
     --------
