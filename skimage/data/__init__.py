@@ -120,7 +120,7 @@ def grass():
 
     Returns
     -------
-    grass: (512, 512) uint8
+    grass: (512, 512) uint8 image
         Some grass.
 
     """
