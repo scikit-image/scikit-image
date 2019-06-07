@@ -323,7 +323,7 @@ class _RegionProperties(object):
         return True
 
 
-def _props_to_dict(regions, want=('label', 'bbox'), separator='-', cancel_auto=False):
+def _props_to_dict(regions, want=('label', 'bbox'), separator='-', always_include_label=True):
     """Convert image regions properties into a dictionary
 
     Parameters
@@ -334,8 +334,8 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', cancel_auto=F
         str of a property the user wants to include
     separator : str, optional
         used in joining coordinates
-    cancel_auto : bool, optional
-        prevents autmatic adding of label and bbox
+    always_include_label : bool, optional
+        allows autmatic adding of label and bbox
 
 
     Output
@@ -366,9 +366,9 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', cancel_auto=F
     objects = {'image', 'coords', 'convex_image', 'filled_image',
                'intensity_image'}
 
-    if not cancel_auto and 'label' not in want:
+    if always_include_label and 'label' not in want:
         want = ('label',) + want
-    if not cancel_auto and 'bbox' not in want:
+    if always_include_label and 'bbox' not in want:
         want = ('bbox',) + want
 
     out = {}
@@ -389,6 +389,18 @@ def _props_to_dict(regions, want=('label', 'bbox'), separator='-', cancel_auto=F
                 out[separator.join(map(str, (prop,) + ind))] = arr[:]
 
     return out
+
+
+def regionprops_table(label_image, intensity_image=None, cache=True,
+                      want=('label', 'bbox'), separator='-',
+                      always_include_label=True):
+    """
+    Refer to regionprops and _props_to_dict
+    """
+    regions = regionprops(label_image, intensity_image=intensity_image,
+                          cache=cache)
+    return _props_to_dict(regions, want=want, separator=separator,
+                          always_include_label=always_include_label)
 
 
 def regionprops(label_image, intensity_image=None, cache=True):

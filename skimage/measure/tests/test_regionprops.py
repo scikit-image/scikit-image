@@ -3,7 +3,8 @@ import functools
 
 import numpy as np
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs, _props_to_dict)
+                                          _parse_docs, _props_to_dict,
+                                          regionprops_table)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
@@ -486,14 +487,24 @@ def test_docstrings_and_props():
         assert_equal(nr_docs_parsed, 0)
 
 
-def test_to_dict():
+def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions)
     assert 'label' in out
     assert 'bbox-0' in out
 
     regions = regionprops(SAMPLE)
-    out = _props_to_dict(regions, ('area',), separator='+')
+    out = _props_to_dict(regions, want=('area',), separator='+')
+    assert 'label' in out
+    assert 'bbox+1' in out
+    assert 'area' in out
+
+def test_regionprops_table():
+    out = regionprops_table(SAMPLE)
+    assert 'label' in out
+    assert 'bbox-0' in out
+
+    out = regionprops_table(SAMPLE, want=('area',), separator='+')
     assert 'label' in out
     assert 'bbox+1' in out
     assert 'area' in out
