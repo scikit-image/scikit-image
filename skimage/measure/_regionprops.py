@@ -56,6 +56,49 @@ PROPS = {
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
+object_columns = {'image', 'coords', 'convex_image', 'filled_image',
+               'intensity_image'}
+
+COL_DTYPES = {
+    'area':'int',
+    'bbox':'int',
+    'bbox_area':'int',
+    'moments_central':'float',
+    'centroid':'int',
+    'convex_area':'int',
+    # 'ConvexHull',
+    'convex_image':'object',
+    'coords':'object',
+    'eccentricity':'float',
+    'equivalent_diameter':'float',
+    'euler_number':'int',
+    'extent':'float',
+    # 'Extrema',
+    'filled_area':'int',
+    'filled_image':'object',
+    'moments_hu':'float',
+    'image':'object',
+    'label':'int',
+    'major_axis_length':'float',
+    'max_intensity':'float',
+    'mean_intensity':'float',
+    'min_intensity':'float',
+    'minor_axis_length':'float',
+    'moments':'float',
+    'moments_normalized':'float',
+    'orientation':'float',
+    'perimeter':'float',
+    # 'PixelIdxList',
+    # 'PixelList',
+    'slice':'slice',
+    'Solidity': 'float',
+    # 'SubarrayIdx'
+    'weighted_moments_central':'float',
+    'weighted_centroid':'int',
+    'weighted_moments_hu':'float',
+    'weighted_moments':'int',
+    'weighted_moments_normalized':'float'
+}
 
 PROP_VALS = set(PROPS.values())
 
@@ -374,11 +417,16 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
         properties = ('label',) + properties
 
     out = {}
-    arr = len(regions) * [0]
+    n = len(regions)
     for prop in properties:
+        dtype = COL_DTYPES[prop]
+        column_buffer = np.zeros(n, dtype=dtype) 
         r = regions[0][prop]
         if np.isscalar(r) or prop in object_columns:
-            out[prop] = [regions[i][prop] for i in range(len(arr))]
+            for i in range(n):
+                print(len(regions),i)
+                column_buffer[i] = regions[i][prop]
+            out[prop] = np.copy(column_buffer)
         else:
             if isinstance(r, np.ndarray):
                 shape = r.shape
@@ -386,9 +434,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
                 shape = (len(r),)
 
             for ind in np.ndindex(shape):
-                for k in range(len(arr)):
-                    arr[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
-                out[separator.join(map(str, (prop,) + ind))] = arr[:]
+                for k in range(n):
+                    column_buffer[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
+                out[separator.join(map(str, (prop,) + ind))] = np.copy(column_buffer)
 
     return out
 
