@@ -113,15 +113,16 @@ def brick():
     The downloaded image was then imported into GIMP, rotated by 90 degrees,
     and a perspective transform was also applied. Finally, the color image was
     converted to grayscale in GIMP and cropped to include a region the size of
-    ``(1024, 1024)`` pixels prior to saving the result in PNG format.
+    ``(1024, 1024)`` and rescaled to ``(512, 512)`` pixels prior to saving the
+    result in PNG format.
 
     Returns
     -------
-    brick: (1024, 1024) uint8 image
+    brick: (512, 512) uint8 image
         A small section of a brick wall.
 
     """
-    return load("brick.png")
+    return load("brick.png", as_gray=True)
 
 
 def grass():
@@ -132,15 +133,16 @@ def grass():
     and licensed underthe Creative Commons CC0 License.
 
     The downloaded image was then imported to GIMP and converted from color
-    to grayscale prior to saving the result in PNG format.
+    to grayscale and the image was cropped to include only the top left
+    ``(512, 512)`` region prior to saving the result in PNG format.
 
     Returns
     -------
-    grass: (1024, 1024) uint8 image
+    grass: (512, 512) uint8 image
         Some grass.
 
     """
-    return load("grass.png")
+    return load("grass.png", as_gray=True)
 
 
 def rough_wall():
