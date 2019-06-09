@@ -106,9 +106,18 @@ def astronaut():
 def brick():
     """Brick wall.
 
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>` and licensed
+    under the Creative Commons CC0 License.
+
+    The downloaded image was then imported into GIMP, rotated by 90 degrees,
+    and a perspective transform was also applied. Finally, the color image was
+    converted to grayscale in GIMP and cropped to include a region the size of
+    ``(1024, 1024)`` pixels prior to saving the result in PNG format.
+
     Returns
     -------
-    brick: (512, 512) uint8 image
+    brick: (1024, 1024) uint8 image
         A small section of a brick wall.
 
     """
