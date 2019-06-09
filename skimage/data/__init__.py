@@ -127,9 +127,16 @@ def brick():
 def grass():
     """Grass.
 
+    The original image was downloaded from
+    `DeviantArt <https://www.deviantart.com/linolafett/art/Grass-01-434853879>`__
+    and licensed underthe Creative Commons CC0 License.
+
+    The downloaded image was then imported to GIMP and converted from color
+    to grayscale prior to saving the result in PNG format.
+
     Returns
     -------
-    grass: (512, 512) uint8 image
+    grass: (1024, 1024) uint8 image
         Some grass.
 
     """
