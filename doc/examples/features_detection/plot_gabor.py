@@ -56,15 +56,15 @@ for theta in range(4):
 shrink = (slice(0, None, 3), slice(0, None, 3))
 brick = img_as_float(data.brick())[shrink]
 grass = img_as_float(data.grass())[shrink]
-wall = img_as_float(data.rough_wall())[shrink]
-image_names = ('brick', 'grass', 'wall')
-images = (brick, grass, wall)
+gravel = img_as_float(data.gravel())[shrink]
+image_names = ('brick', 'grass', 'gravel')
+images = (brick, grass, gravel)
 
 # prepare reference features
 ref_feats = np.zeros((3, len(kernels), 2), dtype=np.double)
 ref_feats[0, :, :] = compute_feats(brick, kernels)
 ref_feats[1, :, :] = compute_feats(grass, kernels)
-ref_feats[2, :, :] = compute_feats(wall, kernels)
+ref_feats[2, :, :] = compute_feats(gravel, kernels)
 
 print('Rotated images matched against references using Gabor filter banks:')
 

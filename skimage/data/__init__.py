@@ -32,6 +32,7 @@ __all__ = ['data_dir',
            'coins',
            'colorwheel',
            'grass',
+           'gravel',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
@@ -154,8 +155,30 @@ def rough_wall():
         Some rough wall.
 
     """
-    return load("rough-wall.png")
+    from warnings import warn
+    warn("The rough_wall dataset has been removed due to licensing concerns."
+         "It has been replaced with the gravel dataset. This warning message"
+         "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
+    return gravel()
 
+def gravel():
+    """Gravel
+
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Gravel04>`__ and
+    licensed under the Creative Commons CC0 License.
+
+    The downloaded image was then imported to GIMP and converted from color
+    to grayscale and the image was rescaled to ``(1024, 1024)`` then the
+    top left ``(512, 512)`` pixel region  was cropped prior to saving the
+    result in PNG format.
+
+    Returns
+    -------
+    gravel: (512, 512) uint8 image
+        Grayscale gravel sample.
+    """
+    return load("gravel.png", as_gray=True)
 
 def text():
     """Gray-level "text" image used for corner detection.

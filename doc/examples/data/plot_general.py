@@ -24,12 +24,12 @@ images = ('astronaut',
           'coffee',
           'coins',
           'grass',
+          'gravel',
           'horse',
           'logo',
           'page',
           'text',
           'rocket',
-          'rough_wall',
           )
 
 

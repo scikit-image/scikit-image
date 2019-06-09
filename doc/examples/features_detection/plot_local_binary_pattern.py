@@ -179,12 +179,12 @@ def match(refs, img):
 
 brick = data.brick()
 grass = data.grass()
-wall = data.rough_wall()
+gravel = data.gravel()
 
 refs = {
     'brick': local_binary_pattern(brick, n_points, radius, METHOD),
     'grass': local_binary_pattern(grass, n_points, radius, METHOD),
-    'wall': local_binary_pattern(wall, n_points, radius, METHOD)
+    'gravel': local_binary_pattern(gravel, n_points, radius, METHOD)
 }
 
 # classify rotated textures
@@ -211,8 +211,8 @@ ax2.axis('off')
 hist(ax5, refs['grass'])
 ax5.set_xlabel('Uniform LBP values')
 
-ax3.imshow(wall)
+ax3.imshow(gravel)
 ax3.axis('off')
-hist(ax6, refs['wall'])
+hist(ax6, refs['gravel'])
 
 plt.show()
