@@ -8,17 +8,13 @@ from skimage.io.collection import MultiImage, ImageCollection
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose, TestCase
 
-def setup():
-    use_plugin('pil')
-
-def teardown():
-    reset_plugins()
-
 
 class TestMultiImage(TestCase):
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
+        use_plugin('pil')
+        use_plugin('simpleitk')
         paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
                  os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
         self.imgs = [MultiImage(paths[0]),
@@ -28,6 +24,7 @@ class TestMultiImage(TestCase):
                      ImageCollection(paths[0]),
                      ImageCollection(paths[1], conserve_memory=False),
                      ImageCollection(os.pathsep.join(paths))]
+        reset_plugins()
 
     def test_shapes(self):
         img = self.imgs[-1]
