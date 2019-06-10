@@ -9,6 +9,8 @@ from skimage._shared.testing import assert_equal
 
 
 priority_plugin = 'pil'
+
+
 def setup():
     io.use_plugin('pil')
 

@@ -14,7 +14,6 @@ class TestMultiImage(TestCase):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
         use_plugin('pil')
-        use_plugin('simpleitk')
         paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
                  os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
         self.imgs = [MultiImage(paths[0]),
