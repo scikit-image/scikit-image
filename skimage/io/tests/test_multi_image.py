@@ -2,18 +2,23 @@ import os
 
 import numpy as np
 from skimage import data_dir
-from skimage.io import use_plugin
+from skimage.io import use_plugin, reset_plugins
 from skimage.io.collection import MultiImage, ImageCollection
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose, TestCase
+
+def setup():
+    use_plugin('pil')
+
+def teardown():
+    reset_plugins()
 
 
 class TestMultiImage(TestCase):
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        use_plugin('pil')
         paths = [os.path.join(data_dir, 'multipage_rgb.tif'),
                  os.path.join(data_dir, 'no_time_for_that_tiny.gif')]
         self.imgs = [MultiImage(paths[0]),
