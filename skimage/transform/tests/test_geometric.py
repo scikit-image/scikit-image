@@ -483,16 +483,25 @@ def test_projective_repr():
             [0., 1., 0.],
             [0., 0., 1.]]) at
         ''').strip()) + ' 0x[a-f0-9]+' + re.escape('>')
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
     assert re.match(want, repr(tform))
 
 
 def test_projective_str():
     tform = ProjectiveTransform()
-    want = textwrap.dedent(
+    want = re.escape(textwrap.dedent(
         '''
         <ProjectiveTransform(matrix=[
             [1., 0., 0.],
             [0., 1., 0.],
             [0., 0., 1.]])>
-        ''').strip()
-    assert str(tform) == want
+        ''').strip())
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
+    print(want)
+    assert re.match(want, str(tform))

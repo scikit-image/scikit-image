@@ -721,7 +721,6 @@ class ProjectiveTransform(GeometricTransform):
 
     def __nice__(self):
         """ common 'paramstr' used by __str__ and __repr__ """
-        # paramstr = str(self.params.tolist())  # original proposal
         npstring = np.array2string(self.params, separator=', ')
         # add a newline and indentation after the first square braket to ensure
         # the columns of the params matrix are aligned in the repr
@@ -735,8 +734,6 @@ class ProjectiveTransform(GeometricTransform):
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        # modname = self.__class__.__module__  # uncomment for more verbosity
-        # classstr = modname + '.' + classname
         return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
 
     def __str__(self):
@@ -744,8 +741,6 @@ class ProjectiveTransform(GeometricTransform):
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        # modname = self.__class__.__module__  # uncomment for more verbosity
-        # classstr = modname + '.' + classname
         return '<{}({})>'.format(classstr, paramstr)
 
 
