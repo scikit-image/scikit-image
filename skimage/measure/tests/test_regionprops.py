@@ -2,6 +2,7 @@ import math
 import functools
 
 import numpy as np
+from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table)
@@ -490,21 +491,24 @@ def test_docstrings_and_props():
 def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions)
-    assert 'label' in out
-    assert 'bbox-0' in out
+    assert out == {'label': array([1]),
+                   'bbox-0': array([0]), 'bbox-1': array([0]),
+                   'bbox-2': array([10]), 'bbox-3': array([18])}
+
 
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('area','bbox'), separator='+')
-    assert 'label' in out
-    assert 'bbox+1' in out
-    assert 'area' in out
+    assert out=={'label': array([1]), 'area': array([180]),
+                 'bbox+0': array([0]), 'bbox+1': array([0]),
+                 'bbox+2': array([10]), 'bbox+3': array([18])}
 
 def test_regionprops_table():
     out = regionprops_table(SAMPLE)
-    assert 'label' in out
-    assert 'bbox-0' in out
+    assert out == {'label': array([1]),
+                   'bbox-0': array([0]), 'bbox-1': array([0]),
+                   'bbox-2': array([10]), 'bbox-3': array([18])}
 
     out = regionprops_table(SAMPLE, properties=('area','bbox'), separator='+')
-    assert 'label' in out
-    assert 'bbox+1' in out
-    assert 'area' in out
+    assert out=={'label': array([1]), 'area': array([180]),
+                 'bbox+0': array([0]), 'bbox+1': array([0]),
+                 'bbox+2': array([10]), 'bbox+3': array([18])}

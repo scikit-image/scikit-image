@@ -35,6 +35,8 @@ PROPS = {
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
     'Image': 'image',
+    'InertiaTensor':'inertia_tensor',
+    'InertiaTensorEigvals':'inertia_tensor_eigvals',
     'Label': 'label',
     'MajorAxisLength': 'major_axis_length',
     'MaxIntensity': 'max_intensity',
@@ -79,6 +81,8 @@ COL_DTYPES = {
     'filled_image':'object',
     'moments_hu':'float',
     'image':'object',
+    'inertia_tensor':'float',
+    'inertia_tensor_eigvals':'float',
     'label':'int',
     'major_axis_length':'float',
     'max_intensity':'float',
@@ -422,11 +426,13 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
     n = len(regions)
     for prop in properties:
         dtype = COL_DTYPES[prop]
-        column_buffer = np.zeros(n, dtype=dtype) 
-        r = regions[0][prop]
+        column_buffer = np.zeros(n, dtype=dtype)
+        try:
+            r = regions[0][prop]
+        except:
+            print(regions)
         if np.isscalar(r) or prop in object_columns:
             for i in range(n):
-                print(len(regions),i)
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
         else:
@@ -439,7 +445,6 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
                 for k in range(n):
                     column_buffer[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
                 out[separator.join(map(str, (prop,) + ind))] = np.copy(column_buffer)
-
     return out
 
 
