@@ -427,10 +427,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
     for prop in properties:
         dtype = COL_DTYPES[prop]
         column_buffer = np.zeros(n, dtype=dtype)
-        try:
-            r = regions[0][prop]
-        except:
-            print(regions)
+        r = regions[0][prop]
         if np.isscalar(r) or prop in object_columns:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
