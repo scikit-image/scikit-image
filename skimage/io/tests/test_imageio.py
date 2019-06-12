@@ -29,15 +29,12 @@ def teardown():
 
 
 @testing.skipif(not imageio_available, reason="imageio not installed")
-def test_imageio_flatten():
-    # a color image is flattened (as_gray in .16)
-    with expected_warnings(['`flatten` has been deprecated']):
-        img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+def test_imageio_as_gray():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    with expected_warnings(['`flatten` has been deprecated']):
-        img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
-    # check that flattening does not occur for an image that is grey already.
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
@@ -77,3 +74,10 @@ class TestSave(TestCase):
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
+
+
+def test_return_class():
+    testing.assert_equal(
+        type(imread(os.path.join(data_dir, 'color.png'))),
+        np.ndarray
+    )

@@ -2,14 +2,10 @@ import math
 import functools
 
 import numpy as np
-from skimage.measure._regionprops import (regionprops as regionprops_default,
-                                          PROPS, perimeter)
+from skimage.measure._regionprops import (regionprops, PROPS, perimeter)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
-
-
-regionprops = functools.partial(regionprops_default, coordinates='rc')
 
 
 SAMPLE = np.array(
@@ -32,6 +28,21 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+SAMPLE_MULTI_REGION = np.array(
+    [[5, 0, 1, 0, 2],
+     [5, 1, 3, 3, 0],
+     [5, 1, 3, 3, 0],
+     [5, 0, 0, 3, 3],
+     [0, 0, 0, 0, 0]]
+)
+
+SAMPLE_MULTI_REGION_3_ONLY = np.array(
+    [[0, 0, 0, 0, 0],
+     [0, 0, 3, 3, 0],
+     [0, 0, 3, 3, 0],
+     [0, 0, 0, 3, 3],
+     [0, 0, 0, 0, 0]]
+)
 
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
@@ -213,13 +224,17 @@ def test_moments_hu():
     assert_array_almost_equal(hu, ref)
 
 
-def test_image():
-    img = regionprops(SAMPLE)[0].image
+def test_bounded_mask():
+    img = regionprops(SAMPLE)[0].bounded_mask
     assert_array_equal(img, SAMPLE)
 
-    img = regionprops(SAMPLE_3D)[0].image
+    img = regionprops(SAMPLE_3D)[0].bounded_mask
     assert_array_equal(img, SAMPLE_3D[1:4, 1:3, 1:3])
 
+def test_full_mask():
+    
+    img = regionprops(SAMPLE_MULTI_REGION)[2]
+    assert_array_equal(img.full_mask, SAMPLE_MULTI_REGION_3_ONLY.astype(bool))
 
 def test_label():
     label = regionprops(SAMPLE)[0].label
@@ -277,50 +292,46 @@ def test_minor_axis_length():
 
 
 def test_moments():
-    m = regionprops(SAMPLE)[0].moments.T  # test was written with x/y coords
+    m = regionprops(SAMPLE)[0].moments
     # determined with OpenCV
     assert_almost_equal(m[0, 0], 72.0)
-    assert_almost_equal(m[0, 1], 408.0)
-    assert_almost_equal(m[0, 2], 2748.0)
-    assert_almost_equal(m[0, 3], 19776.0)
-    assert_almost_equal(m[1, 0], 680.0)
+    assert_almost_equal(m[0, 1], 680.0)
+    assert_almost_equal(m[0, 2], 7682.0)
+    assert_almost_equal(m[0, 3], 95588.0)
+    assert_almost_equal(m[1, 0], 408.0)
     assert_almost_equal(m[1, 1], 3766.0)
-    assert_almost_equal(m[1, 2], 24836.0)
-    assert_almost_equal(m[2, 0], 7682.0)
-    assert_almost_equal(m[2, 1], 43882.0)
-    assert_almost_equal(m[3, 0], 95588.0)
+    assert_almost_equal(m[1, 2], 43882.0)
+    assert_almost_equal(m[2, 0], 2748.0)
+    assert_almost_equal(m[2, 1], 24836.0)
+    assert_almost_equal(m[3, 0], 19776.0)
 
 
 def test_moments_normalized():
-    # test was written with x/y coords
-    nu = regionprops(SAMPLE)[0].moments_normalized.T
-    
+    nu = regionprops(SAMPLE)[0].moments_normalized
+
     # determined with OpenCV
-    assert_almost_equal(nu[0, 2], 0.08410493827160502)
+    assert_almost_equal(nu[0, 2], 0.24301268861454037)
+    assert_almost_equal(nu[0, 3], -0.017278118992041805)
     assert_almost_equal(nu[1, 1], -0.016846707818929982)
-    assert_almost_equal(nu[1, 2], -0.002899800614433943)
-    assert_almost_equal(nu[2, 0], 0.24301268861454037)
-    assert_almost_equal(nu[2, 1], 0.045473992910668816)
-    assert_almost_equal(nu[3, 0], -0.017278118992041805)
+    assert_almost_equal(nu[1, 2], 0.045473992910668816)
+    assert_almost_equal(nu[2, 0], 0.08410493827160502)
+    assert_almost_equal(nu[2, 1], -0.002899800614433943)
 
 
 def test_orientation():
-    orientation = regionprops(SAMPLE, coordinates='xy')[0].orientation
+    orient = regionprops(SAMPLE)[0].orientation
     # determined with MATLAB
-    assert_almost_equal(orientation, 0.10446844651921)
-    # test correct quadrant determination
-    orientation2 = regionprops(SAMPLE, coordinates='rc')[0].orientation
-    assert_almost_equal(orientation2, -math.pi / 2 + orientation)
+    assert_almost_equal(orient, -1.4663278802756865)
     # test diagonal regions
     diag = np.eye(10, dtype=int)
-    orientation_diag = regionprops(diag, coordinates='xy')[0].orientation
-    assert_almost_equal(orientation_diag, -math.pi / 4)
-    orientation_diag = regionprops(np.flipud(diag))[0].orientation
-    assert_almost_equal(orientation_diag, math.pi / 4)
-    orientation_diag = regionprops(np.fliplr(diag))[0].orientation
-    assert_almost_equal(orientation_diag, math.pi / 4)
-    orientation_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
-    assert_almost_equal(orientation_diag, -math.pi / 4)
+    orient_diag = regionprops(diag)[0].orientation
+    assert_almost_equal(orient_diag, -math.pi / 4)
+    orient_diag = regionprops(np.flipud(diag))[0].orientation
+    assert_almost_equal(orient_diag, math.pi / 4)
+    orient_diag = regionprops(np.fliplr(diag))[0].orientation
+    assert_almost_equal(orient_diag, math.pi / 4)
+    orient_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
+    assert_almost_equal(orient_diag, -math.pi / 4)
 
 
 def test_perimeter():
@@ -339,17 +350,17 @@ def test_solidity():
 
 def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_central.T  # test used x/y coords
+                      )[0].weighted_moments_central
     ref = np.array(
-        [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
-            -7.5943608473e+02],
-         [  3.7303493627e-14, -8.7837837838e+01, -1.4801314828e+02,
-            -1.2714707125e+03],
-         [  1.2602837838e+03,  2.1571526662e+03,  6.6989799420e+03,
-             1.5304076361e+04],
-         [ -7.6561796932e+02, -4.2385971907e+03, -9.9501164076e+03,
-            -3.3156729271e+04]]
-    )
+        [[7.4000000000e+01, 3.7303493627e-14, 1.2602837838e+03,
+          -7.6561796932e+02],
+         [-2.1316282073e-13, -8.7837837838e+01, 2.1571526662e+03,
+          -4.2385971907e+03],
+         [4.7837837838e+02, -1.4801314828e+02, 6.6989799420e+03,
+          -9.9501164076e+03],
+         [-7.5943608473e+02, -1.2714707125e+03, 1.5304076361e+04,
+          -3.3156729271e+04]])
+
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
@@ -377,28 +388,24 @@ def test_weighted_moments_hu():
 
 def test_weighted_moments():
     wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                     )[0].weighted_moments.T  # test used x/y coords
+                     )[0].weighted_moments
     ref = np.array(
-        [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
-            1.9778000000e+04],
-         [  6.9900000000e+02, 3.7850000000e+03, 2.4855000000e+04,
-            1.7500100000e+05],
-         [  7.8630000000e+03, 4.4063000000e+04, 2.9347700000e+05,
-            2.0810510000e+06],
-         [  9.7317000000e+04, 5.7256700000e+05, 3.9007170000e+06,
-            2.8078871000e+07]]
+        [[7.4000000e+01, 6.9900000e+02, 7.8630000e+03, 9.7317000e+04],
+         [4.1000000e+02, 3.7850000e+03, 4.4063000e+04, 5.7256700e+05],
+         [2.7500000e+03, 2.4855000e+04, 2.9347700e+05, 3.9007170e+06],
+         [1.9778000e+04, 1.7500100e+05, 2.0810510e+06, 2.8078871e+07]]
     )
     assert_array_almost_equal(wm, ref)
 
 
 def test_weighted_moments_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_moments_normalized.T  # test used x/y coord
+                      )[0].weighted_moments_normalized
     ref = np.array(
-        [[       np.nan,        np.nan,  0.0873590903, -0.0161217406],
-         [       np.nan, -0.0160405109, -0.0031421072, -0.0031376984],
-         [  0.230146783,  0.0457932622,  0.0165315478,  0.0043903193],
-         [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
+        [[       np.nan,        np.nan, 0.2301467830, -0.0162529732],
+         [       np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
+         [ 0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
+         [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
 
@@ -433,54 +440,51 @@ def test_invalid_size():
         regionprops(SAMPLE, wrong_intensity_sample)
 
 
-def test_equals():
-    arr = np.zeros((100, 100), dtype=np.int)
-    arr[0:25, 0:25] = 1
-    arr[50:99, 50:99] = 2
+# def test_equals():
+    # arr = np.zeros((100, 100), dtype=np.int)
+    # arr[0:25, 0:25] = 1
+    # arr[50:99, 50:99] = 2
 
-    regions = regionprops(arr)
-    r1 = regions[0]
+    # regions = regionprops(arr)
+    # r1 = regions[0]
 
-    regions = regionprops(arr)
-    r2 = regions[0]
-    r3 = regions[1]
+    # regions = regionprops(arr)
+    # r2 = regions[0]
+    # r3 = regions[1]
 
-    assert_equal(r1 == r2, True, "Same regionprops are not equal")
-    assert_equal(r1 != r3, True, "Different regionprops are equal")
+    # assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    # assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
-def test_iterate_all_props():
-    region = regionprops(SAMPLE)[0]
-    p0 = {p: region[p] for p in region}
+# def test_iterate_all_props():
+    # region = regionprops(SAMPLE)[0]
+    # p0 = {p: region[p] for p in region}
 
-    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
-    p1 = {p: region[p] for p in region}
+    # region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    # p1 = {p: region[p] for p in region}
 
-    assert len(p0) < len(p1)
+    # assert len(p0) < len(p1)
+
     
 def test_cache_on():
     region = regionprops(SAMPLE, cache=True)[0]
-    f0 = region.filled_image
+    a0 = region.area
     
     # Make sure object is put into cache
-    assert 'filled_image' in region._cache
+    assert 'area' in region._cache
     
-    f1 = region._cache['filled_image']
-    assert_array_equal( f0, f1 )
-    assert f0 is f1
+    a1 = region._cache['area']
+    assert_equal( a0, a1 )
+    assert a0 is a1
 
 def test_cache_off():
     region = regionprops(SAMPLE, cache=False)[0]
-    items_before = len(region._cache)
+    a0 = region.area
     
-    f0 = region.filled_image
-    f1 = region.filled_image
+    # Make sure object is not in cache
+    assert 'area' not in region._cache
+    assert len(region._cache) == 0
     
-    items_after = len(region._cache)
-    
-    assert items_before != items_after
-    assert not f0 is f1
-    assert_array_equal( f0, f1 )
 
 # def test_docstrings_and_props():
     # def foo():
@@ -503,7 +507,3 @@ def test_cache_off():
     # else:
         # assert_equal(nr_docs_parsed, 0)
 
-
-def test_incorrect_coordinate_convention():
-    with testing.raises(ValueError):
-        regionprops_default(SAMPLE, coordinates='xyz')[0]

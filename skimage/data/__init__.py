@@ -44,7 +44,7 @@ __all__ = ['data_dir',
            'stereo_motorcycle']
 
 
-def load(f, as_gray=False, as_grey=None):
+def load(f, as_gray=False):
     """Load an image file located in the data directory.
 
     Parameters
@@ -52,22 +52,13 @@ def load(f, as_gray=False, as_grey=None):
     f : string
         File name.
     as_gray : bool, optional
-        Convert to grayscale.
-    as_grey : bool or None, optional
-        Deprecated keyword argument. Use `as_gray` instead.
-        If None, `as_gray` is used.
-        Convert to grayscale.
+        Whether to convert the image to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
-    if as_grey is not None:
-        as_gray = as_grey
-        warn('`as_grey` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
-
     use_plugin('pil')
     return imread(_os.path.join(data_dir, f), as_gray=as_gray)
 
@@ -239,8 +230,7 @@ def horse():
     This image was downloaded from
     `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
 
-    Released into public domain and drawn and uploaded by Andreas Preuss
-    (marauder).
+    No copyright restrictions. CC0 given by owner (Andreas Preuss (marauder)).
 
     Returns
     -------

@@ -28,13 +28,12 @@ def teardown():
 
 
 @testing.skipif(not imread_available, reason="imageread not installed")
-def test_imread_flatten():
-    # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+def test_imread_as_gray():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
-    # check that flattening does not occur for an image that is grey already.
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 

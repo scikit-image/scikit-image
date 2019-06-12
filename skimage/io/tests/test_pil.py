@@ -52,20 +52,12 @@ def test_png_round_trip():
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
-def test_img_as_gray_flatten():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
-    with expected_warnings(['deprecated']):
-        img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
-    assert_array_equal(img, img_flat)
-
-
-def test_imread_flatten():
-    # a color image is flattened
+def test_imread_as_gray():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
     img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
-    # check that flattening does not occur for an image that is grey already.
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 

@@ -1,25 +1,14 @@
 from math import sqrt, atan2, pi as PI
-import itertools
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
 
-
 from functools import wraps
 
 __all__ = ['regionprops', 'perimeter']
 
-
-XY_TO_RC_DEPRECATION_MESSAGE = (
-    'regionprops and image moments (including moments, normalized moments, '
-    'central moments, and inertia tensor) of 2D images will change from xy '
-    'coordinates to rc coordinates in version 0.16.\nSee '
-    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
-    'for details on how to avoid this message.'
-)
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
                     [0, 1, 0]], dtype=np.uint8)
@@ -66,24 +55,40 @@ PROPS = {
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
-PROP_VALS = set(PROPS.values())
+#PROP_VALS = set(PROPS.values())
 
 
-def _cached(f):
+#def _cached(f):
+#    @wraps(f)
+#    def wrapper(obj):
+#        cache = obj._cache
+#        prop = f.__name__
+#
+#        if not ((prop in cache) and obj._cache_active):
+#            cache[prop] = f(obj)
+#
+#        return cache[prop]
+#
+#    return wrapper
+        
+def _cached_property(f):
+    """Decorator for caching computationally expensive properties"""
     @wraps(f)
-    def wrapper(obj):
-        cache = obj._cache
-        prop = f.__name__
-
-        if not ((prop in cache) and obj._cache_active):
-            cache[prop] = f(obj)
-
-        return cache[prop]
-
-    return wrapper
-
+    def caching_wrapper(obj):
+        if obj._cache_active:
+            try:
+                return obj._cache[f.__name__]
+                # Found in cache
+            except KeyError:
+                # Add to cache
+                obj._cache[f.__name__] = f(obj)
+                return obj._cache[f.__name__]
+        else:
+            return f(obj)
+    return caching_wrapper
 
 def only2d(method):
+    """Decorator for raising an exception if property is calculted on a non-2D image"""
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
@@ -92,164 +97,164 @@ def only2d(method):
         return method(self, *args, **kwargs)
     return func2d
 
-def requires_intensity_image(method):
-    @wraps(method)
-    def funcIntensity(self, *args, **kwargs):
-        if self._intensity_image is None:
-            raise AttributeError('No intensity image specified.')
-        return method(self, *args, **kwargs)
-    return funcIntensity
 
-class _RegionProperties(object):
-    """Please refer to `skimage.measure.regionprops` for more information
-    on the available region properties.
+class Region(object):
+    """ Represents a region of an image and provides methods to calculate various properties of this region.
+        
+        Region objects are typically instantiated from ``regionprops``, and not directly.
+        
+        The region described is that labeled with a given integer ``label``, given array ``label_image``
+        in which the value at each point corresponds to an integer label. The labeled region should be
+        bounded by ``slice``. The original ``intensity_image`` may also be supplied for properties requiring this.
+        
+        For documentation of remaining initilizer parameters, see ``regionprops`` documentation.      
+        
+        Each region also supports iteration, so that you can do::
+            for prop in region:
+                print(prop, region[prop])
+        
     """
-
-    def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, coordinates):
-
+    def __init__(self, slice, label, label_image, intensity_image, cache_active):
+        
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
                 raise ValueError('Label and intensity image must have the'
-                                 'same shape.')
-        
-        self._image = label_image[slice] == label # Pre-slice on init so original labeled image does not need to be retained
-        # Pack if cache not enabled
-        if not cache_active:
-            self._image = np.packbits(self._image, axis=None)
-        
-        
+                                 ' same shape.')
+         
         self._original_shape = label_image.shape
-        self._original_size = label_image.size
+        #self._original_size = label_image.size
+
         self._label = label
         self._slice = slice
+        self.slice = slice
+        self._ndim = label_image.ndim
+
         self._intensity_image = intensity_image
 
         self._cache_active = cache_active
         self._cache = {}
-        self._ndim = label_image.ndim
-        # Note: in PR 2603, we added support for nD moments in regionprops.
-        # Many properties used xy coordinates, instead of rc. This attribute
-        # helps with the deprecation process and should be removed in 0.16.
-        if label_image.ndim > 2 or coordinates == 'rc':
-            self._use_xy_warning = False
-            self._transpose_moments = False
-        elif coordinates == 'xy':
-            self._use_xy_warning = False  # don't warn if 'xy' given explicitly
-            self._transpose_moments = True
-        elif coordinates is None:
-            self._use_xy_warning = True
-            self._transpose_moments = True
+        
+        # Make slice on init so original labeled image can be de-referenced
+        if cache_active:
+            bounded_mask = label_image[slice] == label
+            # standard numpy bool uses 1 byte per value, so packing into integers causes 8 times less memory to be used.
+            self._mask_shape = bounded_mask.shape
+            self._bounded_mask_packed = np.packbits(bounded_mask, axis=None)
+            self._label_image = None  # original label image not set. If de-referenced elsewhere then memory usage will be reduced.
         else:
-            raise ValueError('Incorrect value for regionprops coordinates: %s.'
-                             ' Possible values are: "rc", "xy", or None')
-    
+            self._bounded_mask_packed = None
+            self._label_image = label_image
+
     @property
-    @_cached
-    def image(self):
+    def bounded_mask(self):
+        """A binary mask of the image region in the bounding box.
+           The size is the same as the bounding box of the region.
         """
-        image : (H, J) ndarray
-            Sliced binary region image which has the same size as bounding box.
-        """
-        if not self._cache_active:
-            im = np.unpackbits(self._image, axis=None)[:self._original_size]
-            im = im.reshape(self._original_shape)
-            im = im.astype(np.bool)
-        else:
-            im = self._image
-        return im
-    
+        
+        # When cache enabled, unpack and return cached mask
+        if self._bounded_mask_packed is not None:
+            size = np.prod(self._mask_shape)
+            bounded_mask = np.unpackbits(self._bounded_mask_packed, axis=None)[:size].reshape(self._mask_shape).astype(np.bool)
+        else: # Otherwise, slice on demand
+            bounded_mask = self._label_image[self.slice] == self.label
+        
+        return bounded_mask
+
     @property
     def label(self):
-        """
-        label : int
-            The original integer label from the labeled input image.
-        """
+        """Original integer label for this region"""
         return self._label
-    
-    @property
-    def slice(self):
-        """
-        slice : tuple of slices
-            A slice to extract the object from the original source image.
-        """
-        return self._slice
-    
-    @property
-    @_cached
-    def area(self):
-        """
-        area : int
-            Number of pixels of the region.
-        """
-        return np.sum(self.image)
 
+    @property
+    def image(self):
+        """ Same as bounded_mask. (Retined for backwards compatability) """
+        return self.bounded_mask
+
+    @property
+    def full_mask(self):
+        """A binary mask of the image region in the original labeled image.
+           The size is the same as the original labeled image.
+        """
+        
+        mask = np.zeros(self._original_shape).astype(bool)
+        mask[self._slice] = self.bounded_mask
+        return mask
+
+    @property
+    @_cached_property
+    def area(self):
+        """Number of pixels in the region"""
+        
+        # TODO: Possible speedup -- accelerate by counting bits in packed array
+        return np.sum(self.bounded_mask)
+    
     @property
     def bbox(self):
         """
-        bbox : tuple
-            A tuple of the bounding box's start coordinates for each dimension, followed by the end coordinates for each dimension. I.e.
-            ``(min_row, min_col, max_row, max_col)``.           
-            Pixels belonging to the bounding box are in the half-open interval
+        A tuple of the bounding box's start coordinates for each dimension,
+        followed by the end coordinates for each dimension, i.e:
+            ``(min_row, min_col, max_row, max_col)``.
+        Pixels belonging to the bounding box are in the half-open interval
             ``[min_row; max_row)`` and ``[min_col; max_col)``.
         """
         return tuple([self.slice[i].start for i in range(self._ndim)] +
                      [self.slice[i].stop for i in range(self._ndim)])
-
+    
     @property
     def bbox_area(self):
-        """
-        bbox_area : int
-            Number of pixels in the bounding box.
-        """
-        return self.image.size
-
+        """Number of pixels in the bounding box"""
+        
+        # TODO: Faster
+        return self.bounded_mask.size
+        
+    
     @property
     def centroid(self):
         """
-        centroid : tuple
-            Tuple containing the coordinate of the region centroid in labeled image ``(row, col)``.
+        Centroid coordinate tuple ``(row, col)``.
         """
         return tuple(self.coords.mean(axis=0))
 
     @property
-    @_cached
+    @_cached_property
     def convex_area(self):
         """
-        convex_image : (H, J) ndarray
-            Binary convex hull image which has the same size as bounding box.
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
+        Returns : ``int``
         """
         return np.sum(self.convex_image)
 
     @property
-    @_cached
+    @_cached_property
     def convex_image(self):
         """
-        convex_image : (H, J) ndarray
-            Binary convex hull image which has the same size as bounding box.
+        Binary convex hull image which has the same size as bounding box.
+        Returns : ``(H, J) ndarray``
         """
         from ..morphology.convex_hull import convex_hull_image
-        return convex_hull_image(self.image)
+        return convex_hull_image(self.bounded_mask)
 
     @property
     def coords(self):
         """
-        coords : (N, 2) ndarray
-            Coordinate list ``(row, col)`` of the pixels in the region.
+        Coordinate list ``(row, col)`` of the region.
+        Returns : ``(N, 2) ndarray``
         """
-        indices = np.nonzero(self.image)
+        indices = np.nonzero(self.bounded_mask)
         return np.vstack([indices[i] + self.slice[i].start
                           for i in range(self._ndim)]).T
-    
+
     @property
     @only2d
     def eccentricity(self):
         """
-        eccentricity : float
-            Eccentricity of the ellipse that has the same second-moments as the region. 
-            The eccentricity is the ratio of the focal distance (distance between focal points) over the major axis length.
-            The value is in the interval [0, 1). When it is 0, the ellipse becomes a circle.
-            Only available for 2d images.
+        Eccentricity of the ellipse that has the same second-moments as the
+        region. The eccentricity is the ratio of the focal distance
+        (distance between focal points) over the major axis length.
+        The value is in the interval [0, 1).
+        When it is 0, the ellipse becomes a circle.
+        Returns : ``float``
         """
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
@@ -259,8 +264,8 @@ class _RegionProperties(object):
     @property
     def equivalent_diameter(self):
         """
-        equivalent_diameter : float
-            The diameter of a circle with the same area as the region.
+        The diameter of a circle with the same area as the region.
+        Returns : ``float``
         """
         if self._ndim == 2:
             return sqrt(4 * self.area / PI)
@@ -270,11 +275,11 @@ class _RegionProperties(object):
     @property
     def euler_number(self):
         """
-        euler_number : int
-            Euler characteristic of region. Computed as number of objects (= 1)
-            subtracted by number of holes (8-connectivity).
+        Euler characteristic of region. Computed as number of objects (= 1)
+        subtracted by number of holes (8-connectivity).
+        Returns : ``int``
         """
-        euler_array = self.filled_image != self.image
+        euler_array = self.filled_image != self.bounded_mask
         _, num = label(euler_array, connectivity=self._ndim, return_num=True,
                        background=0)
         return -num + 1
@@ -282,121 +287,119 @@ class _RegionProperties(object):
     @property
     def extent(self):
         """
-        extent : float
-            Ratio of pixels in the region to pixels in the total bounding box.
+        Ratio of pixels in the region to pixels in the total bounding box.
+        Computed as ``area / (rows * cols)``
+        Returns : ``float``
         """
-        return self.area / self.image.size  #Note : Python 2 comparability, maybe should force float?
-    
+        return self.area / self.image.size
+
     @property
     def filled_area(self):
         """
-        filled_area : int
-            Number of pixels of the region will all the holes filled in. Describes the area of the filled_image.
+        Number of pixels of the region with all the holes filled in. Describes
+        the area of the filled_bounded_mask.
+        Returns : ``int``
         """
         return np.sum(self.filled_image)
-    
+
     @property
-    @_cached
-    def filled_image(self):
+    @_cached_property
+    def filled_bounded_mask(self):
         """
-        filled_image : (H, J) ndarray
-            Binary region image with filled holes which has the same size as the bounding box.
+        Binary region image with filled holes which has the same size as
+        bounding box.
+        Returns : ``(H, J) ndarray``
         """
         structure = np.ones((3,) * self._ndim)
-        return ndi.binary_fill_holes(self.image, structure)
-
+        return ndi.binary_fill_holes(self.bounded_mask, structure)
+    
     @property
-    @_cached
+    def filled_image(self):
+        """ Same as filled_bounded_mask """
+        return self.filled_bounded_mask
+    
+    @property
+    @_cached_property
     def inertia_tensor(self):
         """
-        inertia_tensor : (2, 2) ndarray
-            Inertia tensor of the region for the rotation around its mass.
+        Inertia tensor of the region for the rotation around its mass.
+        Returns ``(2, 2) ndarray``
         """
         mu = self.moments_central
-        return _moments.inertia_tensor(self.image, mu)
-
+        return _moments.inertia_tensor(self.bounded_mask, mu)
+    
     @property
-    @_cached
+    @_cached_property
     def inertia_tensor_eigvals(self):
         """
-        inertia_tensor_eigvals : tuple
-            The two eigen values of the inertia tensor in decreasing order.
+        The two eigen values of the inertia tensor in decreasing order.
+        Returns : tuple
         """
-        return _moments.inertia_tensor_eigvals(self.image,
+        return _moments.inertia_tensor_eigvals(self.bounded_mask,
                                                T=self.inertia_tensor)
-    
-    @requires_intensity_image
     @property
-    @_cached
+    @_cached_property
     def intensity_image(self):
         """
-        intensity_image : ndarray
-            If an intensity image has been supplied, this is the region of that image inside the region bounding box.
-            Raises AttributeError if no intensity image specified.
+        Original intensity image region inside region bounding box.
+        Returns : ``ndarray``
+        Raises : ``AttributeError`` if no intensity image specified
         """
-        return self._intensity_image[self.slice] * self.image
+        if self._intensity_image is None:
+            raise AttributeError('No intensity image specified.')
+        return self._intensity_image[self.slice] * self.bounded_mask
 
-    @requires_intensity_image
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
     @property
     def local_centroid(self):
         """
-        local_centroid : tuple
-            Centroid coordinate tuple ``(row, col)``, relative to region bounding box.
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding box.
+        Returns : ``array``
         """
         M = self.moments
-        if self._transpose_moments:
-            M = M.T
         return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
                      M[(0,) * self._ndim])
 
-    @requires_intensity_image
     @property
     def max_intensity(self):
         """
-        max_intensity : datatype of given intensity image
-            Value with the greatest intensity in the region.
-            Raises AttributeError if no intensity image specified.
+        Value with the greatest intensity in the region.
+        Returns : ``float``
         """
-        return np.max(self.intensity_image[self.image])
+        return np.max(self.intensity_image[self.bounded_mask])
 
-    @requires_intensity_image
     @property
     def mean_intensity(self):
         """
-        mean_intensity : float
-            Value with the mean intensity in the region.
-            Raises AttributeError if no intensity image specified.
+        Value with the mean intensity in the region.
+        Returns : ``float``
         """
-        return np.mean(self.intensity_image[self.image])
+        return np.mean(self.intensity_image[self.bounded_mask])
 
-    @requires_intensity_image
     @property
     def min_intensity(self):
         """
-        min_intensity : datatype of given intensity image
-            Value with the least intensity in the region.
-            Raises AttributeError if no intensity image specified.
+        Value with the least intensity in the region.
+        Returns : ``float``
         """
-        return np.min(self.intensity_image[self.image])
-    
-    @requires_intensity_image    
+        return np.min(self.intensity_image[self.bounded_mask])
+
     @property
-    def integrated_intensity(self):
+    def total_intensity(self):
         """
-        integrated_intensity : datatype of given intensity image
-            Total integrated intensity of the given intensity image in the region
-            Raises AttributeError if no intensity image specified.
+        Total intensity of all pixels in the given intensity image for the region.
+        Returns : ``float``
         """
-        return np.sum(self.intensity_image[self.image])
+        return np.sum(self.intensity_image[self.bounded_mask])
 
     @property
     def major_axis_length(self):
         """
-        major_axis_length : float
-            The length of the major axis of the ellipse that has the same normalized second central moments as the region.
+        The length of the major axis of the ellipse that has the same
+        normalized second central moments as the region.
+        Returns : ``float``
         """
         l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
@@ -404,64 +407,56 @@ class _RegionProperties(object):
     @property
     def minor_axis_length(self):
         """
-        minor_axis_length : float
-            The length of the minor axis of the ellipse that has the same normalized second central moments as the region.
+        The length of the minor axis of the ellipse that has the same
+        normalized second central moments as the region.
+        Returns : ``float``
         """
         l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
     @property
-    @_cached
+    @_cached_property
     def moments(self):
         """
-        moments : (3, 3) ndarray
-            Spatial moments up to 3rd order::
-                m_ji = sum{ array(x, y) * x^j * y^i }
-            where the sum is over the `x`, `y` coordinates of the region.
+        Spatial moments up to 3rd order::
+            ``m_ij = sum{ array(row, col) * row^i * col^j }``
+        where the sum is over the `row`, `col` coordinates of the region.
+        Returns : (3, 3) ndarray
         """
-        M = _moments.moments(self.image.astype(np.uint8), 3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            M = M.T
+        M = _moments.moments(self.bounded_mask.astype(np.uint8), 3)
         return M
 
     @property
-    @_cached
+    @_cached_property
     def moments_central(self):
         """
-        moments_central : (3, 3) ndarray
-            Central moments (translation invariant) up to 3rd order::
-                mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-            where the sum is over the `x`, `y` coordinates of the region,
-            and `x_c` and `y_c` are the coordinates of the region's centroid.
+        Central moments (translation invariant) up to 3rd order::
+            ``mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }``
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's centroid.
+        Returns : ``(3, 3) ndarray``
         """
-        mu = _moments.moments_central(self.image.astype(np.uint8),
+        mu = _moments.moments_central(self.bounded_mask.astype(np.uint8),
                                       self.local_centroid, order=3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            mu = mu.T
         return mu
 
     @property
     @only2d
     def moments_hu(self):
         """
-        moments_hu : tuple
-            Hu moments (translation, scale and rotation invariant).
-            Only available for 2d images.
+        Hu moments (translation, scale and rotation invariant).
+        Returns : ``tuple``
         """
         return _moments.moments_hu(self.moments_normalized)
 
     @property
-    @_cached
+    @_cached_property
     def moments_normalized(self):
         """
-        moments_normalized : (3, 3) ndarray
-            Normalized moments (translation and scale invariant) up to 3rd order::
-                nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
-            where `m_00` is the zeroth spatial moment.
+        Normalized moments (translation and scale invariant) up to 3rd order::
+            ``nu_ij = mu_ij / m_00^[(i+j)/2 + 1]``
+        where `m_00` is the zeroth spatial moment.
+        Returns : ``(3, 3) ndarray``
         """
         return _moments.moments_normalized(self.moments_central, 3)
 
@@ -469,133 +464,108 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         """
-        orientation : float
-            In 'rc' coordinates, angle between the 0th axis (rows) and the major
-            axis of the ellipse that has the same second moments as the region,
-            ranging from `-pi/2` to `pi/2` counter-clockwise.
-
-            In `xy` coordinates, as above but the angle is now measured from the
-            "x" or horizontal axis.
-            
-            Only available for 2d images.
+        Angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
+        Returns : ``float``
         """
         a, b, b, c = self.inertia_tensor.flat
-        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return sign * 0.5 * atan2(-2 * b, c - a)
+            return 0.5 * atan2(-2 * b, c - a)
 
     @property
     @only2d
     def perimeter(self):
         """
-        perimeter : float
-            Perimeter of object which approximates the contour as a line
-            through the centers of border pixels using a 4-connectivity.
-            
-            Only available for 2d images.
+        Perimeter of object which approximates the contour as a line
+        through the centers of border pixels using a 4-connectivity.
+        Returns : ``float``
         """
-        return perimeter(self.image, 4)
+        return perimeter(self.bounded_mask, 4)
 
     @property
     def solidity(self):
         """
-        solidity : float
-            Ratio of pixels in the region to pixels of the convex hull image.
+        Ratio of pixels in the region to pixels of the convex hull image.
+        Returns : ``float``
         """
-        return self.area / self.convex_area # Python 2 compatibility?
+        return self.area / self.convex_area
 
     @property
-    @requires_intensity_image
     def weighted_centroid(self):
         """
-        weighted_centroid : array
-            Centroid coordinate tuple ``(row, col)`` weighted with intensity image.
-            
-            Raises AttributeError if no intensity image specified.
+        Centroid coordinate tuple ``(row, col)`` weighted with intensity
+        image.
+        Returns : ``array``
         """
         ctr = self.weighted_local_centroid
         return tuple(idx + slc.start
                      for idx, slc in zip(ctr, self.slice))
-    
+
     @property
-    @requires_intensity_image
     def weighted_local_centroid(self):
         """
-        weighted_local_centroid : tuple
-            Centroid coordinate tuple ``(row, col)``, relative to region bounding
-            box, weighted with intensity image.
-            
-            Raises AttributeError if no intensity image specified.
+        Centroid coordinate tuple ``(row, col)``, relative to region bounding
+        box, weighted with intensity image.
+        Returns : ``array``
         """
         M = self.weighted_moments
         return (M[tuple(np.eye(self._ndim, dtype=int))] /
                 M[(0,) * self._ndim])
 
     @property
-    @requires_intensity_image
-    @_cached
+    @_cached_property
     def weighted_moments(self):
         """
-        weighted_moments : (3, 3) ndarray
-            Spatial moments of intensity image up to 3rd order::
-                wm_ji = sum{ array(x, y) * x^j * y^i }
-            where the sum is over the `x`, `y` coordinates of the region.
-            
-            Raises AttributeError if no intensity image specified.
+        Spatial moments of intensity image up to 3rd order::
+            ``wm_ij = sum{ array(row, col) * row^i * col^j }``
+        where the sum is over the `row`, `col` coordinates of the region.
+        Returns : ``(3, 3) ndarray``
         """
         return _moments.moments(self._intensity_image_double(), 3)
 
     @property
-    @_cached
-    @requires_intensity_image
+    @_cached_property
     def weighted_moments_central(self):
         """
-        weighted_moments_central : (3, 3) ndarray
-            Central moments (translation invariant) of intensity image up to 3rd order::
-                wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-            where the sum is over the `x`, `y` coordinates of the region,
-            and `x_c` and `y_c` are the coordinates of the region's weighted
-            centroid.
-            
-            Raises AttributeError if no intensity image specified.
+        Central moments (translation invariant) of intensity image up to
+        3rd order::
+            ``wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }``
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's weighted centroid.
+        Returns : ``(3, 3) ndarray``
         """
         ctr = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double(),
                                         center=ctr, order=3)
 
-    @property    
-    @requires_intensity_image
+    @property
     @only2d
     def weighted_moments_hu(self):
         """
-        weighted_moments_hu : tuple
-            Hu moments (translation, scale and rotation invariant) of intensity image.
-            
-            Raises AttributeError if no intensity image specified.
-
-            Only available for 2d images.
+        Hu moments (translation, scale and rotation invariant) of intensity image.
+        Returns : ``tuple``
         """
         return _moments.moments_hu(self.weighted_moments_normalized)
 
     @property
-    @_cached
-    @requires_intensity_image
+    @_cached_property
     def weighted_moments_normalized(self):
         """
-        weighted_moments_normalized** : (3, 3) ndarray
-            Normalized moments (translation and scale invariant) of intensity image up to 3rd order::
-                wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
-            where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
-            
-            Raises AttributeError if no intensity image specified.
+        Normalized moments (translation and scale invariant) of intensity
+        image up to 3rd order::
+            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
+        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+        Returns : ``(3, 3) ndarray``
         """
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
+    ## Does anyone actually use this?
     def __iter__(self):
         props = PROP_VALS
 
@@ -615,30 +585,31 @@ class _RegionProperties(object):
 
         return iter(sorted(props))
 
-    def __getitem__(self, key):
-        value = getattr(self, key, None)
-        if value is not None:
-            return value
-        else:  # backwards compatibility
-            return getattr(self, PROPS[key])
+    ## Could not find anyone using it this way, or via the (undocumented) backwards compatability keys
+    #def __getitem__(self, key):
+    #    value = getattr(self, key, None)
+    #    if value is not None:
+    #        return value
+    #    else:  # backwards compatibility
+    #        return getattr(self, PROPS[key])
 
-    def __eq__(self, other):
-        if not isinstance(other, _RegionProperties):
-            return False
+    
+    # def __eq__(self, other):
+        # if not isinstance(other, Region):
+            # return False
 
-        for key in PROP_VALS:
-            try:
-                # so that NaNs are equal
-                np.testing.assert_equal(getattr(self, key, None),
-                                        getattr(other, key, None))
-            except AssertionError:
-                return False
+        # for key in PROP_VALS:
+            # try:
+                # # so that NaNs are equal
+                # np.testing.assert_equal(getattr(self, key, None),
+                                        # getattr(other, key, None))
+            # except AssertionError:
+                # return False
 
-        return True
+        # return True
 
 
-def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -656,156 +627,16 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
     cache : bool, optional
-        Determine whether to cache calculated properties. The computation is
-        much faster for cached properties, whereas the memory consumption
-        increases.
-    coordinates : 'rc' or 'xy', optional
-        Coordinate conventions for 2D images. (Only 'rc' coordinates are
-        supported for 3D images.)
+        Setting ``cache`` to True will enable caching of the bounded regions of the labeled image region and
+        caching of the calculation results for the computationally intensive properties.
+        This option increases speed at the cost of allocating some memory for each Region object.
+        However, in applications where the original label_image(s) are not needed after instantiating regions,
+        a significant reduction in overall memory usage is possible when enabling caching. This is because
+        the original label_images can now be de-referenced.
 
     Returns
     -------
-    properties : list of RegionProperties
-        Each item describes one labeled region, and can be accessed using the
-        attributes listed below.
-
-    Notes
-    -----
-    The following properties can be accessed as attributes or keys:
-
-    **area** : int
-        Number of pixels of the region.
-    **bbox** : tuple
-        Bounding box ``(min_row, min_col, max_row, max_col)``.
-        Pixels belonging to the bounding box are in the half-open interval
-        ``[min_row; max_row)`` and ``[min_col; max_col)``.
-    **bbox_area** : int
-        Number of pixels of bounding box.
-    **centroid** : array
-        Centroid coordinate tuple ``(row, col)``.
-    **convex_area** : int
-        Number of pixels of convex hull image, which is the smallest convex
-        polygon that encloses the region.
-    **convex_image** : (H, J) ndarray
-        Binary convex hull image which has the same size as bounding box.
-    **coords** : (N, 2) ndarray
-        Coordinate list ``(row, col)`` of the region.
-    **eccentricity** : float
-        Eccentricity of the ellipse that has the same second-moments as the
-        region. The eccentricity is the ratio of the focal distance
-        (distance between focal points) over the major axis length.
-        The value is in the interval [0, 1).
-        When it is 0, the ellipse becomes a circle.
-    **equivalent_diameter** : float
-        The diameter of a circle with the same area as the region.
-    **euler_number** : int
-        Euler characteristic of region. Computed as number of objects (= 1)
-        subtracted by number of holes (8-connectivity).
-    **extent** : float
-        Ratio of pixels in the region to pixels in the total bounding box.
-        Computed as ``area / (rows * cols)``
-    **filled_area** : int
-        Number of pixels of the region will all the holes filled in. Describes
-        the area of the filled_image.
-    **filled_image** : (H, J) ndarray
-        Binary region image with filled holes which has the same size as
-        bounding box.
-    **image** : (H, J) ndarray
-        Sliced binary region image which has the same size as bounding box.
-    **inertia_tensor** : (2, 2) ndarray
-        Inertia tensor of the region for the rotation around its mass.
-    **inertia_tensor_eigvals** : tuple
-        The two eigen values of the inertia tensor in decreasing order.
-    **intensity_image** : ndarray
-        Image inside region bounding box.
-    **label** : int
-        The label in the labeled input image.
-    **local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box.
-    **major_axis_length** : float
-        The length of the major axis of the ellipse that has the same
-        normalized second central moments as the region.
-    **max_intensity** : float
-        Value with the greatest intensity in the region.
-    **mean_intensity** : float
-        Value with the mean intensity in the region.
-    **min_intensity** : float
-        Value with the least intensity in the region.
-    **minor_axis_length** : float
-        The length of the minor axis of the ellipse that has the same
-        normalized second central moments as the region.
-    **moments** : (3, 3) ndarray
-        Spatial moments up to 3rd order::
-
-            m_ji = sum{ array(x, y) * x^j * y^i }
-
-        where the sum is over the `x`, `y` coordinates of the region.
-    **moments_central** : (3, 3) ndarray
-        Central moments (translation invariant) up to 3rd order::
-
-            mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's centroid.
-    **moments_hu** : tuple
-        Hu moments (translation, scale and rotation invariant).
-    **moments_normalized** : (3, 3) ndarray
-        Normalized moments (translation and scale invariant) up to 3rd order::
-
-            nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
-
-        where `m_00` is the zeroth spatial moment.
-    **orientation** : float
-        In 'rc' coordinates, angle between the 0th axis (rows) and the major
-        axis of the ellipse that has the same second moments as the region,
-        ranging from `-pi/2` to `pi/2` counter-clockwise.
-
-        In `xy` coordinates, as above but the angle is now measured from the
-        "x" or horizontal axis.
-    **perimeter** : float
-        Perimeter of object which approximates the contour as a line
-        through the centers of border pixels using a 4-connectivity.
-    **slice** : tuple of slices
-        A slice to extract the object from the source image.
-    **solidity** : float
-        Ratio of pixels in the region to pixels of the convex hull image.
-    **weighted_centroid** : array
-        Centroid coordinate tuple ``(row, col)`` weighted with intensity
-        image.
-    **weighted_local_centroid** : array
-        Centroid coordinate tuple ``(row, col)``, relative to region bounding
-        box, weighted with intensity image.
-    **weighted_moments** : (3, 3) ndarray
-        Spatial moments of intensity image up to 3rd order::
-
-            wm_ji = sum{ array(x, y) * x^j * y^i }
-
-        where the sum is over the `x`, `y` coordinates of the region.
-    **weighted_moments_central** : (3, 3) ndarray
-        Central moments (translation invariant) of intensity image up to
-        3rd order::
-
-            wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's weighted
-        centroid.
-    **weighted_moments_hu** : tuple
-        Hu moments (translation, scale and rotation invariant) of intensity
-        image.
-    **weighted_moments_normalized** : (3, 3) ndarray
-        Normalized moments (translation and scale invariant) of intensity
-        image up to 3rd order::
-
-            wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
-
-        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
-
-    Each region also supports iteration, so that you can do::
-
-      for prop in region:
-          print(prop, region[prop])
+    List of ``Region`` objects.
 
     See Also
     --------
@@ -853,8 +684,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         label = i + 1
 
-        props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache, coordinates=coordinates)
+        props = Region(sl, label, label_image, intensity_image, cache)
         regions.append(props)
 
     return regions
@@ -925,3 +755,28 @@ def perimeter(image, neighbourhood=4):
     total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
+
+# def _parse_docs():
+    # import re
+    # import textwrap
+
+    # doc = regionprops.__doc__ or ''
+    # matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+                          # doc, flags=re.DOTALL)
+    # prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
+
+    # return prop_doc
+
+
+# def _install_properties_docs():
+    # prop_doc = _parse_docs()
+
+    # for p in [member for member in dir(_RegionProperties)
+              # if not member.startswith('_')]:
+        # getattr(_RegionProperties, p).__doc__ = prop_doc[p]
+        # setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
+
+
+# if __debug__:
+    # # don't install docstrings when in optimized/non-debug mode
+    # _install_properties_docs()

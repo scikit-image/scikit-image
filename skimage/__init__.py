@@ -29,8 +29,6 @@ measure
     Measurement of image properties, e.g., similarity and contours.
 morphology
     Morphological operations, e.g., opening or skeletonization.
-novice
-    Simplified interface for teaching purposes.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
