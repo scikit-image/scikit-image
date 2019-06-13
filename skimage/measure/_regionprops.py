@@ -398,6 +398,25 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
         Dictionary mapping property names to an array of values of that property, one per region.
         This dictionary can be used as input to a pandas DataFrame, with keys mapping to columns.
 
+
+    Notes
+    -----
+    1. Column separation:
+        A column is dedicated for a scalar, an object or an item in a __len__ structure
+        1.1 scalar : the prop name references a 1D numpy array with a scalar
+                     item per value of the region.
+        1.2 object : the prop name references a 1D numpy array with an object
+                     item per value of the region. Objects are not arrays which
+                     either have the capacity to be ndimensional, or where the
+                     array size can change between regions. All objects are stored
+                     in the object_columns dictionary.
+        1.3 __len__ structure : Every item in the structure is made into a property whose name depends
+                                on the item's location in the structure. The name references a 1D numpy
+                                array with a scalar item per value of the region. The structure is
+                                effectively decomposed into items.
+                                
+                                
+
     Examples
     --------
     >>> from skimage import data, util, measure
@@ -432,11 +451,15 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
         dtype = COL_DTYPES[prop]
         column_buffer = np.zeros(n, dtype=dtype)
         r = regions[0][prop]
+
+        # scalars and objects are dedicated one column per prop
+        # array properties are raveled into multiple columns
+        # for more info, refer to notes 1
         if np.isscalar(r) or prop in object_columns:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
-        else: #array properties are raveled into multiple columns
+        else:
             if isinstance(r, np.ndarray):
                 shape = r.shape
             else:
