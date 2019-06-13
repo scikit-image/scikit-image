@@ -436,7 +436,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
-        else:
+        else: #array properties are raveled into multiple columns
             if isinstance(r, np.ndarray):
                 shape = r.shape
             else:
