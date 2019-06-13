@@ -15,7 +15,6 @@ importorskip('imageio')
 
 
 def setup():
-    np.random.seed(0)
     use_plugin('imageio')
 
 
@@ -57,6 +56,7 @@ class TestSave(TestCase):
 
     def test_imsave_roundtrip(self):
         dtype = np.uint8
+        np.random.seed(0)
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
