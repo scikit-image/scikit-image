@@ -59,8 +59,10 @@ PROPS = {
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
-object_columns = {'image', 'coords', 'convex_image', 'filled_image',
-               'intensity_image'}
+
+object_columns = {
+    'image':1, 'coords':1, 'convex_image':1, 'filled_image':1, 'intensity_image':1
+}
 
 COL_DTYPES = {
     'area':'int',
@@ -416,8 +418,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
 
 """
 
-    object_columns = {'image', 'coords', 'convex_image', 'filled_image',
-               'intensity_image'}
+    object_columns = {
+        'image':1, 'coords':1, 'convex_image':1, 'filled_image':1,'intensity_image':1
+        }
 
     if always_include_label and 'label' not in properties:
         properties = ('label',) + properties
