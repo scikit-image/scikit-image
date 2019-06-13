@@ -382,7 +382,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
     regions : (N,) list
         List of _RegionProperties objects as returned by :func:`regionprops`
     properties : tuple, optional
-        properties which the output need to have
+        Properties that will be included in the resulting dictionary
+        For a full list of properties, please see :func:`regionprops`
     separator : str, optional
         Each element of non-scalar properties and is not listed in object_columns will
         be put into its own column, with the index of that element separated from
