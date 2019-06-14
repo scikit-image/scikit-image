@@ -456,7 +456,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
     object_columns = {
         'image': 1, 'coords': 1, 'convex_image': 1,
-        'filled_image': 1,'intensity_image' :1
+        'filled_image': 1, 'intensity_image': 1
     }
 
     if always_include_label and 'label' not in properties:
@@ -484,8 +484,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
             for ind in np.ndindex(shape):
                 for k in range(n):
-                    column_buffer[k] = regions[k][prop][ind if len(ind) > 1 else ind[0]]
-                out[separator.join(map(str, (prop,) + ind))] = np.copy(column_buffer)
+                    loc = ind if len(ind) > 1 else ind[0]
+                    column_buffer[k] = regions[k][prop][loc]
+                modified_prop = separator.join(map(str, (prop,) + ind))
+                out[modified_prop] = np.copy(column_buffer)
     return out
 
 
