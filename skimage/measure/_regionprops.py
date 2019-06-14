@@ -388,7 +388,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         Users should remember to add label to be able to keep track of
         regions.
     separator : str, optional
-        Each element of non-scalar properties and is not listed in
+        Each element of non-scalar properties, whose property is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
 
@@ -516,7 +516,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         Users should remember to add label to be able to keep track of
         regions.
     separator : str, optional
-        Each element of non-scalar properties and is not listed in
+        Each element of non-scalar properties, whose property is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
 
