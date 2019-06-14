@@ -375,8 +375,7 @@ class _RegionProperties(object):
         return True
 
 
-def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
-                   always_include_label=True):
+def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     """Convert image regions properties into a dictionary
 
     Parameters
@@ -390,9 +389,6 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
         Each element of non-scalar properties and is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
-    always_include_label : bool, optional
-        allows autmatic adding of label to the output as label is a natural
-        index for the structure.
 
 
     Output
@@ -457,8 +453,6 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
 """
 
-    if always_include_label and 'label' not in properties:
-        properties = ('label',) + properties
 
     out = {}
     n = len(regions)
@@ -490,8 +484,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
 
 def regionprops_table(label_image, intensity_image=None, cache=True,
-                      properties=('label', 'bbox'), separator='-',
-                      always_include_label=True):
+                      properties=('label', 'bbox'), separator='-'):
     """Find image properties and convert them into a dictionary
 
     Parameters
@@ -522,9 +515,6 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         Each element of non-scalar properties and is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
-    always_include_label : bool, optional
-        allows autmatic adding of label to the output as label is a natural
-        index for the structure.
 
 
     Output
@@ -588,8 +578,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
 """
     regions = regionprops(label_image, intensity_image=intensity_image,
-    return _props_to_dict(regions, properties=properties, separator=separator,
-                          always_include_label=always_include_label)
+    return _props_to_dict(regions, properties=properties, separator=separator)
 
 
 def regionprops(label_image, intensity_image=None, cache=True):
