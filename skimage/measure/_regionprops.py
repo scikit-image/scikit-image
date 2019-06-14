@@ -391,7 +391,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
     always_include_label : bool, optional
-        allows autmatic adding of label to the output
+        allows autmatic adding of label to the output as label is a natural
+        index for the structure.
 
 
     Output
@@ -521,7 +522,8 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
     always_include_label : bool, optional
-        allows autmatic adding of label to the output
+        allows autmatic adding of label to the output as label is a natural
+        index for the structure.
 
 
     Output
