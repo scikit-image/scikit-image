@@ -385,6 +385,8 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     properties : tuple, optional
         Properties that will be included in the resulting dictionary
         For a full list of properties, please see :func:`regionprops`
+        Users should remember to add label to be able to keep track of
+        regions.
     separator : str, optional
         Each element of non-scalar properties and is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
@@ -511,6 +513,8 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     properties : tuple, optional
         Properties that will be included in the resulting dictionary
         For a full list of properties, please see :func:`regionprops`
+        Users should remember to add label to be able to keep track of
+        regions.
     separator : str, optional
         Each element of non-scalar properties and is not listed in
         OBJECT_COLUMNS will be put into its own column, with the index of that
