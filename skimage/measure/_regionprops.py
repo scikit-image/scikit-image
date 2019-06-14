@@ -382,7 +382,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
     Parameters
     ----------
     regions : (N,) list
-        List of _RegionProperties objects as returned by :func:`regionprops`
+        List of RegionProperties objects as returned by :func:`regionprops`
     properties : tuple, optional
         Properties that will be included in the resulting dictionary
         For a full list of properties, please see :func:`regionprops`
@@ -408,19 +408,20 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
     1. Column separation:
         A column is dedicated for a scalar, an object or an item
         in a __len__ structure.
-        1.1 scalar : the prop name references a 1D numpy array with a scalar
-                     item per value of the region.
-        1.2 object : the prop name references a 1D numpy array with an object
-                     item per value of the region. Objects are not arrays which
-                     either have the capacity to be ndimensional, or where the
-                     array size can change between regions. All objects are
-                     stored in the OBJECT_COLUMNS dictionary.
-        1.3 __len__ structure : Every item in the structure is made into a
-                                property whose name depends on the item's
-                                location in the structure. The name references
-                                a 1D numpy array with a scalar item per value
-                                of the region. The structure is effectively
-                                decomposed into items.
+        1.1 scalar
+            The prop name references a 1D numpy array with a scalar item per
+            value of the region.
+        1.2 object
+            The prop name references a 1D numpy array with an object item per
+            value of the region. Objects are not arrays which either have the
+            capacity to be ndimensional, or where the array size can change
+            between regions. All objects are stored in the OBJECT_COLUMNS
+            dictionary.
+        1.3 __len__ structure
+            Every item in the structure is made into a property whose name
+            depends on the item's location in the structure. The name
+            references a 1D numpy array with a scalar item per value of the
+            region. The structure is effectively decomposed into items.
 
 
     Examples
@@ -539,19 +540,20 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     1. Column separation:
         A column is dedicated for a scalar, an object or an item
         in a __len__ structure.
-        1.1 scalar : the prop name references a 1D numpy array with a scalar
-                     item per value of the region.
-        1.2 object : the prop name references a 1D numpy array with an object
-                     item per value of the region. Objects are not arrays which
-                     either have the capacity to be ndimensional, or where the
-                     array size can change between regions. All objects are
-                     stored in the OBJECT_COLUMNS dictionary.
-        1.3 __len__ structure : Every item in the structure is made into a
-                                property whose name depends on the item's
-                                location in the structure. The name references
-                                a 1D numpy array with a scalar item per value
-                                of the region. The structure is effectively
-                                decomposed into items.
+        1.1 scalar
+            The prop name references a 1D numpy array with a scalar item per
+            value of the region.
+        1.2 object
+            The prop name references a 1D numpy array with an object item per
+            value of the region. Objects are not arrays which either have the
+            capacity to be ndimensional, or where the array size can change
+            between regions. All objects are stored in the OBJECT_COLUMNS
+            dictionary.
+        1.3 __len__ structure
+            Every item in the structure is made into a property whose name
+            depends on the item's location in the structure. The name
+            references a 1D numpy array with a scalar item per value of the
+            region. The structure is effectively decomposed into items.
 
 
     Examples
