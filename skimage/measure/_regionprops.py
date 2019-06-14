@@ -61,8 +61,8 @@ PROPS = {
 }
 
 OBJECT_COLUMNS = {
-    'image': 1, 'coords': 1, 'convex_image': 1, 'slice': 1,
-    'filled_image': 1, 'intensity_image': 1
+    'image', 'coords', 'convex_image', 'slice',
+    'filled_image', 'intensity_image'
 }
 
 COL_DTYPES = {
