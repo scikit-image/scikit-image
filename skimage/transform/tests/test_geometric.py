@@ -1,4 +1,5 @@
 import numpy as np
+import re
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
@@ -8,6 +9,7 @@ from skimage.transform import (estimate_transform, matrix_transform,
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
+import textwrap
 
 
 SRC = np.array([
@@ -470,3 +472,36 @@ def test_degenerate():
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
+
+
+def test_projective_repr():
+    tform = ProjectiveTransform()
+    want = re.escape(textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=[
+            [1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]]) at
+        ''').strip()) + ' 0x[a-f0-9]+' + re.escape('>')
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
+    assert re.match(want, repr(tform))
+
+
+def test_projective_str():
+    tform = ProjectiveTransform()
+    want = re.escape(textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=[
+            [1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]])>
+        ''').strip())
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
+    print(want)
+    assert re.match(want, str(tform))
