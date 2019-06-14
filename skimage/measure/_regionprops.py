@@ -60,52 +60,53 @@ PROPS = {
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
-object_columns = {
-    'image':1, 'coords':1, 'convex_image':1, 'filled_image':1, 'intensity_image':1
+OBJECT_COLUMNS = {
+    'image': 1, 'coords': 1, 'convex_image': 1,
+    'filled_image': 1, 'intensity_image': 1
 }
 
 COL_DTYPES = {
-    'area':'int',
-    'bbox':'int',
-    'bbox_area':'int',
-    'moments_central':'float',
-    'centroid':'int',
-    'convex_area':'int',
+    'area': 'int',
+    'bbox': 'int',
+    'bbox_area': 'int',
+    'moments_central': 'float',
+    'centroid': 'int',
+    'convex_area': 'int',
     # 'ConvexHull',
-    'convex_image':'object',
-    'coords':'object',
-    'eccentricity':'float',
-    'equivalent_diameter':'float',
-    'euler_number':'int',
-    'extent':'float',
+    'convex_image': 'object',
+    'coords': 'object',
+    'eccentricity': 'float',
+    'equivalent_diameter': 'float',
+    'euler_number': 'int',
+    'extent': 'float',
     # 'Extrema',
-    'filled_area':'int',
-    'filled_image':'object',
-    'moments_hu':'float',
-    'image':'object',
-    'inertia_tensor':'float',
-    'inertia_tensor_eigvals':'float',
-    'label':'int',
-    'major_axis_length':'float',
-    'max_intensity':'float',
-    'mean_intensity':'float',
-    'min_intensity':'float',
-    'minor_axis_length':'float',
-    'moments':'float',
-    'moments_normalized':'float',
-    'orientation':'float',
-    'perimeter':'float',
+    'filled_area': 'int',
+    'filled_image': 'object',
+    'moments_hu': 'float',
+    'image': 'object',
+    'inertia_tensor': 'float',
+    'inertia_tensor_eigvals': 'float',
+    'label': 'int',
+    'major_axis_length': 'float',
+    'max_intensity': 'float',
+    'mean_intensity': 'float',
+    'min_intensity': 'float',
+    'minor_axis_length': 'float',
+    'moments': 'float',
+    'moments_normalized': 'float',
+    'orientation': 'float',
+    'perimeter': 'float',
     # 'PixelIdxList',
     # 'PixelList',
-    'slice':'slice',
+    'slice': 'slice',
     'Solidity': 'float',
     # 'SubarrayIdx'
-    'weighted_moments_central':'float',
-    'weighted_centroid':'int',
-    'weighted_moments_hu':'float',
-    'weighted_local_centroid':'int',
-    'weighted_moments':'int',
-    'weighted_moments_normalized':'float'
+    'weighted_moments_central': 'float',
+    'weighted_centroid': 'int',
+    'weighted_moments_hu': 'float',
+    'weighted_local_centroid': 'int',
+    'weighted_moments': 'int',
+    'weighted_moments_normalized': 'float'
 }
 
 PROP_VALS = set(PROPS.values())
@@ -387,7 +388,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
         For a full list of properties, please see :func:`regionprops`
     separator : str, optional
         Each element of non-scalar properties and is not listed in
-        object_columns will be put into its own column, with the index of that
+        OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
     always_include_label : bool, optional
         allows autmatic adding of label to the output
@@ -412,7 +413,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
                      item per value of the region. Objects are not arrays which
                      either have the capacity to be ndimensional, or where the
                      array size can change between regions. All objects are
-                     stored in the object_columns dictionary.
+                     stored in the OBJECT_COLUMNS dictionary.
         1.3 __len__ structure : Every item in the structure is made into a
                                 property whose name depends on the item's
                                 location in the structure. The name references
@@ -454,11 +455,6 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
 
 """
 
-    object_columns = {
-        'image': 1, 'coords': 1, 'convex_image': 1,
-        'filled_image': 1, 'intensity_image': 1
-    }
-
     if always_include_label and 'label' not in properties:
         properties = ('label',) + properties
 
@@ -472,7 +468,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
-        if np.isscalar(r) or prop in object_columns:
+        if np.isscalar(r) or prop in OBJECT_COLUMNS:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
@@ -522,7 +518,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         For a full list of properties, please see :func:`regionprops`
     separator : str, optional
         Each element of non-scalar properties and is not listed in
-        object_columns will be put into its own column, with the index of that
+        OBJECT_COLUMNS will be put into its own column, with the index of that
         element separated from the name by this separator.
     always_include_label : bool, optional
         allows autmatic adding of label to the output
@@ -547,7 +543,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
                      item per value of the region. Objects are not arrays which
                      either have the capacity to be ndimensional, or where the
                      array size can change between regions. All objects are
-                     stored in the object_columns dictionary.
+                     stored in the OBJECT_COLUMNS dictionary.
         1.3 __len__ structure : Every item in the structure is made into a
                                 property whose name depends on the item's
                                 location in the structure. The name references
