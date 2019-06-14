@@ -19,7 +19,7 @@ from .entropy import shannon_entropy
 
 __all__ = ['find_contours',
            'regionprops',
-           'to_dict',
+           'regionprops_table',
            'perimeter',
            'approximate_polygon',
            'subdivide_polygon',
