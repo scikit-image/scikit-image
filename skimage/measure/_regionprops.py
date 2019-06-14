@@ -422,10 +422,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
     >>> from skimage import data, util, measure
     >>> image = data.coins() > 110
     >>> label_image = measure.label(image, connectivity=image.ndim)
-    >>> propslist = regionprops(label_image, image)
+    >>> propslist = _props_to_dict(label_image, image)
     >>> props = to_dict(propslist, properties=['label', 'inertia_tensor', 'inertia_tensor_eigvals'])
-    >>> props
-    <output here>
+    >>> props # doctest: +ELLIPSIS
+    {'label': array([1, 2, ...]), 'bbox-0': array([0, 0, ...]), ... 'bbox-3': array([277, 291, ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
     obtain a clean DataFrame::
@@ -433,7 +433,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
     >>> import pandas as pd  # doctest: +SKIP
     >>> data = pd.DataFrame(props)  # doctest: +SKIP
     >>> data.head()  # doctest: +SKIP
-    <output of data.head()>
+       label  bbox-0  bbox-1  bbox-2  bbox-3
+    0      1       0       0      74     277
+    1      2       0     278       8     291
+    2      3       0     300       1     303
+    3      4       0     304       4     305
+    4      5       0     306       2     308
 
 
 """
@@ -475,9 +480,89 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-', always_
 def regionprops_table(label_image, intensity_image=None, cache=True,
                       properties=('label', 'bbox'), separator='-',
                       always_include_label=True):
-    """
-    Refer to regionprops and _props_to_dict
-    """
+    """Find image properties and convert them into a dictionary
+
+    Parameters
+    ----------
+    label_image : (N, M) ndarray
+        Labeled input image. Labels with value 0 are ignored.
+
+        .. versionchanged:: 0.14.1
+            Previously, ``label_image`` was processed by ``numpy.squeeze`` and
+            so any number of singleton dimensions was allowed. This resulted in
+            inconsistent handling of images with singleton dimensions. To
+            recover the old behaviour, use
+            ``regionprops(np.squeeze(label_image), ...)``.
+    intensity_image : (N, M) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image.
+        Default is None.
+    cache : bool, optional
+        Determine whether to cache calculated properties. The computation is
+        much faster for cached properties, whereas the memory consumption
+        increases.
+    coordinates : 'rc' or 'xy', optional
+        Coordinate conventions for 2D images. (Only 'rc' coordinates are
+        supported for 3D images.)
+    properties : tuple, optional
+        Properties that will be included in the resulting dictionary
+        For a full list of properties, please see :func:`regionprops`
+    separator : str, optional
+        Each element of non-scalar properties and is not listed in object_columns will
+        be put into its own column, with the index of that element separated from
+        the name by this separator.
+    always_include_label : bool, optional
+        allows autmatic adding of label to the output
+
+
+    Output
+    ------
+    out_dict : dict
+        Dictionary mapping property names to an array of values of that property, one per region.
+        This dictionary can be used as input to a pandas DataFrame, with keys mapping to columns.
+
+
+    Notes
+    -----
+    1. Column separation:
+        A column is dedicated for a scalar, an object or an item in a __len__ structure
+        1.1 scalar : the prop name references a 1D numpy array with a scalar
+                     item per value of the region.
+        1.2 object : the prop name references a 1D numpy array with an object
+                     item per value of the region. Objects are not arrays which
+                     either have the capacity to be ndimensional, or where the
+                     array size can change between regions. All objects are stored
+                     in the object_columns dictionary.
+        1.3 __len__ structure : Every item in the structure is made into a property whose name depends
+                                on the item's location in the structure. The name references a 1D numpy
+                                array with a scalar item per value of the region. The structure is
+                                effectively decomposed into items.
+                                
+                                
+
+    Examples
+    --------
+    >>> from skimage import data, util, measure
+    >>> image = data.coins() > 110
+    >>> label_image = measure.label(image, connectivity=image.ndim)
+    >>> props = regionprops_table(label_image, intensity_image=image, properties=['label', 'inertia_tensor', 'inertia_tensor_eigvals'])
+    >>> props # doctest: +ELLIPSIS
+    {'label': array([1, 2, ...]), 'bbox-0': array([0, 0, ...]), ... 'bbox-3': array([277, 291, ...])}
+
+    The resulting dictionary can be directly passed to pandas, if installed, to
+    obtain a clean DataFrame::
+
+    >>> import pandas as pd  # doctest: +SKIP
+    >>> data = pd.DataFrame(props)  # doctest: +SKIP
+    >>> data.head()  # doctest: +SKIP
+       label  bbox-0  bbox-1  bbox-2  bbox-3
+    0      1       0       0      74     277
+    1      2       0     278       8     291
+    2      3       0     300       1     303
+    3      4       0     304       4     305
+    4      5       0     306       2     308
+
+
+"""
     regions = regionprops(label_image, intensity_image=intensity_image,
                           cache=cache)
     return _props_to_dict(regions, properties=properties, separator=separator,
