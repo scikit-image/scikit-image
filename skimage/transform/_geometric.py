@@ -721,13 +721,7 @@ class ProjectiveTransform(GeometricTransform):
                             "types.")
 
     def __nice__(self):
-        """common 'paramstr' used by __str__ and __repr__
-
-        Examples
-        --------
-        >>> print(ProjectiveTransform())
-        >>> print(ProjectiveTransform(np.random.rand(3, 3)))
-        """
+        """common 'paramstr' used by __str__ and __repr__"""
         npstring = np.array2string(self.params, separator=', ')
         paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
         return paramstr
