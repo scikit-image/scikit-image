@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy import spatial
+import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 
@@ -728,12 +729,7 @@ class ProjectiveTransform(GeometricTransform):
         >>> print(ProjectiveTransform(np.random.rand(3, 3)))
         """
         npstring = np.array2string(self.params, separator=', ')
-        lines = npstring.split('\n ')
-        # Initial indentation
-        lines = ['    ' + p for p in lines]
-        # Add an extra space to every non-first line for alignment
-        lines[1:] = [' ' + p for p in lines[1:]]
-        paramstr = 'matrix=\n' + '\n'.join(lines)
+        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
         return paramstr
 
     def __repr__(self):
