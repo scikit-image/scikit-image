@@ -10,25 +10,14 @@ from skimage._shared.testing import (assert_array_almost_equal, TestCase,
                                      expected_warnings)
 
 
-try:
-    import imageio as _imageio
-except ImportError:
-    imageio_available = False
-else:
-    imageio_available = True
-
-
 def setup():
-    if imageio_available:
-        np.random.seed(0)
-        use_plugin('imageio')
+    use_plugin('imageio')
 
 
 def teardown():
     reset_plugins()
 
 
-@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_as_gray():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
@@ -38,13 +27,11 @@ def test_imageio_as_gray():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@testing.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
@@ -63,9 +50,9 @@ class TestSave(TestCase):
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @testing.skipif(not imageio_available, reason="imageio not installed")
     def test_imsave_roundtrip(self):
         dtype = np.uint8
+        np.random.seed(0)
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 

@@ -9,25 +9,18 @@ from skimage._shared import testing
 from skimage._shared.testing import (TestCase, assert_array_equal,
                                      assert_array_almost_equal)
 
-try:
-    import imread as _imread
-except ImportError:
-    imread_available = False
-else:
-    imread_available = True
+from pytest import importorskip
 
+importorskip('imread')
 
 def setup():
-    if imread_available:
-        np.random.seed(0)
-        use_plugin('imread')
+    use_plugin('imread')
 
 
 def teardown():
     reset_plugins()
 
 
-@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_as_gray():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
@@ -37,19 +30,16 @@ def test_imread_as_gray():
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@testing.skipif(not imread_available, reason="imageread not installed")
 def test_imread_truncated_jpg():
     with testing.raises(RuntimeError):
         io.imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-@testing.skipif(not imread_available, reason="imageread not installed")
 def test_bilevel():
     expected = np.zeros((10, 10), bool)
     expected[::2] = 1
@@ -68,9 +58,9 @@ class TestSave(TestCase):
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @testing.skipif(not imread_available, reason="imageread not installed")
     def test_imsave_roundtrip(self):
         dtype = np.uint8
+        np.random.seed(0)
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 

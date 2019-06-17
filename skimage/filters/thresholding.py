@@ -1041,7 +1041,7 @@ def apply_hysteresis_threshold(image, low, high):
 
 
 def threshold_multiotsu(image, classes=3, nbins=256):
-    """Generates multiple thresholds for an input image.
+    r"""Generates multiple thresholds for an input image.
 
     Parameters
     ----------
@@ -1049,9 +1049,10 @@ def threshold_multiotsu(image, classes=3, nbins=256):
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
-        regions. Accepts an integer from 2 to 5.
+        regions.
     nbins : int, optional
-        Number of bins used to calculate the histogram.
+        Number of bins used to calculate the histogram. This value is ignored
+        for integer arrays.
 
     Returns
     -------
@@ -1063,6 +1064,11 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     The threshold values are chosen in a way that maximizes the variance
     between the desired classes. Based on the Multi-Otsu approach by
     Liao, Chen and Chung.
+
+    This implementation relies on a Cython function whose complexity
+    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is the number of histogram bins and :math:`C` is the number of
+    classes desired.
 
     References
     ----------
@@ -1088,6 +1094,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
                                   nbins=nbins,
                                   source_range='image')
     prob = hist / image.size
+    # histogram ignores nbins for integer arrays.
+    nbins = len(bin_centers)
 
     # defining arrays to store the zeroth (momP, cumulative probability)
     # and first (momS, mean) moments, and the variance between classes
