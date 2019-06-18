@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy import spatial
+import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 
@@ -720,24 +721,20 @@ class ProjectiveTransform(GeometricTransform):
                             "types.")
 
     def __nice__(self):
-        """ common 'paramstr' used by __str__ and __repr__ """
+        """common 'paramstr' used by __str__ and __repr__"""
         npstring = np.array2string(self.params, separator=', ')
-        # add a newline and indentation after the first square braket to ensure
-        # the columns of the params matrix are aligned in the repr
-        lines = npstring[1:].split('\n ')
-        indented_lines = ['    ' + p for p in lines]
-        paramstr = 'matrix=[\n' + '\n'.join(indented_lines)
+        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
         return paramstr
 
     def __repr__(self):
-        """ Add standard repr formatting around a nice string """
+        """Add standard repr formatting around a __nice__ string"""
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
         return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
 
     def __str__(self):
-        """ Add standard str formatting around a nice string """
+        """Add standard str formatting around a __nice__ string"""
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
