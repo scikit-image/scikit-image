@@ -140,7 +140,7 @@ def only2d(method):
     return func2d
 
 
-class _RegionProperties(object):
+class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
@@ -365,7 +365,7 @@ class _RegionProperties(object):
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
-        if not isinstance(other, _RegionProperties):
+        if not isinstance(other, RegionProperties):
             return False
 
         for key in PROP_VALS:
@@ -377,6 +377,10 @@ class _RegionProperties(object):
                 return False
 
         return True
+
+
+# For compatibility with code written prior to 0.16
+_RegionProperties = RegionProperties
 
 
 def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
@@ -798,8 +802,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
         label = i + 1
 
-        props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache)
+        props = RegionProperties(sl, label, label_image, intensity_image,
+                                 cache)
         regions.append(props)
 
     return regions
@@ -886,10 +890,10 @@ def _parse_docs():
 def _install_properties_docs():
     prop_doc = _parse_docs()
 
-    for p in [member for member in dir(_RegionProperties)
+    for p in [member for member in dir(RegionProperties)
               if not member.startswith('_')]:
-        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
+        getattr(RegionProperties, p).__doc__ = prop_doc[p]
+        setattr(RegionProperties, p, property(getattr(RegionProperties, p)))
 
 
 if __debug__:
