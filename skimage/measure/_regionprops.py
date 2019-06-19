@@ -384,29 +384,36 @@ _RegionProperties = RegionProperties
 
 
 def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
-    """Convert image regions properties into a dictionary
+    """Convert image region properties list into a column dictionary.
 
     Parameters
     ----------
     regions : (N,) list
-        List of RegionProperties objects as returned by :func:`regionprops`
-    properties : tuple, optional
+        List of RegionProperties objects as returned by :func:`regionprops`.
+    properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
-        For a full list of properties, please see :func:`regionprops`
-        Users should remember to add label to be able to keep track of
-        regions.
+        For a list of available properties, please see :func:`regionprops`.
+        Users should remember to add "label" to keep track of region
+        identities.
     separator : str, optional
-        Each element of non-scalar properties, whose property is not listed in
-        OBJECT_COLUMNS will be put into its own column, with the index of that
-        element separated from the name by this separator.
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+         and ``inertia_tensor-1-1`` (where the separator is ``-``).
 
+         Object columns are those that cannot be split in this way because the
+         number of columns would change depending on the object. For example,
+         ``image`` and ``coords``.
 
     Output
     ------
     out_dict : dict
         Dictionary mapping property names to an array of values of that
-        property, one per region. This dictionary can be used as input to a
-        pandas DataFrame, with keys mapping to columns.
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
 
 
     Notes
@@ -435,17 +442,13 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     >>> from skimage import data, util, measure
     >>> image = data.coins() > 110
     >>> label_image = measure.label(image, connectivity=image.ndim)
-    >>> propslist = _props_to_dict(label_image, image)
-    >>> props = to_dict(propslist,
-                        properties=['label',
-                                    'inertia_tensor',
-                                    'inertia_tensor_eigvals'])
-    >>> props # doctest: +ELLIPSIS
-    {
-        'label': array([1, 2, ...]),
-        'bbox-0': array([0, 0, ...]),
-        ... 'bbox-3': array([277, 291, ...])
-    }
+    >>> proplist = regionprops(label_image, image)
+    >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
+    ...                                              'inertia_tensor_eigvals'])
+    >>> props  # doctest: +ELLIPSIS
+    {'label': array([1, 2, ...]), ...
+    ...'inertia_tensor-0-0': array([0, 0, ...]),...
+    ...'inertia_tensor_eigvals-1': array([277, 291, ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
     obtain a clean DataFrame::
@@ -460,9 +463,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     3      4       0     304       4     305
     4      5       0     306       2     308
 
-
-"""
-
+    """
 
     out = {}
     n = len(regions)
@@ -501,13 +502,6 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     ----------
     label_image : (N, M) ndarray
         Labeled input image. Labels with value 0 are ignored.
-
-        .. versionchanged:: 0.14.1
-            Previously, ``label_image`` was processed by ``numpy.squeeze``
-            and so any number of singleton dimensions was allowed. This
-            resulted in inconsistent handling of images with singleton
-            dimensions. To recover the old behaviour,
-            use ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
@@ -518,24 +512,30 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     coordinates : 'rc' or 'xy', optional
         Coordinate conventions for 2D images. (Only 'rc' coordinates are
         supported for 3D images.)
-    properties : tuple, optional
+    properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
-        For a full list of properties, please see :func:`regionprops`
-        Users should remember to add label to be able to keep track of
-        regions.
+        For a list of available properties, please see :func:`regionprops`.
+        Users should remember to add "label" to keep track of region
+        identities.
     separator : str, optional
-        Each element of non-scalar properties, whose property is not listed in
-        OBJECT_COLUMNS will be put into its own column, with the index of that
-        element separated from the name by this separator.
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+         and ``inertia_tensor-1-1`` (where the separator is ``-``).
 
+         Object columns are those that cannot be split in this way because the
+         number of columns would change depending on the object. For example,
+         ``image`` and ``coords``.
 
     Output
     ------
     out_dict : dict
         Dictionary mapping property names to an array of values of that
-        property, one per region. This dictionary can be used as input to a
-        pandas DataFrame, with keys mapping to columns.
-
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
 
     Notes
     -----
@@ -563,16 +563,13 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     >>> from skimage import data, util, measure
     >>> image = data.coins() > 110
     >>> label_image = measure.label(image, connectivity=image.ndim)
-    >>> props = regionprops_table(label_image, intensity_image=image,
-                                  properties=['label',
-                                              'inertia_tensor',
-                                              'inertia_tensor_eigvals'])
-    >>> props # doctest: +ELLIPSIS
-    {
-        'label': array([1, 2, ...]),
-        'bbox-0': array([0, 0, ...]),
-        ... 'bbox-3': array([277, 291, ...])
-    }
+    >>> proplist = regionprops(label_image, image)
+    >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
+    ...                                              'inertia_tensor_eigvals'])
+    >>> props  # doctest: +ELLIPSIS
+    {'label': array([1, 2, ...]), ...
+    ...'inertia_tensor-0-0': array([0, 0, ...]),...
+    ...'inertia_tensor_eigvals-1': array([277, 291, ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
     obtain a clean DataFrame::
@@ -587,8 +584,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     3      4       0     304       4     305
     4      5       0     306       2     308
 
-
-"""
+    """
     regions = regionprops(label_image, intensity_image=intensity_image,
     return _props_to_dict(regions, properties=properties, separator=separator)
 
