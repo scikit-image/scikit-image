@@ -586,6 +586,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
+                          cache=cache)
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
