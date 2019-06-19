@@ -14,7 +14,7 @@ avoiding deadlocks.
 
 This is a meritocratic, consensus-based community project. Anyone with an
 interest in the project can join the community, contribute to the project
-design and participate in the decision making process. This document describes
+design, and participate in the decision making process. This document describes
 how that participation takes place and how to set about earning merit within
 the project community.
 
@@ -29,8 +29,8 @@ project. Anyone can become a contributor, and contributions can take many forms
 
 Core developers
 ---------------
-Core developers are community members who have shown that they are dedicated to
-the continued development of the project through ongoing engagement with the
+Core developers are community members who have demonstrated
+continued commitment to the project through ongoing engagement with the
 community. They have shown they can be trusted to maintain scikit-image with
 care. Being a core developer allows contributors to more easily carry on
 with their project related activities by giving them direct access to the
@@ -38,7 +38,8 @@ project’s repository and is represented as being an organization member on the
 scikit-image `GitHub organization <https://github.com/orgs/scikit-image/people>`_.
 Core developers are expected to review code contributions, can merge approved
 pull requests, can cast votes for and against merging a pull-request, and can
-be involved in deciding major changes to the API.
+be involved in deciding major changes to the API. Core developers are expected
+to adhere to the :ref:`core developer guide <core-dev>`.
 
 New core developers can be nominated by any existing core developer. Once they
 have been nominated, there will be a vote by the current core developers.
