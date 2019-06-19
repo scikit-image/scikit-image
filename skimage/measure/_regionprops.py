@@ -445,10 +445,11 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     >>> proplist = regionprops(label_image, image)
     >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
     ...                                              'inertia_tensor_eigvals'])
-    >>> props  # doctest: +ELLIPSIS
-    {'label': array([1, 2, ...]), ...
-    ...'inertia_tensor-0-0': array([0, 0, ...]),...
-    ...'inertia_tensor_eigvals-1': array([277, 291, ...])}
+    >>> props  # doctest: +ELLIPSIS +SKIP
+    {'label': array([ 1,  2, ...]), ...
+     'inertia_tensor-0-0': array([  4.012...e+03,   8.51..., ...]), ...
+     ...,
+     'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
     obtain a clean DataFrame::
@@ -566,10 +567,11 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     >>> proplist = regionprops(label_image, image)
     >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
     ...                                              'inertia_tensor_eigvals'])
-    >>> props  # doctest: +ELLIPSIS
-    {'label': array([1, 2, ...]), ...
-    ...'inertia_tensor-0-0': array([0, 0, ...]),...
-    ...'inertia_tensor_eigvals-1': array([277, 291, ...])}
+    >>> props  # doctest: +ELLIPSIS +SKIP
+    {'label': array([ 1,  2, ...]), ...
+     'inertia_tensor-0-0': array([  4.012...e+03,   8.51..., ...]), ...
+     ...,
+     'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
     obtain a clean DataFrame::
