@@ -51,12 +51,6 @@ def test_png_round_trip():
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
-def test_imread_as_gray_flatten():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
-    img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
-    assert_array_equal(img, img_flat)
-
-
 def test_imread_as_gray():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
