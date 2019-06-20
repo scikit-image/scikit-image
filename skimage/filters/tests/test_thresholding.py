@@ -545,5 +545,5 @@ def test_multiotsu_output():
 def test_thresholds_dask_compatibility(thresholding, lower, upper):
     pytest.importorskip('dask', reason="dask python library is not installed")
     import dask.array as da
-    dask_camera = da.from_array(skimage.data.camera(), chunks=(256, 256))
+    dask_camera = da.from_array(data.camera(), chunks=(256, 256))
     assert lower < float(thresholding(dask_camera)) < upper
