@@ -51,6 +51,7 @@ API Changes
   ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
 - Default value of ``order`` parameter has been set to ``rc`` in
   ``skimage.feature.hessian_matrix``.
+- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
 
 
 Bugfixes
