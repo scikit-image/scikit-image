@@ -18,6 +18,16 @@ def polygon2mask(image_shape, polygon):
     -------
     mask : 2-D ndarray of type 'bool'.
         The mask that corresponds to the input polygon.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import polygon2mask
+    >>> image_shape = (128, 128)
+    >>> polygon = np.array([[60, 100], [100, 40], [40, 40]])
+    >>> mask = polygon2mask(image_shape, polygon)
+    >>> mask.shape
+    (128, 128)
     """
     polygon = np.asarray(polygon)
     vertex_row_coords, vertex_col_coords = polygon.T
