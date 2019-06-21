@@ -3,7 +3,7 @@ import numpy as np
 from .. import draw
 
 
-def poly2mask(image_shape, polygon):
+def polygon2mask(image_shape, polygon):
     """Compute a mask from polygon.
 
     Parameters
