@@ -55,4 +55,4 @@ __all__ = ['match_histograms',
            'pyramid_expand',
            'pyramid_gaussian',
            'pyramid_laplacian',
-           'poly2mask']
+           'polygon2mask']
