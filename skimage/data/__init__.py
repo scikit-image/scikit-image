@@ -236,8 +236,7 @@ def horse():
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_gray=True))
+    return img_as_bool(load("horse.png", as_gray=True))
 
 
 def clock():

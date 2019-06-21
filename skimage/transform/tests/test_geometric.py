@@ -478,10 +478,10 @@ def test_projective_repr():
     tform = ProjectiveTransform()
     want = re.escape(textwrap.dedent(
         '''
-        <ProjectiveTransform(matrix=[
-            [1., 0., 0.],
-            [0., 1., 0.],
-            [0., 0., 1.]]) at
+        <ProjectiveTransform(matrix=
+            [[1., 0., 0.],
+             [0., 1., 0.],
+             [0., 0., 1.]]) at
         ''').strip()) + ' 0x[a-f0-9]+' + re.escape('>')
     # Hack the escaped regex to allow whitespace before each number for
     # compatibility with different numpy versions.
@@ -494,10 +494,10 @@ def test_projective_str():
     tform = ProjectiveTransform()
     want = re.escape(textwrap.dedent(
         '''
-        <ProjectiveTransform(matrix=[
-            [1., 0., 0.],
-            [0., 1., 0.],
-            [0., 0., 1.]])>
+        <ProjectiveTransform(matrix=
+            [[1., 0., 0.],
+             [0., 1., 0.],
+             [0., 0., 1.]])>
         ''').strip())
     # Hack the escaped regex to allow whitespace before each number for
     # compatibility with different numpy versions.
