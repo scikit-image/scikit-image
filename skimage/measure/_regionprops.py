@@ -530,8 +530,8 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
          number of columns would change depending on the object. For example,
          ``image`` and ``coords``.
 
-    Output
-    ------
+    Returns
+    -------
     out_dict : dict
         Dictionary mapping property names to an array of values of that
         property, one value per region. This dictionary can be used as input to
