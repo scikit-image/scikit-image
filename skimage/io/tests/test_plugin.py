@@ -7,8 +7,12 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_equal
 
 
-io.use_plugin('pil')
+
 priority_plugin = 'pil'
+
+
+def setup():
+    io.use_plugin('pil')
 
 
 def teardown_module():
