@@ -16,7 +16,6 @@ from ._warps import (swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
-from ._polygon2mask import polygon2mask
 
 
 __all__ = ['match_histograms',
@@ -54,5 +53,4 @@ __all__ = ['match_histograms',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
-           'pyramid_laplacian',
-           'polygon2mask']
+           'pyramid_laplacian']
