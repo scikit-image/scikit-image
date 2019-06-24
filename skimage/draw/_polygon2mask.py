@@ -19,6 +19,11 @@ def polygon2mask(image_shape, polygon):
     mask : 2-D ndarray of type 'bool'.
         The mask that corresponds to the input polygon.
 
+    Notes
+    -----
+    This function does not do any border checking, so that all
+    the vertices need to be within the given shape.
+
     Examples
     --------
     >>> import numpy as np
