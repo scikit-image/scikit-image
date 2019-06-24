@@ -540,24 +540,23 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
     Notes
     -----
-    1. Column separation:
-        A column is dedicated for a scalar, an object or an item
-        in a __len__ structure.
-        1.1 scalar
-            The prop name references a 1D numpy array with a scalar item per
-            value of the region.
-        1.2 object
-            The prop name references a 1D numpy array with an object item per
-            value of the region. Objects are not arrays which either have the
-            capacity to be ndimensional, or where the array size can change
-            between regions. All objects are stored in the OBJECT_COLUMNS
-            dictionary.
-        1.3 __len__ structure
-            Every item in the structure is made into a property whose name
-            depends on the item's location in the structure. The name
-            references a 1D numpy array with a scalar item per value of the
-            region. The structure is effectively decomposed into items.
+    Each column contains either a scalar property, an object property, or an
+    element in a multidimensional array.
 
+    Properties with scalar values for each region, such as "eccentricity", will
+    appear as a float or int array with that property name as key.
+
+    Multidimensional properties *of fixed size* for a given image dimension,
+    such as "centroid" (every centroid will have three elements in a 3D image,
+    no matter the region size), will be split into that many columns, with the
+    name {property_name}{separator}{element_num} (for 1D properties),
+    {property_name}{separator}{elem_num0}{separator}{elem_num1} (for 2D
+    properties), and so on.
+
+    For multidimensional properties that don't have a fixed size, such as
+    "image" (the image of a region varies in size depending on the region
+    size), an object array will be used, with the corresponding property name
+    as the key.
 
     Examples
     --------
