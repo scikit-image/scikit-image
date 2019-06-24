@@ -524,11 +524,11 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         from the property name by this separator. For example, the inertia
         tensor of a 2D region will appear in four columns:
         ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
-         and ``inertia_tensor-1-1`` (where the separator is ``-``).
+        and ``inertia_tensor-1-1`` (where the separator is ``-``).
 
-         Object columns are those that cannot be split in this way because the
-         number of columns would change depending on the object. For example,
-         ``image`` and ``coords``.
+        Object columns are those that cannot be split in this way because the
+        number of columns would change depending on the object. For example,
+        ``image`` and ``coords``.
 
     Returns
     -------
