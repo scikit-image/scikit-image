@@ -27,7 +27,7 @@ def polygon2mask(image_shape, polygon):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import polygon2mask
+    >>> from skimage.draw import polygon2mask
     >>> image_shape = (128, 128)
     >>> polygon = np.array([[60, 100], [100, 40], [40, 40]])
     >>> mask = polygon2mask(image_shape, polygon)
