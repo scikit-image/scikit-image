@@ -41,9 +41,8 @@ def test_sobel_zeros():
 
 def test_sobel_mask():
     """Sobel on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.sobel(np.random.uniform(size=(10, 10)),
-                           np.zeros((10, 10), bool))
+                           np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -52,7 +51,7 @@ def test_sobel_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.sobel(image) * np.sqrt(2)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
@@ -70,15 +69,14 @@ def test_sobel_vertical():
 
 def test_sobel_h_zeros():
     """Horizontal sobel on an array of all zeros."""
-    result = filters.sobel_h(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.sobel_h(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_sobel_h_mask():
     """Horizontal Sobel on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.sobel_h(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+                             np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -87,7 +85,7 @@ def test_sobel_h_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.sobel_h(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
@@ -103,15 +101,14 @@ def test_sobel_h_vertical():
 
 def test_sobel_v_zeros():
     """Vertical sobel on an array of all zeros."""
-    result = filters.sobel_v(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.sobel_v(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_sobel_v_mask():
     """Vertical Sobel on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.sobel_v(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+                             np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -120,7 +117,7 @@ def test_sobel_v_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.sobel_v(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
@@ -136,15 +133,14 @@ def test_sobel_v_horizontal():
 
 def test_scharr_zeros():
     """Scharr on an array of all zeros."""
-    result = filters.scharr(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.scharr(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert (np.all(result < 1e-16))
 
 
 def test_scharr_mask():
     """Scharr on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.scharr(np.random.uniform(size=(10, 10)),
-                            np.zeros((10, 10), bool))
+                            np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -153,7 +149,7 @@ def test_scharr_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.scharr(image) * np.sqrt(2)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
@@ -171,15 +167,15 @@ def test_scharr_vertical():
 
 def test_scharr_h_zeros():
     """Horizontal Scharr on an array of all zeros."""
-    result = filters.scharr_h(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.scharr_h(np.zeros((10, 10)),
+                              np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_scharr_h_mask():
     """Horizontal Scharr on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.scharr_h(np.random.uniform(size=(10, 10)),
-                              np.zeros((10, 10), bool))
+                              np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -188,7 +184,7 @@ def test_scharr_h_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.scharr_h(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
@@ -204,15 +200,15 @@ def test_scharr_h_vertical():
 
 def test_scharr_v_zeros():
     """Vertical Scharr on an array of all zeros."""
-    result = filters.scharr_v(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.scharr_v(np.zeros((10, 10)),
+                              np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_scharr_v_mask():
     """Vertical Scharr on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.scharr_v(np.random.uniform(size=(10, 10)),
-                              np.zeros((10, 10), bool))
+                              np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -221,7 +217,7 @@ def test_scharr_v_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.scharr_v(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
@@ -237,15 +233,15 @@ def test_scharr_v_horizontal():
 
 def test_prewitt_zeros():
     """Prewitt on an array of all zeros."""
-    result = filters.prewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.prewitt(np.zeros((10, 10)),
+                             np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_prewitt_mask():
     """Prewitt on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.prewitt(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+                             np.zeros((10, 10), dtype=bool))
     assert_allclose(np.abs(result), 0)
 
 
@@ -254,7 +250,7 @@ def test_prewitt_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.prewitt(image) * np.sqrt(2)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
@@ -272,15 +268,15 @@ def test_prewitt_vertical():
 
 def test_prewitt_h_zeros():
     """Horizontal prewitt on an array of all zeros."""
-    result = filters.prewitt_h(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.prewitt_h(np.zeros((10, 10)),
+                               np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_prewitt_h_mask():
     """Horizontal prewitt on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.prewitt_h(np.random.uniform(size=(10, 10)),
-                               np.zeros((10, 10), bool))
+                               np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -289,7 +285,7 @@ def test_prewitt_h_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.prewitt_h(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
@@ -305,15 +301,15 @@ def test_prewitt_h_vertical():
 
 def test_prewitt_v_zeros():
     """Vertical prewitt on an array of all zeros."""
-    result = filters.prewitt_v(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.prewitt_v(np.zeros((10, 10)),
+                               np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
 def test_prewitt_v_mask():
     """Vertical prewitt on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.prewitt_v(np.random.uniform(size=(10, 10)),
-                               np.zeros((10, 10), bool))
+                               np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -322,7 +318,7 @@ def test_prewitt_v_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.prewitt_v(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
@@ -342,16 +338,16 @@ def test_laplace_zeros():
     image = np.zeros((9, 9))
     image[3:-3, 3:-3] = 1
     result = filters.laplace(image)
-    res_chk = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                        [0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                        [0., 0., 0., -1., -1., -1., 0., 0., 0.],
-                        [0., 0., -1., 2., 1., 2., -1., 0., 0.],
-                        [0., 0., -1., 1., 0., 1., -1., 0., 0.],
-                        [0., 0., -1., 2., 1., 2., -1., 0., 0.],
-                        [0., 0., 0., -1., -1., -1., 0., 0., 0.],
-                        [0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                        [0., 0., 0., 0., 0., 0., 0., 0., 0.]])
-    assert_allclose(result, res_chk)
+    check_result = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                             [0., 0., 0., -1., -1., -1., 0., 0., 0.],
+                             [0., 0., -1., 2., 1., 2., -1., 0., 0.],
+                             [0., 0., -1., 1., 0., 1., -1., 0., 0.],
+                             [0., 0., -1., 2., 1., 2., -1., 0., 0.],
+                             [0., 0., 0., -1., -1., -1., 0., 0., 0.],
+                             [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                             [0., 0., 0., 0., 0., 0., 0., 0., 0.]])
+    assert_allclose(result, check_result)
 
 
 def test_laplace_mask():
@@ -360,21 +356,20 @@ def test_laplace_mask():
     image = np.zeros((9, 9))
     image[3:-3, 3:-3] = 1
     # Define the mask
-    result = filters.laplace(image, ksize=3, mask=np.zeros((9, 9), bool))
+    result = filters.laplace(image, ksize=3, mask=np.zeros((9, 9), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_zeros():
     """Farid on an array of all zeros."""
-    result = filters.farid(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.farid(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_mask():
     """Farid on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.farid(np.random.uniform(size=(10, 10)),
-                           np.zeros((10, 10), bool))
+                           np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -383,7 +378,7 @@ def test_farid_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.farid(image) * np.sqrt(2)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == result[i == 0][0]))
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
@@ -401,15 +396,14 @@ def test_farid_vertical():
 
 def test_farid_h_zeros():
     """Horizontal Farid on an array of all zeros."""
-    result = filters.farid_h(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.farid_h(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_h_mask():
     """Horizontal Farid on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.farid_h(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+                             np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -418,7 +412,7 @@ def test_farid_h_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.farid_h(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     i[np.abs(j) == 5] = 10000
     assert np.all(result[i == 0] == result[i == 0][0])
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
@@ -434,15 +428,14 @@ def test_farid_h_vertical():
 
 def test_farid_v_zeros():
     """Vertical Farid on an array of all zeros."""
-    result = filters.farid_v(np.zeros((10, 10)), np.ones((10, 10), bool))
+    result = filters.farid_v(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0, atol=1e-10)
 
 
 def test_farid_v_mask():
     """Vertical Farid on a masked array should be zero."""
-    np.random.seed(0)
     result = filters.farid_v(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), bool))
+                             np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -451,7 +444,7 @@ def test_farid_v_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.farid_v(image)
-    # Fudge the eroded points
+    # Check if result match transform direction
     j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
     assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
