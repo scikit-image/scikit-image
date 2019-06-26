@@ -3,33 +3,30 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 from numpy cimport ndarray
-import numpy as np
 from numpy.math cimport INFINITY
-from warnings import warn
 
 
 cdef double f(double p):
-    cdef double out = np.inf
-    #largest number a Py_ssize_t can take
+    cdef double out = INFINITY
     if p == 0:
         out = 0
     return out
 
 cdef double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c):
-    cdef double out = (<double>a-<double>b)**2+c
+    cdef double out = <double>(a-b)**2+c
     return out
 
 cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
     cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
-        if a==np.inf and b!=np.inf:
-            out = -np.inf
+        if a==INFINITY and b!=INFINITY:
+            out = -INFINITY
         else:
-            out = np.inf
+            out = INFINITY
     return out
 
 cdef double manhattan_dist(Py_ssize_t a, double b, double c):
-    cdef double out = (np.abs(a-b)+c)
+    cdef double out = (abs(a-b)+c)
     return out
 
 cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
@@ -43,7 +40,7 @@ cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
     if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return np.inf
+        return INFINITY
     return -1
 
 def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
@@ -58,27 +55,27 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
             cost_arr[i] = f(arr[i])
 
     start = 0
-    while start<len(arr):
-        if cost_arr[start] != np.inf:
+    while start<length:
+        if cost_arr[start] != INFINITY:
             break
         start+=1
-    start = min(len(arr)-1,start)
+    start = min(length-1,start)
 
     rightmost = 0
-    domains[0] = -np.inf
-    domains[1] = np.inf
+    domains[0] = -INFINITY
+    domains[1] = INFINITY
     centers[0] = start
     
     for i in range(start+1,length):
         intersection = euclidean_meet(i,centers[rightmost],cost_arr)
-        while intersection <= domains[rightmost] or domains[rightmost]==np.inf and rightmost>start:
+        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
             rightmost-=1
             intersection = euclidean_meet(i,centers[rightmost],cost_arr)
 
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-        domains[rightmost+1] = np.inf
+        domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
@@ -100,28 +97,28 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
             cost_arr[i] = f(arr[i])
 
     start = 0
-    while start<len(arr):
-        if cost_arr[start] != np.inf:
+    while start<length:
+        if cost_arr[start] != INFINITY:
             break
         start+=1
-    start = min(len(arr)-1,start)
+    start = min(length-1,start)
 
 
     rightmost = 0
-    domains[0] = -np.inf
-    domains[1] = np.inf
+    domains[0] = -INFINITY
+    domains[1] = INFINITY
     centers[0] = start
     
     for i in range(start+1,length):
         intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
-        while intersection <= domains[rightmost] or domains[rightmost]==np.inf and rightmost>start:
+        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
             rightmost-=1
             intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
 
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-        domains[rightmost+1] = np.inf
+        domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
@@ -146,11 +143,11 @@ def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
             cost_arr[i] = cost_func(arr[i])
 
     start = 0
-    while start<len(arr):
+    while start<length:
         if cost_arr[start] != INFINITY:
             break
         start+=1
-    start = min(len(arr)-1,start)
+    start = min(length-1,start)
 
     rightmost = 0
     domains[0] = -INFINITY
@@ -158,10 +155,10 @@ def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
     centers[0] = start
 
     for i in range(start+1,length):
-        intersection = dist_meet(i,centers[rightmost],cost_arr,rightmost)
+        intersection = dist_meet(i,centers[rightmost],cost_arr)
         while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
             rightmost-=1
-            intersection = dist_meet(i,centers[rightmost],cost_arr,rightmost)
+            intersection = dist_meet(i,centers[rightmost],cost_arr)
 
         rightmost+=1
         centers[rightmost]=i

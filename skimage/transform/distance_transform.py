@@ -24,7 +24,7 @@ def f(p):
 def euclidean_dist(a,b,c):
     return (a-b)**2+c
 
-def euclidean_meet(a,b,f,r):
+def euclidean_meet(a,b,f):
     out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
         if a==np.inf and b!=np.inf:
@@ -36,7 +36,7 @@ def euclidean_meet(a,b,f,r):
 def manhattan_dist(a,b,c):
     return np.abs(a-b)+c
 
-def manhattan_meet(a,b,f,r):
+def manhattan_meet(a,b,f):
     s = (a + f[a] + b - f[b]) / 2
     if manhattan_dist(a,s,f[a])==manhattan_dist(b,s,f[b]):
         return s
