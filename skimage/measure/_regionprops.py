@@ -450,7 +450,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
      'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
-    obtain a clean DataFrame::
+    obtain a clean DataFrame:
 
     >>> import pandas as pd  # doctest: +SKIP
     >>> data = pd.DataFrame(props)  # doctest: +SKIP
@@ -571,7 +571,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
      'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
 
     The resulting dictionary can be directly passed to pandas, if installed, to
-    obtain a clean DataFrame::
+    obtain a clean DataFrame:
 
     >>> import pandas as pd  # doctest: +SKIP
     >>> data = pd.DataFrame(props)  # doctest: +SKIP
