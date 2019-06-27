@@ -27,7 +27,6 @@ from ..._shared.utils import assert_nD
 from . import percentile_cy
 from .generic import _handle_input
 
-
 __all__ = ['autolevel_percentile', 'gradient_percentile',
            'mean_percentile', 'subtract_mean_percentile',
            'enhance_contrast_percentile', 'percentile', 'pop_percentile',
@@ -36,10 +35,9 @@ __all__ = ['autolevel_percentile', 'gradient_percentile',
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
            out_dtype=None):
-
     assert_nD(image, 2)
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
-                                                    out_dtype)
+    image, selem, out, mask, n_bins, out_dtype = _handle_input(image, selem, out, mask,
+                                                               out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins, p0=p0, p1=p1)
