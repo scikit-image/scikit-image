@@ -509,7 +509,7 @@ class TestRank:
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (np.uint8, np.uint16, np.int32, np.int64,
+        for dtype in (np.bool_, np.uint8, np.uint16, np.int32, np.int64,
                       np.float32, np.float64):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
             rank.mean(image=image, selem=elem, out=out, mask=mask,
@@ -686,10 +686,23 @@ class TestRank:
         assert rank.median(a)[1, 1] == 0
         assert rank.median(a, disk(1))[1, 1] == 1
 
-
     def test_majority(self):
         img = data.camera()
         elem = np.ones((3, 3), dtype=np.uint8)
         expected = rank.windowed_histogram(
             img, elem).argmax(-1).astype(np.uint8)
         assert_equal(expected, rank.majority(img, elem))
+
+    def test_output_same_dtype(self):
+        image = (np.random.rand(100, 100) * 256).astype(np.uint8)
+        out = np.empty_like(image)
+        mask = np.ones(image.shape, dtype=np.uint8)
+        elem = np.ones((3, 3), dtype=np.uint8)
+        rank.maximum(image=image, selem=elem, out=out, mask=mask)
+        assert_equal(image.dtype, out.dtype)
+
+    def test_input_boolean_dtype(self):
+        image = (np.random.rand(100, 100) * 256).astype(np.bool_)
+        elem = np.ones((3, 3), dtype=np.bool_)
+        with testing.raises(ValueError):
+            rank.maximum(image=image, selem=elem)
