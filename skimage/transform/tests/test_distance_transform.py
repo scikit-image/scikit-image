@@ -32,7 +32,7 @@ def test_3d():
 def test_large():
     from scipy.ndimage.morphology import distance_transform_edt, distance_transform_cdt
     import time
-    case = (np.random.randint(2, size=(10,10,10,10))).astype('float64')
+    case = (np.random.randint(2, size=(10,10,10,10,10,))).astype('float64')
 
     start = time.time()
     out_euc = distance_transform_edt(case)**2
@@ -42,10 +42,23 @@ def test_large():
     skimage_out_slow_euc = generalized_distance_transform(case, func='slow')
     skimage_out_slow_man = generalized_distance_transform(case, func='slow', dist_func=manhattan_dist, dist_meet=manhattan_meet)
     start = time.time()
+
+#    import cProfile
+ 
+#    pr = cProfile.Profile()
+
+#    pr.enable()
     skimage_out_euc = generalized_distance_transform(case, func='euclidean')
     skimage_out_man = generalized_distance_transform(case, func='manhattan')
+   
+#    pr.disable()
+ 
+#    pr.print_stats(sort='time')
+    
     print('skimage time:', time.time()-start)
     np.testing.assert_allclose(skimage_out_slow_euc,out_euc)
     np.testing.assert_allclose(skimage_out_slow_man,out_man)
     np.testing.assert_allclose(skimage_out_euc,out_euc)
     np.testing.assert_allclose(skimage_out_man,out_man)
+
+#

@@ -75,7 +75,7 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
+    domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
@@ -118,7 +118,7 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
+    domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
@@ -163,7 +163,7 @@ def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
+    domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
