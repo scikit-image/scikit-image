@@ -35,7 +35,8 @@ __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
     assert_nD(image, 2)
-    image, selem, out, mask, n_bins, out_dtype = _handle_input(image, selem, out, mask,
+    image, selem, out, mask, n_bins, out_dtype = _handle_input(image, selem,
+                                                               out, mask,
                                                                out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
