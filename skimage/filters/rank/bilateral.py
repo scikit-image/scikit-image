@@ -41,7 +41,7 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins, s0=s0, s1=s1)
 
-    return out.reshape(out.shape[:2])
+    return out.reshape(out.shape[:2]).astype(out_dtype)
 
 
 def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,

@@ -42,7 +42,7 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins, p0=p0, p1=p1)
 
-    return out.reshape(out.shape[:2])
+    return out.reshape(out.shape[:2]).astype(out_dtype)
 
 
 def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
