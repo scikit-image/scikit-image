@@ -99,12 +99,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         Output data-type.
 
     """
-    # check `image` is 2D
     assert_nD(image, 2)
-
-    # if `image` is not an integer 8-bit/16-bit or a boolean, we cast it as
-    # an unsigned 8-bit image.
-    input_dtype = image.dtype
     if image.dtype not in (np.uint8, np.uint16, np.bool_):
         message = ('Possible precision loss converting image of type {} to '
                    'uint8 as required by rank filters. Convert manually using '
@@ -113,13 +108,12 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
-    # make `image` contiguous in memory
+    if out_dtype is None:
+        out_dtype = image.dtype
+
+    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
-    # cast `selem` as an unsigned 8-bit array and make it contiguous in memory
-    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
-
-    # idem with `mask`
     if mask is None:
         mask = np.ones(image.shape, dtype=np.uint8)
     else:
@@ -129,19 +123,12 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     if image is out:
         raise NotImplementedError("Cannot perform rank operation in place.")
 
-    # allocate a new output array if necessary
     if out is None:
         out = np.empty(image.shape + (pixel_size,))
     else:
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
-    out = out.astype(image.dtype)
 
-    # cast output in the desired dtype
-    if out_dtype is None:
-        out_dtype = input_dtype
-
-    # compute the number of bins in the histogram from `image` dtype
     if image.dtype in (np.uint8, np.int8):
         n_bins = 256
     else:
@@ -253,7 +240,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.astype(out_dtype)
+    return out.astype(out_dtype).astype(out_dtype)
 
 
 def _default_selem(func):
