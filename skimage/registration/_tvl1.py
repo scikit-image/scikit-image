@@ -103,31 +103,29 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
             # Regularization term
 
-            for ___ in range(2):
+            u = u_ - tau*div(pu1, pu2)
 
-                u = u_ - tau*div(pu1, pu2)
+            ux, uy = forward_diff(u)
+            ux *= f1
+            uy *= f1
+            Q = 1 + np.sqrt(ux*ux + uy*uy)
 
-                ux, uy = forward_diff(u)
-                ux *= f1
-                uy *= f1
-                Q = 1 + np.sqrt(ux*ux + uy*uy)
+            pu1 += ux
+            pu1 /= Q
+            pu2 += uy
+            pu2 /= Q
 
-                pu1 += ux
-                pu1 /= Q
-                pu2 += uy
-                pu2 /= Q
+            v = v_ - tau*div(pv1, pv2)
 
-                v = v_ - tau*div(pv1, pv2)
+            vx, vy = forward_diff(v)
+            vx *= f1
+            vy *= f1
+            Q = 1 + np.sqrt(vx*vx + vy*vy)
 
-                vx, vy = forward_diff(v)
-                vx *= f1
-                vy *= f1
-                Q = 1 + np.sqrt(vx*vx + vy*vy)
-
-                pv1 += vx
-                pv1 /= Q
-                pv2 += vy
-                pv2 /= Q
+            pv1 += vx
+            pv1 /= Q
+            pv2 += vy
+            pv2 /= Q
 
         u0 -= u
         v0 -= v
