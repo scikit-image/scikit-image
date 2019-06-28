@@ -194,11 +194,45 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
 
     Examples
     --------
+    >>> import numpy as np
     >>> from matplotlib import pyplot as plt
-    >>> import pyimof
-    >>> I0, I1 = pyimof.data.yosemite()
-    >>> u, v = pyimof.solvers.tvl1(I0, I1)
-    >>> pyimof.display.plot(u, v)
+    >>> from skimage.color import rgb2gray
+    >>> from skimage.data import stereo_motorcycle
+    >>> from skimage.registration import tvl1
+    >>> # --- Load the sequence
+    >>> I0, I1, disp = stereo_motorcycle()
+    >>> # --- Convert the images to gray level: color is not supported.
+    >>> I0 = rgb2gray(I0)
+    >>> I1 = rgb2gray(I1)
+    >>> # --- Compute the optical flow
+    >>> u, v = tvl1(I1, I0)
+    >>> # --- Display the result
+    >>> fig = plt.figure(figsize=(12, 4))
+    >>> ax0, ax1 = fig.subplots(1, 2)
+    >>> nl, nc = u.shape
+    >>> step = 10
+    >>> y, x = np.mgrid[:nl:step, :nc:step]
+    >>> # Ground truth
+    >>> gt_u = disp[::step, ::step]
+    >>> gt_v = np.zeros_like(gt_u)
+    >>> gt_norm = np.sqrt(disp*disp)
+    >>> ax0.imshow(gt_norm)
+    >>> ax0.set_aspect('equal')
+    >>> ax0.quiver(x, y, gt_u, gt_v, units='dots',
+                   angles='xy', scale_units='xy')
+    >>> ax0.set_title('Ground truth')
+    >>> ax0.set_axis_off()
+    >>> # Estimated optical flow
+    >>> u_ = u[::step, ::step]
+    >>> v_ = v[::step, ::step]
+    >>> of_norm = np.sqrt(u*u+v*v)
+    >>> ax1.imshow(of_norm)
+    >>> ax1.set_aspect('equal')
+    >>> ax1.quiver(x, y, u_, v_, units='dots',
+                   angles='xy', scale_units='xy')
+    >>> ax1.set_title('Estimated optical flow')
+    >>> ax1.set_axis_off()
+    >>> fig.set_tight_layout(True)
     >>> plt.show()
 
     """
