@@ -90,21 +90,22 @@ plt.tight_layout()
 plt.show()
 
 ######################################################################
-# As in the example above, we illustrate the rotational invariance
-# of the filters in this example. The top row shows a
-# rotationally invariant image along with the angle of its analytical gradient.
-# The other two rows contain the difference between the different gradient
-# approximations (Sobel, Prewitt, Scharr & Farid) and analytical gradient.
+# As in the previous example, here we illustrate the rotational invariance of
+# the filters. The top row shows a rotationally invariant image along with the
+# angle of its analytical gradient. The other two rows contain the difference
+# between the different gradient approximations (Sobel, Prewitt, Scharr &
+# Farid) and analytical gradient.
 #
 # The Farid & Simoncelli derivative filters [4]_, [5]_  are the most
 # rotationally invariant, but require a 5x5 kernel, which is computationally
 # more intensive than a 3x3 kernel.
 #
-# .. [4] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
-#     multidimensional signals."
-#     IEEE Transactions on image processing 13.4 (2004): 496-508.
+# .. [4] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+#        multidimensional signals", IEEE Transactions on Image Processing 13(4):
+#        496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
 #
-# .. [5] https://en.wikipedia.org/wiki/Image_derivatives
+# .. [5] Wikipedia, "Farid and Simoncelli Derivatives." Available at:
+#        <https://en.wikipedia.org/wiki/Image_derivatives#Farid_and_Simoncelli_Derivatives>
 
 
 x, y = np.mgrid[-10:10:255j, -10:10:255j]

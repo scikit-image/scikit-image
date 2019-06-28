@@ -548,7 +548,7 @@ def laplace(image, ksize=3, mask=None):
 
 
 def farid(image, mask=None):
-    """Find the edge magnitude using the Farid & Simoncelli transform.
+    """Find the edge magnitude using the Farid transform.
 
     Parameters
     ----------
@@ -562,7 +562,7 @@ def farid(image, mask=None):
     Returns
     -------
     output : 2-D array
-        The Farid & Simoncelli edge map.
+        The Farid edge map.
 
     See also
     --------
@@ -577,13 +577,11 @@ def farid(image, mask=None):
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
-    multidimensional signals."
-        IEEE Transactions on image processing 13.4 (2004): 496-508.
-
-
-    .. [2] https://en.wikipedia.org/wiki/Image_derivatives
-    #Farid_and_Simoncelli_Derivatives
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Wikipedia, "Farid and Simoncelli Derivatives." Available at:
+           <https://en.wikipedia.org/wiki/Image_derivatives#Farid_and_Simoncelli_Derivatives>
 
     Examples
     --------
@@ -599,8 +597,7 @@ def farid(image, mask=None):
 
 
 def farid_h(image, mask=None):
-    """Find the horizontal edges of an image using the Farid & Simoncelli
-    transform.
+    """Find the horizontal edges of an image using the Farid transform.
 
     Parameters
     ----------
@@ -614,23 +611,20 @@ def farid_h(image, mask=None):
     Returns
     -------
     output : 2-D array
-        The Farid & Simoncelli edge map.
+        The Farid edge map.
 
     Notes
     -----
-    The kernel was constructed using the 5-tap weights from [1]
-
+    The kernel was constructed using the 5-tap weights from [1].
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
-    multidimensional signals."
-        IEEE Transactions on image processing 13.4 (2004): 496-508.
-    .. [2] Farid, Hany, and Eero P. Simoncelli. "Optimally
-    rotation-equivariant directional derivative kernels."
-        International Conference on Computer Analysis of Images and Patterns.
-        Springer, Berlin, Heidelberg, 1997.
-
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Farid, H. and Simoncelli, E. P. "Optimally rotation-equivariant
+           directional derivative kernels", In: 7th International Conference on
+           Computer Analysis of Images and Patterns, Kiel, Germany. Sep, 1997.
     """
     assert_nD(image, 2)
     image = img_as_float(image)
@@ -639,8 +633,7 @@ def farid_h(image, mask=None):
 
 
 def farid_v(image, mask=None):
-    """Find the vertical edges of an image using the Farid & Simoncelli
-    transform.
+    """Find the vertical edges of an image using the Farid transform.
 
     Parameters
     ----------
@@ -654,19 +647,17 @@ def farid_v(image, mask=None):
     Returns
     -------
     output : 2-D array
-        The Farid & Simoncelli edge map.
+        The Farid edge map.
 
     Notes
     -----
-    The kernel was constructed using the 5-tap weights from [1]
-
+    The kernel was constructed using the 5-tap weights from [1].
 
     References
     ----------
-    .. [1] Farid, Hany, and Eero P. Simoncelli. "Differentiation of discrete
-    multidimensional signals."
-        IEEE Transactions on image processing 13.4 (2004): 496-508.
-
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
     """
     assert_nD(image, 2)
     image = img_as_float(image)
