@@ -41,3 +41,5 @@ Other
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
+* When ``numpy`` is set to > 1.16, one may simplify the implementation of
+  of `feature.blob_log` using the vectorized version of ``np.logspace``.
