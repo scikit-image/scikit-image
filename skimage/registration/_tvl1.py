@@ -97,7 +97,7 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
             v_[idx] -= rho[idx] * Iy[idx] / NI[idx]
 
             idx = ~idx
-            srho = f0*np.sign(rho[idx])
+            srho = f0 * np.sign(rho[idx])
             u_[idx] -= srho * Ix[idx]
             v_[idx] -= srho * Iy[idx]
 
@@ -129,7 +129,7 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
         u0 -= u
         v0 -= v
-        if (u0 * u0 + v0 * v0).sum()/(u.size) < tol:
+        if (u0 * u0 + v0 * v0).sum() / (u.size) < tol:
             break
         else:
             u0, v0 = u.copy(), v.copy()
