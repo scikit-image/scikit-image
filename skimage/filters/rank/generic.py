@@ -124,7 +124,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         raise NotImplementedError("Cannot perform rank operation in place.")
 
     if out is None:
-        out = np.empty(image.shape + (pixel_size,))
+        out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
@@ -187,7 +187,7 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.reshape(out.shape[:2]).astype(out_dtype)
+    return out.reshape(out.shape[:2])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -240,7 +240,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.astype(out_dtype).astype(out_dtype)
+    return out
 
 
 def _default_selem(func):
