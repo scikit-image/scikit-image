@@ -56,12 +56,12 @@ def generalized_distance_transform(ndarr_in, func='slow', cost_func=f, dist_func
     else:
         gdt1d = partial(_generalized_distance_transform_1d_slow, cost_func=cost_func, dist_func=dist_func, dist_meet=dist_meet)
         warnings.warn("slow")
-    output = np.zeros(ndarr.shape, dtype=np.double)
+    output = np.empty(ndarr.shape, dtype=np.double)
     for dimension in range(ndarr.ndim):
         length = ndarr.shape[dimension]
-        domains_buffer =np.zeros(length+1, dtype=np.double)
-        centers_buffer = np.zeros(length,dtype=np.intp)
-        out_buffer = np.zeros(length, dtype=np.double)
+        domains_buffer =np.empty(length+1, dtype=np.double)
+        centers_buffer = np.empty(length,dtype=np.intp)
+        out_buffer = np.empty(length, dtype=np.double)
         
         if dimension == 0:
             output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer)
