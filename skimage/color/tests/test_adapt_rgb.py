@@ -5,7 +5,6 @@ import numpy as np
 from skimage import img_as_float, img_as_uint
 from skimage import color, data, filters
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
-from skimage._shared._warnings import expected_warnings
 
 # Down-sample image for quicker testing.
 COLOR_IMAGE = data.astronaut()[::5, ::6]
@@ -45,8 +44,7 @@ def smooth_hsv(image, sigma):
 
 @adapt_rgb(hsv_value)
 def edges_hsv_uint(image):
-    with expected_warnings(['precision loss']):
-        return img_as_uint(filters.sobel(image))
+    return img_as_uint(filters.sobel(image))
 
 
 def test_gray_scale_image():
