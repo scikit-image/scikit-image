@@ -59,8 +59,8 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
     nl, nc = I0.shape
     y, x = np.meshgrid(np.arange(nl), np.arange(nc), indexing='ij')
 
-    f0 = lambda_*tau
-    f1 = dt/tau
+    f0 = lambda_ * tau
+    f1 = dt / tau
 
     u = u0.copy()
     v = v0.copy()
@@ -75,52 +75,52 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
             u = ndi.filters.median_filter(u, 3)
             v = ndi.filters.median_filter(v, 3)
 
-        wI1 = warp(I1, np.array([y+v, x+u]), mode='nearest')
+        wI1 = warp(I1, np.array([y + v, x + u]), mode='nearest')
         Ix, Iy = central_diff(wI1)
-        NI = Ix*Ix + Iy*Iy
+        NI = Ix * Ix + Iy * Iy
         NI[NI == 0] = 1
 
-        rho_0 = wI1 - I0 - u0*Ix - v0*Iy
+        rho_0 = wI1 - I0 - u0 * Ix - v0 * Iy
 
         for __ in range(niter):
 
             # Data term
 
-            rho = rho_0 + u*Ix + v*Iy
+            rho = rho_0 + u * Ix + v * Iy
 
-            idx = abs(rho) <= f0*NI
+            idx = abs(rho) <= f0 * NI
 
             u_ = u.copy()
             v_ = v.copy()
 
-            u_[idx] -= rho[idx]*Ix[idx]/NI[idx]
-            v_[idx] -= rho[idx]*Iy[idx]/NI[idx]
+            u_[idx] -= rho[idx] * Ix[idx] / NI[idx]
+            v_[idx] -= rho[idx] * Iy[idx] / NI[idx]
 
             idx = ~idx
             srho = f0*np.sign(rho[idx])
-            u_[idx] -= srho*Ix[idx]
-            v_[idx] -= srho*Iy[idx]
+            u_[idx] -= srho * Ix[idx]
+            v_[idx] -= srho * Iy[idx]
 
             # Regularization term
 
-            u = u_ - tau*div(pu1, pu2)
+            u = u_ - tau * div(pu1, pu2)
 
             ux, uy = forward_diff(u)
             ux *= f1
             uy *= f1
-            Q = 1 + np.sqrt(ux*ux + uy*uy)
+            Q = 1 + np.sqrt(ux * ux + uy * uy)
 
             pu1 += ux
             pu1 /= Q
             pu2 += uy
             pu2 /= Q
 
-            v = v_ - tau*div(pv1, pv2)
+            v = v_ - tau * div(pv1, pv2)
 
             vx, vy = forward_diff(v)
             vx *= f1
             vy *= f1
-            Q = 1 + np.sqrt(vx*vx + vy*vy)
+            Q = 1 + np.sqrt(vx * vx + vy * vy)
 
             pv1 += vx
             pv1 /= Q
@@ -129,7 +129,7 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
         u0 -= u
         v0 -= v
-        if (u0*u0+v0*v0).sum()/(u.size) < tol:
+        if (u0 * u0 + v0 * v0).sum()/(u.size) < tol:
             break
         else:
             u0, v0 = u.copy(), v.copy()

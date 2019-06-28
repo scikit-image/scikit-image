@@ -111,14 +111,14 @@ def resize_flow(u, v, shape):
     """
 
     nl, nc = u.shape
-    sy, sx = shape[0]/nl, shape[1]/nc
+    sy, sx = shape[0] / nl, shape[1] / nc
 
     u = resize(u, shape, order=0, preserve_range=True,
                anti_aliasing=False)
     v = resize(v, shape, order=0, preserve_range=True,
                anti_aliasing=False)
 
-    ru, rv = sx*u, sy*v
+    ru, rv = sx * u, sy * v
 
     return ru, rv
 

@@ -38,7 +38,7 @@ nl, nc = I0.shape
 
 y, x = np.meshgrid(np.arange(nl), np.arange(nc), indexing='ij')
 
-wI1 = warp(I1, np.array([y+v, x+u]), mode='nearest')
+wI1 = warp(I1, np.array([y + v, x + u]), mode='nearest')
 
 # build an RGB image with the unregistered sequence
 seq_im = np.zeros((nl, nc, 3))
