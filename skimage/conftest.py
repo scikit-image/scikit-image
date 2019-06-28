@@ -8,18 +8,8 @@ if Version(np.__version__) >= Version('1.14'):
     np.set_printoptions(legacy='1.13')
 
 # List of files that pytest should ignore
-collect_ignore = ["setup.py",
-                  "skimage/io/_plugins",
-                  "doc/",
-                  "tools/",
-                  "viewer_examples"]
+collect_ignore = ["io/_plugins",]
 try:
     import visvis
 except ImportError:
-    collect_ignore.append("skimage/measure/mc_meta/visual_test.py")
-
-# importing skimage.novice issues some warnings. Without these lines,
-# pytest issues numerous warnings when crawling the package.
-import warnings
-
-warnings.filterwarnings('ignore', message='The `skimage.novice` module')
+    collect_ignore.append("measure/mc_meta/visual_test.py")

@@ -28,10 +28,9 @@ doc/source/auto_examples/**/*
 doc/source/_static/random.js
 .idea/
 *.log
-doc/release/_release_notes_for_docs.txt
+doc/release/_release_notes_for_docs.rst
 doc/gh-pages
 wheels
 skimage/morphology/_skeletonize_3d_cy.pyx
 .asv
-
-save-demo.jpg
+.vscode/

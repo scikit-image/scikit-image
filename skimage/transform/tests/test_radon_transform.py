@@ -45,6 +45,26 @@ def _rescale_intensity(x):
     return x
 
 
+def test_iradon_bias_circular_phantom():
+    """
+    test that a uniform circular phantom has a small reconstruction bias
+    """
+    pixels = 128
+    xy = np.arange(-pixels / 2, pixels / 2) + 0.5
+    x, y = np.meshgrid(xy, xy)
+    image = x**2 + y**2 <= (pixels/4)**2
+
+    theta = np.linspace(0., 180., max(image.shape), endpoint=False)
+    sinogram = radon(image, theta=theta)
+
+    reconstruction_fbp = iradon(sinogram, theta=theta)
+    error = reconstruction_fbp - image
+    
+    tol = 5e-5
+    roi_err = np.abs(np.mean(error))
+    assert( roi_err < tol )
+    
+
 def check_radon_center(shape, circle):
     # Create a test image with only a single non-zero pixel at the origin
     image = np.zeros(shape, dtype=np.float)
@@ -396,9 +416,9 @@ def test_iradon_sart():
         np.random.seed(1239867)
         shifts = np.random.uniform(-3, 3, sinogram.shape[1])
         x = np.arange(sinogram.shape[0])
-        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
-                                               sinogram[:, i])
-                                     for i in range(sinogram.shape[1])).T
+        sinogram_shifted = np.vstack([np.interp(x + shifts[i], x,
+                                                sinogram[:, i])
+                                      for i in range(sinogram.shape[1])]).T
         reconstructed = iradon_sart(sinogram_shifted, theta,
                                     projection_shifts=shifts)
         if debug:

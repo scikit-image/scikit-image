@@ -1,25 +1,16 @@
 from math import sqrt, atan2, pi as PI
-import itertools
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
 
-
 from functools import wraps
+
 
 __all__ = ['regionprops', 'perimeter']
 
 
-XY_TO_RC_DEPRECATION_MESSAGE = (
-    'regionprops and image moments (including moments, normalized moments, '
-    'central moments, and inertia tensor) of 2D images will change from xy '
-    'coordinates to rc coordinates in version 0.16.\nSee '
-    'https://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
-    'for details on how to avoid this message.'
-)
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
                     [0, 1, 0]], dtype=np.uint8)
@@ -99,12 +90,12 @@ class _RegionProperties(object):
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, coordinates):
+                 cache_active):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
                 raise ValueError('Label and intensity image must have the'
-                                 'same shape.')
+                                 ' same shape.')
 
         self.label = label
 
@@ -116,21 +107,6 @@ class _RegionProperties(object):
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
-        # Note: in PR 2603, we added support for nD moments in regionprops.
-        # Many properties used xy coordinates, instead of rc. This attribute
-        # helps with the deprecation process and should be removed in 0.16.
-        if label_image.ndim > 2 or coordinates == 'rc':
-            self._use_xy_warning = False
-            self._transpose_moments = False
-        elif coordinates == 'xy':
-            self._use_xy_warning = False  # don't warn if 'xy' given explicitly
-            self._transpose_moments = True
-        elif coordinates is None:
-            self._use_xy_warning = True
-            self._transpose_moments = True
-        else:
-            raise ValueError('Incorrect value for regionprops coordinates: %s.'
-                             ' Possible values are: "rc", "xy", or None')
 
     @_cached
     def area(self):
@@ -221,8 +197,6 @@ class _RegionProperties(object):
 
     def local_centroid(self):
         M = self.moments
-        if self._transpose_moments:
-            M = M.T
         return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
                      M[(0,) * self._ndim])
 
@@ -246,20 +220,12 @@ class _RegionProperties(object):
     @_cached
     def moments(self):
         M = _moments.moments(self.image.astype(np.uint8), 3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            M = M.T
         return M
 
     @_cached
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
                                       self.local_centroid, order=3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            mu = mu.T
         return mu
 
     @only2d
@@ -273,14 +239,13 @@ class _RegionProperties(object):
     @only2d
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
-        sign = -1 if self._transpose_moments else 1
         if a - c == 0:
             if b < 0:
                 return -PI / 4.
             else:
                 return PI / 4.
         else:
-            return sign * 0.5 * atan2(-2 * b, c - a)
+            return 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -358,8 +323,7 @@ class _RegionProperties(object):
         return True
 
 
-def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -380,9 +344,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-    coordinates : 'rc' or 'xy', optional
-        Coordinate conventions for 2D images. (Only 'rc' coordinates are
-        supported for 3D images.)
 
     Returns
     -------
@@ -459,31 +420,28 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
-            m_ji = sum{ array(x, y) * x^j * y^i }
+            m_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `x`, `y` coordinates of the region.
+        where the sum is over the `row`, `col` coordinates of the region.
     **moments_central** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
-            mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's centroid.
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's centroid.
     **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
     **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
-            nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
+            nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        In 'rc' coordinates, angle between the 0th axis (rows) and the major
+        Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,
         ranging from `-pi/2` to `pi/2` counter-clockwise.
-
-        In `xy` coordinates, as above but the angle is now measured from the
-        "x" or horizontal axis.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
@@ -500,17 +458,17 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
-            wm_ji = sum{ array(x, y) * x^j * y^i }
+            wm_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `x`, `y` coordinates of the region.
+        where the sum is over the `row`, `col` coordinates of the region.
     **weighted_moments_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
-            wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's weighted
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's weighted
         centroid.
     **weighted_moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
@@ -519,7 +477,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
-            wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
+            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
 
@@ -575,7 +533,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache, coordinates=coordinates)
+                                  cache)
         regions.append(props)
 
     return regions
@@ -654,7 +612,7 @@ def _parse_docs():
     doc = regionprops.__doc__ or ''
     matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
-    prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
+    prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
 

@@ -3,7 +3,8 @@ from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, expected_warnings
+from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_basic():
@@ -135,6 +136,18 @@ def test_object():
 
     with testing.raises(ValueError):
         convex_hull_object(image, 7)
+
+
+def test_non_c_contiguous():
+    # 2D Fortran-contiguous
+    image = np.ones((2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D Fortran-contiguous
+    image = np.ones((2, 2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D non-contiguous
+    image = np.transpose(np.ones((2, 2, 2), dtype=bool), [0, 2, 1])
+    assert_array_equal(convex_hull_image(image), image)
 
 
 @testing.fixture

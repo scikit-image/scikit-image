@@ -8,6 +8,7 @@ from ..exposure import histogram
 from .._shared.utils import assert_nD, warn, deprecated
 from ..transform import integral_image
 from ..util import crop, dtype_limits
+from ..filters._multiotsu import _find_threshold_multiotsu
 
 
 __all__ = ['try_all_threshold',
@@ -21,7 +22,8 @@ __all__ = ['try_all_threshold',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'apply_hysteresis_threshold']
+           'apply_hysteresis_threshold',
+           'threshold_multiotsu']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -527,8 +529,8 @@ def threshold_li(image, *, tolerance=None):
 
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
-        is less than this value. By default, this is half of the range of the
-        input image, divided by 256.
+        is less than this value. By default, this is half the smallest
+        difference between intensity values in ``image``.
 
     Returns
     -------
@@ -578,8 +580,7 @@ def threshold_li(image, *, tolerance=None):
     # Li's algorithm requires positive image (because of log(mean))
     image_min = np.min(image)
     image -= image_min
-    image_range = np.max(image)
-    tolerance = tolerance or 0.5 * image_range / 256
+    tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate
     t_curr = np.mean(image)
@@ -903,16 +904,30 @@ def threshold_niblack(image, window_size=15, k=0.2):
     -----
     This algorithm is originally designed for text recognition.
 
+    The Bradley threshold is a particular case of the Niblack
+    one, being equivalent to
+
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> q = 1
+    >>> threshold_image = threshold_niblack(image, k=0) * q
+
+    for some value ``q``. By default, Bradley and Roth use ``q=1``.
+
+
     References
     ----------
-    .. [1] Niblack, W (1986), An introduction to Digital Image
-           Processing, Prentice-Hall.
+    .. [1] W. Niblack, An introduction to Digital Image Processing,
+           Prentice-Hall, 1986.
+    .. [2] D. Bradley and G. Roth, "Adaptive thresholding using Integral
+           Image", Journal of Graphics Tools 12(2), pp. 13-21, 2007.
+           :DOI:`10.1080/2151237X.2007.10129236`
 
     Examples
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
+    >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
     return m - k * s
@@ -1023,3 +1038,100 @@ def apply_hysteresis_threshold(image, low, high):
     connected_to_high = sums > 0
     thresholded = connected_to_high[labels_low]
     return thresholded
+
+
+def threshold_multiotsu(image, classes=3, nbins=256):
+    r"""Generates multiple thresholds for an input image.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Grayscale input image.
+    classes : int, optional
+        Number of classes to be thresholded, i.e. the number of resulting
+        regions.
+    nbins : int, optional
+        Number of bins used to calculate the histogram. This value is ignored
+        for integer arrays.
+
+    Returns
+    -------
+    idx_thresh : array
+        Array containing the threshold values for the desired classes.
+
+    Notes
+    -----
+    The threshold values are chosen in a way that maximizes the variance
+    between the desired classes. Based on the Multi-Otsu approach by
+    Liao, Chen and Chung.
+
+    This implementation relies on a Cython function whose complexity
+    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is the number of histogram bins and :math:`C` is the number of
+    classes desired.
+
+    References
+    ----------
+    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
+           multilevel thresholding", Journal of Information Science and
+           Engineering 17 (5): 713-727, 2001. Available at:
+           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+    .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
+           Available at:
+           <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
+
+    Examples
+    --------
+    >>> from skimage.color import label2rgb
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> thresholds = threshold_multiotsu(image)
+    >>> regions = np.digitize(image, bins=thresholds)
+    >>> regions_colorized = label2rgb(regions)
+    """
+    # calculating the histogram and the probability of each gray level.
+    hist, bin_centers = histogram(image.ravel(),
+                                  nbins=nbins,
+                                  source_range='image')
+    prob = hist / image.size
+    # histogram ignores nbins for integer arrays.
+    nbins = len(bin_centers)
+
+    # defining arrays to store the zeroth (momP, cumulative probability)
+    # and first (momS, mean) moments, and the variance between classes
+    # (var_btwcls).
+    momP, momS, var_btwcls = [np.zeros((nbins, nbins)) for n in range(3)]
+
+    # building the lookup tables.
+    # step 1: calculating the diagonal.
+    for u in range(1, nbins):
+        momP[u, u] = prob[u]
+        momS[u, u] = u * prob[u]
+
+    # step 2: calculating the first row.
+    for u in range(1, nbins-1):
+        momP[1, u+1] = momP[1, u] + prob[u+1]
+        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
+
+    # step 3: calculating the other rows recursively.
+    for u in range(2, nbins):
+        for v in range(u+1, nbins):
+            momP[u, v] = momP[1, v] - momP[1, u-1]
+            momS[u, v] = momS[1, v] - momS[1, u-1]
+
+    # step 4: calculating the between class variance.
+    for u in range(1, nbins):
+        for v in range(u+1, nbins):
+            if (momP[u, v] != 0):
+                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
+            else:
+                var_btwcls[u, v] = 0
+
+    # finding max threshold candidates, depending on classes.
+    # number of thresholds is equal to number of classes - 1.
+    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, nbins)
+
+    # correcting threshold values.
+    idx_thresh = bin_centers[:-1][aux_thresh.astype('int')]
+
+    return idx_thresh

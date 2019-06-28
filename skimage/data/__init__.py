@@ -10,7 +10,7 @@ import os as _os
 
 import numpy as _np
 
-from ..io import imread, use_plugin
+from ..io import imread
 from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
@@ -35,14 +35,16 @@ __all__ = ['data_dir',
            'lbp_frontal_face_cascade_filename',
            'lfw_subset',
            'logo',
+           'microaneurysms',
            'moon',
            'page',
            'text',
+           'retina',
            'rocket',
            'stereo_motorcycle']
 
 
-def load(f, as_gray=False, as_grey=None):
+def load(f, as_gray=False):
     """Load an image file located in the data directory.
 
     Parameters
@@ -50,24 +52,14 @@ def load(f, as_gray=False, as_grey=None):
     f : string
         File name.
     as_gray : bool, optional
-        Convert to grayscale.
-    as_grey : bool or None, optional
-        Deprecated keyword argument. Use `as_gray` instead.
-        If None, `as_gray` is used.
-        Convert to grayscale.
+        Whether to convert the image to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
-    if as_grey is not None:
-        as_gray = as_grey
-        warn('`as_grey` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
-
-    use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
+    return imread(_os.path.join(data_dir, f), plugin='pil', as_gray=as_gray)
 
 
 def camera():
@@ -175,6 +167,34 @@ def logo():
     return load("logo.png")
 
 
+def microaneurysms():
+    """Gray-level "microaneurysms" image.
+
+    Detail from an image of the retina (green channel).
+    The image is a crop of image 07_dr.JPG from the
+    High-Resolution Fundus (HRF) Image Database:
+    https://www5.cs.fau.de/research/data/fundus-images/
+
+    Notes
+    -----
+    No copyright restrictions. CC0 given by owner (Andreas Maier).
+
+    Returns
+    -------
+    microaneurysms : (102, 102) uint8 ndarray
+        Retina image with lesions.
+
+    References
+    ----------
+    .. [1] Budai, A., Bock, R, Maier, A., Hornegger, J.,
+           Michelson, G. (2013).  Robust Vessel Segmentation in Fundus
+           Images. International Journal of Biomedical Imaging, vol. 2013,
+           2013.
+           :DOI:`10.1155/2013/154860`
+    """
+    return load("microaneurysms.png")
+
+
 def moon():
     """Surface of the moon.
 
@@ -209,16 +229,14 @@ def horse():
     This image was downloaded from
     `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
 
-    Released into public domain and drawn and uploaded by Andreas Preuss
-    (marauder).
+    No copyright restrictions. CC0 given by owner (Andreas Preuss (marauder)).
 
     Returns
     -------
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_gray=True))
+    return img_as_bool(load("horse.png", as_gray=True))
 
 
 def clock():
@@ -317,6 +335,33 @@ def hubble_deep_field():
         Hubble deep field image.
     """
     return load("hubble_deep_field.jpg")
+
+
+def retina():
+    """Human retina.
+
+    This image of a retina is useful for demonstrations requiring circular
+    images.
+
+    Notes
+    -----
+    This image was downloaded from
+    `wikimedia <https://commons.wikimedia.org/wiki/File:Fundus_photograph_of_normal_left_eye.jpg>`.
+    This file is made available under the Creative Commons CC0 1.0 Universal
+    Public Domain Dedication.
+
+    References
+    ----------
+    .. [1] Häggström, Mikael (2014). "Medical gallery of Mikael Häggström 2014".
+           WikiJournal of Medicine 1 (2). :DOI:`10.15347/wjm/2014.008`.
+           ISSN 2002-4436. Public Domain
+
+    Returns
+    -------
+    retina : (1411, 1411, 3) uint8 ndarray
+        Retina image in RGB.
+    """
+    return load("retina.jpg")
 
 
 def rocket():

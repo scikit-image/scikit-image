@@ -142,7 +142,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     extracting features for all possible ROI in an image; use threading when
     extracting the feature at specific location for a limited number of ROIs.
     Refer to the example
-    :ref:`sphx_glr_auto_examples_xx_applications_plot_haar_extraction_selection_classification.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_haar_extraction_selection_classification.py`
     for more insights.
 
     Examples

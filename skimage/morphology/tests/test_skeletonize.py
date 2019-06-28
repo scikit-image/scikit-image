@@ -26,7 +26,7 @@ class TestSkeletonize():
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
         with testing.raises(ValueError):
-            skeletonize(im)
+            skeletonize(im, method='zhang')
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
