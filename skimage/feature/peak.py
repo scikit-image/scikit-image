@@ -22,7 +22,8 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     return coord[::-1]
 
 
-def _get_peak_mask(image, min_distance, footprint, threshold_abs, threshold_rel):
+def _get_peak_mask(image, min_distance, footprint, threshold_abs,
+                   threshold_rel):
     """
     Return the mask containing all peak candidates above thresholds
     """
@@ -34,9 +35,9 @@ def _get_peak_mask(image, min_distance, footprint, threshold_abs, threshold_rel)
         image_max = ndi.maximum_filter(image, size=size, mode='constant')
     mask = image == image_max
     if threshold_rel is not None:
-        threshold=max(threshold_abs, threshold_rel * image.max())
+        threshold = max(threshold_abs, threshold_rel * image.max())
     else:
-        threshold=threshold_abs
+        threshold = threshold_abs
     mask &= image > threshold
     return mask
 
@@ -175,30 +176,22 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
         labels = labels.astype(np.int32)
 
-        # New values for new ordering
-        # for label in label_values[label_values != 0]:
-        #    maskim = (labels == label)
-        #    out += peak_local_max(image * maskim, min_distance=min_distance,
-        #                          threshold_abs=threshold_abs,
-        #                          threshold_rel=threshold_rel,
-        #                          exclude_border=exclude_border,
-        #                          indices=False, num_peaks=num_peaks_per_label,
-        #                          footprint=footprint, labels=None)
-        # modify to speed it up, as the original code passes the full image for each label
-        # too slow, more so for 3D images and many objects
         if exclude_border:
             # create a mask for the non-exclude region
-            inner_mask = _exclude_border(np.ones_like(labels, dtype=bool), footprint, exclude_border)
+            inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
+                                         footprint, exclude_border)
 
         for i, obj in enumerate(ndi.find_objects(labels)):
             label = i + 1
             # print("Label>", label)
             img = image[obj] * (labels[obj] == label)
-            mask = _get_peak_mask(img, min_distance, footprint, threshold_abs, threshold_rel)
+            mask = _get_peak_mask(img, min_distance, footprint, threshold_abs,
+                                  threshold_rel)
             if exclude_border:
                 # remove peaks fall in the exclude region
                 mask &= inner_mask[obj]
-            coordinates = _get_high_intensity_peaks(img, mask, num_peaks_per_label)
+            coordinates = _get_high_intensity_peaks(img, mask,
+                                                    num_peaks_per_label)
             nd_indices = tuple(coordinates.T)
             mask.fill(False)
             mask[nd_indices] = True
@@ -213,7 +206,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             return out
 
     # Non maximum filter
-    mask = _get_peak_mask(image, min_distance, footprint, threshold_abs, threshold_rel)
+    mask = _get_peak_mask(image, min_distance, footprint, threshold_abs,
+                          threshold_rel)
 
     if exclude_border:
         mask = _exclude_border(mask, footprint, exclude_border)
