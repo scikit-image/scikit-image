@@ -1,11 +1,11 @@
 import math
-import functools
 
 import numpy as np
 from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs, _props_to_dict,
-                                          regionprops_table)
+                                          regionprops_table, OBJECT_COLUMNS,
+                                          COL_DTYPES)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
@@ -496,7 +496,8 @@ def test_props_to_dict():
                    'bbox-2': array([10]), 'bbox-3': array([18])}
 
     regions = regionprops(SAMPLE)
-    out = _props_to_dict(regions, properties=('label', 'area', 'bbox'), separator='+')
+    out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
+                         separator='+')
     assert out == {'label': array([1]), 'area': array([180]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
@@ -508,7 +509,18 @@ def test_regionprops_table():
                    'bbox-0': array([0]), 'bbox-1': array([0]),
                    'bbox-2': array([10]), 'bbox-3': array([18])}
 
-    out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'), separator='+')
+    out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
+                            separator='+')
     assert out == {'label': array([1]), 'area': array([180]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_props_dict_complete():
+    region = regionprops(SAMPLE)[0]
+    properties = [s for s in dir(region) if not s.startswith('_')]
+    assert set(properties) == set(PROPS.values())
+
+
+def test_column_dtypes_complete():
+    assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
