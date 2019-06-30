@@ -559,8 +559,6 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     >>> props = regionprops_table(label_image, image,
     ...                           properties=['label', 'inertia_tensor',
     ...                                       'inertia_tensor_eigvals'])
-    >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
-    ...                                              'inertia_tensor_eigvals'])
     >>> props  # doctest: +ELLIPSIS +SKIP
     {'label': array([ 1,  2, ...]), ...
      'inertia_tensor-0-0': array([  4.012...e+03,   8.51..., ...]), ...
