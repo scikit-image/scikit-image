@@ -46,7 +46,7 @@ class Skeletonize3d(object):
         self.image = np.stack(5 * [invert(data.horse())])
 
     def time_skeletonize_3d(self):
-        morphology.skeletonize(self.image)
+        morphology.skeletonize_3d(self.image)
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -65,4 +65,4 @@ class Skeletonize3d(object):
         pass
 
     def peakmem_skeletonize_3d(self):
-        morphology.skeletonize(self.image)
+        morphology.skeletonize_3d(self.image)

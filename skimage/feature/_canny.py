@@ -21,7 +21,7 @@ from .._shared.utils import assert_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels.
+    """Smooth an image with a linear function, ignoring masked pixels
 
     Parameters
     ----------
@@ -58,12 +58,12 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     -----------
     image : 2D array
         Grayscale input image to detect edges on; can be of any dtype.
-    sigma : float, optional
+    sigma : float
         Standard deviation of the Gaussian filter.
-    low_threshold : float, optional
+    low_threshold : float
         Lower bound for hysteresis thresholding (linking edges).
         If None, low_threshold is set to 10% of dtype's max.
-    high_threshold : float, optional
+    high_threshold : float
         Upper bound for hysteresis thresholding (linking edges).
         If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
@@ -108,7 +108,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     -----------
     .. [1] Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
-           :DOI:`10.1109/TPAMI.1986.4767851`
     .. [2] William Green's Canny tutorial
            http://dasl.unlv.edu/daslDrexel/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
@@ -158,12 +157,12 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        low_threshold = 0.1
+        low_threshold = 0.1 * dtype_max
     else:
         low_threshold = low_threshold / dtype_max
 
     if high_threshold is None:
-        high_threshold = 0.2
+        high_threshold = 0.2 * dtype_max
     else:
         high_threshold = high_threshold / dtype_max
 

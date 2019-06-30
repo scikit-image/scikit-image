@@ -4,39 +4,54 @@ import skimage.io as io
 from skimage import data_dir
 from skimage._shared import testing
 
-testing.pytest.importorskip('astropy')
-from astropy.io import fits
-import skimage.io._plugins.fits_plugin as fplug
+
+pyfits_available = True
+
+try:
+    from astropy.io import fits as pyfits
+except ImportError:
+    try:
+        import pyfits
+    except ImportError:
+        pyfits_available = False
+
+if pyfits_available:
+    import skimage.io._plugins.fits_plugin as fplug
 
 
 def test_fits_plugin_import():
-    # Make sure we get an import exception if Astropy isn't there
+    # Make sure we get an import exception if PyFITS isn't there
     # (not sure how useful this is, but it ensures there isn't some other
     # error when trying to load the plugin)
     try:
         io.use_plugin('fits')
     except ImportError:
-        raise()
+        assert not pyfits_available
+    else:
+        assert pyfits_available
 
 
 def teardown():
     io.reset_plugins()
 
 
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
     img = io.imread(testfile)
-    assert np.all(img == fits.getdata(testfile, 1))
+    assert np.all(img == pyfits.getdata(testfile, 1))
 
 
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_simple():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'simple.fits')
     img = io.imread(testfile)
-    assert np.all(img == fits.getdata(testfile, 0))
+    assert np.all(img == pyfits.getdata(testfile, 0))
 
 
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_single_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
@@ -47,6 +62,7 @@ def test_imread_collection_single_MEF():
     assert _same_ImageCollection(ic1, ic2)
 
 
+@testing.skipif(not pyfits_available, reason="pyfits not installed")
 def test_imread_collection_MEF_and_simple():
     io.use_plugin('fits')
     testfile1 = os.path.join(data_dir, 'multi.fits')

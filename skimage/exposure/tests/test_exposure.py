@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 import pytest
-from skimage import util
+import skimage
 from skimage import data
 from skimage import exposure
 from skimage.exposure.exposure import intensity_range
@@ -123,7 +123,7 @@ np.random.seed(0)
 
 test_img_int = data.camera()
 # squeeze image intensities to lower image contrast
-test_img = util.img_as_float(test_img_int)
+test_img = skimage.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
 
 
@@ -135,7 +135,8 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    img = util.img_as_ubyte(test_img)
+    with expected_warnings(['precision loss']):
+        img = skimage.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -143,7 +144,7 @@ def test_equalize_ubyte():
 
 
 def test_equalize_float():
-    img = util.img_as_float(test_img)
+    img = skimage.img_as_float(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -151,7 +152,7 @@ def test_equalize_float():
 
 
 def test_equalize_masked():
-    img = util.img_as_float(test_img)
+    img = skimage.img_as_float(test_img)
     mask = np.zeros(test_img.shape)
     mask[50:150, 50:250] = 1
     img_mask_eq = exposure.equalize_hist(img, mask=mask)
@@ -273,11 +274,12 @@ def test_rescale_uint14_limits():
 def test_adapthist_grayscale():
     """Test a grayscale float image
     """
-    img = util.img_as_float(data.astronaut())
+    img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
-                                          clip_limit=0.01, nbins=128)
+    with expected_warnings(['precision loss|non-contiguous input']):
+        adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
+                                              clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 102.078, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
@@ -286,17 +288,18 @@ def test_adapthist_grayscale():
 def test_adapthist_color():
     """Test an RGB color uint16 image
     """
-    img = util.img_as_uint(data.astronaut())
+    img = skimage.img_as_uint(data.astronaut())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+    with expected_warnings(['precision loss']):
+        adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert adapted.min() == 0
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
-    full_scale = exposure.rescale_intensity(img)
+    full_scale = skimage.exposure.rescale_intensity(img)
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 1)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.02, 2)
     return data, adapted
@@ -305,13 +308,14 @@ def test_adapthist_color():
 def test_adapthist_alpha():
     """Test an RGBA color image
     """
-    img = util.img_as_float(data.astronaut())
+    img = skimage.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
-    adapted = exposure.equalize_adapthist(img)
+    with expected_warnings(['precision loss']):
+        adapted = exposure.equalize_adapthist(img)
     assert adapted.shape != img.shape
     img = img[:, :, :3]
-    full_scale = exposure.rescale_intensity(img)
+    full_scale = skimage.exposure.rescale_intensity(img)
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 2)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
@@ -332,8 +336,8 @@ def peak_snr(img1, img2):
     """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
-    img1 = util.img_as_float(img1)
-    img2 = util.img_as_float(img2)
+    img1 = skimage.img_as_float(img1)
+    img2 = skimage.img_as_float(img2)
     mse = 1. / img1.size * np.square(img1 - img2).sum()
     _, max_ = dtype_range[img1.dtype.type]
     return 20 * np.log(max_ / mse)

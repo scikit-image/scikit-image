@@ -103,7 +103,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
@@ -112,7 +112,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
             [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective r- and c-directions.
+    of the Gaussian kernel in the respective x- and y-directions.
 
     Parameters
     ----------
@@ -126,11 +126,11 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    order : {'rc', 'xy'}, optional
+    order : {'xy', 'rc'}, optional
         This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
-        usage of the last axis initially (Hxx, Hxy, Hyy)
+        the image axes in gradient computation. 'xy' indicates the usage
+        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
+        the use of the first axis initially (Hrr, Hrc, Hcc).
 
     Returns
     -------
@@ -146,7 +146,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
     >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
@@ -159,6 +159,18 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
+
+    if order is None:
+        if image.ndim == 2:
+            # The legacy 2D code followed (x, y) convention, so we swap the axis
+            # order to maintain compatibility with old code
+            warn('deprecation warning: the default order of the hessian matrix values '
+                 'will be "row-column" instead of "xy" starting in skimage version 0.15. '
+                 'Use order="rc" or order="xy" to set this explicitly')
+            order = 'xy'
+        else:
+            order = 'rc'
+
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
@@ -284,7 +296,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
-def hessian_matrix_eigvals(H_elems):
+def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     """Compute Eigenvalues of Hessian matrix.
 
     Parameters
@@ -292,6 +304,12 @@ def hessian_matrix_eigvals(H_elems):
     H_elems : list of ndarray
         The upper-diagonal elements of the Hessian matrix, as returned
         by `hessian_matrix`.
+    Hxy : ndarray, deprecated
+        Element of the Hessian matrix for each pixel in the input image.
+    Hyy : ndarray, deprecated
+        Element of the Hessian matrix for each pixel in the input image.
+    Hxx : ndarray, deprecated
+        Element of the Hessian matrix for each pixel in the input image.
 
     Returns
     -------
@@ -313,6 +331,13 @@ def hessian_matrix_eigvals(H_elems):
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
     """
+    if Hxy is not None:
+        if Hxx is None:
+            Hxx = H_elems
+        H_elems = [Hxx, Hxy, Hyy]
+        warn('The API of `hessian_matrix_eigvals` has changed. Use a list of '
+             'elements instead of separate arguments. The old version of the '
+             'API will be removed in version 0.16.')
     if len(H_elems) == 3:  # Use fast Cython code for 2D
         eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
     else:

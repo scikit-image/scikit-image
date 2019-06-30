@@ -72,7 +72,7 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1
     - os: osx
       osx_image: xcode9.4
       language: objective-c
@@ -118,11 +118,7 @@ install:
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
         pip install --retries 3 -r ./requirements/optional.txt $WHEELHOUSE
-        if [[ "${EXTRA_DEPS}" != "0" ]]; then
-          # Extra deps need compilation, and it may not always be possible to
-          # compile them easily on all platforms
-          pip install --retries 3 -r ./requirements/extras.txt $WHEELHOUSE
-        fi
+        pip install --retries 3 -r ./requirements/extras.txt $WHEELHOUSE
       fi
     - tools/travis/install_qt.sh
 

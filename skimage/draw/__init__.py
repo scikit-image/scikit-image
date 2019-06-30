@@ -5,8 +5,6 @@ from .draw import (circle, ellipse, set_color, polygon_perimeter,
 from .draw3d import ellipsoid, ellipsoid_stats
 from ._draw import _bezier_segment
 from ._random_shapes import random_shapes
-from ._polygon2mask import polygon2mask
-
 
 __all__ = ['line',
            'line_aa',
@@ -23,5 +21,4 @@ __all__ = ['line',
            'set_color',
            'random_shapes',
            'rectangle',
-           'rectangle_perimeter',
-           'polygon2mask']
+           'rectangle_perimeter']

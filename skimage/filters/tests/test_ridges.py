@@ -14,8 +14,8 @@ def test_2d_null_matrix():
     zeros = np.zeros((3, 3))
     ones = np.ones((3, 3))
 
-    assert_equal(meijering(a_black, black_ridges=True), ones)
-    assert_equal(meijering(a_white, black_ridges=False), ones)
+    assert_equal(meijering(a_black, black_ridges=True), zeros)
+    assert_equal(meijering(a_white, black_ridges=False), zeros)
 
     assert_equal(sato(a_black, black_ridges=True), zeros)
     assert_equal(sato(a_white, black_ridges=False), zeros)
@@ -35,8 +35,8 @@ def test_3d_null_matrix():
     zeros = np.zeros((3, 3, 3))
     ones = np.ones((3, 3, 3))
 
-    assert_allclose(meijering(a_black, black_ridges=True), ones, atol=1e-1)
-    assert_allclose(meijering(a_white, black_ridges=False), ones, atol=1e-1)
+    assert_equal(meijering(a_black, black_ridges=True), zeros)
+    assert_equal(meijering(a_white, black_ridges=False), zeros)
 
     assert_equal(sato(a_black, black_ridges=True), zeros)
     assert_equal(sato(a_white, black_ridges=False), zeros)

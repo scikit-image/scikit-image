@@ -1,6 +1,5 @@
 import numpy as np
 import skimage
-from skimage import util
 import skimage.data as data
 from skimage.filters.rank import median
 from skimage.morphology import disk
@@ -14,10 +13,11 @@ from skimage.viewer.plugins import (
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_allclose,
                                      assert_almost_equal)
+from skimage._shared._warnings import expected_warnings
 
 
 def setup_line_profile(image, limits='image'):
-    viewer = ImageViewer(util.img_as_float(image))
+    viewer = ImageViewer(skimage.img_as_float(image))
     plugin = LineProfile(limits=limits)
     viewer += plugin
     return plugin
@@ -56,7 +56,7 @@ def test_line_profile_rgb():
 def test_line_profile_dynamic():
     """Test a line profile updating after an image transform"""
     image = data.coins()[:-50, :]  # shave some off to make the line lower
-    image = util.img_as_float(image)
+    image = skimage.img_as_float(image)
     viewer = ImageViewer(image)
 
     lp = LineProfile(limits='dtype')
@@ -68,7 +68,9 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.std(line), 0.229, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    viewer.image = util.img_as_float(median(image, selem=disk(radius=3)))
+    with expected_warnings(['precision loss']):
+        viewer.image = skimage.img_as_float(median(image,
+                                                   selem=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
     assert_almost_equal(np.std(viewer.image), 0.198, 3)
@@ -132,7 +134,7 @@ def test_crop():
 
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_color_histogram():
-    image = util.img_as_float(data.load('color.png'))
+    image = skimage.img_as_float(data.load('color.png'))
     viewer = ImageViewer(image)
     ch = ColorHistogram(dock='right')
     viewer += ch
@@ -156,11 +158,12 @@ def test_plot_plugin():
 
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_plugin():
-    img = util.img_as_float(data.moon())
+    img = skimage.img_as_float(data.moon())
     viewer = ImageViewer(img)
 
     def median_filter(img, radius=3):
-        return median(img, selem=disk(radius=radius))
+        with expected_warnings(['precision loss']):
+            return median(img, selem=disk(radius=radius))
 
     plugin = Plugin(image_filter=median_filter)
     viewer += plugin

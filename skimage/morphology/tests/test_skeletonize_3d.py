@@ -1,5 +1,6 @@
 
 import os
+import warnings
 
 import numpy as np
 import scipy.ndimage as ndi
@@ -7,46 +8,40 @@ import scipy.ndimage as ndi
 from skimage import io, draw, data_dir
 from skimage.data import binary_blobs
 from skimage.util import img_as_ubyte
-from skimage.morphology import skeletonize, skeletonize_3d
+from skimage.morphology import skeletonize_3d
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_, parametrize
+from skimage._shared._warnings import expected_warnings
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
 def test_skeletonize_wrong_dim():
     im = np.zeros(5, dtype=np.uint8)
     with testing.raises(ValueError):
-        skeletonize(im, method='lee')
+        skeletonize_3d(im)
 
     im = np.zeros((5, 5, 5, 5), dtype=np.uint8)
     with testing.raises(ValueError):
-        skeletonize(im, method='lee')
+        skeletonize_3d(im)
 
 
-def test_skeletonize_1D_old_api():
+def test_skeletonize_1D():
     # a corner case of an image of a shape(1, N)
     im = np.ones((5, 1), dtype=np.uint8)
     res = skeletonize_3d(im)
     assert_equal(res, im)
 
 
-def test_skeletonize_1D():
-    # a corner case of an image of a shape(1, N)
-    im = np.ones((5, 1), dtype=np.uint8)
-    res = skeletonize(im, method='lee')
-    assert_equal(res, im)
-
-
 def test_skeletonize_no_foreground():
     im = np.zeros((5, 5), dtype=np.uint8)
-    result = skeletonize(im, method='lee')
+    result = skeletonize_3d(im)
     assert_equal(result, im)
 
 
 def test_skeletonize_all_foreground():
     im = np.ones((3, 4), dtype=np.uint8)
-    assert_equal(skeletonize(im, method='lee'),
+    assert_equal(skeletonize_3d(im),
                  np.array([[0, 0, 0, 0],
                            [1, 1, 1, 1],
                            [0, 0, 0, 0]], dtype=np.uint8))
@@ -55,7 +50,7 @@ def test_skeletonize_all_foreground():
 def test_skeletonize_single_point():
     im = np.zeros((5, 5), dtype=np.uint8)
     im[3, 3] = 1
-    result = skeletonize(im, method='lee')
+    result = skeletonize_3d(im)
     assert_equal(result, im)
 
 
@@ -64,7 +59,7 @@ def test_skeletonize_already_thinned():
     im[3, 1:-1] = 1
     im[2, -1] = 1
     im[4, 0] = 1
-    result = skeletonize(im, method='lee')
+    result = skeletonize_3d(im)
     assert_equal(result, im)
 
 
@@ -75,8 +70,10 @@ def test_dtype_conv():
     img[img < 0.5] = 0
 
     orig = img.copy()
-    res = skeletonize(img, method='lee')
-    img_max = img_as_ubyte(img).max()
+    with expected_warnings(['precision']):
+        res = skeletonize_3d(img)
+    with expected_warnings(['precision']):
+        img_max = img_as_ubyte(img).max()
 
     assert_equal(res.dtype, np.uint8)
     assert_equal(img, orig)  # operation does not clobber the original
@@ -89,7 +86,10 @@ def test_dtype_conv():
 def test_input_with_warning(img):
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
-    check_input(img)
+    # Skeletonize changes it to uint8. Therefore, for images of type float,
+    # we can expect a warning.
+    with expected_warnings(['precision']):
+        check_input(img)
 
 
 @parametrize("img", [
@@ -104,7 +104,7 @@ def test_input_without_warning(img):
 
 def check_input(img):
     orig = img.copy()
-    skeletonize(img, method='lee')
+    skeletonize_3d(img)
     assert_equal(img, orig)
 
 
@@ -131,7 +131,8 @@ def test_skeletonize_num_neighbours():
     circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
     image[circle1] = 1
     image[circle2] = 0
-    result = skeletonize(image, method='lee')
+    with expected_warnings(['precision']):
+        result = skeletonize_3d(image)
 
     # there should never be a 2x2 block of foreground pixels in a skeleton
     mask = np.array([[1,  1],
@@ -172,7 +173,7 @@ def test_two_hole_image():
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
                      dtype=np.uint8)
-    res = skeletonize(img_o, method='lee')
+    res = skeletonize_3d(img_o)
     assert_equal(res, img_f)
 
 
@@ -183,6 +184,6 @@ def test_3d_vs_fiji():
     img = img[:-2, ...]
     img = img.astype(np.uint8)*255
 
-    img_s = skeletonize(img)
+    img_s = skeletonize_3d(img)
     img_f = io.imread(os.path.join(data_dir, "_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)

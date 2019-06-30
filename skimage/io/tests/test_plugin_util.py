@@ -11,32 +11,39 @@ np.random.seed(0)
 
 class TestPrepareForDisplay(TestCase):
     def test_basic(self):
-        prepare_for_display(np.random.rand(10, 10))
+        with expected_warnings(['precision loss']):
+            prepare_for_display(np.random.rand(10, 10))
 
     def test_dtype(self):
-        x = prepare_for_display(np.random.rand(10, 15))
+        with expected_warnings(['precision loss']):
+            x = prepare_for_display(np.random.rand(10, 15))
         assert x.dtype == np.dtype(np.uint8)
 
     def test_grey(self):
-        tmp = np.arange(12, dtype=float).reshape((4, 3)) / 11
-        x = prepare_for_display(tmp)
+        with expected_warnings(['precision loss']):
+            tmp = np.arange(12, dtype=float).reshape((4, 3)) / 11
+            x = prepare_for_display(tmp)
         assert_array_equal(x[..., 0], x[..., 2])
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255
 
     def test_color(self):
-        prepare_for_display(np.random.rand(10, 10, 3))
+        with expected_warnings(['precision loss']):
+            prepare_for_display(np.random.rand(10, 10, 3))
 
     def test_alpha(self):
-        prepare_for_display(np.random.rand(10, 10, 4))
+        with expected_warnings(['precision loss']):
+            prepare_for_display(np.random.rand(10, 10, 4))
 
     def test_wrong_dimensionality(self):
         with testing.raises(ValueError):
-            prepare_for_display(np.random.rand(10, 10, 1, 1))
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 1, 1))
 
     def test_wrong_depth(self):
         with testing.raises(ValueError):
-            prepare_for_display(np.random.rand(10, 10, 5))
+            with expected_warnings(['precision loss']):
+                prepare_for_display(np.random.rand(10, 10, 5))
 
 
 class TestWindowManager(TestCase):

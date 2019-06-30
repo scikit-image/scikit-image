@@ -3,8 +3,7 @@ from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
-from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import assert_array_equal, expected_warnings
 
 
 def test_basic():

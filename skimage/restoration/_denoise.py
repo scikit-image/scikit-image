@@ -10,21 +10,21 @@ import skimage.color as color
 import numbers
 
 
-def _gaussian_weight(sigma_sqr, value, *, dtype=float):
-    return np.exp(-0.5 * value * value / sigma_sqr, dtype=dtype)
+def _gaussian_weight(sigma_sqr, value):
+    return np.exp(-0.5 * value * value / sigma_sqr)
 
 
-def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
-    values = np.linspace(0, max_value / bins, bins, endpoint=False)
-    color_lut = _gaussian_weight(sigma**2, values, dtype=dtype)
+def _compute_color_lut(bins, sigma, max_value, dtype):
+    color_lut = _gaussian_weight(sigma**2, np.linspace(0, max_value/bins, bins,
+                                                       endpoint=False))
     return color_lut
 
 
-def _compute_range_lut(win_size, sigma, *, dtype=float):
+def _compute_range_lut(win_size, sigma):
     grid_points = np.arange(-win_size, win_size + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     d = np.hypot(rr, cc)
-    range_lut = _gaussian_weight(sigma**2, d, dtype=dtype).ravel()
+    range_lut = _gaussian_weight(sigma**2, d).ravel()
     return range_lut
 
 
@@ -148,10 +148,9 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     sigma_color = sigma_color or image.std()
 
-    color_lut = _compute_color_lut(bins, sigma_color, max_value,
-                                   dtype=image.dtype)
+    color_lut = _compute_color_lut(bins, sigma_color, max_value, image.dtype)
 
-    range_lut = _compute_range_lut(win_size, sigma_spatial, dtype=image.dtype)
+    range_lut = _compute_range_lut(win_size, sigma_spatial)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
@@ -222,8 +221,7 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
-    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
-                        isotropic, out)
+    _denoise_tv_bregman(image, weight, max_iter, eps, isotropic, out)
     return np.squeeze(out[1:-1, 1:-1])
 
 

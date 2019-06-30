@@ -1,5 +1,6 @@
 import os
 
+import pytest
 import numpy as np
 from skimage import io, data_dir
 

@@ -417,8 +417,7 @@ class MultiImage(ImageCollection):
         from ._io import imread
 
         def load_func(fname, **kwargs):
-            if dtype is not None:
-                kwargs.setdefault('dtype', dtype)
+            kwargs.setdefault('dtype', dtype)
             return imread(fname, **kwargs)
 
         self._filename = filename
