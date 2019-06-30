@@ -7,13 +7,6 @@ Version 0.16
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* Remove `flatten` for `imread` in ``skimage.io._io.py``.
-* In ``skimage.measure._regionprops``, remove all references to
-  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
-* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
-  arguments.
-* In ``skimage.filters.median``, change default from ``behavior='rank'`` to
-  ``behavior='ndimage'``.
 
 Version 0.17
 ------------
@@ -22,13 +15,12 @@ Version 0.17
   and ``shift_y``.
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
+* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
   once minimal required ``numpy`` is set to >= 1.14.0.
-* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
-  ``skimage.feature.corner``.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
@@ -47,3 +39,7 @@ Other
   environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
+* Check whether imread wheels are available, then re-enable testing imread
+  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
+* When ``numpy`` is set to > 1.16, one may simplify the implementation of
+  of `feature.blob_log` using the vectorized version of ``np.logspace``.

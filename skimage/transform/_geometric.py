@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from scipy import spatial
+import textwrap
 
 from .._shared.utils import get_bound_method_class, safe_as_int
 
@@ -549,9 +550,12 @@ class ProjectiveTransform(GeometricTransform):
         src = np.vstack((x, y, np.ones_like(x)))
         dst = src.T @ matrix.T
 
+        # below, we will divide by the last dimension of the homogeneous
+        # coordinate matrix. In order to avoid division by zero,
+        # we replace exact zeros in this column with a very small number.
+        dst[dst[:, 2] == 0, 2] = np.finfo(float).eps
         # rescale to homogeneous coordinates
-        dst[:, 0] /= dst[:, 2]
-        dst[:, 1] /= dst[:, 2]
+        dst[:, :2] /= dst[:, 2:3]
 
         return dst[:, :2]
 
@@ -676,6 +680,12 @@ class ProjectiveTransform(GeometricTransform):
         A = A[:, list(self._coeffs) + [8]]
 
         _, _, V = np.linalg.svd(A)
+        # if the last element of the vector corresponding to the smallest
+        # singular value is close to zero, this implies a degenerate case
+        # because it is a rank-defective transform, which would map points
+        # to a line rather than a plane.
+        if np.isclose(V[-1, -1], 0):
+            return False
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
@@ -709,6 +719,26 @@ class ProjectiveTransform(GeometricTransform):
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
+
+    def __nice__(self):
+        """common 'paramstr' used by __str__ and __repr__"""
+        npstring = np.array2string(self.params, separator=', ')
+        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
+        return paramstr
+
+    def __repr__(self):
+        """Add standard repr formatting around a __nice__ string"""
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        return '<{}({}) at {}>'.format(classstr, paramstr, hex(id(self)))
+
+    def __str__(self):
+        """Add standard str formatting around a __nice__ string"""
+        paramstr = self.__nice__()
+        classname = self.__class__.__name__
+        classstr = classname
+        return '<{}({})>'.format(classstr, paramstr)
 
 
 class AffineTransform(ProjectiveTransform):
