@@ -205,8 +205,7 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
     >>> # --- Compute the optical flow
     >>> u, v = tvl1(I1, I0)
     >>> # --- Display the result
-    >>> fig = plt.figure(figsize=(12, 4))
-    >>> ax0, ax1 = fig.subplots(1, 2)
+    >>> fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(8, 3))
     >>> nl, nc = u.shape
     >>> step = 10
     >>> y, x = np.mgrid[:nl:step, :nc:step]
@@ -230,7 +229,7 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
                    angles='xy', scale_units='xy')
     >>> ax1.set_title('Estimated optical flow')
     >>> ax1.set_axis_off()
-    >>> fig.set_tight_layout(True)
+    >>> fig.tight_layout()
     >>> plt.show()
 
     """

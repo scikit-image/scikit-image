@@ -60,8 +60,7 @@ target_im[..., 2] = I0
 
 # --- Show the result
 
-fig = plt.figure(figsize=(5, 10))
-ax0, ax1, ax2 = fig.subplots(3, 1, True)
+fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(5, 10))
 
 ax0.imshow(seq_im)
 ax0.set_title("Unregistered sequence")
