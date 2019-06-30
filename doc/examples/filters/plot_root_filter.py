@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import alpha_rooting
 
+
 def imshow_side_by_side(original,
                         alpha: float):
     fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(20, 14))
@@ -28,6 +29,7 @@ def imshow_side_by_side(original,
 ###########################################################################
 # Contrast enhancement and sharpening properties of alpha-root filtering
 # are presented below.
+
 
 original = data.astronaut()
 imshow_side_by_side(original, alpha=0.9)
