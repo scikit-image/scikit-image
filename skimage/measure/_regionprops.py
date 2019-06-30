@@ -455,12 +455,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     >>> import pandas as pd  # doctest: +SKIP
     >>> data = pd.DataFrame(props)  # doctest: +SKIP
     >>> data.head()  # doctest: +SKIP
-       label  bbox-0  bbox-1  bbox-2  bbox-3
-    0      1       0       0      74     277
-    1      2       0     278       8     291
-    2      3       0     300       1     303
-    3      4       0     304       4     305
-    4      5       0     306       2     308
+       label  inertia_tensor-0-0  ...  inertia_tensor_eigvals-1
+    0      1         4012.909888  ...                267.065503
+    1      2            8.514739  ...                  2.834806
+    2      3            0.666667  ...                  0.000000
+    3      4            0.000000  ...                  0.000000
+    4      5            0.222222  ...                  0.111111
 
     """
 
@@ -576,12 +576,14 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     >>> import pandas as pd  # doctest: +SKIP
     >>> data = pd.DataFrame(props)  # doctest: +SKIP
     >>> data.head()  # doctest: +SKIP
-       label  bbox-0  bbox-1  bbox-2  bbox-3
-    0      1       0       0      74     277
-    1      2       0     278       8     291
-    2      3       0     300       1     303
-    3      4       0     304       4     305
-    4      5       0     306       2     308
+       label  inertia_tensor-0-0  ...  inertia_tensor_eigvals-1
+    0      1         4012.909888  ...                267.065503
+    1      2            8.514739  ...                  2.834806
+    2      3            0.666667  ...                  0.000000
+    3      4            0.000000  ...                  0.000000
+    4      5            0.222222  ...                  0.111111
+
+    [5 rows x 7 columns]
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
