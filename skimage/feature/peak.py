@@ -180,14 +180,17 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
                                          footprint, exclude_border)
 
+        # For each label, extract a smaller image enclosing the object of
+        # interest, identify num_peaks_per_label peaks and mark them in
+        # variable out.
         for label_idx, obj in enumerate(ndi.find_objects(labels)):
-            img = image[obj] * (labels[obj] == label_idx + 1)
-            mask = _get_peak_mask(img, min_distance, footprint, threshold_abs,
+            img_object = image[obj] * (labels[obj] == label_idx + 1)
+            mask = _get_peak_mask(img_object, min_distance, footprint, threshold_abs,
                                   threshold_rel)
             if exclude_border:
                 # remove peaks fall in the exclude region
                 mask &= inner_mask[obj]
-            coordinates = _get_high_intensity_peaks(img, mask,
+            coordinates = _get_high_intensity_peaks(img_object, mask,
                                                     num_peaks_per_label)
             nd_indices = tuple(coordinates.T)
             mask.fill(False)
