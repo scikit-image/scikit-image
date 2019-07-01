@@ -25,7 +25,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
 def _get_peak_mask(image, min_distance, footprint, threshold_abs,
                    threshold_rel):
     """
-    Return the mask containing all peak candidates above thresholds
+    Return the mask containing all peak candidates above thresholds.
     """
     if footprint is not None:
         image_max = ndi.maximum_filter(image, footprint=footprint,
@@ -44,7 +44,7 @@ def _get_peak_mask(image, min_distance, footprint, threshold_abs,
 
 def _exclude_border(mask, footprint, exclude_border):
     """
-    Remove peaks round the borders
+    Remove peaks round the borders.
     """
     # zero out the image borders
     for i in range(mask.ndim):
@@ -152,9 +152,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
-    if type(exclude_border) == bool:
-        exclude_border = min_distance if exclude_border else 0
-
     out = np.zeros_like(image, dtype=np.bool)
 
     # no peak for a trivial image
@@ -166,8 +163,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     threshold_abs = threshold_abs if threshold_abs is not None else image.min()
 
-    # In the case of labels, recursively build and return an output
-    # operating on each label separately
+    if type(exclude_border) == bool:
+        exclude_border = min_distance if exclude_border else 0
+
+    # In the case of labels, call ndi on each label
     if labels is not None:
         label_values = np.unique(labels)
         # Reorder label values to have consecutive integers (no gaps)
@@ -181,10 +180,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
                                          footprint, exclude_border)
 
-        for i, obj in enumerate(ndi.find_objects(labels)):
-            label = i + 1
-            # print("Label>", label)
-            img = image[obj] * (labels[obj] == label)
+        for label_idx, obj in enumerate(ndi.find_objects(labels)):
+            img = image[obj] * (labels[obj] == label_idx + 1)
             mask = _get_peak_mask(img, min_distance, footprint, threshold_abs,
                                   threshold_rel)
             if exclude_border:
