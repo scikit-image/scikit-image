@@ -185,8 +185,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         # variable out.
         for label_idx, obj in enumerate(ndi.find_objects(labels)):
             img_object = image[obj] * (labels[obj] == label_idx + 1)
-            mask = _get_peak_mask(img_object, min_distance, footprint, threshold_abs,
-                                  threshold_rel)
+            mask = _get_peak_mask(img_object, min_distance, footprint,
+                                  threshold_abs, threshold_rel)
             if exclude_border:
                 # remove peaks fall in the exclude region
                 mask &= inner_mask[obj]
