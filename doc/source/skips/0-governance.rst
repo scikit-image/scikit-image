@@ -68,7 +68,8 @@ subject to a two-third majority of all cast votes as well as a simple majority
 approval of all the current TC members. TC members who do not actively engage
 with the TC duties are expected to resign.
 
-The initial Technical Committee of scikit-image consists of …
+The initial Technical Committee of scikit-image consists of Stéfan van der
+Walt, Juan Nunez-Iglesias, and Emmanuelle Gouillart.
 
 Decision Making Process
 =======================
