@@ -79,10 +79,10 @@ Our values
   how that function is used in a scientific application. Good documentation is
   hard, so this requirement can stall many contributions. Core developers take
   an active role in finishing final documentation examples.
-- We don't do magic. We use NumPy arrays instead of fancy façade objects^, and
-  we prefer to educate users rather than make decisions on their behalf. This
-  does not preclude sensible defaults, but it does preclude *value-dependent*
-  behavior that is not controllable by the user. [3]_
+- We don't do magic. We use NumPy arrays instead of fancy façade objects[#np],
+  and we prefer to educate users rather than make decisions on their behalf.
+  This does not preclude sensible defaults, but it does preclude
+  *value-dependent* behavior that is not controllable by the user. [3]_
 
 This document
 *************
@@ -103,12 +103,12 @@ To find out more about the history of this document, please read the following:
 - The image.sc forum post [6]_
 - The SKIP GitHub pull request [7]_
 
-Footnotes
-*********
+.. rubric:: Footnotes
 
-^ The use of NumPy arrays was the most supported of the statement's components,
-together with the points about inclusivity, mentorship, and documentation.  We
-had +1s from Mark Harfouche, Royi Avital, and Greg Lee, among others.
+.. [#np] The use of NumPy arrays was the most supported of the statement's
+   components, together with the points about inclusivity, mentorship, and
+   documentation. We had +1s from Mark Harfouche, Royi Avital, and Greg Lee,
+   among others.
 
 Backward compatibility
 ----------------------
