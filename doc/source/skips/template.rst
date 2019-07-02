@@ -2,9 +2,9 @@
 SKIP Template and Instructions
 ==============================
 
-:Author: <list of authors' real names and optionally, email addresses>
+:Author: <list of authors' real names and, optionally, email addresses>
 :Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn |
-         Final | Superseded>
+          Final | Superseded>
 :Type: <Standards Track | Process>
 :Created: <date created on, in yyyy-mm-dd format>
 :Resolved: <date resolved, in yyyy-mm-dd format>
@@ -23,15 +23,15 @@ Detailed description
 This section describes the need for the SKIP. It should describe the
 existing problem that it is trying to solve and why this SKIP makes the
 situation better. It should include examples of how the new functionality
-would be used and perhaps some use cases.
+would be used and perhaps some real-world use cases.
 
 
 Implementation
 --------------
 
-This section lists the major steps required to implement the SKIP.  Where
+This section lists the major steps required to implement the SKIP. Where
 possible, it should be noted where one step is dependent on another, and which
-steps may be optionally omitted.  Where it makes sense, each step should
+steps may be optionally omitted. Where it makes sense, each step should
 include a link related pull requests as the implementation progresses.
 
 Any pull requests or developmt branches containing work on this SKIP should
