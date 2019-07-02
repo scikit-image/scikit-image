@@ -79,6 +79,9 @@ place on the project `mailing list <mailto:scikit-image@python.org>`_
 and the `issue tracker <https://github.com/scikit-image/scikit-image/issues>`_.
 Occasionally, sensitive discussion may occur on a private list.
 
+Decisions should be made in accordance with the :ref:`mission, vision and
+values <values>` of the scikit-image project.
+
 Scikit-image uses a “consensus seeking” process for making decisions. The group
 tries to find a resolution that has no open objections among core developers.
 At any point during the discussion, any core-developer can call for a vote,
@@ -105,10 +108,11 @@ are made according to the following rules:
   on the issue or pull-request page (lazy consensus).
 
 - **Changes to the API principles and changes to dependencies or supported
-  versions** happen via a :ref:`skip` and follow the decision-making process
+  versions** require a :ref:`skip` and follow the decision-making process
   outlined above.
 
-- **Changes to the governance model** use the same decision process outlined above.
+- **Changes to this governance model or our mission, vision, and values**
+  require a :ref:`skip` and follow the decision-making process outlined above.
 
 If a veto -1 vote is cast on a lazy consensus, the proposer can appeal to the
 community and core developers and the change can be approved or rejected using
@@ -130,10 +134,18 @@ vote. The lifetime of a SKIP is as follows:
 - Such proposal must be a consolidated document, in the form of a
   ‘SciKit-Image Proposal’ (SKIP), rather than a long discussion on a GitHub issue or
   the mailing list.
-- To submit a SKIP, you should copy the
-  `SKIP template <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips/template.rst>`_,
+- To submit a SKIP, you should copy the `SKIP template
+  <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips/template.rst>`_,
   and give it a new name in the same directory, for example,
   ``35-currying-all-functions.rst``. You should then fill in each section with
   appropriate links to prior discussions. Finally, you should submit the added
   file as a pull request (see the :ref:`contributing guide <howto_contribute>`).
 
+A list of all existing SKIPs is available :ref:`here <skip_list>`.
+
+Copyright
+=========
+
+This document is based on the `scikit-learn governanced document
+<https://scikit-learn.org/stable/governance.html>`_ and is placed in the public
+domain.
