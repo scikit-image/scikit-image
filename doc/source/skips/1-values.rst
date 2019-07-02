@@ -5,7 +5,7 @@ SKIP-1: scikit-image mission statement
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
 :Status: Active
 :Type: Process
-:Created: 2019-07-02
+:Created: 2018-12-08
 :Resolved:
 :Resolution:
 :Version effective: 0.16
