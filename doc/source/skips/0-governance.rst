@@ -146,6 +146,6 @@ A list of all existing SKIPs is available :ref:`here <skip_list>`.
 Copyright
 =========
 
-This document is based on the `scikit-learn governanced document
+This document is based on the `scikit-learn governance document
 <https://scikit-learn.org/stable/governance.html>`_ and is placed in the public
 domain.
