@@ -1,3 +1,5 @@
+.. _skip_list:
+
 scikit-image proposals (SKIPS)
 ******************************
 
