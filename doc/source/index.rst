@@ -25,6 +25,8 @@ Sections
    auto_examples/index
    release_notes_and_installation
    core_developer
+   skips/index
+   values
 
 .. list-table::
    :class: contentstable
