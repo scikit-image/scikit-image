@@ -13,7 +13,8 @@ mailing list (address provided below).
 Read about our `governance structure <skips/0-governance.html>`_ and our
 `mission, vision, and values <values.html>`_.
 
-Major proposals to the project are documented in `SKIPs <skips>`_.
+Major proposals to the project are documented in
+`SKIPs <skips/index.html>`_.
 
 Homepage
 --------

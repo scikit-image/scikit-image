@@ -37,9 +37,9 @@ Our values
   how that function is used in a scientific application. Good documentation is
   hard, so this requirement can stall many contributions. Core developers take
   an active role in finishing final documentation examples.
-- We don't do magic. We use NumPy arrays instead of fancy façade objects[#np],
-  and we prefer to educate users rather than make decisions on their behalf.
-  This does not preclude sensible defaults, but it does preclude
+- We don't do magic. We use NumPy arrays instead of fancy façade objects
+  [#np]_, and we prefer to educate users rather than make decisions on their
+  behalf.  This does not preclude sensible defaults, but it does preclude
   *value-dependent* behavior that is not controllable by the user. [3]_
 
 This document
