@@ -51,7 +51,8 @@ def _exclude_border(mask, footprint, exclude_border):
         mask = mask.swapaxes(0, i)
         remove = (footprint.shape[i] if footprint is not None
                   else 2 * exclude_border)
-        mask[:remove // 2] = mask[-remove // 2:] = False
+        mask[:remove // 2] = False
+        mask[-remove // 2:] = False
         mask = mask.swapaxes(0, i)
     return mask
 
@@ -154,13 +155,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     """
     out = np.zeros_like(image, dtype=np.bool)
 
-    # no peak for a trivial image
-    if np.all(image == image.flat[0]):
-        if indices is True:
-            return np.empty((0, 2), np.int)
-        else:
-            return out
-
     threshold_abs = threshold_abs if threshold_abs is not None else image.min()
 
     if type(exclude_border) == bool:
@@ -201,8 +195,6 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         if indices is True:
             return coordinates
         else:
-            nd_indices = tuple(coordinates.T)
-            out[nd_indices] = True
             return out
 
     # Non maximum filter
