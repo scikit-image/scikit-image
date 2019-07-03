@@ -44,16 +44,14 @@ def _get_peak_mask(image, min_distance, footprint, threshold_abs,
 
 def _exclude_border(mask, footprint, exclude_border):
     """
-    Remove peaks round the borders.
+    Remove peaks round the borders
     """
     # zero out the image borders
     for i in range(mask.ndim):
-        mask = mask.swapaxes(0, i)
         remove = (footprint.shape[i] if footprint is not None
                   else 2 * exclude_border)
-        mask[:remove // 2] = False
-        mask[-remove // 2:] = False
-        mask = mask.swapaxes(0, i)
+        mask[(slice(None),) * i + (slice(None, remove // 2),)] = False
+        mask[(slice(None),) * i + (slice(-remove // 2, None),)] = False
     return mask
 
 
