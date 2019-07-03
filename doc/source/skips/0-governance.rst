@@ -108,8 +108,8 @@ are made according to the following rules:
   on the issue or pull-request page (lazy consensus).
 
 - **Changes to the API principles and changes to dependencies or supported
-  versions** require a :ref:`skip` and follow the decision-making process
-  outlined above.
+  Python versions** require a :ref:`skip` and follow the decision-making
+  process outlined above.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`skip` and follow the decision-making process outlined above.
@@ -140,6 +140,9 @@ vote. The lifetime of a SKIP is as follows:
   ``35-currying-all-functions.rst``. You should then fill in each section with
   appropriate links to prior discussions. Finally, you should submit the added
   file as a pull request (see the :ref:`contributing guide <howto_contribute>`).
+- The SKIP pull request may be merged as “Accepted” before implementation, or
+  the implementation may happen on the same PR. Upon implementation, the SKIP
+  status should be updated to “Final”.
 
 A list of all existing SKIPs is available :ref:`here <skip_list>`.
 
