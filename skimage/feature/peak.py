@@ -158,6 +158,13 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     if type(exclude_border) == bool:
         exclude_border = min_distance if exclude_border else 0
 
+    # no peak for a trivial image
+    if np.all(image == image.flat[0]):
+        if indices is True:
+            return np.empty((0, 2), np.int)
+        else:
+            return out
+
     # In the case of labels, call ndi on each label
     if labels is not None:
         label_values = np.unique(labels)
