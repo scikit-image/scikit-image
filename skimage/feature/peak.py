@@ -44,7 +44,7 @@ def _get_peak_mask(image, min_distance, footprint, threshold_abs,
 
 def _exclude_border(mask, footprint, exclude_border):
     """
-    Remove peaks round the borders
+    Remove peaks near the borders
     """
     # zero out the image borders
     for i in range(mask.ndim):
@@ -189,10 +189,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             mask[nd_indices] = True
             out[obj] += mask
 
+        if not indices and np.isinf(num_peaks):
+            return out
+
         coordinates = _get_high_intensity_peaks(image, out, num_peaks)
-        if indices is True:
+        if indices:
             return coordinates
         else:
+            out.fill(False)
+            nd_indices = tuple(coordinates.T)
+            out[nd_indices] = True
             return out
 
     # Non maximum filter
