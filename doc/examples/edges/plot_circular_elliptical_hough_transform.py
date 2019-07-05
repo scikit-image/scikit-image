@@ -53,7 +53,7 @@ edges = canny(image, sigma=3, low_threshold=10, high_threshold=50)
 hough_radii = np.arange(20, 35, 2)
 hough_res = hough_circle(edges, hough_radii)
 
-# Select the most prominent 5 circles
+# Select the most prominent 3 circles
 accums, cx, cy, radii = hough_circle_peaks(hough_res, hough_radii,
                                            total_num_peaks=3)
 
