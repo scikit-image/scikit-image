@@ -177,9 +177,34 @@ def grass():
     `DeviantArt <https://www.deviantart.com/linolafett/art/Grass-01-434853879>`__
     and licensed underthe Creative Commons CC0 License.
 
-    The downloaded image was then imported to GIMP and converted from color
-    to grayscale and the image was cropped to include only the top left
-    ``(512, 512)`` region prior to saving the result in PNG format.
+    The downloaded image was cropped to include a region of ``(512, 512)``
+    pixels around the top left corner, converted to grayscale, then to uint8
+    prior to saving the result in PNG format.
+
+    Notes
+    -----
+
+    >> import sys; print(sys.version)
+    >> import platform; print(platform.platform())
+    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >> import numpy; print(f"numpy version: {numpy.__version__}")
+    >> import imageio; print(f"imageio version {imageio.__version__}")
+    >> import requests
+    >> import zipfile
+    >> url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a407467e-4ff0-49f1-923f-c9e388e84612/d76wfef-2878b78d-5dce-43f9-be36->>     26ec9bc0df3b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2E0MDc0NjdlLTRmZjAtNDlmMS05MjNmLWM5ZTM4OGU4NDYxMlwvZDc2d2ZlZi0yODc4Yjc4ZC01ZGNlLTQzZjktYmUzNi0yNmVjOWJjMGRmM2IuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.98hIcOTCqXWQ67Ec5bM5eovKEn2p91mWB3uedH61ynI'
+    >> r = requests.get(url)
+    >> with open('grass_orig.jpg', 'bw') as f:
+    ..     f.write(r.content)
+    >> grass_orig = imageio.imread('grass_orig.jpg')
+    >> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >> imageio.imwrite('grass.png', grass)
+
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
 
     Returns
     -------
@@ -216,6 +241,38 @@ def gravel():
     to grayscale and the image was rescaled to ``(1024, 1024)`` then the
     top left ``(512, 512)`` pixel region  was cropped prior to saving the
     result in PNG format.
+
+    Notes
+    -----
+
+    >> import sys; print(sys.version)
+    >> import platform; print(platform.platform())
+    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >> import numpy; print(f"numpy version: {numpy.__version__}")
+    >> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+    
+    >> import requests
+    >> import zipfile
+
+    >> url = 'https://cdn.struffelproductions.com/file/cc0textures/Gravel04/%5B2K%5DGravel04.zip'
+    >> r = requests.get(url)
+    >> with open('[2K]Gravel04.zip', 'bw') as f:
+    ..     f.write(r.content)
+
+    >> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
+    ..     z.extract('Gravel04_col.jpg')
+
+    >> from skimage.transform import resize
+    >> gravel_orig = imageio.imread('Gravel04_col.jpg')
+    >> gravel = resize(gravel_orig, (1024, 1024))
+    >> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >> imageio.imwrite('gravel.png', gravel)
 
     Returns
     -------
