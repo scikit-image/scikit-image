@@ -5,7 +5,6 @@
 
 import numpy as np
 cimport numpy as np
-cimport cython
 
 ctypedef np.float64_t IMGDTYPE
 
@@ -17,7 +16,7 @@ cdef extern from "fast_exp.h":
 
 cdef inline double patch_distance_2d(IMGDTYPE [:, :] p1,
                                      IMGDTYPE [:, :] p2,
-                                     IMGDTYPE [:, ::] w, int s, double var):
+                                     IMGDTYPE [:, ::] w, int s, double var) nogil:
     """
     Compute a Gaussian distance between two image patches.
 
@@ -69,7 +68,7 @@ cdef inline double patch_distance_2dmultichannel(IMGDTYPE [:, :, :] p1,
                                                  IMGDTYPE [:, :, :] p2,
                                                  IMGDTYPE [:, ::] w,
                                                  int s, double var,
-                                                 int n_channels):
+                                                 int n_channels) nogil:
     """
     Compute a Gaussian distance between two image patches.
 
@@ -117,7 +116,7 @@ cdef inline double patch_distance_2dmultichannel(IMGDTYPE [:, :, :] p1,
 
 cdef inline double patch_distance_3d(IMGDTYPE [:, :, :] p1,
                                      IMGDTYPE [:, :, :] p2,
-                                     IMGDTYPE [:, :, ::] w, int s, double var):
+                                     IMGDTYPE [:, :, ::] w, int s, double var) nogil:
     """
     Compute a Gaussian distance between two image patches.
 
@@ -217,57 +216,58 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
 
     # Coordinates of central pixel
     # Iterate over rows, taking padding into account
-    for row in range(offset, n_row + offset):
-        row_start = row - offset
-        row_end = row + offset + 1
-        # Iterate over columns, taking padding into account
-        for col in range(offset, n_col + offset):
-            # Initialize per-channel bins
-            for channel in range(n_channels):
-                new_values[channel] = 0
-            # Reset weights for each local region
-            weight_sum = 0
-            col_start = col - offset
-            col_end = col + offset + 1
+    with nogil:
+        for row in range(offset, n_row + offset):
+            row_start = row - offset
+            row_end = row + offset + 1
+            # Iterate over columns, taking padding into account
+            for col in range(offset, n_col + offset):
+                # Initialize per-channel bins
+                for channel in range(n_channels):
+                    new_values[channel] = 0
+                # Reset weights for each local region
+                weight_sum = 0
+                col_start = col - offset
+                col_end = col + offset + 1
 
-            # Iterate over local 2d patch for each pixel
-            # First rows
-            for i in range(max(-d, offset - row),
-                           min(d + 1, n_row + offset - row)):
-                row_start_i = row_start + i
-                row_end_i = row_end + i
-                # Local patch columns
-                for j in range(max(-d, offset - col),
-                               min(d + 1, n_col + offset - col)):
-                    col_start_j = col_start + j
-                    col_end_j = col_end + j
-                    # Shortcut for grayscale, else assume RGB
-                    if n_channels == 1:
-                        weight = patch_distance_2d(
-                                 padded[row_start:row_end,
-                                        col_start:col_end, 0],
-                                 padded[row_start_i:row_end_i,
-                                        col_start_j:col_end_j, 0],
-                                 w, s, var)
-                    else:
-                        weight = patch_distance_2dmultichannel(
-                                 padded[row_start:row_end,
-                                        col_start:col_end, :],
-                                 padded[row_start_i:row_end_i,
-                                        col_start_j:col_end_j, :],
-                                        w, s, var, n_channels)
+                # Iterate over local 2d patch for each pixel
+                # First rows
+                for i in range(max(-d, offset - row),
+                               min(d + 1, n_row + offset - row)):
+                    row_start_i = row_start + i
+                    row_end_i = row_end + i
+                    # Local patch columns
+                    for j in range(max(-d, offset - col),
+                                   min(d + 1, n_col + offset - col)):
+                        col_start_j = col_start + j
+                        col_end_j = col_end + j
+                        # Shortcut for grayscale, else assume RGB
+                        if n_channels == 1:
+                            weight = patch_distance_2d(
+                                     padded[row_start:row_end,
+                                            col_start:col_end, 0],
+                                     padded[row_start_i:row_end_i,
+                                            col_start_j:col_end_j, 0],
+                                     w, s, var)
+                        else:
+                            weight = patch_distance_2dmultichannel(
+                                     padded[row_start:row_end,
+                                            col_start:col_end, :],
+                                     padded[row_start_i:row_end_i,
+                                            col_start_j:col_end_j, :],
+                                            w, s, var, n_channels)
 
-                    # Collect results in weight sum
-                    weight_sum += weight
-                    # Apply to each channel multiplicatively
-                    for channel in range(n_channels):
-                        new_values[channel] += weight * padded[row + i,
-                                                               col + j,
-                                                               channel]
+                        # Collect results in weight sum
+                        weight_sum += weight
+                        # Apply to each channel multiplicatively
+                        for channel in range(n_channels):
+                            new_values[channel] += weight * padded[row + i,
+                                                                   col + j,
+                                                                   channel]
 
-            # Normalize the result
-            for channel in range(n_channels):
-                result[row, col, channel] = new_values[channel] / weight_sum
+                # Normalize the result
+                for channel in range(n_channels):
+                    result[row, col, channel] = new_values[channel] / weight_sum
 
     # Return cropped result, undoing padding
     return result[offset:-offset, offset:-offset]
@@ -326,51 +326,52 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
 
     # Coordinates of central pixel
     # Iterate over planes, taking padding into account
-    for pln in range(offset, n_pln + offset):
-        pln_start = pln - offset
-        pln_end = pln + offset + 1
-        # Iterate over rows, taking padding into account
-        for row in range(offset, n_row + offset):
-            row_start = row - offset
-            row_end = row + offset + 1
-            # Iterate over columns, taking padding into account
-            for col in range(offset, n_col + offset):
-                col_start = col - offset
-                col_end = col + offset + 1
-                new_value = 0
-                weight_sum = 0
+    with nogil:
+        for pln in range(offset, n_pln + offset):
+            pln_start = pln - offset
+            pln_end = pln + offset + 1
+            # Iterate over rows, taking padding into account
+            for row in range(offset, n_row + offset):
+                row_start = row - offset
+                row_end = row + offset + 1
+                # Iterate over columns, taking padding into account
+                for col in range(offset, n_col + offset):
+                    col_start = col - offset
+                    col_end = col + offset + 1
+                    new_value = 0
+                    weight_sum = 0
 
-                # Iterate over local 3d patch for each pixel
-                # First planes
-                for i in range(max(-d, offset - pln),
-                               min(d + 1, n_pln + offset - pln)):
-                    pln_start_i = pln_start + i
-                    pln_end_i = pln_end + i
-                    # Rows
-                    for j in range(max(-d, offset - row),
-                                   min(d + 1, n_row + offset - row)):
-                        row_start_j = row_start + j
-                        row_end_j = row_end + j
-                        # Columns
-                        for k in range(max(-d, offset - col),
-                                       min(d + 1, n_col + offset - col)):
-                            col_start_k = col_start + k
-                            col_end_k = col_end + k
-                            weight = patch_distance_3d(
-                                    padded[pln_start:pln_end,
-                                           row_start:row_end,
-                                           col_start:col_end],
-                                    padded[pln_start_i:pln_end_i,
-                                           row_start_j:row_end_j,
-                                           col_start_k:col_end_k],
-                                    w, s, var)
-                            # Collect results in weight sum
-                            weight_sum += weight
-                            new_value += weight * padded[pln + i,
-                                                         row + j, col + k]
+                    # Iterate over local 3d patch for each pixel
+                    # First planes
+                    for i in range(max(-d, offset - pln),
+                                   min(d + 1, n_pln + offset - pln)):
+                        pln_start_i = pln_start + i
+                        pln_end_i = pln_end + i
+                        # Rows
+                        for j in range(max(-d, offset - row),
+                                       min(d + 1, n_row + offset - row)):
+                            row_start_j = row_start + j
+                            row_end_j = row_end + j
+                            # Columns
+                            for k in range(max(-d, offset - col),
+                                           min(d + 1, n_col + offset - col)):
+                                col_start_k = col_start + k
+                                col_end_k = col_end + k
+                                weight = patch_distance_3d(
+                                        padded[pln_start:pln_end,
+                                               row_start:row_end,
+                                               col_start:col_end],
+                                        padded[pln_start_i:pln_end_i,
+                                               row_start_j:row_end_j,
+                                               col_start_k:col_end_k],
+                                        w, s, var)
+                                # Collect results in weight sum
+                                weight_sum += weight
+                                new_value += weight * padded[pln + i,
+                                                             row + j, col + k]
 
-                # Normalize the result
-                result[pln, row, col] = new_value / weight_sum
+                    # Normalize the result
+                    result[pln, row, col] = new_value / weight_sum
 
     # Return cropped result, undoing padding
     return result[offset:-offset, offset:-offset, offset:-offset]
@@ -379,7 +380,7 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, double h=0.1,
 
 
 cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral, int row,
-                                            int col, int offset, double h2s2):
+                                            int col, int offset, double h2s2) nogil:
     """
     References
     ----------
@@ -405,7 +406,7 @@ cdef inline double _integral_to_distance_2d(IMGDTYPE [:, ::] integral, int row,
 cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
                                             int pln, int row, int col,
                                             int offset,
-                                            double s_cube_h_square):
+                                            double s_cube_h_square) nogil:
     """
     References
     ----------
@@ -432,10 +433,10 @@ cdef inline double _integral_to_distance_3d(IMGDTYPE [:, :, ::] integral,
     return distance
 
 
-cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
-                               IMGDTYPE [:, ::] integral, int t_row,
-                               int t_col, int n_row, int n_col, int n_channels,
-                               double var):
+cdef inline void _integral_image_2d(IMGDTYPE [:, :, ::] padded,
+                                    IMGDTYPE [:, ::] integral, int t_row,
+                                    int t_col, int n_row, int n_col,
+                                    int n_channels, double var) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_row, t_col)``.
@@ -487,11 +488,10 @@ cdef inline _integral_image_2d(IMGDTYPE [:, :, ::] padded,
                                  integral[row - 1, col - 1]
 
 
-cdef inline _integral_image_3d(IMGDTYPE [:, :, ::] padded,
-                               IMGDTYPE [:, :, ::] integral, int t_pln,
-                               int t_row, int t_col, int n_pln, int n_row,
-                               int n_col,
-                               double var):
+cdef inline void _integral_image_3d(IMGDTYPE [:, :, ::] padded,
+                                    IMGDTYPE [:, :, ::] integral, int t_pln,
+                                    int t_row, int t_col, int n_pln, int n_row,
+                                    int n_col, double var) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
@@ -591,7 +591,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
                           mode='reflect').astype(np.float64))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, ::1] weights = np.zeros_like(padded[..., 0], order='C')
-    cdef IMGDTYPE [:, ::1] integral = np.zeros_like(padded[..., 0], order='C')
+    cdef IMGDTYPE [:, ::1] integral = np.empty_like(padded[..., 0], order='C')
     cdef int n_row, n_col, t_row, t_col, row, col, n_channels, channel
     cdef double weight, distance
     cdef double alpha
@@ -602,55 +602,56 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, double h=0.1,
     n_row += 2 * pad_size
     n_col += 2 * pad_size
 
-    # Outer loops on patch shifts
-    # With t2 >= 0, reference patch is always on the left of test patch
-    # Iterate over shifts along the row axis
-    for t_row in range(-d, d + 1):
-        # Iterate over shifts along the column axis
-        for t_col in range(0, d + 1):
-            # alpha is to account for patches on the same column
-            # distance is computed twice in this case
-            if t_col == 0 and t_row is not 0:
-                alpha = 0.5
-            else:
-                alpha = 1.
-            # Compute integral image of the squared difference between
-            # padded and the same image shifted by (t_row, t_col)
-            integral = np.zeros_like(padded[..., 0], order='C')
-            _integral_image_2d(padded, integral, t_row, t_col,
-                               n_row, n_col, n_channels, var)
+    with nogil:
+        # Outer loops on patch shifts
+        # With t2 >= 0, reference patch is always on the left of test patch
+        # Iterate over shifts along the row axis
+        for t_row in range(-d, d + 1):
+            # Iterate over shifts along the column axis
+            for t_col in range(0, d + 1):
+                # alpha is to account for patches on the same column
+                # distance is computed twice in this case
+                if t_col == 0 and t_row is not 0:
+                    alpha = 0.5
+                else:
+                    alpha = 1.
+                # Compute integral image of the squared difference between
+                # padded and the same image shifted by (t_row, t_col)
+                integral[: ,:] = 0
+                _integral_image_2d(padded, integral, t_row, t_col,
+                                   n_row, n_col, n_channels, var)
 
-            # Inner loops on pixel coordinates
-            # Iterate over rows, taking offset and shift into account
-            for row in range(max(offset, offset - t_row),
-                             min(n_row - offset, n_row - offset - t_row)):
-                # Iterate over columns, taking offset and shift into account
-                for col in range(max(offset, offset - t_col),
-                                 min(n_col - offset, n_col - offset - t_col)):
-                    # Compute squared distance between shifted patches
-                    distance = _integral_to_distance_2d(integral, row, col,
-                                                     offset, h2s2)
-                    # exp of large negative numbers is close to zero
-                    if distance > DISTANCE_CUTOFF:
-                        continue
-                    weight = alpha * fast_exp(-distance)
-                    # Accumulate weights corresponding to different shifts
-                    weights[row, col] += weight
-                    weights[row + t_row, col + t_col] += weight
-                    # Iterate over channels
-                    for channel in range(n_channels):
-                        result[row, col, channel] += weight * \
-                                    padded[row + t_row, col + t_col, channel]
-                        result[row + t_row, col + t_col, channel] += \
-                                        weight * padded[row, col, channel]
+                # Inner loops on pixel coordinates
+                # Iterate over rows, taking offset and shift into account
+                for row in range(max(offset, offset - t_row),
+                                 min(n_row - offset, n_row - offset - t_row)):
+                    # Iterate over columns, taking offset and shift into account
+                    for col in range(max(offset, offset - t_col),
+                                     min(n_col - offset, n_col - offset - t_col)):
+                        # Compute squared distance between shifted patches
+                        distance = _integral_to_distance_2d(integral, row, col,
+                                                         offset, h2s2)
+                        # exp of large negative numbers is close to zero
+                        if distance > DISTANCE_CUTOFF:
+                            continue
+                        weight = alpha * fast_exp(-distance)
+                        # Accumulate weights corresponding to different shifts
+                        weights[row, col] += weight
+                        weights[row + t_row, col + t_col] += weight
+                        # Iterate over channels
+                        for channel in range(n_channels):
+                            result[row, col, channel] += weight * \
+                                        padded[row + t_row, col + t_col, channel]
+                            result[row + t_row, col + t_col, channel] += \
+                                            weight * padded[row, col, channel]
 
-    # Normalize pixel values using sum of weights of contributing patches
-    for row in range(offset, n_row - offset):
-        for col in range(offset, n_col - offset):
-            for channel in range(n_channels):
-                # No risk of division by zero, since the contribution
-                # of a null shift is strictly positive
-                result[row, col, channel] /= weights[row, col]
+        # Normalize pixel values using sum of weights of contributing patches
+        for row in range(offset, n_row - offset):
+            for col in range(offset, n_col - offset):
+                for channel in range(n_channels):
+                    # No risk of division by zero, since the contribution
+                    # of a null shift is strictly positive
+                    result[row, col, channel] /= weights[row, col]
 
     # Return cropped result, undoing padding
     return result[pad_size:-pad_size, pad_size:-pad_size]
@@ -702,7 +703,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1,
                                 pad_size, mode='reflect').astype(np.float64))
     cdef IMGDTYPE [:, :, ::1] result = np.zeros_like(padded)
     cdef IMGDTYPE [:, :, ::1] weights = np.zeros_like(padded)
-    cdef IMGDTYPE [:, :, ::1] integral = np.zeros_like(padded)
+    cdef IMGDTYPE [:, :, ::1] integral = np.empty_like(padded)
     cdef int n_pln, n_row, n_col, t_pln, t_row, t_col, \
              pln, row, col
     cdef int pln_dist_min, pln_dist_max, row_dist_min, row_dist_max, \
@@ -717,66 +718,67 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, double h=0.1,
     n_row += 2 * pad_size
     n_col += 2 * pad_size
 
-    # Outer loops on patch shifts
-    # With t2 >= 0, reference patch is always on the left of test patch
-    # Iterate over shifts along the plane axis
-    for t_pln in range(-d, d + 1):
-        pln_dist_min = max(offset, offset - t_pln)
-        pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
-        # Iterate over shifts along the row axis
-        for t_row in range(-d, d + 1):
-            row_dist_min = max(offset, offset - t_row)
-            row_dist_max = min(n_row - offset, n_row - offset - t_row)
-            # Iterate over shifts along the column axis
-            for t_col in range(0, d + 1):
-                col_dist_min = max(offset, offset - t_col)
-                col_dist_max = min(n_col - offset, n_col - offset - t_col)
-                # alpha is to account for patches on the same column
-                # distance is computed twice in this case
-                if t_col == 0 and (t_pln is not 0 or t_row is not 0):
-                    alpha = 0.5
-                else:
-                    alpha = 1.0
+    with nogil:
+        # Outer loops on patch shifts
+        # With t2 >= 0, reference patch is always on the left of test patch
+        # Iterate over shifts along the plane axis
+        for t_pln in range(-d, d + 1):
+            pln_dist_min = max(offset, offset - t_pln)
+            pln_dist_max = min(n_pln - offset, n_pln - offset - t_pln)
+            # Iterate over shifts along the row axis
+            for t_row in range(-d, d + 1):
+                row_dist_min = max(offset, offset - t_row)
+                row_dist_max = min(n_row - offset, n_row - offset - t_row)
+                # Iterate over shifts along the column axis
+                for t_col in range(0, d + 1):
+                    col_dist_min = max(offset, offset - t_col)
+                    col_dist_max = min(n_col - offset, n_col - offset - t_col)
+                    # alpha is to account for patches on the same column
+                    # distance is computed twice in this case
+                    if t_col == 0 and (t_pln is not 0 or t_row is not 0):
+                        alpha = 0.5
+                    else:
+                        alpha = 1.0
 
-                # Compute integral image of the squared difference between
-                # padded and the same image shifted by (t_pln, t_row, t_col)
-                integral = np.zeros_like(padded)
-                _integral_image_3d(padded, integral, t_pln, t_row, t_col,
-                                   n_pln, n_row, n_col, var)
+                    # Compute integral image of the squared difference between
+                    # padded and the same image shifted by (t_pln, t_row, t_col)
+                    integral[:, :] = 0
+                    _integral_image_3d(padded, integral, t_pln, t_row, t_col,
+                                       n_pln, n_row, n_col, var)
 
-                # Inner loops on pixel coordinates
-                # Iterate over planes, taking offset and shift into account
-                for pln in range(pln_dist_min, pln_dist_max):
-                    # Iterate over rows, taking offset and shift into account
-                    for row in range(row_dist_min, row_dist_max):
-                        # Iterate over columns
-                        for col in range(col_dist_min, col_dist_max):
-                            # Compute squared distance between shifted patches
-                            distance = _integral_to_distance_3d(integral,
-                                        pln, row, col, offset, s_cube_h_square)
-                            # exp of large negative numbers is close to zero
-                            if distance > DISTANCE_CUTOFF:
-                                continue
+                    # Inner loops on pixel coordinates
+                    # Iterate over planes, taking offset and shift into account
+                    for pln in range(pln_dist_min, pln_dist_max):
+                        # Iterate over rows, taking offset and shift into account
+                        for row in range(row_dist_min, row_dist_max):
+                            # Iterate over columns
+                            for col in range(col_dist_min, col_dist_max):
+                                # Compute squared distance between shifted patches
+                                distance = _integral_to_distance_3d(integral,
+                                            pln, row, col, offset, s_cube_h_square)
+                                # exp of large negative numbers is close to zero
+                                if distance > DISTANCE_CUTOFF:
+                                    continue
 
-                            weight = alpha * fast_exp(-distance)
-                            # Accumulate weights for the different shifts
-                            weights[pln, row, col] += weight
-                            weights[pln + t_pln, row + t_row,
-                                                 col + t_col] += weight
-                            result[pln, row, col] += weight * \
-                                    padded[pln + t_pln, row + t_row,
-                                                        col + t_col]
-                            result[pln + t_pln, row + t_row,
-                                                col + t_col] += weight * \
-                                                  padded[pln, row, col]
+                                weight = alpha * fast_exp(-distance)
+                                # Accumulate weights for the different shifts
+                                weights[pln, row, col] += weight
+                                weights[pln + t_pln, row + t_row,
+                                                     col + t_col] += weight
+                                result[pln, row, col] += weight * \
+                                        padded[pln + t_pln, row + t_row,
+                                                            col + t_col]
+                                result[pln + t_pln, row + t_row,
+                                                    col + t_col] += weight * \
+                                                      padded[pln, row, col]
 
-    # Normalize pixel values using sum of weights of contributing patches
-    for pln in range(offset, n_pln - offset):
-        for row in range(offset, n_row - offset):
-            for col in range(offset, n_col - offset):
-                # No risk of division by zero, since the contribution
-                # of a null shift is strictly positive
-                result[pln, row, col] /= weights[pln, row, col]
+        # Normalize pixel values using sum of weights of contributing patches
+        for pln in range(offset, n_pln - offset):
+            for row in range(offset, n_row - offset):
+                for col in range(offset, n_col - offset):
+                    # No risk of division by zero, since the contribution
+                    # of a null shift is strictly positive
+                    result[pln, row, col] /= weights[pln, row, col]
 
     # Return cropped result, undoing padding
     return result[pad_size:-pad_size, pad_size:-pad_size, pad_size:-pad_size]

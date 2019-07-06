@@ -1,7 +1,12 @@
 from itertools import product
-
 import numpy as np
-import dask
+from .._shared.utils import warn
+
+try:
+    import dask
+    dask_available = True
+except ImportError:
+    dask_available = False
 
 
 def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
@@ -119,7 +124,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     .. [1] R.R. Coifman and D.L. Donoho.  "Translation-Invariant De-Noising".
            Wavelets and Statistics, Lecture Notes in Statistics, vol.103.
            Springer, New York, 1995, pp.125-150.
-           DOI:10.1007/978-1-4612-2544-7_9
+           :DOI:`10.1007/978-1-4612-2544-7_9`
 
     Examples
     --------
@@ -143,6 +148,12 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         tmp = func(xs, **func_kw)
         return _roll_axes(tmp, -np.asarray(shift))
 
+    if not dask_available and (num_workers is None or num_workers > 1):
+        num_workers = 1
+        warn('The optional dask dependency is not installed. '
+             'The number of workers is set to 1. To silence '
+             'this warning, install dask or explicitly set `num_workers=1` '
+             'when calling the `cycle_spin` function')
     # compute a running average across the cycle shifts
     if num_workers == 1:
         # serial processing

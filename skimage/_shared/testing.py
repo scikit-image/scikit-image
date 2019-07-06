@@ -4,6 +4,7 @@ Testing utilities.
 
 import os
 import re
+import struct
 import threading
 import functools
 from tempfile import NamedTemporaryFile
@@ -16,19 +17,25 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal, assert_, assert_warns,
                            assert_no_warnings)
 
-from ._warnings import expected_warnings
 import warnings
 
-from .. import data, io, img_as_uint, img_as_float, img_as_int, img_as_ubyte
+from .. import data, io
+from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 import pytest
 
 
-SKIP_RE = re.compile("(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
 skipif = pytest.mark.skipif
+xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
+
+# true if python is running in 32bit mode
+# Calculate the size of a void * pointer in bits
+# https://docs.python.org/3/library/struct.html
+arch32 = struct.calcsize("P") * 8 == 32
 
 
 def assert_less(a, b, msg=None):
@@ -123,25 +130,20 @@ def color_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision loss']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['sign loss|precision loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_ubyte(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_ubyte(img4))
 
     img5 = img_as_uint(img)
-    with expected_warnings(['precision loss']):
-        r5 = roundtrip(img5, plugin, fmt)
+    r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
 
@@ -160,24 +162,20 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(img2.astype(np.uint8), r2)
 
     img3 = img_as_float(img)
-    with expected_warnings(['precision|\A\Z']):
-        r3 = roundtrip(img3, plugin, fmt)
+    r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
         testing.assert_allclose(r3, img_as_uint(img))
 
-    with expected_warnings(['precision loss']):
-        img4 = img_as_int(img)
+    img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
-        with expected_warnings(['sign loss|\A\Z']):
-            r4 = roundtrip(img4, plugin, fmt)
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
-        with expected_warnings(['precision loss|sign loss']):
-            r4 = roundtrip(img4, plugin, fmt)
-            testing.assert_allclose(r4, img_as_uint(img4))
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_uint(img4))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)

@@ -13,7 +13,7 @@ term which is dependent on the length of the boundary of the segmented
 region.
 
 This algorithm was first proposed by Tony Chan and Luminita Vese, in
-a publication entitled "An Active Countour Model Without Edges" [1]_. See also
+a publication entitled "An Active Contour Model Without Edges" [1]_. See also
 [2]_, [3]_.
 
 This implementation of the algorithm is somewhat simplified in the
@@ -36,12 +36,12 @@ References
 ----------
 .. [1] An Active Contour Model without Edges, Tony Chan and
        Luminita Vese, Scale-Space Theories in Computer Vision, 1999,
-       DOI:10.1007/3-540-48236-9_13
+       :DOI:`10.1007/3-540-48236-9_13`
 .. [2] Chan-Vese Segmentation, Pascal Getreuer, Image Processing On
        Line, 2 (2012), pp. 214-224,
-       DOI:10.5201/ipol.2012.g-cv
-.. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen,
-       http://arxiv.org/abs/1107.2782 , 2011
+       :DOI:`10.5201/ipol.2012.g-cv`
+.. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen, 2011
+       :arXiv:`1107.2782`
 """
 import numpy as np
 import matplotlib.pyplot as plt

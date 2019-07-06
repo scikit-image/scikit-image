@@ -6,7 +6,7 @@ Image processing algorithms for SciPy, including IO, morphology, filtering,
 warping, color manipulation, object detection, etc.
 
 Please refer to the online documentation at
-http://scikit-image.org/
+https://scikit-image.org/
 """
 
 DISTNAME = 'scikit-image'
@@ -14,16 +14,27 @@ DESCRIPTION = 'Image processing routines for SciPy'
 LONG_DESCRIPTION = descr
 MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
-URL = 'http://scikit-image.org'
+URL = 'https://scikit-image.org'
 LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
+DOWNLOAD_URL = 'https://scikit-image.org/download.html'
+PROJECT_URLS = {
+    "Bug Tracker": 'https://github.com/scikit-image/scikit-image/issues',
+    "Documentation": 'https://scikit-image.org/docs/stable/',
+    "Source Code": 'https://github.com/scikit-image/scikit-image'
+}
 
 import os
 import sys
+import tempfile
+import shutil
 
 import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
+from distutils.errors import CompileError, LinkError
+
+from numpy.distutils.command.build_ext import build_ext
+
 
 if sys.version_info < (3, 5):
 
@@ -49,6 +60,56 @@ import builtins
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
 
+# Support for openmp
+
+compile_flags = ['-fopenmp']
+link_flags = ['-fopenmp']
+
+code = """#include <omp.h>
+int main(int argc, char** argv) { return(0); }"""
+
+
+class ConditionalOpenMP(build_ext):
+
+    def can_compile_link(self):
+
+        cc = self.compiler
+        fname = 'test.c'
+        cwd = os.getcwd()
+        tmpdir = tempfile.mkdtemp()
+
+        try:
+            os.chdir(tmpdir)
+            with open(fname, 'wt') as fobj:
+                fobj.write(code)
+            try:
+                objects = cc.compile([fname],
+                                     extra_postargs=compile_flags)
+            except CompileError:
+                return False
+            try:
+                # Link shared lib rather then executable to avoid
+                # http://bugs.python.org/issue4431 with MSVC 10+
+                cc.link_shared_lib(objects, "testlib",
+                                   extra_postargs=link_flags)
+            except (LinkError, TypeError):
+                return False
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(tmpdir)
+        return True
+
+    def build_extensions(self):
+        """ Hook into extension building to check compiler flags """
+
+        if self.can_compile_link():
+
+            for ext in self.extensions:
+                ext.extra_compile_args += compile_flags
+                ext.extra_link_args += link_flags
+
+        build_ext.build_extensions(self)
+
 
 with open('skimage/__init__.py') as fid:
     for line in fid:
@@ -56,8 +117,22 @@ with open('skimage/__init__.py') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-with open('requirements/default.txt') as fid:
-    INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
+
+def parse_requirements_file(filename):
+    with open(filename) as fid:
+        requires = [l.strip() for l in fid.readlines() if l]
+
+    return requires
+
+
+INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
+# The `requirements/extras.txt` file is explicitely omitted because
+# it contains requirements that do not have wheels uploaded to pip
+# for the platforms we wish to support.
+extras_require = {
+    dep : parse_requirements_file('requirements/' + dep + '.txt')
+    for dep in ['docs', 'optional', 'test']
+}
 
 # requirements for those browsing PyPI
 REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
@@ -116,7 +191,7 @@ if __name__ == "__main__":
                   'Install numpy with pip:\n' +
                   'pip install numpy\n'
                   'Or use your operating system package manager. For more\n' +
-                  'details, see http://scikit-image.org/docs/stable/install.html')
+                  'details, see https://scikit-image.org/docs/stable/install.html')
             sys.exit(1)
 
     setup(
@@ -128,6 +203,7 @@ if __name__ == "__main__":
         url=URL,
         license=LICENSE,
         download_url=DOWNLOAD_URL,
+        project_urls=PROJECT_URLS,
         version=VERSION,
 
         classifiers=[
@@ -139,6 +215,10 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX',
@@ -147,8 +227,9 @@ if __name__ == "__main__":
         ],
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
+        extras_require=extras_require,
         python_requires='>=3.5',
-        packages=setuptools.find_packages(exclude=['doc']),
+        packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
 
@@ -157,6 +238,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
+                  'build_ext': ConditionalOpenMP,
                   'sdist': sdist},
         **extra
     )

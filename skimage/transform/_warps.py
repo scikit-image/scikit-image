@@ -16,20 +16,6 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
-def _multichannel_default(multichannel, ndim):
-    if multichannel is not None:
-        return multichannel
-    else:
-        warn('The default multichannel argument (None) is deprecated.  Please '
-             'specify either True or False explicitly.  multichannel will '
-             'default to False starting with release 0.16.')
-        # utility for maintaining previous color image default behavior
-        if ndim == 3:
-            return True
-        else:
-            return False
-
-
 def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
            preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
@@ -72,15 +58,16 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
-        Also see http://scikit-image.org/docs/dev/user_guide/data_types.html
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
         avoid aliasing artifacts.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
-        By default, this value is chosen as (1 - s) / 2 where s is the
-        down-scaling factor.
+        By default, this value is chosen as (s - 1) / 2 where s is the
+        down-scaling factor, where s > 1. For the up-size case, s < 1, no
+        anti-aliasing is performed prior to rescaling.
 
     Notes
     -----
@@ -129,8 +116,24 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
                 warn("Anti-aliasing standard deviation greater than zero but "
                      "not down-sampling along all axes")
 
+        # Translate modes used by np.pad to those used by ndi.gaussian_filter
+        np_pad_to_ndimage = {
+            'constant': 'constant',
+            'edge': 'nearest',
+            'symmetric': 'reflect',
+            'reflect': 'mirror',
+            'wrap': 'wrap'
+        }
+        try:
+            ndi_mode = np_pad_to_ndimage[mode]
+        except KeyError:
+            raise ValueError("Unknown mode, or cannot translate mode. The "
+                             "mode should be one of 'constant', 'edge', "
+                             "'symmetric', 'reflect', or 'wrap'. See the "
+                             "documentation of numpy.pad for more info.")
+
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
-                                    cval=cval, mode=mode)
+                                    cval=cval, mode=ndi_mode)
 
     # 2-dimensional interpolation
     if len(output_shape) == 2 or (len(output_shape) == 3 and
@@ -182,7 +185,7 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
 
 
 def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=None,
+            preserve_range=False, multichannel=False,
             anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
@@ -223,12 +226,10 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. By default, is set to True for
-        3D (2D+color) inputs, and False for others. Starting in release 0.16,
-        this will always default to False.
+        channels or another spatial dimension.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior to
         down-scaling. It is crucial to filter when down-sampling the image to
@@ -257,7 +258,6 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
     (256, 256)
 
     """
-    multichannel = _multichannel_default(multichannel, image.ndim)
     scale = np.atleast_1d(scale)
     if len(scale) > 1:
         if ((not multichannel and len(scale) != image.ndim) or
@@ -293,7 +293,9 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         False.
     center : iterable of length 2
         The rotation center. If ``center=None``, the image is rotated around
-        its center, i.e. ``center=(rows / 2 - 0.5, cols / 2 - 0.5)``.
+        its center, i.e. ``center=(cols / 2 - 0.5, rows / 2 - 0.5)``.  Please
+        note that this parameter is (cols, rows), contrary to normal skimage
+        ordering.
 
     Returns
     -------
@@ -319,7 +321,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Notes
     -----
@@ -492,7 +494,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     """
     if center is None:
@@ -723,7 +725,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see
-        http://scikit-image.org/docs/dev/user_guide/data_types.html
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -794,6 +796,10 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     >>> warped = warp(cube, coords)
 
     """
+
+    if image.size == 0:
+        raise ValueError("Cannot warp empty image with dimensions", image.shape)
+
     image = convert_to_float(image, preserve_range)
 
     input_shape = np.array(image.shape)

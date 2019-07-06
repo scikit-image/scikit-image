@@ -45,8 +45,8 @@ References
 ----------
 .. [1] Official specification of sRGB, IEC 61966-2-1:1999.
 .. [2] http://www.poynton.com/ColorFAQ.html
-.. [3] http://en.wikipedia.org/wiki/HSL_and_HSV
-.. [4] http://en.wikipedia.org/wiki/CIE_1931_color_space
+.. [3] https://en.wikipedia.org/wiki/HSL_and_HSV
+.. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
 
@@ -243,7 +243,7 @@ def rgb2hsv(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
@@ -318,7 +318,7 @@ def hsv2rgb(hsv):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
@@ -364,7 +364,7 @@ xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
-# From http://en.wikipedia.org/wiki/CIE_1931_color_space
+# From https://en.wikipedia.org/wiki/CIE_1931_color_space
 # Note: Travis's code did not have the divide by 0.17697
 xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
                             [0.17697, 0.81240, 0.01063],
@@ -437,7 +437,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 #
 #     References
 #    ----------
-#    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+#    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
 illuminants = \
     {"A": {'2': (1.098466069456375, 1, 0.3558228003436005),
@@ -478,7 +478,7 @@ def get_xyz_coords(illuminant, observer):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
     """
     illuminant = illuminant.upper()
@@ -501,7 +501,7 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
-# http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+# https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 # Hematoxylin + DAB
 rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
@@ -621,7 +621,7 @@ def xyz2rgb(xyz):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -637,8 +637,7 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
-    arr[arr < 0] = 0
-    arr[arr > 1] = 1
+    np.clip(arr, 0, 1, out=arr)
     return arr
 
 
@@ -669,7 +668,7 @@ def rgb2xyz(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -706,7 +705,7 @@ def rgb2rgbcie(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -738,7 +737,7 @@ def rgbcie2rgb(rgbcie):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -904,7 +903,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
-    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
 
     Examples
     --------
@@ -923,7 +922,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
-    arr[mask] = np.power(arr[mask], 1. / 3.)
+    arr[mask] = np.cbrt(arr[mask])
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -973,7 +972,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
-    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
 
     """
 
@@ -1111,7 +1110,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://en.wikipedia.org/wiki/CIELUV
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     Examples
     --------
@@ -1132,7 +1131,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
-    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[mask] = 116. * np.cbrt(L[mask]) - 16.
     L[~mask] = 903.3 * L[~mask]
 
     u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
@@ -1187,7 +1186,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://en.wikipedia.org/wiki/CIELUV
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     """
 
@@ -1249,7 +1248,7 @@ def rgb2luv(rgb):
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
     .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
-    .. [3] http://en.wikipedia.org/wiki/CIELUV
+    .. [3] https://en.wikipedia.org/wiki/CIELUV
 
     """
     return xyz2luv(rgb2xyz(rgb))
@@ -1395,7 +1394,7 @@ def separate_stains(rgb, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
@@ -1451,7 +1450,7 @@ def combine_stains(stains, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 
     Examples

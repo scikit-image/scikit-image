@@ -6,7 +6,18 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
 fi
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" == "PyQt5" ]]; then
-    pip install --retries 3 -q $PIP_FLAGS pyqt5
+    if [[ $MINIMUM_REQUIREMENTS == "1" ]]; then
+        # PyQt 5.11 changed how they ship SIP
+        # Which conflicts with how matplotlib detects the
+        # presence of PyQt before MPL 2.2.3
+        pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.11"
+    elif [[ `lsb_release  -r -s` == "14.04" ]]; then
+        # Apparently Qt 5.12 is only supported by ubuntu 16.04
+        # https://github.com/scikit-image/scikit-image/pull/3744#issuecomment-463450663
+        pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.12"
+    else
+        pip install --retries 3 -q $PIP_FLAGS pyqt5
+    fi
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
 elif [[ "${QT}" == "PySide2" ]]; then

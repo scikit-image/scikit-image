@@ -1,9 +1,10 @@
 import numpy as np
 from skimage.draw import ellipsoid, ellipsoid_stats
 from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
-                             mesh_surface_area, correct_mesh_orientation)
+                             mesh_surface_area)
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_marching_cubes_isotropic():
@@ -70,43 +71,6 @@ def test_invalid_input():
                                spacing=(1, 2))
     with testing.raises(ValueError):
         marching_cubes_lewiner(np.zeros((20, 20)), 0)
-
-
-def test_correct_mesh_orientation():
-    sphere_small = ellipsoid(1, 1, 1, levelset=True)
-
-    # Mesh with incorrectly oriented faces which was previously returned from
-    # `marching_cubes`, before it guaranteed correct mesh orientation
-    verts = np.array([[1., 2., 2.],
-                      [2., 2., 1.],
-                      [2., 1., 2.],
-                      [2., 2., 3.],
-                      [2., 3., 2.],
-                      [3., 2., 2.]])
-
-    faces = np.array([[0, 1, 2],
-                      [2, 0, 3],
-                      [1, 0, 4],
-                      [4, 0, 3],
-                      [1, 2, 5],
-                      [2, 3, 5],
-                      [1, 4, 5],
-                      [5, 4, 3]])
-
-    # Correct mesh orientation - descent
-    corrected_faces1 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='descent')
-    corrected_faces2 = correct_mesh_orientation(sphere_small, verts, faces,
-                                                gradient_direction='ascent')
-
-    # Ensure ascent is opposite of descent for all faces
-    assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
-
-    # Ensure correct faces have been reversed: 1, 4, and 5
-    idx = [1, 4, 5]
-    expected = faces.copy()
-    expected[idx] = expected[idx, ::-1]
-    assert_array_equal(expected, corrected_faces1)
 
 
 def test_both_algs_same_result_ellipse():

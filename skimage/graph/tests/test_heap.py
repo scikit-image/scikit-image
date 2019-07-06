@@ -17,7 +17,7 @@ def _test_heap(n, fast_update):
     a = [random.uniform(1.0, 100.0) for i in range(n // 2)]
     a = a + a
 
-    t0 = time.clock()
+    t0 = time.perf_counter()
 
     # insert in heap with random removals
     if fast_update:
@@ -41,7 +41,7 @@ def _test_heap(n, fast_update):
         except IndexError:
             break
 
-    t1 = time.clock()
+    t1 = time.perf_counter()
 
     # verify
     for i in range(1, len(b)):

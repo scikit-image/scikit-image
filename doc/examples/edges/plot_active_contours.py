@@ -22,6 +22,7 @@ boundaries of the face.
 
 .. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
        International Journal of Computer Vision 1 (4): 321 (1988).
+       DOI:`10.1007/BF00133570`
 """
 
 import numpy as np
@@ -49,6 +50,8 @@ ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
 ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
 ax.set_xticks([]), ax.set_yticks([])
 ax.axis([0, img.shape[1], img.shape[0], 0])
+
+plt.show()
 
 ######################################################################
 # Here we initialize a straight line between two points, `(5, 136)` and

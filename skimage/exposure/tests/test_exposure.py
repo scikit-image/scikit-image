@@ -1,7 +1,8 @@
 import warnings
 
 import numpy as np
-import skimage
+import pytest
+from skimage import util
 from skimage import data
 from skimage import exposure
 from skimage.exposure.exposure import intensity_range
@@ -12,28 +13,107 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal,
+                                     assert_equal,
                                      assert_almost_equal)
 
 
 # Test integer histograms
 # =======================
 
+def test_wrong_source_range():
+    im = np.array([-1, 100], dtype=np.int8)
+    with testing.raises(ValueError):
+        frequencies, bin_centers = exposure.histogram(im, source_range='foobar')
+
+
 def test_negative_overflow():
-    im = np.array([-1, 127], dtype=np.int8)
+    im = np.array([-1, 100], dtype=np.int8)
     frequencies, bin_centers = exposure.histogram(im)
-    assert_array_equal(bin_centers, np.arange(-1, 128))
+    assert_array_equal(bin_centers, np.arange(-1, 101))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
     assert_array_equal(frequencies[1:-1], 0)
 
 
 def test_all_negative_image():
-    im = np.array([-128, -1], dtype=np.int8)
+    im = np.array([-100, -1], dtype=np.int8)
     frequencies, bin_centers = exposure.histogram(im)
-    assert_array_equal(bin_centers, np.arange(-128, 0))
+    assert_array_equal(bin_centers, np.arange(-100, 0))
     assert frequencies[0] == 1
     assert frequencies[-1] == 1
     assert_array_equal(frequencies[1:-1], 0)
+
+
+def test_int_range_image():
+    im = np.array([10, 100], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im)
+    assert_equal(len(bin_centers), len(frequencies))
+    assert_equal(bin_centers[0], 10)
+    assert_equal(bin_centers[-1], 100)
+
+
+def test_peak_uint_range_dtype():
+    im = np.array([10, 100], dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(0, 256))
+    assert_equal(frequencies[10], 1)
+    assert_equal(frequencies[100], 1)
+    assert_equal(frequencies[101], 0)
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_peak_int_range_dtype():
+    im = np.array([10, 100], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(-128, 128))
+    assert_equal(frequencies[128+10], 1)
+    assert_equal(frequencies[128+100], 1)
+    assert_equal(frequencies[128+101], 0)
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_flat_uint_range_dtype():
+    im = np.linspace(0, 255, 256, dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(0, 256))
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_flat_int_range_dtype():
+    im = np.linspace(-128, 128, 256, dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype')
+    assert_array_equal(bin_centers, np.arange(-128, 128))
+    assert_equal(frequencies.shape, (256,))
+
+
+def test_peak_float_out_of_range_image():
+    im = np.array([10, 100], dtype=np.float16)
+    frequencies, bin_centers = exposure.histogram(im, nbins=90)
+    # offset values by 0.5 for float...
+    assert_array_equal(bin_centers, np.arange(10, 100) + 0.5)
+
+
+def test_peak_float_out_of_range_dtype():
+    im = np.array([10, 100], dtype=np.float16)
+    nbins = 10
+    frequencies, bin_centers = exposure.histogram(im, nbins=nbins, source_range='dtype')
+    assert_almost_equal(np.min(bin_centers), -0.9, 3)
+    assert_almost_equal(np.max(bin_centers), 0.9, 3)
+    assert_equal(len(bin_centers), 10)
+
+
+def test_normalize():
+    im = np.array([0, 255, 255], dtype=np.uint8)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=False)
+    expected = np.zeros(256)
+    expected[0] = 1
+    expected[-1] = 2
+    assert_equal(frequencies, expected)
+    frequencies, bin_centers = exposure.histogram(im, source_range='dtype',
+                                                  normalize=True)
+    expected /= 3.
+    assert_equal(frequencies, expected)
 
 
 # Test histogram equalization
@@ -43,7 +123,7 @@ np.random.seed(0)
 
 test_img_int = data.camera()
 # squeeze image intensities to lower image contrast
-test_img = skimage.img_as_float(test_img_int)
+test_img = util.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
 
 
@@ -55,8 +135,7 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    with expected_warnings(['precision loss']):
-        img = skimage.img_as_ubyte(test_img)
+    img = util.img_as_ubyte(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -64,7 +143,7 @@ def test_equalize_ubyte():
 
 
 def test_equalize_float():
-    img = skimage.img_as_float(test_img)
+    img = util.img_as_float(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
@@ -72,7 +151,7 @@ def test_equalize_float():
 
 
 def test_equalize_masked():
-    img = skimage.img_as_float(test_img)
+    img = util.img_as_float(test_img)
     mask = np.zeros(test_img.shape)
     mask[50:150, 50:250] = 1
     img_mask_eq = exposure.equalize_hist(img, mask=mask)
@@ -194,12 +273,11 @@ def test_rescale_uint14_limits():
 def test_adapthist_grayscale():
     """Test a grayscale float image
     """
-    img = skimage.img_as_float(data.astronaut())
+    img = util.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    with expected_warnings(['precision loss|non-contiguous input']):
-        adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
-                                              clip_limit=0.01, nbins=128)
+    adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
+                                          clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 102.078, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
@@ -208,18 +286,17 @@ def test_adapthist_grayscale():
 def test_adapthist_color():
     """Test an RGB color uint16 image
     """
-    img = skimage.img_as_uint(data.astronaut())
+    img = util.img_as_uint(data.astronaut())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
         assert len(w) > 0
-    with expected_warnings(['precision loss']):
-        adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
+    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
 
     assert adapted.min() == 0
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
-    full_scale = skimage.exposure.rescale_intensity(img)
+    full_scale = exposure.rescale_intensity(img)
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 1)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.02, 2)
     return data, adapted
@@ -228,14 +305,13 @@ def test_adapthist_color():
 def test_adapthist_alpha():
     """Test an RGBA color image
     """
-    img = skimage.img_as_float(data.astronaut())
+    img = util.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
-    with expected_warnings(['precision loss']):
-        adapted = exposure.equalize_adapthist(img)
+    adapted = exposure.equalize_adapthist(img)
     assert adapted.shape != img.shape
     img = img[:, :, :3]
-    full_scale = skimage.exposure.rescale_intensity(img)
+    full_scale = exposure.rescale_intensity(img)
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 2)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
@@ -256,8 +332,8 @@ def peak_snr(img1, img2):
     """
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
-    img1 = skimage.img_as_float(img1)
-    img2 = skimage.img_as_float(img2)
+    img1 = util.img_as_float(img1)
+    img2 = util.img_as_float(img2)
     mse = 1. / img1.size * np.square(img1 - img2).sum()
     _, max_ = dtype_range[img1.dtype.type]
     return 20 * np.log(max_ / mse)
@@ -478,3 +554,17 @@ def test_is_low_contrast():
     image = (image.astype(np.uint16)) * 2**8
     assert exposure.is_low_contrast(image)
     assert not exposure.is_low_contrast(image, upper_percentile=100)
+
+
+# Test Dask Compatibility
+# =======================
+
+def test_dask_histogram():
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    dask_array = da.from_array(np.array([[0, 1], [1, 2]]), chunks=(1, 2))
+    output_hist, output_bins = exposure.histogram(dask_array)
+    expected_bins = [0, 1, 2]
+    expected_hist = [1, 2, 1]
+    assert np.allclose(expected_bins, output_bins)
+    assert np.allclose(expected_hist, output_hist)

@@ -11,8 +11,7 @@ __all__ = ['imread', 'imsave', 'imshow', 'show',
            'imread_collection', 'imshow_collection']
 
 
-def imread(fname, as_gray=False, plugin=None, flatten=None,
-           **plugin_args):
+def imread(fname, as_gray=False, plugin=None, **plugin_args):
     """Load an image from file.
 
     Parameters
@@ -32,8 +31,6 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
     ----------------
     plugin_args : keywords
         Passed to the given plugin.
-    flatten : bool
-        Backward compatible keyword, superseded by `as_gray`.
 
     Returns
     -------
@@ -43,16 +40,6 @@ def imread(fname, as_gray=False, plugin=None, flatten=None,
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
-    if 'as_grey' in plugin_args.keys():
-        as_gray = plugin_args.pop('as_grey', as_gray)
-        warn('`as_grey` has been deprecated in favor of `as_gray`')
-
-    # Backward compatibility
-    if flatten is not None:
-        as_gray = flatten
-        warn('`flatten` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
-
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
@@ -104,7 +91,7 @@ def imread_collection(load_pattern, conserve_memory=True,
                        plugin=plugin, **plugin_args)
 
 
-def imsave(fname, arr, plugin=None, **plugin_args):
+def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     """Save an image to file.
 
     Parameters
@@ -113,11 +100,13 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Target filename.
     arr : ndarray of shape (M,N) or (M,N,3) or (M,N,4)
         Image data.
-    plugin : str
+    plugin : str, optional
         Name of plugin to use.  By default, the different plugins are
         tried (starting with imageio) until a suitable
         candidate is found.  If not given and fname is a tiff file, the
         tifffile plugin will be used.
+    check_contrast : bool, optional
+        Check for low contrast and print warning (default: True).
 
     Other parameters
     ----------------
@@ -135,7 +124,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     if plugin is None and hasattr(fname, 'lower'):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
-    if is_low_contrast(arr):
+    if check_contrast and is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
     if arr.dtype == bool:
         warn('%s is a boolean image: setting True to 1 and False to 0' % fname)

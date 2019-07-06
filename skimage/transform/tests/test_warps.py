@@ -231,19 +231,13 @@ def test_rescale_multichannel_multiscale():
 
 
 def test_rescale_multichannel_defaults():
-    # ensure multichannel=None matches the previous default behaviour
-
-    # 2D: multichannel should default to False
     x = np.zeros((8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
     assert_equal(scaled.shape, (16, 6))
 
-    # 3D: multichannel should default to True
     x = np.zeros((8, 8, 3), dtype=np.double)
-    with expected_warnings(['multichannel']):
-        scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
-    assert_equal(scaled.shape, (16, 16, 3))
+    scaled = rescale(x, 2, order=0, anti_aliasing=False, mode='constant')
+    assert_equal(scaled.shape, (16, 16, 6))
 
 
 def test_resize2d():
@@ -402,6 +396,23 @@ def test_downsize_anti_aliasing():
     assert_equal(scaled[3:, :].sum(), 0)
     assert_equal(scaled[:, 3:].sum(), 0)
 
+    sigma = 0.125
+    out_size = (5, 5)
+    resize(x, out_size, order=1, mode='constant',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='edge',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='symmetric',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='reflect',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='wrap',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+
+    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
+        resize(x, out_size, order=1, mode='non-existent',
+               anti_aliasing=True, anti_aliasing_sigma=sigma)
+
 
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.double)
@@ -477,17 +488,32 @@ def test_slow_warp_nonint_oshape():
 def test_keep_range():
     image = np.linspace(0, 2, 25).reshape(5, 5)
     out = rescale(image, 2, preserve_range=False, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image, 2, preserve_range=True, clip=True, order=0,
-                  mode='constant', multichannel='False', anti_aliasing=False)
+                  mode='constant', multichannel=False, anti_aliasing=False)
     assert out.min() == 0
     assert out.max() == 2
 
     out = rescale(image.astype(np.uint8), 2, preserve_range=False,
-                  mode='constant', multichannel='False', anti_aliasing=False,
+                  mode='constant', multichannel=False, anti_aliasing=False,
                   clip=True, order=0)
     assert out.min() == 0
     assert out.max() == 2 / 255.0
+
+
+def test_zero_image_size():
+    with testing.raises(ValueError):
+        warp(np.zeros(0),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((0, 10)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 0)),
+             SimilarityTransform())
+    with testing.raises(ValueError):
+        warp(np.zeros((10, 10, 0)),
+             SimilarityTransform())

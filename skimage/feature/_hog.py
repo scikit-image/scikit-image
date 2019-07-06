@@ -1,6 +1,5 @@
 import numpy as np
 from . import _hoghistogram
-from .._shared.utils import skimage_deprecation, warn
 
 
 def _hog_normalize_block(block, method, eps=1e-5):
@@ -45,7 +44,7 @@ def _hog_channel_gradient(channel):
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
-        block_norm=None, visualize=False, visualise=None, transform_sqrt=False,
+        block_norm='L2-Hys', visualize=False, transform_sqrt=False,
         feature_vector=True, multichannel=None):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
@@ -71,7 +70,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         Block normalization method:
 
         ``L1``
-           Normalization using L1-norm. (default)
+           Normalization using L1-norm.
         ``L1-sqrt``
            Normalization using L1-norm, followed by square root.
         ``L2``
@@ -79,7 +78,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
         ``L2-Hys``
            Normalization using L2-norm, followed by limiting the
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
-           renormalization using L2-norm.
+           renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
 
     visualize : bool, optional
@@ -109,18 +108,18 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+    .. [1] https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
 
     .. [2] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
            Human Detection, IEEE Computer Society Conference on Computer
            Vision and Pattern Recognition 2005 San Diego, CA, USA,
            https://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf,
-           DOI:10.1109/CVPR.2005.177
+           :DOI:`10.1109/CVPR.2005.177`
 
     .. [3] Lowe, D.G., Distinctive image features from scale-invatiant
            keypoints, International Journal of Computer Vision (2004) 60: 91,
            http://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf,
-           DOI:10.1023/B:VISI.0000029664.99615.94
+           :DOI:`10.1023/B:VISI.0000029664.99615.94`
 
     .. [4] Dalal, N, Finding People in Images and Videos,
            Human-Computer Interaction [cs.HC], Institut National Polytechnique
@@ -140,14 +139,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     ``True``, the function computes the square root of each color channel
     and then applies the hog algorithm to the image.
     """
-
-    if block_norm is None:
-        block_norm = 'L1'
-        warn('Default value of `block_norm`==`L1` is deprecated and will '
-             'be changed to `L2-Hys` in v0.15. To supress this message '
-             'specify explicitly the normalization method.',
-             skimage_deprecation)
-
     image = np.atleast_2d(image)
 
     if multichannel is None:
@@ -241,10 +232,6 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     # now compute the histogram for each cell
     hog_image = None
 
-    if visualise is not None:
-        visualize = visualise
-        warn('Argument `visualise` is deprecated and will '
-             'be changed to `visualize` in v0.16', skimage_deprecation)
     if visualize:
         from .. import draw
 

@@ -35,11 +35,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import cython
 import numpy as np
-import heap
+from . import heap
 from .._shared.utils import warn
 
 cimport numpy as cnp
-cimport heap
+from . cimport heap
 
 OFFSET_D = np.int8
 OFFSETS_INDEX_D = np.int16
@@ -602,7 +602,7 @@ cdef class MCP:
                 # If we have already found the best path here then
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
-                    # Give subclass the oportunity to examine these two nodes
+                    # Give subclass the opportunity to examine these two nodes
                     # Note that only when both nodes are "frozen" their
                     # cumulative cost is set. By doing the check here, each
                     # pair of nodes is checked exactly once.

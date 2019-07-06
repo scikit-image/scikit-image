@@ -16,23 +16,23 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         Binary descriptors of size P about M keypoints in the first image.
     descriptors2 : (N, P) array
         Binary descriptors of size P about N keypoints in the second image.
-    metric : {'euclidean', 'cityblock', 'minkowski', 'hamming', ...}
+    metric : {'euclidean', 'cityblock', 'minkowski', 'hamming', ...} , optional
         The metric to compute the distance between two descriptors. See
         `scipy.spatial.distance.cdist` for all possible types. The hamming
         distance should be used for binary descriptors. By default the L2-norm
         is used for all descriptors of dtype float or double and the Hamming
         distance is used for binary descriptors automatically.
-    p : int
+    p : int, optional
         The p-norm to apply for ``metric='minkowski'``.
-    max_distance : float
+    max_distance : float, optional
         Maximum allowed distance between descriptors of two keypoints
         in separate images to be regarded as a match.
-    cross_check : bool
+    cross_check : bool, optional
         If True, the matched keypoints are returned after cross checking i.e. a
         matched pair (keypoint1, keypoint2) is returned if keypoint2 is the
         best match for keypoint1 in second image and keypoint1 is the best
         match for keypoint2 in first image.
-    max_ratio : float
+    max_ratio : float, optional
         Maximum ratio of distances between first and second closest descriptor
         in the second set of descriptors. This threshold is useful to filter
         ambiguous matches between the two descriptor sets. The choice of this
@@ -59,7 +59,12 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         else:
             metric = 'euclidean'
 
-    distances = cdist(descriptors1, descriptors2, metric=metric, p=p)
+    kwargs = {}
+    # Scipy raises an error if p is passed as an extra argument when it isn't
+    # necessary for the chosen metric.
+    if metric == 'minkowski':
+        kwargs['p'] = p
+    distances = cdist(descriptors1, descriptors2, metric=metric, **kwargs)
 
     indices1 = np.arange(descriptors1.shape[0])
     indices2 = np.argmin(distances, axis=1)

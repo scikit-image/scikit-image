@@ -1,12 +1,31 @@
+import itertools
 import scipy.stats
 import numpy as np
 from math import ceil
 from .. import img_as_float
-from ..restoration._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
+from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import warn
 import pywt
 import skimage.color as color
 import numbers
+
+
+def _gaussian_weight(sigma_sqr, value, *, dtype=float):
+    return np.exp(-0.5 * value * value / sigma_sqr, dtype=dtype)
+
+
+def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
+    values = np.linspace(0, max_value / bins, bins, endpoint=False)
+    color_lut = _gaussian_weight(sigma**2, values, dtype=dtype)
+    return color_lut
+
+
+def _compute_range_lut(win_size, sigma, *, dtype=float):
+    grid_points = np.arange(-win_size, win_size + 1)
+    rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
+    d = np.hypot(rr, cc)
+    range_lut = _gaussian_weight(sigma**2, d, dtype=dtype).ravel()
+    return range_lut
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
@@ -62,7 +81,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
     References
     ----------
-    .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+    .. [1] https://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
 
     Examples
     --------
@@ -109,8 +128,44 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     if win_size is None:
         win_size = max(5, 2 * int(ceil(3 * sigma_spatial)) + 1)
 
-    return _denoise_bilateral(image, win_size, sigma_color, sigma_spatial,
-                              bins, mode, cval)
+    min_value = image.min()
+    max_value = image.max()
+
+    if min_value == max_value:
+        return image
+
+    # if image.max() is 0, then dist_scale can have an unverified value
+    # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
+    # so we verify we have a positive image and that the max is not 0.0.
+    if min_value < 0.0:
+        raise ValueError("Image must contain only positive values")
+
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
+
+    sigma_color = sigma_color or image.std()
+
+    color_lut = _compute_color_lut(bins, sigma_color, max_value,
+                                   dtype=image.dtype)
+
+    range_lut = _compute_range_lut(win_size, sigma_spatial, dtype=image.dtype)
+
+    out = np.empty(image.shape, dtype=image.dtype)
+
+    dims = image.shape[2]
+
+    # There are a number of arrays needed in the Cython function.
+    # It's easier to allocate them outside of Cython so that all
+    # arrays are in the same type, then just copy the empty array
+    # where needed within Cython.
+    empty_dims = np.empty(dims, dtype=image.dtype)
+
+    return _denoise_bilateral(image, image.max(), win_size, sigma_color,
+                              sigma_spatial, bins, mode, cval, color_lut,
+                              range_lut, empty_dims, out)
 
 
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
@@ -147,17 +202,29 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Total_variation_denoising
+    .. [1] https://en.wikipedia.org/wiki/Total_variation_denoising
     .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
            Regularized Problems",
            ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
-           http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
-    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+           https://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] https://web.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
-    return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
+    image = np.atleast_3d(img_as_float(image))
+    image = np.ascontiguousarray(image)
+
+    rows = image.shape[0]
+    cols = image.shape[1]
+    dims = image.shape[2]
+
+    shape_ext = (rows + 2, cols + 2, dims)
+
+    out = np.zeros(shape_ext, image.dtype)
+    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+                        isotropic, out)
+    return np.squeeze(out[1:-1, 1:-1])
 
 
 def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
@@ -278,7 +345,7 @@ def denoise_tv_chambolle(image, weight=0.1, eps=2.e-4, n_iter_max=200,
     Make sure to set the multichannel parameter appropriately for color images.
 
     The principle of total variation denoising is explained in
-    http://en.wikipedia.org/wiki/Total_variation_denoising
+    https://en.wikipedia.org/wiki/Total_variation_denoising
 
     The principle of total variation denoising is to minimize the
     total variation of the image, which can be roughly described as
@@ -362,7 +429,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
     """
     # Consider regions with detail coefficients exactly zero to be masked out
     detail_coeffs = detail_coeffs[np.nonzero(detail_coeffs)]
@@ -421,10 +488,10 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     """
     wavelet = pywt.Wavelet(wavelet)
@@ -574,10 +641,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     .. [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
            thresholding for image denoising and compression." Image Processing,
            IEEE Transactions on 9.9 (2000): 1532-1546.
-           DOI: 10.1109/83.862633
+           :DOI:`10.1109/83.862633`
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-           DOI: 10.1093/biomet/81.3.425
+           :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------
@@ -665,7 +732,7 @@ def estimate_sigma(image, average_sigmas=False, multichannel=False):
     ----------
     .. [1] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
        by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
-       DOI:10.1093/biomet/81.3.425
+       :DOI:`10.1093/biomet/81.3.425`
 
     Examples
     --------

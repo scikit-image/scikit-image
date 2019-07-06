@@ -111,7 +111,7 @@ def test_rag_error():
     labels[5:, :] = 1
     with testing.raises(ValueError):
         graph.rag_mean_color(img, labels,
-                             2, 'non existant mode')
+                             2, 'non existent mode')
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -215,8 +215,8 @@ def test_rag_boundary():
     labels[8:, 8:] = 4
 
     g = graph.rag_boundary(labels, edge_map, connectivity=1)
-    assert set(g.nodes()) == set([1, 2, 3, 4])
-    assert set(g.edges()) == set([(1, 2), (1, 3), (2, 4), (3, 4)])
+    assert set(g.nodes()) == {1, 2, 3, 4}
+    assert set(g.edges()) == {(1, 2), (1, 3), (2, 4), (3, 4)}
     assert g[1][3]['weight'] == 0.25
     assert g[2][4]['weight'] == 0.34375
     assert g[1][3]['count'] == 16

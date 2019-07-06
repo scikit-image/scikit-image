@@ -5,7 +5,6 @@
 import numpy as np
 
 cimport numpy as cnp
-cimport cython
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdlib cimport abs
@@ -343,7 +342,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Increase the parameter to extract longer lines.
     line_gap : int
         Maximum gap between pixels to still form a line.
-        Increase the parameter to merge broken lines more aggresively.
+        Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype=double
         Angles at which to compute the transform, in radians.
     seed : int, optional
@@ -529,7 +528,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 lines[nlines, 1, 0] = line_end[2]
                 lines[nlines, 1, 1] = line_end[3]
                 nlines += 1
-                if nlines > lines_max:
+                if nlines >= lines_max:
                     break
 
     PyMem_Free(line_end)

@@ -1,5 +1,5 @@
 # See "Writing benchmarks" in the asv docs for more information.
-# http://asv.readthedocs.io/en/latest/writing_benchmarks.html
+# https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 
 from skimage import data, img_as_float
@@ -24,3 +24,7 @@ class ExposureSuite:
     def time_rescale_intensity(self):
         result = exposure.rescale_intensity(self.image,
                                             in_range=(self.p2, self.p98))
+    def time_histogram(self):
+        # Running it 10 times to achieve significant performance time.
+        for i in range(10):
+            result = exposure.histogram(self.image)

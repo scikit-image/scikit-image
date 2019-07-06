@@ -18,8 +18,10 @@ class PaintTool(CanvasToolBase):
         Skimage viewer or plot plugin object.
     overlay_shape : shape tuple
         2D shape tuple used to initialize overlay image.
+    radius : int
+        The size of the paint cursor.
     alpha : float (between [0, 1])
-        Opacity of overlay
+        Opacity of overlay.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -69,7 +71,7 @@ class PaintTool(CanvasToolBase):
         self.alpha = alpha
         self.cmap = LABELS_CMAP
         self._overlay_plot = None
-        self.shape = overlay_shape
+        self.shape = overlay_shape[:2]
 
         self._cursor = plt.Rectangle((0, 0), 0, 0, **props)
         self._cursor.set_visible(False)
@@ -118,7 +120,8 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.NoNorm(), animated=True)
+                         norm=mcolors.NoNorm(vmin=0, vmax=self.cmap.N),
+                         animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)

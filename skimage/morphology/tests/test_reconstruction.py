@@ -108,3 +108,34 @@ def test_invalid_method():
     mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
     with testing.raises(ValueError):
         reconstruction(seed, mask, method='foo')
+
+
+def test_invalid_offset_not_none():
+    """Test reconstruction with invalid not None offset parameter"""
+    image = np.array([[1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 2, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [1, 1, 1, 1, 1, 1, 3, 1],
+                      [1, 1, 1, 1, 1, 1, 1, 1]])
+
+    mask = np.array([[4, 4, 4, 1, 1, 1, 1, 1],
+                     [4, 4, 4, 1, 1, 1, 1, 1],
+                     [4, 4, 4, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 4, 4, 4],
+                     [1, 1, 1, 1, 1, 4, 4, 4],
+                     [1, 1, 1, 1, 1, 4, 4, 4]])
+    with testing.raises(ValueError):
+        reconstruction(image, mask, method='dilation',
+                       selem=np.ones((3, 3)), offset=np.array([3, 0]))
+
+
+def test_offset_not_none():
+    """Test reconstruction with valid offset parameter"""
+    seed = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    mask = np.array([0, 8, 6, 8, 8, 8, 8, 4, 4, 0])
+    expected = np.array([0, 3, 6, 6, 6, 6, 6, 4, 4, 0])
+
+    assert_array_almost_equal(
+        reconstruction(seed, mask, method='dilation',
+                       selem=np.ones(3), offset=np.array([0])), expected)

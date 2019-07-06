@@ -1,25 +1,16 @@
 from math import sqrt, atan2, pi as PI
-import itertools
-from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
 from ._label import label
 from . import _moments
 
-
 from functools import wraps
+
 
 __all__ = ['regionprops', 'perimeter']
 
 
-XY_TO_RC_DEPRECATION_MESSAGE = (
-    'regionprops and image moments (including moments, normalized moments, '
-    'central moments, and inertia tensor) of 2D images will change from xy '
-    'coordinates to rc coordinates in version 0.16.\nSee '
-    'http://scikit-image.org/docs/0.14.x/release_notes_and_installation.html#deprecations '
-    'for details on how to avoid this message.'
-)
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
                     [0, 1, 0]], dtype=np.uint8)
@@ -99,12 +90,12 @@ class _RegionProperties(object):
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, coordinates):
+                 cache_active):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
                 raise ValueError('Label and intensity image must have the'
-                                 'same shape.')
+                                 ' same shape.')
 
         self.label = label
 
@@ -116,21 +107,6 @@ class _RegionProperties(object):
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
-        # Note: in PR 2603, we added support for nD moments in regionprops.
-        # Many properties used xy coordinates, instead of rc. This attribute
-        # helps with the deprecation process and should be removed in 0.16.
-        if label_image.ndim > 2 or coordinates == 'rc':
-            self._use_xy_warning = False
-            self._transpose_moments = False
-        elif coordinates == 'xy':
-            self._use_xy_warning = False  # don't warn if 'xy' given explicitly
-            self._transpose_moments = True
-        elif coordinates is None:
-            self._use_xy_warning = True
-            self._transpose_moments = True
-        else:
-            raise ValueError('Incorrect value for regionprops coordinates: %s.'
-                             ' Possible values are: "rc", "xy", or None')
 
     @_cached
     def area(self):
@@ -221,8 +197,6 @@ class _RegionProperties(object):
 
     def local_centroid(self):
         M = self.moments
-        if self._transpose_moments:
-            M = M.T
         return tuple(M[tuple(np.eye(self._ndim, dtype=int))] /
                      M[(0,) * self._ndim])
 
@@ -246,20 +220,12 @@ class _RegionProperties(object):
     @_cached
     def moments(self):
         M = _moments.moments(self.image.astype(np.uint8), 3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            M = M.T
         return M
 
     @_cached
     def moments_central(self):
         mu = _moments.moments_central(self.image.astype(np.uint8),
                                       self.local_centroid, order=3)
-        if self._use_xy_warning:
-            warn(XY_TO_RC_DEPRECATION_MESSAGE)
-        if self._transpose_moments:
-            mu = mu.T
         return mu
 
     @only2d
@@ -279,7 +245,7 @@ class _RegionProperties(object):
             else:
                 return PI / 4.
         else:
-            return -0.5 * atan2(-2 * b, (a - c))
+            return 0.5 * atan2(-2 * b, c - a)
 
     @only2d
     def perimeter(self):
@@ -339,7 +305,7 @@ class _RegionProperties(object):
         value = getattr(self, key, None)
         if value is not None:
             return value
-        else:  # backwards compatability
+        else:  # backwards compatibility
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
@@ -357,8 +323,7 @@ class _RegionProperties(object):
         return True
 
 
-def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+def regionprops(label_image, intensity_image=None, cache=True):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -379,9 +344,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-    coordinates : 'rc' or 'xy', optional
-        Coordinate conventions for 2D images. (Only 'rc' coordinates are
-        supported for 3D images.)
 
     Returns
     -------
@@ -394,7 +356,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     The following properties can be accessed as attributes or keys:
 
     **area** : int
-        Number of pixels of region.
+        Number of pixels of the region.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
@@ -404,7 +366,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid** : array
         Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
-        Number of pixels of convex hull image.
+        Number of pixels of convex hull image, which is the smallest convex
+        polygon that encloses the region.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
@@ -424,7 +387,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
     **filled_area** : int
-        Number of pixels of filled region.
+        Number of pixels of the region will all the holes filled in. Describes
+        the area of the filled_image.
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
@@ -456,28 +420,28 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
-            m_ji = sum{ array(x, y) * x^j * y^i }
+            m_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `x`, `y` coordinates of the region.
+        where the sum is over the `row`, `col` coordinates of the region.
     **moments_central** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
-            mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's centroid.
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's centroid.
     **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
     **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
-            nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
+            nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
     **orientation** : float
-        Angle between the X-axis and the major axis of the ellipse that has
-        the same second-moments as the region. Ranging from `-pi/2` to
-        `pi/2` in counter-clockwise direction.
+        Angle between the 0th axis (rows) and the major
+        axis of the ellipse that has the same second moments as the region,
+        ranging from `-pi/2` to `pi/2` counter-clockwise.
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
@@ -494,17 +458,17 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
-            wm_ji = sum{ array(x, y) * x^j * y^i }
+            wm_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `x`, `y` coordinates of the region.
+        where the sum is over the `row`, `col` coordinates of the region.
     **weighted_moments_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
-            wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's weighted
+        where the sum is over the `row`, `col` coordinates of the region,
+        and `row_c` and `col_c` are the coordinates of the region's weighted
         centroid.
     **weighted_moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
@@ -513,7 +477,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
-            wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
+            wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
 
@@ -535,7 +499,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -569,7 +533,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache, coordinates=coordinates)
+                                  cache)
         regions.append(props)
 
     return regions
@@ -580,10 +544,12 @@ def perimeter(image, neighbourhood=4):
 
     Parameters
     ----------
-    image : array
-        Binary image.
+    image : (N, M) ndarray
+        2D binary image.
     neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination.
+        Neighborhood connectivity for border pixel determination. It is used to
+        compute the contour. A higher neighbourhood widens the border on which
+        the perimeter is computed.
 
     Returns
     -------
@@ -595,7 +561,23 @@ def perimeter(image, neighbourhood=4):
     .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> # coins image (binary)
+    >>> img_coins = data.coins() > 110
+    >>> # total perimeter of all objects in the image
+    >>> perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    7796.867...
+    >>> perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    8806.268...
+
     """
+    if image.ndim != 2:
+        raise NotImplementedError('`perimeter` supports 2D images only')
+
     if neighbourhood == 4:
         strel = STREL_4
     else:
@@ -627,10 +609,10 @@ def _parse_docs():
     import re
     import textwrap
 
-    doc = regionprops.__doc__
-    matches = re.finditer('\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
+    doc = regionprops.__doc__ or ''
+    matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
                           doc, flags=re.DOTALL)
-    prop_doc = dict((m.group(1), textwrap.dedent(m.group(2))) for m in matches)
+    prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
 
@@ -644,4 +626,6 @@ def _install_properties_docs():
         setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
 
 
-_install_properties_docs()
+if __debug__:
+    # don't install docstrings when in optimized/non-debug mode
+    _install_properties_docs()

@@ -10,7 +10,7 @@ from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    Py_ssize_t* histo,
                                    double pop, dtype_t g,
-                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                   Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                    double p0, double p1,
                                    Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -19,13 +19,13 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
     if pop:
         sum = 0
         p1 = 1.0 - p1
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if sum > p0 * pop:
                 imin = i
                 break
         sum = 0
-        for i in range(max_bin - 1, -1, -1):
+        for i in range(n_bins - 1, -1, -1):
             sum += histo[i]
             if sum > p1 * pop:
                 imax = i
@@ -33,7 +33,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
 
         delta = imax - imin
         if delta > 0:
-            out[0] = <dtype_t_out>((max_bin - 1) * (_min(_max(imin, g), imax)
+            out[0] = <dtype_t_out>((n_bins - 1) * (_min(_max(imin, g), imax)
                                            - imin) / delta)
         else:
             out[0] = <dtype_t_out>(imax - imin)
@@ -44,7 +44,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
                                   Py_ssize_t* histo,
                                   double pop, dtype_t g,
-                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                  Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                   double p0, double p1,
                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -53,13 +53,13 @@ cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
     if pop:
         sum = 0
         p1 = 1.0 - p1
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if sum >= p0 * pop:
                 imin = i
                 break
         sum = 0
-        for i in range(max_bin - 1, -1, -1):
+        for i in range(n_bins - 1, -1, -1):
             sum += histo[i]
             if sum >= p1 * pop:
                 imax = i
@@ -73,7 +73,7 @@ cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t* histo,
                               double pop, dtype_t g,
-                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               double p0, double p1,
                               Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -83,7 +83,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
         sum = 0
         mean = 0
         n = 0
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if (sum >= p0 * pop) and (sum <= p1 * pop):
                 n += histo[i]
@@ -99,7 +99,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t* histo,
                              double pop, dtype_t g,
-                             Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                             Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,
                              Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -109,7 +109,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
         sum = 0
         sum_g = 0
         n = 0
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if (sum >= p0 * pop) and (sum <= p1 * pop):
                 n += histo[i]
@@ -125,7 +125,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
                                        Py_ssize_t* histo,
                                        double pop, dtype_t g,
-                                       Py_ssize_t max_bin,
+                                       Py_ssize_t n_bins,
                                        Py_ssize_t mid_bin, double p0,
                                        double p1, Py_ssize_t s0,
                                        Py_ssize_t s1) nogil:
@@ -136,7 +136,7 @@ cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
         sum = 0
         mean = 0
         n = 0
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if (sum >= p0 * pop) and (sum <= p1 * pop):
                 n += histo[i]
@@ -153,7 +153,7 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
                                           Py_ssize_t odepth,
                                           Py_ssize_t* histo, double pop,
                                           dtype_t g,
-                                          Py_ssize_t max_bin,
+                                          Py_ssize_t n_bins,
                                           Py_ssize_t mid_bin, double p0,
                                           double p1, Py_ssize_t s0,
                                           Py_ssize_t s1) nogil:
@@ -163,13 +163,13 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
     if pop:
         sum = 0
         p1 = 1.0 - p1
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if sum > p0 * pop:
                 imin = i
                 break
         sum = 0
-        for i in range(max_bin - 1, -1, -1):
+        for i in range(n_bins - 1, -1, -1):
             sum += histo[i]
             if sum > p1 * pop:
                 imax = i
@@ -189,7 +189,7 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
 cdef inline void _kernel_percentile(dtype_t_out* out, Py_ssize_t odepth,
                                     Py_ssize_t* histo,
                                     double pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                    Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                     double p0, double p1,
                                     Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -198,11 +198,11 @@ cdef inline void _kernel_percentile(dtype_t_out* out, Py_ssize_t odepth,
 
     if pop:
         if p0 == 1:  # make sure p0 = 1 returns the maximum filter
-            for i in range(max_bin - 1, -1, -1):
+            for i in range(n_bins - 1, -1, -1):
                 if histo[i]:
                     break
         else:
-            for i in range(max_bin):
+            for i in range(n_bins):
                 sum += histo[i]
                 if sum > p0 * pop:
                     break
@@ -214,7 +214,7 @@ cdef inline void _kernel_percentile(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t* histo,
                              double pop, dtype_t g,
-                             Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                             Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,
                              Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -223,7 +223,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
     if pop:
         sum = 0
         n = 0
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if (sum >= p0 * pop) and (sum <= p1 * pop):
                 n += histo[i]
@@ -235,7 +235,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
                                    Py_ssize_t* histo,
                                    double pop, dtype_t g,
-                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                   Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                    double p0, double p1,
                                    Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -243,12 +243,12 @@ cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
     cdef Py_ssize_t sum = 0
 
     if pop:
-        for i in range(max_bin):
+        for i in range(n_bins):
             sum += histo[i]
             if sum >= p0 * pop:
                 break
 
-        out[0] = <dtype_t_out>((max_bin - 1) * (g >= i))
+        out[0] = <dtype_t_out>((n_bins - 1) * (g >= i))
     else:
         out[0] = <dtype_t_out>0
 
@@ -258,10 +258,10 @@ def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, double p0, double p1,
-               Py_ssize_t max_bin):
+               Py_ssize_t n_bins):
 
     _core(_kernel_autolevel[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _gradient(dtype_t[:, ::1] image,
@@ -269,10 +269,10 @@ def _gradient(dtype_t[:, ::1] image,
               char[:, ::1] mask,
               dtype_t_out[:, :, ::1] out,
               signed char shift_x, signed char shift_y, double p0, double p1,
-              Py_ssize_t max_bin):
+              Py_ssize_t n_bins):
 
     _core(_kernel_gradient[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _mean(dtype_t[:, ::1] image,
@@ -280,10 +280,10 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, double p0, double p1,
-          Py_ssize_t max_bin):
+          Py_ssize_t n_bins):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _sum(dtype_t[:, ::1] image,
@@ -291,10 +291,10 @@ def _sum(dtype_t[:, ::1] image,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, double p0, double p1,
-         Py_ssize_t max_bin):
+         Py_ssize_t n_bins):
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _subtract_mean(dtype_t[:, ::1] image,
@@ -302,10 +302,10 @@ def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] mask,
                    dtype_t_out[:, :, ::1] out,
                    signed char shift_x, signed char shift_y, double p0, double p1,
-                   Py_ssize_t max_bin):
+                   Py_ssize_t n_bins):
 
     _core(_kernel_subtract_mean[dtype_t_out, dtype_t], image, selem, mask,
-          out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          out, shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _enhance_contrast(dtype_t[:, ::1] image,
@@ -313,10 +313,10 @@ def _enhance_contrast(dtype_t[:, ::1] image,
                       char[:, ::1] mask,
                       dtype_t_out[:, :, ::1] out,
                       signed char shift_x, signed char shift_y, double p0, double p1,
-                      Py_ssize_t max_bin):
+                      Py_ssize_t n_bins):
 
     _core(_kernel_enhance_contrast[dtype_t_out, dtype_t], image, selem, mask,
-          out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          out, shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _percentile(dtype_t[:, ::1] image,
@@ -324,10 +324,10 @@ def _percentile(dtype_t[:, ::1] image,
                 char[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
                 signed char shift_x, signed char shift_y, double p0, double p1,
-                Py_ssize_t max_bin):
+                Py_ssize_t n_bins):
 
     _core(_kernel_percentile[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, 1, 0, 0, max_bin)
+          shift_x, shift_y, p0, 1, 0, 0, n_bins)
 
 
 def _pop(dtype_t[:, ::1] image,
@@ -335,10 +335,10 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, double p0, double p1,
-         Py_ssize_t max_bin):
+         Py_ssize_t n_bins):
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, p1, 0, 0, max_bin)
+          shift_x, shift_y, p0, p1, 0, 0, n_bins)
 
 
 def _threshold(dtype_t[:, ::1] image,
@@ -346,7 +346,7 @@ def _threshold(dtype_t[:, ::1] image,
                char[:, ::1] mask,
                dtype_t_out[:, :, ::1] out,
                signed char shift_x, signed char shift_y, double p0, double p1,
-               Py_ssize_t max_bin):
+               Py_ssize_t n_bins):
 
     _core(_kernel_threshold[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, p0, 1, 0, 0, max_bin)
+          shift_x, shift_y, p0, 1, 0, 0, n_bins)

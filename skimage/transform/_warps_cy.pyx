@@ -151,16 +151,16 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     else:
         transform_func = _transform_projective
 
-    cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
-                               char, double) nogil
+    cdef void (*interp_func)(double*, Py_ssize_t , Py_ssize_t ,
+                             double, double, char, double, double*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation
+        interp_func = nearest_neighbour_interpolation[cnp.float64_t, double, double]
     elif order == 1:
-        interp_func = bilinear_interpolation
+        interp_func = bilinear_interpolation[cnp.float64_t, double, double]
     elif order == 2:
-        interp_func = biquadratic_interpolation
+        interp_func = biquadratic_interpolation[cnp.float64_t, double, double]
     elif order == 3:
-        interp_func = bicubic_interpolation
+        interp_func = bicubic_interpolation[cnp.float64_t, double, double]
     else:
         raise ValueError("Unsupported interpolation order", order)
 
@@ -168,7 +168,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         for tfr in range(out_r):
             for tfc in range(out_c):
                 transform_func(tfc, tfr, &M[0, 0], &c, &r)
-                out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
-                                            mode_c, cval)
+                interp_func(&img[0, 0], rows, cols, r, c,
+                            mode_c, cval, &out[tfr, tfc])
 
     return np.asarray(out)

@@ -6,7 +6,8 @@ from skimage import img_as_float
 from skimage import draw
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
-from skimage._shared.testing import test_parallel, expected_warnings
+from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 import pytest
 
@@ -70,9 +71,6 @@ def test_hessian_matrix():
                                        [0, 0, -2, 0, 0],
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  2, 0, 0]]))
-
-    matrix2d = np.random.rand(3, 3)
-    assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
 
 
 def test_hessian_matrix_3d():
@@ -168,9 +166,11 @@ def test_hessian_matrix_det_3d(im3d):
 
 
 def test_shape_index():
+    # software floating point arm doesn't raise a warning on divide by zero
+    # https://github.com/scikit-image/scikit-image/issues/3335
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    with expected_warnings(['divide by zero', 'invalid value']):
+    with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
         s = shape_index(square, sigma=0.1)
     assert_almost_equal(
         s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],

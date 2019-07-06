@@ -1,4 +1,4 @@
-"""
+r"""
 
 General Description
 -------------------
@@ -51,7 +51,7 @@ References
 import functools
 import numpy as np
 from scipy import ndimage as ndi
-from ... import img_as_ubyte
+from ...util import img_as_ubyte
 from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
@@ -67,6 +67,11 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     assert_nD(image, 2)
     if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
@@ -92,26 +97,29 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     is_8bit = image.dtype in (np.uint8, np.int8)
 
     if is_8bit:
-        max_bin = 255
+        n_bins = 256
     else:
-        max_bin = max(4, image.max())
+        # Convert to a Python int to avoid the potential overflow when we add
+        # 1 to the maximum of the image.
+        n_bins = int(max(3, image.max())) + 1
 
-    bitdepth = int(np.log2(max_bin))
-    if bitdepth > 10:
-        warn("Bitdepth of %d may result in bad rank filter "
-             "performance due to large number of bins." % bitdepth)
+    if n_bins > 2**10:
+        warn("Bad rank filter performance is expected due to a "
+             "large number of bins ({}), equivalent to an approximate "
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
 
-    return image, selem, out, mask, max_bin
+    return image, selem, out, mask, n_bins
 
 
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype)
+    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+                                                    out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
+         out=out, n_bins=n_bins)
 
     return out.reshape(out.shape[:2])
 
@@ -119,12 +127,12 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None, pixel_size=1):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype,
-                                                     pixel_size=pixel_size)
+    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+                                                    out_dtype,
+                                                    pixel_size=pixel_size)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
+         out=out, n_bins=n_bins)
 
     return out
 
@@ -511,6 +519,11 @@ def median(image, selem=None, out=None, mask=None,
     -------
     out : 2-D array (same dtype as input image)
         Output image.
+
+    See also
+    --------
+    skimage.filters.median : Implementation of a median filtering which handles
+        images with floating precision.
 
     Examples
     --------
@@ -934,7 +947,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] https://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Examples
     --------
@@ -978,7 +991,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Otsu's_method
+    .. [1] https://en.wikipedia.org/wiki/Otsu's_method
 
     Examples
     --------
@@ -1047,3 +1060,43 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.double,
                                    pixel_size=n_bins)
+
+
+def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Majority filter assign to each pixel the most occuring value within
+    its neighborhood.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8, uint16 array).
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters.rank import majority
+    >>> from skimage.morphology import disk
+    >>> img = data.camera()
+    >>> maj_img = majority(img, disk(5))
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._majority, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)

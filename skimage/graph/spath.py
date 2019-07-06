@@ -56,8 +56,9 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
     start_indices = np.insert(non_axis_indices, axis,
                               np.zeros(non_axis_shape), axis=0)
     starts = np.reshape(start_indices, (arr.ndim, non_axis_size), order='F').T
-    end_indices = np.insert(non_axis_indices, axis, -np.ones(non_axis_shape),
-                            axis=0)
+    end_indices = np.insert(non_axis_indices, axis,
+                            np.full(non_axis_shape, -1,
+                                    dtype=non_axis_indices.dtype), axis=0)
     ends = np.reshape(end_indices, (arr.ndim, non_axis_size), order='F').T
 
     # Find the minimum-cost path to one of the end-points

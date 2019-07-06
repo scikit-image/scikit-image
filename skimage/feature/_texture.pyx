@@ -7,20 +7,12 @@ cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
-import cython
 
 cdef extern from "numpy/npy_math.h":
     double NAN "NPY_NAN"
 
-ctypedef fused any_int:
-    cnp.uint8_t
-    cnp.uint16_t
-    cnp.uint32_t
-    cnp.uint64_t
-    cnp.int8_t
-    cnp.int16_t
-    cnp.int32_t
-    cnp.int64_t
+from .._shared.fused_numerics cimport np_anyint as any_int
+from .._shared.fused_numerics cimport np_real_numeric
 
 
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
@@ -48,7 +40,8 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
     """
 
     cdef:
-        Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
+        Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col, start_row,\
+                   end_row, start_col, end_col, offset_row, offset_col
         any_int i, j
         cnp.float64_t angle, distance
 
@@ -60,22 +53,21 @@ def _glcm_loop(any_int[:, ::1] image, double[:] distances,
             angle = angles[a_idx]
             for d_idx in range(distances.shape[0]):
                 distance = distances[d_idx]
-                for r in range(rows):
-                    for c in range(cols):
+                offset_row = round(sin(angle) * distance)
+                offset_col = round(cos(angle) * distance)
+                start_row = max(0, -offset_row)
+                end_row = min(rows, rows - offset_row)
+                start_col = max(0, -offset_col)
+                end_col = min(cols, cols - offset_col)
+                for r in range(start_row, end_row):
+                    for c in range(start_col, end_col):
                         i = image[r, c]
-
                         # compute the location of the offset pixel
-                        row = r + <int>round(sin(angle) * distance)
-                        col = c + <int>round(cos(angle) * distance)
-
-                        # make sure the offset is within bounds
-                        if row >= 0 and row < rows and \
-                           col >= 0 and col < cols:
-                            j = image[row, col]
-
-                            if i >= 0 and i < levels and \
-                               j >= 0 and j < levels:
-                                out[i, j, d_idx, a_idx] += 1
+                        row = r + offset_row
+                        col = c + offset_col
+                        j = image[row, col]
+                        if 0 <= i < levels and 0 <= j < levels:
+                            out[i, j, d_idx, a_idx] += 1
 
 
 cdef inline int _bit_rotate_right(int value, int length) nogil:
@@ -93,7 +85,7 @@ cdef inline int _bit_rotate_right(int value, int length) nogil:
 
 
 def _local_binary_pattern(double[:, ::1] image,
-                          int P, float R, char method='D'):
+                          int P, float R, char method=b'D'):
     """Gray scale and rotation invariant LBP (Local Binary Patterns).
 
     LBP is an invariant descriptor that can be used for texture classification.
@@ -153,9 +145,9 @@ def _local_binary_pattern(double[:, ::1] image,
         for r in range(image.shape[0]):
             for c in range(image.shape[1]):
                 for i in range(P):
-                    texture[i] = bilinear_interpolation(&image[0, 0], rows, cols,
-                                                        r + rp[i], c + cp[i],
-                                                        'C', 0)
+                    bilinear_interpolation[cnp.float64_t, double, double](
+                            &image[0, 0], rows, cols, r + rp[i], c + cp[i],
+                            b'C', 0, &texture[i])
                 # signed / thresholded texture
                 for i in range(P):
                     if texture[i] - image[r, c] >= 0:
@@ -165,8 +157,8 @@ def _local_binary_pattern(double[:, ::1] image,
 
                 lbp = 0
 
-                # if method == 'var':
-                if method == 'V':
+                # if method == b'var':
+                if method == b'V':
                     # Compute the variance without passing from numpy.
                     # Following the LBP paper, we're taking a biased estimate
                     # of the variance (ddof=0)
@@ -181,14 +173,14 @@ def _local_binary_pattern(double[:, ::1] image,
                         lbp = var_
                     else:
                         lbp = NAN
-                # if method == 'uniform':
-                elif method == 'U' or method == 'N':
+                # if method == b'uniform':
+                elif method == b'U' or method == b'N':
                     # determine number of 0 - 1 changes
                     changes = 0
                     for i in range(P - 1):
                         changes += (signed_texture[i]
                                     - signed_texture[i + 1]) != 0
-                    if method == 'N':
+                    if method == b'N':
                         # Uniform local binary patterns are defined as patterns
                         # with at most 2 value changes (from 0 to 1 or from 1 to
                         # 0). Uniform patterns can be characterized by their
@@ -258,12 +250,12 @@ def _local_binary_pattern(double[:, ::1] image,
                         else:
                             lbp = P + 1
                 else:
-                    # method == 'default'
+                    # method == b'default'
                     for i in range(P):
                         lbp += signed_texture[i] * weights[i]
 
-                    # method == 'ror'
-                    if method == 'R':
+                    # method == b'ror'
+                    if method == b'R':
                         # shift LBP P times to the right and get minimum value
                         rotation_chain[0] = <int>lbp
                         for i in range(1, P):
@@ -286,11 +278,11 @@ cdef:
     Py_ssize_t[::1] mlbp_c_offsets = np.asarray([-1, 0, 1, 1, 1, 0, -1, -1], dtype=np.intp)
 
 
-def _multiblock_lbp(float[:, ::1] int_image,
-                    Py_ssize_t r,
-                    Py_ssize_t c,
-                    Py_ssize_t width,
-                    Py_ssize_t height):
+cpdef int _multiblock_lbp(float[:, ::1] int_image,
+                          Py_ssize_t r,
+                          Py_ssize_t c,
+                          Py_ssize_t width,
+                          Py_ssize_t height) nogil:
     """Multi-block local binary pattern (MB-LBP) [1]_.
 
     Parameters
@@ -329,20 +321,11 @@ def _multiblock_lbp(float[:, ::1] int_image,
         Py_ssize_t r_shift = height - 1
         Py_ssize_t c_shift = width - 1
 
-        # Copy offset array to multiply it by width and height later.
-        Py_ssize_t[::1] r_offsets = mlbp_r_offsets.copy()
-        Py_ssize_t[::1] c_offsets = mlbp_c_offsets.copy()
-
         Py_ssize_t current_rect_r, current_rect_c
         Py_ssize_t element_num, i
         double current_rect_val
         int has_greater_value
         int lbp_code = 0
-
-    # Pre-multiply offsets with width and height.
-    for i in range(8):
-        r_offsets[i] = r_offsets[i]*height
-        c_offsets[i] = c_offsets[i]*width
 
     # Sum of intensity values of central rectangle.
     cdef float central_rect_val = integrate(int_image, central_rect_r, central_rect_c,
@@ -351,8 +334,8 @@ def _multiblock_lbp(float[:, ::1] int_image,
 
     for element_num in range(8):
 
-        current_rect_r = central_rect_r + r_offsets[element_num]
-        current_rect_c = central_rect_c + c_offsets[element_num]
+        current_rect_r = central_rect_r + mlbp_r_offsets[element_num]*height
+        current_rect_c = central_rect_c + mlbp_c_offsets[element_num]*width
 
 
         current_rect_val = integrate(int_image, current_rect_r, current_rect_c,

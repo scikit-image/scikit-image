@@ -3,7 +3,6 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 from libc.float cimport DBL_MAX
-from cpython cimport bool
 
 import numpy as np
 cimport numpy as cnp
@@ -226,7 +225,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     # new object with connected segments initialized to -1
     cdef Py_ssize_t[:, :, ::1] connected_segments \
-        = -1 * np.ones_like(segments, dtype=np.intp)
+        = np.full_like(segments, -1, dtype=np.intp)
 
     cdef Py_ssize_t current_new_label = 0
     cdef Py_ssize_t label = 0

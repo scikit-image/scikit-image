@@ -44,7 +44,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     References
     ----------
-    .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+    .. [1] https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
     ndim = image.ndim
@@ -56,7 +56,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
     if ndim == 2:
-        coords = possible_hull(image.astype(np.uint8))
+        coords = possible_hull(np.ascontiguousarray(image, dtype=np.uint8))
     else:
         coords = np.transpose(np.nonzero(image))
         if offset_coordinates:

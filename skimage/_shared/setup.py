@@ -13,9 +13,9 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('_shared', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['geometry.pyx'], working_path=base_path)
-    cython(['transform.pyx'], working_path=base_path)
-    cython(['interpolation.pyx'], working_path=base_path)
+    cython(['geometry.pyx',
+            'transform.pyx',
+            'interpolation.pyx'], working_path=base_path)
 
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage import restoration, data, color, img_as_float, measure
 from skimage.measure import compare_psnr
@@ -9,6 +10,21 @@ from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_warns, assert_)
 from skimage._shared._warnings import expected_warnings
+from distutils.version import LooseVersion as Version
+
+
+if (Version(np.__version__) >= '1.15.0' and
+        Version(pywt.__version__) <= '0.5.2'):
+    PYWAVELET_ND_INDEXING_WARNING = 'non-tuple sequence for multidimensional'
+else:
+    PYWAVELET_ND_INDEXING_WARNING = None
+
+try:
+    import dask
+except ImportError:
+    DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
+else:
+    DASK_NOT_INSTALLED_WARNING = None
 
 
 np.random.seed(1234)
@@ -174,6 +190,30 @@ def test_denoise_bilateral_2d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
+@pytest.mark.parametrize('dtype', [np.float32, np.double])
+def test_denoise_bilateral_types(dtype):
+    img = checkerboard_gray.copy()[:50, :50]
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1).astype(dtype)
+
+    # check that we can process multiple float types
+    out = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                        sigma_spatial=10, multichannel=False)
+
+
+@pytest.mark.parametrize('dtype', [np.float32, np.double])
+def test_denoise_bregman_types(dtype):
+    img = checkerboard_gray.copy()[:50, :50]
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1).astype(dtype)
+
+    # check that we can process multiple float types
+    out = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                        sigma_spatial=10, multichannel=False)
+
+
 def test_denoise_bilateral_zeros():
     img = np.zeros((10, 10))
     assert_equal(img, restoration.denoise_bilateral(img, multichannel=False))
@@ -226,7 +266,7 @@ def test_denoise_bilateral_nan():
     img = np.full((50, 50), np.NaN)
     # This is in fact an optional warning for our test suite.
     # Python 3.5 will not trigger a warning.
-    with expected_warnings(['invalid|\A\Z']):
+    with expected_warnings([r'invalid|\A\Z']):
         out = restoration.denoise_bilateral(img, multichannel=False)
     assert_equal(img, out)
 
@@ -342,17 +382,19 @@ def test_wavelet_denoising():
         noisy = np.clip(noisy, 0, 1)
 
         # Verify that SNR is improved when true sigma is used
-        denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                               multichannel=multichannel,
-                                               convert2ycbcr=convert2ycbcr)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
+                                                   multichannel=multichannel,
+                                                   convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
 
         # Verify that SNR is improved with internally estimated sigma
-        denoised = restoration.denoise_wavelet(noisy,
-                                               multichannel=multichannel,
-                                               convert2ycbcr=convert2ycbcr)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            denoised = restoration.denoise_wavelet(noisy,
+                                                   multichannel=multichannel,
+                                                   convert2ycbcr=convert2ycbcr)
         psnr_noisy = compare_psnr(img, noisy)
         psnr_denoised = compare_psnr(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
@@ -367,10 +409,12 @@ def test_wavelet_denoising():
         assert_(psnr_denoised_1 > psnr_noisy)
 
         # Test changing noise_std (higher threshold, so less energy in signal)
-        res1 = restoration.denoise_wavelet(noisy, sigma=2*sigma,
-                                           multichannel=multichannel)
-        res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
-                                           multichannel=multichannel)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            res1 = restoration.denoise_wavelet(noisy, sigma=2 * sigma,
+                                               multichannel=multichannel)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            res2 = restoration.denoise_wavelet(noisy, sigma=sigma,
+                                               multichannel=multichannel)
         assert_(np.sum(res1**2) <= np.sum(res2**2))
 
 
@@ -383,8 +427,9 @@ def test_wavelet_threshold():
     noisy = np.clip(noisy, 0, 1)
 
     # employ a single, user-specified threshold instead of BayesShrink sigmas
-    denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
-                                  threshold=sigma)
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+        denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
+                                      threshold=sigma)
     psnr_noisy = compare_psnr(img, noisy)
     psnr_denoised = compare_psnr(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
@@ -394,7 +439,8 @@ def test_wavelet_threshold():
         _wavelet_threshold(noisy, wavelet='db1', method=None, threshold=None)
 
     # warns if a threshold is provided in a case where it would be ignored
-    with expected_warnings(["Thresholding method "]):
+    with expected_warnings(["Thresholding method ",
+                            PYWAVELET_ND_INDEXING_WARNING]):
         _wavelet_threshold(noisy, wavelet='db1', method='BayesShrink',
                            threshold=sigma)
 
@@ -414,8 +460,17 @@ def test_wavelet_denoising_nd():
             noisy = img + sigma * rstate.randn(*(img.shape))
             noisy = np.clip(noisy, 0, 1)
 
-            # Verify that SNR is improved with internally estimated sigma
-            denoised = restoration.denoise_wavelet(noisy, method=method)
+            # Mark H. 2018.08:
+            #   The issue arises because when ndim in [1, 2]
+            #   ``waverecn`` calls ``_match_coeff_dims``
+            #   Which includes a numpy 1.15 deprecation.
+            #   for larger number of dimensions _match_coeff_dims isn't called
+            #   for some reason.
+            anticipated_warnings = (PYWAVELET_ND_INDEXING_WARNING
+                                    if ndim < 3 else None)
+            with expected_warnings([anticipated_warnings]):
+                # Verify that SNR is improved with internally estimated sigma
+                denoised = restoration.denoise_wavelet(noisy, method=method)
             psnr_noisy = compare_psnr(img, noisy)
             psnr_denoised = compare_psnr(img, denoised)
             assert_(psnr_denoised > psnr_noisy)
@@ -439,7 +494,8 @@ def test_wavelet_denoising_levels():
     noisy = img + sigma * rstate.randn(*(img.shape))
     noisy = np.clip(noisy, 0, 1)
 
-    denoised = restoration.denoise_wavelet(noisy, wavelet=wavelet)
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+        denoised = restoration.denoise_wavelet(noisy, wavelet=wavelet)
     denoised_1 = restoration.denoise_wavelet(noisy, wavelet=wavelet,
                                              wavelet_levels=1)
     psnr_noisy = compare_psnr(img, noisy)
@@ -449,17 +505,27 @@ def test_wavelet_denoising_levels():
     # multi-level case should outperform single level case
     assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
 
-    # invalid number of wavelet levels results in a ValueError
+    # invalid number of wavelet levels results in a ValueError or UserWarning
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
+    if Version(pywt.__version__) < '1.0.0':
+        # exceeding max_level raises a ValueError in PyWavelets 0.4-0.5.2
+        with testing.raises(ValueError):
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+                restoration.denoise_wavelet(
+                    noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+    else:
+        # exceeding max_level raises a UserWarning in PyWavelets >= 1.0.0
+        with expected_warnings([
+                'all coefficients will experience boundary effects']):
+            restoration.denoise_wavelet(
+                noisy, wavelet=wavelet, wavelet_levels=max_level + 1)
+
     with testing.raises(ValueError):
-        restoration.denoise_wavelet(
-            noisy,
-            wavelet=wavelet, wavelet_levels=max_level+1)
-    with testing.raises(ValueError):
-        restoration.denoise_wavelet(
-            noisy,
-            wavelet=wavelet, wavelet_levels=-1)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+            restoration.denoise_wavelet(
+                noisy,
+                wavelet=wavelet, wavelet_levels=-1)
 
 
 def test_estimate_sigma_gray():
@@ -523,13 +589,16 @@ def test_wavelet_denoising_args():
 
     for convert2ycbcr in [True, False]:
         for multichannel in [True, False]:
+            anticipated_warnings = (PYWAVELET_ND_INDEXING_WARNING
+                                    if multichannel else None)
             for sigma in [0.1, [0.1, 0.1, 0.1], None]:
                 if (not multichannel and not convert2ycbcr) or \
                         (isinstance(sigma, list) and not multichannel):
                     continue
-                restoration.denoise_wavelet(noisy, sigma=sigma,
-                                            convert2ycbcr=convert2ycbcr,
-                                            multichannel=multichannel)
+                with expected_warnings([anticipated_warnings]):
+                    restoration.denoise_wavelet(noisy, sigma=sigma,
+                                                convert2ycbcr=convert2ycbcr,
+                                                multichannel=multichannel)
 
 
 def test_denoise_wavelet_biorthogonal():
@@ -567,26 +636,32 @@ def test_cycle_spinning_multichannel():
         func_kw = dict(sigma=sigma, multichannel=multichannel)
 
         # max_shifts=0 is equivalent to just calling denoise_func
-        dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
-                                       func_kw=func_kw,
-                                       multichannel=multichannel)
-        dn = denoise_func(noisy, **func_kw)
+        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                DASK_NOT_INSTALLED_WARNING]):
+            dn_cc = restoration.cycle_spin(noisy, denoise_func, max_shifts=0,
+                                           func_kw=func_kw,
+                                           multichannel=multichannel)
+            dn = denoise_func(noisy, **func_kw)
         assert_equal(dn, dn_cc)
 
         # denoising with cycle spinning will give better PSNR than without
         for max_shifts in valid_shifts:
-            dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                           max_shifts=max_shifts,
-                                           func_kw=func_kw,
-                                           multichannel=multichannel)
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=max_shifts,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for shift_steps in valid_steps:
-            dn_cc = restoration.cycle_spin(noisy, denoise_func,
-                                           max_shifts=2,
-                                           shift_steps=shift_steps,
-                                           func_kw=func_kw,
-                                           multichannel=multichannel)
+            with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                                    DASK_NOT_INSTALLED_WARNING]):
+                dn_cc = restoration.cycle_spin(noisy, denoise_func,
+                                               max_shifts=2,
+                                               shift_steps=shift_steps,
+                                               func_kw=func_kw,
+                                               multichannel=multichannel)
             assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
 
         for max_shifts in invalid_shifts:
@@ -613,16 +688,19 @@ def test_cycle_spinning_num_workers():
     denoise_func = restoration.denoise_wavelet
     func_kw = dict(sigma=sigma, multichannel=True)
 
-    # same result whether using 1 worker or multiple workers
-    dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                    func_kw=func_kw, multichannel=False,
-                                    num_workers=1)
-    dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                    func_kw=func_kw, multichannel=False,
-                                    num_workers=4)
-    dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                    func_kw=func_kw, multichannel=False,
-                                    num_workers=None)
+    # same results are expected whether using 1 worker or multiple workers
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
+        dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                        func_kw=func_kw, multichannel=False,
+                                        num_workers=1)
+    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
+                            DASK_NOT_INSTALLED_WARNING]):
+        dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                        func_kw=func_kw, multichannel=False,
+                                        num_workers=4)
+        dn_cc3 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
+                                        func_kw=func_kw, multichannel=False,
+                                        num_workers=None)
     assert_almost_equal(dn_cc1, dn_cc2)
     assert_almost_equal(dn_cc1, dn_cc3)
 
