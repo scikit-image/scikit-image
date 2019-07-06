@@ -107,6 +107,13 @@ def astronaut():
 def brick():
     """Brick wall.
 
+    Returns
+    -------
+    brick: (512, 512) uint8 image
+        A small section of a brick wall.
+
+    Notes
+    -----
     The original image was downloaded from
     `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>` and licensed
     under the Creative Commons CC0 License.
@@ -114,17 +121,16 @@ def brick():
     A perspective transform was then applied to the image, prior to
     rotating it by 90 degrees, cropping and scaling it to obtain the final
     image.
+    """
 
-    Notes
-    -----
-
+    """
     The following code was used to obtain the final image.
 
-    >> import sys; print(sys.version)
-    >> import platform; print(platform.platform())
-    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >> import numpy; print(f"numpy version: {numpy.__version__}")
-    >> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -132,40 +138,34 @@ def brick():
     numpy version: 1.16.4
     imageio version 2.4.1
 
-    >> import requests
-    >> import zipfile
-    >> url = 'https://cdn.struffelproductions.com/file/cc0textures/Bricks25/%5B2K%5DBricks25.zip'
-    >> r = requests.get(url)
-    >> with open('[2K]Bricks25.zip', 'bw') as f:
-    ..     f.write(r.content)
-    >> with zipfile.ZipFile('[2K]Bricks25.zip') as z:
-    .. z.extract('Bricks25_col.jpg')
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Bricks25/%5B2K%5DBricks25.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Bricks25.zip', 'bw') as f:
+    ...     f.write(r.content)
+    >>> with zipfile.ZipFile('[2K]Bricks25.zip') as z:
+    ... z.extract('Bricks25_col.jpg')
 
-    >> from numpy.linalg import inv
-    >> from skimage.transform import rescale, warp, rotate
-    >> from skimage.color import rgb2gray
-    >> from imageio import imread, imwrite
-    >> from skimage import img_as_ubyte
-    >> import numpy as np
-
-
-    >> # Obtained playing around with GIMP 2.10 with their perspective tool
-    >> H = inv(np.asarray([[ 0.54764, -0.00219, 0],
-    ..                     [-0.12822,  0.54688, 0],
-    ..                     [-0.00022,        0, 1]]))
+    >>> from numpy.linalg import inv
+    >>> from skimage.transform import rescale, warp, rotate
+    >>> from skimage.color import rgb2gray
+    >>> from imageio import imread, imwrite
+    >>> from skimage import img_as_ubyte
+    >>> import numpy as np
 
 
-    >> brick_orig = imread('Bricks25_col.jpg')
-    >> brick = warp(brick_orig, H)
-    >> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
-    >> brick = rotate(brick, -90)
-    >> imwrite('brick.png', img_as_ubyte(rgb2gray(brick)))
+    >>> # Obtained playing around with GIMP 2.10 with their perspective tool
+    >>> H = inv(np.asarray([[ 0.54764, -0.00219, 0],
+    ...                     [-0.12822,  0.54688, 0],
+    ...                     [-0.00022,        0, 1]]))
 
-    Returns
-    -------
-    brick: (512, 512) uint8 image
-        A small section of a brick wall.
 
+    >>> brick_orig = imread('Bricks25_col.jpg')
+    >>> brick = warp(brick_orig, H)
+    >>> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
+    >>> brick = rotate(brick, -90)
+    >>> imwrite('brick.png', img_as_ubyte(rgb2gray(brick)))
     """
     return load("brick.png", as_gray=True)
 
@@ -173,6 +173,13 @@ def brick():
 def grass():
     """Grass.
 
+    Returns
+    -------
+    grass: (512, 512) uint8 image
+        Some grass.
+
+    Notes
+    -----
     The original image was downloaded from
     `DeviantArt <https://www.deviantart.com/linolafett/art/Grass-01-434853879>`__
     and licensed underthe Creative Commons CC0 License.
@@ -181,24 +188,16 @@ def grass():
     pixels around the top left corner, converted to grayscale, then to uint8
     prior to saving the result in PNG format.
 
-    Notes
-    -----
+    """
 
-    >> import sys; print(sys.version)
-    >> import platform; print(platform.platform())
-    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >> import numpy; print(f"numpy version: {numpy.__version__}")
-    >> import imageio; print(f"imageio version {imageio.__version__}")
-    >> import requests
-    >> import zipfile
-    >> url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a407467e-4ff0-49f1-923f-c9e388e84612/d76wfef-2878b78d-5dce-43f9-be36->>     26ec9bc0df3b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2E0MDc0NjdlLTRmZjAtNDlmMS05MjNmLWM5ZTM4OGU4NDYxMlwvZDc2d2ZlZi0yODc4Yjc4ZC01ZGNlLTQzZjktYmUzNi0yNmVjOWJjMGRmM2IuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.98hIcOTCqXWQ67Ec5bM5eovKEn2p91mWB3uedH61ynI'
-    >> r = requests.get(url)
-    >> with open('grass_orig.jpg', 'bw') as f:
-    ..     f.write(r.content)
-    >> grass_orig = imageio.imread('grass_orig.jpg')
-    >> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
-    >> imageio.imwrite('grass.png', grass)
+    """
+    The following code was used to obtain the final image.
 
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
@@ -206,11 +205,15 @@ def grass():
     numpy version: 1.16.4
     imageio version 2.4.1
 
-    Returns
-    -------
-    grass: (512, 512) uint8 image
-        Some grass.
-
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a407467e-4ff0-49f1-923f-c9e388e84612/d76wfef-2878b78d-5dce-43f9-be36->>     26ec9bc0df3b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2E0MDc0NjdlLTRmZjAtNDlmMS05MjNmLWM5ZTM4OGU4NDYxMlwvZDc2d2ZlZi0yODc4Yjc4ZC01ZGNlLTQzZjktYmUzNi0yNmVjOWJjMGRmM2IuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.98hIcOTCqXWQ67Ec5bM5eovKEn2p91mWB3uedH61ynI'
+    >>> r = requests.get(url)
+    >>> with open('grass_orig.jpg', 'bw') as f:
+    ...     f.write(r.content)
+    >>> grass_orig = imageio.imread('grass_orig.jpg')
+    >>> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> imageio.imwrite('grass.png', grass)
     """
     return load("grass.png", as_gray=True)
 
@@ -233,51 +236,54 @@ def rough_wall():
 def gravel():
     """Gravel
 
+    Returns
+    -------
+    gravel: (512, 512) uint8 image
+        Grayscale gravel sample.
+
+    Notes
+    -----
     The original image was downloaded from
     `CC0Textures <https://cc0textures.com/view.php?tex=Gravel04>`__ and
     licensed under the Creative Commons CC0 License.
 
-    The downloaded image was then imported to GIMP and converted from color
-    to grayscale and the image was rescaled to ``(1024, 1024)`` then the
-    top left ``(512, 512)`` pixel region  was cropped prior to saving the
-    result in PNG format.
+    The downloaded image was then rescaled to ``(1024, 1024)``, then the
+    top left ``(512, 512)`` pixel region  was cropped prior to converting the
+    image to grayscale and uint8 data type. The result was saved using the
+    PNG format.
+    """
 
-    Notes
-    -----
+    """
+    The following code was used to obtain the final image.
 
-    >> import sys; print(sys.version)
-    >> import platform; print(platform.platform())
-    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
-    >> import numpy; print(f"numpy version: {numpy.__version__}")
-    >> import imageio; print(f"imageio version {imageio.__version__}")
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
     3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
     [GCC 7.3.0]
     Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
     scikit-image version: 0.16.dev0
     numpy version: 1.16.4
     imageio version 2.4.1
-    
-    >> import requests
-    >> import zipfile
 
-    >> url = 'https://cdn.struffelproductions.com/file/cc0textures/Gravel04/%5B2K%5DGravel04.zip'
-    >> r = requests.get(url)
-    >> with open('[2K]Gravel04.zip', 'bw') as f:
-    ..     f.write(r.content)
+    >>> import requests
+    >>> import zipfile
 
-    >> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
-    ..     z.extract('Gravel04_col.jpg')
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Gravel04/%5B2K%5DGravel04.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Gravel04.zip', 'bw') as f:
+    ...     f.write(r.content)
 
-    >> from skimage.transform import resize
-    >> gravel_orig = imageio.imread('Gravel04_col.jpg')
-    >> gravel = resize(gravel_orig, (1024, 1024))
-    >> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
-    >> imageio.imwrite('gravel.png', gravel)
+    >>> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
+    ...     z.extract('Gravel04_col.jpg')
 
-    Returns
-    -------
-    gravel: (512, 512) uint8 image
-        Grayscale gravel sample.
+    >>> from skimage.transform import resize
+    >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
+    >>> gravel = resize(gravel_orig, (1024, 1024))
+    >>> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> imageio.imwrite('gravel.png', gravel)
     """
     return load("gravel.png", as_gray=True)
 
