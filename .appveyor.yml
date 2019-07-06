@@ -13,6 +13,8 @@ environment:
 
 matrix:
   fast_finish: true
+  allow_failures:
+    - PIP_FLAGS: --pre
 
 install:
   - ECHO "Filesystem root:"

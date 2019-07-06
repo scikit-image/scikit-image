@@ -77,6 +77,8 @@ matrix:
       osx_image: xcode9.4
       language: objective-c
       env: TRAVIS_PYTHON_VERSION=3.7
+   allow_failures:
+      env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
