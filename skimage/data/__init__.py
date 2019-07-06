@@ -111,11 +111,55 @@ def brick():
     `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>` and licensed
     under the Creative Commons CC0 License.
 
-    The downloaded image was then imported into GIMP, rotated by 90 degrees,
-    and a perspective transform was also applied. Finally, the color image was
-    converted to grayscale in GIMP and cropped to include a region the size of
-    ``(1024, 1024)`` and rescaled to ``(512, 512)`` pixels prior to saving the
-    result in PNG format.
+    A perspective transform was then applied to the image, prior to
+    rotating it by 90 degrees, cropping and scaling it to obtain the final
+    image.
+
+    Notes
+    -----
+
+    The following code was used to obtain the final image.
+
+    >> import sys; print(sys.version)
+    >> import platform; print(platform.platform())
+    >> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >> import numpy; print(f"numpy version: {numpy.__version__}")
+    >> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >> import requests
+    >> import zipfile
+    >> url = 'https://cdn.struffelproductions.com/file/cc0textures/Bricks25/%5B2K%5DBricks25.zip'
+    >> r = requests.get(url)
+    >> with open('[2K]Bricks25.zip', 'bw') as f:
+    ..     f.write(r.content)
+    >> with zipfile.ZipFile('[2K]Bricks25.zip') as z:
+    .. z.extract('Bricks25_col.jpg')
+
+    >> from numpy.linalg import inv
+    >> from skimage.transform import rescale, warp, rotate
+    >> from skimage.color import rgb2gray
+    >> from imageio import imread, imwrite
+    >> from skimage import img_as_ubyte
+    >> import numpy as np
+
+
+    >> # Obtained playing around with GIMP 2.10 with their perspective tool
+    >> H = inv(np.asarray([[ 0.54764, -0.00219, 0],
+    ..                     [-0.12822,  0.54688, 0],
+    ..                     [-0.00022,        0, 1]]))
+
+
+    >> brick_orig = imread('Bricks25_col.jpg')
+    >> brick = warp(brick_orig, H)
+    >> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
+    >> brick = rotate(brick, -90)
+    >> imwrite('brick.png', img_as_ubyte(rgb2gray(brick)))
 
     Returns
     -------
