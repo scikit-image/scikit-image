@@ -115,7 +115,7 @@ def brick():
     Notes
     -----
     The original image was downloaded from
-    `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>` and licensed
+    `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>`_ and licensed
     under the Creative Commons CC0 License.
 
     A perspective transform was then applied to the image, prior to
