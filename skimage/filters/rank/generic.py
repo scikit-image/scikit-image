@@ -101,8 +101,8 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
 
     """
     assert_nD(image, 2)
-    if (image.dtype in (bool, np.bool, np.bool_) or
-            out_dtype in (bool, np.bool, np.bool_)):
+    if (image.dtype in (bool, np.bool, np.bool_)
+            or out_dtype in (bool, np.bool, np.bool_)):
         raise ValueError('dtype cannot be bool.')
     if image.dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
