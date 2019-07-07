@@ -1,6 +1,8 @@
 from __future__ import division, absolute_import, print_function
+from distutils.version import LooseVersion
 
 import numpy as np
+# note: skimage.util.pad is just numpy.pad
 from skimage.util import pad
 
 from skimage._shared import testing
@@ -990,6 +992,8 @@ class ValueError3(TestCase):
         with testing.raises(ValueError):
             pad(arr, 4, mode='mean', reflect_type='odd')
 
+    @testing.skipif(LooseVersion(np.__version__) >= LooseVersion('1.17'),
+                    reason='Error removed in NumPy 1.17')
     def test_mode_not_set(self):
         arr = np.arange(30).reshape(5, 6)
         with testing.raises(TypeError):
