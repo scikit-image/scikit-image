@@ -100,15 +100,14 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=
 
     """
     assert_nD(image, 2)
-    if image.dtype not in (np.uint8, np.uint16, np.bool_):
+    if image.dtype in (bool, np.bool, np.bool_) or out_dtype in (bool, np.bool, np.bool_):
+        raise ValueError('dtype cannot be bool.')
+    if image.dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
                    .format(image.dtype))
         warn(message, stacklevel=5)
-        image = img_as_ubyte(image)
-
-    if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
 
     if out_dtype is None:
@@ -129,9 +128,6 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=
     if out is None:
         out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
-        if out.dtype == np.dtype(np.bool_):
-            # So much hackery,
-            out = out.view(np.uint8)
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
 
@@ -247,30 +243,6 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, n_bins=n_bins)
 
     return out
-
-
-def _default_selem(func):
-    """Decorator to add a default structuring element to morphology functions.
-
-    Parameters
-    ----------
-    func : function
-        A morphology function such as erosion, dilation, opening, closing,
-        white_tophat, or black_tophat.
-
-    Returns
-    -------
-    func_out : function
-        The function, using a default structuring element of same dimension
-        as the input image with connectivity 1.
-    """
-    @functools.wraps(func)
-    def func_out(image, selem=None, *args, **kwargs):
-        if selem is None:
-            selem = ndi.generate_binary_structure(image.ndim, image.ndim)
-        return func(image, selem=selem, *args, **kwargs)
-
-    return func_out
 
 
 def autolevel(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
@@ -605,7 +577,6 @@ def subtract_mean(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-@_default_selem
 def median(image, selem=None, out=None, mask=None,
            shift_x=False, shift_y=False):
     """Return local median of an image.
@@ -647,6 +618,8 @@ def median(image, selem=None, out=None, mask=None,
 
     """
 
+    if selem is None:
+        selem = ndi.generate_binary_structure(image.ndim, image.ndim)
     return _apply_scalar_per_pixel(generic_cy._median, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
