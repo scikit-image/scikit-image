@@ -705,5 +705,5 @@ class TestRank:
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.bool_)
         elem = np.ones((3, 3), dtype=np.bool_)
-        # rank.maximum(image=image, selem=elem, out=out, mask=mask)
-        # assert_equal(image.dtype, out.dtype)
+        rank.maximum(image=image, selem=elem, out=out, mask=mask)
+        assert_equal(image.dtype, out.dtype)

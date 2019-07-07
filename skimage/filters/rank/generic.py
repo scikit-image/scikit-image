@@ -105,7 +105,10 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
                    .format(image.dtype))
-        warn(message, stacklevel=3)
+        warn(message, stacklevel=5)
+        image = img_as_ubyte(image)
+
+    if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
 
     if out_dtype is None:
@@ -126,6 +129,9 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=
     if out is None:
         out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
+        if out.dtype == np.dtype(np.bool_):
+            # So much hackery,
+            out = out.view(np.uint8)
         if len(out.shape) == 2:
             out = out.reshape(out.shape+(pixel_size,))
 
