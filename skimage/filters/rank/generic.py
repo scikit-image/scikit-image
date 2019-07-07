@@ -23,7 +23,7 @@ adjusted accordingly. The user may provide a mask image (same size as input
 image) where non zero values are the part of the image participating in the
 histogram computation. By default the entire image is filtered.
 
-This implementation outperforms grey.dilation for large structuring elements.
+This implementation outperforms gray.dilation for large structuring elements.
 
 Input images will be cast in unsigned 8-bit integer or unsigned 16-bit integer
 if necessary. The number of histogram bins is then determined from the maximum
@@ -62,7 +62,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
+def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -71,15 +71,15 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         Input image.
     selem : 2-D array (integer, float or boolean)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    out_dtype : data-type
+    out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
-    pixel_size : int
+    pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
 
     Returns
@@ -105,7 +105,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
                    .format(image.dtype))
-        warn(message, stacklevel=2)
+        warn(message, stacklevel=3)
         image = img_as_ubyte(image)
 
     if out_dtype is None:
@@ -214,8 +214,8 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     out_dtype : data-type, optional
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
-    pixel_size : int
-        Dimension of each pixel. Default value is 1.
+    pixel_size : int, optional
+        Dimension of each pixel.
 
     Returns
     -------
@@ -270,21 +270,21 @@ def _default_selem(func):
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Auto-level image using local histogram.
 
-    This filter locally stretches the histogram of grey values to cover the
+    This filter locally stretches the histogram of gray values to cover the
     entire range of values from "white" to "black".
 
     Parameters
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -319,14 +319,14 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -358,14 +358,14 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -397,14 +397,14 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -436,14 +436,14 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -484,14 +484,14 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -523,14 +523,14 @@ def geometric_mean(image, selem, out=None, mask=None,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -567,14 +567,14 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -608,15 +608,15 @@ def median(image, selem=None, out=None, mask=None,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
         full square of size 3 is used.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -653,14 +653,14 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -703,14 +703,14 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -739,7 +739,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
     """Enhance contrast of an image.
 
-    This replaces each pixel by the local maximum if the pixel greyvalue is
+    This replaces each pixel by the local maximum if the pixel gray value is
     closer to the local maximum than the local minimum. Otherwise it is
     replaced by the local minimum.
 
@@ -747,14 +747,14 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -789,14 +789,14 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -839,14 +839,14 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -882,21 +882,21 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Local threshold of an image.
 
-    The resulting binary mask is True if the greyvalue of the center pixel is
+    The resulting binary mask is True if the gray value of the center pixel is
     greater than the local mean.
 
     Parameters
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -939,14 +939,14 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -979,14 +979,14 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1027,21 +1027,21 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
-    minimum number of bits needed to encode the local greylevel
+    minimum number of bits needed to encode the local gray level
     distribution.
 
     Parameters
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1078,14 +1078,14 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1123,14 +1123,14 @@ def windowed_histogram(image, selem, out=None, mask=None,
     ----------
     image : 2-D array (integer, float or boolean)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer, float, boolean or optional)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1176,14 +1176,14 @@ def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : ndarray
         Image array (uint8, uint16 array).
-    selem : 2-D array
+    selem : 2-D array (integer, float, boolean or optional)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (integer, float, boolean or optional)
         If None, a new array will be allocated.
-    mask : ndarray
+    mask : ndarray (integer, float, boolean or optional)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
