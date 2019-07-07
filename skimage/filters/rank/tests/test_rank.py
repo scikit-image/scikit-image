@@ -684,7 +684,6 @@ class TestRank:
         assert rank.median(a)[1, 1] == 0
         assert rank.median(a, disk(1))[1, 1] == 1
 
-
     def test_majority(self):
         img = data.camera()
         elem = np.ones((3, 3), dtype=np.uint8)

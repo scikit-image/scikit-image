@@ -62,7 +62,8 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=1):
+def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
+                  pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -100,7 +101,8 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None, pixel_size=
 
     """
     assert_nD(image, 2)
-    if image.dtype in (bool, np.bool, np.bool_) or out_dtype in (bool, np.bool, np.bool_):
+    if (image.dtype in (bool, np.bool, np.bool_) or
+            out_dtype in (bool, np.bool, np.bool_)):
         raise ValueError('dtype cannot be bool.')
     if image.dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
@@ -245,7 +247,8 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     return out
 
 
-def autolevel(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def autolevel(image, selem=None, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of gray values to cover the
@@ -287,7 +290,8 @@ def autolevel(image, selem=None, out=None, mask=None, shift_x=False, shift_y=Fal
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def bottomhat(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def bottomhat(image, selem=None, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Local bottom-hat of an image.
 
     This filter computes the morphological closing of the image and then
@@ -329,7 +333,8 @@ def bottomhat(image, selem=None, out=None, mask=None, shift_x=False, shift_y=Fal
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def equalize(image, selem=None, out=None, mask=None, shift_x=False,
+             shift_y=False):
     """Equalize image using local histogram.
 
     Parameters
@@ -368,7 +373,8 @@ def equalize(image, selem=None, out=None, mask=None, shift_x=False, shift_y=Fals
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def gradient(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def gradient(image, selem=None, out=None, mask=None, shift_x=False,
+             shift_y=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
@@ -407,7 +413,8 @@ def gradient(image, selem=None, out=None, mask=None, shift_x=False, shift_y=Fals
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def maximum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def maximum(image, selem=None, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Return local maximum of an image.
 
     Parameters
@@ -533,8 +540,9 @@ def geometric_mean(image, selem=None, out=None, mask=None,
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem,
+                                   out=out, mask=mask, shift_x=shift_x,
+                                   shift_y=shift_y)
 
 
 def subtract_mean(image, selem=None, out=None, mask=None, shift_x=False,
@@ -625,7 +633,8 @@ def median(image, selem=None, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def minimum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def minimum(image, selem=None, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Return local minimum of an image.
 
     Parameters
@@ -673,7 +682,8 @@ def minimum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def modal(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def modal(image, selem=None, out=None, mask=None, shift_x=False,
+          shift_y=False):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
@@ -858,7 +868,8 @@ def sum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_y=shift_y)
 
 
-def threshold(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def threshold(image, selem=None, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Local threshold of an image.
 
     The resulting binary mask is True if the gray value of the center pixel is
@@ -908,7 +919,8 @@ def threshold(image, selem=None, out=None, mask=None, shift_x=False, shift_y=Fal
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def tophat(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def tophat(image, selem=None, out=None, mask=None, shift_x=False,
+           shift_y=False):
     """Local top-hat of an image.
 
     This filter computes the morphological opening of the image and then
@@ -1002,7 +1014,8 @@ def noise_filter(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def entropy(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def entropy(image, selem=None, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
@@ -1147,7 +1160,8 @@ def windowed_histogram(image, selem=None, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def majority(image, selem=None, out=None, mask=None, shift_x=False,
+             shift_y=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
 
