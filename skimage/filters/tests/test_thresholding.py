@@ -310,6 +310,12 @@ def test_li_arbitrary_start_point():
     assert 111 < optimum < 112
 
 
+def test_li_negative_inital_guess():
+    coins = data.coins()
+    with testing.raises(ValueError):
+        result = threshold_li(coins, initial_guess=-5)
+
+
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
