@@ -606,6 +606,12 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
         t_next = initial_guess - image_min
+        image_max = np.max(image) + image_min
+        if not 0 < t_next < np.max(image):
+            msg = ('The initial guess for threshold_li must be within the '
+                   'range of the image. Got {} for image min {} and max {} '
+                   .format(initial_guess, image_min, image_max))
+            raise ValueError(msg)
     else:
         raise TypeError('Incorrect type for `initial_guess`; should be '
                         'a floating point value, or a function mapping an '
