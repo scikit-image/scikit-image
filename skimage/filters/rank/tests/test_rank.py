@@ -701,8 +701,6 @@ class TestRank:
 
     def test_input_boolean_dtype(self):
         image = (np.random.rand(100, 100) * 256).astype(np.bool_)
-        out = np.empty_like(image)
-        mask = np.ones(image.shape, dtype=np.bool_)
         elem = np.ones((3, 3), dtype=np.bool_)
         with testing.raises(ValueError):
-            rank.maximum(image=image, selem=elem, out=out, mask=mask)
+            rank.maximum(image=image, selem=elem)

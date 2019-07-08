@@ -68,13 +68,13 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     out_dtype : data-type, optional
@@ -96,8 +96,6 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
         neighborhood.
     n_bins : int
         Number of histogram bins.
-    out_dtype : data-type
-        Output data-type.
 
     """
     assert_nD(image, 2)
@@ -112,9 +110,6 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
-    if out_dtype is None:
-        out_dtype = image.dtype
-
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
@@ -128,6 +123,8 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
         raise NotImplementedError("Cannot perform rank operation in place.")
 
     if out is None:
+        if out_dtype is None:
+            out_dtype = image.dtype
         out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
         if len(out.shape) == 2:
@@ -146,7 +143,7 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
              "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
              stacklevel=2)
 
-    return image, selem, out, mask, n_bins, out_dtype
+    return image, selem, out, mask, n_bins
 
 
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -157,13 +154,13 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     ----------
     func : function
         Cython function to apply.
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer or float)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer or float)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -181,7 +178,7 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins, out_dtype = _handle_input(image,
+    image, selem, out, mask, n_bins = _handle_input(image,
                                                                selem,
                                                                out,
                                                                mask,
@@ -202,13 +199,13 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     ----------
     func : function
         Cython function to apply.
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float or boolean)
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float or boolean)
+    out : 2-D array (integer or float)
         If None, a new array is allocated.
-    mask : ndarray (integer, float or boolean)
+    mask : ndarray (integer or float)
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -233,7 +230,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins, out_dtype = _handle_input(image,
+    image, selem, out, mask, n_bins = _handle_input(image,
                                                                selem,
                                                                out,
                                                                mask,
@@ -256,13 +253,13 @@ def autolevel(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -299,13 +296,13 @@ def bottomhat(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -339,13 +336,13 @@ def equalize(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -379,13 +376,13 @@ def gradient(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -419,13 +416,13 @@ def maximum(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -467,13 +464,13 @@ def mean(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -506,13 +503,13 @@ def geometric_mean(image, selem=None, out=None, mask=None,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -551,13 +548,13 @@ def subtract_mean(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -591,14 +588,14 @@ def median(image, selem=None, out=None, mask=None,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
         full square of size 3 is used.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -639,13 +636,13 @@ def minimum(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -690,13 +687,13 @@ def modal(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -734,13 +731,13 @@ def enhance_contrast(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -776,13 +773,13 @@ def pop(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -826,13 +823,13 @@ def sum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -877,13 +874,13 @@ def threshold(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -928,13 +925,13 @@ def tophat(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -968,13 +965,13 @@ def noise_filter(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -1024,13 +1021,13 @@ def entropy(image, selem=None, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -1068,13 +1065,13 @@ def otsu(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -1113,13 +1110,13 @@ def windowed_histogram(image, selem=None, out=None, mask=None,
 
     Parameters
     ----------
-    image : 2-D array (integer, float or boolean)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer, float, boolean or optional)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -1169,11 +1166,11 @@ def majority(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : ndarray
         Image array (uint8, uint16 array).
-    selem : 2-D array (integer, float, boolean or optional)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (integer, float, boolean or optional)
+    out : ndarray (integer or float), optional
         If None, a new array will be allocated.
-    mask : ndarray (integer, float, boolean or optional)
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional

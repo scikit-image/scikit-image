@@ -36,7 +36,7 @@ __all__ = ['autolevel_percentile', 'gradient_percentile',
 def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
            out_dtype=None):
     assert_nD(image, 2)
-    image, selem, out, mask, n_bins, out_dtype = _handle_input(image, selem,
+    image, selem, out, mask, n_bins = _handle_input(image, selem,
                                                                out, mask,
                                                                out_dtype)
 
