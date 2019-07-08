@@ -72,7 +72,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
                    .format(image.dtype))
-        warn(message, stacklevel=5)
+        warn(message, stacklevel=4)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
