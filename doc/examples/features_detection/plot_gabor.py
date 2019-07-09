@@ -115,7 +115,7 @@ for label, img, ax in zip(image_names, images, axes[0][1:]):
 for label, (kernel, powers), ax_row in zip(kernel_params, results, axes[1:]):
     # Plot Gabor kernel
     ax = ax_row[0]
-    ax.imshow(np.real(kernel), interpolation='nearest')
+    ax.imshow(np.real(kernel))
     ax.set_ylabel(label, fontsize=7)
     ax.set_xticks([])
     ax.set_yticks([])

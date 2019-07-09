@@ -90,7 +90,7 @@ rr, cc, val = circle_perimeter_aa(60, 40, 30)
 img[rr, cc] = val
 
 
-ax2.imshow(img, cmap=plt.cm.gray, interpolation='nearest')
+ax2.imshow(img, cmap=plt.cm.gray)
 ax2.set_title('Anti-aliasing')
 ax2.axis('off')
 
