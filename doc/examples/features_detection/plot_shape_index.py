@@ -111,12 +111,12 @@ point_y_s, point_x_s = np.where(np.abs(s_smooth - target) < delta)
 point_z_s = image[point_y_s, point_x_s]
 
 
-fig = plt.figure(figsize=(24, 8))
+fig = plt.figure(figsize=(12, 4))
 ax1 = fig.add_subplot(1, 3, 1)
 
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.axis('off')
-ax1.set_title('Input image', fontsize=18)
+ax1.set_title('Input image')
 
 scatter_settings = dict(alpha=0.75, s=10, linewidths=0)
 
@@ -159,7 +159,7 @@ ax3 = fig.add_subplot(1, 3, 3, sharex=ax1, sharey=ax1)
 
 ax3.imshow(s, cmap=plt.cm.gray)
 ax3.axis('off')
-ax3.set_title('Shape index, $\sigma=1$', fontsize=18)
+ax3.set_title('Shape index, $\sigma=1$')
 
 fig.tight_layout()
 
