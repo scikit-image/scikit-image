@@ -164,6 +164,12 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     out : (N, M[, ..., P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
+    See also
+    --------
+    sato
+    frangi
+    hessian
+
     References
     ----------
     .. [1] Meijering, E., Jacob, M., Sarria, J. C., Steiner, P., Hirling, H.,
@@ -251,6 +257,12 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     -------
     out : (N, M[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
+
+    See also
+    --------
+    meijering
+    frangi
+    hessian
 
     References
     ----------
@@ -343,6 +355,12 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     Written by Marc Schrijver, November 2001
     Re-Written by D. J. Kroon, University of Twente, May 2009, [2]_
     Adoption of 3D version from D. G. Ellis, Januar 20017, [3]_
+
+    See also
+    --------
+    meijering
+    sato
+    hessian
 
     References
     ----------
@@ -474,6 +492,12 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     -----
     Written by Marc Schrijver (November 2001)
     Re-Written by D. J. Kroon University of Twente (May 2009) [2]_
+
+    See also
+    --------
+    meijering
+    sato
+    frangi
 
     References
     ----------
