@@ -17,6 +17,10 @@ Version 0.17
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 
+Version 0.18
+------------
+* In ``skimage.features.corner_peaks``, remove the warning.
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
