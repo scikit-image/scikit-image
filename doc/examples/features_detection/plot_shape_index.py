@@ -150,7 +150,7 @@ ax2.scatter(
     **scatter_settings
 )
 
-ax2.legend()
+ax2.legend(loc=3)
 
 ax2.axis('off')
 ax2.set_title('3D visualization')
