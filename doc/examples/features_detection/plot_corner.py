@@ -23,8 +23,8 @@ tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7,
 image = warp(data.checkerboard()[:99, :99], tform.inverse, output_shape=(200, 310))
 # Ellipse
 rr, cc = ellipse(160, 175, 10, 100)
-# Two squares
 image[rr, cc] = 1
+# Two squares
 image[30:80, 200:250] = 1
 image[80:130, 250:300] = 1
 
