@@ -38,6 +38,10 @@ Version 0.18
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 
+Version 0.18
+------------
+* In ``skimage.features.corner_peaks``, remove the warning.
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
