@@ -13,6 +13,9 @@ The present class of ridge filters relies on the eigenvalues of
 the Hessian matrix of image intensities to detect ridge structures where the
 intensity changes perpendicular but not along the structure.
 
+Note that, due to edge effects, results for Meijering and Frangi filters
+are cropped by 4 pixels on each edge to get a proper rendering.
+
 References
 ----------
 
@@ -61,7 +64,11 @@ fig, axes = plt.subplots(2, 5)
 for i, black_ridges in enumerate([1, 0]):
     for j, func in enumerate([identity, meijering, sato, frangi, hessian]):
         kwargs['black_ridges'] = black_ridges
-        axes[i, j].imshow(func(image, **kwargs), cmap=cmap, aspect='auto')
+        result = func(image, **kwargs)
+        if func in (meijering, frangi):
+            # Crop by 4 pixels for rendering purpose.
+            result = result[4:-4, 4:-4]
+        axes[i, j].imshow(result, cmap=cmap, aspect='auto')
         if i == 0:
             axes[i, j].set_title(['Original\nimage', 'Meijering\nneuriteness',
                                   'Sato\ntubeness', 'Frangi\nvesselness',
