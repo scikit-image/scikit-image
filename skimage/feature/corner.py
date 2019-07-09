@@ -422,6 +422,11 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     response : ndarray
         Kitchen and Rosenfeld response image.
 
+    References
+    ----------
+    .. [1] Kitchen, L., & Rosenfeld, A. (1982). Gray-level corner detection.
+           Pattern recognition letters, 1(2), 95-102.
+           :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
