@@ -917,6 +917,10 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
 
+    See also
+    --------
+    skimage.feature.peak_local_max
+
     Examples
     --------
     >>> from skimage.feature import peak_local_max
