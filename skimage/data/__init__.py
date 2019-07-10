@@ -233,6 +233,7 @@ def rough_wall():
          "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
     return gravel()
 
+
 def gravel():
     """Gravel
 
@@ -286,6 +287,7 @@ def gravel():
     >>> imageio.imwrite('gravel.png', gravel)
     """
     return load("gravel.png", as_gray=True)
+
 
 def text():
     """Gray-level "text" image used for corner detection.
