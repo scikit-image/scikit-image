@@ -1,31 +1,20 @@
 from __future__ import print_function, division
 
 import numpy as np
-from ..morphology import binary_erosion, disk, ball
 
 from ._set_metrics import hausdorff_distance_onesided
 
 
-def binary_find_boundaries(image):
-    if image.dtype != np.bool:
-        raise ValueError('image must have dtype = \'bool\'')
-    if image.ndim == 2:
-        selem = disk(1)
-    elif image.ndim == 3:
-        selem = ball(1)
-    else:
-        raise ValueError('image must be 2D or 3D')
-    eroded = binary_erosion(image, selem)
-    return (image & (~eroded))
-
-
 def hausdorff_distance(a, b):
     """
-    Calculate the Hausdorff distance [1]_ between two sets.
+    Calculate the Hausdorff distance [1]_ between two sets of points.
+
+    The Hausdorff distance is the maximum distance between any point on
+    ``a`` and its nearest point on ``b``, and vice-versa.
 
     Parameters
     ----------
-    a, b : ndarray, shape ``(N, M)``,dtype=float
+    a, b : ndarray, shape ``(N, M)``, dtype=float
         Array containing the coordinates of ``N`` points in an
         ``M`` dimensional space.
 
@@ -54,10 +43,13 @@ def hausdorff_distance(a, b):
             # Exactly one set is empty; the distance is infinite
             return np.inf
 
-    a = np.require(a, np.float64, ['C'])
-    b = np.require(b, np.float64, ['C'])
-    return max(hausdorff_distance_onesided(a, b),
-               hausdorff_distance_onesided(b, a))
+    a_points = np.transpose(np.nonzero(a))
+    b_points = np.transpose(np.nonzero(b))
+
+    a_points = np.require(a_points, np.float64, ['C'])
+    b_points = np.require(b_points, np.float64, ['C'])
+    return max(hausdorff_distance_onesided(a_points, b_points),
+               hausdorff_distance_onesided(b_points, a_points))
 
 
 def hausdorff_distance_region(a, b):
@@ -91,6 +83,4 @@ def hausdorff_distance_region(a, b):
     if a.shape != b.shape:
         raise ValueError('Array shapes must be identical')
 
-    a_points = np.transpose(np.nonzero(a))
-    b_points = np.transpose(np.nonzero(b))
-    return hausdorff_distance(a_points, b_points)
+    return hausdorff_distance(a, b)
