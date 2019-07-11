@@ -213,9 +213,12 @@ def greycoprops(P, prop='contrast'):
     assert_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
-    assert num_level == num_level2
-    assert num_dist > 0
-    assert num_angle > 0
+    if num_level != num_level2:
+        raise ValueError('num_level and num_level2 must be equal.')
+    if num_dist <= 0:
+        raise ValueError('num_dist must be positive.')
+    if num_angle <= 0:
+        raise ValueError('num_angle must be positive.')
 
     # normalize each GLCM
     P = P.astype(np.float64)
