@@ -18,6 +18,7 @@ def test_hausdorff_empty():
         hausdorff_distance(non_empty, empty)
     assert hausdorff_distance(empty, empty) == 0.
 
+
 def test_hausdorff_simple():
     points_a = (3, 0)
     points_b = (6, 0)
@@ -32,6 +33,8 @@ def test_hausdorff_simple():
 
 
 points = [(0, 0), (3, 0), (1, 4), (4, 1)]
+
+
 @parametrize("points_a, points_b", itertools.product(points, repeat=2))
 def test_hausdorff_region_single(points_a, points_b):
     check_hausdorff_region_single(points_a, points_b)
@@ -51,6 +54,8 @@ def check_hausdorff_region_single(points_a, points_b):
 
 points_a = [(5, 4), (4, 5), (3, 4), (4, 3)]
 points_b = [(6, 4), (2, 6), (2, 4), (4, 0)]
+
+
 @parametrize("points_a, points_b", itertools.product(points_a, points_b))
 def test_hausdorff_region_different_points(points_a, points_b):
     check_hausdorff_region_different_points(points_a, points_b)
