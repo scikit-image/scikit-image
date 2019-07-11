@@ -18,6 +18,18 @@ def test_hausdorff_empty():
         hausdorff_distance(non_empty, empty)
     assert hausdorff_distance(empty, empty) == 0.
 
+def test_hausdorff_simple():
+    points_a = (3, 0)
+    points_b = (6, 0)
+    shape = (7, 1)
+    coords_a = np.zeros(shape, dtype=np.bool)
+    coords_b = np.zeros(shape, dtype=np.bool)
+    coords_a[points_a] = True
+    coords_b[points_b] = True
+    distance = np.sqrt(sum((ca - cb) ** 2
+                           for ca, cb in zip(points_a, points_b)))
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
+
 
 points = [(0, 0), (3, 0), (1, 4), (4, 1)]
 @parametrize("points_a, points_b", itertools.product(points, repeat=2))

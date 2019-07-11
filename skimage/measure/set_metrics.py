@@ -28,6 +28,19 @@ def hausdorff_distance(a, b):
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Hausdorff_distance
+
+    Examples
+    --------
+    >>> points_a = (3, 0)
+    >>> points_b = (6, 0)
+    >>> shape = (7, 1)
+    >>> coords_a = np.zeros(shape, dtype=np.bool)
+    >>> coords_b = np.zeros(shape, dtype=np.bool)
+    >>> coords_a[points_a] = True
+    >>> coords_b[points_b] = True
+    >>> hausdorff_distance(coords_a, coords_b)
+    3.0
+
     """
     if a.dtype != np.bool or b.dtype != np.bool:
         raise ValueError('Arrays must have dtype = \'bool\'')
