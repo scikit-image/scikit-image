@@ -882,10 +882,12 @@ def _install_properties_docs():
 
     for p in [member for member in dir(RegionProperties)
               if not member.startswith('_')]:
-        getattr(RegionProperties, p).__doc__ = prop_doc[p]
+        if __debug__:
+            # don't install docstrings when in optimized/non-debug mode
+            getattr(RegionProperties, p).__doc__ = prop_doc[p]
+        # but make all the of these "functions" properties now
         setattr(RegionProperties, p, property(getattr(RegionProperties, p)))
 
 
-if __debug__:
-    # don't install docstrings when in optimized/non-debug mode
-    _install_properties_docs()
+_install_properties_docs()
+
