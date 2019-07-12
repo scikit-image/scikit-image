@@ -62,7 +62,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
+def _handle_input(image, selem=None, out=None, mask=None, out_dtype=None,
                   pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
@@ -70,7 +70,7 @@ def _handle_input(image, selem, out=None, mask=None, out_dtype=None,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float)
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -244,7 +244,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     return out
 
 
-def autolevel(image, selem=None, out=None, mask=None, shift_x=False,
+def autolevel(image, selem, out=None, mask=None, shift_x=False,
               shift_y=False):
     """Auto-level image using local histogram.
 
@@ -255,7 +255,7 @@ def autolevel(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -287,7 +287,7 @@ def autolevel(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def bottomhat(image, selem=None, out=None, mask=None, shift_x=False,
+def bottomhat(image, selem, out=None, mask=None, shift_x=False,
               shift_y=False):
     """Local bottom-hat of an image.
 
@@ -298,7 +298,7 @@ def bottomhat(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -330,15 +330,14 @@ def bottomhat(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem=None, out=None, mask=None, shift_x=False,
-             shift_y=False):
+def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Equalize image using local histogram.
 
     Parameters
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -370,7 +369,7 @@ def equalize(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def gradient(image, selem=None, out=None, mask=None, shift_x=False,
+def gradient(image, selem, out=None, mask=None, shift_x=False,
              shift_y=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -378,7 +377,7 @@ def gradient(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -410,7 +409,7 @@ def gradient(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def maximum(image, selem=None, out=None, mask=None, shift_x=False,
+def maximum(image, selem, out=None, mask=None, shift_x=False,
             shift_y=False):
     """Return local maximum of an image.
 
@@ -418,7 +417,7 @@ def maximum(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -459,14 +458,14 @@ def maximum(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def mean(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return local mean of an image.
 
     Parameters
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -497,7 +496,7 @@ def mean(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
                                    mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def geometric_mean(image, selem=None, out=None, mask=None,
+def geometric_mean(image, selem, out=None, mask=None,
                    shift_x=False, shift_y=False):
     """Return local geometric mean of an image.
 
@@ -505,7 +504,7 @@ def geometric_mean(image, selem=None, out=None, mask=None,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -542,7 +541,7 @@ def geometric_mean(image, selem=None, out=None, mask=None,
                                    shift_y=shift_y)
 
 
-def subtract_mean(image, selem=None, out=None, mask=None, shift_x=False,
+def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=False):
     """Return image subtracted from its local mean.
 
@@ -550,7 +549,7 @@ def subtract_mean(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -630,7 +629,7 @@ def median(image, selem=None, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def minimum(image, selem=None, out=None, mask=None, shift_x=False,
+def minimum(image, selem, out=None, mask=None, shift_x=False,
             shift_y=False):
     """Return local minimum of an image.
 
@@ -638,7 +637,7 @@ def minimum(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -679,7 +678,7 @@ def minimum(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def modal(image, selem=None, out=None, mask=None, shift_x=False,
+def modal(image, selem, out=None, mask=None, shift_x=False,
           shift_y=False):
     """Return local mode of an image.
 
@@ -689,7 +688,7 @@ def modal(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -721,7 +720,7 @@ def modal(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def enhance_contrast(image, selem=None, out=None, mask=None, shift_x=False,
+def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
     """Enhance contrast of an image.
 
@@ -733,7 +732,7 @@ def enhance_contrast(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -765,7 +764,7 @@ def enhance_contrast(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def pop(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
@@ -775,7 +774,7 @@ def pop(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -815,7 +814,7 @@ def pop(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_y=shift_y)
 
 
-def sum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return the local sum of pixels.
 
     Note that the sum may overflow depending on the data type of the input
@@ -825,7 +824,7 @@ def sum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -865,7 +864,7 @@ def sum(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_y=shift_y)
 
 
-def threshold(image, selem=None, out=None, mask=None, shift_x=False,
+def threshold(image, selem, out=None, mask=None, shift_x=False,
               shift_y=False):
     """Local threshold of an image.
 
@@ -876,7 +875,7 @@ def threshold(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -916,7 +915,7 @@ def threshold(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def tophat(image, selem=None, out=None, mask=None, shift_x=False,
+def tophat(image, selem, out=None, mask=None, shift_x=False,
            shift_y=False):
     """Local top-hat of an image.
 
@@ -927,7 +926,7 @@ def tophat(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -959,7 +958,7 @@ def tophat(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def noise_filter(image, selem=None, out=None, mask=None, shift_x=False,
+def noise_filter(image, selem, out=None, mask=None, shift_x=False,
                  shift_y=False):
     """Noise feature.
 
@@ -967,7 +966,7 @@ def noise_filter(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -1011,7 +1010,7 @@ def noise_filter(image, selem=None, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def entropy(image, selem=None, out=None, mask=None, shift_x=False,
+def entropy(image, selem, out=None, mask=None, shift_x=False,
             shift_y=False):
     """Local entropy.
 
@@ -1023,7 +1022,7 @@ def entropy(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -1060,14 +1059,14 @@ def entropy(image, selem=None, out=None, mask=None, shift_x=False,
                                    out_dtype=np.double)
 
 
-def otsu(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
+def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -1104,7 +1103,7 @@ def otsu(image, selem=None, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_y=shift_y)
 
 
-def windowed_histogram(image, selem=None, out=None, mask=None,
+def windowed_histogram(image, selem, out=None, mask=None,
                        shift_x=False, shift_y=False, n_bins=None):
     """Normalized sliding window histogram
 
@@ -1112,7 +1111,7 @@ def windowed_histogram(image, selem=None, out=None, mask=None,
     ----------
     image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
@@ -1157,7 +1156,7 @@ def windowed_histogram(image, selem=None, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority(image, selem=None, out=None, mask=None, shift_x=False,
+def majority(image, selem, out=None, mask=None, shift_x=False,
              shift_y=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
@@ -1166,7 +1165,7 @@ def majority(image, selem=None, out=None, mask=None, shift_x=False,
     ----------
     image : ndarray
         Image array (uint8, uint16 array).
-    selem : 2-D array (integer or float), optional
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray (integer or float), optional
         If None, a new array will be allocated.
