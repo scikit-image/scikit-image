@@ -84,7 +84,8 @@ def radon(image, theta=None, circle=True):
         padded_image = np.pad(image, pad_width, mode='constant',
                               constant_values=0)
     # padded_image is always square
-    assert padded_image.shape[0] == padded_image.shape[1]
+    if padded_image.shape[0] != padded_image.shape[1]:
+        raise ValueError('padded_image must be a square')
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
     center = padded_image.shape[0] // 2
 
