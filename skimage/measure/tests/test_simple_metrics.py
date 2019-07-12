@@ -1,7 +1,8 @@
 import numpy as np
 
 import skimage.data
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse
+from skimage.measure import (compare_psnr, compare_nrmse, compare_mse,
+                             compare_nmi)
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_almost_equal
@@ -75,3 +76,18 @@ def test_NRMSE_errors():
     # invalid normalization name
     with testing.raises(ValueError):
         compare_nrmse(x, x, 'foo')
+
+
+def test_nmi():
+    assert_almost_equal(compare_nmi(cam, cam), 2)
+    assert compare_nmi(cam, cam_noisy) < compare_nmi(cam, cam)
+
+
+def test_nmi_different_sizes():
+    assert compare_nmi(cam[:, :400], cam[:400, :]) > 1
+
+
+def test_nmi_random():
+    random1 = np.random.random((100, 100))
+    random2 = np.random.random((100, 100))
+    assert_almost_equal(compare_nmi(random1, random2, bins=10), 1, decimal=2)

@@ -17,6 +17,8 @@ New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
 
+- Image affine registration (``skimage.transform.registration``)
+
 
 Improvements
 ------------
