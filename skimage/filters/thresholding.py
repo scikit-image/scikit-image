@@ -422,7 +422,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
     csuml = np.cumsum(hist)
-    csumh = np.cumsum(hist[::-1])[::-1] - hist
+    csumh = csuml[-1] - csuml
 
     # intensity_sum contains the total pixel intensity from each bin
     intensity_sum = hist * bin_centers
@@ -437,8 +437,9 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # can be in the top bin. So we just patch up csumh[-1] to not cause 0/0
     # errors.
     csumh[-1] = 1
-    l = np.cumsum(intensity_sum) / csuml
-    h = (np.cumsum(intensity_sum[::-1])[::-1] - intensity_sum) / csumh
+    csum_intensity = np.cumsum(intensity_sum)
+    l = csum_intensity / csuml
+    h = (csum_intensity[-1] - csum_intensity) / csumh
 
     # isodata finds threshold values that meet the criterion t = (l + m)/2
     # where l is the mean of all pixels <= t and h is the mean of all pixels
