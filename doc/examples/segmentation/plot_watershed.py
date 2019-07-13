@@ -16,7 +16,7 @@ In the example below, two overlapping circles are to be separated. To
 do so, one computes an image that is the distance to the
 background. The maxima of this distance (i.e., the minima of the
 opposite of the distance) are chosen as markers and the flooding of
-basins from such markers separate the two circles along a watershed
+basins from such markers separates the two circles along a watershed
 line.
 
 See Wikipedia_ for more details on the algorithm.
