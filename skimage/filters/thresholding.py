@@ -666,7 +666,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
-    smooth_hist = np.copy(hist).astype(np.float64)
+    smooth_hist = hist.astype(np.float64, copy=False)
 
     for counter in range(max_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
