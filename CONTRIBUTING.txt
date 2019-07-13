@@ -86,12 +86,12 @@ For a more detailed discussion, read these :doc:`detailed documents
 
    * Reviewers (the other developers and interested community members) will
      write inline and/or general comments on your Pull Request (PR) to help
-     you improve its implementation, documentation and style.  Every single
+     you improve its implementation, documentation, and style.  Every single
      developer working on the project has their code reviewed, and we've come
-     to see it as friendly conversation from which we all learn and the
+     to see it as a friendly conversation from which we all learn and the
      overall code quality benefits.  Therefore, please don't let the review
      discourage you from contributing: its only aim is to improve the quality
-     of project, not to criticize (we are, after all, very grateful for the
+     of the project, not to criticize (we are, after all, very grateful for the
      time you're donating!).
 
    * To update your pull request, make your changes on your local repository
@@ -174,7 +174,7 @@ Build environment setup
 -----------------------
 
 Once you've cloned your fork of the scikit-image repository,
-you should setup a Python development environment tailored for scikit-image.
+you should set up a Python development environment tailored for scikit-image.
 You may choose the environment manager of your choice.
 Here we provide instructions for two popular environment managers:
 ``venv`` (pip based) and ``conda`` (Anaconda or Miniconda).
@@ -335,7 +335,7 @@ detailing the test coverage::
 Activate Travis-CI for your fork (optional)
 -------------------------------------------
 
-Travis-CI checks all unittests in the project to prevent breakage.
+Travis-CI checks all unit tests in the project to prevent breakage.
 
 Before sending a pull request, you may want to check that Travis-CI
 successfully passes all tests. To do so,
@@ -449,7 +449,7 @@ followed to warn users.
 
     * adding a new function, or
     * adding a new keyword argument to the *end* of a function signature, or
-    * fixing what was buggy behaviour
+    * fixing what was buggy behavior
 
 - a deprecation cycle is necessary for *any breaking API change*, meaning a
     change where the function, invoked with the same arguments, would return a
