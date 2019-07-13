@@ -341,6 +341,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     array([  0,  63, 127], dtype=int8)
 
     """
+    if image.min() == image.max():
+        return image
+
     dtype = image.dtype.type
 
     imin, imax = intensity_range(image, in_range)
