@@ -23,7 +23,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 
-from skimage.data import camera
+from skimage.data import astronaut
 from skimage.transform import register_affine, pyramid_gaussian
 from skimage import measure
 
@@ -35,13 +35,13 @@ from skimage import measure
 #
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
-r = 0.12
+r = -0.12
 c, s = np.cos(r), np.sin(r)
 matrix_transform = np.array([[c, -s, 0],
                              [s, c, 50],
                              [0, 0,  1]])
 
-image = camera()
+image = astronaut()[..., 1]  # Just green channel
 target = ndi.affine_transform(image, matrix_transform)
 
 ###############################################################################
