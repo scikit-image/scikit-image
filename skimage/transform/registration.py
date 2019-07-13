@@ -81,7 +81,7 @@ def cost_nmi(image0, image1, *, bins=100):
 
 def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
                     multichannel=False, inverse=True,
-                    level_callback=None):
+                    level_callback=None, method='Powell', **kwargs):
     """Find a transformation matrix to register a target image to a reference.
 
     Parameters
@@ -114,6 +114,11 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
         containing the current downsampled image, transformation matrix, and
         cost as the argument. This is useful for debugging or for plotting
         intermediate results during the iterative process.
+    method : string
+        Method of minimization.  See ``scipy.optimize.minimize`` for available
+        options.
+    **kwargs : keyword arguments
+        Keyword arguments passed through to ``scipy.optimize.minimize``
 
     Returns
     -------
@@ -123,20 +128,21 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
 
     Example
     -------
-    >>> from skimage.data import camera
-    >>> reference_image = camera()
-    >>> r = 0.12  # radians
+    >>> from skimage.data import astronaut
+    >>> reference_image = astronaut()[..., 1]
+    >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
     >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
     >>> matrix = register_affine(reference_image, target_image)
     >>> registered_target = ndi.affine_transform(target_image, matrix)
-
     """
 
     # ignore the channels if present
     ndim = reference.ndim if not multichannel else reference.ndim - 1
-    assert ndim > 0, 'input images must have at least 1 spatial dimension.'
+    if ndim == 0:
+        raise ValueError(
+            'Input images must have at least 1 spatial dimension.')
 
     min_dim = min(reference.shape[:ndim])
     nlevels = int(np.floor(np.log2(min_dim) - np.log2(minimum_size)))
@@ -155,13 +161,13 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
                 transformed = ndi.affine_transform(tgt, transformation,
                                                    order=1)
             else:
-                transformed = np.empty_like(tgt)
+                transformed = np.zeros_like(tgt)
                 for ch in range(tgt.shape[-1]):
                     ndi.affine_transform(tgt[..., ch], transformation,
                                          order=1, output=transformed[..., ch])
             return cost(ref, transformed)
 
-        result = minimize(_cost, x0=parameter_vector, method='Powell')
+        result = minimize(_cost, x0=parameter_vector, method=method, **kwargs)
         parameter_vector = result.x
         if level_callback is not None:
             level_callback(
