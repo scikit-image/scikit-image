@@ -8,15 +8,15 @@ is, for separating different objects in an image.
 
 Starting from user-defined markers, the watershed algorithm treats
 pixels values as a local topography (elevation). The algorithm floods
-basins from the markers, until basins attributed to different markers
+basins from the markers until basins attributed to different markers
 meet on watershed lines.  In many cases, markers are chosen as local
 minima of the image, from which basins are flooded.
 
 In the example below, two overlapping circles are to be separated. To
 do so, one computes an image that is the distance to the
 background. The maxima of this distance (i.e., the minima of the
-opposite of the distance) are chosen as markers, and the flooding of
-basins from such markers separates the two circles along a watershed
+opposite of the distance) are chosen as markers and the flooding of
+basins from such markers separate the two circles along a watershed
 line.
 
 See Wikipedia_ for more details on the algorithm.
