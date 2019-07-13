@@ -1,7 +1,5 @@
 body {
     font-family: "Lato", sans-serif;
-    letter-spacing: 0.02em;
-    font-size: 102%;
     line-height: 23px;
 }
 a {
@@ -322,14 +320,77 @@ a.copybtn {
     z-index: 100 !important;
 }
 
-dl.glossary dt { 
+dl.glossary dt {
     font-weight: bold;
     font-size: 1.1em;
 }
 
 
-dl.glossary dd { 
+dl.glossary dd {
   margin-bottom: 0.5em;
 }
 
 
+.classifier:before {
+    content: " : ";
+}
+
+.classifier {
+    font-weight: normal;
+}
+
+dl .field-list > dt {
+    padding-top: 0.1em;
+    font-size: 19px;
+}
+
+.seealso .admonition-title {
+    font-size: 19px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.seealso > dl {
+    margin-bottom: 0;
+}
+
+/* No padding at bottom of See Also */
+
+.seealso > dl > dd {
+    padding-bottom: 0;
+}
+
+dl .field-list > dd {
+    border-left: solid 10px #eee;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-top: 0.5em;
+}
+
+.field-list p {
+    margin-bottom: 0;
+}
+
+dl.citation {
+    padding: 0em 1em 1em 1em;
+    margin: 0em;
+}
+
+.citation * {
+    display: inline;
+}
+
+.citation > dt {
+    background: none;
+    color: black;
+}
+
+.citation > dt:before {
+    display: block;
+    white-space: pre;
+    content: "\A";
+}
+
+.citation > dt:first-child:before {
+    display: inline;
+}

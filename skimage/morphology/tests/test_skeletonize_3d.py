@@ -11,7 +11,6 @@ from skimage.morphology import skeletonize, skeletonize_3d
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_, parametrize
-from skimage._shared._warnings import expected_warnings
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
@@ -76,10 +75,8 @@ def test_dtype_conv():
     img[img < 0.5] = 0
 
     orig = img.copy()
-    with expected_warnings(['precision']):
-        res = skeletonize(img, method='lee')
-    with expected_warnings(['precision']):
-        img_max = img_as_ubyte(img).max()
+    res = skeletonize(img, method='lee')
+    img_max = img_as_ubyte(img).max()
 
     assert_equal(res.dtype, np.uint8)
     assert_equal(img, orig)  # operation does not clobber the original
@@ -92,10 +89,7 @@ def test_dtype_conv():
 def test_input_with_warning(img):
     # check that the input is not clobbered
     # for 2D and 3D images of varying dtypes
-    # Skeletonize changes it to uint8. Therefore, for images of type float,
-    # we can expect a warning.
-    with expected_warnings(['precision']):
-        check_input(img)
+    check_input(img)
 
 
 @parametrize("img", [
@@ -137,8 +131,7 @@ def test_skeletonize_num_neighbours():
     circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
     image[circle1] = 1
     image[circle2] = 0
-    with expected_warnings(['precision']):
-        result = skeletonize(image, method='lee')
+    result = skeletonize(image, method='lee')
 
     # there should never be a 2x2 block of foreground pixels in a skeleton
     mask = np.array([[1,  1],

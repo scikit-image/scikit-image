@@ -18,25 +18,35 @@ from ..restoration.uft import laplacian
 
 EROSION_SELEM = generate_binary_structure(2, 2)
 
-HSOBEL_WEIGHTS = np.array([[ 1, 2, 1],
-                           [ 0, 0, 0],
-                           [-1,-2,-1]]) / 4.0
+HSOBEL_WEIGHTS = np.array([[1, 2, 1],
+                           [0, 0, 0],
+                           [-1, -2, -1]]) / 4.0
 VSOBEL_WEIGHTS = HSOBEL_WEIGHTS.T
 
-HSCHARR_WEIGHTS = np.array([[ 3,  10,  3],
-                            [ 0,   0,  0],
+HSCHARR_WEIGHTS = np.array([[3, 10, 3],
+                            [0, 0, 0],
                             [-3, -10, -3]]) / 16.0
 VSCHARR_WEIGHTS = HSCHARR_WEIGHTS.T
 
-HPREWITT_WEIGHTS = np.array([[ 1, 1, 1],
-                             [ 0, 0, 0],
-                             [-1,-1,-1]]) / 3.0
+HPREWITT_WEIGHTS = np.array([[1, 1, 1],
+                             [0, 0, 0],
+                             [-1, -1, -1]]) / 3.0
 VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 ROBERTS_PD_WEIGHTS = np.array([[1, 0],
                                [0, -1]], dtype=np.double)
 ROBERTS_ND_WEIGHTS = np.array([[0, 1],
                                [-1, 0]], dtype=np.double)
+
+# These filter weights can be found in Farid & Simoncelli (2004),
+# Table 1 (3rd and 4th row). Additional decimal places were computed
+# using the code found at https://www.cs.dartmouth.edu/farid/
+p = np.array([[0.0376593171958126, 0.249153396177344, 0.426374573253687,
+               0.249153396177344, 0.0376593171958126]])
+d1 = np.array([[0.109603762960254, 0.276690988455557, 0, -0.276690988455557,
+                -0.109603762960254]])
+HFARID_WEIGHTS = d1.T * p
+VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
 
 def _mask_filter_result(result, mask):
@@ -101,7 +111,7 @@ def sobel(image, mask=None):
     >>> edges = filters.sobel(camera)
     """
     assert_nD(image, 2)
-    out = np.sqrt(sobel_h(image, mask)**2 + sobel_v(image, mask)**2)
+    out = np.sqrt(sobel_h(image, mask) ** 2 + sobel_v(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
 
@@ -212,7 +222,7 @@ def scharr(image, mask=None):
     >>> from skimage import filters
     >>> edges = filters.scharr(camera)
     """
-    out = np.sqrt(scharr_h(image, mask)**2 + scharr_v(image, mask)**2)
+    out = np.sqrt(scharr_h(image, mask) ** 2 + scharr_v(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
 
@@ -330,7 +340,7 @@ def prewitt(image, mask=None):
     >>> edges = filters.prewitt(camera)
     """
     assert_nD(image, 2)
-    out = np.sqrt(prewitt_h(image, mask)**2 + prewitt_v(image, mask)**2)
+    out = np.sqrt(prewitt_h(image, mask) ** 2 + prewitt_v(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
 
@@ -429,8 +439,8 @@ def roberts(image, mask=None):
 
     """
     assert_nD(image, 2)
-    out = np.sqrt(roberts_pos_diag(image, mask)**2 +
-                  roberts_neg_diag(image, mask)**2)
+    out = np.sqrt(roberts_pos_diag(image, mask) ** 2 +
+                  roberts_neg_diag(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
 
@@ -530,7 +540,126 @@ def laplace(image, ksize=3, mask=None):
 
     """
     image = img_as_float(image)
-    # Create the discrete Laplacian operator - We keep only the real part of the filter
-    _, laplace_op = laplacian(image.ndim, (ksize, ) * image.ndim)
+    # Create the discrete Laplacian operator - We keep only the real part of
+    # the filter
+    _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
     result = convolve(image, laplace_op)
+    return _mask_filter_result(result, mask)
+
+
+def farid(image, mask=None):
+    """Find the edge magnitude using the Farid transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Farid edge map.
+
+    See also
+    --------
+    sobel, prewitt, canny
+
+    Notes
+    -----
+    Take the square root of the sum of the squares of the horizontal and
+    vertical derivatives to get a magnitude that is somewhat insensitive to
+    direction. Similar to the Scharr operator, this operator is designed with
+    a rotation invariance constraint.
+
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Wikipedia, "Farid and Simoncelli Derivatives." Available at:
+           <https://en.wikipedia.org/wiki/Image_derivatives#Farid_and_Simoncelli_Derivatives>
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> camera = data.camera()
+    >>> from skimage import filters
+    >>> edges = filters.farid(camera)
+    """
+    assert_nD(image, 2)
+    out = np.sqrt(farid_h(image, mask) ** 2 + farid_v(image, mask) ** 2)
+    out /= np.sqrt(2)
+    return out
+
+
+def farid_h(image, mask=None):
+    """Find the horizontal edges of an image using the Farid transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Farid edge map.
+
+    Notes
+    -----
+    The kernel was constructed using the 5-tap weights from [1].
+
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    .. [2] Farid, H. and Simoncelli, E. P. "Optimally rotation-equivariant
+           directional derivative kernels", In: 7th International Conference on
+           Computer Analysis of Images and Patterns, Kiel, Germany. Sep, 1997.
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, HFARID_WEIGHTS)
+    return _mask_filter_result(result, mask)
+
+
+def farid_v(image, mask=None):
+    """Find the vertical edges of an image using the Farid transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : 2-D array
+        The Farid edge map.
+
+    Notes
+    -----
+    The kernel was constructed using the 5-tap weights from [1].
+
+    References
+    ----------
+    .. [1] Farid, H. and Simoncelli, E. P., "Differentiation of discrete
+           multidimensional signals", IEEE Transactions on Image Processing
+           13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
+    """
+    assert_nD(image, 2)
+    image = img_as_float(image)
+    result = convolve(image, VFARID_WEIGHTS)
     return _mask_filter_result(result, mask)

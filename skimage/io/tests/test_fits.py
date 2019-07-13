@@ -4,31 +4,19 @@ import skimage.io as io
 from skimage import data_dir
 from skimage._shared import testing
 
-
-pyfits_available = True
-
-try:
-    from astropy.io import fits as pyfits
-except ImportError:
-    try:
-        import pyfits
-    except ImportError:
-        pyfits_available = False
-
-if pyfits_available:
-    import skimage.io._plugins.fits_plugin as fplug
+testing.pytest.importorskip('astropy')
+from astropy.io import fits
+import skimage.io._plugins.fits_plugin as fplug
 
 
 def test_fits_plugin_import():
-    # Make sure we get an import exception if PyFITS isn't there
+    # Make sure we get an import exception if Astropy isn't there
     # (not sure how useful this is, but it ensures there isn't some other
     # error when trying to load the plugin)
     try:
         io.use_plugin('fits')
     except ImportError:
-        assert not pyfits_available
-    else:
-        assert pyfits_available
+        raise()
 
 
 def teardown():

@@ -6,7 +6,8 @@ from skimage import img_as_float
 from skimage import draw
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
-from skimage._shared.testing import test_parallel, expected_warnings
+from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 import pytest
 
