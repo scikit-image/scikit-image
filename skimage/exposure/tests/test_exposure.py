@@ -267,6 +267,12 @@ def test_rescale_uint14_limits():
     assert_array_almost_equal(out, [0, uint14_max])
 
 
+def test_rescale_same_values():
+    image = np.zeros((2,2), dtype=np.uint8)
+    out = exposure.rescale_intensity(image)
+    assert_array_almost_equal(out, image)
+
+
 # Test adaptive histogram equalization
 # ====================================
 
