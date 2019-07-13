@@ -657,10 +657,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
         bounding box.
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
-    **inertia_tensor** : (Ndim, Ndim) ndarray
+    **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
-        The N eigen values of the inertia tensor in decreasing order.
+        The eigenvalues of the inertia tensor in decreasing order.
     **intensity_image** : ndarray
         Image inside region bounding box.
     **label** : int
