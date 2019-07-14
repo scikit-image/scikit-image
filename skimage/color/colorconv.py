@@ -36,14 +36,14 @@ Supported color spaces
         Defined in terms of LAB CIE.  C and H are the polar representation of
         a and b.  The polar angle C is defined to be on ``(0, 2*pi)``
 * C1C2C3 : Hexadecimal color #c1c2c3
-        C1C2C3 color space is obtained from RGB manipulation 
-        and is invariant to shadowing effects of light 
+        C1C2C3 color space is obtained from RGB manipulation
+        and is invariant to shadowing effects of light
         interaction particularly for matte objects
 * MAXRGB : max(R), max(G), max(B)
-        MaxRGB is an extremely simple method of estimating the chromaticity 
-        of the scene illumination for color constancy and automatic white 
-        balancing based on the assumption that the triple of maxima obtained 
-        independently from each of the three color channels represents the 
+        MaxRGB is an extremely simple method of estimating the chromaticity
+        of the scene illumination for color constancy and automatic white
+        balancing based on the assumption that the triple of maxima obtained
+        independently from each of the three color channels represents the
         color of the illumination
 
 :author: Nicolas Pinto (rgb2hsv)
@@ -689,12 +689,8 @@ def rgb2xyz(rgb):
     return _convert(xyz_from_rgb, arr)
 
 
-
 def rgb2c1c2c3(rgb):
     """RGB to C1C2C3 color space conversion.
-    C1C2C3 color space is obtained from RGB manipulation 
-    and is invariant to shadowing effects of light 
-    interaction particularly for matte objects
 
     Parameters
     ----------
@@ -710,6 +706,12 @@ def rgb2c1c2c3(rgb):
     ------
     ValueError
         If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
+        
+    Notes
+    -----
+    C1C2C3 color space is obtained from RGB manipulation
+    and is invariant to shadowing effects of light
+    interaction particularly for matte objects
 
     References
     ----------
@@ -725,17 +727,12 @@ def rgb2c1c2c3(rgb):
         np.maximum(rgb[..., 1], rgb[..., 2]) + np.finfo(float).eps, 
         np.maximum(rgb[..., 0], rgb[..., 2]) + np.finfo(float).eps, 
         np.maximum(rgb[..., 0], rgb[..., 1]) + np.finfo(float).eps
-        )))
+    )))
     return out
 
 
 def rgb2maxrgb(rgb):
     """RGB to MAXRGB color space conversion.
-    MaxRGB is an extremely simple method of estimating the chromaticity 
-    of the scene illumination for color constancy and automatic white 
-    balancing based on the assumption that the triple of maxima obtained 
-    independently from each of the three color channels represents the 
-    color of the illumination
 
     Parameters
     ----------
@@ -751,7 +748,15 @@ def rgb2maxrgb(rgb):
     ------
     ValueError
         If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
-
+    
+    Notes
+    ------
+    MaxRGB is an extremely simple method of estimating the chromaticity
+    of the scene illumination for color constancy and automatic white
+    balancing based on the assumption that the triple of maxima obtained
+    independently from each of the three color channels represents the
+    color of the illumination
+    
     References
     ----------
     .. [1] https://docs.gimp.org/en/plug-in-max-rgb.html
@@ -766,7 +771,7 @@ def rgb2maxrgb(rgb):
     R = rgb[:, :, 0]
     G = rgb[:, :, 1]
     B = rgb[:, :, 2]
-    M = np.max(rgb, axis = -1)
+    M = np.max(rgb, axis=-1)
     R[R < M] = 0
     G[G < M] = 0
     B[B < M] = 0
