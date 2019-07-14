@@ -34,6 +34,6 @@ def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
     data = np.ones(im_true_r.shape)
     data[ignored] = 0
     if normalize:
-        data = data/im_true.size
+        data = data / im_true.size
     cont = sparse.coo_matrix((data, (im_true_r, im_test_r))).tocsr()
     return cont

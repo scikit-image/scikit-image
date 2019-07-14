@@ -1,8 +1,9 @@
 
 import numpy as np
-from ..util.dtype import dtype_range
-from ..evaluate.simple_metrics import (mean_squared_error, peak_signal_noise_ratio, normalized_root_mse)
-from .._shared.utils import skimage_deprecation, warn
+from ..evaluate.simple_metrics import (mean_squared_error,
+                                       peak_signal_noise_ratio,
+                                       normalized_root_mse)
+from .._shared.utils import warn
 
 __all__ = ['compare_mse',
            'compare_nrmse',

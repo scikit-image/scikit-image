@@ -12,7 +12,7 @@ def test_contingency_table():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
 
-    table1 = sparse.coo_matrix((np.full(im_true.size, 1/im_true.size),
+    table1 = sparse.coo_matrix((np.full(im_true.size, 1 / im_true.size),
                                 (im_true.ravel(), im_test.ravel())),
                                dtype=float).tocsr()
     table2 = contingency_table(im_true, im_test, normalize=True)

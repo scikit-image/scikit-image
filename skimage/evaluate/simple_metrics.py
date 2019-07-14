@@ -85,7 +85,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
 
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true*im_true), dtype=np.float64))
+        denom = np.sqrt(np.mean((im_true * im_true), dtype=np.float64))
     elif norm_type == 'min-max':
         denom = im_true.max() - im_true.min()
     elif norm_type == 'mean':
