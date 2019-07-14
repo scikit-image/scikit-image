@@ -1,4 +1,5 @@
 from math import sqrt, atan2, pi as PI
+import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -195,7 +196,9 @@ class RegionProperties:
 
     @only2d
     def eccentricity(self):
-        l1, l2 = self.inertia_tensor_eigvals
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'regionprops and image moments')
+            l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
@@ -261,11 +264,15 @@ class RegionProperties:
         return np.min(self.intensity_image[self.image])
 
     def major_axis_length(self):
-        l1 = self.inertia_tensor_eigvals[0]
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'regionprops and image moments')
+            l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
     def minor_axis_length(self):
-        l2 = self.inertia_tensor_eigvals[-1]
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'regionprops and image moments')
+            l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
     @_cached
