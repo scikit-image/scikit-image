@@ -231,15 +231,15 @@ cdef inline cnp.float64_t _sq_euclidean_distance(
     Py_ssize_t p2,
     Py_ssize_t[::1] unravel_factors
 ) nogil:
-    """Calculate the squared euclidean distance between two points in a raveled array.
+    """Calculate the squared euclidean distance between two points.
 
     Parameters
     ----------
     p1, p2 :
         Two raveled coordinates (indices to a raveled array). 
     unravel_factors :
-        An array of factors for all dimensions except the first one. E.g. if the
-        unraveled array has the shape ``(1, 2, 3, 4)`` this should be 
+        An array of factors for all dimensions except the first one. E.g. if
+        the unraveled array has the shape ``(1, 2, 3, 4)`` this should be 
         ``np.array([2 * 3 * 4, 3 * 4, 4])``.
 
     Returns
@@ -283,8 +283,8 @@ def _remove_close_maxima(
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
     priority : ndarray, one-dimensional
-        A one-dimensional array of indices indicating the order in which conflicting
-        maxima are kept.
+        A one-dimensional array of indices indicating the order in which
+        conflicting maxima are kept.
     minimal_distance : float
         The minimal euclidean distance allowed between non-conflicting maxima.
     """
@@ -318,8 +318,8 @@ def _remove_close_maxima(
                 if queue_count[start_index] == 1:
                     continue
                 if maxima[start_index] == 0:
-                    # This should never be the case and hints either at faulty values in
-                    # `priority` or a bug in this algorithm
+                    # This should never be the case and hints either at faulty
+                    # values in `priority` or a bug in this algorithm
                     with gil:
                         raise ValueError(
                             "value {} in priority does not point to maxima"
@@ -331,8 +331,9 @@ def _remove_close_maxima(
                 queue_clear(&to_search)
                 queue_clear(&to_delete)
 
-                # Find all points of the current maximum and queue in `current_maximum`,
-                # queue the points surrounding the maximum in `to_search`
+                # Find all points of the current maximum and queue in
+                # `current_maximum`, queue the points surrounding the maximum
+                # in `to_search`
                 queue_push(&current_maximum, &start_index)
                 queue_count[start_index] = 1
                 while queue_pop(&current_maximum, &current_index):
@@ -349,7 +350,8 @@ def _remove_close_maxima(
                             queue_push(&to_search, &neighbor)
                             queue_count[neighbor] = 1
 
-                # Evaluate the space within the minimal distance of the current maximum
+                # Evaluate the space within the minimal distance of the current
+                # maximum
                 while queue_pop(&to_search, &current_index):
                     # Check if `current_index` is in range of any point
                     # in `current_maximum`
@@ -362,10 +364,11 @@ def _remove_close_maxima(
                             break
                     else:
                         # Didn't find any point close enough
-                        # -> we aren't in range anymore and can ignore this point
+                        # -> not in range anymore and can ignore this point
                         continue
 
-                    # If another maximum is at `current_index`, queue it in `to_delete`
+                    # If another maximum is at `current_index`, queue it in
+                    # `to_delete`
                     if maxima[current_index] == 1:
                         queue_push(&to_delete, &current_index)
                         # Set flag to 2, to indicate that it was queued twice:
@@ -384,8 +387,8 @@ def _remove_close_maxima(
                 # Restore empty range surrounding the current_maximum
                 queue_restore(&to_search)
                 while queue_pop(&to_search, &current_index):
-                    # Decrease queue count to honor points which are queued a second
-                    # time in `to_delete`
+                    # Decrease queue count to honor points which are queued a
+                    # second time in `to_delete`
                     queue_count[current_index] -= 1
 
                 # Remove maxima that are to close
@@ -396,7 +399,10 @@ def _remove_close_maxima(
                         neighbor = current_index + neighbor_offsets[i]
                         if not 0 <= neighbor < maxima.shape[0]:
                             continue
-                        if queue_count[neighbor] == 0 and maxima[neighbor] == 1:
+                        if (
+                            queue_count[neighbor] == 0
+                            and maxima[neighbor] == 1
+                        ):
                             queue_push(&to_delete, &neighbor)
                             queue_count[neighbor] = 1
 

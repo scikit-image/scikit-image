@@ -358,8 +358,8 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid maxima.
     distance : float, optional
-        The minimal euclidean distance allowed between maxima. In case of a conflict,
-        the maximum with the smaller value is dismissed.
+        The minimal euclidean distance allowed between maxima. In case of a
+        conflict, the maximum with the smaller value is dismissed.
 
     Returns
     -------
@@ -488,12 +488,13 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         # No padding was performed but set edge values back to 0
         _set_edge_values_inplace(flags, value=0)
 
-    # Ensure contiguity which might be broken due to cropping and is required in case
-    # maxima are selected based on their distance to each other
+    # Ensure contiguity which might be broken due to cropping and is required
+    # in case maxima are selected based on their distance to each other
     flags = np.ascontiguousarray(flags)
 
     if distance:
-        # Reconstruct offsets in case flags was padded during earlier construction
+        # Reconstruct offsets in case flags was padded during earlier
+        # construction
         neighbor_offsets = _offsets_to_raveled_neighbors(
             flags.shape, selem, center=((1,) * flags.ndim)
         )
@@ -545,8 +546,8 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid minima.
     distance : float, optional
-        The minimal euclidean distance allowed between minima. In case of a conflict,
-        the minima with the larger value is dismissed.
+        The minimal euclidean distance allowed between minima. In case of a
+        conflict, the minima with the larger value is dismissed.
 
     Returns
     -------
