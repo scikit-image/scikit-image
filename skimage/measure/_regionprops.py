@@ -196,9 +196,7 @@ class RegionProperties:
 
     @only2d
     def eccentricity(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', 'regionprops and image moments')
-            l1, l2 = self.inertia_tensor_eigvals
+        l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
@@ -264,15 +262,11 @@ class RegionProperties:
         return np.min(self.intensity_image[self.image])
 
     def major_axis_length(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', 'regionprops and image moments')
-            l1 = self.inertia_tensor_eigvals[0]
+        l1 = self.inertia_tensor_eigvals[0]
         return 4 * sqrt(l1)
 
     def minor_axis_length(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', 'regionprops and image moments')
-            l2 = self.inertia_tensor_eigvals[-1]
+        l2 = self.inertia_tensor_eigvals[-1]
         return 4 * sqrt(l2)
 
     @_cached
@@ -510,9 +504,6 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-    coordinates : 'rc' or 'xy', optional
-        Coordinate conventions for 2D images. (Only 'rc' coordinates are
-        supported for 3D images.)
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
         For a list of available properties, please see :func:`regionprops`.
