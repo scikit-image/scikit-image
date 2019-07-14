@@ -27,8 +27,8 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
 
     References
     ----------
-    .. [1] Marina Meilă (2007), Comparing clusterings—an information based distance,
-           Journal of Multivariate Analysis, Volume 98, Issue 5, Pages
+    .. [1] Marina Meilă (2007), Comparing clusterings—an information based
+           distance,Journal of Multivariate Analysis, Volume 98, Issue 5, Pages
            873-895, ISSN 0047-259X, https://doi.org/10.1016/j.jmva.2006.11.013.
     """
     hxgy, hygx = _vi_tables(im_true, im_test, table,

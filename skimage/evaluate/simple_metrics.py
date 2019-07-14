@@ -1,6 +1,6 @@
 import numpy as np
 from ..util.dtype import dtype_range
-from .._shared.utils import skimage_deprecation, warn
+from .._shared.utils import warn
 
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
