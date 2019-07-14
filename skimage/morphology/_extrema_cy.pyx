@@ -5,7 +5,9 @@
 
 """Cython code used in extrema.py."""
 
+import numpy as np
 cimport numpy as cnp
+from libc.math cimport pow
 
 
 # Must be defined to use QueueWithHistory
@@ -57,7 +59,7 @@ def _local_maxima(dtype_t[::1] image not None,
         An array of flags that is used to store the state of each pixel during
         evaluation and is MODIFIED INPLACE. Initially, pixels that border the
         image edge must be marked as "BORDER_INDEX" while all other pixels
-        should be marked with "NOT_MAXIMUM".
+        should be marked with "NOT_MAXIMUM". Modified in place.
     neighbor_offsets : ndarray
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
@@ -107,7 +109,7 @@ cdef inline void _mark_candidates_in_last_dimension(
         The raveled view of a n-dimensional array.
     flags :
         An array of flags that is used to store the state of each pixel during
-        evaluation.
+        evaluation. Modified in place.
     
     Notes
     -----
@@ -152,7 +154,7 @@ cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
     ----------
     flags :
         An array of flags that is used to store the state of each pixel during
-        evaluation.
+        evaluation. Modified in place.
     """
     cdef Py_ssize_t i = 1
     while i < flags.shape[0]:
@@ -173,7 +175,7 @@ cdef inline void _fill_plateau(
         The raveled view of a n-dimensional array.
     flags :
         An array of flags that is used to store the state of each pixel during
-        evaluation.
+        evaluation. Modified in place.
     neighbor_offsets :
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
@@ -222,3 +224,183 @@ cdef inline void _fill_plateau(
         # Initial guess was wrong -> flag as NOT_MAXIMUM
         while queue_pop(queue_ptr, &neighbor):
             flags[neighbor] = NOT_MAXIMUM
+
+
+cdef inline cnp.float64_t _sq_euclidean_distance(
+    Py_ssize_t p1,
+    Py_ssize_t p2,
+    Py_ssize_t[::1] unravel_factors
+) nogil:
+    """Calculate the squared euclidean distance between two points in a raveled array.
+
+    Parameters
+    ----------
+    p1, p2 :
+        Two raveled coordinates (indices to a raveled array). 
+    unravel_factors :
+        An array of factors for all dimensions except the first one. E.g. if the
+        unraveled array has the shape ``(1, 2, 3, 4)`` this should be 
+        ``np.array([2 * 3 * 4, 3 * 4, 4])``.
+
+    Returns
+    -------
+    sq_distance :
+        The squared euclidean distance between `p1` and `p2`.
+    """
+    cdef:
+        Py_ssize_t i, div1, div2, mod1, mod2
+        cnp.float64_t sq_distance
+    sq_distance = 0
+    mod1 = p1
+    mod2 = p2
+    for i in range(unravel_factors.shape[0]):
+        div1 = mod1 // unravel_factors[i]
+        div2 = mod2 // unravel_factors[i]
+        mod1 %= unravel_factors[i]
+        mod2 %= unravel_factors[i]
+        sq_distance += pow(div1 - div2, 2)
+    sq_distance += pow(mod1 - mod2, 2)
+    return sq_distance
+
+
+def _remove_close_maxima(
+    unsigned char[::1] maxima,
+    tuple shape,
+    Py_ssize_t[::1] neighbor_offsets,
+    Py_ssize_t[::1] priority,
+    cnp.float64_t minimal_distance,
+):
+    """Remove maxima which are to close to maxima with larger values.
+
+    Parameters
+    ----------
+    maxima : ndarray, one-dimensional
+        A raveled boolean array indicating the positions of local maxima which
+        can be reshaped with `shape`. Modified in place.
+    shape : tuple
+        A tuple indicating the shape of the unraveled `maxima`.
+    neighbor_offsets : ndarray
+        A one-dimensional array that contains the offsets to find the
+        connected neighbors for any index in `image`.
+    priority : ndarray, one-dimensional
+        A one-dimensional array of indices indicating the order in which conflicting
+        maxima are kept.
+    minimal_distance : float
+        The minimal euclidean distance allowed between non-conflicting maxima.
+    """
+    cdef:
+        Py_ssize_t p, i, start_index, current_index, neighbor
+        cnp.float64_t sq_distance,
+        Py_ssize_t[::1] unravel_factors
+        unsigned char[::1] queue_count,
+        QueueWithHistory current_maximum, to_search, to_delete
+
+    sq_distance = minimal_distance * minimal_distance
+    queue_count = np.zeros(maxima.shape[0], dtype=np.uint8)
+
+    # Calculate factors to unravel indices for `maxima` and `flags`:
+    # -> omit the first dimension
+    # -> multiply dimension with all following dimensions
+    unravel_factors = np.array(shape[1:], dtype=np.intp)
+    for i in range(unravel_factors.shape[0] - 2, -1, -1):
+        unravel_factors[i] *= unravel_factors[i + 1]
+
+    with nogil:
+        queue_init(&current_maximum, 64)
+        queue_init(&to_search, 64)
+        queue_init(&to_delete, 64)
+
+        try:
+            for p in range(priority.shape[0]):
+                start_index = priority[p]
+
+                # Index was queued & dealt with earlier can be safely skipped
+                if queue_count[start_index] == 1:
+                    continue
+                if maxima[start_index] == 0:
+                    # This should never be the case and hints either at faulty values in
+                    # `priority` or a bug in this algorithm
+                    with gil:
+                        raise ValueError(
+                            "value {} in priority does not point to maxima"
+                            .format(start_index)
+                        )
+
+                # Empty buffers of all queues
+                queue_clear(&current_maximum)
+                queue_clear(&to_search)
+                queue_clear(&to_delete)
+
+                # Find all points of the current maximum and queue in `current_maximum`,
+                # queue the points surrounding the maximum in `to_search`
+                queue_push(&current_maximum, &start_index)
+                queue_count[start_index] = 1
+                while queue_pop(&current_maximum, &current_index):
+                    for i in range(neighbor_offsets.shape[0]):
+                        neighbor = current_index + neighbor_offsets[i]
+                        if not 0 <= neighbor < maxima.shape[0]:
+                            continue
+                        if queue_count[neighbor] == 1:
+                            continue
+                        if maxima[neighbor] == 1:
+                            queue_push(&current_maximum, &neighbor)
+                            queue_count[neighbor] = 1
+                        else:
+                            queue_push(&to_search, &neighbor)
+                            queue_count[neighbor] = 1
+
+                # Evaluate the space within the minimal distance of the current maximum
+                while queue_pop(&to_search, &current_index):
+                    # Check if `current_index` is in range of any point
+                    # in `current_maximum`
+                    queue_restore(&current_maximum)
+                    while queue_pop(&current_maximum, &i):
+                        if _sq_euclidean_distance(
+                            current_index, i, unravel_factors
+                        ) <= sq_distance:
+                            # At least one point is close enough -> break early
+                            break
+                    else:
+                        # Didn't find any point close enough
+                        # -> we aren't in range anymore and can ignore this point
+                        continue
+
+                    # If another maximum is at `current_index`, queue it in `to_delete`
+                    if maxima[current_index] == 1:
+                        queue_push(&to_delete, &current_index)
+                        # Set flag to 2, to indicate that it was queued twice:
+                        # in `to_search` and `to_delete`
+                        queue_count[current_index] = 2
+
+                    # Queue neighbors of `current_index` for searching
+                    for i in range(neighbor_offsets.shape[0]):
+                        neighbor = current_index + neighbor_offsets[i]
+                        if not 0 <= neighbor < maxima.shape[0]:
+                            continue
+                        if queue_count[neighbor] == 0:
+                            queue_push(&to_search, &neighbor)
+                            queue_count[neighbor] = 1
+
+                # Restore empty range surrounding the current_maximum
+                queue_restore(&to_search)
+                while queue_pop(&to_search, &current_index):
+                    # Decrease queue count to honor points which are queued a second
+                    # time in `to_delete`
+                    queue_count[current_index] -= 1
+
+                # Remove maxima that are to close
+                while queue_pop(&to_delete, &current_index):
+                    maxima[current_index] = 0
+                    # Find connected points of current deleted maximum
+                    for i in range(neighbor_offsets.shape[0]):
+                        neighbor = current_index + neighbor_offsets[i]
+                        if not 0 <= neighbor < maxima.shape[0]:
+                            continue
+                        if queue_count[neighbor] == 0 and maxima[neighbor] == 1:
+                            queue_push(&to_delete, &neighbor)
+                            queue_count[neighbor] = 1
+
+        finally:
+            queue_exit(&current_maximum)
+            queue_exit(&to_search)
+            queue_exit(&to_delete)

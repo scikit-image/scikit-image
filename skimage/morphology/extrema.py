@@ -16,7 +16,7 @@ from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
 from . import greyreconstruct
 from ._util import _offsets_to_raveled_neighbors
-from ._extrema_cy import _local_maxima
+from ._extrema_cy import _local_maxima, _remove_close_maxima
 
 
 def _add_constant_clip(image, const_value):
@@ -329,7 +329,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
 
 
 def local_maxima(image, selem=None, connectivity=None, indices=False,
-                 allow_borders=True):
+                 allow_borders=True, distance=None):
     """Find local maxima of n-dimensional array.
 
     The local maxima are defined as connected sets of pixels with equal gray
@@ -357,6 +357,9 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         the output will be a boolean array with the same shape as `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid maxima.
+    distance : float, optional
+        The minimal euclidean distance allowed between maxima. In case of a conflict,
+        the maximum with the smaller value is dismissed.
 
     Returns
     -------
@@ -485,6 +488,27 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         # No padding was performed but set edge values back to 0
         _set_edge_values_inplace(flags, value=0)
 
+    # Ensure contiguity which might be broken due to cropping and is required in case
+    # maxima are selected based on their distance to each other
+    flags = np.ascontiguousarray(flags)
+
+    if distance:
+        # Reconstruct offsets in case flags was padded during earlier construction
+        neighbor_offsets = _offsets_to_raveled_neighbors(
+            flags.shape, selem, center=((1,) * flags.ndim)
+        )
+        # Sort maxima indices based on their image value
+        priority = np.nonzero(flags.ravel())[0]
+        sort = np.argsort(image.ravel()[priority])[::-1]
+        priority = np.ascontiguousarray(priority[sort])
+        _remove_close_maxima(
+            maxima=flags.ravel(),
+            shape=flags.shape,
+            neighbor_offsets=neighbor_offsets,
+            priority=priority,
+            minimal_distance=distance,
+        )
+
     if indices:
         return np.nonzero(flags)
     else:
@@ -492,7 +516,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
 
 
 def local_minima(image, selem=None, connectivity=None, indices=False,
-                 allow_borders=True):
+                 allow_borders=True, distance=None):
     """Find local minima of n-dimensional array.
 
     The local minima are defined as connected sets of pixels with equal gray
@@ -520,6 +544,9 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         the output will be a boolean array with the same shape as `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid minima.
+    distance : float, optional
+        The minimal euclidean distance allowed between minima. In case of a conflict,
+        the minima with the larger value is dismissed.
 
     Returns
     -------
@@ -597,5 +624,6 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         selem=selem,
         connectivity=connectivity,
         indices=indices,
-        allow_borders=allow_borders
+        allow_borders=allow_borders,
+        distance=distance
     )
