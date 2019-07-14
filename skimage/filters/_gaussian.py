@@ -129,6 +129,12 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
+    if output is not None and not preserve_range:
+        if isinstance(output, np.ndarray):
+            if issubclass(output.dtype.type, np.integer):
+                preserve_range = True
+        elif issubclass(output, np.integer):
+            preserve_range = True
     image = convert_to_float(image, preserve_range)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
-                               truncate=truncate)
+    return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
+                               cval=cval, truncate=truncate)

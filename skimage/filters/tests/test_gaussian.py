@@ -68,3 +68,13 @@ def test_4d_ok():
     img[2, 2, 2, 2] = 1
     res = gaussian(img, 1, mode='reflect')
     assert np.allclose(res.sum(), 1)
+
+
+def test_output_type():
+    img = np.arange(16, dtype=np.uint8).reshape((4, 4))
+    output_type = np.uint8
+    gaussian_img = gaussian(img, 1, output=output_type)
+    assert gaussian_img.dtype == output_type
+    output_image = np.zeros_like(img, dtype=output_type)
+    gaussian_img = gaussian(img, 1, output=output_image)
+    assert gaussian_img.dtype == output_type
