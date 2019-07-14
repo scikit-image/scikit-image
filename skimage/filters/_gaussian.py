@@ -10,22 +10,6 @@ from .._shared.utils import warn, convert_to_float
 __all__ = ['gaussian']
 
 
-def _convert_input(image, preserve_range):
-    """
-    Parameters
-    ----------
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
-    """
-    if preserve_range:
-        image = image.astype(np.double)
-    else:
-        image = img_as_float(image)
-    return image
-
-
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
              multichannel=None, preserve_range=False, truncate=4.0):
     """Multi-dimensional Gaussian filter.
