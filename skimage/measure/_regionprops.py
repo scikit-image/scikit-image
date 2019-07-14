@@ -1,5 +1,4 @@
 from math import sqrt, atan2, pi as PI
-import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
