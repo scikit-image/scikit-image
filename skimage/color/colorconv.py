@@ -706,7 +706,7 @@ def rgb2c1c2c3(rgb):
     ------
     ValueError
         If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
-        
+
     Notes
     -----
     C1C2C3 color space is obtained from RGB manipulation
@@ -724,8 +724,8 @@ def rgb2c1c2c3(rgb):
     >>> img_c1c2c3 = rgb2c1c2c3(img)
     """
     out = np.arctan(rgb / np.dstack((
-        np.maximum(rgb[..., 1], rgb[..., 2]) + np.finfo(float).eps, 
-        np.maximum(rgb[..., 0], rgb[..., 2]) + np.finfo(float).eps, 
+        np.maximum(rgb[..., 1], rgb[..., 2]) + np.finfo(float).eps,
+        np.maximum(rgb[..., 0], rgb[..., 2]) + np.finfo(float).eps,
         np.maximum(rgb[..., 0], rgb[..., 1]) + np.finfo(float).eps
     )))
     return out
@@ -748,7 +748,7 @@ def rgb2maxrgb(rgb):
     ------
     ValueError
         If `rgb` is not a 3-D array of shape ``(.., .., 3)``.
-    
+
     Notes
     ------
     MaxRGB is an extremely simple method of estimating the chromaticity
@@ -756,7 +756,7 @@ def rgb2maxrgb(rgb):
     balancing based on the assumption that the triple of maxima obtained
     independently from each of the three color channels represents the
     color of the illumination
-    
+
     References
     ----------
     .. [1] https://docs.gimp.org/en/plug-in-max-rgb.html
