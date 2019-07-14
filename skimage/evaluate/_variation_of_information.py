@@ -7,7 +7,7 @@ __all__ = ['variation_of_information']
 
 def variation_of_information(im_true=None, im_test=None, *, table=None,
                              ignore_labels=[], normalize=False):
-    """Return the symmetric conditional entropies associated with the VI.
+    """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
@@ -24,6 +24,12 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     -------
     vi : ndarray of float, shape (2,)
         The conditional entropies of im_test|im_true and im_true|im_test.
+
+    References
+    ----------
+    .. [1] Marina Meilă (2007), Comparing clusterings—an information based distance,
+           Journal of Multivariate Analysis, Volume 98, Issue 5, Pages
+           873-895, ISSN 0047-259X, https://doi.org/10.1016/j.jmva.2006.11.013.
     """
     hxgy, hygx = _vi_tables(im_true, im_test, table,
                             ignore_labels, normalize=normalize)
