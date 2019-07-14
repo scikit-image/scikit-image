@@ -29,7 +29,8 @@ ctypedef fused dtype_t:
     cnp.float64_t
 
 
-# Definition of flag values used for `flags` in _local_maxima & _fill_plateau
+# Definition of flag values used for `flags` in _local_maxima, _fill_plateau,
+# and _remove_close_maxima
 cdef:
     # First or last index in a dimension
     unsigned char BORDER_INDEX = 3
@@ -38,6 +39,7 @@ cdef:
     # Index was queued (flood-fill) and might still be part of maximum OR
     # when evaluation is complete this flag value marks definite local maxima
     unsigned char QUEUED_CANDIDATE = 1
+    unsigned char MAXIMUM = 1
     # None of the above is true
     unsigned char NOT_MAXIMUM = 0
 
@@ -264,7 +266,7 @@ cdef inline cnp.float64_t _sq_euclidean_distance(
 
 
 def _remove_close_maxima(
-    unsigned char[::1] maxima,
+    unsigned char[::1] flags,
     tuple shape,
     Py_ssize_t[::1] neighbor_offsets,
     Py_ssize_t[::1] priority,
@@ -274,9 +276,10 @@ def _remove_close_maxima(
 
     Parameters
     ----------
-    maxima : ndarray, one-dimensional
+    flags : ndarray, one-dimensional
         A raveled boolean array indicating the positions of local maxima which
-        can be reshaped with `shape`. Modified in place.
+        can be reshaped with `shape`. Pixels that border the image edge must
+        be marked as "BORDER_INDEX". Modified in place.
     shape : tuple
         A tuple indicating the shape of the unraveled `maxima`.
     neighbor_offsets : ndarray
@@ -296,7 +299,7 @@ def _remove_close_maxima(
         QueueWithHistory current_maximum, to_search, to_delete
 
     sq_distance = minimal_distance * minimal_distance
-    queue_count = np.zeros(maxima.shape[0], dtype=np.uint8)
+    queue_count = np.zeros(flags.shape[0], dtype=np.uint8)
 
     # Calculate factors to unravel indices for `maxima` and `flags`:
     # -> omit the first dimension
@@ -317,7 +320,7 @@ def _remove_close_maxima(
                 # Index was queued & dealt with earlier can be safely skipped
                 if queue_count[start_index] == 1:
                     continue
-                if maxima[start_index] == 0:
+                if flags[start_index] != MAXIMUM:
                     # This should never be the case and hints either at faulty
                     # values in `priority` or a bug in this algorithm
                     with gil:
@@ -339,11 +342,12 @@ def _remove_close_maxima(
                 while queue_pop(&current_maximum, &current_index):
                     for i in range(neighbor_offsets.shape[0]):
                         neighbor = current_index + neighbor_offsets[i]
-                        if not 0 <= neighbor < maxima.shape[0]:
+                        if (
+                            flags[neighbor] == BORDER_INDEX
+                            or queue_count[neighbor] == 1
+                        ):
                             continue
-                        if queue_count[neighbor] == 1:
-                            continue
-                        if maxima[neighbor] == 1:
+                        if flags[neighbor] == MAXIMUM:
                             queue_push(&current_maximum, &neighbor)
                             queue_count[neighbor] = 1
                         else:
@@ -369,7 +373,7 @@ def _remove_close_maxima(
 
                     # If another maximum is at `current_index`, queue it in
                     # `to_delete`
-                    if maxima[current_index] == 1:
+                    if flags[current_index] == MAXIMUM:
                         queue_push(&to_delete, &current_index)
                         # Set flag to 2, to indicate that it was queued twice:
                         # in `to_search` and `to_delete`
@@ -378,7 +382,7 @@ def _remove_close_maxima(
                     # Queue neighbors of `current_index` for searching
                     for i in range(neighbor_offsets.shape[0]):
                         neighbor = current_index + neighbor_offsets[i]
-                        if not 0 <= neighbor < maxima.shape[0]:
+                        if flags[neighbor] == BORDER_INDEX:
                             continue
                         if queue_count[neighbor] == 0:
                             queue_push(&to_search, &neighbor)
@@ -393,15 +397,15 @@ def _remove_close_maxima(
 
                 # Remove maxima that are to close
                 while queue_pop(&to_delete, &current_index):
-                    maxima[current_index] = 0
+                    flags[current_index] = NOT_MAXIMUM
                     # Find connected points of current deleted maximum
                     for i in range(neighbor_offsets.shape[0]):
                         neighbor = current_index + neighbor_offsets[i]
-                        if not 0 <= neighbor < maxima.shape[0]:
+                        if flags[neighbor] == BORDER_INDEX:
                             continue
                         if (
                             queue_count[neighbor] == 0
-                            and maxima[neighbor] == 1
+                            and flags[neighbor] == MAXIMUM
                         ):
                             queue_push(&to_delete, &neighbor)
                             queue_count[neighbor] = 1

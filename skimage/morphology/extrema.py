@@ -481,6 +481,19 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
             else:
                 raise  # Otherwise raise original message
 
+        if distance:
+            # Sort maxima indices based on their image value
+            priority = np.nonzero(flags.ravel() == 1)[0]
+            sort = np.argsort(image.ravel()[priority])[::-1]
+            priority = np.ascontiguousarray(priority[sort])
+            _remove_close_maxima(
+                flags=flags.ravel(),
+                shape=flags.shape,
+                neighbor_offsets=neighbor_offsets,
+                priority=priority,
+                minimal_distance=distance,
+            )
+
     if allow_borders:
         # Revert padding performed at the beginning of the function
         flags = crop(flags, 1)
@@ -488,28 +501,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         # No padding was performed but set edge values back to 0
         _set_edge_values_inplace(flags, value=0)
 
-    # Ensure contiguity which might be broken due to cropping and is required
-    # in case maxima are selected based on their distance to each other
     flags = np.ascontiguousarray(flags)
-
-    if distance:
-        # Reconstruct offsets in case flags was padded during earlier
-        # construction
-        neighbor_offsets = _offsets_to_raveled_neighbors(
-            flags.shape, selem, center=((1,) * flags.ndim)
-        )
-        # Sort maxima indices based on their image value
-        priority = np.nonzero(flags.ravel())[0]
-        sort = np.argsort(image.ravel()[priority])[::-1]
-        priority = np.ascontiguousarray(priority[sort])
-        _remove_close_maxima(
-            maxima=flags.ravel(),
-            shape=flags.shape,
-            neighbor_offsets=neighbor_offsets,
-            priority=priority,
-            minimal_distance=distance,
-        )
-
     if indices:
         return np.nonzero(flags)
     else:
