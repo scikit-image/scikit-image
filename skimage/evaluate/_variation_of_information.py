@@ -4,25 +4,32 @@ from ._contingency_table import contingency_table
 
 __all__ = ['variation_of_information']
 
-def variation_of_information(im_true=None, im_test=None,*,table=None, ignore_labels=[], normalize = False):
+
+def variation_of_information(im_true=None, im_test=None, *, table=None,
+                             ignore_labels=[], normalize=False):
     """Return the symmetric conditional entropies associated with the VI.
+
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
     as the amount of under-segmentation of Y and H(X|Y) as the amount
     of over-segmentation. In other words, a perfect over-segmentation
     will have H(Y|X)=0 and a perfect under-segmentation will have H(X|Y)=0.
+
     Parameters
     ----------
     im_true, im_test : ndarray of int
         Label images / segmentations.
+
     Returns
     -------
     vi : ndarray of float, shape (2,)
         The conditional entropies of im_test|im_true and im_true|im_test.
     """
-    hxgy, hygx = _vi_tables(im_true, im_test, table, ignore_labels, normalize=normalize)
+    hxgy, hygx = _vi_tables(im_true, im_test, table,
+                            ignore_labels, normalize=normalize)
     # false splits, false merges
     return np.array([hygx.sum(), hxgy.sum()])
+
 
 def _xlogx(x):
     """Compute x * log_2(x).
@@ -46,7 +53,8 @@ def _xlogx(x):
     return y
 
 
-def _vi_tables(im_true, im_test, table=None, ignore_labels=[], normalize=False):
+def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
+               normalize=False):
     """Compute probability tables used for calculating VI.
     Parameters
     ----------
@@ -60,7 +68,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[], normalize=False):
     """
     if table is None:
         # normalize, since it is an identity op if already done
-        pxy = contingency_table(im_true, im_test, ignore_labels, normalize=normalize)
+        pxy = contingency_table(
+            im_true, im_test, ignore_labels, normalize=normalize)
 
     else:
         pxy = table
@@ -79,6 +88,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[], normalize=False):
     hxgy = -_xlogx(pxy @ py_inv).sum(axis=0) @ py
 
     return list(map(np.asarray, [hxgy, hygx]))
+
 
 def _invert_nonzero(arr):
     """Compute the inverse of the non-zero elements of arr, not changing 0.

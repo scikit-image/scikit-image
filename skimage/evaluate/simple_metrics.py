@@ -92,7 +92,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
         denom = im_true.mean()
     else:
         raise ValueError("Unsupported norm_type")
-    return np.sqrt(compare_mse(im_true, im_test)) / denom
+    return np.sqrt(mean_squared_error(im_true, im_test)) / denom
 
 
 def peak_signal_noise_ratio(im_true, im_test, data_range=None):
@@ -139,5 +139,5 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
 
     im_true, im_test = _as_floats(im_true, im_test)
 
-    err = compare_mse(im_true, im_test)
+    err = mean_squared_error(im_true, im_test)
     return 10 * np.log10((data_range ** 2) / err)

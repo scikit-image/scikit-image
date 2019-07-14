@@ -1,17 +1,20 @@
 from .simple_metrics import _assert_compatible
-import numpy as np
 from ._contingency_table import contingency_table
 
 __all__ = ['adapted_rand_error']
 
-def adapted_rand_error(im_true=None, im_test=None,*,table=None, ignore_labels=None, normalize=False):
-    """Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
+
+def adapted_rand_error(im_true=None, im_test=None, *, table=None,
+                       ignore_labels=None, normalize=False):
+    r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
+
     Parameters
     ----------
     im_true : ndarray of int
         Ground-truth label image.
     im_test : ndarray of int
         Test image.
+
     Returns
     -------
     are : float
@@ -25,9 +28,11 @@ def adapted_rand_error(im_true=None, im_test=None,*,table=None, ignore_labels=No
         The adapted Rand recall: this is the number of pairs of pixels that
         have the same label in the test label image *and* in the true image,
         divided by the number in the true image.
+
     Notes
     -----
     Pixels with label 0 in the true segmentation are ignored in the score.
+
     References
     ----------
     .. [1] Arganda-Carreras I, Turaga SC, Berger DR, et al. (2015)
@@ -38,7 +43,8 @@ def adapted_rand_error(im_true=None, im_test=None,*,table=None, ignore_labels=No
     _assert_compatible(im_true, im_test)
 
     if table is None:
-        p_ij = contingency_table(im_true, im_test, ignore_labels=[0], normalize=normalize)
+        p_ij = contingency_table(im_true, im_test, ignore_labels=[
+                                 0], normalize=normalize)
     else:
         p_ij = table
 

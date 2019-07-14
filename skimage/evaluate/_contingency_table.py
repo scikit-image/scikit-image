@@ -3,8 +3,10 @@ import numpy as np
 
 __all__ = ['contingency_table']
 
+
 def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
     """Return the contingency table for all regions in matched segmentations.
+
     Parameters
     ----------
     im_true : ndarray of int
@@ -16,6 +18,7 @@ def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
         values will not be counted in the score.
     normalize : bool
         Determines if the contingency table is normalized by pixel count.
+
     Returns
     -------
     cont : scipy.sparse.csr_matrix

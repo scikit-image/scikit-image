@@ -1,6 +1,7 @@
 
 import numpy as np
 from ..util.dtype import dtype_range
+from ..evaluate.simple_metrics import (mean_squared_error, peak_signal_noise_ratio, normalized_root_mse)
 from .._shared.utils import skimage_deprecation, warn
 
 __all__ = ['compare_mse',
@@ -40,13 +41,11 @@ def compare_mse(im1, im2):
     """
     warn('DEPRECATED: skimage.measure.compare_mse has been moved to '
          'skimage.evaluation.mean_squared_error. It will be removed from '
-         'skimage.measure in version 0.18')
-    _assert_compatible(im1, im2)
-    im1, im2 = _as_floats(im1, im2)
-    return np.mean(np.square(im1 - im2), dtype=np.float64)
+         'skimage.measure in version 0.18.')
+    return mean_squared_error(im1, im2)
 
 
-def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
+def compare_nrmse(im_true, im_test, norm_type='euclidean'):
     """Compute the normalized root mean-squared error (NRMSE) between two
     images.
 
@@ -84,19 +83,10 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     .. [1] https://en.wikipedia.org/wiki/Root-mean-square_deviation
 
     """
-    _assert_compatible(im_true, im_test)
-    im_true, im_test = _as_floats(im_true, im_test)
-
-    norm_type = norm_type.lower()
-    if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true*im_true), dtype=np.float64))
-    elif norm_type == 'min-max':
-        denom = im_true.max() - im_true.min()
-    elif norm_type == 'mean':
-        denom = im_true.mean()
-    else:
-        raise ValueError("Unsupported norm_type")
-    return np.sqrt(compare_mse(im_true, im_test)) / denom
+    warn('DEPRECATED: skimage.measure.compare_nrmse has been moved to '
+         'skimage.evaluation.normalized_root_mse. It will be removed from '
+         'skimage.measure in version 0.18.')
+    return normalized_root_mse(im_true, im_test, norm_type=norm_type)
 
 
 def compare_psnr(im_true, im_test, data_range=None):
@@ -123,25 +113,7 @@ def compare_psnr(im_true, im_test, data_range=None):
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 
     """
-    _assert_compatible(im_true, im_test)
-
-    if data_range is None:
-        if im_true.dtype != im_test.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im_true.")
-        dmin, dmax = dtype_range[im_true.dtype.type]
-        true_min, true_max = np.min(im_true), np.max(im_true)
-        if true_max > dmax or true_min < dmin:
-            raise ValueError(
-                "im_true has intensity values outside the range expected for "
-                "its data type.  Please manually specify the data_range")
-        if true_min >= 0:
-            # most common case (255 for uint8, 1 for float)
-            data_range = dmax
-        else:
-            data_range = dmax - dmin
-
-    im_true, im_test = _as_floats(im_true, im_test)
-
-    err = compare_mse(im_true, im_test)
-    return 10 * np.log10((data_range ** 2) / err)
+    warn('DEPRECATED: skimage.measure.compare_psnr has been moved to '
+         'skimage.evaluation.peak_signal_noise_ratio. It will be removed from '
+         'skimage.measure in version 0.18.')
+    return peak_signal_noise_ratio(im_true, im_test, data_range=data_range)

@@ -2,6 +2,7 @@
 ========================
 Evaluating segmentations
 ========================
+
 When trying out different segmentation methods, how do you know which one is
 best? If you have a *ground truth* or *gold standard* segmentation, you can use
 various metrics to check how close each automated method comes to the truth.
@@ -18,16 +19,16 @@ import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
 from skimage import data
-from skimage.measure import (adapted_rand_error,
-                             variation_of_information)
+from skimage.evaluate import (adapted_rand_error,
+                              variation_of_information)
 from skimage.filters import sobel
 from skimage.measure import label
 from skimage.util import img_as_float
 from skimage.feature import canny
 from skimage.morphology import remove_small_objects
 from skimage.segmentation import (morphological_geodesic_active_contour,
-                                  inverse_gaussian_gradient, 
-                                  watershed, 
+                                  inverse_gaussian_gradient,
+                                  watershed,
                                   mark_boundaries)
 
 image = data.coins()
@@ -91,8 +92,8 @@ recall_list = []
 split_list = []
 merge_list = []
 for name, im_test in zip(method_names, [im_test1, im_test2, im_test3]):
-    error, precision, recall = compare_adapted_rand_error(im_true, im_test)
-    splits, merges = compare_variation_of_information(im_true, im_test)
+    error, precision, recall = adapted_rand_error(im_true, im_test)
+    splits, merges = variation_of_information(im_true, im_test)
     split_list.append(splits)
     merge_list.append(merges)
     precision_list.append(precision)
