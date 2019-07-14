@@ -14,6 +14,15 @@ def adapted_rand_error(im_true=None, im_test=None, *, table=None,
         Ground-truth label image.
     im_test : ndarray of int
         Test image.
+    table : scipy.sparse array in crs format, optional
+        A contingency table built with skimage.evaluate.contingency_table.
+        If None, it will be computed on the fly.
+    ignore_labels : list of int, optional
+        Labels to ignore. Any part of the true image labeled with any of these
+        values will not be counted in the score.
+    normalize : bool, optional
+        If True, normalizes contigency table by the number of pixels of
+        each value.
 
     Returns
     -------

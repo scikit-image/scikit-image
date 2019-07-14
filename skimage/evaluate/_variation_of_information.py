@@ -19,6 +19,15 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     ----------
     im_true, im_test : ndarray of int
         Label images / segmentations.
+    table : scipy.sparse array in crs format, optional
+        A contingency table built with skimage.evaluate.contingency_table.
+        If None, it will be computed with skimage.evaluate.contingency_table.
+    ignore_labels : list of int, optional
+        Labels to ignore. Any part of the true image labeled with any of these
+        values will not be counted in the score.
+    normalize : bool, optional
+        If True, normalizes contigency table by the number of pixels of
+        each value.
 
     Returns
     -------
@@ -40,10 +49,12 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
 def _xlogx(x):
     """Compute x * log_2(x).
     We define 0 * log_2(0) = 0
+
     Parameters
     ----------
     x : ndarray or scipy.sparse.csc_matrix or csr_matrix
         The input array.
+
     Returns
     -------
     y : same type as x
@@ -62,10 +73,12 @@ def _xlogx(x):
 def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
                normalize=False):
     """Compute probability tables used for calculating VI.
+
     Parameters
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
+
     Returns
     -------
     hxgy, hygx : ndarray of float
