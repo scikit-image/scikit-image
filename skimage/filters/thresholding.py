@@ -422,7 +422,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
     csuml = np.cumsum(hist)
-    csumh = np.cumsum(hist[::-1])[::-1] - hist
+    csumh = csuml[-1] - csuml
 
     # intensity_sum contains the total pixel intensity from each bin
     intensity_sum = hist * bin_centers
@@ -434,11 +434,12 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # last bin of csumh, which is zero by construction.
     # So no worries about division by zero in the following lines, except
     # for the last bin, but we can ignore that because no valid threshold
-    # can be in the top bin. So we just patch up csumh[-1] to not cause 0/0
-    # errors.
-    csumh[-1] = 1
-    l = np.cumsum(intensity_sum) / csuml
-    h = (np.cumsum(intensity_sum[::-1])[::-1] - intensity_sum) / csumh
+    # can be in the top bin.
+    # To avoid the division by zero, we simply skip over the last element in
+    # all future computation.
+    csum_intensity = np.cumsum(intensity_sum)
+    lower = csum_intensity[:-1] / csuml[:-1]
+    higher = (csum_intensity[-1] - csum_intensity[:-1]) / csumh[:-1]
 
     # isodata finds threshold values that meet the criterion t = (l + m)/2
     # where l is the mean of all pixels <= t and h is the mean of all pixels
@@ -447,7 +448,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # were calculated -- which is, of course, the histogram bin centers.
     # We only require this equality to be within the precision of the bin
     # width, of course.
-    all_mean = (l + h) / 2.0
+    all_mean = (lower + higher) / 2.0
     bin_width = bin_centers[1] - bin_centers[0]
 
     # Look only at thresholds that are below the actual all_mean value,
@@ -455,8 +456,8 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # group. Otherwise can get thresholds that are not actually fixed-points
     # of the isodata algorithm. For float images, this matters less, since
     # there really can't be any guarantees anymore anyway.
-    distances = all_mean - bin_centers
-    thresholds = bin_centers[(distances >= 0) & (distances < bin_width)]
+    distances = all_mean - bin_centers[:-1]
+    thresholds = bin_centers[:-1][(distances >= 0) & (distances < bin_width)]
 
     if return_all:
         return thresholds
@@ -665,7 +666,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
-    smooth_hist = np.copy(hist).astype(np.float64)
+    smooth_hist = hist.astype(np.float64, copy=False)
 
     for counter in range(max_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)

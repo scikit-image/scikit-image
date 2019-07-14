@@ -348,8 +348,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     image = np.clip(image, imin, imax)
 
-    image = (image - imin) / float(imax - imin)
-    return np.array(image * (omax - omin) + omin, dtype=dtype)
+    if imin != imax:
+        image = (image - imin) / float(imax - imin)
+    return np.asarray(image * (omax - omin) + omin, dtype=dtype)
 
 
 def _assert_non_negative(image):
