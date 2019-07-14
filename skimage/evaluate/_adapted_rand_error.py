@@ -1,10 +1,10 @@
-from simple_metrics import assert_compatible
+from .simple_metrics import _assert_compatible
 import numpy as np
-from utils import _contingency_table
+from ._contingency_table import contingency_table
 
 __all__ = ['adapted_rand_error']
 
-def adapted_rand_error(im_true, im_test):
+def adapted_rand_error(im_true=None, im_test=None,*,table=None, ignore_labels=None, normalize=False):
     """Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
     Parameters
     ----------
@@ -37,7 +37,10 @@ def adapted_rand_error(im_true, im_test):
     """
     _assert_compatible(im_true, im_test)
 
-    p_ij = _contingency_table(im_true, im_test, ignore_labels=[0])
+    if table is None:
+        p_ij = contingency_table(im_true, im_test, ignore_labels=[0], normalize=normalize)
+    else:
+        p_ij = table
 
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()

@@ -1,11 +1,10 @@
-
 import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import skimage_deprecation, warn
 
-__all__ = ['compare_mse',
-           'compare_nrmse',
-           'compare_psnr',
+__all__ = ['mean_squared_error',
+           'normalized_root_mse',
+           'peak_signal_noise_ratio',
            ]
 
 
@@ -24,7 +23,7 @@ def _as_floats(im1, im2):
     return im1, im2
 
 
-def compare_mse(im1, im2):
+def mean_squared_error(im1, im2):
     """Compute the mean-squared error between two images.
 
     Parameters
@@ -38,15 +37,12 @@ def compare_mse(im1, im2):
         The mean-squared error (MSE) metric.
 
     """
-    warn('DEPRECATED: skimage.measure.compare_mse has been moved to '
-         'skimage.evaluation.mean_squared_error. It will be removed from '
-         'skimage.measure in version 0.18')
     _assert_compatible(im1, im2)
     im1, im2 = _as_floats(im1, im2)
     return np.mean(np.square(im1 - im2), dtype=np.float64)
 
 
-def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
+def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     """Compute the normalized root mean-squared error (NRMSE) between two
     images.
 
@@ -99,7 +95,7 @@ def compare_nrmse(im_true, im_test, norm_type='Euclidean'):
     return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
-def compare_psnr(im_true, im_test, data_range=None):
+def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     """ Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
