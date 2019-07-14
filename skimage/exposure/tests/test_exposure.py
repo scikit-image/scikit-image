@@ -275,7 +275,7 @@ def test_rescale_all_zeros():
 
 
 def test_rescale_same_values():
-    image = np.ones((2, 2), dtype=np.uint8)
+    image = np.ones((2, 2))
     out = exposure.rescale_intensity(image)
     assert ~np.isnan(out).all()
     assert_array_almost_equal(out, image)
