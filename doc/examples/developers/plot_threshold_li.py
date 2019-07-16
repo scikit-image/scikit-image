@@ -16,7 +16,8 @@ optimum point by using the slope of the cross-entropy [2]_. This is the method
 implemented in scikit-image's :func:`skimage.filters.threshold_li`.
 
 Here, we demonstrate the cross-entropy and its optimization by Li's iterative
-method.
+method. Note that we are using the private function `_cross_entropy`, which
+should not be used in production code, as it could change.
 
 .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
        Pattern Recognition, 26(4): 617-625
@@ -214,7 +215,8 @@ plt.show()
 # need to be processed.
 
 def quantile_95(image):
-    return np.quantile(image, 0.95)
+    # you can use np.quantile(image, 0.95) if you have NumPy>=1.15
+    return np.percentile(image, 95)
 
 iter_thresholds5 = []
 opt_threshold5 = filters.threshold_li(cell, initial_guess=quantile_95,
