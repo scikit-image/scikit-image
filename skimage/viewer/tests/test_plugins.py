@@ -1,5 +1,4 @@
 import numpy as np
-import skimage
 from skimage import util
 import skimage.data as data
 from skimage.filters.rank import median
@@ -68,7 +67,8 @@ def test_line_profile_dynamic():
     assert_almost_equal(np.std(line), 0.229, 3)
     assert_almost_equal(np.max(line) - np.min(line), 0.725, 1)
 
-    viewer.image = util.img_as_float(median(image, selem=disk(radius=3)))
+    viewer.image = util.img_as_float(
+        median(util.img_as_ubyte(image), selem=disk(radius=3)))
 
     line = lp.get_profiles()[-1][0]
     assert_almost_equal(np.std(viewer.image), 0.198, 3)
@@ -160,7 +160,8 @@ def test_plugin():
     viewer = ImageViewer(img)
 
     def median_filter(img, radius=3):
-        return median(img, selem=disk(radius=radius))
+        return median(
+            util.img_as_ubyte(img), selem=disk(radius=radius))
 
     plugin = Plugin(image_filter=median_filter)
     viewer += plugin
