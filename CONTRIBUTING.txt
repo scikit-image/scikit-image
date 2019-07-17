@@ -574,7 +574,7 @@ Here, the creation of the image is completed is in the ``setup`` method, and not
 included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
-more about features of `asv`, we refer the read to the official
+more about the features of `asv`, please refer to the official
 `airpseed velocity documentation <http://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
 
 Testing the benchmarks locally
