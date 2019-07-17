@@ -261,7 +261,7 @@ def test_li_coins_image():
     # threshold below that found by the iterative method. Not sure why that is
     # but `threshold_li` does find the stationary point of the function (ie the
     # tolerance can be reduced arbitrarily but the exact same threshold is
-    # found), so my guess some kind of histogram binning effect.
+    # found), so my guess is some kind of histogram binning effect.
     assert ce_actual < _cross_entropy(image, threshold - 2)
 
 
@@ -297,6 +297,23 @@ def test_li_inf_minus_inf():
 def test_li_constant_image_with_nan():
     image = np.array([8, 8, 8, 8, np.nan])
     assert threshold_li(image) == 8
+
+
+def test_li_arbitrary_start_point():
+    cell = data.cell()
+    max_stationary_point = threshold_li(cell)
+    low_stationary_point = threshold_li(cell,
+                                        initial_guess=np.percentile(cell, 5))
+    optimum = threshold_li(cell, initial_guess=np.percentile(cell, 95))
+    assert 67 < max_stationary_point < 68
+    assert 48 < low_stationary_point < 49
+    assert 111 < optimum < 112
+
+
+def test_li_negative_inital_guess():
+    coins = data.coins()
+    with testing.raises(ValueError):
+        result = threshold_li(coins, initial_guess=-5)
 
 
 def test_yen_camera_image():

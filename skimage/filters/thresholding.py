@@ -520,7 +520,8 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
-def threshold_li(image, *, tolerance=None):
+def threshold_li(image, *, tolerance=None, initial_guess=None,
+                 iter_callback=None):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
     Parameters
@@ -532,6 +533,21 @@ def threshold_li(image, *, tolerance=None):
         Finish the computation when the change in the threshold in an iteration
         is less than this value. By default, this is half the smallest
         difference between intensity values in ``image``.
+
+    initial_guess : float or Callable[[array[float]], float], optional
+        Li's iterative method uses gradient descent to find the optimal
+        threshold. If the image intensity histogram contains more than two
+        modes (peaks), the gradient descent could get stuck in a local optimum.
+        An initial guess for the iteration can help the algorithm find the
+        globally-optimal threshold. A float value defines a specific start
+        point, while a callable should take in an array of image intensities
+        and return a float value. Example valid callables include
+        ``numpy.mean`` (default), ``lambda arr: numpy.quantile(arr, 0.95)``,
+        or even :func:`skimage.filters.threshold_otsu`.
+
+    iter_callback : Callable[[float], Any], optional
+        A function that will be called on the threshold at every iteration of
+        the algorithm.
 
     Returns
     -------
@@ -583,9 +599,32 @@ def threshold_li(image, *, tolerance=None):
     image -= image_min
     tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
-    # Initial estimate
-    t_curr = np.mean(image)
-    t_next = t_curr + 2 * tolerance
+    # Initial estimate for iteration. See "initial_guess" in the parameter list
+    if initial_guess is None:
+        t_next = np.mean(image)
+    elif callable(initial_guess):
+        t_next = initial_guess(image)
+    elif np.isscalar(initial_guess):  # convert to new, positive image range
+        t_next = initial_guess - image_min
+        image_max = np.max(image) + image_min
+        if not 0 < t_next < np.max(image):
+            msg = ('The initial guess for threshold_li must be within the '
+                   'range of the image. Got {} for image min {} and max {} '
+                   .format(initial_guess, image_min, image_max))
+            raise ValueError(msg)
+    else:
+        raise TypeError('Incorrect type for `initial_guess`; should be '
+                        'a floating point value, or a function mapping an '
+                        'array to a floating point value.')
+
+    # initial value for t_curr must be different from t_next by at
+    # least the tolerance. Since the image is positive, we ensure this
+    # by setting to a large-enough negative number
+    t_curr = -2 * tolerance
+
+    # Callback on initial iterations
+    if iter_callback is not None:
+        iter_callback(t_next + image_min)
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
@@ -597,6 +636,9 @@ def threshold_li(image, *, tolerance=None):
 
         t_next = ((mean_back - mean_fore) /
                   (np.log(mean_back) - np.log(mean_fore)))
+
+        if iter_callback is not None:
+            iter_callback(t_next + image_min)
 
     threshold = t_next + image_min
     return threshold
