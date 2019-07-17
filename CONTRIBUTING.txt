@@ -581,7 +581,7 @@ Testing the benchmarks locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Prior to running the true benchmark, it is often worthwhile to test that the
-code if free of typos. To do so, you may use the ``asv dev``::
+code is free of typos. To do so, you may use the command::
 
   asv dev -b TransformSuite
 
