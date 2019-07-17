@@ -7,7 +7,8 @@ from ..filters import sobel
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc='periodic', max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1):
+                   max_iterations=2500, convergence=0.1,
+                   callback=None):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -49,6 +50,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
+    callback: function, optional
+        Called every 11 iterations with three args (snake, i, conv).
+        snake: (N, 2) ndarray -- the current snake.
+        i: int -- the total number of iterations completed.
+        conv: float -- convergence criterion. This value is computed by
+        looking over the previous 10 snakes to find the minimum distance
+        that each point has moved, and taking the maximum. If any
+        point is moving, the value will be high and the algorithm will
+        continue. If all points are stationary, the value will be low, and
+        the algorithm terminates when the value falls below 'convergence'.
 
     Returns
     -------
@@ -84,6 +95,17 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2) #doctest: +SKIP
     >>> int(np.mean(dist)) #doctest: +SKIP
     25
+
+    Watch the snake progress:
+
+    >>> import matplotlib.pyplot as plt
+    >>> def cb(snake, it, dist):
+    ...     pts = plt.scatter(snake[:, 0], snake[:, 1], figure=fig)
+    ...     plt.title('it = %i, dist=%f' % (it, dist))
+    ...     plt.pause(.05)
+    ...     pts.remove()
+    >>> plt.imshow(img, figure=fig)  #doctest: +SKIP
+    >>> snake = active_contour(img, init, callback=cb)  #doctest: +SKIP
 
     """
     max_iterations = int(max_iterations)
@@ -124,7 +146,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     intp = RectBivariateSpline(np.arange(img.shape[1]),
                                np.arange(img.shape[0]),
                                img.T, kx=2, ky=2, s=0)
-
     x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
     n = len(x)
     xsave = np.empty((convergence_order, n))
@@ -214,5 +235,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                  np.abs(ysave-y[None, :]), 1))
             if dist < convergence:
                 break
+            elif callback:
+                callback(np.array([x, y]).T, i, dist)
 
     return np.array([x, y]).T
