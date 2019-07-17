@@ -605,7 +605,7 @@ Comparing results to master
 
 Often, the goal of a PR is to compare the results of the modifications in terms
 speed to a snapshot of the code that is in the master branch of the
-``scikit-image`` repository. The ``asv continuous`` is of help here::
+``scikit-image`` repository. The command ``asv continuous`` is of help here::
 
   asv continuous master -b TransformSuite
 
