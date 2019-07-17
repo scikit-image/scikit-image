@@ -594,7 +594,7 @@ Running your benchmark
 The command above is fast, but doesn't always test the performance of the code
 adequately. To do that you may want to run the benchmark in your current
 environment to see the performance of your change as you are developing new
-features. the command ``asv run -E existing`` will specify that you wish to run
+features. The command ``asv run -E existing`` will specify that you wish to run
 the benchmark in your existing environment. This will save a significant amount
 of time since building scikit-image can be a time consuming task::
 
