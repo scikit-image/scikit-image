@@ -543,7 +543,7 @@ To let airspeed velocity know more information about your machine.
 Writing a benchmark
 ~~~~~~~~~~~~~~~~~~~
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
-a class with a ``setup`` method and a ``time_`` method.
+a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
 The setup method should contain all the code necessary to prepare your data
 before the function you wish to benchmark. The ``time_`` method
