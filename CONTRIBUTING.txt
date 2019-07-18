@@ -570,7 +570,7 @@ potentially the allocation of memory for results. We take for example the
       def time_hough_line(self):
           result1, result2, result3 = transform.hough_line(self.image)
 
-Here, the creation of the image is completed is in the ``setup`` method, and not
+Here, the creation of the image is completed in the ``setup`` method, and not
 included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
