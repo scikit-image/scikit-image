@@ -322,6 +322,37 @@ def checkerboard():
     return load("chessboard_GRAY.png")
 
 
+def cell():
+    """Cell floating in saline.
+
+    This is a quantitative phase image retrieved from a digital hologram using
+    the Python library ``qpformat``. The image shows a cell with high phase
+    value, above the background phase.
+
+    Because of a banding pattern artifact in the background, this image is a
+    good test of thresholding algorithms. The pixel spacing is 0.107 µm.
+
+    These data were part of a comparison between several refractive index
+    retrieval techniques for spherical objects as part of [1]_.
+
+    This image is CC0, dedicated to the public domain. You may copy, modify, or
+    distribute it without asking permission.
+
+    Returns
+    -------
+    cell : (660, 550) uint8 array
+        Image of a cell.
+
+    References
+    ----------
+    ..[1]: Paul Müller, Mirjam Schürmann, Salvatore Girardo, Gheorghe Cojoc,
+           and Jochen Guck. "Accurate evaluation of size and refractive index
+           for spherical objects in quantitative phase imaging." Optics Express
+           26(8): 10729-10743 (2018). :DOI:`10.1364/OE.26.010729`
+    """
+    return load('cell.png')
+
+
 def coins():
     """Greek coins from Pompeii.
 
