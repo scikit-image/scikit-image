@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.sparse as sparse
 from ._contingency_table import contingency_table
+from .._shared.testing import assert_shape_equal
 
 __all__ = ['variation_of_information']
 
@@ -18,7 +19,7 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     Parameters
     ----------
     im_true, im_test : ndarray of int
-        Label images / segmentations.
+        Label images / segmentations, must have same shape.
     table : scipy.sparse array in crs format, optional
         A contingency table built with skimage.evaluate.contingency_table.
         If None, it will be computed with skimage.evaluate.contingency_table.
@@ -85,6 +86,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
         Per-segment conditional entropies of ``im_true`` given ``im_test`` and
         vice-versa.
     """
+    assert_shape_equal(im_true, im_test)
+
     if table is None:
         # normalize, since it is an identity op if already done
         pxy = contingency_table(

@@ -4,6 +4,7 @@ from ._contingency_table import contingency_table
 from .simple_metrics import (mean_squared_error,
                              normalized_root_mse,
                              peak_signal_noise_ratio)
+from ._structural_similarity import structural_similarity
 
 __all__ = ['adapted_rand_error',
            'variation_of_information',
@@ -11,4 +12,5 @@ __all__ = ['adapted_rand_error',
            'mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
+           'structural_similarity'
            ]

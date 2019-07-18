@@ -1,18 +1,12 @@
 import numpy as np
 from ..util.dtype import dtype_range
 from .._shared.utils import warn
+from .._shared.testing import assert_shape_equal
 
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
            'peak_signal_noise_ratio',
            ]
-
-
-def _assert_compatible(im1, im2):
-    """Raise an error if the shape and dtype do not match."""
-    if not im1.shape == im2.shape:
-        raise ValueError('Input images must have the same dimensions.')
-    return
 
 
 def _as_floats(im1, im2):
@@ -28,8 +22,8 @@ def mean_squared_error(im1, im2):
 
     Parameters
     ----------
-    im1, im2 : ndarray
-        Image.  Any dimensionality.
+    im_true, im_test : ndarray
+        Images.  Any dimensionality, must have same shape.
 
     Returns
     -------
@@ -37,9 +31,9 @@ def mean_squared_error(im1, im2):
         The mean-squared error (MSE) metric.
 
     """
-    _assert_compatible(im1, im2)
+    assert_shape_equal(im1, im2)
     im1, im2 = _as_floats(im1, im2)
-    return np.mean(np.square(im1 - im2), dtype=np.float64)
+    return np.mean((im1 - im2) ** 2, dtype=np.float64)
 
 
 def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
@@ -49,7 +43,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     Parameters
     ----------
     im_true : ndarray
-        Ground-truth image.
+        Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
     norm_type : {'Euclidean', 'min-max', 'mean'}
@@ -80,7 +74,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     .. [1] https://en.wikipedia.org/wiki/Root-mean-square_deviation
 
     """
-    _assert_compatible(im_true, im_test)
+    assert_shape_equal(im_true, im_test)
     im_true, im_test = _as_floats(im_true, im_test)
 
     norm_type = norm_type.lower()
@@ -101,7 +95,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     Parameters
     ----------
     im_true : ndarray
-        Ground-truth image.
+        Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
     data_range : int
@@ -119,7 +113,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 
     """
-    _assert_compatible(im_true, im_test)
+    assert_shape_equal(im_true, im_test)
 
     if data_range is None:
         if im_true.dtype != im_test.dtype:

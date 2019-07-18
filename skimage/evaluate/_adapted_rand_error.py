@@ -1,4 +1,4 @@
-from .simple_metrics import _assert_compatible
+from .._shared.testing import assert_shape_equal
 from ._contingency_table import contingency_table
 
 __all__ = ['adapted_rand_error']
@@ -11,7 +11,7 @@ def adapted_rand_error(im_true=None, im_test=None, *, table=None,
     Parameters
     ----------
     im_true : ndarray of int
-        Ground-truth label image.
+        Ground-truth label image, same shape as im_test.
     im_test : ndarray of int
         Test image.
     table : scipy.sparse array in crs format, optional
@@ -49,7 +49,7 @@ def adapted_rand_error(im_true=None, im_test=None, *, table=None,
            for connectomics. Front. Neuroanat. 9:142.
            :DOI:`10.3389/fnana.2015.00142`
     """
-    _assert_compatible(im_true, im_test)
+    assert_shape_equal(im_true, im_test)
 
     if table is None:
         p_ij = contingency_table(im_true, im_test, ignore_labels=[

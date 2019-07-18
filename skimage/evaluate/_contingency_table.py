@@ -10,7 +10,7 @@ def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
     Parameters
     ----------
     im_true : ndarray of int
-        Ground-truth label image.
+        Ground-truth label image, same shape as im_test.
     im_test : ndarray of int
         Test image.
     ignore_labels : list of int, optional

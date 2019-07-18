@@ -22,9 +22,10 @@ Version 0.18
 ------------
 
 * The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.mse`,
-  `skimage.measure.nrmse`,
-  `skimage.measure.pnsr`
+  `skimage.measure.compare_mse`,
+  `skimage.measure.compare_nrmse`,
+  `skimage.measure.compare_pnsr`
+  `skimage.measure.compare_ssim`
 * `skimage/measure/tests/test_simple_metrics.py` should also be removed
 
 

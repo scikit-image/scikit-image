@@ -11,13 +11,6 @@ __all__ = ['compare_mse',
            ]
 
 
-def _assert_compatible(im1, im2):
-    """Raise an error if the shape and dtype do not match."""
-    if not im1.shape == im2.shape:
-        raise ValueError('Input images must have the same dimensions.')
-    return
-
-
 def _as_floats(im1, im2):
     """Promote im1, im2 to nearest appropriate floating point precision."""
     float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
@@ -31,8 +24,10 @@ def compare_mse(im1, im2):
 
     Parameters
     ----------
-    im1, im2 : ndarray
-        Image.  Any dimensionality.
+    im_true : ndarray
+        Ground-truth image, same shape as im_test.
+    im_test : ndarray
+        Test image.
 
     Returns
     -------
@@ -53,10 +48,10 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
     Parameters
     ----------
     im_true : ndarray
-        Ground-truth image.
+        Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
-    norm_type : {'Euclidean', 'min-max', 'mean'}
+    norm_type : {'euclidean', 'min-max', 'mean'}
         Controls the normalization method to use in the denominator of the
         NRMSE.  There is no standard method of normalization across the
         literature [1]_.  The methods available here are as follows:
@@ -96,7 +91,7 @@ def compare_psnr(im_true, im_test, data_range=None):
     Parameters
     ----------
     im_true : ndarray
-        Ground-truth image.
+        Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
     data_range : int

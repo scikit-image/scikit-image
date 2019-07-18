@@ -1,9 +1,10 @@
 Version 0.16
 ------------
 - The following functions are deprecated and will be removed in 0.18:
-  `skimage.measure.mse`,
-  `skimage.measure.nrmse`,
-  `skimage.measure.pnsr`,
+  `skimage.measure.compare_mse`,
+  `skimage.measure.compare_nrmse`,
+  `skimage.measure.compare_pnsr`,
+  `skimage.measure.compare_ssim`
   Their functionality still exists, but under the new `skimage.evaluate`
   submodule under different names.
 - Additionally, three new functions have been added to `skimage.evaluate`:
