@@ -31,7 +31,3 @@ def test_are():
     im_test = np.array([[1, 2], [3, 1]])
     assert_almost_equal(adapted_rand_error(im_true, im_test, normalize=False),
                         (0.3333333, 0.5, 1.0))
-
-def test_iou():
-    im_true = np.array([[0, 0, 0], [0, 1, 0],[0, 0, 0]])
-    im_test = np.array([[0, 0, 0], [0, 1, 0],[0, 0, 0]])
