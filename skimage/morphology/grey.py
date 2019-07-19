@@ -380,6 +380,10 @@ def white_tophat(image, selem=None, out=None):
     --------
     black_tophat
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
     Examples
     --------
     >>> # Subtract grey background from bright peak
@@ -450,6 +454,10 @@ def black_tophat(image, selem=None, out=None):
     See also
     --------
     white_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
 
     Examples
     --------
