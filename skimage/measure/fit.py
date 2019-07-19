@@ -119,8 +119,9 @@ class LineModelND(BaseModel):
         """
         _check_data_atleast_2D(data)
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
@@ -153,8 +154,9 @@ class LineModelND(BaseModel):
             If the line is parallel to the given axis.
         """
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 

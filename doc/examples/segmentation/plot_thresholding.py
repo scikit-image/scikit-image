@@ -58,7 +58,7 @@ plt.show()
 # underlying assumptions, it is often difficult to know which algorithm will give
 # the best results. Therefore, Scikit-image includes a function to evaluate
 # thresholding algorithms provided by the library. At a glance, you can select
-# the best algorithm for you data without a deep understanding of their
+# the best algorithm for your data without a deep understanding of their
 # mechanisms.
 #
 

@@ -35,7 +35,11 @@ PROPS = {
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
     'Image': 'image',
+    'InertiaTensor': 'inertia_tensor',
+    'InertiaTensorEigvals': 'inertia_tensor_eigvals',
+    'IntensityImage': 'intensity_image',
     'Label': 'label',
+    'LocalCentroid': 'local_centroid',
     'MajorAxisLength': 'major_axis_length',
     'MaxIntensity': 'max_intensity',
     'MeanIntensity': 'mean_intensity',
@@ -53,8 +57,55 @@ PROPS = {
     'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
+    'WeightedLocalCentroid': 'weighted_local_centroid',
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
+}
+
+OBJECT_COLUMNS = {
+    'image', 'coords', 'convex_image', 'slice',
+    'filled_image', 'intensity_image'
+}
+
+COL_DTYPES = {
+    'area': int,
+    'bbox': int,
+    'bbox_area': int,
+    'moments_central': float,
+    'centroid': int,
+    'convex_area': int,
+    'convex_image': object,
+    'coords': object,
+    'eccentricity': float,
+    'equivalent_diameter': float,
+    'euler_number': int,
+    'extent': float,
+    'filled_area': int,
+    'filled_image': object,
+    'moments_hu': float,
+    'image': object,
+    'inertia_tensor': float,
+    'inertia_tensor_eigvals': float,
+    'intensity_image': object,
+    'label': int,
+    'local_centroid': int,
+    'major_axis_length': float,
+    'max_intensity': float,
+    'mean_intensity': float,
+    'min_intensity': float,
+    'minor_axis_length': float,
+    'moments': float,
+    'moments_normalized': float,
+    'orientation': float,
+    'perimeter': float,
+    'slice': object,
+    'solidity': float,
+    'weighted_moments_central': float,
+    'weighted_centroid': int,
+    'weighted_moments_hu': float,
+    'weighted_local_centroid': int,
+    'weighted_moments': int,
+    'weighted_moments_normalized': float
 }
 
 PROP_VALS = set(PROPS.values())
@@ -84,7 +135,7 @@ def only2d(method):
     return func2d
 
 
-class _RegionProperties(object):
+class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
@@ -309,7 +360,7 @@ class _RegionProperties(object):
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
-        if not isinstance(other, _RegionProperties):
+        if not isinstance(other, RegionProperties):
             return False
 
         for key in PROP_VALS:
@@ -321,6 +372,215 @@ class _RegionProperties(object):
                 return False
 
         return True
+
+
+# For compatibility with code written prior to 0.16
+_RegionProperties = RegionProperties
+
+
+def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
+    """Convert image region properties list into a column dictionary.
+
+    Parameters
+    ----------
+    regions : (N,) list
+        List of RegionProperties objects as returned by :func:`regionprops`.
+    properties : tuple or list of str, optional
+        Properties that will be included in the resulting dictionary
+        For a list of available properties, please see :func:`regionprops`.
+        Users should remember to add "label" to keep track of region
+        identities.
+    separator : str, optional
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+        and ``inertia_tensor-1-1`` (where the separator is ``-``).
+
+        Object columns are those that cannot be split in this way because the
+        number of columns would change depending on the object. For example,
+        ``image`` and ``coords``.
+
+    Returns
+    -------
+    out_dict : dict
+        Dictionary mapping property names to an array of values of that
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
+
+    Notes
+    -----
+    Each column contains either a scalar property, an object property, or an
+    element in a multidimensional array.
+
+    Properties with scalar values for each region, such as "eccentricity", will
+    appear as a float or int array with that property name as key.
+
+    Multidimensional properties *of fixed size* for a given image dimension,
+    such as "centroid" (every centroid will have three elements in a 3D image,
+    no matter the region size), will be split into that many columns, with the
+    name {property_name}{separator}{element_num} (for 1D properties),
+    {property_name}{separator}{elem_num0}{separator}{elem_num1} (for 2D
+    properties), and so on.
+
+    For multidimensional properties that don't have a fixed size, such as
+    "image" (the image of a region varies in size depending on the region
+    size), an object array will be used, with the corresponding property name
+    as the key.
+
+    Examples
+    --------
+    >>> from skimage import data, util, measure
+    >>> image = data.coins()
+    >>> label_image = measure.label(image > 110, connectivity=image.ndim)
+    >>> proplist = regionprops(label_image, image)
+    >>> props = _props_to_dict(proplist, properties=['label', 'inertia_tensor',
+    ...                                              'inertia_tensor_eigvals'])
+    >>> props  # doctest: +ELLIPSIS +SKIP
+    {'label': array([ 1,  2, ...]), ...
+     'inertia_tensor-0-0': array([  4.012...e+03,   8.51..., ...]), ...
+     ...,
+     'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
+
+    The resulting dictionary can be directly passed to pandas, if installed, to
+    obtain a clean DataFrame:
+
+    >>> import pandas as pd  # doctest: +SKIP
+    >>> data = pd.DataFrame(props)  # doctest: +SKIP
+    >>> data.head()  # doctest: +SKIP
+       label  inertia_tensor-0-0  ...  inertia_tensor_eigvals-1
+    0      1         4012.909888  ...                267.065503
+    1      2            8.514739  ...                  2.834806
+    2      3            0.666667  ...                  0.000000
+    3      4            0.000000  ...                  0.000000
+    4      5            0.222222  ...                  0.111111
+
+    """
+
+    out = {}
+    n = len(regions)
+    for prop in properties:
+        dtype = COL_DTYPES[prop]
+        column_buffer = np.zeros(n, dtype=dtype)
+        r = regions[0][prop]
+
+        # scalars and objects are dedicated one column per prop
+        # array properties are raveled into multiple columns
+        # for more info, refer to notes 1
+        if np.isscalar(r) or prop in OBJECT_COLUMNS:
+            for i in range(n):
+                column_buffer[i] = regions[i][prop]
+            out[prop] = np.copy(column_buffer)
+        else:
+            if isinstance(r, np.ndarray):
+                shape = r.shape
+            else:
+                shape = (len(r),)
+
+            for ind in np.ndindex(shape):
+                for k in range(n):
+                    loc = ind if len(ind) > 1 else ind[0]
+                    column_buffer[k] = regions[k][prop][loc]
+                modified_prop = separator.join(map(str, (prop,) + ind))
+                out[modified_prop] = np.copy(column_buffer)
+    return out
+
+
+def regionprops_table(label_image, intensity_image=None, cache=True,
+                      properties=('label', 'bbox'), separator='-'):
+    """Find image properties and convert them into a dictionary
+
+    Parameters
+    ----------
+    label_image : (N, M) ndarray
+        Labeled input image. Labels with value 0 are ignored.
+    intensity_image : (N, M) ndarray, optional
+        Intensity (i.e., input) image with same size as labeled image.
+        Default is None.
+    cache : bool, optional
+        Determine whether to cache calculated properties. The computation is
+        much faster for cached properties, whereas the memory consumption
+        increases.
+    properties : tuple or list of str, optional
+        Properties that will be included in the resulting dictionary
+        For a list of available properties, please see :func:`regionprops`.
+        Users should remember to add "label" to keep track of region
+        identities.
+    separator : str, optional
+        For non-scalar properties not listed in OBJECT_COLUMNS, each element
+        will appear in its own column, with the index of that element separated
+        from the property name by this separator. For example, the inertia
+        tensor of a 2D region will appear in four columns:
+        ``inertia_tensor-0-0``, ``inertia_tensor-0-1``, ``inertia_tensor-1-0``,
+        and ``inertia_tensor-1-1`` (where the separator is ``-``).
+
+        Object columns are those that cannot be split in this way because the
+        number of columns would change depending on the object. For example,
+        ``image`` and ``coords``.
+
+    Returns
+    -------
+    out_dict : dict
+        Dictionary mapping property names to an array of values of that
+        property, one value per region. This dictionary can be used as input to
+        pandas ``DataFrame`` to map property names to columns in the frame and
+        regions to rows.
+
+    Notes
+    -----
+    Each column contains either a scalar property, an object property, or an
+    element in a multidimensional array.
+
+    Properties with scalar values for each region, such as "eccentricity", will
+    appear as a float or int array with that property name as key.
+
+    Multidimensional properties *of fixed size* for a given image dimension,
+    such as "centroid" (every centroid will have three elements in a 3D image,
+    no matter the region size), will be split into that many columns, with the
+    name {property_name}{separator}{element_num} (for 1D properties),
+    {property_name}{separator}{elem_num0}{separator}{elem_num1} (for 2D
+    properties), and so on.
+
+    For multidimensional properties that don't have a fixed size, such as
+    "image" (the image of a region varies in size depending on the region
+    size), an object array will be used, with the corresponding property name
+    as the key.
+
+    Examples
+    --------
+    >>> from skimage import data, util, measure
+    >>> image = data.coins()
+    >>> label_image = measure.label(image > 110, connectivity=image.ndim)
+    >>> props = regionprops_table(label_image, image,
+    ...                           properties=['label', 'inertia_tensor',
+    ...                                       'inertia_tensor_eigvals'])
+    >>> props  # doctest: +ELLIPSIS +SKIP
+    {'label': array([ 1,  2, ...]), ...
+     'inertia_tensor-0-0': array([  4.012...e+03,   8.51..., ...]), ...
+     ...,
+     'inertia_tensor_eigvals-1': array([  2.67...e+02,   2.83..., ...])}
+
+    The resulting dictionary can be directly passed to pandas, if installed, to
+    obtain a clean DataFrame:
+
+    >>> import pandas as pd  # doctest: +SKIP
+    >>> data = pd.DataFrame(props)  # doctest: +SKIP
+    >>> data.head()  # doctest: +SKIP
+       label  inertia_tensor-0-0  ...  inertia_tensor_eigvals-1
+    0      1         4012.909888  ...                267.065503
+    1      2            8.514739  ...                  2.834806
+    2      3            0.666667  ...                  0.000000
+    3      4            0.000000  ...                  0.000000
+    4      5            0.222222  ...                  0.111111
+
+    [5 rows x 7 columns]
+
+    """
+    regions = regionprops(label_image, intensity_image=intensity_image,
+                          cache=cache)
+    return _props_to_dict(regions, properties=properties, separator=separator)
 
 
 def regionprops(label_image, intensity_image=None, cache=True):
@@ -394,10 +654,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
         bounding box.
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
-    **inertia_tensor** : (2, 2) ndarray
+    **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
-        The two eigen values of the inertia tensor in decreasing order.
+        The eigenvalues of the inertia tensor in decreasing order.
     **intensity_image** : ndarray
         Image inside region bounding box.
     **label** : int
@@ -532,8 +792,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
         label = i + 1
 
-        props = _RegionProperties(sl, label, label_image, intensity_image,
-                                  cache)
+        props = RegionProperties(sl, label, label_image, intensity_image,
+                                 cache)
         regions.append(props)
 
     return regions
@@ -620,10 +880,10 @@ def _parse_docs():
 def _install_properties_docs():
     prop_doc = _parse_docs()
 
-    for p in [member for member in dir(_RegionProperties)
+    for p in [member for member in dir(RegionProperties)
               if not member.startswith('_')]:
-        getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
+        getattr(RegionProperties, p).__doc__ = prop_doc[p]
+        setattr(RegionProperties, p, property(getattr(RegionProperties, p)))
 
 
 if __debug__:

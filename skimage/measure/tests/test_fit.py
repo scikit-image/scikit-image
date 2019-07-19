@@ -22,16 +22,16 @@ def test_line_model_predict():
 
 
 def test_line_model_nd_invalid_input():
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1), np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
@@ -40,7 +40,7 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().estimate(np.empty((1, 3)))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().residuals(np.empty((1, 3)))
 
     data = np.empty((1, 2))

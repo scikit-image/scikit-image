@@ -63,10 +63,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.io import imread
-from skimage import data_dir
+from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, rescale
 
-image = imread(data_dir + "/phantom.png", as_gray=True)
+image = shepp_logan_phantom()
 image = rescale(image, scale=0.4, mode='reflect', multichannel=False)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
