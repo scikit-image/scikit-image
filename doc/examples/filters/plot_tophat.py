@@ -1,7 +1,9 @@
 """
-=======
-Top hat
-=======
+============================================
+Removing small objects with a top hat filter
+============================================
+
+.. [1] https://en.wikipedia.org/wiki/Top-hat_transform
 
 """
 
