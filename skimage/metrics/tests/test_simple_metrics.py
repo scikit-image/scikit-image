@@ -4,7 +4,7 @@ from skimage._shared import testing
 import numpy as np
 
 import skimage.data
-from skimage.evaluate import (peak_signal_noise_ratio, normalized_root_mse,
+from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
                               mean_squared_error)
 
 

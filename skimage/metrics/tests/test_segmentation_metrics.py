@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sparse
 
-from skimage.evaluate import (adapted_rand_error,
+from skimage.metrics import (adapted_rand_error,
                               variation_of_information,
                               contingency_table)
 

@@ -208,7 +208,7 @@ def test_mssim_mixed_dtype():
     mssim = ssim(cam, cam_noisy)
     with expected_warnings(['Inputs have mismatched dtype', ''.join([
                     'DEPRECATED: skimage.measure.compare_ssim has been moved ',
-                    'to skimage.evaluation.structural_similarity. It will be ',
+                    'to skimage.metrics.structural_similarity. It will be ',
                     'removed from skimage.measure in version 0.18.'])]):
         mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
     assert_almost_equal(mssim, mssim_mixed)

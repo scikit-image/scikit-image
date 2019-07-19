@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
 from skimage import data
-from skimage.evaluate import (adapted_rand_error,
+from skimage.metrics import (adapted_rand_error,
                               variation_of_information)
 from skimage.filters import sobel
 from skimage.measure import label

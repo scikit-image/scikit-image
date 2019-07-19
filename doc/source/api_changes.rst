@@ -5,12 +5,12 @@ Version 0.16
   `skimage.measure.compare_nrmse`,
   `skimage.measure.compare_pnsr`,
   `skimage.measure.compare_ssim`
-  Their functionality still exists, but under the new `skimage.evaluate`
+  Their functionality still exists, but under the new `skimage.metrics`
   submodule under different names.
-- Additionally, three new functions have been added to `skimage.evaluate`:
-  `skimage.evaluate.variation_of_information`
-  `skimage.evaluate.adapted_rand_error`
-  `skimage.evaluate.contingency_table`
+- Additionally, three new functions have been added to `skimage.metrics`:
+  `skimage.metrics.variation_of_information`
+  `skimage.metrics.adapted_rand_error`
+  `skimage.metrics.contingency_table`
 - A new example of plotting these evaluation metrics has been added to the docs.
 
 Version 0.15

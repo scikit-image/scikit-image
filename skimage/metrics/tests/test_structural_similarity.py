@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from skimage import data, data_dir
-from skimage.evaluate import structural_similarity
+from skimage.metrics import structural_similarity
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
