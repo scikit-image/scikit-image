@@ -22,7 +22,7 @@ def mean_squared_error(im1, im2):
 
     Parameters
     ----------
-    im_true, im_test : ndarray
+    im1, im2 : ndarray
         Images.  Any dimensionality, must have same shape.
 
     Returns
