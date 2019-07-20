@@ -13,7 +13,8 @@ __all__ = ['structural_similarity']
 def structural_similarity(im1, im2, win_size=None, gradient=False,
                           data_range=None, multichannel=False,
                           gaussian_weights=False, full=False, **kwargs):
-    """Compute the mean structural similarity index between two images.
+    """
+    Compute the mean structural similarity index between two images.
 
     Parameters
     ----------

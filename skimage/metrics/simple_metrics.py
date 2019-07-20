@@ -10,7 +10,9 @@ __all__ = ['mean_squared_error',
 
 
 def _as_floats(im1, im2):
-    """Promote im1, im2 to nearest appropriate floating point precision."""
+    """
+    Promote im1, im2 to nearest appropriate floating point precision.
+    """
     float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
     im1 = np.asarray(im1, dtype=float_type)
     im2 = np.asarray(im2, dtype=float_type)
@@ -18,7 +20,8 @@ def _as_floats(im1, im2):
 
 
 def mean_squared_error(im1, im2):
-    """Compute the mean-squared error between two images.
+    """
+    Compute the mean-squared error between two images.
 
     Parameters
     ----------
@@ -37,7 +40,8 @@ def mean_squared_error(im1, im2):
 
 
 def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
-    """Compute the normalized root mean-squared error (NRMSE) between two
+    """
+    Compute the normalized root mean-squared error (NRMSE) between two
     images.
 
     Parameters
@@ -90,7 +94,8 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
 
 
 def peak_signal_noise_ratio(im_true, im_test, data_range=None):
-    """ Compute the peak signal to noise ratio (PSNR) for an image.
+    """
+    Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
     ----------

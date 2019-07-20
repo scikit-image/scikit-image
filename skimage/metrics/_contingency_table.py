@@ -5,7 +5,8 @@ __all__ = ['contingency_table']
 
 
 def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
-    """Return the contingency table for all regions in matched segmentations.
+    """
+    Return the contingency table for all regions in matched segmentations.
 
     Parameters
     ----------

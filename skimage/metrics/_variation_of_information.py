@@ -8,7 +8,8 @@ __all__ = ['variation_of_information']
 
 def variation_of_information(im_true=None, im_test=None, *, table=None,
                              ignore_labels=[], normalize=False):
-    """Return symmetric conditional entropies associated with the VI. [1]_
+    """
+    Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
@@ -38,8 +39,8 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     References
     ----------
     .. [1] Marina Meilă (2007), Comparing clusterings—an information based
-           distance, Journal of Multivariate Analysis, Volume 98, Issue 5, Pages
-           873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
+        distance, Journal of Multivariate Analysis, Volume 98, Issue 5,
+        Pages 873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
     """
     hxgy, hygx = _vi_tables(im_true, im_test, table,
                             ignore_labels, normalize=normalize)
@@ -48,7 +49,8 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
 
 
 def _xlogx(x):
-    """Compute x * log_2(x).
+    """
+    Compute x * log_2(x).
     We define 0 * log_2(0) = 0
 
     Parameters
@@ -73,7 +75,8 @@ def _xlogx(x):
 
 def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
                normalize=False):
-    """Compute probability tables used for calculating VI.
+    """
+    Compute probability tables used for calculating VI.
 
     Parameters
     ----------
@@ -113,10 +116,13 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
 
 
 def _invert_nonzero(arr):
-    """Compute the inverse of the non-zero elements of arr, not changing 0.
+    """
+    Compute the inverse of the non-zero elements of arr, not changing 0.
+
     Parameters
     ----------
     arr : ndarray
+
     Returns
     -------
     arr_inv : ndarray

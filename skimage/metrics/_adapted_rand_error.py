@@ -6,7 +6,8 @@ __all__ = ['adapted_rand_error']
 
 def adapted_rand_error(im_true=None, im_test=None, *, table=None,
                        ignore_labels=None, normalize=False):
-    r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
+    r"""
+    Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
     ----------
