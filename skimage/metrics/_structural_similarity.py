@@ -19,7 +19,7 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
     ----------
     im1, im2 : ndarray
         Images. Any dimensionality with same shape.
-    win_size : int or None
+    win_size : int or None, optional
         The side-length of the sliding window used in comparison. Must be an
         odd value. If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
