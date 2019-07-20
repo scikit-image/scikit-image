@@ -1,7 +1,7 @@
 """
-========================
-Evaluating segmentations
-========================
+===============================
+Evaluating segmentation metrics
+===============================
 
 When trying out different segmentation methods, how do you know which one is
 best? If you have a *ground truth* or *gold standard* segmentation, you can use
@@ -105,7 +105,7 @@ for name, im_test in zip(method_names, [im_test1, im_test2, im_test3]):
     print('False Splits: {}'.format(splits))
     print('False Merges: {}'.format(merges))
 
-fig, axes = plt.subplots(2, 3, figsize=(4, 6), constrained_layout=True)
+fig, axes = plt.subplots(2, 3, figsize=(9, 6), constrained_layout=True)
 ax = axes.ravel()
 
 ax[0].scatter(merge_list, split_list)

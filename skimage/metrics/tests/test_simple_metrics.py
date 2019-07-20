@@ -3,7 +3,7 @@ from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared import testing
 import numpy as np
 
-import skimage.data
+from skimage import data
 from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
                              mean_squared_error)
 

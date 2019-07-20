@@ -5,7 +5,7 @@ from skimage.metrics import (adapted_rand_error,
                              variation_of_information,
                              contingency_table)
 
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_equal, assert_almost_equal, assert_array_equal
 
 
 def test_contingency_table():
