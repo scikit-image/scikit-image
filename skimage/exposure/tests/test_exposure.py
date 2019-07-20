@@ -252,6 +252,33 @@ def test_adapthist_alpha():
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
 
 
+def test_adapthist_grayscale_Nd():
+    """
+    Test for n-dimensional consistency with float images
+    Note: Currently if img.ndim == 3, img.shape[2] > 4 must hold for the image
+    not to be interpreted as a color image by @adapt_rgb
+    """
+    # construct a 2d image and a stack of it
+    np.random.seed(0)
+    img2d = np.random.random((25, 25))
+    img3d = np.array([img2d] * 25)
+    with expected_warnings(['precision loss']):
+        adapted2d = exposure.equalize_adapthist(img2d,
+                                                kernel_size=5,
+                                                clip_limit=0.01)
+        adapted3d = exposure.equalize_adapthist(img3d,
+                                                kernel_size=5,
+                                                clip_limit=0.01)
+
+    # check that dimensions of input and output match
+    assert img2d.shape == adapted2d.shape
+    assert img3d.shape == adapted3d.shape
+
+    # check that the result from the stack of 2d images is similar
+    # to the underlying 2d image
+    assert np.mean(np.abs(adapted2d - adapted3d[12])) < 0.06
+
+
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 
