@@ -75,6 +75,7 @@ def guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
+    warn('This functions is deprecated and will be removed in 0.18.')
     if image.ndim == 2:
         return 2
     if image.ndim == 3 and image.shape[-1] != 3:

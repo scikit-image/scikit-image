@@ -3,11 +3,41 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import img_as_float
-from ..color import guess_spatial_dimensions
 from .._shared.utils import warn, convert_to_float
 
 
 __all__ = ['gaussian']
+
+
+def _guess_spatial_dimensions(image):
+    """Make an educated guess about whether an image has a channels dimension.
+
+    Parameters
+    ----------
+    image : ndarray
+        The input image.
+
+    Returns
+    -------
+    spatial_dims : int or None
+        The number of spatial dimensions of `image`. If ambiguous, the value
+        is ``None``.
+
+    Raises
+    ------
+    ValueError
+        If the image array has less than two or more than four dimensions.
+    """
+    if image.ndim == 2:
+        return 2
+    if image.ndim == 3 and image.shape[-1] != 3:
+        return 3
+    if image.ndim == 3 and image.shape[-1] == 3:
+        return None
+    if image.ndim == 4 and image.shape[-1] == 3:
+        return 3
+    else:
+        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
@@ -96,7 +126,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     spatial_dims = None
     try:
-        spatial_dims = guess_spatial_dimensions(image)
+        spatial_dims = _guess_spatial_dimensions(image)
     except ValueError:
         spatial_dims = image.ndim
     if spatial_dims is None and multichannel is None:
