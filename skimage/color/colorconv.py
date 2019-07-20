@@ -54,7 +54,6 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype, dtype_limits
-from ..filters import _guess_spatial_dimensions
 
 
 def guess_spatial_dimensions(image):
@@ -76,6 +75,7 @@ def guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
+    from ..filters import _guess_spatial_dimensions
     warn('This function is deprecated and will be removed in 0.18')
     return _guess_spatial_dimensions(image)
 
