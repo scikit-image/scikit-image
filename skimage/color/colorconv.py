@@ -76,7 +76,7 @@ def guess_spatial_dimensions(image):
         If the image array has less than two or more than four dimensions.
     """
     from ..filters import _guess_spatial_dimensions
-    warn('This function is deprecated and will be removed in 0.18')
+    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
     return _guess_spatial_dimensions(image)
 
 
