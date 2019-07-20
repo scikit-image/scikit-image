@@ -8,7 +8,8 @@ from ..filters import sobel
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc=None, max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1, *,
+                   max_iterations=2500, convergence=0.1,
+                   *,
                    boundary_condition='periodic',
                    coordinates=None):
     """Active contour model.
