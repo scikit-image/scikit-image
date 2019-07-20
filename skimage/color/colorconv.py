@@ -54,6 +54,30 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 from ..util import dtype, dtype_limits
+from ..filters import _guess_spatial_dimensions
+
+
+def guess_spatial_dimensions(image):
+    """Make an educated guess about whether an image has a channels dimension.
+
+    Parameters
+    ----------
+    image : ndarray
+        The input image.
+
+    Returns
+    -------
+    spatial_dims : int or None
+        The number of spatial dimensions of `image`. If ambiguous, the value
+        is ``None``.
+
+    Raises
+    ------
+    ValueError
+        If the image array has less than two or more than four dimensions.
+    """
+    warn('This function is deprecated and will be removed in 0.18')
+    return _guess_spatial_dimensions(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):

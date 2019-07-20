@@ -21,13 +21,13 @@ Version 0.17
 Version 0.18
 ------------
 
+* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * The following functions are deprecated and should be removed in 0.18:
   `skimage.measure.compare_mse`,
   `skimage.measure.compare_nrmse`,
   `skimage.measure.compare_pnsr`
   `skimage.measure.compare_ssim`
 * `skimage/measure/tests/test_simple_metrics.py` should also be removed
-
 
 Other
 -----
