@@ -28,6 +28,7 @@ NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 def equalize_adapthist(image, kernel_size=None,
                        clip_limit=0.01, nbins=256):
     """Contrast Limited Adaptive Histogram Equalization (CLAHE).
+
     An algorithm for local contrast enhancement, that uses histograms computed
     over different tile regions of the image. Local details can therefore be
     enhanced even in regions that are darker or lighter than most of the image.
@@ -47,13 +48,16 @@ def equalize_adapthist(image, kernel_size=None,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("data range").
+
     Returns
     -------
     out : (N1, ...,NN[, C]) ndarray
         Equalized image.
+
     See Also
     --------
     equalize_hist, rescale_intensity
+
     Notes
     -----
     * For color images, the following steps are performed:
@@ -61,6 +65,7 @@ def equalize_adapthist(image, kernel_size=None,
        - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
+
     References
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/
@@ -70,7 +75,8 @@ def equalize_adapthist(image, kernel_size=None,
     image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
 
     if kernel_size is None:
-        kernel_size = tuple([image.shape[dim] // 8 for dim in range(image.ndim)])
+        kernel_size = tuple([image.shape[dim] // 8
+                             for dim in range(image.ndim)])
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
@@ -85,6 +91,7 @@ def equalize_adapthist(image, kernel_size=None,
 
 def _clahe(image, kernel_size, clip_limit, nbins=128):
     """Contrast Limited Adaptive Histogram Equalization.
+
     Parameters
     ----------
     image : (N1,...,NN) ndarray
@@ -95,10 +102,12 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
         Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
         Number of gray bins for histogram ("data range").
+
     Returns
     -------
     out : (N1,...,NN) ndarray
         Equalized image.
+
     The number of "effective" greylevels in the output image is set by `nbins`;
     selecting a small value (eg. 128) speeds up processing and still produce
     an output image of good quality. The output image will have the same
@@ -109,9 +118,11 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    ns = [int(np.ceil(image.shape[dim] / kernel_size[dim])) for dim in range(image.ndim)]
+    ns = [int(np.ceil(image.shape[dim] / kernel_size[dim]))
+          for dim in range(image.ndim)]
 
-    steps = [int(np.floor(image.shape[dim] / ns[dim])) for dim in range(image.ndim)]
+    steps = [int(np.floor(image.shape[dim] / ns[dim]))
+             for dim in range(image.ndim)]
 
     bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
@@ -123,7 +134,9 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
 
     for inds in np.ndindex(*ns):
 
-        region = tuple([slice(inds[dim] * steps[dim], (inds[dim] + 1) * steps[dim]) for dim in range(image.ndim)])
+        region = tuple([slice(inds[dim] * steps[dim], (inds[dim] + 1) *
+                              steps[dim])
+                        for dim in range(image.ndim)])
         sub_img = image[region]
 
         if clip_limit > 0.0:  # Calculate actual cliplimit
@@ -178,9 +191,11 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
 
         maps = []
         for edge in np.ndindex(*([2]*image.ndim)):
-            maps.append(map_array[tuple([[lowers, uppers][edge[dim]][dim] for dim in range(image.ndim)])])
+            maps.append(map_array[tuple([[lowers, uppers][edge[dim]][dim]
+                                         for dim in range(image.ndim)])])
 
-        slices = [np.arange(starts[dim], starts[dim] + offsets[dim]) for dim in range(image.ndim)]
+        slices = [np.arange(starts[dim], starts[dim] + offsets[dim])
+                  for dim in range(image.ndim)]
 
         interpolate(image, slices[::-1], maps, lut)
 
@@ -279,6 +294,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
 
 def interpolate(image, slices, maps, lut):
     """Find the new grayscale level for a region using bilinear interpolation.
+
     Parameters
     ----------
     image : ndarray
@@ -289,34 +305,44 @@ def interpolate(image, slices, maps, lut):
         Mappings of greylevels from histograms.
     lut : ndarray
         Maps grayscale levels in image to histogram levels.
+
     Returns
     -------
     out : ndarray
         Original image with the subregion replaced.
+
     Notes
     -----
     This function calculates the new greylevel assignments of pixels within
     a submatrix of the image. This is done by linear interpolation between
-    2**image.ndim different adjacent mappings in order to eliminate boundary artifacts.
+    2^image.ndim different adjacent mappings in order to eliminate boundary
+    artifacts.
     """
 
-    norm = np.product([slices[dim].size for dim in range(image.ndim)])  # Normalization factor
+    norm = np.product([slices[dim].size
+                       for dim in range(image.ndim)])  # Normalization factor
 
     # interpolation weight matrices
-    coeffs = np.meshgrid(*tuple([np.arange(slices[dim].size) for dim in range(image.ndim)]), indexing='ij')
+    coeffs = np.meshgrid(*tuple([np.arange(slices[dim].size)
+                                 for dim in range(image.ndim)]), indexing='ij')
     coeffs = [coeff.transpose() for coeff in coeffs]
 
-    inv_coeffs = [np.flip(coeffs[dim], axis=image.ndim - dim - 1) + 1 for dim in range(image.ndim)]
+    inv_coeffs = [np.flip(coeffs[dim], axis=image.ndim - dim - 1) + 1
+                  for dim in range(image.ndim)]
 
-    region = tuple([slice(int(slices[dim][0]), int(slices[dim][-1] + 1)) for dim in range(image.ndim)][::-1])
+    region = tuple([slice(int(slices[dim][0]), int(slices[dim][-1] + 1))
+                    for dim in range(image.ndim)][::-1])
     view = image[region]
 
     im_slice = lut[view]
 
     new = np.zeros_like(view, dtype=int)
-    for iedge, edge in enumerate(np.ndindex(*([2]*image.ndim))):
+    for iedge, edge in enumerate(np.ndindex(*([2] * image.ndim))):
         edge = edge[::-1]
-        new += np.product([[inv_coeffs,coeffs][edge[dim]][dim] for dim in range(image.ndim)],0) * maps[iedge][im_slice]
+        new += \
+            np.product([[inv_coeffs, coeffs][edge[dim]][dim]
+                        for dim in range(image.ndim)], 0)\
+            * maps[iedge][im_slice]
 
     new = (new / norm).astype(view.dtype)
     view[::] = new
