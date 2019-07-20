@@ -161,7 +161,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     starts = [0] * image.ndim
     prev_inds = [0] * image.ndim
 
-    for inds in np.ndindex(*[ns[dim]+1 for dim in range(image.ndim)]):
+    for inds in np.ndindex(*[ns[dim] + 1 for dim in range(image.ndim)]):
 
         for dim in range(image.ndim):
             if inds[dim] != prev_inds[dim]:
@@ -170,7 +170,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
         for dim in range(image.ndim):
             if dim < image.ndim - 1:
                 if inds[dim] != prev_inds[dim]:
-                    starts[dim+1] = 0
+                    starts[dim + 1] = 0
 
         prev_inds = inds[:]
 
@@ -190,7 +190,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
                 uppers[dim] = inds[dim]
 
         maps = []
-        for edge in np.ndindex(*([2]*image.ndim)):
+        for edge in np.ndindex(*([2] * image.ndim)):
             maps.append(map_array[tuple([[lowers, uppers][edge[dim]][dim]
                                          for dim in range(image.ndim)])])
 
