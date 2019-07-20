@@ -98,7 +98,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
         Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
-    data_range : int
+    data_range : int, optional
         The data range of the input image (distance between minimum and
         maximum possible values).  By default, this is estimated from the image
         data-type.
