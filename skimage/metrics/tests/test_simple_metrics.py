@@ -5,7 +5,7 @@ import numpy as np
 
 import skimage.data
 from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
-                              mean_squared_error)
+                             mean_squared_error)
 
 
 np.random.seed(5)

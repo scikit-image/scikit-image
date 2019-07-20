@@ -75,7 +75,8 @@ def test_structural_similarity_grad(seed):
     assert g[0] < 0.05
     assert np.all(g[1] < 0.05)
 
-    mssim, grad, s = structural_similarity(X, Y, data_range=255, gradient=True, full=True)
+    mssim, grad, s = structural_similarity(
+        X, Y, data_range=255, gradient=True, full=True)
     assert np.all(grad < 0.05)
 
 
@@ -117,7 +118,8 @@ def test_structural_similarity_multichannel():
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
-    m, grad, S3 = structural_similarity(Xc, Yc, multichannel=True, full=True, gradient=True)
+    m, grad, S3 = structural_similarity(
+        Xc, Yc, multichannel=True, full=True, gradient=True)
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
 
@@ -147,7 +149,8 @@ def test_structural_similarity_multichannel_chelsea():
 
     # multichannel result should be mean of the individual channel results
     mssim = structural_similarity(Xc, Yc, multichannel=True)
-    mssim_sep = [structural_similarity(Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
+    mssim_sep = [structural_similarity(
+        Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
     assert_almost_equal(mssim, np.mean(mssim_sep))
 
     # structural_similarity of image with itself should be 1.0
@@ -159,7 +162,7 @@ def test_gaussian_structural_similarity_vs_IPOL():
     # https://www.ipol.im/pub/art/2011/g_lmii/
     mssim_IPOL = 0.327309966087341
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                 use_sample_covariance=False)
+                                  use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
 
 
@@ -175,7 +178,7 @@ def test_gaussian_mssim_vs_author_ref():
     """
     mssim_matlab = 0.327314295673357
     mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                 use_sample_covariance=False)
+                                  use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_matlab, decimal=10)
 
 
@@ -188,8 +191,9 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
     grad_matlab = ref['grad_matlab']
     mssim_matlab = float(ref['mssim_matlab'])
 
-    mssim, grad = structural_similarity(cam, cam_noisy, gaussian_weights=True, gradient=True,
-                       use_sample_covariance=False)
+    mssim, grad = structural_similarity(cam, cam_noisy, gaussian_weights=True,
+                                        gradient=True,
+                                        use_sample_covariance=False)
 
     assert_almost_equal(mssim, mssim_matlab, decimal=3)
 
@@ -211,7 +215,8 @@ def test_mssim_mixed_dtype():
     assert_almost_equal(mssim, mssim_mixed)
 
     # no warning when user supplies data_range
-    mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.float32), data_range=255)
+    mssim_mixed = structural_similarity(
+        cam, cam_noisy.astype(np.float32), data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
 

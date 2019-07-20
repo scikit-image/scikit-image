@@ -2,8 +2,8 @@ import numpy as np
 import scipy.sparse as sparse
 
 from skimage.metrics import (adapted_rand_error,
-                              variation_of_information,
-                              contingency_table)
+                             variation_of_information,
+                             contingency_table)
 
 from skimage._shared.testing import assert_equal, assert_almost_equal
 
@@ -12,11 +12,15 @@ def test_contingency_table():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
 
-    table1 = sparse.coo_matrix((np.full(im_true.size, 1 / im_true.size),
-                                (im_true.ravel(), im_test.ravel())),
-                               dtype=float).tocsr()
-    table2 = contingency_table(im_true, im_test, normalize=True)
-    (table1 != table2).nnz == 0
+    table1 = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                       [0., 0.25, 0., 0., 0., 0., 0., 0., 0.],
+                       [0., 0.25, 0., 0., 0., 0., 0., 0., 0.],
+                       [0., 0., 0., 0., 0., 0., 0., 0., 0.25],
+                       [0., 0., 0., 0., 0., 0., 0., 0., 0.25]])
+
+    sparse_table2 = contingency_table(im_true, im_test, normalize=True)
+    table2 = sparse_table2.toarray()
+    assert_array_equal(table1, table2)
 
 
 def test_vi():
