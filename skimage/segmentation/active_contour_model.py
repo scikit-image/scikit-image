@@ -9,7 +9,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
                    bc=None, max_px_move=1.0,
                    max_iterations=2500, convergence=0.1, *,
-                   boundary_condition='periodic'):
+                   boundary_condition='periodic',
+                   coordinates=None):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -55,6 +56,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         be combined by parsing 'fixed-free', 'free-fixed'. Parsing
         'fixed-fixed' or 'free-free' yields same behaviour as 'fixed' and
         'free', respectively.
+    coordinates : {'rc' or 'xy'}, optional
+        Whether to use rc or xy coordinates. The default will change from xy
+        to rc in scikit-image v0.18.
 
     Returns
     -------
@@ -98,6 +102,12 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                    'removed in scikit-image v0.18.')
         warn(message, category=DeprecationWarning)
         boundary_condition = bc
+    if coordinates is None:
+        message = ('The coordinates returned by `active_contour` will change '
+                   'from xy coordinates (transposed from image dimensions) to '
+                   'rc coordinates in scikit-image 0.18.')
+        warn(message, category=FutureWarning)
+        coordinates = 'xy'
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
@@ -227,4 +237,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
             if dist < convergence:
                 break
 
-    return np.array([x, y]).T
+    if coordinates == 'xy':
+        x, y = y, x
+
+    return np.stack([y, x], axis=1)
