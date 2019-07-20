@@ -9,7 +9,7 @@ from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
 
 
 np.random.seed(5)
-cam = skimage.data.camera()
+cam = data.camera()
 sigma = 20.0
 cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
