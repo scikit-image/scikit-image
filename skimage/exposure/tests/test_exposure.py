@@ -262,13 +262,12 @@ def test_adapthist_grayscale_Nd():
     np.random.seed(0)
     img2d = np.random.random((25, 25))
     img3d = np.array([img2d] * 25)
-    with expected_warnings(['precision loss']):
-        adapted2d = exposure.equalize_adapthist(img2d,
-                                                kernel_size=5,
-                                                clip_limit=0.01)
-        adapted3d = exposure.equalize_adapthist(img3d,
-                                                kernel_size=5,
-                                                clip_limit=0.01)
+    adapted2d = exposure.equalize_adapthist(img2d,
+                                            kernel_size=5,
+                                            clip_limit=0.01)
+    adapted3d = exposure.equalize_adapthist(img3d,
+                                            kernel_size=5,
+                                            clip_limit=0.01)
 
     # check that dimensions of input and output match
     assert img2d.shape == adapted2d.shape
