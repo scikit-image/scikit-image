@@ -95,7 +95,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     spatial_dims = None
     try:
-        spatial_dims = guess_spatial_dimensions(image)
+        spatial_dims = _guess_spatial_dimensions(image)
     except ValueError:
         spatial_dims = image.ndim
     if spatial_dims is None and multichannel is None:
@@ -117,7 +117,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
                                truncate=truncate)
 
 
-def guess_spatial_dimensions(image):
+def _guess_spatial_dimensions(image):
     """Make an educated guess about whether an image has a channels dimension.
 
     Parameters
