@@ -9,7 +9,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'check_shape_equality', 'warn']
+           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -158,7 +158,7 @@ def check_shape_equality(im1, im2):
     return
 
 
-def assert_nD(array, ndim, arg_name='image'):
+def check_nD(array, ndim, arg_name='image'):
     """
     Verify an array meets the desired ndims and array isn't empty.
 

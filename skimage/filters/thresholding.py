@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from collections import OrderedDict
 from collections.abc import Iterable
 from ..exposure import histogram
-from .._shared.utils import assert_nD, warn, deprecated
+from .._shared.utils import check_nD, warn, deprecated
 from ..transform import integral_image
 from ..util import crop, dtype_limits
 from ..filters._multiotsu import _find_threshold_multiotsu
@@ -203,7 +203,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     if block_size % 2 == 0:
         raise ValueError("The kwarg ``block_size`` must be odd! Given "
                          "``block_size`` {0} is even.".format(block_size))
-    assert_nD(image, 2)
+    check_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,

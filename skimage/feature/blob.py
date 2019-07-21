@@ -7,7 +7,7 @@ from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 # This basic blob detection algorithm is based on:
@@ -542,7 +542,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     image = img_as_float(image)
     image = integral_image(image)

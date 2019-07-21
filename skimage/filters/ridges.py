@@ -14,7 +14,7 @@ from warnings import warn
 import numpy as np
 
 from ..util import img_as_float, invert
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -274,7 +274,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     """
 
     # Check image dimensions
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.asarray(sigmas)
@@ -390,7 +390,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
     # Check image dimensions
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.asarray(sigmas)
