@@ -18,6 +18,17 @@ Version 0.17
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 * Remove ``rough_wall`` from ``skimage.data.__init__``.
 
+Version 0.18
+------------
+
+* The following functions are deprecated and should be removed in 0.18:
+  `skimage.measure.compare_mse`,
+  `skimage.measure.compare_nrmse`,
+  `skimage.measure.compare_pnsr`
+  `skimage.measure.compare_ssim`
+* `skimage/measure/tests/test_simple_metrics.py` should also be removed
+
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
