@@ -56,7 +56,7 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
         NRMSE.  There is no standard method of normalization across the
         literature [1]_.  The methods available here are as follows:
 
-        - 'Euclidean' : normalize by the averaged Euclidean norm of
+        - 'euclidean' : normalize by the averaged Euclidean norm of
           ``im_true``::
 
               NRMSE = RMSE * sqrt(N) / || im_true ||
