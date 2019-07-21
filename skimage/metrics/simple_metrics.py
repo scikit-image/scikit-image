@@ -1,6 +1,6 @@
 import numpy as np
 from ..util.dtype import dtype_range
-from .._shared.utils import warn, assert_shape_equal
+from .._shared.utils import warn, check_shape_equality
 
 __all__ = ['mean_squared_error',
            'normalized_root_mse',
@@ -33,7 +33,7 @@ def mean_squared_error(im1, im2):
         The mean-squared error (MSE) metric.
 
     """
-    assert_shape_equal(im1, im2)
+    check_shape_equality(im1, im2)
     im1, im2 = _as_floats(im1, im2)
     return np.mean((im1 - im2) ** 2, dtype=np.float64)
 
@@ -77,7 +77,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     .. [1] https://en.wikipedia.org/wiki/Root-mean-square_deviation
 
     """
-    assert_shape_equal(im_true, im_test)
+    check_shape_equality(im_true, im_test)
     im_true, im_test = _as_floats(im_true, im_test)
 
     norm_type = norm_type.lower()
@@ -117,7 +117,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 
     """
-    assert_shape_equal(im_true, im_test)
+    check_shape_equality(im_true, im_test)
 
     if data_range is None:
         if im_true.dtype != im_test.dtype:

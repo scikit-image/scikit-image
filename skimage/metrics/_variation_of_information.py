@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sparse
 from ._contingency_table import contingency_table
-from .._shared.utils import assert_shape_equal
+from .._shared.utils import check_shape_equality
 
 __all__ = ['variation_of_information']
 
@@ -89,7 +89,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
         Per-segment conditional entropies of ``im_true`` given ``im_test`` and
         vice-versa.
     """
-    assert_shape_equal(im_true, im_test)
+    check_shape_equality(im_true, im_test)
 
     if table is None:
         # normalize, since it is an identity op if already done

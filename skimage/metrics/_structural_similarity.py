@@ -4,7 +4,7 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared.utils import warn, assert_shape_equal
+from .._shared.utils import warn, check_shape_equality
 
 __all__ = ['structural_similarity']
 
@@ -80,7 +80,7 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
        :DOI:`10.1007/s10043-009-0119-z`
 
     """
-    assert_shape_equal(im1, im2)
+    check_shape_equality(im1, im2)
 
     if multichannel:
         # loop over channels
