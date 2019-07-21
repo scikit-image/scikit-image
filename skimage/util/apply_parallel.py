@@ -4,13 +4,6 @@ from multiprocessing import cpu_count
 __all__ = ['apply_parallel']
 
 
-try:
-    import dask.array as da
-    dask_available = True
-except ImportError:
-    dask_available = False
-
-
 def _get_chunks(shape, ncpu):
     """Split the array into equal sized chunks based on the number of
     available processors. The last chunk in each dimension absorbs the
@@ -51,6 +44,7 @@ def _get_chunks(shape, ncpu):
 
 
 def _ensure_dask_array(array, chunks=None):
+    import dask.array as da
     if isinstance(array, da.Array):
         return array
 
@@ -111,7 +105,11 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     to disk instead of loading in memory.
 
     """
-    if not dask_available:
+    try:
+        # Importing dask takes time. since apply_parallel is on the
+        # minimum import path of skimage, we lazy attempt to import dask
+        import dask.array as da
+    except ImportError:
         raise RuntimeError("Could not import 'dask'.  Please install "
                            "using 'pip install dask'")
 
