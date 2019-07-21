@@ -4,8 +4,7 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 
 from ..util.dtype import dtype_range
 from ..util.arraycrop import crop
-from .._shared.utils import warn
-from .._shared.testing import assert_shape_equal
+from .._shared.utils import warn, assert_shape_equal
 
 __all__ = ['structural_similarity']
 

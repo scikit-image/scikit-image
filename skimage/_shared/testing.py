@@ -52,13 +52,6 @@ def assert_greater(a, b, msg=None):
     assert a > b, message
 
 
-def assert_shape_equal(im1, im2):
-    """Raise an error if the shape and dtype do not match."""
-    if not im1.shape == im2.shape:
-        raise ValueError('Input images must have the same dimensions.')
-    return
-
-
 def doctest_skip_parser(func):
     """ Decorator replaces custom skip test markup in doctests
 

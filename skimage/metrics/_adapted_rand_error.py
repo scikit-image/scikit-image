@@ -1,4 +1,4 @@
-from .._shared.testing import assert_shape_equal
+from .._shared.utils import assert_shape_equal
 from ._contingency_table import contingency_table
 
 __all__ = ['adapted_rand_error']

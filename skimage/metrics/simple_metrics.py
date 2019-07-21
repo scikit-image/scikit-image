@@ -1,7 +1,6 @@
 import numpy as np
 from ..util.dtype import dtype_range
-from .._shared.utils import warn
-from .._shared.testing import assert_shape_equal
+from .._shared.utils import warn, assert_shape_equal
 
 __all__ = ['mean_squared_error',
            'normalized_root_mse',

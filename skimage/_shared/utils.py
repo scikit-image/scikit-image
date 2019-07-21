@@ -9,7 +9,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn']
+           'safe_as_int', 'assert_nD', 'assert_shape_equal', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -149,6 +149,13 @@ def safe_as_int(val, atol=1e-3):
                          "{0}, check inputs.".format(val))
 
     return np.round(val).astype(np.int64)
+
+
+def assert_shape_equal(im1, im2):
+    """Raise an error if the shape and dtype do not match."""
+    if not im1.shape == im2.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
 
 
 def assert_nD(array, ndim, arg_name='image'):

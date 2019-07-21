@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sparse
 from ._contingency_table import contingency_table
-from .._shared.testing import assert_shape_equal
+from .._shared.utils import assert_shape_equal
 
 __all__ = ['variation_of_information']
 
