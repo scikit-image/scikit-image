@@ -152,7 +152,7 @@ def safe_as_int(val, atol=1e-3):
 
 
 def check_shape_equality(im1, im2):
-    """Raise an error if the shape and dtype do not match."""
+    """Raise an error if the shape do not match."""
     if not im1.shape == im2.shape:
         raise ValueError('Input images must have the same dimensions.')
     return
