@@ -68,7 +68,7 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
                     cc = wc + c
                     kc = wc + window_ext
 
-                    # save pixel values for all dims and compute euclidian
+                    # save pixel values for all dims and compute euclidean
                     # distance between centre stack and current position
                     dist = 0
                     for d in range(dims):

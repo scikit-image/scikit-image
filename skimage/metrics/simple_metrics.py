@@ -50,12 +50,12 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
         Ground-truth image, same shape as im_test.
     im_test : ndarray
         Test image.
-    norm_type : {'Euclidean', 'min-max', 'mean'}, optional
+    norm_type : {'euclidean', 'min-max', 'mean'}, optional
         Controls the normalization method to use in the denominator of the
         NRMSE.  There is no standard method of normalization across the
         literature [1]_.  The methods available here are as follows:
 
-        - 'Euclidean' : normalize by the averaged Euclidean norm of
+        - 'euclidean' : normalize by the averaged Euclidean norm of
           ``im_true``::
 
               NRMSE = RMSE * sqrt(N) / || im_true ||
@@ -81,6 +81,7 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     assert_shape_equal(im_true, im_test)
     im_true, im_test = _as_floats(im_true, im_test)
 
+    # Ensure that both 'Euclidean' and 'euclidean' match
     norm_type = norm_type.lower()
     if norm_type == 'euclidean':
         denom = np.sqrt(np.mean((im_true * im_true), dtype=np.float64))
