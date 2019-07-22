@@ -10,7 +10,6 @@ import os as _os
 
 import numpy as _np
 
-from ..io import imread
 from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
@@ -65,6 +64,9 @@ def load(f, as_gray=False):
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
+    # importing io is quite slow since it scans all the backends
+    # we lazy import it here
+    from ..io import imread
     return imread(_os.path.join(data_dir, f), plugin='pil', as_gray=as_gray)
 
 

@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 import sys
 import warnings
-import inspect
 import re
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
@@ -44,7 +43,9 @@ def all_warnings():
     >>> with all_warnings():
     ...     assert_warns(RuntimeWarning, foo)
     """
-
+    # _warnings.py is on the critical import path.
+    # Since this is a testing only function, we lazy import inspect.
+    import inspect
     # Whenever a warning is triggered, Python adds a __warningregistry__
     # member to the *calling* module.  The exercize here is to find
     # and eradicate all those breadcrumbs that were left lying around.
