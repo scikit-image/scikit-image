@@ -7,6 +7,13 @@ import numpy as np
 
 __all__ = ['crop']
 
+from distutils.version import LooseVersion as Version
+old_numpy = Version(np.__version__) < Version('1.16')
+if old_numpy:
+    from numpy.lib.arraypad import _validate_lengths
+else:
+    from numpy.lib.arraypad import _as_pairs
+
 
 def crop(ar, crop_width, copy=False, order='K'):
     """Crop array `ar` by `crop_width` along each dimension.
@@ -37,18 +44,6 @@ def crop(ar, crop_width, copy=False, order='K'):
         The cropped array. If ``copy=False`` (default), this is a sliced
         view of the input array.
     """
-    # Since arraycrop is in the critical import path, we lazy import distutils
-    # to check the version of numpy
-    # After numpy 1.15, a new backward compatible function have been
-    # implemented.
-    # See https://github.com/numpy/numpy/pull/11966
-    from distutils.version import LooseVersion as Version
-    old_numpy = Version(np.__version__) < Version('1.16')
-    if old_numpy:
-        from numpy.lib.arraypad import _validate_lengths
-    else:
-        from numpy.lib.arraypad import _as_pairs
-
     ar = np.array(ar, copy=False)
     if old_numpy:
         crops = _validate_lengths(ar, crop_width)
