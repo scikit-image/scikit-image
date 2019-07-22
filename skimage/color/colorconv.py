@@ -75,16 +75,9 @@ def guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
-    if image.ndim == 2:
-        return 2
-    if image.ndim == 3 and image.shape[-1] != 3:
-        return 3
-    if image.ndim == 3 and image.shape[-1] == 3:
-        return None
-    if image.ndim == 4 and image.shape[-1] == 3:
-        return 3
-    else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+    from ..filters import _guess_spatial_dimensions
+    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
+    return _guess_spatial_dimensions(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
