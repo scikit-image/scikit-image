@@ -4,7 +4,7 @@
 import os
 from glob import glob
 import re
-import typing
+from collections.abc import Sequence
 from copy import copy
 
 import numpy as np
@@ -76,11 +76,12 @@ def alphanumeric_key(s):
 def _is_multipattern(load_pattern):
     """Helping function. Returns True if load_pattern contains a tuple, list,
     or a string separated with os.pathsep."""
-    pattern = ((isinstance(load_pattern, str) and os.pathsep in load_pattern)
-               or (not isinstance(load_pattern, str) and
-                   isinstance(load_pattern, typing.Sequence) and
-                   all(isinstance(pattern, str) for pattern in load_pattern))
-               )
+    pattern = (
+        (isinstance(load_pattern, str) and os.pathsep in load_pattern)
+        or (not isinstance(load_pattern, str) and
+            isinstance(load_pattern, Sequence) and
+            all(isinstance(pattern, str) for pattern in load_pattern))
+    )
     return pattern
 
 
@@ -164,7 +165,6 @@ class ImageCollection(object):
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
     """
-
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
@@ -250,7 +250,6 @@ class ImageCollection(object):
         img : ndarray or ImageCollection.
             The `n`-th image in the collection, or a new ImageCollection with
             the selected images.
-
         """
         if hasattr(n, '__index__'):
             n = n.__index__()
@@ -390,7 +389,6 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-
     """A class containing a single multi-frame image.
 
     Parameters
