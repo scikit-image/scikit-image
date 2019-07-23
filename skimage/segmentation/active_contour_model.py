@@ -70,7 +70,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     ----------
     .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour
             models". International Journal of Computer Vision 1 (4): 321
-            (1988). DOI:`10.1007/BF00133570`
+            (1988). :DOI:`10.1007/BF00133570`
 
     Examples
     --------
