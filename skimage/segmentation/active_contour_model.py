@@ -58,8 +58,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         'fixed-fixed' or 'free-free' yields same behaviour as 'fixed' and
         'free', respectively.
     coordinates : {'rc' or 'xy'}, optional
-        Whether to use rc or xy coordinates. The default will change from xy
-        to rc in scikit-image v0.18.
+        Whether to use rc or xy coordinates. The 'xy' option (current default)
+        will be removed in version 0.18.
 
     Returns
     -------
