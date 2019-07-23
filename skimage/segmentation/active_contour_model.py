@@ -101,13 +101,14 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         message = ('The keyword argument `bc` to `active_contour` has been '
                    'renamed. Use `boundary_condition=` instead. `bc` will be '
                    'removed in scikit-image v0.18.')
-        warn(message, category=DeprecationWarning)
+        warn(message, stacklevel=2)
         boundary_condition = bc
     if coordinates is None:
         message = ('The coordinates returned by `active_contour` will change '
                    'from xy coordinates (transposed from image dimensions) to '
-                   'rc coordinates in scikit-image 0.18.')
-        warn(message, category=FutureWarning)
+                   'rc coordinates in scikit-image 0.18. Set '
+                   "`coordinates='rc'` to silence this warning.")
+        warn(message, category=FutureWarning, stacklevel=2)
         coordinates = 'xy'
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
