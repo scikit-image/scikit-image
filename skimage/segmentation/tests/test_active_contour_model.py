@@ -141,6 +141,6 @@ def test_xy_coord_warning():
         y = 220 + 100*np.cos(s)
         init = np.array([x, y]).T
         snake = active_contour(gaussian(img, 3), init,
-                               bc='periodic', alpha=0.015, beta=10,
-                               w_line=0, w_edge=1, gamma=0.001,
+                               boundary_condition='periodic', alpha=0.015,
+                               beta=10, w_line=0, w_edge=1, gamma=0.001,
                                max_iterations=100)
