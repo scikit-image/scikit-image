@@ -18,10 +18,10 @@ def test_periodic_reference():
     init = np.array([r, c]).T
     snake = active_contour(gaussian(img, 3), init, alpha=0.015, beta=10,
                            w_line=0, w_edge=1, gamma=0.001, coordinates='rc')
-    refx = [299, 298, 298, 298, 298, 297, 297, 296, 296, 295]
-    refy = [98, 99, 100, 101, 102, 103, 104, 105, 106, 108]
-    assert_equal(np.array(snake[:10, 0], dtype=np.int32), refx)
-    assert_equal(np.array(snake[:10, 1], dtype=np.int32), refy)
+    refr = [98, 99, 100, 101, 102, 103, 104, 105, 106, 108]
+    refc = [299, 298, 298, 298, 298, 297, 297, 296, 296, 295]
+    assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
+    assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
 
 def test_fixed_reference():
