@@ -87,13 +87,13 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Initialize spline:
 
     >>> s = np.linspace(0, 2*np.pi, 100)
-    >>> init = 50 * np.array([np.cos(s), np.sin(s)]).T + 50
+    >>> init = 50 * np.array([np.sin(s), np.cos(s)]).T + 50
 
     Fit spline to image:
 
-    >>> snake = active_contour(img, init, w_edge=0, w_line=1) #doctest: +SKIP
-    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2) #doctest: +SKIP
-    >>> int(np.mean(dist)) #doctest: +SKIP
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1, coordinates='rc')  # doctest: +SKIP
+    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)  # doctest: +SKIP
+    >>> int(np.mean(dist))  # doctest: +SKIP
     25
 
     """
@@ -104,12 +104,16 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         warn(message, stacklevel=2)
         boundary_condition = bc
     if coordinates is None:
-        message = ('The coordinates returned by `active_contour` will change '
+        message = ('The coordinates used by `active_contour` will change '
                    'from xy coordinates (transposed from image dimensions) to '
                    'rc coordinates in scikit-image 0.18. Set '
-                   "`coordinates='rc'` to silence this warning.")
+                   "`coordinates='rc'` to silence this warning. "
+                   "`coordinates='xy'` will restore the old behavior until "
+                   '0.18, but will stop working thereafter.')
         warn(message, category=FutureWarning, stacklevel=2)
         coordinates = 'xy'
+    if coordinates == 'rc':
+        snake = snake[:, ::-1]
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
