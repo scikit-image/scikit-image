@@ -121,10 +121,24 @@ def test_bc_deprecation():
     with expected_warnings(['boundary_condition']):
         img = rgb2gray(data.astronaut())
         s = np.linspace(0, 2*np.pi, 400)
-        x = 220 + 100*np.cos(s)
-        y = 100 + 100*np.sin(s)
-        init = np.array([x, y]).T
+        r = 100 + 100*np.sin(s)
+        c = 220 + 100*np.cos(s)
+        init = np.array([r, c]).T
         snake = active_contour(gaussian(img, 3), init,
                                bc='periodic', alpha=0.015, beta=10,
                                w_line=0, w_edge=1, gamma=0.001,
                                max_iterations=100, coordinates='rc')
+
+
+def test_xy_coord_warning():
+    # this should raise ValueError after 0.18.
+    with expected_warnings(['xy coordinates']):
+        img = rgb2gray(data.astronaut())
+        s = np.linspace(0, 2*np.pi, 400)
+        x = 100 + 100*np.sin(s)
+        y = 220 + 100*np.cos(s)
+        init = np.array([x, y]).T
+        snake = active_contour(gaussian(img, 3), init,
+                               bc='periodic', alpha=0.015, beta=10,
+                               w_line=0, w_edge=1, gamma=0.001,
+                               max_iterations=100)
