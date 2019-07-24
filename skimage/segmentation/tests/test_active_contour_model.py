@@ -108,13 +108,15 @@ def test_end_points():
 
 def test_bad_input():
     img = np.zeros((10, 10))
-    x = np.linspace(5, 424, 100)
-    y = np.linspace(136, 50, 100)
-    init = np.array([x, y]).T
+    r = np.linspace(136, 50, 100)
+    c = np.linspace(5, 424, 100)
+    init = np.array([r, c]).T
     with testing.raises(ValueError):
-        active_contour(img, init, boundary_condition='wrong')
+        active_contour(img, init, boundary_condition='wrong',
+                       coordinates='rc')
     with testing.raises(ValueError):
-        active_contour(img, init, max_iterations=-15)
+        active_contour(img, init, max_iterations=-15,
+                       coordinates='rc')
 
 
 def test_bc_deprecation():
