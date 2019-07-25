@@ -16,6 +16,18 @@ Version 0.17
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
+* Remove ``rough_wall`` from ``skimage.data.__init__``.
+
+Version 0.18
+------------
+
+* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
+* The following functions are deprecated and should be removed in 0.18:
+  `skimage.measure.compare_mse`,
+  `skimage.measure.compare_nrmse`,
+  `skimage.measure.compare_pnsr`
+  `skimage.measure.compare_ssim`
+* `skimage/measure/tests/test_simple_metrics.py` should also be removed
 
 Other
 -----
@@ -30,8 +42,8 @@ Other
   moves away from using ``np.matrix`` in a future version too.
 * Remove the conditional import and function call when ``numpy`` is set
   to > 1.15.x in ``skimage/util/arraycrop.py``.
-* When minimum supported version of ``scipy`` reaches 0.18, use 
-  ``scipy.fftpack.next_fast_len`` directly in 
+* When minimum supported version of ``scipy`` reaches 0.18, use
+  ``scipy.fftpack.next_fast_len`` directly in
   ``skimage.feature.masked_register_translation``.
 * Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
   `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue

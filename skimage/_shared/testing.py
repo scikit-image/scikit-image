@@ -52,6 +52,13 @@ def assert_greater(a, b, msg=None):
     assert a > b, message
 
 
+def assert_shape_equal(im1, im2):
+    """Raise an error if the shape and dtype do not match."""
+    if not im1.shape == im2.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
+
+
 def doctest_skip_parser(func):
     """ Decorator replaces custom skip test markup in doctests
 
@@ -229,7 +236,8 @@ def test_parallel(num_threads=2):
         def inner(*args, **kwargs):
             threads = []
             for i in range(num_threads - 1):
-                thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                thread = threading.Thread(target=func, args=args,
+                                          kwargs=kwargs)
                 threads.append(thread)
             for thread in threads:
                 thread.start()

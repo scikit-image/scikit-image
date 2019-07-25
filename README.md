@@ -7,6 +7,7 @@
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
 - **Mailing list:** [https://mail.python.org/mailman/listinfo/scikit-image](https://mail.python.org/mailman/listinfo/scikit-image)
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
+- **Benchmarks:** [https://pandas.pydata.org/speed/scikit-image/](https://pandas.pydata.org/speed/scikit-image/)
 
 ## Installation from binaries
 
