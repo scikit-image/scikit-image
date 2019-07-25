@@ -39,7 +39,7 @@ fig.tight_layout()
 plt.show()
 
 ######################################################################
-# **skeletonize vs skeletonize 3d**
+# **Zhang's method vs Lee's method**
 #
 # ``skeletonize`` [Zha84]_ works by making successive passes of
 # the image, removing pixels on object borders. This continues until no
@@ -50,15 +50,16 @@ plt.show()
 # value of 0, 1, 2 or 3, which are selectively removed during
 # the iterations.
 #
-# ``skeletonize_3d`` [Lee94]_ uses an octree data structure to examine a 3x3x3
-# neighborhood of a pixel. The algorithm proceeds by iteratively sweeping
-# over the image, and removing pixels at each iteration until the image
-# stops changing. Each iteration consists of two steps: first, a list of
-# candidates for removal is assembled; then pixels from this list are
-# rechecked sequentially, to better preserve connectivity of the image.
+# ``skeletonize(..., method='lee')`` [Lee94]_ uses an octree data structure
+# to examine a 3x3x3 neighborhood of a pixel. The algorithm proceeds by
+# iteratively sweeping over the image, and removing pixels at each iteration
+# until the image stops changing. Each iteration consists of two steps: first,
+# a list of candidates for removal is assembled; then pixels from this list
+# are rechecked sequentially, to better preserve connectivity of the image.
 #
-# Note that ``skeletonize_3d`` is designed to be used mostly on 3-D images.
-# However, for illustrative purposes, we apply this algorithm on a 2-D image.
+# Note that Lee's method [Lee94]_ is designed to be used on 3-D images, and
+# is selected automatically for those. For illustrative purposes, we apply
+# this algorithm to a 2-D image.
 #
 # .. [Zha84] A fast parallel algorithm for thinning digital patterns,
 #            T. Y. Zhang and C. Y. Suen, Communications of the ACM,
@@ -71,28 +72,28 @@ plt.show()
 #
 
 import matplotlib.pyplot as plt
-from skimage.morphology import skeletonize, skeletonize_3d
+from skimage.morphology import skeletonize
 from skimage.data import binary_blobs
 
 
 data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
 
 skeleton = skeletonize(data)
-skeleton3d = skeletonize_3d(data)
+skeleton_lee = skeletonize(data, method='lee')
 
 fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(data, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(skeleton, cmap=plt.cm.gray)
 ax[1].set_title('skeletonize')
 ax[1].axis('off')
 
-ax[2].imshow(skeleton3d, cmap=plt.cm.gray, interpolation='nearest')
-ax[2].set_title('skeletonize_3d')
+ax[2].imshow(skeleton_lee, cmap=plt.cm.gray)
+ax[2].set_title('skeletonize (Lee 94)')
 ax[2].axis('off')
 
 fig.tight_layout()
@@ -113,10 +114,9 @@ plt.show()
 # the medial axis with this function. This gives an estimate of the local width
 # of the objects.
 #
-# For a skeleton with fewer branches, ``skeletonize`` or ``skeletonize_3d``
-# should be preferred.
+# For a skeleton with fewer branches, ``skeletonize`` should be preferred.
 
-from skimage.morphology import medial_axis, skeletonize, skeletonize_3d
+from skimage.morphology import medial_axis, skeletonize
 
 # Generate the data
 data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
@@ -126,7 +126,7 @@ skel, distance = medial_axis(data, return_distance=True)
 
 # Compare with other skeletonization algorithms
 skeleton = skeletonize(data)
-skeleton3d = skeletonize_3d(data)
+skeleton_lee = skeletonize(data, method='lee')
 
 # Distance to the background for pixels of the skeleton
 dist_on_skel = distance * skel
@@ -134,21 +134,21 @@ dist_on_skel = distance * skel
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(data, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(dist_on_skel, cmap='magma', interpolation='nearest')
+ax[1].imshow(dist_on_skel, cmap='magma')
 ax[1].contour(data, [0.5], colors='w')
 ax[1].set_title('medial_axis')
 ax[1].axis('off')
 
-ax[2].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(skeleton, cmap=plt.cm.gray)
 ax[2].set_title('skeletonize')
 ax[2].axis('off')
 
-ax[3].imshow(skeleton3d, cmap=plt.cm.gray, interpolation='nearest')
-ax[3].set_title('skeletonize_3d')
+ax[3].imshow(skeleton_lee, cmap=plt.cm.gray)
+ax[3].set_title("skeletonize (Lee 94)")
 ax[3].axis('off')
 
 fig.tight_layout()
@@ -177,19 +177,19 @@ thinned_partial = thin(image, max_iter=25)
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(skeleton, cmap=plt.cm.gray)
 ax[1].set_title('skeleton')
 ax[1].axis('off')
 
-ax[2].imshow(thinned, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(thinned, cmap=plt.cm.gray)
 ax[2].set_title('thinned')
 ax[2].axis('off')
 
-ax[3].imshow(thinned_partial, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(thinned_partial, cmap=plt.cm.gray)
 ax[3].set_title('partially thinned')
 ax[3].axis('off')
 

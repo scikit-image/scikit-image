@@ -22,7 +22,7 @@ the corresponding release branch.
   1. Review and cleanup ``doc/release/release_dev.txt``.
 
   2. Make a list of merges, contributors, and reviewers by running
-     ``doc/release/contribs.py <tag of previous release>``.
+     ``tools/generate_release_notes.py -h`` and following that file's usage.
 
   3. Paste this list at the end of the ``release_dev.txt``.
 
@@ -80,8 +80,8 @@ the corresponding release branch.
 - Build the package wheels (pre-compiled binaries) for various platforms:
 
   - Clone https://github.com/scikit-image/scikit-image-wheels.
-  - (If making a patch release, switch to the appropriate v<major>.<minor>.x
-    branch.)
+  - If making a patch release, switch to the appropriate v<major>.<minor>.x
+    branch. Otherwise, create that branch.
   - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
     release tag (e.g. ``v0.14.0``).
   - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to

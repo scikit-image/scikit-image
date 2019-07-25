@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.restoration import denoise_nl_means, estimate_sigma
-from skimage.measure import compare_psnr
+from skimage.metrics import peak_signal_noise_ratio
 from skimage.util import random_noise
 
 
@@ -94,11 +94,11 @@ ax[1, 2].set_title('non-local means\n(fast, using $\sigma_{est}$)')
 fig.tight_layout()
 
 # print PSNR metric for each case
-psnr_noisy = compare_psnr(astro, noisy)
-psnr = compare_psnr(astro, denoise)
-psnr2 = compare_psnr(astro, denoise2)
-psnr_fast = compare_psnr(astro, denoise_fast)
-psnr2_fast = compare_psnr(astro, denoise2_fast)
+psnr_noisy = peak_signal_noise_ratio(astro, noisy)
+psnr = peak_signal_noise_ratio(astro, denoise)
+psnr2 = peak_signal_noise_ratio(astro, denoise2)
+psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
+psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
 
 print("PSNR (noisy) = {:0.2f}".format(psnr_noisy))
 print("PSNR (slow) = {:0.2f}".format(psnr))

@@ -22,16 +22,16 @@ def test_line_model_predict():
 
 
 def test_line_model_nd_invalid_input():
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1), np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
@@ -40,7 +40,7 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().estimate(np.empty((1, 3)))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().residuals(np.empty((1, 3)))
 
     data = np.empty((1, 2))
@@ -348,3 +348,23 @@ def test_ransac_invalid_input():
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=1.01)
+
+
+def test_ransac_sample_duplicates():
+    class DummyModel(object):
+
+        """Dummy model to check for duplicates."""
+
+        def estimate(self, data):
+            # Assert that all data points are unique.
+            assert_equal(np.unique(data).size, data.size)
+            return True
+
+        def residuals(self, data):
+            return np.ones(len(data), dtype=np.double)
+
+    # Create dataset with four unique points. Force 10 iterations
+    # and check that there are no duplicated data points.
+    data = np.arange(4)
+    ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
+           max_trials=10)

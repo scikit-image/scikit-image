@@ -20,6 +20,9 @@ addons:
     - texlive
     - texlive-latex-extra
     - dvipng
+    # this became necessary to use matplotlib and qt5.12
+    # https://github.com/matplotlib/matplotlib/pull/13412
+    - qtbase5-dev
 
 env:
   global:
@@ -69,7 +72,7 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1
+      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1 EXTRA_DEPS=0
     - os: osx
       osx_image: xcode9.4
       language: objective-c
@@ -106,7 +109,7 @@ install:
         pip install --no-build-isolation .;
       fi
     # Install testing requirements
-    - pip install --retries 3 -q $PIP_FLAGS -r requirements/test.txt
+    - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples
     - export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
     - mkdir -p ${MPL_DIR}
@@ -114,7 +117,12 @@ install:
     # Install most of the optional packages
     - |
       if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-        pip install --retries 3 -q -r ./requirements/optional.txt $WHEELHOUSE
+        pip install --retries 3 -r ./requirements/optional.txt $WHEELHOUSE
+        if [[ "${EXTRA_DEPS}" != "0" ]]; then
+          # Extra deps need compilation, and it may not always be possible to
+          # compile them easily on all platforms
+          pip install --retries 3 -r ./requirements/extras.txt $WHEELHOUSE
+        fi
       fi
     - tools/travis/install_qt.sh
 

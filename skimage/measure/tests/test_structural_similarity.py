@@ -176,7 +176,7 @@ def test_gaussian_mssim_vs_author_ref():
     mssim_matlab = 0.327314295673357
     mssim = ssim(cam, cam_noisy, gaussian_weights=True,
                  use_sample_covariance=False)
-    assert_almost_equal(mssim, mssim_matlab, decimal=3)
+    assert_almost_equal(mssim, mssim_matlab, decimal=10)
 
 
 def test_gaussian_mssim_and_gradient_vs_Matlab():
@@ -206,7 +206,10 @@ def test_mssim_vs_legacy():
 
 def test_mssim_mixed_dtype():
     mssim = ssim(cam, cam_noisy)
-    with expected_warnings(['Inputs have mismatched dtype']):
+    with expected_warnings(['Inputs have mismatched dtype', ''.join([
+                    'DEPRECATED: skimage.measure.compare_ssim has been moved ',
+                    'to skimage.metrics.structural_similarity. It will be ',
+                    'removed from skimage.measure in version 0.18.'])]):
         mssim_mixed = ssim(cam, cam_noisy.astype(np.float32))
     assert_almost_equal(mssim, mssim_mixed)
 

@@ -51,7 +51,7 @@ References
 import functools
 import numpy as np
 from scipy import ndimage as ndi
-from ... import img_as_ubyte
+from ...util import img_as_ubyte
 from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
@@ -67,6 +67,11 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
     assert_nD(image, 2)
     if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
@@ -101,7 +106,8 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     if n_bins > 2**10:
         warn("Bad rank filter performance is expected due to a "
              "large number of bins ({}), equivalent to an approximate "
-             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)))
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
 
     return image, selem, out, mask, n_bins
 
@@ -1054,3 +1060,43 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.double,
                                    pixel_size=n_bins)
+
+
+def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Majority filter assign to each pixel the most occuring value within
+    its neighborhood.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8, uint16 array).
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters.rank import majority
+    >>> from skimage.morphology import disk
+    >>> img = data.camera()
+    >>> maj_img = majority(img, disk(5))
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._majority, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)

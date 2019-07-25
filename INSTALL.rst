@@ -71,12 +71,12 @@ either download and install Windows compilers from `here`_  or use
    compiler=mingw32
 
 A run-through of the compilation process for Windows is included in
-our `setup of AppVeyor`_ (a continuous integration service).
+our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _python.org: http://python.org/
 .. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
-.. _setup of AppVeyor: https://github.com/scikit-image/scikit-image/blob/master/.appveyor.yml
+.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
 .. _virtual environments: https://docs.python-guide.org/en/latest/dev/virtualenvs/
@@ -100,13 +100,13 @@ Build Requirements
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
 * `Cython >= 0.23.4 <http://www.cython.org/>`__
 
-Build Requirements (docs)
--------------------------
+Documentation Requirements
+--------------------------
 
 .. include:: ../../requirements/docs.txt
    :literal:
 
-Runtime requirements
+Runtime Requirements
 --------------------
 
 .. include:: ../../requirements/default.txt
@@ -135,14 +135,8 @@ functionality is only available with the following installed:
 * `imread <http://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
-Testing requirements
+Testing Requirements
 --------------------
 
 .. include:: ../../requirements/test.txt
-   :literal:
-
-Documentation requirements
---------------------------
-
-.. include:: ../../requirements/docs.txt
    :literal:

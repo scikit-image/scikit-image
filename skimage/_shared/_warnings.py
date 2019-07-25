@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 import sys
 import warnings
-import inspect
 import re
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
@@ -44,7 +43,9 @@ def all_warnings():
     >>> with all_warnings():
     ...     assert_warns(RuntimeWarning, foo)
     """
-
+    # _warnings.py is on the critical import path.
+    # Since this is a testing only function, we lazy import inspect.
+    import inspect
     # Whenever a warning is triggered, Python adds a __warningregistry__
     # member to the *calling* module.  The exercize here is to find
     # and eradicate all those breadcrumbs that were left lying around.
@@ -82,9 +83,12 @@ def expected_warnings(matching):
 
     Examples
     --------
-    >>> from skimage import data, img_as_ubyte, img_as_float
-    >>> with expected_warnings(['precision loss']):
-    ...     d = img_as_ubyte(img_as_float(data.coins()))
+    >>> import numpy as np
+    >>> image = np.random.randint(0, 2**16, size=(100, 100), dtype=np.uint16)
+    >>> # rank filters are slow when bit-depth exceeds 10 bits
+    >>> from skimage import filters
+    >>> with expected_warnings(['Bad rank filter performance']):
+    ...     median_filtered = filters.rank.median(image)
 
     Notes
     -----

@@ -9,9 +9,14 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 .. seealso::
     A more comprehensive presentation on
-    :ref:`sphx_glr_auto_examples_xx_applications_plot_thresholding.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_thresholding.py`
 
 """
+
+
+import matplotlib.pyplot as plt
+from skimage import data
+from skimage.filters import threshold_otsu
 
 ######################################################################
 # We illustrate how to apply one of these thresholding algorithms.
@@ -22,11 +27,6 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 #
 # .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
-
-import matplotlib.pyplot as plt
-from skimage import data
-from skimage.filters import threshold_otsu
-
 
 image = data.camera()
 thresh = threshold_otsu(image)
@@ -58,7 +58,7 @@ plt.show()
 # underlying assumptions, it is often difficult to know which algorithm will give
 # the best results. Therefore, Scikit-image includes a function to evaluate
 # thresholding algorithms provided by the library. At a glance, you can select
-# the best algorithm for you data without a deep understanding of their
+# the best algorithm for your data without a deep understanding of their
 # mechanisms.
 #
 

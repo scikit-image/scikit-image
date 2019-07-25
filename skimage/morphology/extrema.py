@@ -9,16 +9,13 @@ provides the related functions h-maxima and h-minima.
 Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
 """
-
-from __future__ import absolute_import
-
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
 from . import greyreconstruct
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
 
 
@@ -77,7 +74,7 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The maxima of height >= h. The result image is a binary image, where
+       The maxima of height >= h. The resulting image is a binary image, where
        pixels belonging to the selected maxima take value 1, the others
        take value 0.
 
@@ -158,7 +155,7 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The minima of depth >= h. The result image is a binary image, where
+       The minima of depth >= h. The resulting image is a binary image, where
        pixels belonging to the selected minima take value 1, the other pixels
        take value 0.
 
@@ -263,7 +260,7 @@ def _fast_pad(image, value):
 
         np.pad(image, mode="constant", constant_values=value)
 
-    However this method needs to only allocate and copy once which can result
+    However, this method needs to only allocate and copy once which can result
     in significant speed gains if `image` is large.
 
     Examples
@@ -317,7 +314,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         selem = ndi.generate_binary_structure(ndim, connectivity)
     else:
         # Validate custom structured element
-        selem = np.asarray(selem, dtype=bool)
+        selem = np.asarray(selem, dtype=np.bool)
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(
@@ -345,29 +342,29 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
         considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
+        Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
         If True, the output will be a tuple of one-dimensional arrays
         representing the indices of local maxima in each dimension. If False,
-        the output will be an array of 0's and 1's with the same shape as
-        `image`.
+        the output will be a boolean array with the same shape as `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid maxima.
 
     Returns
     -------
     maxima : ndarray or tuple[ndarray]
-        If `indices` is false, an array with the same shape as `image` is
-        returned with 1's indicating the position of local maxima
-        (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
-        containing the coordinates (indices) of all found maxima.
+        If `indices` is false, a boolean array with the same shape as `image`
+        is returned with ``True`` indicating the position of local maxima
+        (``False`` otherwise). If `indices` is true, a tuple of one-dimensional
+        arrays containing the coordinates (indices) of all found maxima.
 
     Warns
     -----
@@ -415,28 +412,28 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     connectivity):
 
     >>> local_maxima(image)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False, False, False, False],
+           [False,  True,  True, False, False, False, False],
+           [ True, False, False, False, False, False,  True]], dtype=bool)
     >>> local_maxima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
     Find local maxima without comparing to diagonal pixels (connectivity 1):
 
     >>> local_maxima(image, connectivity=1)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False,  True,  True, False,  True,  True, False],
+           [ True, False, False, False, False, False,  True]], dtype=bool)
 
     and exclude maxima that border the image edge:
 
     >>> local_maxima(image, connectivity=1, allow_borders=False)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False, False, False, False, False, False, False]], dtype=bool)
     """
     image = np.asarray(image, order="C")
     if image.size == 0:
@@ -445,7 +442,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
             # Make sure that output is a tuple of 1 empty array per dimension
             return np.nonzero(image)
         else:
-            return np.zeros(image.shape, dtype=np.uint8)
+            return np.zeros(image.shape, dtype=np.bool)
 
     if allow_borders:
         # Ensure that local maxima are always at least one smaller sample away
@@ -491,7 +488,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     if indices:
         return np.nonzero(flags)
     else:
-        return flags
+        return flags.view(np.bool)
 
 
 def local_minima(image, selem=None, connectivity=None, indices=False,
@@ -508,29 +505,29 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
         An n-dimensional array.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
-        evaluated pixel. It must contain only 1's and 0's, have the same number
-        of dimensions as `image`. If not given, all adjacent pixels are
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
         considered as part of the neighborhood.
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
+        Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
     indices : bool, optional
         If True, the output will be a tuple of one-dimensional arrays
         representing the indices of local minima in each dimension. If False,
-        the output will be an array of 0's and 1's with the same shape as
-        `image`.
+        the output will be a boolean array with the same shape as `image`.
     allow_borders : bool, optional
         If true, plateaus that touch the image border are valid minima.
 
     Returns
     -------
     minima : ndarray or tuple[ndarray]
-        If `indices` is false, an array with the same shape as `image` is
-        returned with 1's indicating the position of local minima
-        (0 otherwise). If `indices` is true, a tuple of one-dimensional arrays
-        containing the coordinates (indices) of all found minima.
+        If `indices` is false, a boolean array with the same shape as `image`
+        is returned with ``True`` indicating the position of local minima
+        (``False`` otherwise). If `indices` is true, a tuple of one-dimensional
+        arrays containing the coordinates (indices) of all found minima.
 
     See Also
     --------
@@ -572,28 +569,28 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     connectivity):
 
     >>> local_minima(image)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [0, 1, 1, 0, 0, 0, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False, False, False, False],
+           [False,  True,  True, False, False, False, False],
+           [ True, False, False, False, False, False,  True]], dtype=bool)
     >>> local_minima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
     Find local minima without comparing to diagonal pixels (connectivity 1):
 
     >>> local_minima(image, connectivity=1)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [1, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False,  True,  True, False,  True,  True, False],
+           [ True, False, False, False, False, False,  True]], dtype=bool)
 
     and exclude minima that border the image edge:
 
     >>> local_minima(image, connectivity=1, allow_borders=False)
-    array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 1, 1, 0, 1, 1, 0],
-           [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    array([[False, False, False, False, False, False, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False,  True,  True, False,  True,  True, False],
+           [False, False, False, False, False, False, False]], dtype=bool)
     """
     return local_maxima(
         image=invert(image),
