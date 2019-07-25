@@ -456,4 +456,4 @@ class TestProminentPeaks(unittest.TestCase):
         dist = ndi.distance_transform_edt(mask)
         local_max = peak.peak_local_max(dist, min_distance=20, indices=True,
                                         exclude_border=False, labels=labels)
-        assert (len(local_max) == 625)
+        assert len(local_max) == 625
