@@ -55,7 +55,6 @@ from ..._shared.utils import assert_nD, warn
 
 from . import generic_cy
 
-
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
            'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
@@ -128,7 +127,7 @@ def _handle_input(image, selem=None, out=None, mask=None, out_dtype=None,
         out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
         if len(out.shape) == 2:
-            out = out.reshape(out.shape+(pixel_size,))
+            out = out.reshape(out.shape + (pixel_size,))
 
     if image.dtype in (np.uint8, np.int8):
         n_bins = 256
@@ -137,7 +136,7 @@ def _handle_input(image, selem=None, out=None, mask=None, out_dtype=None,
         # 1 to the maximum of the image.
         n_bins = int(max(3, image.max())) + 1
 
-    if n_bins > 2**10:
+    if n_bins > 2 ** 10:
         warn("Bad rank filter performance is expected due to a "
              "large number of bins ({}), equivalent to an approximate "
              "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
@@ -179,10 +178,10 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     """
     # preprocess and verify the input
     image, selem, out, mask, n_bins = _handle_input(image,
-                                                               selem,
-                                                               out,
-                                                               mask,
-                                                               out_dtype)
+                                                    selem,
+                                                    out,
+                                                    mask,
+                                                    out_dtype)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
@@ -231,11 +230,11 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     """
     # preprocess and verify the input
     image, selem, out, mask, n_bins = _handle_input(image,
-                                                               selem,
-                                                               out,
-                                                               mask,
-                                                               out_dtype,
-                                                               pixel_size)
+                                                    selem,
+                                                    out,
+                                                    mask,
+                                                    out_dtype,
+                                                    pixel_size)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
