@@ -43,7 +43,7 @@ class edt2d:
 
 class edt3d:
     """Benchmark for distance transform in scikit-image."""
-    timeout = 120.0
+    timeout = 240.0
     def setup(self):
         self.case = (1+-1*(np.random.randint(50, size=(512,512,512))//48)).astype('float64')
 

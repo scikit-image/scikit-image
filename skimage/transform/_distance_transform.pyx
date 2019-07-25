@@ -12,7 +12,7 @@ cdef double f(double p):
         out = 0
     return out
 
-cdef double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c):
+cdef double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c) nogil:
     cdef double out = <double>(a-b)**2+c
     return out
 
@@ -25,8 +25,12 @@ cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
             out = INFINITY
     return out
 
-cdef double manhattan_dist(Py_ssize_t a, double b, double c):
-    cdef double out = (abs(a-b)+c)
+cdef double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
+    cdef double out
+    if a>=b:
+        out = a-b+c
+    else:
+        out = b-a+c
     return out
 
 cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
