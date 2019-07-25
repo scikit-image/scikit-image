@@ -13,7 +13,7 @@ and vice-versa.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage import measure
+from skimage import metrics
 
 shape = (600, 600)
 image = np.zeros(shape)
@@ -51,9 +51,9 @@ for x, y in zip(set_bx, set_by):
     coords_b[(x, y)] = True
 
 # Call the hausdorff function on the coordinates
-measure.set_metrics.hausdorff_distance(coords_a, coords_b)
+metrics.hausdorff_distance(coords_a, coords_b)
 
-# Plot (one of) the lines that shows the length of the hausdorff distance
+# Plot (one of) the line(s) that shows the length of the hausdorff distance
 x_line = [200, 300]
 y_line = [300, 100]
 plt.plot(x_line, y_line, 'g')

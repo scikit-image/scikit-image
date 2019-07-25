@@ -18,6 +18,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('graph')
     config.add_subpackage('io')
     config.add_subpackage('measure')
+    config.add_subpackage('metrics')
     config.add_subpackage('morphology')
     config.add_subpackage('transform')
     config.add_subpackage('util')

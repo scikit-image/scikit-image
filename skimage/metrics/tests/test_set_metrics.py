@@ -6,7 +6,7 @@ import itertools
 import pytest
 
 from skimage._shared.testing import parametrize
-from skimage.measure import hausdorff_distance
+from skimage.metrics import hausdorff_distance
 
 
 def test_hausdorff_empty():

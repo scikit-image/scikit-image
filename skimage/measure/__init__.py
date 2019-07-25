@@ -15,7 +15,6 @@ from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
-from .set_metrics import hausdorff_distance
 
 
 __all__ = ['find_contours',
@@ -48,6 +47,5 @@ __all__ = ['find_contours',
            'compare_mse',
            'compare_nrmse',
            'compare_psnr',
-           'shannon_entropy',
-           'hausdorff_distance'
+           'shannon_entropy'
            ]
