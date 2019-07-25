@@ -27,8 +27,8 @@ fig, ax = plt.subplots()
 plt_x = [0, 1, 0, -1, 0]
 plt_y = [1, 0, -1, 0, 1]
 
-set_ax = [(x_diamond + r*x) for x in plt_x]
-set_ay = [(y_diamond + r*y) for y in plt_y]
+set_ax = [(x_diamond + r * x) for x in plt_x]
+set_ay = [(y_diamond + r * y) for y in plt_y]
 plt.plot(set_ax, set_ay, 'r')
 
 # Create a kite-like shape where the four corners form the 2nd set of points
@@ -37,8 +37,8 @@ y_kite = 300
 x_r = 150
 y_r = 200
 
-set_bx = [(x_kite + x_r*x) for x in plt_x]
-set_by = [(y_kite + y_r*y) for y in plt_y]
+set_bx = [(x_kite + x_r * x) for x in plt_x]
+set_by = [(y_kite + y_r * y) for y in plt_y]
 plt.plot(set_bx, set_by, 'b')
 
 # Set up the data to compute the hausdorff distance
