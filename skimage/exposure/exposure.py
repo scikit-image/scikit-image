@@ -91,7 +91,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
         Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
-        integer arrays.
+        integer arrays, for which each integer is its own bin.
     source_range : string, optional
         'image' (default) determines the range from the input image.
         'dtype' determines the range from the expected range of the images
@@ -152,7 +152,8 @@ def cumulative_distribution(image, nbins=256):
     image : array
         Image array.
     nbins : int, optional
-        Number of bins for image histogram.
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays, for which each integer is its own bin.
 
     Returns
     -------
@@ -192,9 +193,8 @@ def equalize_hist(image, nbins=256, mask=None):
     image : array
         Image array.
     nbins : int, optional
-        Number of bins for image histogram. Note: this argument is
-        ignored for integer images, for which each integer is its own
-        bin.
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays, for which each integer is its own bin.
     mask: ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
