@@ -648,9 +648,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     Parameters
     ----------
-    data : [list, tuple of] (N, D) array
+    data : [list, tuple of] (N, ...) array
         Data set to which the model is fitted, where N is the number of data
-        points and D the dimensionality of the data.
+        points and the remaining dimension are depending on model requirements.
         If the model class requires multiple input data arrays (e.g. source and
         destination coordinates of  ``skimage.transform.AffineTransform``),
         they can be optionally passed as tuple or list. Note, that in this case
@@ -666,7 +666,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int or float in range [0, 1)
+    min_samples : int in range [0, <nb-samples>)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
         Maximum distance for a data point to be classified as an inlier.
@@ -758,18 +758,20 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> sum(inliers) > 40
     True
 
-    Robustly estimate geometric transformation:
+    Robustly estimate geometric transformation. The argument `min_samples`
+     is an absolute number. If instead we want to use a proportion of the full
+     dataset, we can multiply by the length of the data and cast to `int`:
 
     >>> from skimage.transform import SimilarityTransform
     >>> np.random.seed(0)
     >>> src = 100 * np.random.rand(50, 2)
-    >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
-    ...                              translation=(10, 20))
+    >>> model0 = SimilarityTransform(scale=0.5, rotation=1, translation=(10, 20))
     >>> dst = model0(src)
     >>> dst[0] = (10000, 10000)
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, 0.5, 10,
+    >>> get_min_samples = lambda ratio: max(1, int(ratio * len(src)))
+    >>> model, inliers = ransac((src, dst), SimilarityTransform, get_min_samples(0.5), 10,
     ...                         init_inliers=np.ones(len(src), dtype=bool))
     >>> inliers
     array([False, False, False,  True,  True,  True,  True,  True,  True,
@@ -778,16 +780,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True], dtype=bool)
-
-    Les us present an example of transforming this function requesting mimimal number
-     of samples to passing a ration of minimal samples called `min_sample_ratio` defined
-     in range [0, 1) as portion of total dataset::
-
-        from skimage.measure import ransac as _ransac
-
-        def ransac(data, model_class, min_sample_ratio, residual_threshold, *args, **kwargs):
-            min_samples = int(min_sample_ratio * len(data))
-            return _ransac(data, model_class, min_samples, residual_threshold, *args, **kwargs)
 
     """
 
@@ -798,11 +790,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     random_state = check_random_state(random_state)
 
-    if np.asarray(data).ndim != 2:
-        raise ValueError("`data` must be (N, D) array, where N is the number of data points"
-                         " and D the dimensionality of the data")
-    # number of samples, since data array here is  (N, D)
-    num_samples = len(data)
+    # in case data is not pair of input and output, male it like it
+    if not isinstance(data, (tuple, list)):
+        data = (data, )
+    data_lens = list(map(len, data))
+    assert len(set(data_lens)) == 1, 'all data have to have the same number of samples,' \
+                                     ' provided: %r' % [d.shape for d in data]
+    num_samples = data_lens[0]
 
     if not (0 < min_samples <= num_samples):
         raise ValueError("`min_samples` must be in range (0, <number-of-samples>]")
@@ -816,9 +810,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
     if not (0 <= stop_probability <= 1):
         raise ValueError("`stop_probability` must be in range (0, 1)")
 
-    # make sure data is list and not tuple, so it can be modified below
-    data = np.asarray(data)
-
     if init_inliers is not None and len(init_inliers) != num_samples:
         raise ValueError("RANSAC received a vector of initial inliers (length %i)"
                          " that didn't match the number of samples (%i)."
@@ -828,16 +819,16 @@ def ransac(data, model_class, min_samples, residual_threshold,
                          % (len(init_inliers), num_samples))
 
     # for the first run use initial guess of inliers
-    random_idxs = (init_inliers if init_inliers is not None
-                   else random_state.choice(num_samples, min_samples, replace=False))
+    spl_idxs = (init_inliers if init_inliers is not None
+                else random_state.choice(num_samples, min_samples, replace=False))
 
     for num_trials in range(max_trials):
-        # here is expected to have list of samples
-        samples = data[random_idxs, :].tolist()
-        # for next time choose random sample set and be sure that no samples repeat
-        random_idxs = random_state.choice(num_samples, min_samples, replace=False)
+        # do sample selection according data pairs
+        samples = [d[spl_idxs] for d in data]
+        # for next iteration choose random sample set and be sure that no samples repeat
+        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
 
-        # check if random sample set is valid
+        # optional check if random sample set is valid
         if is_data_valid is not None and not is_data_valid(*samples):
             continue
 
@@ -845,17 +836,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
         sample_model = model_class()
 
         success = sample_model.estimate(*samples)
-
-        if success is not None:  # backwards compatibility
-            if not success:
-                continue
-
-        # check if estimated model is valid
-        if is_model_valid is not None \
-                and not is_model_valid(sample_model, *samples):
+        # backwards compatibility
+        if success is not None and not success:
             continue
 
-        sample_model_residuals = np.abs(sample_model.residuals(data))
+        # optional check if estimated model is valid
+        if is_model_valid is not None and not is_model_valid(sample_model, *samples):
+            continue
+
+        sample_model_residuals = np.abs(sample_model.residuals(*data))
         # consensus set / inliers
         sample_model_inliers = sample_model_residuals < residual_threshold
         sample_model_residuals_sum = np.sum(sample_model_residuals ** 2)
@@ -885,6 +874,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # estimate final model using all inliers
     if best_inliers is not None:
         # select inliers for each data array
-        best_model.estimate(data[best_inliers, :])
+        data_inliers = [d[best_inliers] for d in data]
+        best_model.estimate(*data_inliers)
 
     return best_model, best_inliers
