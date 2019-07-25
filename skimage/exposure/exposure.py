@@ -144,7 +144,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     return hist, bin_centers
 
 
-def cumulative_distribution(image, nbins=256):
+def cumulative_distribution(image, nbins=256, source_range='image'):
     """Return cumulative distribution function (cdf) for the given image.
 
     Parameters
@@ -154,6 +154,10 @@ def cumulative_distribution(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays, for which each integer is its own bin.
+    source_range : string, optional
+        'image' (default) determines the range from the input image.
+        'dtype' determines the range from the expected range of the images
+        of that data type.
 
     Returns
     -------
@@ -179,13 +183,13 @@ def cumulative_distribution(image, nbins=256):
     >>> np.alltrue(cdf[0] == np.cumsum(hi[0])/float(image.size))
     True
     """
-    hist, bin_centers = histogram(image, nbins)
+    hist, bin_centers = histogram(image, nbins, source_range=source_range)
     img_cdf = hist.cumsum()
     img_cdf = img_cdf / float(img_cdf[-1])
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256, mask=None):
+def equalize_hist(image, nbins=256, mask=None, source_range='image'):
     """Return image after histogram equalization.
 
     Parameters
@@ -198,6 +202,10 @@ def equalize_hist(image, nbins=256, mask=None):
     mask: ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
+    source_range : string, optional
+        'image' (default) determines the range from the input image.
+        'dtype' determines the range from the expected range of the images
+        of that data type.
 
     Returns
     -------
@@ -216,9 +224,11 @@ def equalize_hist(image, nbins=256, mask=None):
     """
     if mask is not None:
         mask = np.array(mask, dtype=bool)
-        cdf, bin_centers = cumulative_distribution(image[mask], nbins)
+        cdf, bin_centers = cumulative_distribution(image[mask], nbins,
+                                                   source_range=source_range)
     else:
-        cdf, bin_centers = cumulative_distribution(image, nbins)
+        cdf, bin_centers = cumulative_distribution(image, nbins,
+                                                   source_range=source_range)
     out = np.interp(image.flat, bin_centers, cdf)
     return out.reshape(image.shape)
 
