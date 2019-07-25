@@ -1,6 +1,6 @@
 import numpy as np
 
-from skimage.measure.set_metrics import hausdorff_distance
+from skimage import metrics
 
 
 class SetMetricsSuite(object):
@@ -15,4 +15,4 @@ class SetMetricsSuite(object):
         self.coords_b[points_b] = True
 
     def time_hausdorff(self):
-        hausdorff_distance(self.coords_a, self.coords_b)
+        metrics.hausdorff_distance(self.coords_a, self.coords_b)
