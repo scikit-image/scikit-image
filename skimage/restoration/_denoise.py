@@ -620,7 +620,8 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
 
 
-def _scale_sigma_and_image_consistently(image, sigma, multichannel):
+def _scale_sigma_and_image_consistently(image, sigma, multichannel,
+                                        rescale_sigma):
     """If the ``image`` is rescaled, also rescale ``sigma`` consistently.
 
     Images that are not floating point will be rescaled via ``img_as_float``.
@@ -633,15 +634,18 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel):
                 "When multichannel is True, sigma must be a scalar or have "
                 "length equal to the number of channels")
     if image.dtype.kind != 'f':
-        range_pre = image.max() - image.min()
+        if rescale_sigma:
+            range_pre = image.max() - image.min()
         image = img_as_float(image)
-        range_post = image.max() - image.min()
-        # apply the same magnitude scaling to sigma
-        scale_factor = range_post / range_pre
-        if multichannel:
-            sigma = [s * scale_factor if s is not None else s for s in sigma]
-        elif sigma is not None:
-            sigma *= scale_factor
+        if rescale_sigma:
+            range_post = image.max() - image.min()
+            # apply the same magnitude scaling to sigma
+            scale_factor = range_post / range_pre
+            if multichannel:
+                sigma = [s * scale_factor if s is not None else s
+                         for s in sigma]
+            elif sigma is not None:
+                sigma *= scale_factor
     return image, sigma
 
 
@@ -669,7 +673,8 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
 
 def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                     wavelet_levels=None, multichannel=False,
-                    convert2ycbcr=False, method='BayesShrink'):
+                    convert2ycbcr=False, method='BayesShrink',
+                    rescale_sigma=None):
     """Perform wavelet denoising on an image.
 
     Parameters
@@ -703,6 +708,12 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
         "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
+    rescale_sigma : bool or None, optional
+        If False, no rescaling of the user-provided ``sigma`` will be
+        performed. The default of ``None`` rescales sigma appropriately if the
+        image is rescaled internally. A ``DeprecationWarning`` is raised to
+        warn the user about this new behaviour. This warning can be avoided
+        by setting ``rescale_sigma=True`.
 
     Returns
     -------
@@ -779,14 +790,26 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     if convert2ycbcr and not multichannel:
         raise ValueError("convert2ycbcr requires multichannel == True")
 
-    image, sigma = _scale_sigma_and_image_consistently(image, sigma,
-                                                       multichannel)
-
+    if rescale_sigma is None:
+        msg = (
+            "As of scikit-image 0.16, automated rescaling of sigma to match "
+            "any internal rescaling of the image is performed. Setting "
+            "rescale_sigma to False, will disable this new behaviour. To "
+            "avoid this warning the user should explicitly set rescale_sigma "
+            "to True or False."
+        )
+        warn(msg, DeprecationWarning)
+        rescale_sigma = True
+    image, sigma = _scale_sigma_and_image_consistently(image,
+                                                       sigma,
+                                                       multichannel,
+                                                       rescale_sigma)
     if multichannel:
         if convert2ycbcr:
             out = color.rgb2ycbcr(image)
-            # convert user-supplied sigmas to the new colorspase as well
-            sigma = _rescale_sigma_rgb2ycbcr(sigma)
+            # convert user-supplied sigmas to the new colorspace as well
+            if rescale_sigma:
+                sigma = _rescale_sigma_rgb2ycbcr(sigma)
             for i in range(3):
                 # renormalizing this color channel to live in [0, 1]
                 _min, _max = out[..., i].min(), out[..., i].max()
@@ -804,7 +827,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                                               method=method,
                                               sigma=sigma_channel,
                                               mode=mode,
-                                              wavelet_levels=wavelet_levels)
+                                              wavelet_levels=wavelet_levels,
+                                              rescale_sigma=rescale_sigma)
                 out[..., i] = out[..., i] * scale_factor
                 out[..., i] += _min
             out = color.ycbcr2rgb(out)
