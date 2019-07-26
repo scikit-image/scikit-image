@@ -66,7 +66,8 @@ Bugfixes
 --------
 - ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
   rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
-  preserve the relative scale of the noise estimate.
+  preserve the relative scale of the noise estimate. To restore the old,
+  behaviour, the user can manually specify ``rescale_sigma=False``.
 
 
 Deprecations
