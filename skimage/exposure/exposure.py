@@ -144,7 +144,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     return hist, bin_centers
 
 
-def cumulative_distribution(image, nbins=256, source_range='image'):
+def cumulative_distribution(image, nbins=256, *, source_range='image'):
     """Return cumulative distribution function (cdf) for the given image.
 
     Parameters
