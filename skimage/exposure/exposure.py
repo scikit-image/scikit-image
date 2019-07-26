@@ -189,7 +189,7 @@ def cumulative_distribution(image, nbins=256, *, source_range='image'):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256, mask=None, source_range='image'):
+def equalize_hist(image, nbins=256, mask=None, *, source_range='image'):
     """Return image after histogram equalization.
 
     Parameters
