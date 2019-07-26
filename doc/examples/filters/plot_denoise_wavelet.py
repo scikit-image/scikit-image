@@ -52,20 +52,21 @@ sigma_est = estimate_sigma(noisy, multichannel=True, average_sigmas=True)
 print(f"Estimated Gaussian noise standard deviation = {sigma_est}")
 
 im_bayes = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
-                           method='BayesShrink', mode='soft')
+                           method='BayesShrink', mode='soft',
+                           rescale_sigma=True)
 im_visushrink = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
                                 method='VisuShrink', mode='soft',
-                                sigma=sigma_est)
+                                sigma=sigma_est, rescale_sigma=True)
 
 # VisuShrink is designed to eliminate noise with high probability, but this
 # results in a visually over-smooth appearance.  Repeat, specifying a reduction
 # in the threshold by factors of 2 and 4.
 im_visushrink2 = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
                                  method='VisuShrink', mode='soft',
-                                 sigma=sigma_est/2)
+                                 sigma=sigma_est/2, rescale_sigma=True)
 im_visushrink4 = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
                                  method='VisuShrink', mode='soft',
-                                 sigma=sigma_est/4)
+                                 sigma=sigma_est/4, rescale_sigma=True)
 
 # Compute PSNR as an indication of image quality
 psnr_noisy = peak_signal_noise_ratio(original, noisy)

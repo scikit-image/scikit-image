@@ -776,7 +776,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     >>> img = color.rgb2gray(img)
     >>> img += 0.1 * np.random.randn(*img.shape)
     >>> img = np.clip(img, 0, 1)
-    >>> denoised_img = denoise_wavelet(img, sigma=0.1)
+    >>> denoised_img = denoise_wavelet(img, sigma=0.1, rescale_sigma=True)
 
     """
     if method not in ["BayesShrink", "VisuShrink"]:
