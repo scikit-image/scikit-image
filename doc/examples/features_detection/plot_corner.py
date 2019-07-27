@@ -20,7 +20,8 @@ from skimage.draw import ellipse
 # Sheared checkerboard
 tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7,
                         translation=(110, 30))
-image = warp(data.checkerboard()[:99, :99], tform.inverse, output_shape=(200, 310))
+image = warp(data.checkerboard()[:90, :90], tform.inverse,
+             output_shape=(200, 310))
 # Ellipse
 rr, cc = ellipse(160, 175, 10, 100)
 image[rr, cc] = 1
