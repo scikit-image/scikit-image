@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.ndimage.morphology import distance_transform_edt
 from skimage.transform import generalized_distance_transform
-from skimage import transform
+
 
 class edt2d:
     """Benchmark for distance transform in scikit-image."""
@@ -72,15 +72,3 @@ class edt3d:
 
     def peakmem_skimage_3d(self):
         result = generalized_distance_transform(self.case)**0.5
-
-class TransformSuite:
-    """Benchmark for transform routines in scikit-image."""
-
-    def setup(self):
-        self.image = np.zeros((2000, 2000))
-        idx = np.arange(500, 1500)
-        self.image[idx[::-1], idx] = 255
-        self.image[idx, idx] = 255
-
-    def time_hough_line(self):
-        result1, result2, result3 = transform.hough_line(self.image)
