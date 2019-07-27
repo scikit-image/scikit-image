@@ -4,7 +4,7 @@ Methods to characterize image textures.
 
 import numpy as np
 import warnings
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
@@ -99,9 +99,9 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    assert_nD(image, 2)
-    assert_nD(distances, 1, 'distances')
-    assert_nD(angles, 1, 'angles')
+    check_nD(image, 2)
+    check_nD(distances, 1, 'distances')
+    check_nD(angles, 1, 'angles')
 
     image = np.ascontiguousarray(image)
 
@@ -210,7 +210,7 @@ def greycoprops(P, prop='contrast'):
            [ 1.25      ,  2.75      ]])
 
     """
-    assert_nD(P, 4, 'P')
+    check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
     if num_level != num_level2:
@@ -319,7 +319,7 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     methods = {
         'default': ord('D'),

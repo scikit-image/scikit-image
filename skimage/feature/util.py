@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..util import img_as_float
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 class FeatureDetector(object):
@@ -139,7 +139,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
-    assert_nD(image, 2)
+    check_nD(image, 2)
     return img_as_float(image)
 
 
