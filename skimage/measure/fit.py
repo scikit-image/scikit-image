@@ -666,7 +666,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int in range [0, <nb-samples>)
+    min_samples : int in range (0, <nb-samples>)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
         Maximum distance for a data point to be classified as an inlier.
@@ -758,9 +758,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> sum(inliers) > 40
     True
 
-    Robustly estimate geometric transformation. The argument `min_samples`
-     is an absolute number. If instead we want to use a proportion of the full
-     dataset, we can multiply by the length of the data and cast to `int`:
+    RANSAC can be used to robustly estimate a geometric transformation. In this section,
+    we also show how to use a proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
     >>> np.random.seed(0)
@@ -770,8 +769,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[0] = (10000, 10000)
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
-    >>> get_min_samples = lambda ratio: max(1, int(ratio * len(src)))
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, get_min_samples(0.5), 10,
+    >>> ratio = 0.5  # use half of the samples
+    >>> min_samples = int(ratio * len(src))
+    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples, 10,
     ...                         init_inliers=np.ones(len(src), dtype=bool))
     >>> inliers
     array([False, False, False,  True,  True,  True,  True,  True,  True,
@@ -793,13 +793,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # in case data is not pair of input and output, male it like it
     if not isinstance(data, (tuple, list)):
         data = (data, )
-    data_lens = list(map(len, data))
-    assert len(set(data_lens)) == 1, 'all data have to have the same number of samples,' \
-                                     ' provided: %r' % [d.shape for d in data]
-    num_samples = data_lens[0]
+    num_samples = len(data[0])
 
-    if not (0 < min_samples <= num_samples):
-        raise ValueError("`min_samples` must be in range (0, <number-of-samples>]")
+    if not (0 < min_samples < num_samples):
+        raise ValueError("`min_samples` must be in range (0, <nb-samples>)")
 
     if residual_threshold < 0:
         raise ValueError("`residual_threshold` must be greater than zero")
@@ -808,7 +805,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         raise ValueError("`max_trials` must be greater than zero")
 
     if not (0 <= stop_probability <= 1):
-        raise ValueError("`stop_probability` must be in range (0, 1)")
+        raise ValueError("`stop_probability` must be in range [0, 1]")
 
     if init_inliers is not None and len(init_inliers) != num_samples:
         raise ValueError("RANSAC received a vector of initial inliers (length %i)"
