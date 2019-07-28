@@ -2,17 +2,14 @@ from contextlib import contextmanager
 import sys
 import warnings
 import re
+import functools
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
 
 
-def warn(message, category=None, stacklevel=2):
-    """A version of `warnings.warn` with a default stacklevel of 2.
-    """
-    if category is not None:
-        warnings.warn(message, category=category, stacklevel=stacklevel)
-    else:
-        warnings.warn(message, stacklevel=stacklevel)
+# A version of `warnings.warn` with a default stacklevel of 2.
+# functool is used so as not to increase the call stack accidentally
+warn = functools.partial(warnings.warn, stacklevel=2)
 
 
 @contextmanager
