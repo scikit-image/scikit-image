@@ -140,3 +140,17 @@ Testing Requirements
 
 .. include:: ../../requirements/test.txt
    :literal:
+
+Warnings during testing phase
+-----------------------------
+
+Scikit-image tries to catch all warnings in its development builds to ensure
+that crucial warnings from dependencies are not missed.  This might cause
+certain tests to fail if you are building scikit-image with versions of
+dependencies that were not tested at the time of the release. To disable
+failures on warnings, export the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
+tests::
+
+   export SKIMAGE_TEST_STRICT_WARNINGS=False
+   pytest --pyargs skimage
