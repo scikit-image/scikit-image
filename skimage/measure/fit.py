@@ -621,7 +621,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None, init_inliers=None):
+           stop_probability=1, random_state=None, initial_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -666,7 +666,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int in range (0, <nb-samples>)
+    min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
         Maximum distance for a data point to be classified as an inlier.
@@ -699,7 +699,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
-    init_inliers : array-like of bool, shape (N,), optional
+    initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
 
 
@@ -772,7 +772,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> ratio = 0.5  # use half of the samples
     >>> min_samples = int(ratio * len(src))
     >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples, 10,
-    ...                         init_inliers=np.ones(len(src), dtype=bool))
+    ...                         initial_inliers=np.ones(len(src), dtype=bool))
     >>> inliers
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -796,7 +796,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     num_samples = len(data[0])
 
     if not (0 < min_samples < num_samples):
-        raise ValueError("`min_samples` must be in range (0, <nb-samples>)")
+        raise ValueError("`min_samples` must be in range (0, <number-of-samples>)")
 
     if residual_threshold < 0:
         raise ValueError("`residual_threshold` must be greater than zero")
@@ -807,16 +807,16 @@ def ransac(data, model_class, min_samples, residual_threshold,
     if not (0 <= stop_probability <= 1):
         raise ValueError("`stop_probability` must be in range [0, 1]")
 
-    if init_inliers is not None and len(init_inliers) != num_samples:
+    if initial_inliers is not None and len(initial_inliers) != num_samples:
         raise ValueError("RANSAC received a vector of initial inliers (length %i)"
                          " that didn't match the number of samples (%i)."
                          " The vector of initial inliers should have the same length"
                          " as the number of samples and contain only True (this sample"
                          " is an initial inlier) and False (this one isn't) values."
-                         % (len(init_inliers), num_samples))
+                         % (len(initial_inliers), num_samples))
 
     # for the first run use initial guess of inliers
-    spl_idxs = (init_inliers if init_inliers is not None
+    spl_idxs = (initial_inliers if initial_inliers is not None
                 else random_state.choice(num_samples, min_samples, replace=False))
 
     for num_trials in range(max_trials):
