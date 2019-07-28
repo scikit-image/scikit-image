@@ -713,7 +713,10 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
         performed. The default of ``None`` rescales sigma appropriately if the
         image is rescaled internally. A ``DeprecationWarning`` is raised to
         warn the user about this new behaviour. This warning can be avoided
-        by setting ``rescale_sigma=True`.
+        by setting ``rescale_sigma=True``.
+
+        .. versionadded:: 0.16
+           ``rescale_sigma`` was introduced in 0.16
 
     Returns
     -------
@@ -732,12 +735,13 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
     If the input is 3D, this function performs wavelet denoising on each color
     plane separately.
 
-    For floating point inputs, the original input range is maintained and there
-    is no clipping applied to the output. Other input types will be converted
-    to a floating point value in the range [-1, 1] or [0, 1] depending on the
-    input image range. Any rescaling applied to the `image` will also be
-    applied to `sigma` to maintain the same relative amplitude for the supplied
-    noise standard deviation.
+    .. versionchanged:: 0.16
+       For floating point inputs, the original input range is maintained and
+       there is no clipping applied to the output. Other input types will be
+       converted to a floating point value in the range [-1, 1] or [0, 1]
+       depending on the input image range. Unless ``rescale_sigma = False``,
+       any internal rescaling applied to the ``image`` will also be applied
+       to ``sigma`` to maintain the same relative amplitude.
 
     Many wavelet coefficient thresholding approaches have been proposed. By
     default, ``denoise_wavelet`` applies BayesShrink, which is an adaptive
