@@ -1,4 +1,4 @@
-
+from warnings import warn
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
@@ -153,7 +153,7 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
     if data_range is None:
         if im1.dtype != im2.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im1.dtype.")
+                 "im1.dtype.", stacklevel=2)
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
 

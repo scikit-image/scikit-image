@@ -1,9 +1,8 @@
-
+from warnings import warn
 import numpy as np
 from ..metrics.simple_metrics import (mean_squared_error,
                                        peak_signal_noise_ratio,
                                        normalized_root_mse)
-from .._shared.utils import warn
 
 __all__ = ['compare_mse',
            'compare_nrmse',
@@ -37,7 +36,7 @@ def compare_mse(im1, im2):
     """
     warn('DEPRECATED: skimage.measure.compare_mse has been moved to '
          'skimage.metrics.mean_squared_error. It will be removed from '
-         'skimage.measure in version 0.18.')
+         'skimage.measure in version 0.18.', stacklevel=2)
     return mean_squared_error(im1, im2)
 
 
@@ -81,7 +80,7 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
     """
     warn('DEPRECATED: skimage.measure.compare_nrmse has been moved to '
          'skimage.metrics.normalized_root_mse. It will be removed from '
-         'skimage.measure in version 0.18.')
+         'skimage.measure in version 0.18.', stacklevel=2)
     return normalized_root_mse(im_true, im_test, norm_type=norm_type)
 
 
@@ -111,5 +110,5 @@ def compare_psnr(im_true, im_test, data_range=None):
     """
     warn('DEPRECATED: skimage.measure.compare_psnr has been moved to '
          'skimage.metrics.peak_signal_noise_ratio. It will be removed from '
-         'skimage.measure in version 0.18.')
+         'skimage.measure in version 0.18.', stacklevel=2)
     return peak_signal_noise_ratio(im_true, im_test, data_range=data_range)

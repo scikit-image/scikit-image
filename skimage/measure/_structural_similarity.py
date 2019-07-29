@@ -1,5 +1,5 @@
+from warnings import warn
 from ..metrics._structural_similarity import structural_similarity
-from .._shared.utils import warn
 
 __all__ = ['compare_ssim']
 
@@ -76,7 +76,7 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     """
     warn('DEPRECATED: skimage.measure.compare_ssim has been moved to '
          'skimage.metrics.structural_similarity. It will be removed from '
-         'skimage.measure in version 0.18.')
+         'skimage.measure in version 0.18.', stacklevel=2)
     return structural_similarity(X, Y, win_size, gradient,
                                  data_range, multichannel,
                                  gaussian_weights, full, **kwargs)

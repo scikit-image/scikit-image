@@ -123,7 +123,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     if data_range is None:
         if im_true.dtype != im_test.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im_true.")
+                 "im_true.", stacklevel=2)
         dmin, dmax = dtype_range[im_true.dtype.type]
         true_min, true_max = np.min(im_true), np.max(im_true)
         if true_max > dmax or true_min < dmin:
