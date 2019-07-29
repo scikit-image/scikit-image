@@ -38,10 +38,10 @@ cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
     cdef double fa = f[a]
     cdef double fb = f[b]
     s = (a + fa + b - fb) / 2
-    if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
+    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
         return s
     s = (a - fa + b + fb) / 2
-    if manhattan_dist(a,s,fa)==manhattan_dist(b,s,fb):
+    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
         return INFINITY
