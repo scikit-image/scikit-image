@@ -11,7 +11,6 @@ import os as _os
 import numpy as _np
 from warnings import warn
 
-from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
 from ._detect import lbp_frontal_face_cascade_filename
