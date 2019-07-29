@@ -653,8 +653,9 @@ def test_cycle_spinning_multichannel():
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
                                                multichannel=multichannel)
-            assert_(peak_signal_noise_ratio(img, dn_cc) >
-                    peak_signal_noise_ratio(img, dn))
+            psnr = peak_signal_noise_ratio(img, dn)
+            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+            assert_(psnr_cc > psnr)
 
         for shift_steps in valid_steps:
             with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
@@ -664,8 +665,9 @@ def test_cycle_spinning_multichannel():
                                                shift_steps=shift_steps,
                                                func_kw=func_kw,
                                                multichannel=multichannel)
-            assert_(peak_signal_noise_ratio(img, dn_cc) >
-                    peak_signal_noise_ratio(img, dn))
+            psnr = peak_signal_noise_ratio(img, dn)
+            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+            assert_(psnr_cc > psnr)
 
         for max_shifts in invalid_shifts:
             with testing.raises(ValueError):

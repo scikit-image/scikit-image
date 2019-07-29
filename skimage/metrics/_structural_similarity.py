@@ -65,6 +65,10 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
     To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
     to True, `sigma` to 1.5, and `use_sample_covariance` to False.
 
+    .. versionchanged:: 0.16
+        This function was renamed from ``skimage.measure.compare_ssim`` to
+        ``skimage.metrics.structural_similarity``.
+
     References
     ----------
     .. [1] Wang, Z., Bovik, A. C., Sheikh, H. R., & Simoncelli, E. P.

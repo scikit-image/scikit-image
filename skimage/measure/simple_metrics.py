@@ -58,7 +58,6 @@ if normalized_root_mse.__doc__ is not None:
     """
 
 
-
 def compare_psnr(im_true, im_test, data_range=None):
     warn('DEPRECATED: skimage.measure.compare_psnr has been moved to '
          'skimage.metrics.peak_signal_noise_ratio. It will be removed from '

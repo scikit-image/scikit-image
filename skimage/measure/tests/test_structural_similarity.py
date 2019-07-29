@@ -118,7 +118,10 @@ def test_structural_similarity_multichannel():
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
-    m, grad, S3 = structural_similarity(Xc, Yc, multichannel=True, full=True, gradient=True)
+    m, grad, S3 = structural_similarity(Xc, Yc,
+                                        multichannel=True,
+                                        full=True,
+                                        gradient=True)
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
 
@@ -214,7 +217,8 @@ def test_mssim_mixed_dtype():
     assert_almost_equal(mssim, mssim_mixed)
 
     # no warning when user supplies data_range
-    mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.float32), data_range=255)
+    mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.float32),
+                                        data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
 
