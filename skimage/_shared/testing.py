@@ -234,14 +234,7 @@ def test_parallel(num_threads=2, warnings_matching=None):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            if warnings_matching is None:
-                # The easiest dummy context manager available for python 3.2+
-                # we still support python older than 3.7
-                # https://stackoverflow.com/questions/45187286/how-do-i-write-a-null-no-op-contextmanager-in-python
-                ctx = memoryview(b'')
-            else:
-                ctx = expected_warnings(warnings_matching)
-            with ctx:
+            with expected_warnings(warnings_matching):
                 threads = []
                 for i in range(num_threads - 1):
                     thread = threading.Thread(target=func, args=args,

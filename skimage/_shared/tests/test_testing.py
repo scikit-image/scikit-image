@@ -116,5 +116,14 @@ def test_parallel_warning():
     change_state_warns_passes()
 
 
+def test_expected_warnings_noop():
+    # This will ensure the line beolow it behaves like a no-op
+    with expected_warnings(['Expected warnings test']):
+
+        # This should behave as a no-op
+        with expected_warnings(None):
+            warn('Expected warnings test')
+
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
