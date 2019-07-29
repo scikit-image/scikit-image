@@ -899,3 +899,29 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     _clip_warp_output(image, warped, order, mode, cval, clip)
 
     return warped
+
+#def warp_polar(image, center, radius, order=1, scaling='linear'):
+#    """This is a stub for me to add my own warp_polar function.
+#    
+#    I will add more information as I get this working.
+#    
+#    order:
+#        0 - nearest-neighbor, etc.
+#    """
+#    
+#    #in the future, take an output size but for now we use defaults
+#    height = 360
+#    width = radius
+#    
+#    
+#    k_lin = width/radius
+#    k_log = width/np.log(radius)
+#    k_ang = height/(2*np.pi)
+#    
+#    def 
+#    
+#    if ()
+#
+#    output = np.empty()
+#    print(output_width)
+#    scipy.ndimage.geometric_transform <- USE THIS FOR MAPPING!
