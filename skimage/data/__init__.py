@@ -69,7 +69,9 @@ def load(f, as_gray=False):
     ----
     This functions is deprecated and will be removed in 0.18.
     """
-    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
+    warn('This function is deprecated and will be removed in 0.18. '
+         'Use `skimage.io.load` or `imageio.imread` directly.', 
+         stacklevel=2)
     return _load(f, as_gray=as_gray)
 
 
