@@ -16,14 +16,17 @@ def compare_mse(im1, im2):
          'skimage.measure in version 0.18.', stacklevel=2)
     return mean_squared_error(im1, im2)
 
+
 if mean_squared_error.__doc__ is not None:
     compare_mse.__doc__ = mean_squared_error.__doc__ + """
     Warns
     -----
     Deprecated:
-        As of scikit-image 0.16, this function is deprecated and will be removed
-        in scikit-image 0.18. Please use the function named
-        ``mean_squared_error`` from the ``metrics`` module instead.
+        .. versionadded:: 0.16
+
+        This function is deprecated and will be removed in scikit-image 0.18.
+        Please use the function named ``mean_squared_error`` from the
+        ``metrics`` module instead.
 
     See also
     --------
@@ -37,14 +40,17 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
          'skimage.measure in version 0.18.', stacklevel=2)
     return normalized_root_mse(im_true, im_test, norm_type=norm_type)
 
+
 if normalized_root_mse.__doc__ is not None:
     compare_nrmse.__doc__ = normalized_root_mse.__doc__ + """
     Warns
     -----
     Deprecated:
-        As of scikit-image 0.16, this function is deprecated and will be removed
-        in scikit-image 0.18. Please use the function named
-        ``normalized_root_mse`` from the ``metrics`` module instead.
+        .. versionadded:: 0.16
+
+        This function is deprecated and will be removed in scikit-image 0.18.
+        Please use the function named ``normalized_root_mse`` from the
+        ``metrics`` module instead.
 
     See also
     --------
@@ -59,14 +65,17 @@ def compare_psnr(im_true, im_test, data_range=None):
          'skimage.measure in version 0.18.', stacklevel=2)
     return peak_signal_noise_ratio(im_true, im_test, data_range=data_range)
 
+
 if peak_signal_noise_ratio.__doc__ is not None:
     compare_psnr.__doc__ = peak_signal_noise_ratio.__doc__ + """
     Warns
     -----
     Deprecated:
-        As of scikit-image 0.16, this function is deprecated and will be removed
-        in scikit-image 0.18. Please use the function named
-        ``peak_signal_noise_ratio`` from the ``metrics`` module instead.
+        .. versionadded:: 0.16
+
+        This function is deprecated and will be removed in scikit-image 0.18.
+        Please use the function named ``peak_signal_noise_ratio`` from the
+        ``metrics`` module instead.
 
     See also
     --------

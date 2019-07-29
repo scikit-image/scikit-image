@@ -14,14 +14,19 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
                                  data_range, multichannel,
                                  gaussian_weights, full, **kwargs)
 
+
 if structural_similarity.__doc__ is not None:
     compare_ssim.__doc__ = structural_similarity.__doc__ + """
+
     Warns
     -----
     Deprecated:
-        As of scikit-image 0.16, this function is deprecated and will be removed
-        in scikit-image 0.18. Please use the function named
+        .. versionadded:: 0.16
+
+        This function is deprecated and will be
+        removed in scikit-image 0.18. Please use the function named
         ``structural_similarity`` from the ``metrics`` module instead.
+
 
     See also
     --------
