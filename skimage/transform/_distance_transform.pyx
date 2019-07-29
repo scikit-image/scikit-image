@@ -6,7 +6,7 @@ from numpy cimport ndarray
 from numpy.math cimport INFINITY
 
 
-cdef double f(double p):
+cdef double f(double p) nogil:
     cdef double out = INFINITY
     if p == 0:
         out = 0
@@ -50,27 +50,27 @@ cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
 def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
                                        bint isfirst, double[::1] domains,
                                        Py_ssize_t[::1] centers, double[::1] out):
+
     cdef Py_ssize_t length = len(arr)
     cdef Py_ssize_t i, rightmost, current_domain,start
     cdef double intersection
-
-    if isfirst:
-        for i in range(length):
-            cost_arr[i] = f(arr[i])
-
-    start = 0
-    while start<length:
-        if cost_arr[start] != INFINITY:
-            break
-        start+=1
-    start = min(length-1,start)
-
-    rightmost = 0
-    domains[0] = -INFINITY
-    domains[1] = INFINITY
-    centers[0] = start
-    
     with nogil:
+        if isfirst:
+            for i in range(length):
+                cost_arr[i] = f(arr[i])
+
+        start = 0
+        while start<length:
+            if cost_arr[start] != INFINITY:
+                break
+            start+=1
+        start = min(length-1,start)
+
+        rightmost = 0
+        domains[0] = -INFINITY
+        domains[1] = INFINITY
+        centers[0] = start
+    
         for i in range(start+1,length):
             intersection = euclidean_meet(i,centers[rightmost],cost_arr)
             while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
@@ -93,27 +93,27 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
 def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
                                        bint isfirst, double[::1] domains,
                                        Py_ssize_t[::1] centers, double[::1] out):
+
     cdef Py_ssize_t length = len(arr)
     cdef Py_ssize_t i, rightmost, current_domain, start
     cdef double intersection
-
-    if isfirst:
-        for i in range(length):
-            cost_arr[i] = f(arr[i])
-
-    start = 0
-    while start<length:
-        if cost_arr[start] != INFINITY:
-            break
-        start+=1
-    start = min(length-1,start)
-
-
-    rightmost = 0
-    domains[0] = -INFINITY
-    domains[1] = INFINITY
-    centers[0] = start
     with nogil:
+        if isfirst:
+            for i in range(length):
+                cost_arr[i] = f(arr[i])
+
+        start = 0
+        while start<length:
+            if cost_arr[start] != INFINITY:
+                break
+            start+=1
+        start = min(length-1,start)
+
+
+        rightmost = 0
+        domains[0] = -INFINITY
+        domains[1] = INFINITY
+        centers[0] = start
         for i in range(start+1,length):
             intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
             while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
