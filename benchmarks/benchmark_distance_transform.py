@@ -62,7 +62,7 @@ class edt3d:
     """Benchmark for distance transform in scikit-image."""
     timeout = 240.0
     def setup(self):
-        size = 256
+        size = 512
         self.case = np.zeros((size*3//2,size,size))
         sphere = _draw_ndsphere(n=3,diam=size)
         self.case[:size, :, :] = sphere
