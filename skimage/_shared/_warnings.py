@@ -2,6 +2,7 @@ from contextlib import contextmanager
 import sys
 import warnings
 import re
+import os
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn']
 
@@ -110,6 +111,15 @@ def expected_warnings(matching):
     if isinstance(matching, str):
         raise ValueError('``matching`` should be a list of strings and not '
                          'a string itself.')
+
+    strict_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS', '1')
+    if strict_warnings.lower() == 'true':
+        strict_warnings = True
+    elif strict_warnings.lower() == 'false':
+        strict_warnings = False
+    else:
+        strict_warnings = bool(int(strict_warnings))
+
     with all_warnings() as w:
         # enter context
         yield w
@@ -125,8 +135,8 @@ def expected_warnings(matching):
                     found = True
                     if match in remaining:
                         remaining.remove(match)
-            if not found:
+            if strict_warnings and not found:
                 raise ValueError('Unexpected warning: %s' % str(warn.message))
-        if len(remaining) > 0:
+        if strict_warnings and (len(remaining) > 0):
             msg = 'No warning raised matching:\n%s' % '\n'.join(remaining)
             raise ValueError(msg)
