@@ -5,6 +5,16 @@ from scipy import ndimage as ndi
 from scipy.ndimage.morphology import distance_transform_edt
 from skimage.transform import generalized_distance_transform
 
+def _draw_ndsphere(n,diam):
+    background = np.zeros((100,100,100))
+    sphere = np.zeros(tuple(n*[diam]))
+
+    for i in range(n):
+        loc = tuple([1]*i+[100]+[1]*(n-i))
+        sphere += (np.arange(100)/100-0.5).reshape(loc)
+    
+
+
 
 class edt2d:
     """Benchmark for distance transform in scikit-image."""

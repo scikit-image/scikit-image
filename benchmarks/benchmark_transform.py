@@ -1,5 +1,3 @@
-# See "Writing benchmarks" in the asv docs for more information.
-# https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 from skimage import transform
 
