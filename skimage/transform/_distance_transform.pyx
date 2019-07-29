@@ -50,12 +50,10 @@ cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
 def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
                                        bint isfirst, double[::1] domains,
                                        Py_ssize_t[::1] centers, double[::1] out):
-
+    cdef Py_ssize_t length = len(arr)
+    cdef Py_ssize_t i, rightmost, current_domain,start
+    cdef double intersection
     with nogil:
-        cdef Py_ssize_t length = len(arr)
-        cdef Py_ssize_t i, rightmost, current_domain,start
-        cdef double intersection
-
         if isfirst:
             for i in range(length):
                 cost_arr[i] = f(arr[i])
@@ -94,12 +92,10 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
 def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
                                        bint isfirst, double[::1] domains,
                                        Py_ssize_t[::1] centers, double[::1] out):
-
+    cdef Py_ssize_t length = len(arr)
+    cdef Py_ssize_t i, rightmost, current_domain, start
+    cdef double intersection
     with nogil:
-        cdef Py_ssize_t length = len(arr)
-        cdef Py_ssize_t i, rightmost, current_domain, start
-        cdef double intersection
-
         if isfirst:
             for i in range(length):
                 cost_arr[i] = f(arr[i])

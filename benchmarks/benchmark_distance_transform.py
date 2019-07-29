@@ -5,14 +5,15 @@ from scipy import ndimage as ndi
 from scipy.ndimage.morphology import distance_transform_edt
 from skimage.transform import generalized_distance_transform
 
-def _draw_ndsphere(n,diam):
-    background = np.zeros((100,100,100))
+def _draw_ndsphere(n=3, diam=10):
     sphere = np.zeros(tuple(n*[diam]))
 
     for i in range(n):
-        loc = tuple([1]*i+[100]+[1]*(n-i))
-        sphere += (np.arange(100)/100-0.5).reshape(loc)
-    
+        loc = tuple([1]*i+[diam]+[1]*(n-1-i))
+        sphere += ((np.arange(diam)/(diam)*2-1)**2).reshape(loc)
+    sphere = sphere < 1
+
+    return sphere.astype(int)
 
 
 
@@ -20,7 +21,13 @@ class edt2d:
     """Benchmark for distance transform in scikit-image."""
     timeout = 120.0
     def setup(self):
-        self.case = (1+-1*(np.random.randint(50, size=(4096,4096))//49)).astype('float64')
+        size = 2048
+        self.case = np.zeros((size*3//2,size))
+        sphere = _draw_ndsphere(n=2,diam=size)
+        self.case[:size,:size] = sphere
+        self.case[-1*size: , : ] = (self.case[-1*size:, : ].astype(bool) | sphere.astype(bool)).astype(int)
+        self.case = self.case.astype(int)
+
 
     def time_scipy_2d(self):
         result = distance_transform_edt(self.case)
@@ -55,7 +62,11 @@ class edt3d:
     """Benchmark for distance transform in scikit-image."""
     timeout = 240.0
     def setup(self):
-        self.case = (1+-1*(np.random.randint(50, size=(512,512,512))//49)).astype('float64')
+        size = 256
+        self.case = np.zeros((size*3//2,size,size))
+        sphere = _draw_ndsphere(n=3,diam=size)
+        self.case[:size, :, :] = sphere
+        self.case[-1*size: , : , : ] = (self.case[-1*size:, :, : ].astype(bool) | sphere.astype(bool)).astype(int)
 
     def time_scipy_3d(self):
         result = distance_transform_edt(self.case)
