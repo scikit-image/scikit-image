@@ -16,7 +16,7 @@ cdef double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c) nogil:
     cdef double out = <double>(a-b)**2+c
     return out
 
-cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
+cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
     cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
         if a==INFINITY and b!=INFINITY:
@@ -33,7 +33,7 @@ cdef double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
         out = b-a+c
     return out
 
-cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f):
+cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
     cdef double s
     cdef double fa = f[a]
     cdef double fb = f[b]
@@ -70,23 +70,24 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
     domains[1] = INFINITY
     centers[0] = start
     
-    for i in range(start+1,length):
-        intersection = euclidean_meet(i,centers[rightmost],cost_arr)
-        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
-            rightmost-=1
+    with nogil:
+        for i in range(start+1,length):
             intersection = euclidean_meet(i,centers[rightmost],cost_arr)
+            while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
+                rightmost-=1
+                intersection = euclidean_meet(i,centers[rightmost],cost_arr)
 
-        rightmost+=1
-        centers[rightmost]=i
-        domains[rightmost]=intersection
-    domains[rightmost+1] = INFINITY
+            rightmost+=1
+            centers[rightmost]=i
+            domains[rightmost]=intersection
+        domains[rightmost+1] = INFINITY
 
-    current_domain = 0
+        current_domain = 0
 
-    for i in range(length):
-        while domains[current_domain+1]<i:
-            current_domain += 1
-        out[i] = euclidean_dist(i,centers[current_domain],cost_arr[<Py_ssize_t>centers[current_domain]])
+        for i in range(length):
+            while domains[current_domain+1]<i:
+                current_domain += 1
+            out[i] = euclidean_dist(i,centers[current_domain],cost_arr[<Py_ssize_t>centers[current_domain]])
     return out
 
 def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
@@ -112,25 +113,25 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
     domains[0] = -INFINITY
     domains[1] = INFINITY
     centers[0] = start
-    
-    for i in range(start+1,length):
-        intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
-        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
-            rightmost-=1
+    with nogil:
+        for i in range(start+1,length):
             intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
+            while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
+                rightmost-=1
+                intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
 
-        rightmost+=1
-        centers[rightmost]=i
-        domains[rightmost]=intersection
-    domains[rightmost+1] = INFINITY
+            rightmost+=1
+            centers[rightmost]=i
+            domains[rightmost]=intersection
+        domains[rightmost+1] = INFINITY
 
-    current_domain = 0
+        current_domain = 0
 
-    for i in range(length):
-        while domains[current_domain+1]<i:
-            current_domain += 1
-        manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
-        out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
+        for i in range(length):
+            while domains[current_domain+1]<i:
+                current_domain += 1
+            manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
+            out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
 
