@@ -80,7 +80,7 @@ the SC by consensus. SC members who do not actively engage
 with the SC duties are expected to resign.
 
 The initial Steering Council of scikit-image consists of Stéfan van der
-Walt, Juan Nunez-Iglesias, and Emmanuelle Gouillart.
+Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, and Josh Warner.
 
 Decision Making Process
 =======================
