@@ -3,6 +3,14 @@ SKIP-1: scikit-image mission statement
 ======================================
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
+:Author: Stéfan van der Walt <stefanv@berkeley.edu>
+:Author: Josh Warner
+:Author: François Boulogne
+:Author: Emmanuelle Gouillart
+:Author: Mark Harfouche
+:Author: Lars Grüter
+:Author: Egor Panfilov
+:Author: Gregory Lee
 :Status: Active
 :Type: Process
 :Created: 2018-12-08

@@ -1,5 +1,20 @@
 .. _governance:
 
+:Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
+:Author: Stéfan van der Walt <stefanv@berkeley.edu>
+:Author: Josh Warner
+:Author: François Boulogne
+:Author: Emmanuelle Gouillart
+:Author: Mark Harfouche
+:Author: Lars Grüter
+:Author: Egor Panfilov
+:Status: Draft
+:Type: Process
+:Created: 2019-07-02
+:Resolved:
+:Resolution:
+:Version effective: 0.16
+
 ===========================================
 scikit-image governance and decision-making
 ===========================================
