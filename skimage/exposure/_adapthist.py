@@ -118,6 +118,18 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
+    # pad the image so that the shape in each dimension
+    # is a multiple of the relevant kernel_size
+    pad_end_per_dim = [0] * image.ndim
+    for dim in range(image.ndim):
+        while (image.shape[dim] + pad_end_per_dim[dim]) % kernel_size[dim]:
+            pad_end_per_dim[dim] += 1
+
+    image = np.pad(image,
+                   [[0, pad_end_per_dim[dim]] for dim in range(image.ndim)],
+                   mode='reflect',
+                   )
+
     ns = [int(np.ceil(image.shape[dim] / kernel_size[dim]))
           for dim in range(image.ndim)]
 
@@ -177,11 +189,11 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
         # modify edges to handle special cases
         for dim in range(image.ndim):
             if inds[dim] == 0:
-                offsets[dim] = steps[dim] / 2.0
+                offsets[dim] = np.ceil(steps[dim] / 2.0)
                 lowers[dim] = 0
                 uppers[dim] = 0
             elif inds[dim] == ns[dim]:
-                offsets[dim] = steps[dim] / 2.0
+                offsets[dim] = np.ceil(steps[dim] / 2.0)
                 lowers[dim] = ns[dim] - 1
                 uppers[dim] = ns[dim] - 1
             else:
@@ -194,11 +206,18 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
             maps.append(map_array[tuple([[lowers, uppers][edge[dim]][dim]
                                          for dim in range(image.ndim)])])
 
-        slices = [np.arange(starts[dim], starts[dim] + offsets[dim])
+        slices = [np.arange(starts[dim],
+                            np.min([starts[dim] + offsets[dim],
+                                    image.shape[dim]]))
                   for dim in range(image.ndim)]
 
         interpolate(image, slices[::-1], maps, lut)
 
+    # undo padding
+    depad_slices = tuple([slice(0, image.shape[dim] - pad_end_per_dim[dim])
+                          for dim in range(image.ndim)])
+
+    image = image[depad_slices]
     return image
 
 
