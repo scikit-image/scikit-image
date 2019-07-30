@@ -1,3 +1,5 @@
+.. _skip-template::
+
 ==============================
 SKIP Template and Instructions
 ==============================
