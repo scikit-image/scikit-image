@@ -30,6 +30,11 @@ Version 0.18
   `skimage.measure.compare_ssim`
 * `skimage/measure/tests/test_simple_metrics.py` should also be removed
 
+Version 0.19
+------------
+
+* Remove argument ``rotation`` in `skimage.draw.ellipse`.
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
