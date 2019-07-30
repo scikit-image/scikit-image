@@ -51,7 +51,7 @@ def ellipse(r, c, r_radius, c_radius, orientation=0, shape=None, rotation=None):
     r_radius, c_radius : float
         Minor and major semi-axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     orientation : float, optional (default : 0)
-        Major axis orientation in clockwise direction as radians.
+        Major axis orientation in counter clockwise direction as radians.
     shape : tuple, optional (default : None)
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
