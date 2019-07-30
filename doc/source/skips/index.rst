@@ -11,8 +11,9 @@ Sections
 .. toctree::
    :maxdepth: 1
 
-   0-governance
-   1-values
+   0-skip-process
+   1-governance
+   2-values
 
 .. toctree::
    :hidden:
