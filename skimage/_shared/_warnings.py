@@ -22,7 +22,7 @@ def all_warnings():
     --------
     >>> import warnings
     >>> def foo():
-    ...     warnings.warn(RuntimeWarning("bar"))
+    ...     warnings.warn(RuntimeWarning("bar"), stacklevel=2)
 
     We raise the warning once, while the warning filter is set to "once".
     Hereafter, the warning is invisible, even with custom filters:
