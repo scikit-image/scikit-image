@@ -146,7 +146,7 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     return hist, bin_centers
 
 
-def cumulative_distribution(image, nbins=256, source_range='image'):
+def cumulative_distribution(image, nbins=256, *, source_range='image'):
     """Return cumulative distribution function (cdf) for the given image.
 
     Parameters
@@ -192,7 +192,7 @@ def cumulative_distribution(image, nbins=256, source_range='image'):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256, mask=None, source_range='image'):
+def equalize_hist(image, nbins=256, mask=None, *, source_range='image'):
     """Return image after histogram equalization.
 
     Parameters
