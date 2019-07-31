@@ -47,7 +47,8 @@ def _bincount_histogram(image, source_range):
     image : array
         Input image.
     source_range : string
-        'image' determines the range from the input image.
+        'image' (default) determines the range from minimum and maximum value
+        of the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
 
@@ -93,7 +94,8 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays, for which each integer is its own bin.
     source_range : string, optional
-        'image' (default) determines the range from the input image.
+        'image' (default) determines the range from minimum and maximum value
+        of the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
     normalize : bool, optional
@@ -155,7 +157,8 @@ def cumulative_distribution(image, nbins=256, source_range='image'):
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays, for which each integer is its own bin.
     source_range : string, optional
-        'image' (default) determines the range from the input image.
+        'image' (default) determines the range from minimum and maximum value
+        of the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
 
