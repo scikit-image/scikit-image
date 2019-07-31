@@ -518,8 +518,8 @@ the `warn <https://docs.python.org/3/library/warnings.html#warnings.warn>`__
 function in the Python standard library.
 
 To test if your warning is being emitted correctly, try calling the function
-from an python console. You it should point you to the python console itself
-instead of being emitted by the files in the scikit-image library
+from an IPython console. It should point you to the console input itself
+instead of being emitted by the files in the scikit-image library.
 
 * **Good**: ``ipython:1: UserWarning: ...``
 * **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
