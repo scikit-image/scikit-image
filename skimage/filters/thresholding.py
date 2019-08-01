@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from collections import OrderedDict
 from collections.abc import Iterable
 from ..exposure import histogram
-from .._shared.utils import check_nD, warn, deprecated
+from .._shared.utils import check_nD, warn
 from ..transform import integral_image
 from ..util import crop, dtype_limits
 from ..filters._multiotsu import _find_threshold_multiotsu
