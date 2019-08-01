@@ -902,7 +902,22 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
 def warp_polar(image, center, radius, output_shape=None,
                scaling='linear', **kwargs):
-    """This is a stub for me to add my own warp_polar function.
+    """Remaps image to polor or semilog-polar coordinates space.
+    
+    Parameters
+    ----------
+    
+    image : ndarray
+        Input image.
+        
+    center : tuple (col, row)
+        Point in image that represents the center of the transformation (i.e.,
+        the origin in cartesian space). Values can be of type `float`.
+        
+    radius : float
+        
+    
+    This is a stub for me to add my own warp_polar function.
     
     I will add more information as I get this working.
     
@@ -912,7 +927,8 @@ def warp_polar(image, center, radius, output_shape=None,
     
     if output_shape == None:
         height = 360
-        width = safe_as_int(radius)
+#        width = safe_as_int(radius)
+        width = int(radius)
         output_shape = (height, width)
     else:
         output_shape = safe_as_int(output_shape)
@@ -940,8 +956,11 @@ def warp_polar(image, center, radius, output_shape=None,
         return np.column_stack((c,r))
     
     if scaling == 'linear':
-        warped = warp(image, linear_mapping, output_shape=output_shape, **kwargs)
+        inverse_map_func = linear_mapping
     elif scaling == 'log':
-        warped = warp(image, log_mapping, output_shape=output_shape, **kwargs)
+        inverse_map_func = log_mapping
+    #need to raise error here if not linear or log...see how other functions do it
+        
+    warped = warp(image, inverse_map_func, output_shape=output_shape, **kwargs)
     
     return warped
