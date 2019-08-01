@@ -904,8 +904,6 @@ def warp_polar(image, center, radius, output_shape=None,
                scaling='linear', **kwargs):
     """This is a stub for me to add my own warp_polar function.
     
-    "Image needs to be grayscale"
-    
     I will add more information as I get this working.
     
     order:
@@ -934,8 +932,16 @@ def warp_polar(image, center, radius, output_shape=None,
         r = ((output_coords[:,0]/k_rad)*np.sin(angle)) + center[1]
         c = ((output_coords[:,0]/k_rad)*np.cos(angle)) + center[0]
         return np.column_stack((c,r))
-
-
-    warped = warp(image, linear_mapping, output_shape=output_shape, **kwargs)
+    
+    def log_mapping(output_coords):
+        angle = output_coords[:,1]/k_ang
+        r = ((np.exp(output_coords[:,0]/k_rad))*np.sin(angle)) + center[1]
+        c = ((np.exp(output_coords[:,0]/k_rad))*np.cos(angle)) + center[0]
+        return np.column_stack((c,r))
+    
+    if scaling == 'linear':
+        warped = warp(image, linear_mapping, output_shape=output_shape, **kwargs)
+    elif scaling == 'log':
+        warped = warp(image, log_mapping, output_shape=output_shape, **kwargs)
     
     return warped
