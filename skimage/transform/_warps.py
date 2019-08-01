@@ -900,28 +900,42 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
     return warped
 
-#def warp_polar(image, center, radius, order=1, scaling='linear'):
-#    """This is a stub for me to add my own warp_polar function.
-#    
-#    I will add more information as I get this working.
-#    
-#    order:
-#        0 - nearest-neighbor, etc.
-#    """
-#    
-#    #in the future, take an output size but for now we use defaults
-#    height = 360
-#    width = radius
-#    
-#    
-#    k_lin = width/radius
-#    k_log = width/np.log(radius)
-#    k_ang = height/(2*np.pi)
-#    
-#    def 
-#    
-#    if ()
-#
-#    output = np.empty()
-#    print(output_width)
-#    scipy.ndimage.geometric_transform <- USE THIS FOR MAPPING!
+def warp_polar(image, center, radius, output_shape=None,
+               scaling='linear', **kwargs):
+    """This is a stub for me to add my own warp_polar function.
+    
+    "Image needs to be grayscale"
+    
+    I will add more information as I get this working.
+    
+    order:
+        0 - nearest-neighbor, etc.
+    """
+    
+    if output_shape == None:
+        height = 360
+        width = safe_as_int(radius)
+        output_shape = (height, width)
+    else:
+        output_shape = safe_as_int(output_shape)
+        height = output_shape[0]
+        width = output_shape[1]
+        
+    
+    if scaling == 'linear':
+        k_rad = width/radius
+    elif scaling == 'log':
+        k_rad = width/np.log(radius)
+        
+    k_ang = height/(2*np.pi)
+
+    def linear_mapping(output_coords):
+        angle = output_coords[:,1]/k_ang
+        r = ((output_coords[:,0]/k_rad)*np.sin(angle)) + center[1]
+        c = ((output_coords[:,0]/k_rad)*np.cos(angle)) + center[0]
+        return np.column_stack((c,r))
+
+
+    warped = warp(image, linear_mapping, output_shape=output_shape, **kwargs)
+    
+    return warped
