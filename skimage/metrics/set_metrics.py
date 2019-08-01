@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import numpy as np
 
 from ._set_metrics import hausdorff_distance_onesided
@@ -49,11 +47,6 @@ def hausdorff_distance(a, b):
 
     a_points = np.transpose(np.nonzero(a))
     b_points = np.transpose(np.nonzero(b))
-
-    if a_points.ndim != 2 or b_points.ndim != 2:
-        raise ValueError('Both input arrays must be two-dimensional')
-    if a_points.shape[1] != b_points.shape[1]:
-        raise ValueError('Second dimension of the arrays must be equal')
 
     # Handle empty sets properly
     if a_points.shape[0] == 0 or b_points.shape[0] == 0:
