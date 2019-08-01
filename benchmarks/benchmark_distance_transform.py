@@ -10,8 +10,8 @@ def _draw_ndsphere(n=3, diam=10):
 
     for i in range(n):
         loc = tuple([1]*i+[diam]+[1]*(n-1-i))
-        sphere += ((np.arange(diam)/(diam)*2-1)**2).reshape(loc)
-    sphere = sphere < 1
+        sphere += ((np.arange(diam+1)/(diam)*2-1)**2).reshape(loc)
+    sphere = sphere <= 1
 
     return sphere.astype(int)
 
