@@ -244,7 +244,7 @@ class FundamentalMatrixTransform(GeometricTransform):
 
     """
 
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, *, ndim=2):
         if matrix is None:
             # default to an identity transform
             matrix = np.eye(3)
@@ -438,7 +438,8 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     """
 
-    def __init__(self, rotation=None, translation=None, matrix=None):
+    def __init__(self, rotation=None, translation=None, matrix=None,
+                 *, ndim=2):
         if rotation is not None:
             if translation is None:
                 raise ValueError("Both rotation and translation required")
@@ -539,33 +540,37 @@ class ProjectiveTransform(GeometricTransform):
 
     _coeffs = range(8)
 
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, *, ndim=2):
+        if matrix is not None:
+            ndim = matrix.shape[0] - 1
+        self.ndim = ndim
         if matrix is None:
             # default to an identity transform
-            matrix = np.eye(3)
-        if matrix.shape != (3, 3):
+            matrix = np.eye(ndim + 1)
+        if matrix.shape != (ndim + 1, ndim + 1):
             raise ValueError("invalid shape of transformation matrix")
         self.params = matrix
+        self._coeffs = range(matrix.size - 1)
 
     @property
     def _inv_matrix(self):
         return np.linalg.inv(self.params)
 
     def _apply_mat(self, coords, matrix):
+        ndim = matrix.shape[0] - 1
         coords = np.array(coords, copy=False, ndmin=2)
 
-        x, y = np.transpose(coords)
-        src = np.vstack((x, y, np.ones_like(x)))
-        dst = src.T @ matrix.T
+        src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
+        dst = src @ matrix.T
 
         # below, we will divide by the last dimension of the homogeneous
         # coordinate matrix. In order to avoid division by zero,
         # we replace exact zeros in this column with a very small number.
-        dst[dst[:, 2] == 0, 2] = np.finfo(float).eps
+        dst[dst[:, ndim] == 0, ndim] = np.finfo(float).eps
         # rescale to homogeneous coordinates
-        dst[:, :2] /= dst[:, 2:3]
+        dst[:, :ndim] /= dst[:, ndim:ndim+1]
 
-        return dst[:, :2]
+        return dst[:, :ndim]
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -1029,7 +1034,8 @@ class EuclideanTransform(ProjectiveTransform):
 
     """
 
-    def __init__(self, matrix=None, rotation=None, translation=None):
+    def __init__(self, matrix=None, rotation=None, translation=None,
+                 *, ndim=2):
         params = any(param is not None
                      for param in (rotation, translation))
 
@@ -1242,7 +1248,7 @@ class PolynomialTransform(GeometricTransform):
 
     """
 
-    def __init__(self, params=None):
+    def __init__(self, params=None, *, ndim=2):
         if params is None:
             # default to transformation which preserves original coordinates
             params = np.array([[0, 1, 0], [0, 0, 1]])
@@ -1448,7 +1454,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
         raise ValueError('the transformation type \'%s\' is not'
                          'implemented' % ttype)
 
-    tform = TRANSFORMS[ttype]()
+    tform = TRANSFORMS[ttype](ndim=src.shape[1])
     tform.estimate(src, dst, **kwargs)
 
     return tform
