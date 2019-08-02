@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 
 from skimage.data import astronaut
 from skimage.transform import register_affine, pyramid_gaussian
-from skimage import measure
+from skimage import metrics
 
 
 ###############################################################################
@@ -109,11 +109,11 @@ plt.show()
 
 _, ax = plt.subplots(1, 6)
 
-initial_nmi = measure.compare_nmi(image, target)
+initial_nmi = metrics.normalized_mutual_information(image, target)
 ax[0].set_title('starting NMI {:.3}'.format(initial_nmi))
 ax[0].imshow(overlay(image, target))
 
-final_nmi = measure.compare_nmi(image, registered)
+final_nmi = metrics.normalized_mutual_information(image, registered)
 ax[5].set_title('final correction, NMI {:.3}'.format(final_nmi))
 ax[5].imshow(overlay(image, registered))
 
@@ -127,7 +127,7 @@ for axis_num, level_num in enumerate([0, 2, 4, 5], start=1):
     transformed = ndi.affine_transform(iter_target, matrix)
     level_image = reference_pyramid[level_num]
     # NMI is sensitive to image resolution, so we must compare at top level
-    level_nmi = measure.compare_nmi(image, transformed_full)
+    level_nmi = metrics.normalized_mutual_information(image, transformed_full)
     ax[axis_num].set_title('level {}, NMI {:.4}'.format(level, level_nmi))
     ax[axis_num].imshow(overlay(level_image, transformed),
                            interpolation='bilinear')
