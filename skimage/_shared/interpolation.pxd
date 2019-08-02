@@ -22,7 +22,6 @@ import numpy as np
 cimport numpy as np
 from .fused_numerics cimport np_real_numeric, np_floats
 
-
 cdef inline Py_ssize_t round(np_floats r) nogil:
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
@@ -328,7 +327,6 @@ cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
     -------
     out : np_real_numeric
         Pixel value at given position.
-
     """
     if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
