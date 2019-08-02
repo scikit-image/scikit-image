@@ -3,7 +3,7 @@ from scipy import ndimage as ndi
 from scipy.optimize import minimize
 
 from .pyramids import pyramid_gaussian
-from ..measure import compare_nmi
+from ..metrics import normalized_mutual_information
 
 __all__ = ['register_affine']
 
@@ -60,7 +60,7 @@ def _matrix_to_parameter_vector(matrix):
 def cost_nmi(image0, image1, *, bins=100):
     """Negative of the normalized mutual information.
 
-    See :func:`skimage.measure.compare_nmi` for more info.
+    See :func:`skimage.metrics.normalized_mutual_information` for more info.
 
     Parameters
     ----------
@@ -76,7 +76,7 @@ def cost_nmi(image0, image1, *, bins=100):
         The negative of the normalized mutual information between ``image0``
         and ``image1``.
     """
-    return -compare_nmi(image0, image1, bins=bins)
+    return -normalized_mutual_information(image0, image1, bins=bins)
 
 
 def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
