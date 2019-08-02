@@ -663,11 +663,6 @@ class ProjectiveTransform(GeometricTransform):
             self.params = np.full((d, d), np.nan)
             return False
 
-        xs = src[:, 0]
-        ys = src[:, 1]
-        xd = dst[:, 0]
-        yd = dst[:, 1]
-
         # params: a0, a1, a2, b0, b1, b2, c0, c1
         A = np.zeros((n * d, (d+1) ** 2))
         for ddim in range(d):
@@ -678,7 +673,7 @@ class ProjectiveTransform(GeometricTransform):
             A[ddim*n : (ddim+1)*n, -d-1:] *= -dst[:, ddim:(ddim+1)]
 
         # Select relevant columns, depending on params
-        A = A[:, list(self._coeffs) + [8]]
+        A = A[:, list(self._coeffs) + [-1]]
 
         _, _, V = np.linalg.svd(A)
         # if the last element of the vector corresponding to the smallest
@@ -688,11 +683,11 @@ class ProjectiveTransform(GeometricTransform):
         if np.isclose(V[-1, -1], 0):
             return False
 
-        H = np.zeros((3, 3))
+        H = np.zeros((d+1, d+1))
         # solution is right singular vector that corresponds to smallest
         # singular value
-        H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
-        H[2, 2] = 1
+        H.flat[list(self._coeffs) + [-1]] = - V[-1, :-1] / V[-1, -1]
+        H[d, d] = 1
 
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
