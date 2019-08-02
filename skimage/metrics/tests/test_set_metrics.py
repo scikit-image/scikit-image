@@ -71,3 +71,30 @@ def check_hausdorff_region_different_points(points_a, points_b):
     distance = np.sqrt(sum((ca - cb) ** 2
                            for ca, cb in zip(points_a, points_b)))
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
+
+
+class Test3DHausdorffRegion:
+    points_a_3d = [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
+    points_b_3d = [(0, 0, 2), (0, 2, 0), (2, 0, 0)]
+    hausdorff_distances_list = []
+
+    def check_3d_hausdorff_region(self, points_a, points_b):
+        shape = (3, 3, 3)
+        coords_a = np.zeros(shape, dtype=np.bool)
+        coords_b = np.zeros(shape, dtype=np.bool)
+        coords_a[points_a] = True
+        coords_b[points_b] = True
+
+        distance = np.sqrt(sum((ca - cb) ** 2
+                               for ca, cb in zip(points_a, points_b)))
+        hausdorff_distance_3d = hausdorff_distance(coords_a, coords_b)
+        assert_almost_equal(hausdorff_distance_3d, distance)
+        self.hausdorff_distances_list.append(hausdorff_distance_3d)
+
+    @parametrize("points_a_3d, points_b_3d", itertools.product(points_a_3d, points_b_3d))
+    def test_3d_hausdorff_region(self, points_a_3d, points_b_3d):
+        self.check_3d_hausdorff_region(points_a_3d, points_b_3d)
+
+    def test_range_of_hausdorff_distances(self):
+        assert_almost_equal(min(self.hausdorff_distances_list), 1)
+        assert_almost_equal(max(self.hausdorff_distances_list), np.sqrt(5))
