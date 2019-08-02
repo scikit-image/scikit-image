@@ -137,60 +137,6 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
             out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_fast(double[:] arr, double[:] cost_arr,
-                                       str func,
-                                       bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
-    cdef double (*dist_func)(Py_ssize_t, double, double) nogil
-    cdef double (*dist_meet)(Py_ssize_t, Py_ssize_t, double[:]) nogil
-    cdef Py_ssize_t length = len(arr)
-    cdef Py_ssize_t i, rightmost, current_domain, start
-    cdef double intersection
-
-    with nogil:
-        if func=='euclidean':
-            dist_func = euclidean_dist
-            dist_meet = euclidean_meet
-        else:
-            dist_func = manhattan_dist
-            dist_meet = manhattan_meet
-
-        if isfirst:
-            for i in range(length):
-                cost_arr[i] = f(arr[i])
-
-        start = 0
-        while start<length:
-            if cost_arr[start] != INFINITY:
-                break
-            start+=1
-        start = min(length-1,start)
-
-        rightmost = 0
-        domains[0] = -INFINITY
-        domains[1] = INFINITY
-        centers[0] = start
-
-        for i in range(start+1,length):
-            intersection = dist_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
-            while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
-                rightmost-=1
-                intersection = dist_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
-
-            rightmost+=1
-            centers[rightmost]=i
-            domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
-
-        current_domain = 0
-
-        for i in range(length):
-            while domains[current_domain+1]<i:
-                current_domain += 1
-            out[i] = dist_func(i,centers[current_domain],cost_arr[centers[current_domain]])
-    return out
-
-
 def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
                                        bint isfirst, double[::1] domains,
