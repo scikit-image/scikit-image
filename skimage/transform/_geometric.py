@@ -667,22 +667,15 @@ class ProjectiveTransform(GeometricTransform):
         ys = src[:, 1]
         xd = dst[:, 0]
         yd = dst[:, 1]
-        rows = src.shape[0]
 
         # params: a0, a1, a2, b0, b1, b2, c0, c1
-        A = np.zeros((rows * 2, 9))
-        A[:rows, 0] = xs
-        A[:rows, 1] = ys
-        A[:rows, 2] = 1
-        A[:rows, 6] = - xd * xs
-        A[:rows, 7] = - xd * ys
-        A[rows:, 3] = xs
-        A[rows:, 4] = ys
-        A[rows:, 5] = 1
-        A[rows:, 6] = - yd * xs
-        A[rows:, 7] = - yd * ys
-        A[:rows, 8] = xd
-        A[rows:, 8] = yd
+        A = np.zeros((n * d, (d+1) ** 2))
+        for ddim in range(d):
+            A[ddim*n : (ddim+1)*n, ddim*(d+1) : ddim*(d+1) + d] = src
+            A[ddim*n : (ddim+1)*n, ddim*(d+1) + d] = 1
+            A[ddim*n : (ddim+1)*n, -d-1:-1] = src
+            A[ddim*n : (ddim+1)*n, -1] = -1
+            A[ddim*n : (ddim+1)*n, -d-1:] *= -dst[:, ddim:(ddim+1)]
 
         # Select relevant columns, depending on params
         A = A[:, list(self._coeffs) + [8]]
