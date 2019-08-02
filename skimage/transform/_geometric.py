@@ -26,18 +26,18 @@ def _center_and_normalize_points(points):
     origin at the centroid of the image points.
 
     Normalize the image points, such that the mean distance from the points
-    to the origin of the coordinate system is sqrt(2).
+    to the origin of the coordinate system is sqrt(D).
 
     Parameters
     ----------
-    points : (N, 2) array
+    points : (N, D) array
         The coordinates of the image points.
 
     Returns
     -------
-    matrix : (3, 3) array
+    matrix : (D+1, D+1) array
         The transformation matrix to obtain the new points.
-    new_points : (N, 2) array
+    new_points : (N, D) array
         The transformed image points.
 
     References
@@ -47,24 +47,27 @@ def _center_and_normalize_points(points):
            (1997): 580-593.
 
     """
-
+    n, d = points.shape
     centroid = np.mean(points, axis=0)
 
-    rms = math.sqrt(np.sum((points - centroid) ** 2) / points.shape[0])
+    centered = points - centroid
+    rms = np.sqrt(np.sum(centered ** 2) / n)
 
-    norm_factor = math.sqrt(2) / rms
+    norm_factor = np.sqrt(d) / rms
 
-    matrix = np.array([[norm_factor, 0, -norm_factor * centroid[0]],
-                       [0, norm_factor, -norm_factor * centroid[1]],
-                       [0, 0, 1]])
+    matrix = np.concatenate((
+        norm_factor * np.concatenate((np.eye(d), -centroid[:, np.newaxis]),
+                                     axis=1),
+        [[0,] * d + [1]]),
+        axis=0
+    )
 
-    pointsh = np.row_stack([points.T, np.ones((points.shape[0]),)])
+    points_h = np.row_stack([points.T, np.ones(n)])
 
-    new_pointsh = (matrix @ pointsh).T
+    new_points_h = (matrix @ points_h).T
 
-    new_points = new_pointsh[:, :2]
-    new_points[:, 0] /= new_pointsh[:, 2]
-    new_points[:, 1] /= new_pointsh[:, 2]
+    new_points = new_points_h[:, :d]
+    new_points /= new_points_h[:, d:]
 
     return matrix, new_points
 
