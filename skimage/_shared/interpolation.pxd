@@ -305,8 +305,8 @@ cdef inline np_real_numeric get_pixel2d(np_real_numeric* image,
 
 cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
                                         Py_ssize_t rows, Py_ssize_t cols,
-                                        Py_ssize_t dims, long r, long c,
-                                        long d, char mode,
+                                        Py_ssize_t dims, Py_ssize_t r,
+                                        Py_ssize_t c, Py_ssize_t d, char mode,
                                         np_real_numeric cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 

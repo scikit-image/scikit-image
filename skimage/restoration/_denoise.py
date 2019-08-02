@@ -10,22 +10,36 @@ import skimage.color as color
 import numbers
 
 
-def _gaussian_weight(sigma_sqr, value, *, dtype=float):
-    return np.exp(-0.5 * (value ** 2  / sigma_sqr), dtype=dtype)
+def _gaussian_filter(array, sigma_squared, *, dtype=float):
+    """Define a Gaussian filter from array and sigma_square.
+
+    Parameters:
+    -----------
+    array : ndarray
+        Input array.
+    sigma_squared : float
+        The squared sigma used in the filter.
+
+    Returns:
+    --------
+    gaussian : ndarray
+        The input array filtered by the Gaussian.
+    """
+    return np.exp(-0.5 * (array ** 2  / sigma_squared), dtype=dtype)
 
 
 def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
     values = np.linspace(0, max_value, bins, endpoint=False)
-    color_lut = _gaussian_weight(sigma**2, values, dtype=dtype)
+    color_lut = _gaussian_filter(values, sigma**2, dtype=dtype)
     return color_lut
 
 
-def _compute_range_lut(win_size, sigma, *, dtype=float):
+def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     win_extend = win_size // 2
     grid_points = np.arange(-win_extend, win_extend + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
-    d = np.hypot(rr, cc)
-    range_lut = _gaussian_weight(sigma**2, d, dtype=dtype).ravel()
+    distances = np.hypot(rr, cc)
+    range_lut = _gaussian_filter(distances, sigma**2, dtype=dtype).ravel()
     return range_lut
 
 
@@ -152,7 +166,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     color_lut = _compute_color_lut(bins, sigma_color, max_value,
                                    dtype=image.dtype)
 
-    range_lut = _compute_range_lut(win_size, sigma_spatial, dtype=image.dtype)
+    range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
