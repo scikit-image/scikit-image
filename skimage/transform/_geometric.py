@@ -53,6 +53,9 @@ def _center_and_normalize_points(points):
     centered = points - centroid
     rms = np.sqrt(np.sum(centered ** 2) / n)
 
+    if rms == 0:
+        return np.full((d, d), np.nan), points
+
     norm_factor = np.sqrt(d) / rms
 
     matrix = np.concatenate((
@@ -652,12 +655,12 @@ class ProjectiveTransform(GeometricTransform):
             True, if model estimation succeeds.
 
         """
+        n, d = src.shape
 
-        try:
-            src_matrix, src = _center_and_normalize_points(src)
-            dst_matrix, dst = _center_and_normalize_points(dst)
-        except ZeroDivisionError:
-            self.params = np.nan * np.empty((3, 3))
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+        if not np.all(np.isfinite(src_matrix + dst_matrix)):
+            self.params = np.full((d, d), np.nan)
             return False
 
         xs = src[:, 0]
