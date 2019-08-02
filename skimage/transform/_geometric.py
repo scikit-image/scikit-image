@@ -779,9 +779,13 @@ class AffineTransform(ProjectiveTransform):
     _coeffs = range(6)  # assumes 2D, but overridden in init if needed
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
-                 translation=None):
+                 translation=None, *, ndim=2):
         params = any(param is not None
                      for param in (scale, rotation, shear, translation))
+
+        # these parameters get overwritten if a higher-D matrix is given
+        self.dim = ndim
+        self._coeffs = range(ndim * (ndim + 1))
 
         if params and matrix is not None:
             raise ValueError("You cannot specify the transformation matrix and"
@@ -894,13 +898,14 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         """
 
+        ndim = src.shape[1]
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
         # find affine mapping from source positions to destination
         self.affines = []
         for tri in self._tesselation.vertices:
-            affine = AffineTransform()
+            affine = AffineTransform(ndim=ndim)
             affine.estimate(src[tri, :], dst[tri, :])
             self.affines.append(affine)
 
@@ -910,7 +915,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         # find affine mapping from source positions to destination
         self.inverse_affines = []
         for tri in self._inverse_tesselation.vertices:
-            affine = AffineTransform()
+            affine = AffineTransform(ndim=ndim)
             affine.estimate(dst[tri, :], src[tri, :])
             self.inverse_affines.append(affine)
 
@@ -1126,7 +1131,8 @@ class SimilarityTransform(EuclideanTransform):
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None,
-                 translation=None):
+                 translation=None, *, ndim=2):
+        self.params = None
         params = any(param is not None
                      for param in (scale, rotation, translation))
 
@@ -1134,27 +1140,49 @@ class SimilarityTransform(EuclideanTransform):
             raise ValueError("You cannot specify the transformation matrix and"
                              " the implicit parameters at the same time.")
         elif matrix is not None:
-            if matrix.shape != (3, 3):
+            if matrix.ndim == 1:  # parameter vector: scale, rot, translation
+                if ndim > 3:
+                    raise ValueError(
+                        'Parameter vectors are only supported for 2D and 3D.'
+                    )
+                scale = matrix[0]
+                rotation = matrix[1] if ndim == 2 else matrix[1:4]
+                translation = matrix[-ndim:]
+                params = True
+            elif matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
-            self.params = matrix
-        elif params:
+            else:
+                self.params = matrix
+                ndim = matrix.shape[0] - 1
+        if params:
+            if ndim == 2:
+                axes = ((0, 1),)
+            elif ndim == 3:
+                axes = ((1, 2), (0, 1), (1, 2))  # XZX Euler angles
+            else:
+                raise ValueError('Parameters only supported for 2D and 3D.')
+            matrix = np.eye(ndim + 1, dtype=float)
             if scale is None:
                 scale = 1
             if rotation is None:
-                rotation = 0
+                rotation = (0,) if ndim == 2 else (0, 0, 0)
+            if np.isscalar(rotation):
+                rotation = [rotation]
             if translation is None:
-                translation = (0, 0)
+                translation = (0,) * ndim
+            for rot, ax in zip(rotation, axes):
+                R = np.eye(ndim + 1)
+                c, s = np.cos(rot), np.sin(rot)
+                R[ax, ax] = c
+                R[ax, ax[::-1]] = -s, s
+                matrix = R @ matrix
 
-            self.params = np.array([
-                [math.cos(rotation), - math.sin(rotation), 0],
-                [math.sin(rotation),   math.cos(rotation), 0],
-                [                 0,                    0, 1]
-            ])
-            self.params[0:2, 0:2] *= scale
-            self.params[0:2, 2] = translation
-        else:
+            matrix[:ndim, :ndim] *= scale
+            matrix[:ndim, ndim] = translation
+            self.params = matrix
+        elif self.params is None:
             # default to an identity transform
-            self.params = np.eye(3)
+            self.params = np.eye(ndim + 1)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
