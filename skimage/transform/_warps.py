@@ -20,9 +20,9 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
            preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
 
-    Performs interpolation to up-size or down-size images. Note that anti-
+    Performs interpolation to up-size or down-size N-dimensional images. Note that anti-
     aliasing should be enabled when down-sizing images to avoid aliasing
-    artifacts. For down-sampling N-dimensional images with an integer factor
+    artifacts. For down-sampling with an integer factor
     also see `skimage.transform.downscale_local_mean`.
 
     Parameters
@@ -189,9 +189,9 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
             anti_aliasing=True, anti_aliasing_sigma=None):
     """Scale image by a certain factor.
 
-    Performs interpolation to up-scale or down-scale images. Note that anti-
+    Performs interpolation to up-scale or down-scale N-dimensional images. Note that anti-
     aliasing should be enabled when down-sizing images to avoid aliasing
-    artifacts. For down-sampling N-dimensional images with an integer factor
+    artifacts. For down-sampling with an integer factor
     also see `skimage.transform.downscale_local_mean`.
 
     Parameters
@@ -393,10 +393,9 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
     The image is padded with `cval` if it is not perfectly divisible by the
     integer factors.
 
-    In contrast to the 2-D interpolation in `skimage.transform.resize` and
-    `skimage.transform.rescale` this function may be applied to N-dimensional
-    images and calculates the local mean of elements in each block of size
-    `factors` in the input image.
+    In contrast to interpolation in `skimage.transform.resize` and
+    `skimage.transform.rescale` this function calculates the local mean of
+    elements in each block of size `factors` in the input image.
 
     Parameters
     ----------
