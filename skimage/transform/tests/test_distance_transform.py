@@ -72,7 +72,7 @@ def test_3d():
 
 def test_euclidean_equivalent_to_ndimage():
     from scipy.ndimage.morphology import distance_transform_edt
-    case = (1+-1*(np.random.randint(50, size=(256,256,256))//49)).astype('float64')
+    case = (1+-1*(np.random.randint(50, size=(64,64,64))//49)).astype('float64')
 
     out_euc = distance_transform_edt(case)
     skimage_out_euc = generalized_distance_transform(case, func='euclidean')**0.5
@@ -81,7 +81,7 @@ def test_euclidean_equivalent_to_ndimage():
 
 def test_manhattan_equivalent_to_ndimage():
     from scipy.ndimage.morphology import distance_transform_cdt
-    case = (1+-1*(np.random.randint(50, size=(256,256,256))//49)).astype('float64')
+    case = (1+-1*(np.random.randint(50, size=(64,64,64))//49)).astype('float64')
 
     out_man = distance_transform_cdt(case, metric = 'taxicab')
     skimage_out_man = generalized_distance_transform(case, func='manhattan')
