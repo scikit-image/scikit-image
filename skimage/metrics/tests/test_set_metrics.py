@@ -73,6 +73,46 @@ def check_hausdorff_region_different_points(points_a, points_b):
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
 
 
+def test_gallery():
+    shape = (60, 60)
+    image = np.zeros(shape)
+
+    # Create a diamond-like shape where the four corners form the 1st set of points
+    x_diamond = 30
+    y_diamond = 30
+    r = 10
+
+    plt_x = [0, 1, 0, -1]
+    plt_y = [1, 0, -1, 0]
+
+    set_ax = [(x_diamond + r * x) for x in plt_x]
+    set_ay = [(y_diamond + r * y) for y in plt_y]
+
+    # Create a kite-like shape where the four corners form the 2nd set of points
+    x_kite = 30
+    y_kite = 30
+    x_r = 15
+    y_r = 20
+
+    set_bx = [(x_kite + x_r * x) for x in plt_x]
+    set_by = [(y_kite + y_r * y) for y in plt_y]
+
+    # Set up the data to compute the hausdorff distance
+    coords_a = np.zeros(shape, dtype=np.bool)
+    coords_b = np.zeros(shape, dtype=np.bool)
+
+    for x, y in zip(set_ax, set_ay):
+        coords_a[(x, y)] = True
+
+    for x, y in zip(set_bx, set_by):
+        coords_b[(x, y)] = True
+
+    # Test the hausdorff function on the coordinates
+    # Should return 10, the distance between the furthest tip of the kite and its closest point on the diamond, which is
+    # the furthest someone can make you travel to encounter your nearest neighboring point on the other set.
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b), 10.)
+
+
 class Test3DHausdorffRegion:
     points_a_3d = [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
     points_b_3d = [(0, 0, 2), (0, 2, 0), (2, 0, 0)]
