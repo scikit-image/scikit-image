@@ -32,45 +32,43 @@ def test_hausdorff_simple():
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
 
 
-points = [(0, 0), (3, 0), (1, 4), (4, 1)]
+class TestHausdorffRegionSingle:
+    points = [(0, 0), (3, 0), (1, 4), (4, 1)]
+    
+    def check_hausdorff_region_single(self, points_a, points_b):
+        shape = (5, 5)
+        coords_a = np.zeros(shape, dtype=np.bool)
+        coords_b = np.zeros(shape, dtype=np.bool)
+        coords_a[points_a] = True
+        coords_b[points_b] = True
+
+        distance = np.sqrt(sum((ca - cb) ** 2
+                               for ca, cb in zip(points_a, points_b)))
+        assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
+
+    @parametrize("points_a, points_b", itertools.product(points, repeat=2))
+    def test_hausdorff_region_single(self, points_a, points_b):
+        self.check_hausdorff_region_single(points_a, points_b)
 
 
-@parametrize("points_a, points_b", itertools.product(points, repeat=2))
-def test_hausdorff_region_single(points_a, points_b):
-    check_hausdorff_region_single(points_a, points_b)
+class TestHausdorffRegionDifferentPoints:
+    points_a = [(5, 4), (4, 5), (3, 4), (4, 3)]
+    points_b = [(6, 4), (2, 6), (2, 4), (4, 0)]
 
+    def check_hausdorff_region_different_points(self, points_a, points_b):
+        shape = (7, 7)
+        coords_a = np.zeros(shape, dtype=np.bool)
+        coords_b = np.zeros(shape, dtype=np.bool)
+        coords_a[points_a] = True
+        coords_b[points_b] = True
 
-def check_hausdorff_region_single(points_a, points_b):
-    shape = (5, 5)
-    coords_a = np.zeros(shape, dtype=np.bool)
-    coords_b = np.zeros(shape, dtype=np.bool)
-    coords_a[points_a] = True
-    coords_b[points_b] = True
+        distance = np.sqrt(sum((ca - cb) ** 2
+                               for ca, cb in zip(points_a, points_b)))
+        assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
 
-    distance = np.sqrt(sum((ca - cb) ** 2
-                           for ca, cb in zip(points_a, points_b)))
-    assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
-
-
-points_a = [(5, 4), (4, 5), (3, 4), (4, 3)]
-points_b = [(6, 4), (2, 6), (2, 4), (4, 0)]
-
-
-@parametrize("points_a, points_b", itertools.product(points_a, points_b))
-def test_hausdorff_region_different_points(points_a, points_b):
-    check_hausdorff_region_different_points(points_a, points_b)
-
-
-def check_hausdorff_region_different_points(points_a, points_b):
-    shape = (7, 7)
-    coords_a = np.zeros(shape, dtype=np.bool)
-    coords_b = np.zeros(shape, dtype=np.bool)
-    coords_a[points_a] = True
-    coords_b[points_b] = True
-
-    distance = np.sqrt(sum((ca - cb) ** 2
-                           for ca, cb in zip(points_a, points_b)))
-    assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
+    @parametrize("points_a, points_b", itertools.product(points_a, points_b))
+    def test_hausdorff_region_different_points(self, points_a, points_b):
+        self.check_hausdorff_region_different_points(points_a, points_b)
 
 
 def test_gallery():
