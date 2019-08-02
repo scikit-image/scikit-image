@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage as ndi
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 __all__ = ['gabor_kernel', 'gabor']
@@ -165,7 +165,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     >>> io.imshow(filt_real)    # doctest: +SKIP
     >>> io.show()               # doctest: +SKIP
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset)
 

@@ -9,9 +9,8 @@ For more images, see
 import os as _os
 
 import numpy as _np
+from warnings import warn
 
-from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
 from ._detect import lbp_frontal_face_cascade_filename
@@ -23,12 +22,16 @@ __all__ = ['data_dir',
            'load',
            'astronaut',
            'binary_blobs',
+           'brick',
            'camera',
            'checkerboard',
            'chelsea',
            'clock',
            'coffee',
            'coins',
+           'colorwheel',
+           'grass',
+           'gravel',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
@@ -41,6 +44,8 @@ __all__ = ['data_dir',
            'text',
            'retina',
            'rocket',
+           'rough_wall',
+           'shepp_logan_phantom',
            'stereo_motorcycle']
 
 
@@ -58,9 +63,36 @@ def load(f, as_gray=False):
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
+
+    Note
+    ----
+    This functions is deprecated and will be removed in 0.18.
     """
-    use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
+    warn('This function is deprecated and will be removed in 0.18. '
+         'Use `skimage.io.load` or `imageio.imread` directly.',
+         stacklevel=2)
+    return _load(f, as_gray=as_gray)
+
+
+def _load(f, as_gray=False):
+    """Load an image file located in the data directory.
+
+    Parameters
+    ----------
+    f : string
+        File name.
+    as_gray : bool, optional
+        Whether to convert the image to grayscale.
+
+    Returns
+    -------
+    img : ndarray
+        Image loaded from ``skimage.data_dir``.
+    """
+    # importing io is quite slow since it scans all the backends
+    # we lazy import it here
+    from ..io import imread
+    return imread(_os.path.join(data_dir, f), plugin='pil', as_gray=as_gray)
 
 
 def camera():
@@ -73,7 +105,7 @@ def camera():
     camera : (512, 512) uint8 ndarray
         Camera image.
     """
-    return load("camera.png")
+    return _load("camera.png")
 
 
 def astronaut():
@@ -95,7 +127,192 @@ def astronaut():
         Astronaut image.
     """
 
-    return load("astronaut.png")
+    return _load("astronaut.png")
+
+
+def brick():
+    """Brick wall.
+
+    Returns
+    -------
+    brick: (512, 512) uint8 image
+        A small section of a brick wall.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>`_ and licensed
+    under the Creative Commons CC0 License.
+
+    A perspective transform was then applied to the image, prior to
+    rotating it by 90 degrees, cropping and scaling it to obtain the final
+    image.
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Bricks25/%5B2K%5DBricks25.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Bricks25.zip', 'bw') as f:
+    ...     f.write(r.content)
+    >>> with zipfile.ZipFile('[2K]Bricks25.zip') as z:
+    ... z.extract('Bricks25_col.jpg')
+
+    >>> from numpy.linalg import inv
+    >>> from skimage.transform import rescale, warp, rotate
+    >>> from skimage.color import rgb2gray
+    >>> from imageio import imread, imwrite
+    >>> from skimage import img_as_ubyte
+    >>> import numpy as np
+
+
+    >>> # Obtained playing around with GIMP 2.10 with their perspective tool
+    >>> H = inv(np.asarray([[ 0.54764, -0.00219, 0],
+    ...                     [-0.12822,  0.54688, 0],
+    ...                     [-0.00022,        0, 1]]))
+
+
+    >>> brick_orig = imread('Bricks25_col.jpg')
+    >>> brick = warp(brick_orig, H)
+    >>> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
+    >>> brick = rotate(brick, -90)
+    >>> imwrite('brick.png', img_as_ubyte(rgb2gray(brick)))
+    """
+    return _load("brick.png", as_gray=True)
+
+
+def grass():
+    """Grass.
+
+    Returns
+    -------
+    grass: (512, 512) uint8 image
+        Some grass.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `DeviantArt <https://www.deviantart.com/linolafett/art/Grass-01-434853879>`__
+    and licensed underthe Creative Commons CC0 License.
+
+    The downloaded image was cropped to include a region of ``(512, 512)``
+    pixels around the top left corner, converted to grayscale, then to uint8
+    prior to saving the result in PNG format.
+
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a407467e-4ff0-49f1-923f-c9e388e84612/d76wfef-2878b78d-5dce-43f9-be36->>     26ec9bc0df3b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2E0MDc0NjdlLTRmZjAtNDlmMS05MjNmLWM5ZTM4OGU4NDYxMlwvZDc2d2ZlZi0yODc4Yjc4ZC01ZGNlLTQzZjktYmUzNi0yNmVjOWJjMGRmM2IuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.98hIcOTCqXWQ67Ec5bM5eovKEn2p91mWB3uedH61ynI'
+    >>> r = requests.get(url)
+    >>> with open('grass_orig.jpg', 'bw') as f:
+    ...     f.write(r.content)
+    >>> grass_orig = imageio.imread('grass_orig.jpg')
+    >>> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> imageio.imwrite('grass.png', grass)
+    """
+    return _load("grass.png", as_gray=True)
+
+
+def rough_wall():
+    """Rough wall.
+
+    Returns
+    -------
+    rough_wall: (512, 512) uint8 image
+        Some rough wall.
+
+    """
+    from warnings import warn
+    warn("The rough_wall dataset has been removed due to licensing concerns."
+         "It has been replaced with the gravel dataset. This warning message"
+         "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
+    return gravel()
+
+
+def gravel():
+    """Gravel
+
+    Returns
+    -------
+    gravel: (512, 512) uint8 image
+        Grayscale gravel sample.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Gravel04>`__ and
+    licensed under the Creative Commons CC0 License.
+
+    The downloaded image was then rescaled to ``(1024, 1024)``, then the
+    top left ``(512, 512)`` pixel region  was cropped prior to converting the
+    image to grayscale and uint8 data type. The result was saved using the
+    PNG format.
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Gravel04/%5B2K%5DGravel04.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Gravel04.zip', 'bw') as f:
+    ...     f.write(r.content)
+
+    >>> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
+    ...     z.extract('Gravel04_col.jpg')
+
+    >>> from skimage.transform import resize
+    >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
+    >>> gravel = resize(gravel_orig, (1024, 1024))
+    >>> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> imageio.imwrite('gravel.png', gravel)
+    """
+    return _load("gravel.png", as_gray=True)
 
 
 def text():
@@ -114,7 +331,7 @@ def text():
         Text image.
     """
 
-    return load("text.png")
+    return _load("text.png")
 
 
 def checkerboard():
@@ -129,7 +346,38 @@ def checkerboard():
     checkerboard : (200, 200) uint8 ndarray
         Checkerboard image.
     """
-    return load("chessboard_GRAY.png")
+    return _load("chessboard_GRAY.png")
+
+
+def cell():
+    """Cell floating in saline.
+
+    This is a quantitative phase image retrieved from a digital hologram using
+    the Python library ``qpformat``. The image shows a cell with high phase
+    value, above the background phase.
+
+    Because of a banding pattern artifact in the background, this image is a
+    good test of thresholding algorithms. The pixel spacing is 0.107 µm.
+
+    These data were part of a comparison between several refractive index
+    retrieval techniques for spherical objects as part of [1]_.
+
+    This image is CC0, dedicated to the public domain. You may copy, modify, or
+    distribute it without asking permission.
+
+    Returns
+    -------
+    cell : (660, 550) uint8 array
+        Image of a cell.
+
+    References
+    ----------
+    ..[1]: Paul Müller, Mirjam Schürmann, Salvatore Girardo, Gheorghe Cojoc,
+           and Jochen Guck. "Accurate evaluation of size and refractive index
+           for spherical objects in quantitative phase imaging." Optics Express
+           26(8): 10729-10743 (2018). :DOI:`10.1364/OE.26.010729`
+    """
+    return _load('cell.png')
 
 
 def coins():
@@ -154,7 +402,7 @@ def coins():
     coins : (303, 384) uint8 ndarray
         Coins image.
     """
-    return load("coins.png")
+    return _load("coins.png")
 
 
 def logo():
@@ -165,7 +413,7 @@ def logo():
     logo : (500, 500, 4) uint8 ndarray
         Logo image.
     """
-    return load("logo.png")
+    return _load("logo.png")
 
 
 def microaneurysms():
@@ -193,7 +441,7 @@ def microaneurysms():
            2013.
            :DOI:`10.1155/2013/154860`
     """
-    return load("microaneurysms.png")
+    return _load("microaneurysms.png")
 
 
 def moon():
@@ -207,7 +455,7 @@ def moon():
     moon : (512, 512) uint8 ndarray
         Moon image.
     """
-    return load("moon.png")
+    return _load("moon.png")
 
 
 def page():
@@ -221,7 +469,7 @@ def page():
     page : (191, 384) uint8 ndarray
         Page image.
     """
-    return load("page.png")
+    return _load("page.png")
 
 
 def horse():
@@ -230,16 +478,14 @@ def horse():
     This image was downloaded from
     `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
 
-    Released into public domain and drawn and uploaded by Andreas Preuss
-    (marauder).
+    No copyright restrictions. CC0 given by owner (Andreas Preuss (marauder)).
 
     Returns
     -------
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_gray=True))
+    return img_as_bool(_load("horse.png", as_gray=True))
 
 
 def clock():
@@ -256,7 +502,7 @@ def clock():
     clock : (300, 400) uint8 ndarray
         Clock image.
     """
-    return load("clock_motion.png")
+    return _load("clock_motion.png")
 
 
 def immunohistochemistry():
@@ -276,7 +522,7 @@ def immunohistochemistry():
     immunohistochemistry : (512, 512, 3) uint8 ndarray
         Immunohistochemistry image.
     """
-    return load("ihc.png")
+    return _load("ihc.png")
 
 
 def chelsea():
@@ -294,7 +540,7 @@ def chelsea():
     chelsea : (300, 451, 3) uint8 ndarray
         Chelsea image.
     """
-    return load("chelsea.png")
+    return _load("chelsea.png")
 
 
 def coffee():
@@ -313,7 +559,7 @@ def coffee():
     coffee : (400, 600, 3) uint8 ndarray
         Coffee image.
     """
-    return load("coffee.png")
+    return _load("coffee.png")
 
 
 def hubble_deep_field():
@@ -337,7 +583,7 @@ def hubble_deep_field():
     hubble_deep_field : (872, 1000, 3) uint8 ndarray
         Hubble deep field image.
     """
-    return load("hubble_deep_field.jpg")
+    return _load("hubble_deep_field.jpg")
 
 
 def retina():
@@ -364,7 +610,35 @@ def retina():
     retina : (1411, 1411, 3) uint8 ndarray
         Retina image in RGB.
     """
-    return load("retina.jpg")
+    return _load("retina.jpg")
+
+
+def shepp_logan_phantom():
+    """Shepp Logan Phantom.
+
+    References
+    ----------
+    .. [1] L. A. Shepp and B. F. Logan, "The Fourier reconstruction of a head
+           section," in IEEE Transactions on Nuclear Science, vol. 21,
+           no. 3, pp. 21-43, June 1974. :DOI:`10.1109/TNS.1974.6499235`
+
+    Returns
+    -------
+    phantom: (400, 400) float64 image
+        Image of the Shepp-Logan phantom in grayscale.
+    """
+    return _load("phantom.png", as_gray=True)
+
+
+def colorwheel():
+    """Color Wheel.
+
+    Returns
+    -------
+    colorwheel: (370, 371, 3) uint8 image
+        A colorwheel.
+    """
+    return _load("color.png")
 
 
 def rocket():
@@ -387,7 +661,7 @@ def rocket():
     rocket : (427, 640, 3) uint8 ndarray
         Rocket image.
     """
-    return load("rocket.jpg")
+    return _load("rocket.jpg")
 
 
 def stereo_motorcycle():
@@ -444,8 +718,8 @@ def stereo_motorcycle():
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 
     """
-    return (load("motorcycle_left.png"),
-            load("motorcycle_right.png"),
+    return (_load("motorcycle_left.png"),
+            _load("motorcycle_right.png"),
             _np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
 
 

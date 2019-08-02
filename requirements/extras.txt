@@ -1,1 +1,1 @@
-imread
+imread>=0.5.1

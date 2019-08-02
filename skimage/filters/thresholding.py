@@ -5,9 +5,10 @@ from scipy import ndimage as ndi
 from collections import OrderedDict
 from collections.abc import Iterable
 from ..exposure import histogram
-from .._shared.utils import assert_nD, warn, deprecated
+from .._shared.utils import check_nD, warn
 from ..transform import integral_image
 from ..util import crop, dtype_limits
+from ..filters._multiotsu import _find_threshold_multiotsu
 
 
 __all__ = ['try_all_threshold',
@@ -21,7 +22,8 @@ __all__ = ['try_all_threshold',
            'threshold_niblack',
            'threshold_sauvola',
            'threshold_triangle',
-           'apply_hysteresis_threshold']
+           'apply_hysteresis_threshold',
+           'threshold_multiotsu']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -201,7 +203,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
     if block_size % 2 == 0:
         raise ValueError("The kwarg ``block_size`` must be odd! Given "
                          "``block_size`` {0} is even.".format(block_size))
-    assert_nD(image, 2)
+    check_nD(image, 2)
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         ndi.generic_filter(image, param, block_size,
@@ -420,7 +422,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # csuml and csumh contain the count of pixels in that bin or lower, and
     # in all bins strictly higher than that bin, respectively
     csuml = np.cumsum(hist)
-    csumh = np.cumsum(hist[::-1])[::-1] - hist
+    csumh = csuml[-1] - csuml
 
     # intensity_sum contains the total pixel intensity from each bin
     intensity_sum = hist * bin_centers
@@ -432,11 +434,12 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # last bin of csumh, which is zero by construction.
     # So no worries about division by zero in the following lines, except
     # for the last bin, but we can ignore that because no valid threshold
-    # can be in the top bin. So we just patch up csumh[-1] to not cause 0/0
-    # errors.
-    csumh[-1] = 1
-    l = np.cumsum(intensity_sum) / csuml
-    h = (np.cumsum(intensity_sum[::-1])[::-1] - intensity_sum) / csumh
+    # can be in the top bin.
+    # To avoid the division by zero, we simply skip over the last element in
+    # all future computation.
+    csum_intensity = np.cumsum(intensity_sum)
+    lower = csum_intensity[:-1] / csuml[:-1]
+    higher = (csum_intensity[-1] - csum_intensity[:-1]) / csumh[:-1]
 
     # isodata finds threshold values that meet the criterion t = (l + m)/2
     # where l is the mean of all pixels <= t and h is the mean of all pixels
@@ -445,7 +448,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # were calculated -- which is, of course, the histogram bin centers.
     # We only require this equality to be within the precision of the bin
     # width, of course.
-    all_mean = (l + h) / 2.0
+    all_mean = (lower + higher) / 2.0
     bin_width = bin_centers[1] - bin_centers[0]
 
     # Look only at thresholds that are below the actual all_mean value,
@@ -453,8 +456,8 @@ def threshold_isodata(image, nbins=256, return_all=False):
     # group. Otherwise can get thresholds that are not actually fixed-points
     # of the isodata algorithm. For float images, this matters less, since
     # there really can't be any guarantees anymore anyway.
-    distances = all_mean - bin_centers
-    thresholds = bin_centers[(distances >= 0) & (distances < bin_width)]
+    distances = all_mean - bin_centers[:-1]
+    thresholds = bin_centers[:-1][(distances >= 0) & (distances < bin_width)]
 
     if return_all:
         return thresholds
@@ -517,7 +520,8 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
-def threshold_li(image, *, tolerance=None):
+def threshold_li(image, *, tolerance=None, initial_guess=None,
+                 iter_callback=None):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
     Parameters
@@ -529,6 +533,21 @@ def threshold_li(image, *, tolerance=None):
         Finish the computation when the change in the threshold in an iteration
         is less than this value. By default, this is half the smallest
         difference between intensity values in ``image``.
+
+    initial_guess : float or Callable[[array[float]], float], optional
+        Li's iterative method uses gradient descent to find the optimal
+        threshold. If the image intensity histogram contains more than two
+        modes (peaks), the gradient descent could get stuck in a local optimum.
+        An initial guess for the iteration can help the algorithm find the
+        globally-optimal threshold. A float value defines a specific start
+        point, while a callable should take in an array of image intensities
+        and return a float value. Example valid callables include
+        ``numpy.mean`` (default), ``lambda arr: numpy.quantile(arr, 0.95)``,
+        or even :func:`skimage.filters.threshold_otsu`.
+
+    iter_callback : Callable[[float], Any], optional
+        A function that will be called on the threshold at every iteration of
+        the algorithm.
 
     Returns
     -------
@@ -580,9 +599,32 @@ def threshold_li(image, *, tolerance=None):
     image -= image_min
     tolerance = tolerance or np.min(np.diff(np.unique(image))) / 2
 
-    # Initial estimate
-    t_curr = np.mean(image)
-    t_next = t_curr + 2 * tolerance
+    # Initial estimate for iteration. See "initial_guess" in the parameter list
+    if initial_guess is None:
+        t_next = np.mean(image)
+    elif callable(initial_guess):
+        t_next = initial_guess(image)
+    elif np.isscalar(initial_guess):  # convert to new, positive image range
+        t_next = initial_guess - image_min
+        image_max = np.max(image) + image_min
+        if not 0 < t_next < np.max(image):
+            msg = ('The initial guess for threshold_li must be within the '
+                   'range of the image. Got {} for image min {} and max {} '
+                   .format(initial_guess, image_min, image_max))
+            raise ValueError(msg)
+    else:
+        raise TypeError('Incorrect type for `initial_guess`; should be '
+                        'a floating point value, or a function mapping an '
+                        'array to a floating point value.')
+
+    # initial value for t_curr must be different from t_next by at
+    # least the tolerance. Since the image is positive, we ensure this
+    # by setting to a large-enough negative number
+    t_curr = -2 * tolerance
+
+    # Callback on initial iterations
+    if iter_callback is not None:
+        iter_callback(t_next + image_min)
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
@@ -594,6 +636,9 @@ def threshold_li(image, *, tolerance=None):
 
         t_next = ((mean_back - mean_fore) /
                   (np.log(mean_back) - np.log(mean_fore)))
+
+        if iter_callback is not None:
+            iter_callback(t_next + image_min)
 
     threshold = t_next + image_min
     return threshold
@@ -663,7 +708,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
 
-    smooth_hist = np.copy(hist).astype(np.float64)
+    smooth_hist = hist.astype(np.float64, copy=False)
 
     for counter in range(max_iter):
         smooth_hist = ndi.uniform_filter1d(smooth_hist, 3)
@@ -902,16 +947,30 @@ def threshold_niblack(image, window_size=15, k=0.2):
     -----
     This algorithm is originally designed for text recognition.
 
+    The Bradley threshold is a particular case of the Niblack
+    one, being equivalent to
+
+    >>> from skimage import data
+    >>> image = data.page()
+    >>> q = 1
+    >>> threshold_image = threshold_niblack(image, k=0) * q
+
+    for some value ``q``. By default, Bradley and Roth use ``q=1``.
+
+
     References
     ----------
-    .. [1] Niblack, W (1986), An introduction to Digital Image
-           Processing, Prentice-Hall.
+    .. [1] W. Niblack, An introduction to Digital Image Processing,
+           Prentice-Hall, 1986.
+    .. [2] D. Bradley and G. Roth, "Adaptive thresholding using Integral
+           Image", Journal of Graphics Tools 12(2), pp. 13-21, 2007.
+           :DOI:`10.1080/2151237X.2007.10129236`
 
     Examples
     --------
     >>> from skimage import data
     >>> image = data.page()
-    >>> binary_image = threshold_niblack(image, window_size=7, k=0.1)
+    >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
     return m - k * s
@@ -1022,3 +1081,100 @@ def apply_hysteresis_threshold(image, low, high):
     connected_to_high = sums > 0
     thresholded = connected_to_high[labels_low]
     return thresholded
+
+
+def threshold_multiotsu(image, classes=3, nbins=256):
+    r"""Generates multiple thresholds for an input image.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Grayscale input image.
+    classes : int, optional
+        Number of classes to be thresholded, i.e. the number of resulting
+        regions.
+    nbins : int, optional
+        Number of bins used to calculate the histogram. This value is ignored
+        for integer arrays.
+
+    Returns
+    -------
+    idx_thresh : array
+        Array containing the threshold values for the desired classes.
+
+    Notes
+    -----
+    The threshold values are chosen in a way that maximizes the variance
+    between the desired classes. Based on the Multi-Otsu approach by
+    Liao, Chen and Chung.
+
+    This implementation relies on a Cython function whose complexity
+    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is the number of histogram bins and :math:`C` is the number of
+    classes desired.
+
+    References
+    ----------
+    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
+           multilevel thresholding", Journal of Information Science and
+           Engineering 17 (5): 713-727, 2001. Available at:
+           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+    .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
+           Available at:
+           <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
+
+    Examples
+    --------
+    >>> from skimage.color import label2rgb
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> thresholds = threshold_multiotsu(image)
+    >>> regions = np.digitize(image, bins=thresholds)
+    >>> regions_colorized = label2rgb(regions)
+    """
+    # calculating the histogram and the probability of each gray level.
+    hist, bin_centers = histogram(image.ravel(),
+                                  nbins=nbins,
+                                  source_range='image')
+    prob = hist / image.size
+    # histogram ignores nbins for integer arrays.
+    nbins = len(bin_centers)
+
+    # defining arrays to store the zeroth (momP, cumulative probability)
+    # and first (momS, mean) moments, and the variance between classes
+    # (var_btwcls).
+    momP, momS, var_btwcls = [np.zeros((nbins, nbins)) for n in range(3)]
+
+    # building the lookup tables.
+    # step 1: calculating the diagonal.
+    for u in range(1, nbins):
+        momP[u, u] = prob[u]
+        momS[u, u] = u * prob[u]
+
+    # step 2: calculating the first row.
+    for u in range(1, nbins-1):
+        momP[1, u+1] = momP[1, u] + prob[u+1]
+        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
+
+    # step 3: calculating the other rows recursively.
+    for u in range(2, nbins):
+        for v in range(u+1, nbins):
+            momP[u, v] = momP[1, v] - momP[1, u-1]
+            momS[u, v] = momS[1, v] - momS[1, u-1]
+
+    # step 4: calculating the between class variance.
+    for u in range(1, nbins):
+        for v in range(u+1, nbins):
+            if (momP[u, v] != 0):
+                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
+            else:
+                var_btwcls[u, v] = 0
+
+    # finding max threshold candidates, depending on classes.
+    # number of thresholds is equal to number of classes - 1.
+    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, nbins)
+
+    # correcting threshold values.
+    idx_thresh = bin_centers[:-1][aux_thresh.astype('int')]
+
+    return idx_thresh

@@ -51,6 +51,8 @@ ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
 ax.set_xticks([]), ax.set_yticks([])
 ax.axis([0, img.shape[1], img.shape[0], 0])
 
+plt.show()
+
 ######################################################################
 # Here we initialize a straight line between two points, `(5, 136)` and
 # `(424, 50)`, and require that the spline has its end points there by giving

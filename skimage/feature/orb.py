@@ -7,7 +7,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor,
 from ..feature import (corner_fast, corner_orientations, corner_peaks,
                        corner_harris)
 from ..transform import pyramid_gaussian
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 from .orb_cy import _orb_loop
 
@@ -168,7 +168,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -240,7 +240,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Corresponding orientations in radians.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -286,7 +286,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -312,11 +312,12 @@ class ORB(FeatureDetector, DescriptorExtractor):
             descriptors, mask = self._extract_octave(octave_image, keypoints,
                                                      orientations)
 
-            keypoints_list.append(keypoints[mask] * self.downscale ** octave)
+            scaled_keypoints = keypoints[mask] * self.downscale ** octave
+            keypoints_list.append(scaled_keypoints)
             responses_list.append(responses[mask])
             orientations_list.append(orientations[mask])
             scales_list.append(self.downscale ** octave *
-                               np.ones(keypoints.shape[0], dtype=np.intp))
+                               np.ones(scaled_keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
 
         if len(scales_list) == 0:
