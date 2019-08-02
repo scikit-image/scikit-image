@@ -5,18 +5,24 @@
 from numpy cimport ndarray
 from numpy.math cimport INFINITY
 
+"""
+Implementation choices
+- Inline had no noticeable effect on the performance. saw now reason to remove it though
+- Merging euc and man into one 'fast' generalised function is not worth it (40s->60s time)
+- refer to 345267b43be9f81abe84dce49259c2827d02ec28 for the merge
+"""
 
-cdef double f(double p) nogil:
+cdef inline double f(double p) nogil:
     cdef double out = INFINITY
     if p == 0:
         out = 0
     return out
 
-cdef double euclidean_dist(Py_ssize_t a, double b, double c) nogil:
+cdef inline double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c) nogil:
     cdef double out = <double>(a-b)**2+c
     return out
 
-cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
+cdef inline double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
     cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
         if a==INFINITY and b!=INFINITY:
@@ -25,7 +31,7 @@ cdef double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
             out = INFINITY
     return out
 
-cdef double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
+cdef inline double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
     cdef double out
     if a>=b:
         out = a-b+c
@@ -33,7 +39,7 @@ cdef double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
         out = b-a+c
     return out
 
-cdef double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
+cdef inline double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
     cdef double s
     cdef double fa = f[a]
     cdef double fb = f[b]
