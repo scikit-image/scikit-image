@@ -738,7 +738,7 @@ class ProjectiveTransform(GeometricTransform):
 
 
 class AffineTransform(ProjectiveTransform):
-    """2D affine transformation.
+    """Affine transformation.
 
     Has the following form::
 
@@ -757,25 +757,26 @@ class AffineTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (3, 3) array, optional
+    matrix : (D+1, D+1) array, optional
         Homogeneous transformation matrix.
     scale : (sx, sy) as array, list or tuple, optional
-        Scale factors.
+        Scale factors. Only available for 2D.
     rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians.
+        Rotation angle in counter-clockwise direction as radians. Only
+        available for 2D.
     shear : float, optional
-        Shear angle in counter-clockwise direction as radians.
+        Shear angle in counter-clockwise direction as radians. Only available
+        for 2D.
     translation : (tx, ty) as array, list or tuple, optional
-        Translation parameters.
+        Translation parameters. Only available for 2D.
 
     Attributes
     ----------
-    params : (3, 3) array
+    params : (D+1, D+1) array
         Homogeneous transformation matrix.
-
     """
-
-    _coeffs = range(6)
+    dim = 2
+    _coeffs = range(6)  # assumes 2D, but overridden in init if needed
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None):
@@ -786,10 +787,26 @@ class AffineTransform(ProjectiveTransform):
             raise ValueError("You cannot specify the transformation matrix and"
                              " the implicit parameters at the same time.")
         elif matrix is not None:
-            if matrix.shape != (3, 3):
+            if matrix.ndim == 1:  # linearized (d, d + 1) homogeneous matrix
+                nparam = matrix.size
+                # solve for d in: d * (d - 1) = nparam
+                self.dim = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
+                d = self.dim
+                if int(d) != d:
+                    raise ValueError('Invalid number of elements for '
+                                     'linearized matrix: {}'.format(x))
+                matrix = np.concatenate(
+                    (matrix.reshape((d, d + 1)), [0] * d + [1]),
+                    axis=0
+                )
+            elif matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
+            else:
+                self.dim = matrix.shape[0] - 1
+                nparam = self.dim * (self.dim + 1)
+            self._coeffs = range(nparam)
             self.params = matrix
-        elif params:
+        elif params:  # note: 2D only
             if scale is None:
                 scale = (1, 1)
             if rotation is None:
@@ -812,22 +829,28 @@ class AffineTransform(ProjectiveTransform):
 
     @property
     def scale(self):
-        sx = math.sqrt(self.params[0, 0] ** 2 + self.params[1, 0] ** 2)
-        sy = math.sqrt(self.params[0, 1] ** 2 + self.params[1, 1] ** 2)
-        return sx, sy
+        return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dim]
 
     @property
     def rotation(self):
+        if self.dim != 2:
+            raise NotImplementedError(
+                'The rotation property is only implemented for 2D transforms.'
+            )
         return math.atan2(self.params[1, 0], self.params[0, 0])
 
     @property
     def shear(self):
+        if self.dim != 2:
+            raise NotImplementedError(
+                'The shear property is only implemented for 2D transforms.'
+            )
         beta = math.atan2(- self.params[0, 1], self.params[1, 1])
         return beta - self.rotation
 
     @property
     def translation(self):
-        return self.params[0:2, 2]
+        return self.params[0:self.dim, self.dim]
 
 
 class PiecewiseAffineTransform(GeometricTransform):
