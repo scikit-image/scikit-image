@@ -81,7 +81,7 @@ def cost_nmi(image0, image1, *, bins=100):
 
 def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
                     multichannel=False, inverse=True,
-                    level_callback=lambda x: None):
+                    level_callback=None):
     """Find a transformation matrix to register a target image to a reference.
 
     Parameters
@@ -163,9 +163,12 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
 
         result = minimize(_cost, x0=parameter_vector, method='Powell')
         parameter_vector = result.x
-        level_callback((tgt,
-                        _parameter_vector_to_matrix(parameter_vector, ndim),
-                        result.fun))
+        if level_callback is not None:
+            level_callback(
+                (tgt,
+                 _parameter_vector_to_matrix(parameter_vector, ndim),
+                 result.fun)
+            )
 
     matrix = _parameter_vector_to_matrix(parameter_vector, ndim)
 
