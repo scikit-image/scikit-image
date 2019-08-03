@@ -144,8 +144,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     References
     ----------
     .. [1] C. Tomasi and R. Manduchi. "Bilateral Filtering for Gray and Color
-    Images." IEEE International Conference on Computer Vision (1998) 839-846.
-    :DOI: `10.1109/ICCV.1998.710815`
+           Images." IEEE International Conference on Computer Vision (1998)
+           839-846. :DOI: `10.1109/ICCV.1998.710815`
 
     Examples
     --------
