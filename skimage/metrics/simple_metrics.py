@@ -173,7 +173,7 @@ def _pad_to(arr, shape):
 
 
 def normalized_mutual_information(im_true, im_test, *, bins=100):
-    """Compute the normalized mutual information.
+    r"""Compute the normalized mutual information.
 
     The normalized mutual information is given by::
 
