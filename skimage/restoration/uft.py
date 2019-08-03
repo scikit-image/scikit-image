@@ -53,8 +53,8 @@ def ufftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = fft.fftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.fftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uifftn(inarray, dim=None):
@@ -84,8 +84,8 @@ def uifftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = fft.ifftn(inarray, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.ifftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def urfftn(inarray, dim=None):
@@ -124,8 +124,8 @@ def urfftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = fft.rfftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.rfftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uirfftn(inarray, dim=None, shape=None):
@@ -168,8 +168,8 @@ def uirfftn(inarray, dim=None, shape=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = fft.irfftn(inarray, shape, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(outarray.shape[-dim:]))
+    outarray = fft.irfftn(inarray, shape, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def ufft2(inarray):
