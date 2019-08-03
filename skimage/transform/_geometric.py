@@ -528,12 +528,15 @@ class ProjectiveTransform(GeometricTransform):
 
     Parameters
     ----------
-    matrix : (3, 3) array, optional
+    matrix : (D+1, D+1) array, optional
         Homogeneous transformation matrix.
+    ndim : int, optional
+        The number of dimensions of the transform. This is ignored if
+        ``matrix`` is not None.
 
     Attributes
     ----------
-    params : (3, 3) array
+    params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
     """
@@ -577,12 +580,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords_out : (N, D) array
             Destination coordinates.
 
         """
@@ -593,12 +596,12 @@ class ProjectiveTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Destination coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords_out : (N, D) array
             Source coordinates.
 
         """
@@ -702,9 +705,7 @@ class ProjectiveTransform(GeometricTransform):
         return True
 
     def __add__(self, other):
-        """Combine this transformation with another.
-
-        """
+        """Combine this transformation with another."""
         if isinstance(other, ProjectiveTransform):
             # combination of the same types result in a transformation of this
             # type again, otherwise use general projective transformation
@@ -780,8 +781,6 @@ class AffineTransform(ProjectiveTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
     """
-    dim = 2
-    _coeffs = range(6)  # assumes 2D, but overridden in init if needed
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None, *, ndim=2):
@@ -803,7 +802,7 @@ class AffineTransform(ProjectiveTransform):
                 d = self.dim
                 if int(d) != d:
                     raise ValueError('Invalid number of elements for '
-                                     'linearized matrix: {}'.format(x))
+                                     'linearized matrix: {}'.format(nparam))
                 matrix = np.concatenate(
                     (matrix.reshape((d, d + 1)), [0] * d + [1]),
                     axis=0
