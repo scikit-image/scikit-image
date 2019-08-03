@@ -9,8 +9,8 @@ import skimage.color as color
 import numbers
 
 
-def _gaussian_filter(array, sigma_squared, *, dtype=float):
-    """Helping function. Define a Gaussian filter from array and
+def _gaussian_weight(array, sigma_squared, *, dtype=float):
+    """Helping function. Define a Gaussian weighting from array and
     sigma_square.
 
     Parameters:
@@ -57,7 +57,7 @@ def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
         Lookup table for the color distance sigma.
     """
     values = np.linspace(0, max_value, bins, endpoint=False)
-    return _gaussian_filter(values, sigma**2, dtype=dtype)
+    return _gaussian_weight(values, sigma**2, dtype=dtype)
 
 
 def _compute_spatial_lut(win_size, sigma, *, dtype=float):
@@ -84,7 +84,7 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     grid_points = np.arange(-win_size // 2, win_size // 2 + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
     distances = np.hypot(rr, cc)
-    return _gaussian_filter(distances, sigma**2, dtype=dtype).ravel()
+    return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
 
 
 
