@@ -1,3 +1,5 @@
+.. _values:
+
 ======================================
 SKIP-1: scikit-image mission statement
 ======================================
@@ -64,7 +66,7 @@ Python. We accomplish this by:
   same name and position in a function signature.
 - **ensuring accuracy**. Test coverage is close to 100% and code is reviewed by
   at least two core developers before being included in the library.
-- **caring about users’ data**. We have a functional [2]_ API and don't modify
+- **caring for users’ data**. We have a functional [2]_ API and don't modify
   input arrays unless explicitly directed to do so.
 - promoting **education in image processing** with extensive pedagogical
   documentation.
@@ -81,17 +83,15 @@ Our values
   the vein of Photoshop or GIMP. This often means prioritizing n-dimensional
   data support, and rejecting implementations of “flashy” filters that have
   little scientific value.
-- We value elegant implementations over getting every last ounce of
+- We value simple, readable implementations over getting every last ounce of
   performance. Readable code that is easy to understand, for newcomers and
   maintainers alike, makes it easier to contribute new code as well as prevent
   bugs. This means that we will prefer a 20% slowdown if it reduces lines of
   code two-fold, for example.
-- We require excellent documentation. All functions should have NumPy-style
-  docstrings [3]_, preferably with doctest examples, as well as gallery
+- We value education and documentation. All functions should have NumPy-style
+  docstrings [3]_, preferably with examples, as well as gallery
   examples that showcase how that function is used in a scientific application.
-  Good documentation is hard, so this requirement can stall many contributions.
-  Core developers take an active role in finishing final documentation
-  examples.
+  Core developers take an active role in finishing documentation examples.
 - We don't do magic. We use NumPy arrays instead of fancy façade objects
   [#np]_, and we prefer to educate users rather than make decisions on their
   behalf.  This does not preclude sensible defaults, but it does preclude
@@ -101,7 +101,7 @@ This document
 *************
 
 Much in the same way that the Zen of Python [5]_ and PEP8 guide style and
-implementation details in most Python code, this guide is meant to guide any
+implementation details in most Python code, this guide is meant to guide
 decisions about the future of scikit-image, be it in terms of code style,
 whether to accept new functionality, or whether to take on new dependencies,
 among other things.
