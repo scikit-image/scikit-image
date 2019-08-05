@@ -15,13 +15,14 @@ What is a SKIP?
 --------------
 
 SKIP stands for SciKit-Image Proposal. A SKIP is a design document providing
-information to the NumPy community, or describing a new feature for
+information to the community, or describing a new feature for
 scikit-image or its processes or environment. The SKIP should provide a
-concise technical specification of the feature and a rationale for the feature.
+rationale for the proposed change as well as a concise technical
+specification, if applicable.
 
 We intend SKIPs to be the primary mechanisms for proposing major new
 features, for collecting community input on an issue, and for
-documenting the design decisions that have gone into NumPy. The SKIP
+documenting the design decisions that have gone into scikit-image. The SKIP
 author is responsible for building consensus within the community and
 documenting dissenting opinions.
 
@@ -46,12 +47,12 @@ There are three kinds of SKIPs:
 
 3. A **Process** SKIP describes a process surrounding scikit-image, or
    proposes a change to (or an event in) a process. Process SKIPs are
-   like Standards Track SKIPs but apply to areas other than the NumPy
-   language itself. They may propose an implementation, but not to
+   like Standards Track SKIPs but apply to areas other than the scikit-image
+   library itself. They may propose an implementation, but not to
    scikit-image's codebase; they require community consensus. Examples include
    procedures, guidelines, changes to the decision-making process, and changes
-   to the tools or environment used in NumPy development. Any meta-SKIP is
-   also considered a Process SKIP.
+   to the tools or environment used in scikit-image development. Any meta-SKIP
+   is also considered a Process SKIP.
 
 
 SKIP Workflow
@@ -61,7 +62,7 @@ The SKIP process begins with a new idea for scikit-image.  It is highly
 recommended that a single SKIP contain a single key proposal or new
 idea. Small enhancements or patches often don't need
 a SKIP and can be injected into the scikit-image development workflow
-with a pull request to the NumPy `repo`_. The more focused the
+with a pull request to the scikit-image `repo`_. The more focused the
 SKIP, the more successful it tends to be.
 
 If in doubt, split your SKIP into several well-focused ones.
@@ -157,7 +158,7 @@ How a SKIP becomes Accepted
 A SKIP is ``Accepted`` by consensus of all interested contributors. We
 need a concrete way to tell whether consensus has been reached. When
 you think a SKIP is ready to accept, send an email to the
-numpy-discussion mailing list with a subject like:
+scikit-image mailing list with a subject like:
 
   Proposal to accept SKIP #<number>: <title>
 
