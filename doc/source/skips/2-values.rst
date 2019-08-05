@@ -57,15 +57,17 @@ scikit-image aims to be the essential toolkit for scientific image analysis in
 Python. We accomplish this by:
 
 - being **easy to use and install**. We are careful in taking on new
-  dependencies, and sometimes cull existing ones, or make them optional.
+  dependencies, and sometimes cull existing ones, or make them optional. All
+  functions in our API have thorough docstrings clarifying expected inputs and
+  outputs.
 - providing a **consistent API**. Conceptually identical arguments have the
   same name and position in a function signature.
 - **ensuring accuracy**. Test coverage is close to 100% and code is reviewed by
   at least two core developers before being included in the library.
 - **caring about users’ data**. We have a functional [2]_ API and don't modify
   input arrays unless explicitly directed to do so.
-- promoting **education** (including self-education) **in image processing**,
-  with extensive pedagogical documentation.
+- promoting **education in image processing** with extensive pedagogical
+  documentation.
 
 Our values
 **********
