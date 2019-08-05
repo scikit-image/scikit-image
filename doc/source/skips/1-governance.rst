@@ -27,7 +27,7 @@ This is a consensus-based community project. Anyone with an interest in the
 project can join the community, contribute to the project design, and
 participate in the decision making process. This document describes how that
 participation takes place, how to find consensus, and how deadlocks are
-avoided.
+resolved.
 
 Roles And Responsibilities
 ==========================
@@ -137,13 +137,10 @@ vote. The lifetime of a SKIP is as follows:
 
 - A proposal is brought up as either a GitHub issue or a post to the mailing
   list.
-- After sufficient discussion, the core advocate(s) of the proposal must consolidate
-  the discussion into a single document, with appropriate references to the
-  original discussion, representing the pros and cons brought up by each
-  participant.
-- Such proposal must be a consolidated document, in the form of a
-  ‘SciKit-Image Proposal’ (SKIP), rather than a long discussion on a GitHub issue or
-  the mailing list.
+- After sufficient discussion, the core advocate(s) of the proposal must
+  consolidate the discussion into a single document, called a SciKit-Image
+  Proposal (SKIP), with appropriate references to the original discussion,
+  representing the pros and cons brought up by each participant.
 - To submit a SKIP, you should copy the `SKIP template
   <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips/template.rst>`_,
   and give it a new name in the same directory, for example,
