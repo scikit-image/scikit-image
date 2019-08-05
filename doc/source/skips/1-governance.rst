@@ -118,9 +118,8 @@ are made according to the following rules:
   core developers *and* no disagreement or requested changes by a core developer
   on the issue or pull-request page (lazy consensus).
 
-- **Changes to the API principles and changes to dependencies or supported
-  Python versions** require a :ref:`skip` and follow the decision-making
-  process outlined above.
+- **Changes to the API principles** require a :ref:`skip` and follow the
+  decision-making process outlined above.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`skip` and follow the decision-making process outlined above.
