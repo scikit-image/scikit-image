@@ -49,7 +49,6 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, double max_value,
                          "`edge`, `wrap`, `symmetric` or `reflect`.")
     cdef char cmode = ord(mode[0].upper())
 
-
     dist_scale = bins / dims / max_value
     values = empty_dims.copy()
     centres = empty_dims.copy()
