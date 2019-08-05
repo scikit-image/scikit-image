@@ -74,10 +74,11 @@ synthetic analysis and a consensus that is both explicit and informed. When the
 core developer community (including the SC members) fails to reach such a
 consensus in a reasonable timeframe, the SC is the entity to resolve the issue.
 
-Membership of the SC is by nomination by a core developer. A nomination will
-result in discussion that cannot take more than a month and then admission to
-the SC by consensus. SC members who do not actively engage
-with the SC duties are expected to resign.
+Membership of the SC is updated by nomination by a core developer. Nominees
+should have demonstrated long-term, continued commitment to the project and its
+:ref:`values`. A nomination will result in discussion that cannot take more
+than a month and then admission to the SC by consensus. SC members who do not
+actively engage with the SC duties are expected to resign.
 
 The initial Steering Council of scikit-image consists of Stéfan van der
 Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
