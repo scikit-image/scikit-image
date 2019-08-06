@@ -76,9 +76,9 @@ def masked_register_translation(
     # cross-correlation
     size_mismatch = np.array(target_image.shape) - np.array(src_image.shape)
 
-    xcorr = cross_correlate_masked(target_image, src_image,
-                 target_mask, src_mask, axes=(0, 1), mode='full',
-                 overlap_ratio=overlap_ratio)
+    xcorr = cross_correlate_masked(target_image, src_image, target_mask,
+                                   src_mask, axes=(0, 1), mode='full',
+                                   overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
     maxima = np.transpose(np.nonzero(xcorr == xcorr.max()))
@@ -157,7 +157,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         if fixed_image.shape[axis] != moving_image.shape[axis]:
             raise ValueError(
                 "Array shapes along non-transformation axes should be "
-                    "equal, but dimensions along axis {a} not".format(a=axis))
+                "equal, but dimensions along axis {a} are not".format(a=axis))
 
     # Determine final size along transformation axes
     # Note that it might be faster to compute Fourier transform in a slightly
