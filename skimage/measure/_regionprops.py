@@ -488,8 +488,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     return out
 
 
-def regionprops_table(label_image, intensity_image=None, cache=True,
-                      properties=('label', 'bbox'), separator='-'):
+def regionprops_table(label_image, intensity_image=None, *, cache=True,
+                      properties=('label', 'bbox'), separator='-',
+                      objects=None):
     """Find image properties and convert them into a dictionary
 
     Parameters
@@ -519,6 +520,10 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
+    objects : list of slices, optional
+        Precomputed objects as given by :func:``scipy.ndimage.find_objects``.
+        This will accelerate calculation of regionprops when properties are
+        measured for different channels for the same objects.
 
     Returns
     -------
@@ -579,7 +584,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
-                          cache=cache)
+                          cache=cache, objects=objects)
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
