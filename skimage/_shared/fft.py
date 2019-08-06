@@ -10,11 +10,13 @@ except ImportError:
     import numpy.fft
     fftmodule = numpy.fft
 
-    # next_fast_len was implemented in scipy 0.18
-    # In case it cannot be imported, we use the id function
-    def next_fast_len(size):
-        """Dummy next_fast_len that returns size unmodified."""
-        return size
-
+    try:
+        from scipy.fftpack import next_fast_len
+    except ImportError:
+        # next_fast_len was implemented in scipy 0.18
+        # In case it cannot be imported, we use the id function
+        def next_fast_len(size):
+            """Dummy next_fast_len that returns size unmodified."""
+            return size
 
 __all__ = ['fftmodule', 'next_fast_len']
