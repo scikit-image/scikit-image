@@ -583,7 +583,8 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
-def regionprops(label_image, intensity_image=None, cache=True):
+def regionprops(label_image, intensity_image=None, cache=True,
+                *, objects=None):
     """Measure properties of labeled image regions.
 
     Parameters
@@ -604,6 +605,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
+    objects : list of slices, optional
+        Precomputed objects as given by :func:``scipy.ndimage.find_objects``.
+        This will accelerate calculation of regionprops when properties are
+        measured for different channels for the same objects.
 
     Returns
     -------
@@ -785,7 +790,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     regions = []
 
-    objects = ndi.find_objects(label_image)
+    if objects is None:
+        objects = ndi.find_objects(label_image)
+
     for i, sl in enumerate(objects):
         if sl is None:
             continue
