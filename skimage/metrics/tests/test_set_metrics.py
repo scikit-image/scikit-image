@@ -34,7 +34,7 @@ def test_hausdorff_simple():
 
 class TestHausdorffRegionSingle:
     points = [(0, 0), (3, 0), (1, 4), (4, 1)]
-    
+
     def check_hausdorff_region_single(self, points_a, points_b):
         shape = (5, 5)
         coords_a = np.zeros(shape, dtype=np.bool)
@@ -73,9 +73,9 @@ class TestHausdorffRegionDifferentPoints:
 
 def test_gallery():
     shape = (60, 60)
-    image = np.zeros(shape)
 
-    # Create a diamond-like shape where the four corners form the 1st set of points
+    # Create a diamond-like shape where the four corners form the 1st set
+    # of points
     x_diamond = 30
     y_diamond = 30
     r = 10
@@ -86,7 +86,8 @@ def test_gallery():
     set_ax = [(x_diamond + r * x) for x in plt_x]
     set_ay = [(y_diamond + r * y) for y in plt_y]
 
-    # Create a kite-like shape where the four corners form the 2nd set of points
+    # Create a kite-like shape where the four corners form the 2nd set of
+    # points
     x_kite = 30
     y_kite = 30
     x_r = 15
@@ -106,8 +107,9 @@ def test_gallery():
         coords_b[(x, y)] = True
 
     # Test the hausdorff function on the coordinates
-    # Should return 10, the distance between the furthest tip of the kite and its closest point on the diamond, which is
-    # the furthest someone can make you travel to encounter your nearest neighboring point on the other set.
+    # Should return 10, the distance between the furthest tip of the kite and
+    # its closest point on the diamond, which is the furthest someone can make
+    # you travel to encounter your nearest neighboring point on the other set.
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), 10.)
 
 
@@ -129,7 +131,8 @@ class Test3DHausdorffRegion:
         assert_almost_equal(hausdorff_distance_3d, distance)
         self.hausdorff_distances_list.append(hausdorff_distance_3d)
 
-    @parametrize("points_a_3d, points_b_3d", itertools.product(points_a_3d, points_b_3d))
+    @parametrize("points_a_3d, points_b_3d",
+                 itertools.product(points_a_3d, points_b_3d))
     def test_3d_hausdorff_region(self, points_a_3d, points_b_3d):
         self.check_3d_hausdorff_region(points_a_3d, points_b_3d)
 
