@@ -899,67 +899,71 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
     return warped
 
-def warp_polar(image, center, radius, output_shape=None,
+
+def warp_polar(image, center=None, radius=None, output_shape=None,
                scaling='linear', **kwargs):
     """Remaps image to polor or semilog-polar coordinates space.
-    
+
     Parameters
     ----------
-    
+
     image : ndarray
         Input image.
-        
-    center : tuple (col, row)
+
+    center : tuple (col, row), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
-        
+
     radius : float
-        
-    
-    This is a stub for me to add my own warp_polar function.
-    
-    I will add more information as I get this working.
-    
-    order:
-        0 - nearest-neighbor, etc.
+
+    output_shape : tuple ()
+
+    Returns
+    -------
+    warped : ndarray
+
     """
-    
-    if output_shape == None:
+    def linear_mapping(output_coords, k_ang, k_rad, center):
+        angle = output_coords[:, 1] / k_ang
+        rr = ((output_coords[:, 0] / k_rad) * np.sin(angle)) + center[1]
+        cc = ((output_coords[:, 0] / k_rad) * np.cos(angle)) + center[0]
+        return np.column_stack((cc, rr))
+
+    def log_mapping(output_coords, k_ang, k_rad, center):
+        angle = output_coords[:, 1] / k_ang
+        rr = ((np.exp(output_coords[:, 0] / k_rad)) *
+              np.sin(angle)) + center[1]
+        cc = ((np.exp(output_coords[:, 0] / k_rad)) *
+              np.cos(angle)) + center[0]
+        return np.column_stack((cc, rr))
+
+    if center is None:
+        center = np.array(image.shape)[:2] / 2
+
+    if radius is None:
+        w, h = np.array(image.shape)[:2] / 2
+        radius = np.sqrt(w ** 2 + h ** 2)
+
+    if output_shape is None:
         height = 360
-#        width = safe_as_int(radius)
         width = int(radius)
         output_shape = (height, width)
     else:
         output_shape = safe_as_int(output_shape)
         height = output_shape[0]
         width = output_shape[1]
-        
-    
+
     if scaling == 'linear':
         k_rad = width/radius
+        map_func = linear_mapping
     elif scaling == 'log':
         k_rad = width/np.log(radius)
-        
-    k_ang = height/(2*np.pi)
+        map_func = log_mapping
 
-    def linear_mapping(output_coords):
-        angle = output_coords[:,1]/k_ang
-        r = ((output_coords[:,0]/k_rad)*np.sin(angle)) + center[1]
-        c = ((output_coords[:,0]/k_rad)*np.cos(angle)) + center[0]
-        return np.column_stack((c,r))
-    
-    def log_mapping(output_coords):
-        angle = output_coords[:,1]/k_ang
-        r = ((np.exp(output_coords[:,0]/k_rad))*np.sin(angle)) + center[1]
-        c = ((np.exp(output_coords[:,0]/k_rad))*np.cos(angle)) + center[0]
-        return np.column_stack((c,r))
-    
-    if scaling == 'linear':
-        inverse_map_func = linear_mapping
-    elif scaling == 'log':
-        inverse_map_func = log_mapping
-    #need to raise error here if not linear or log...see how other functions do it
-        
-    warped = warp(image, inverse_map_func, output_shape=output_shape, **kwargs)
-    
+    k_ang = height/(2*np.pi)
+    warp_args = {'k_ang': k_ang, 'k_rad': k_rad, 'center': center}
+
+    warped = warp(image, map_func, map_args=warp_args,
+                  output_shape=output_shape, **kwargs)
+
     return warped
