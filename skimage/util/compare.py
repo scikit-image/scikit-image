@@ -1,5 +1,5 @@
 import numpy as np
-from skimage import img_as_float64
+from ..util import img_as_float64
 from itertools import product
 
 
