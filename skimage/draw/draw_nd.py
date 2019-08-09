@@ -51,7 +51,7 @@ def _round_safe(coords):
     return _round_function(coords).astype(int)
 
 
-def line_nd(start, stop, endpoint=False, round=True):
+def line_nd(start, stop, *, endpoint=False, round=True):
     """Draw a single-pixel thick line in n dimensions.
 
     The line produced will be ndim-connected. That is, two subsequent
