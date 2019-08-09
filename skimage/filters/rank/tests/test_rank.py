@@ -56,11 +56,10 @@ class TestRank():
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
-        @test_parallel()
+        @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
-            with expected_warnings(['Possible precision loss']):
-                result = getattr(rank, filter)(self.image, self.selem)
+            result = getattr(rank, filter)(self.image, self.selem)
             if filter == "entropy":
                 # There may be some arch dependent rounding errors
                 # See the discussions in

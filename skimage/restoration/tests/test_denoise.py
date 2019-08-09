@@ -190,6 +190,19 @@ def test_denoise_bilateral_2d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
+def test_denoise_bilateral_pad():
+    """This test checks if the bilateral filter is returning an image
+    correctly padded."""
+    img = img_as_float(data.chelsea())[100:200, 100:200]
+    img_bil = restoration.denoise_bilateral(img, sigma_color=0.1,
+                                            sigma_spatial=10,
+                                            multichannel=True)
+    condition_padding = np.count_nonzero(np.isclose(img_bil,
+                                                    0,
+                                                    atol=0.001))
+    assert_equal(condition_padding, 0)
+
+
 @pytest.mark.parametrize('dtype', [np.float32, np.double])
 def test_denoise_bilateral_types(dtype):
     img = checkerboard_gray.copy()[:50, :50]

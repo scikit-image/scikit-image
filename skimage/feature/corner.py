@@ -422,6 +422,11 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     response : ndarray
         Kitchen and Rosenfeld response image.
 
+    References
+    ----------
+    .. [1] Kitchen, L., & Rosenfeld, A. (1982). Gray-level corner detection.
+           Pattern recognition letters, 1(2), 95-102.
+           :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
@@ -612,7 +617,11 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
@@ -668,13 +677,13 @@ def corner_fast(image, n=12, threshold=0.15):
     ----------
     image : 2D ndarray
         Input image.
-    n : int
+    n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
         that should all be either brighter or darker w.r.t testpixel.
         A point c on the circle is darker w.r.t test pixel p if
         `Ic < Ip - threshold` and brighter if `Ic > Ip + threshold`. Also
         stands for the n in `FAST-n` corner detector.
-    threshold : float
+    threshold : float, optional
         Threshold used in deciding whether the pixels on the circle are
         brighter, darker or similar w.r.t. the test pixel. Decrease the
         threshold when more corners are desired and vice-versa.
@@ -686,8 +695,10 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Edward Rosten and Tom Drummond
-           "Machine Learning for high-speed corner detection",
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
+           corner detection. In European conference on computer vision (pp. 430-443).
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
            https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
@@ -752,8 +763,11 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-           foerstner87.fast.pdf
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
@@ -911,6 +925,10 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     ----------
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
+
+    See also
+    --------
+    skimage.feature.peak_local_max
 
     Examples
     --------
