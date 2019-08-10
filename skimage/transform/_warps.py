@@ -900,6 +900,22 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     return warped
 
 
+def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
+    angle = output_coords[:, 1] / k_ang
+    rr = ((output_coords[:, 0] / k_rad) * np.sin(angle)) + center[0]
+    cc = ((output_coords[:, 0] / k_rad) * np.cos(angle)) + center[1]
+    return np.column_stack((cc, rr))
+
+
+def _log_polar_mapping(output_coords, k_ang, k_rad, center):
+    angle = output_coords[:, 1] / k_ang
+    rr = ((np.exp(output_coords[:, 0] / k_rad)) *
+          np.sin(angle)) + center[0]
+    cc = ((np.exp(output_coords[:, 0] / k_rad)) *
+          np.cos(angle)) + center[1]
+    return np.column_stack((cc, rr))
+
+
 def warp_polar(image, center=None, radius=None, output_shape=None,
                scaling='linear', **kwargs):
     """Remaps image to polor or log-polar coordinates space.
@@ -910,7 +926,7 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
         Input image. If array has 3 dimensions (e.g., 2-D color image),
         the transformation is applied to the first two axes.
 
-    center : tuple (col, row), optional
+    center : tuple (row, col), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
         If no value is given, the center is assumed to be the center point
@@ -919,9 +935,7 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     radius : float, optional
         Radius of the circle that bounds the area to be transformed.
 
-    output_shape : tuple, optional
-        The shape of the first two dimensions.
-        The
+    output_shape : tuple (row, col), optional
 
     scaling : {'linear', 'log'}
         Specify whether the image warp is polar or log-polar
@@ -952,20 +966,6 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     >>> warped = warp_polar(image, (100,100), 100,
     ...                     output_shape=image.shape, scaling='log')
     """
-    def linear_mapping(output_coords, k_ang, k_rad, center):
-        angle = output_coords[:, 1] / k_ang
-        rr = ((output_coords[:, 0] / k_rad) * np.sin(angle)) + center[1]
-        cc = ((output_coords[:, 0] / k_rad) * np.cos(angle)) + center[0]
-        return np.column_stack((cc, rr))
-
-    def log_mapping(output_coords, k_ang, k_rad, center):
-        angle = output_coords[:, 1] / k_ang
-        rr = ((np.exp(output_coords[:, 0] / k_rad)) *
-              np.sin(angle)) + center[1]
-        cc = ((np.exp(output_coords[:, 0] / k_rad)) *
-              np.cos(angle)) + center[0]
-        return np.column_stack((cc, rr))
-
     if image.ndim > 3 or image.ndim < 2:
         raise ValueError("Input array must be 2 or 3 dimensions,"
                          " got {}".format(image.ndim))
@@ -988,10 +988,10 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
 
     if scaling == 'linear':
         k_rad = width/radius
-        map_func = linear_mapping
+        map_func = _linear_polar_mapping
     elif scaling == 'log':
         k_rad = width/np.log(radius)
-        map_func = log_mapping
+        map_func = _log_polar_mapping
 
     k_ang = height/(2*np.pi)
     warp_args = {'k_ang': k_ang, 'k_rad': k_rad, 'center': center}
