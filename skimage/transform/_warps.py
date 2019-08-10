@@ -909,10 +909,8 @@ def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
 
 def _log_polar_mapping(output_coords, k_ang, k_rad, center):
     angle = output_coords[:, 1] / k_ang
-    rr = ((np.exp(output_coords[:, 0] / k_rad)) *
-          np.sin(angle)) + center[0]
-    cc = ((np.exp(output_coords[:, 0] / k_rad)) *
-          np.cos(angle)) + center[1]
+    rr = ((np.exp(output_coords[:, 0] / k_rad)) * np.sin(angle)) + center[0]
+    cc = ((np.exp(output_coords[:, 0] / k_rad)) * np.cos(angle)) + center[1]
     return np.column_stack((cc, rr))
 
 
@@ -971,7 +969,7 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
                          " got {}".format(image.ndim))
 
     if center is None:
-        center = np.array(image.shape)[:2] / 2
+        center = (np.array(image.shape)[:2] / 2) - 0.5
 
     if radius is None:
         w, h = np.array(image.shape)[:2] / 2

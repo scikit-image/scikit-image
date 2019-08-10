@@ -6,10 +6,12 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform,
-                               downscale_local_mean)
+                               downscale_local_mean,
+                               warp_polar)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
-
+from skimage.draw import circle_perimeter_aa
+from skimage.feature import peak_local_max
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel)
@@ -517,3 +519,29 @@ def test_zero_image_size():
     with testing.raises(ValueError):
         warp(np.zeros((10, 10, 0)),
              SimilarityTransform())
+
+
+def test_linear_polar_scaling():
+    radii = [5, 10, 15, 20]
+    image = np.zeros([51, 51])
+    for rad in radii:
+        rr, cc, val = circle_perimeter_aa(25, 25, rad)
+        image[rr,cc] = val
+    warped = warp_polar(image, radius=25)
+    profile = warped.mean(axis=0)
+    peaks = peak_local_max(profile)
+    assert np.alltrue([peak in radii for peak in peaks])
+
+
+def test_log_polar_scaling():
+    radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5)]
+    radii = [int(x) for x in radii]
+    image = np.zeros([301, 301])
+    for rad in radii:
+        rr, cc, val = circle_perimeter_aa(150, 150, rad)
+        image[rr, cc] = val
+    warped = warp_polar(image, radius=22, scaling='log')
+    profile = warped.mean(axis=0)
+    peaks = peak_local_max(profile)
+    gaps = peaks[:-1]-peaks[1:]
+    #something wrong here, need to fix k_rad scaling situation
