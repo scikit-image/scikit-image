@@ -979,7 +979,7 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
 
     if output_shape is None:
         height = 360
-        width = int(radius)
+        width = int(np.ceil(radius))
         output_shape = (height, width)
     else:
         output_shape = safe_as_int(output_shape)
