@@ -17,18 +17,18 @@ __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
            'imread_collection_wrapper']
 
 
-def concatenate_images(image_collection):
+def concatenate_images(ic):
     """Concatenate all images in the image collection into an array.
 
     Parameters
     ----------
-    image_collection : an iterable of images
+    ic : an iterable of images
         The images to be concatenated.
 
     Returns
     -------
     array_cat : ndarray
-        An array having one more dimension than the images in `image_col`.
+        An array having one more dimension than the images in `ic`.
 
     See Also
     --------
@@ -37,19 +37,19 @@ def concatenate_images(image_collection):
     Raises
     ------
     ValueError
-        If images in `image_collection` don't have identical shapes.
+        If images in `ic` don't have identical shapes.
 
     Notes
     -----
     `concatenate_images` receives any iterable object containing images,
     including ImageCollection and MultiImage, and returns a NumPy array.
     """
-    all_images = [image[np.newaxis, ...] for image in image_collection]
+    all_images = [image[np.newaxis, ...] for image in ic]
     try:
-        array_concat = np.concatenate(all_images)
+        array_cat = np.concatenate(all_images)
     except ValueError:
         raise ValueError('Image dimensions must agree.')
-    return array_concat
+    return array_cat
 
 
 def alphanumeric_key(s):
