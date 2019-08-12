@@ -88,9 +88,10 @@ def _is_multipattern(input_pattern):
     has_iterable = isinstance(input_pattern, Sequence)
     has_strings = all(isinstance(pat, str) for pat in input_pattern)
 
-    is_multipattern = has_str_ospathsep or (not_a_string
-                                            and has_iterable
-                                            and has_strings)
+    is_multipattern = (has_str_ospathsep or
+                       (not_a_string
+                        and has_iterable
+                        and has_strings))
     return is_multipattern
 
 
