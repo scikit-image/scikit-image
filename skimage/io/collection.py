@@ -28,7 +28,7 @@ def concatenate_images(ic):
     Returns
     -------
     array_cat : ndarray
-        An array having one more dimension than the images in ``ic``.
+        An array having one more dimension than the images in `ic`.
 
     See Also
     --------
@@ -37,7 +37,7 @@ def concatenate_images(ic):
     Raises
     ------
     ValueError
-        If images in ``ic`` don't have identical shapes.
+        If images in `ic` don't have identical shapes.
 
     Notes
     -----
@@ -125,8 +125,8 @@ class ImageCollection(object):
     that slicing returns a new ImageCollection, *not* a view into the data.
 
     If multiple patterns are entered as a single string, they should be
-    separated by os.pathsep, e.g. '/tmp/work/*.png:/tmp/other/*.jpg' in *nix,
-    or '/tmp/work/*.png;/tmp/other/*.jpg' in Windows.
+    separated by os.pathsep, e.g. '/tmp/work/*.png:/tmp/other/*.jpg' in
+    Unix-like systems, or '/tmp/work/*.png;/tmp/other/*.jpg' in Windows.
 
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
