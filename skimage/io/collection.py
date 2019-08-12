@@ -78,16 +78,20 @@ def alphanumeric_key(s):
     return k
 
 
-def _is_multipattern(load_pattern):
-    """Helping function. Returns True if load_pattern contains a tuple, list,
-    or a string separated with os.pathsep."""
-    pattern = (
-        (isinstance(load_pattern, str) and os.pathsep in load_pattern)
-        or (not isinstance(load_pattern, str) and
-            isinstance(load_pattern, Sequence) and
-            all(isinstance(pattern, str) for pattern in load_pattern))
-    )
-    return pattern
+def _is_multipattern(input_pattern):
+    """Helping function. Returns True if pattern contains a tuple, list, or a
+    string separated with os.pathsep."""
+    # Conditions to be accepted by ImageCollection:
+    has_str_ospathsep = (isinstance(input_pattern, str)
+                         and os.pathsep in input_pattern)
+    not_a_string = not isinstance(input_pattern, str)
+    has_iterable = isinstance(input_pattern, Sequence)
+    has_strings = all(isinstance(pat, str) for pat in input_pattern)
+
+    is_multipattern = has_str_ospathsep or (not_a_string
+                                            and has_iterable
+                                            and has_strings)
+    return is_multipattern
 
 
 class ImageCollection(object):
