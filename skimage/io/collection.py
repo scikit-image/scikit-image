@@ -28,7 +28,7 @@ def concatenate_images(ic):
     Returns
     -------
     array_cat : ndarray
-        An array having one more dimension than the images in `ic`.
+        An array having one more dimension than the images in ``ic``.
 
     See Also
     --------
@@ -37,11 +37,11 @@ def concatenate_images(ic):
     Raises
     ------
     ValueError
-        If images in `ic` don't have identical shapes.
+        If images in ``ic`` don't have identical shapes.
 
     Notes
     -----
-    `concatenate_images` receives any iterable object containing images,
+    ``concatenate_images`` receives any iterable object containing images,
     including ImageCollection and MultiImage, and returns a NumPy array.
     """
     all_images = [image[np.newaxis, ...] for image in ic]
