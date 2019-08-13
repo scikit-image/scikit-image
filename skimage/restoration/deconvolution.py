@@ -325,8 +325,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
-
-def richardson_lucy(image, psf, iterations=50, clip=True):
+def richardson_lucy2(image, psf, iterations=50, clip=True):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -360,6 +359,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+       [2] D.S.C.Biggs and M. Andrews, "Acceleration of iterative image 
+       restoration algorithms," Appl. Opt. 36(8), 1766–1775 (1997).    
     """
     # compute the times for direct convolution and the fft method. The fft is of
     # complexity O(N log(N)) for each dimension and the direct method does
@@ -375,26 +376,27 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
         convolve_method = fftconvolve
     else:
         convolve_method = convolve
-
     image = image.astype(np.float)
     psf = psf.astype(np.float)    
     psf_mirror = psf[::-1, ::-1]
     im_deconv = image
-    im_deconv_mid = np.zeros_like(image)
-    v = np.zeros_like(image)
+    im_deconv_mid = np.zeros_like(image,'float32')
+    v = np.zeros_like(image,'float32')
     for _ in range(iterations):
         im_deconv_mid_update=im_deconv_mid
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv_mid=relative_blur*convolve_method(relative_blur, 
+        im_deconv_mid=im_deconv*convolve_method(relative_blur, 
                                                     psf_mirror, 'same')
         v_update=v
         v=im_deconv_mid-im_deconv
+        v[v<0]=0
         if _==0:
             alpha=0
         else:
             alpha=(v_update*v).sum()/((v_update*v_update).sum() +2e-15)
-            alpha=np.max(np.min(alpha,1),0)
-        im_deconv=im_deconv_mid+alpha*(im_deconv_mid-im_deconv_mid_update)   
+            alpha=np.maximum(np.minimum(alpha,1),0)
+        im_deconv=im_deconv_mid+alpha*(im_deconv_mid-im_deconv_mid_update)
+        im_deconv[im_deconv<0]=0
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
