@@ -385,18 +385,18 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     for _ in range(iterations):
         im_deconv_mid_update = im_deconv_mid
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv_mid = im_deconv * convolve_method(relative_blur, 
-                                                    psf_mirror, 'same')
+        im_deconv_mid = im_deconv * convolve_method(relative_blur, psf_mirror,
+                                                    'same')
         v_update = v
         v = im_deconv_mid - im_deconv
-        v[v<0]=0
-        if _==0:
+        v[v<0] = 0
+        if _ == 0:
             alpha = 0
         else:
-            alpha = (v_update*v).sum() / ((v_update*v_update).sum() +2e-15)
-            alpha = np.maximum(np.minimum(alpha,1),0)
+            alpha = (v_update*v).sum() / ((v_update*v_update).sum() + 2e-15)
+            alpha = np.maximum(np.minimum(alpha, 1), 0)
         im_deconv = im_deconv_mid+alpha * (im_deconv_mid-im_deconv_mid_update)
-        im_deconv[im_deconv<0]=0
+        im_deconv[im_deconv<0] = 0
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
