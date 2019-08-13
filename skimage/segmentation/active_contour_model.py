@@ -112,8 +112,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                    '0.18, but will stop working thereafter.')
         warn(message, category=FutureWarning, stacklevel=2)
         coordinates = 'xy'
+        snake_xy = snake
     if coordinates == 'rc':
-        snake = snake[:, ::-1]
+        snake_xy = snake[:, ::-1]
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
@@ -153,7 +154,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                np.arange(img.shape[0]),
                                img.T, kx=2, ky=2, s=0)
 
-    x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
+    x, y = snake_xy[:, 0].astype(np.float), snake_xy[:, 1].astype(np.float)
     n = len(x)
     xsave = np.empty((convergence_order, n))
     ysave = np.empty((convergence_order, n))
@@ -244,6 +245,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                 break
 
     if coordinates == 'xy':
-        x, y = y, x
-
-    return np.stack([y, x], axis=1)
+        return np.stack([x, y], axis=1)
+    else:
+        return np.stack([y, x], axis=1)
