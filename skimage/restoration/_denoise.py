@@ -1,4 +1,3 @@
-import itertools
 import scipy.stats
 import numpy as np
 from math import ceil
@@ -10,38 +9,87 @@ import skimage.color as color
 import numbers
 
 
-def _gaussian_weight(sigma_sqr, value, *, dtype=float):
-    return np.exp(-0.5 * value * value / sigma_sqr, dtype=dtype)
+def _gaussian_weight(array, sigma_squared, *, dtype=float):
+    """Helping function. Define a Gaussian weighting from array and
+    sigma_square.
+
+    Parameters
+    ----------
+    array : ndarray
+        Input array.
+    sigma_squared : float
+        The squared standard deviation used in the filter.
+    dtype : data type object, optional (default : float)
+        The type and size of the data to be returned.
+
+    Returns
+    -------
+    gaussian : ndarray
+        The input array filtered by the Gaussian.
+    """
+    return np.exp(-0.5 * (array ** 2  / sigma_squared), dtype=dtype)
 
 
 def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
-    values = np.linspace(0, max_value / bins, bins, endpoint=False)
-    color_lut = _gaussian_weight(sigma**2, values, dtype=dtype)
-    return color_lut
+    """Helping function. Define a lookup table containing Gaussian filter
+    values using the color distance sigma.
+
+    Parameters
+    ----------
+     bins : int
+        Number of discrete values for Gaussian weights of color filtering.
+        A larger value results in improved accuracy.
+    sigma : float
+        Standard deviation for grayvalue/color distance (radiometric
+        similarity). A larger value results in averaging of pixels with larger
+        radiometric differences. Note, that the image will be converted using
+        the `img_as_float` function and thus the standard deviation is in
+        respect to the range ``[0, 1]``. If the value is ``None`` the standard
+        deviation of the ``image`` will be used.
+    max_value : float
+        Maximum value of the input image.
+    dtype : data type object, optional (default : float)
+        The type and size of the data to be returned.
+
+    Returns
+    -------
+    color_lut : ndarray
+        Lookup table for the color distance sigma.
+    """
+    values = np.linspace(0, max_value, bins, endpoint=False)
+    return _gaussian_weight(values, sigma**2, dtype=dtype)
 
 
-def _compute_range_lut(win_size, sigma, *, dtype=float):
-    grid_points = np.arange(-win_size, win_size + 1)
+def _compute_spatial_lut(win_size, sigma, *, dtype=float):
+    """Helping function. Define a lookup table containing Gaussian filter
+    values using the spatial sigma.
+
+    Parameters
+    ----------
+    win_size : int
+        Window size for filtering.
+        If win_size is not specified, it is calculated as
+        ``max(5, 2 * ceil(3 * sigma_spatial) + 1)``.
+    sigma : float
+        Standard deviation for range distance. A larger value results in
+        averaging of pixels with larger spatial differences.
+    dtype : data type object
+        The type and size of the data to be returned.
+
+    Returns
+    -------
+    spatial_lut : ndarray
+        Lookup table for the spatial sigma.
+    """
+    grid_points = np.arange(-win_size // 2, win_size // 2 + 1)
     rr, cc = np.meshgrid(grid_points, grid_points, indexing='ij')
-    d = np.hypot(rr, cc)
-    range_lut = _gaussian_weight(sigma**2, d, dtype=dtype).ravel()
-    return range_lut
+    distances = np.hypot(rr, cc)
+    return _gaussian_weight(distances, sigma**2, dtype=dtype).ravel()
 
 
 def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                       bins=10000, mode='constant', cval=0, multichannel=False):
     """Denoise image using bilateral filter.
-
-    This is an edge-preserving, denoising filter. It averages pixels based on
-    their spatial closeness and radiometric similarity [1]_.
-
-    Spatial closeness is measured by the Gaussian function of the Euclidean
-    distance between two pixels and a certain standard deviation
-    (`sigma_spatial`).
-
-    Radiometric similarity is measured by the Gaussian function of the
-    Euclidean distance between two color values and a certain standard
-    deviation (`sigma_color`).
 
     Parameters
     ----------
@@ -79,9 +127,24 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     denoised : ndarray
         Denoised image.
 
+    Notes
+    -----
+    This is an edge-preserving, denoising filter. It averages pixels based on
+    their spatial closeness and radiometric similarity [1]_.
+
+    Spatial closeness is measured by the Gaussian function of the Euclidean
+    distance between two pixels and a certain standard deviation
+    (`sigma_spatial`).
+
+    Radiometric similarity is measured by the Gaussian function of the
+    Euclidean distance between two color values and a certain standard
+    deviation (`sigma_color`).
+
     References
     ----------
-    .. [1] https://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+    .. [1] C. Tomasi and R. Manduchi. "Bilateral Filtering for Gray and Color
+           Images." IEEE International Conference on Computer Vision (1998)
+           839-846. :DOI:`10.1109/ICCV.1998.710815`
 
     Examples
     --------
@@ -151,7 +214,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
     color_lut = _compute_color_lut(bins, sigma_color, max_value,
                                    dtype=image.dtype)
 
-    range_lut = _compute_range_lut(win_size, sigma_spatial, dtype=image.dtype)
+    range_lut = _compute_spatial_lut(win_size, sigma_spatial, dtype=image.dtype)
 
     out = np.empty(image.shape, dtype=image.dtype)
 
@@ -254,7 +317,6 @@ def _denoise_tv_chambolle_nd(image, weight=0.1, eps=2.e-4, n_iter_max=200):
     Notes
     -----
     Rudin, Osher and Fatemi algorithm.
-
     """
 
     ndim = image.ndim
@@ -492,7 +554,6 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     .. [2] D. L. Donoho and I. M. Johnstone. "Ideal spatial adaptation
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
            :DOI:`10.1093/biomet/81.3.425`
-
     """
     wavelet = pywt.Wavelet(wavelet)
     if not wavelet.orthogonal:

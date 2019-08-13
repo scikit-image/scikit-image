@@ -52,7 +52,7 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 from ...util import img_as_ubyte
-from ..._shared.utils import assert_nD, warn
+from ..._shared.utils import check_nD, warn
 
 from . import generic_cy
 
@@ -65,7 +65,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 
 def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
-    assert_nD(image, 2)
+    check_nD(image, 2)
     if image.dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
                    'uint8 as required by rank filters. Convert manually using '

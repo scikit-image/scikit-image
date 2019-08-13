@@ -35,7 +35,10 @@ def test_PSNR_float():
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
     # mismatched dtype results in a warning if data_range is unspecified
-    with expected_warnings(['Inputs have mismatched dtype']):
+    with expected_warnings(['Inputs have mismatched dtype', ''.join([
+            'DEPRECATED: skimage.measure.compare_psnr has been moved to ',
+            'skimage.metrics.peak_signal_noise_ratio. It will be removed ',
+            'from skimage.measure in version 0.18.'])]):
         p_mixed = compare_psnr(cam / 255., np.float32(cam_noisy / 255.))
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
