@@ -526,7 +526,7 @@ def test_linear_polar_scaling():
     image = np.zeros([51, 51])
     for rad in radii:
         rr, cc, val = circle_perimeter_aa(25, 25, rad)
-        image[rr,cc] = val
+        image[rr, cc] = val
     warped = warp_polar(image, radius=25)
     profile = warped.mean(axis=0)
     peaks = peak_local_max(profile)
@@ -534,14 +534,15 @@ def test_linear_polar_scaling():
 
 
 def test_log_polar_scaling():
-    radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5)]
+    radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
+             np.exp(5)-1, np.exp(5)+1]
     radii = [int(x) for x in radii]
     image = np.zeros([301, 301])
     for rad in radii:
         rr, cc, val = circle_perimeter_aa(150, 150, rad)
         image[rr, cc] = val
-    warped = warp_polar(image, radius=22, scaling='log')
+    warped = warp_polar(image, radius=200, scaling='log')
     profile = warped.mean(axis=0)
     peaks = peak_local_max(profile)
     gaps = peaks[:-1]-peaks[1:]
-    #something wrong here, need to fix k_rad scaling situation
+    assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
