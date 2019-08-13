@@ -8,10 +8,10 @@ import numpy as np
 from scipy import ndimage as ndi
 from skimage.transform import warp
 
-from .utils import coarse_to_fine, central_diff, forward_diff, div
+from .utils import coarse_to_fine
 
 
-def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
+def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
     """TV-L1 solver for optical flow estimation.
 
     Parameters
@@ -20,11 +20,8 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
         The first gray scale image of the sequence.
     I1 : ~numpy.ndarray
         The second gray scale image of the sequence.
-    u0 : ~numpy.ndarray
+    flow0 : ~numpy.ndarray
         Initialization for the horizontal component of the vector
-        field.
-    v0 : ~numpy.ndarray
-        Initialization for the vertical component of the vector
         field.
     dt : float
         Time step of the numerical scheme. Convergence is proved for
@@ -50,91 +47,91 @@ def _tvl1(I0, I1, u0, v0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
     Returns
     -------
-    u, v : tuple[~numpy.ndarray]
-        The horizontal and vertical components of the estimated
-        optical flow.
+    flow : ~numpy.ndarray
+        The estimated optical flow.
 
     """
 
-    nl, nc = I0.shape
-    y, x = np.meshgrid(np.arange(nl), np.arange(nc), indexing='ij')
+    grid = np.array(
+        np.meshgrid(*[np.arange(n) for n in I0.shape], indexing='ij'))
 
     f0 = lambda_ * tau
     f1 = dt / tau
+    tol *= I0.size
 
-    u = u0.copy()
-    v = v0.copy()
+    flow = flow0
 
-    pu1 = np.zeros_like(u0)
-    pu2 = np.zeros_like(u0)
-    pv1 = np.zeros_like(u0)
-    pv2 = np.zeros_like(u0)
+    g = np.zeros((I0.ndim, ) + I0.shape)
+    proj = np.zeros((I0.ndim, I0.ndim, ) + I0.shape)
+
+    s_g = [slice(None), ] * g.ndim
+    s_p = [slice(None), ] * proj.ndim
+    s_d = [slice(None), ] * (proj.ndim-2)
 
     for _ in range(nwarp):
         if prefilter:
-            u = ndi.filters.median_filter(u, 3)
-            v = ndi.filters.median_filter(v, 3)
+            flow = ndi.filters.median_filter(flow, [1]+I0.ndim*[3])
 
-        wI1 = warp(I1, np.array([y + v, x + u]), mode='nearest')
-        Ix, Iy = central_diff(wI1)
-        NI = Ix * Ix + Iy * Iy
+        wI1 = warp(I1, grid+flow, mode='nearest')
+        grad = np.array(np.gradient(wI1))
+        NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
 
-        rho_0 = wI1 - I0 - u0 * Ix - v0 * Iy
+        rho_0 = wI1 - I0 - (grad*flow0).sum(0)
 
-        for __ in range(niter):
+        for _ in range(niter):
 
             # Data term
 
-            rho = rho_0 + u * Ix + v * Iy
+            rho = rho_0 + (grad*flow).sum(0)
 
             idx = abs(rho) <= f0 * NI
 
-            u_ = u.copy()
-            v_ = v.copy()
+            flow_ = flow
 
-            u_[idx] -= rho[idx] * Ix[idx] / NI[idx]
-            v_[idx] -= rho[idx] * Iy[idx] / NI[idx]
+            flow_[:, idx] -= rho[idx]*grad[:, idx]/NI[idx]
 
             idx = ~idx
             srho = f0 * np.sign(rho[idx])
-            u_[idx] -= srho * Ix[idx]
-            v_[idx] -= srho * Iy[idx]
+            flow_[:, idx] -= srho*grad[:, idx]
 
             # Regularization term
+            flow = flow_.copy()
 
-            u = u_ - tau * div(pu1, pu2)
+            for idx in range(flow.shape[0]):
+                s_p[0] = idx
+                for _ in range(niter):
+                    for ax in range(flow.shape[0]):
+                        s_g[0] = ax
+                        s_g[ax+1] = slice(0, -1)
+                        g[tuple(s_g)] = np.diff(flow[idx], axis=ax)
+                        s_g[ax+1] = slice(None)
 
-            ux, uy = forward_diff(u)
-            ux *= f1
-            uy *= f1
-            Q = 1 + np.sqrt(ux * ux + uy * uy)
+                    norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
+                    norm *= f1
+                    norm += 1.
+                    proj[idx] -= dt * g
+                    proj[idx] /= norm
 
-            pu1 += ux
-            pu1 /= Q
-            pu2 += uy
-            pu2 /= Q
+                    # d will be the (negative) divergence of p[idx]
+                    d = -proj[idx].sum(0)
+                    for ax in range(flow.shape[0]):
+                        s_p[1] = ax
+                        s_p[ax+2] = slice(0, -1)
+                        s_d[ax] = slice(1, None)
+                        d[tuple(s_d)] += proj[tuple(s_p)]
+                        s_p[ax+2] = slice(None)
+                        s_d[ax] = slice(None)
 
-            v = v_ - tau * div(pv1, pv2)
+                    flow[idx] = flow_[idx] + d
 
-            vx, vy = forward_diff(v)
-            vx *= f1
-            vy *= f1
-            Q = 1 + np.sqrt(vx * vx + vy * vy)
-
-            pv1 += vx
-            pv1 /= Q
-            pv2 += vy
-            pv2 /= Q
-
-        u0 -= u
-        v0 -= v
-        if (u0 * u0 + v0 * v0).sum() / (u.size) < tol:
+        flow0 -= flow
+        if (flow0*flow0).sum() < tol:
             break
-        else:
-            u0, v0 = u.copy(), v.copy()
 
-    return u, v
+        flow0 = flow
+
+    return flow
 
 
 def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
@@ -199,7 +196,7 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
     >>> # --- Convert the images to gray level: color is not supported.
     >>> I0 = rgb2gray(I0)
     >>> I1 = rgb2gray(I1)
-    >>> u, v = tvl1(I1, I0)
+    >>> flow = tvl1(I1, I0)
 
     """
 

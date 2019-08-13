@@ -8,86 +8,7 @@ import skimage
 from skimage.transform import pyramid_reduce, resize
 
 
-def central_diff(p):
-    """Central difference scheme.
-
-    Parameters
-    ----------
-    p : ~numpy.ndarray
-        The array to be processed.
-
-    Returns
-    -------
-    p_x, p_y : tuple[~numpy.ndarray]
-        The horizontal and vertical gradient components.
-
-    """
-    p_y, p_x = np.gradient(p)
-    p_x[:, 0] = 0
-    p_x[:, -1] = 0
-    p_y[0, :] = 0
-    p_y[-1, :] = 0
-
-    return p_x, p_y
-
-
-def forward_diff(p):
-    """Forward difference scheme
-
-    Parameters
-    ----------
-    p : ~numpy.ndarray
-        The array to be processed.
-
-    Returns
-    -------
-    p_x, p_y : tuple[~numpy.ndarray]
-        The horizontal and vertical gradient components.
-
-    """
-    p_x = p.copy()
-    p_x[:, 1:] -= p[:, :-1]
-    p_x[:, 0] = 0
-    p_x[:, -1] = 0
-
-    p_y = p.copy()
-    p_y[1:, :] -= p[:-1, :]
-    p_y[0, :] = 0
-    p_y[-1, :] = 0
-
-    return p_x, p_y
-
-
-def div(p1, p2):
-    """Divergence of P=(p1, p2) using backward differece scheme:
-
-    div(P) = p1_x + p2_y
-
-    Parameters
-    ----------
-    p1 : ~numpy.ndarray
-        The first component to be processed.
-    p2 : ~numpy.ndarray
-        The second component to be processed.
-
-    Returns
-    -------
-    div_p : ~numpy.ndarray
-        The divergence of P=(p1, p2).
-
-    """
-    p1_x = p1.copy()
-    p1_x[:, :-1] -= p1[:, 1:]
-
-    p2_y = p2.copy()
-    p2_y[:-1, :] -= p2[1:, :]
-
-    div_p = p1_x + p2_y
-
-    return div_p
-
-
-def resize_flow(u, v, shape):
+def resize_flow(flow, shape):
     """Rescale the values of the vector field (u, v) to the desired shape.
 
     The values of the output vector field are scaled to the new
@@ -95,10 +16,8 @@ def resize_flow(u, v, shape):
 
     Parameters
     ----------
-    u : ~numpy.ndarray
-        The horizontal component of the motion field.
-    v : ~numpy.ndarray
-        The vertical component of the motion field.
+    flow : ~numpy.ndarray
+        The motion field to be processed.
     shape : iterable
         Couple of integers representing the output shape.
 
@@ -110,17 +29,13 @@ def resize_flow(u, v, shape):
 
     """
 
-    nl, nc = u.shape
-    sy, sx = shape[0] / nl, shape[1] / nc
+    scale = np.array([n / o for n, o in zip(shape, flow.shape[1:])])
 
-    u = resize(u, shape, order=0, preserve_range=True,
-               anti_aliasing=False)
-    v = resize(v, shape, order=0, preserve_range=True,
-               anti_aliasing=False)
+    for _ in shape:
+        scale = scale[..., np.newaxis]
 
-    ru, rv = sx * u, sy * v
-
-    return ru, rv
+    return scale*resize(flow, (flow.shape[0],) + shape, order=0,
+                        preserve_range=True, anti_aliasing=False)
 
 
 def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
@@ -148,7 +63,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     size = min(I.shape)
     count = 1
 
-    while (count < nlevel) and (size > min_size):
+    while (count < nlevel) and (size > downscale * min_size):
         J = pyramid_reduce(pyramid[-1], downscale, multichannel=False)
         pyramid.append(J)
         size = min(J.shape)
@@ -183,9 +98,6 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
 
     """
 
-    if (I0.ndim != 2) or (I1.ndim != 2):
-        raise ValueError("Only grayscale images are supported.")
-
     if I0.shape != I1.shape:
         raise ValueError("Input images should have the same shape")
 
@@ -194,13 +106,11 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
                        get_pyramid(skimage.img_as_float32(I1),
                                    downscale, nlevel, min_size)))
 
-    u = np.zeros_like(pyramid[0][0])
-    v = np.zeros_like(u)
+    flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape)
 
-    u, v = solver(pyramid[0][0], pyramid[0][1], u, v)
+    flow = solver(pyramid[0][0], pyramid[0][1], flow)
 
     for J0, J1 in pyramid[1:]:
-        u, v = resize_flow(u, v, J0.shape)
-        u, v = solver(J0, J1, u, v)
+        flow = solver(J0, J1, resize_flow(flow, J0.shape))
 
-    return u, v
+    return flow

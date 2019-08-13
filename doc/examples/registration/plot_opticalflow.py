@@ -30,7 +30,7 @@ I0 = rgb2gray(I0)
 I1 = rgb2gray(I1)
 
 # --- Compute the optical flow
-u, v = tvl1(I0, I1)
+v, u = tvl1(I0, I1)
 
 # --- Use the estimated optical flow for registeration
 
