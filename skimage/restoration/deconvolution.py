@@ -325,7 +325,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
-def richardson_lucy2(image, psf, iterations=50, clip=True):
+def richardson_lucy(image, psf, iterations=50, clip=True):
     """Richardson-Lucy deconvolution.
 
     Parameters
