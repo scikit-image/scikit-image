@@ -7,7 +7,9 @@ from . import _moments
 
 from functools import wraps
 
+
 __all__ = ['regionprops', 'perimeter']
+
 
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
@@ -33,7 +35,10 @@ PROPS = {
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
     'Image': 'image',
+    'InertiaTensor': 'inertia_tensor',
+    'InertiaTensorEigvals': 'inertia_tensor_eigvals',
     'Label': 'label',
+    'LocalCentroid': 'local_centroid',
     'MajorAxisLength': 'major_axis_length',
     'MaxIntensity': 'max_intensity',
     'MeanIntensity': 'mean_intensity',
@@ -51,25 +56,58 @@ PROPS = {
     'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
+    'WeightedLocalCentroid': 'weighted_local_centroid',
     'WeightedMoments': 'weighted_moments',
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
-#PROP_VALS = set(PROPS.values())
+OBJECT_COLUMNS = {
+    'image', 'coords', 'convex_image', 'slice',
+    'filled_image', 'intensity_image'
+}
+
+COL_DTYPES = {
+    'area': int,
+    'bbox': int,
+    'bbox_area': int,
+    'moments_central': float,
+    'centroid': int,
+    'convex_area': int,
+    'convex_image': object,
+    'coords': object,
+    'eccentricity': float,
+    'equivalent_diameter': float,
+    'euler_number': int,
+    'extent': float,
+    'filled_area': int,
+    'filled_image': object,
+    'moments_hu': float,
+    'image': object,
+    'inertia_tensor': float,
+    'inertia_tensor_eigvals': float,
+    'intensity_image': object,
+    'label': int,
+    'local_centroid': int,
+    'major_axis_length': float,
+    'max_intensity': float,
+    'mean_intensity': float,
+    'min_intensity': float,
+    'minor_axis_length': float,
+    'moments': float,
+    'moments_normalized': float,
+    'orientation': float,
+    'perimeter': float,
+    'slice': object,
+    'solidity': float,
+    'weighted_moments_central': float,
+    'weighted_centroid': int,
+    'weighted_moments_hu': float,
+    'weighted_local_centroid': int,
+    'weighted_moments': int,
+    'weighted_moments_normalized': float
+}
 
 
-#def _cached(f):
-#    @wraps(f)
-#    def wrapper(obj):
-#        cache = obj._cache
-#        prop = f.__name__
-#
-#        if not ((prop in cache) and obj._cache_active):
-#            cache[prop] = f(obj)
-#
-#        return cache[prop]
-#
-#    return wrapper
         
 def _cached_property(f):
     """Decorator for caching computationally expensive properties"""
@@ -98,7 +136,7 @@ def only2d(method):
     return func2d
 
 
-class Region(object):
+class RegionProperties(object):
     """ Represents a region of an image and provides methods to calculate various properties of this region.
         
         Region objects are typically instantiated from ``regionprops``, and not directly.
@@ -191,6 +229,8 @@ class Region(object):
     @property
     def bbox(self):
         """
+        Returns
+        -------
         A tuple of the bounding box's start coordinates for each dimension,
         followed by the end coordinates for each dimension, i.e:
             ``(min_row, min_col, max_row, max_col)``.
@@ -585,28 +625,28 @@ class Region(object):
 
         return iter(sorted(props))
 
-    ## Could not find anyone using it this way, or via the (undocumented) backwards compatability keys
+    ## Could not find any examples of code using this way, or via the (undocumented) backwards-compatability keys
     #def __getitem__(self, key):
-    #    value = getattr(self, key, None)
-    #    if value is not None:
-    #        return value
-    #    else:  # backwards compatibility
-    #        return getattr(self, PROPS[key])
+    def __getitem__(self, key):
+        value = getattr(self, key, None)
+        if value is not None:
+            return value
+        else:  # backwards compatibility
+            return getattr(self, PROPS[key])
 
-    
-    # def __eq__(self, other):
-        # if not isinstance(other, Region):
-            # return False
+    def __eq__(self, other):
+        if not isinstance(other, _RegionProperties):
+            return False
 
-        # for key in PROP_VALS:
-            # try:
-                # # so that NaNs are equal
-                # np.testing.assert_equal(getattr(self, key, None),
-                                        # getattr(other, key, None))
-            # except AssertionError:
-                # return False
+        for key in PROP_VALS:
+            try:
+                # so that NaNs are equal
+                np.testing.assert_equal(getattr(self, key, None),
+                                        getattr(other, key, None))
+            except AssertionError:
+                return False
 
-        # return True
+        return True
 
 
 def regionprops(label_image, intensity_image=None, cache=True):
@@ -636,7 +676,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     Returns
     -------
-    List of ``Region`` objects.
+    List of ``RegionProperties`` objects.
 
     See Also
     --------
@@ -684,7 +724,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
         label = i + 1
 
-        props = Region(sl, label, label_image, intensity_image, cache)
+        props = RegionProperties(sl, label, label_image, intensity_image, cache)
         regions.append(props)
 
     return regions
@@ -755,28 +795,3 @@ def perimeter(image, neighbourhood=4):
     total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
-
-# def _parse_docs():
-    # import re
-    # import textwrap
-
-    # doc = regionprops.__doc__ or ''
-    # matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
-                          # doc, flags=re.DOTALL)
-    # prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
-
-    # return prop_doc
-
-
-# def _install_properties_docs():
-    # prop_doc = _parse_docs()
-
-    # for p in [member for member in dir(_RegionProperties)
-              # if not member.startswith('_')]:
-        # getattr(_RegionProperties, p).__doc__ = prop_doc[p]
-        # setattr(_RegionProperties, p, property(getattr(_RegionProperties, p)))
-
-
-# if __debug__:
-    # # don't install docstrings when in optimized/non-debug mode
-    # _install_properties_docs()

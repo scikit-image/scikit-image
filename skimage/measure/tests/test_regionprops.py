@@ -486,24 +486,3 @@ def test_cache_off():
     assert len(region._cache) == 0
     
 
-# def test_docstrings_and_props():
-    # def foo():
-        # """foo"""
-
-    # has_docstrings = bool(foo.__doc__)
-
-    # region = regionprops(SAMPLE)[0]
-
-    # docs = _parse_docs()
-    # props = [m for m in dir(region) if not m.startswith('_')]
-
-    # nr_docs_parsed = len(docs)
-    # nr_props = len(props)
-    # if has_docstrings:
-        # assert_equal(nr_docs_parsed, nr_props)
-        # ds = docs['weighted_moments_normalized']
-        # assert 'iteration' not in ds
-        # assert len(ds.split('\n')) > 3
-    # else:
-        # assert_equal(nr_docs_parsed, 0)
-

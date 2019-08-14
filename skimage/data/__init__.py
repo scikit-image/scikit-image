@@ -10,7 +10,7 @@ import os as _os
 
 import numpy as _np
 
-from ..io import imread, use_plugin
+from ..io import imread
 from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
@@ -59,8 +59,7 @@ def load(f, as_gray=False):
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
-    use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
+    return imread(_os.path.join(data_dir, f), plugin='pil', as_gray=as_gray)
 
 
 def camera():
@@ -237,8 +236,7 @@ def horse():
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_gray=True))
+    return img_as_bool(load("horse.png", as_gray=True))
 
 
 def clock():

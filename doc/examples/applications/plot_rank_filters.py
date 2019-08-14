@@ -37,7 +37,7 @@ from ``skimage.data`` for all comparisons.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import img_as_ubyte
+from skimage.util import img_as_ubyte
 from skimage import data
 from skimage.exposure import histogram
 
