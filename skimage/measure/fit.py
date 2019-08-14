@@ -119,8 +119,9 @@ class LineModelND(BaseModel):
         """
         _check_data_atleast_2D(data)
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
@@ -153,8 +154,9 @@ class LineModelND(BaseModel):
             If the line is parallel to the given axis.
         """
         if params is None:
+            if self.params is None:
+                raise ValueError('Parameters cannot be None')
             params = self.params
-        assert params is not None
         if len(params) != 2:
             raise ValueError('Parameters are defined by 2 sets.')
 
@@ -619,7 +621,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None):
+           stop_probability=1, random_state=None, initial_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -646,9 +648,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     Parameters
     ----------
-    data : [list, tuple of] (N, D) array
+    data : [list, tuple of] (N, ...) array
         Data set to which the model is fitted, where N is the number of data
-        points and D the dimensionality of the data.
+        points and the remaining dimension are depending on model requirements.
         If the model class requires multiple input data arrays (e.g. source and
         destination coordinates of  ``skimage.transform.AffineTransform``),
         they can be optionally passed as tuple or list. Note, that in this case
@@ -664,9 +666,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         where `success` indicates whether the model estimation succeeded
         (`True` or `None` for success, `False` for failure).
-    min_samples : int
+    min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
-    residual_threshold : float
+    residual_threshold : float larger than 0
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
         This function is called with the randomly selected data before the
@@ -697,6 +699,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
+    initial_inliers : array-like of bool, shape (N,), optional
+        Initial samples selection for model estimation
 
 
     Returns
@@ -754,18 +758,21 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> sum(inliers) > 40
     True
 
-    Robustly estimate geometric transformation:
+    RANSAC can be used to robustly estimate a geometric transformation. In this section,
+    we also show how to use a proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
     >>> np.random.seed(0)
     >>> src = 100 * np.random.rand(50, 2)
-    >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
-    ...                              translation=(10, 20))
+    >>> model0 = SimilarityTransform(scale=0.5, rotation=1, translation=(10, 20))
     >>> dst = model0(src)
     >>> dst[0] = (10000, 10000)
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, 2, 10)
+    >>> ratio = 0.5  # use half of the samples
+    >>> min_samples = int(ratio * len(src))
+    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples, 10,
+    ...                         initial_inliers=np.ones(len(src), dtype=bool))
     >>> inliers
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -783,33 +790,42 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     random_state = check_random_state(random_state)
 
-    if min_samples < 0:
-        raise ValueError("`min_samples` must be greater than zero")
+    # in case data is not pair of input and output, male it like it
+    if not isinstance(data, (tuple, list)):
+        data = (data, )
+    num_samples = len(data[0])
+
+    if not (0 < min_samples < num_samples):
+        raise ValueError("`min_samples` must be in range (0, <number-of-samples>)")
+
+    if residual_threshold < 0:
+        raise ValueError("`residual_threshold` must be greater than zero")
 
     if max_trials < 0:
         raise ValueError("`max_trials` must be greater than zero")
 
-    if stop_probability < 0 or stop_probability > 1:
+    if not (0 <= stop_probability <= 1):
         raise ValueError("`stop_probability` must be in range [0, 1]")
 
-    if not isinstance(data, list) and not isinstance(data, tuple):
-        data = [data]
+    if initial_inliers is not None and len(initial_inliers) != num_samples:
+        raise ValueError("RANSAC received a vector of initial inliers (length %i)"
+                         " that didn't match the number of samples (%i)."
+                         " The vector of initial inliers should have the same length"
+                         " as the number of samples and contain only True (this sample"
+                         " is an initial inlier) and False (this one isn't) values."
+                         % (len(initial_inliers), num_samples))
 
-    # make sure data is list and not tuple, so it can be modified below
-    data = list(data)
-    # number of samples
-    num_samples = data[0].shape[0]
+    # for the first run use initial guess of inliers
+    spl_idxs = (initial_inliers if initial_inliers is not None
+                else random_state.choice(num_samples, min_samples, replace=False))
 
     for num_trials in range(max_trials):
+        # do sample selection according data pairs
+        samples = [d[spl_idxs] for d in data]
+        # for next iteration choose random sample set and be sure that no samples repeat
+        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
 
-        # choose random sample set
-        samples = []
-        random_idxs = random_state.choice(num_samples, min_samples,
-                                          replace=False)
-        for d in data:
-            samples.append(d[random_idxs])
-
-        # check if random sample set is valid
+        # optional check if random sample set is valid
         if is_data_valid is not None and not is_data_valid(*samples):
             continue
 
@@ -817,20 +833,18 @@ def ransac(data, model_class, min_samples, residual_threshold,
         sample_model = model_class()
 
         success = sample_model.estimate(*samples)
+        # backwards compatibility
+        if success is not None and not success:
+            continue
 
-        if success is not None:  # backwards compatibility
-            if not success:
-                continue
-
-        # check if estimated model is valid
-        if is_model_valid is not None \
-                and not is_model_valid(sample_model, *samples):
+        # optional check if estimated model is valid
+        if is_model_valid is not None and not is_model_valid(sample_model, *samples):
             continue
 
         sample_model_residuals = np.abs(sample_model.residuals(*data))
         # consensus set / inliers
         sample_model_inliers = sample_model_residuals < residual_threshold
-        sample_model_residuals_sum = np.sum(sample_model_residuals**2)
+        sample_model_residuals_sum = np.sum(sample_model_residuals ** 2)
 
         # choose as new best model if number of inliers is maximal
         sample_inlier_num = np.sum(sample_model_inliers)
@@ -845,20 +859,19 @@ def ransac(data, model_class, min_samples, residual_threshold,
             best_inlier_num = sample_inlier_num
             best_inlier_residuals_sum = sample_model_residuals_sum
             best_inliers = sample_model_inliers
-            if (
-                best_inlier_num >= stop_sample_num
+            dynamic_max_trials = _dynamic_max_trials(best_inlier_num,
+                                                     num_samples,
+                                                     min_samples,
+                                                     stop_probability)
+            if (best_inlier_num >= stop_sample_num
                 or best_inlier_residuals_sum <= stop_residuals_sum
-                or num_trials
-                    >= _dynamic_max_trials(best_inlier_num, num_samples,
-                                           min_samples, stop_probability)
-            ):
+                or num_trials >= dynamic_max_trials):
                 break
 
     # estimate final model using all inliers
     if best_inliers is not None:
         # select inliers for each data array
-        for i in range(len(data)):
-            data[i] = data[i][best_inliers]
-        best_model.estimate(*data)
+        data_inliers = [d[best_inliers] for d in data]
+        best_model.estimate(*data_inliers)
 
     return best_model, best_inliers

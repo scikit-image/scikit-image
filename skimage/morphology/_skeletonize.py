@@ -7,7 +7,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -324,7 +324,7 @@ def thin(image, max_iter=None):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     # check that image is 2d
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     # convert image to uint8 with values in {0, 1}
     skel = np.asanyarray(image, dtype=bool).astype(np.uint8)

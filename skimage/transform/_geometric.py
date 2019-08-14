@@ -305,8 +305,10 @@ class FundamentalMatrixTransform(GeometricTransform):
             coordinates.
 
         """
-        assert src.shape == dst.shape
-        assert src.shape[0] >= 8
+        if src.shape != dst.shape:
+            raise ValueError('src and dst shapes must be identical.')
+        if src.shape[0] < 8:
+            raise ValueError('src.shape[0] must be equal or larger than 8.')
 
         # Center and normalize image points for better numerical stability.
         try:
