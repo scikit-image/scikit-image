@@ -128,7 +128,7 @@ def _cached_property(f):
     return caching_wrapper
 
 def only2d(method):
-    """Decorator for raising an exception if property is calculted on a non-2D image"""
+    """Decorator for raising an exception if property is calculated on a non-2D image"""
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
@@ -207,7 +207,7 @@ class RegionProperties(object):
 
     @property
     def image(self):
-        """ Same as bounded_mask. (Retined for backwards compatability) """
+        """ Same as bounded_mask. (Retained for backwards compatibility) """
         return self.bounded_mask
 
     @property
@@ -245,8 +245,6 @@ class RegionProperties(object):
     @property
     def bbox_area(self):
         """Number of pixels in the bounding box"""
-        
-        # TODO: Faster
         return self.bounded_mask.size
         
     
@@ -627,7 +625,7 @@ class RegionProperties(object):
 
         return iter(sorted(props))
 
-    ## Could not find any examples of code using this way, or via the (undocumented) backwards-compatability keys
+    ## Could not find any examples of code using this way, or via the (undocumented) backwards-compatibility keys
     #def __getitem__(self, key):
     def __getitem__(self, key):
         value = getattr(self, key, None)
