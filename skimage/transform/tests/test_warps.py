@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import _stackcopy
+from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
+                                      _log_polar_mapping)
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
@@ -521,7 +522,55 @@ def test_zero_image_size():
              SimilarityTransform())
 
 
-def test_linear_polar_scaling():
+def test_linear_polar_mapping():
+    output_coords = np.array([[0, 0],
+                             [0, 90],
+                             [0, 180],
+                             [0, 270],
+                             [99, 0],
+                             [99, 180],
+                             [99, 270],
+                             [99, 45]])
+    ground_truth = np.array([[100, 100],
+                             [100, 100],
+                             [100, 100],
+                             [100, 100],
+                             [199, 100],
+                             [1, 100],
+                             [100, 1],
+                             [170.00357134, 170.00357134]])
+    k_ang = 360 / (2 * np.pi)
+    k_rad = 1
+    center = (100, 100)
+    coords = _linear_polar_mapping(output_coords, k_ang, k_rad, center)
+    assert np.allclose(coords, ground_truth)
+
+
+def test_log_polar_mapping():
+    output_coords = np.array([[0, 0],
+                              [0, 90],
+                              [0, 180],
+                              [0, 270],
+                              [99, 0],
+                              [99, 180],
+                              [99, 270],
+                              [99, 45]])
+    ground_truth = np.array([[101, 100],
+                             [100, 101],
+                             [99, 100],
+                             [100, 99],
+                             [195.4992586, 100],
+                             [4.5007414, 100],
+                             [100, 4.5007414],
+                             [167.52817336, 167.52817336]])
+    k_ang = 360 / (2 * np.pi)
+    k_rad = 100 / np.log(100)
+    center = (100, 100)
+    coords = _log_polar_mapping(output_coords, k_ang, k_rad, center)
+    assert np.allclose(coords, ground_truth)
+
+
+def test_linear_warp_polar():
     radii = [5, 10, 15, 20]
     image = np.zeros([51, 51])
     for rad in radii:
@@ -533,7 +582,7 @@ def test_linear_polar_scaling():
     assert np.alltrue([peak in radii for peak in peaks])
 
 
-def test_log_polar_scaling():
+def test_log_warp_polar():
     radii = [np.exp(2), np.exp(3), np.exp(4), np.exp(5),
              np.exp(5)-1, np.exp(5)+1]
     radii = [int(x) for x in radii]

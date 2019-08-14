@@ -901,17 +901,65 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
 
 def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
+    """Inverse mapping function to convert from cartesion to polar coordinates
+
+    Parameters
+    ----------
+    output_coords : ndarray
+        `(M, 2)` array of `(col, row)` coordinates in the output image
+    k_ang : float
+        Scaling factor that relates the intended number of rows in the output
+        image to angle: `k_ang = nrows / (2 * np.pi)`
+    k_rad : float
+        Scaling factor that relates the radius of the circle bounding the
+        area to be transformed to the intended number of columns in the output
+        image: `k_rad = ncols / radius`
+    center : tuple (row, col)
+        Coordinates that represent the center of the circle that bounds the
+        area to be transformed in an input image.
+
+    Returns
+    -------
+    coords : ndarray
+        `(M, 2)` array of `(col, row)` coordinates in the input image that
+        correspond to the `output_coords` given as input.
+    """
     angle = output_coords[:, 1] / k_ang
     rr = ((output_coords[:, 0] / k_rad) * np.sin(angle)) + center[0]
     cc = ((output_coords[:, 0] / k_rad) * np.cos(angle)) + center[1]
-    return np.column_stack((cc, rr))
+    coords = np.column_stack((cc, rr))
+    return coords
 
 
 def _log_polar_mapping(output_coords, k_ang, k_rad, center):
+    """Inverse mapping function to convert from cartesion to polar coordinates
+
+    Parameters
+    ----------
+    output_coords : ndarray
+        `(M, 2)` array of `(col, row)` coordinates in the output image
+    k_ang : float
+        Scaling factor that relates the intended number of rows in the output
+        image to angle: `k_ang = nrows / (2 * np.pi)`
+    k_rad : float
+        Scaling factor that relates the radius of the circle bounding the
+        area to be transformed to the intended number of columns in the output
+        image: `k_rad = width / np.log(radius)`
+    center : tuple (row, col)
+        Coordinates that represent the center of the circle that bounds the
+        area to be transformed in an input image.
+
+    Returns
+    -------
+    coords : ndarray
+        `(M, 2)` array of `(col, row)` coordinates in the input image that
+        correspond to the `output_coords` given as input.
+    """
     angle = output_coords[:, 1] / k_ang
     rr = ((np.exp(output_coords[:, 0] / k_rad)) * np.sin(angle)) + center[0]
     cc = ((np.exp(output_coords[:, 0] / k_rad)) * np.cos(angle)) + center[1]
-    return np.column_stack((cc, rr))
+    coords = np.column_stack((cc, rr))
+    return coords
 
 
 def warp_polar(image, center=None, radius=None, output_shape=None,
@@ -923,21 +971,16 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     image : ndarray (2-D or 3-D)
         Input image. If array has 3 dimensions (e.g., 2-D color image),
         the transformation is applied to the first two axes.
-
     center : tuple (row, col), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
         If no value is given, the center is assumed to be the center point
         of the image.
-
     radius : float, optional
         Radius of the circle that bounds the area to be transformed.
-
     output_shape : tuple (row, col), optional
-
     scaling : {'linear', 'log'}
         Specify whether the image warp is polar or log-polar
-
     **kwargs : keyword arguments
         Passed to `transform.warp`.
 
@@ -985,13 +1028,13 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
         width = output_shape[1]
 
     if scaling == 'linear':
-        k_rad = width/radius
+        k_rad = width / radius
         map_func = _linear_polar_mapping
     elif scaling == 'log':
-        k_rad = width/np.log(radius)
+        k_rad = width / np.log(radius)
         map_func = _log_polar_mapping
 
-    k_ang = height/(2*np.pi)
+    k_ang = height / (2 * np.pi)
     warp_args = {'k_ang': k_ang, 'k_rad': k_rad, 'center': center}
 
     warped = warp(image, map_func, map_args=warp_args,
