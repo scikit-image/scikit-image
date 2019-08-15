@@ -3,7 +3,7 @@ from ..util import img_as_float64
 from itertools import product
 
 
-def compare_images(image1, image2, method='diff'):
+def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     """
     Return an image showing the differences between two images.
 
@@ -14,6 +14,9 @@ def compare_images(image1, image2, method='diff'):
     method : string, optional
         Method used for the comparison.
         Valid values are {'diff', 'blend', 'checkerboard'}
+    n_tiles : tuple, optional
+        Used only for the `checkerboard` method. Specifies the number
+        of tiles (row, column) to divide the image.
 
     Returns
     -------
@@ -28,12 +31,11 @@ def compare_images(image1, image2, method='diff'):
     elif method == 'blend':
         comparison = 0.5 * (img2 + img1)
     elif method == 'checkerboard':
-        num_box = 9
         shapex, shapey = img1.shape
         mask = np.full((shapex, shapey), False)
-        stepx = int(shapex / num_box)
-        stepy = int(shapey / num_box)
-        for i, j in product(range(num_box), range(num_box)):
+        stepx = int(shapex / n_tiles[0])
+        stepy = int(shapey / n_tiles[1])
+        for i, j in product(range(n_tiles[0]), range(n_tiles[1])):
             if (i+j) % 2 == 0:
                 mask[i*stepx:(i+1)*stepx, j*stepy:(j+1)*stepy] = True
         comparison = np.zeros_like(img1)
