@@ -44,6 +44,7 @@ PROPS = {
     'MaxIntensity': 'max_intensity',
     'MeanIntensity': 'mean_intensity',
     'MinIntensity': 'min_intensity',
+    'TotalIntensity': 'total_intensity',
     'MinorAxisLength': 'minor_axis_length',
     'Moments': 'moments',
     'NormalizedMoments': 'moments_normalized',
@@ -93,6 +94,7 @@ COL_DTYPES = {
     'max_intensity': float,
     'mean_intensity': float,
     'min_intensity': float,
+    'total_intensity': float,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -141,7 +143,7 @@ def only2d(method):
 class RegionProperties(object):
     """ Represents a region of an image and provides methods to calculate various properties of this region.
         
-        Region objects are typically instantiated from ``regionprops``, and not directly.
+        RegionProperties objects are typically instantiated from ``regionprops`` convenience function (returns a list of RegionProperties), and not directly.
         
         The region described is that labeled with a given integer ``label``, given array ``label_image``
         in which the value at each point corresponds to an integer label. The labeled region should be
@@ -862,7 +864,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
 
 def regionprops(label_image, intensity_image=None, cache=True):
-    """Measure properties of labeled image regions.
+    """Measure properties of all the regions in labeled image.
 
     Parameters
     ----------
@@ -892,6 +894,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     See Also
     --------
+    RegionProperties
     label
 
     References
