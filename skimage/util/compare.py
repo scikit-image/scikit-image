@@ -15,7 +15,8 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
         Images to process, must be of the same shape.
     method : string, optional
         Method used for the comparison.
-        Valid values are {'diff', 'blend', 'checkerboard'}
+        Valid values are {'diff', 'blend', 'checkerboard'}.
+        Details are provided in the note section.
     n_tiles : tuple, optional
         Used only for the `checkerboard` method. Specifies the number
         of tiles (row, column) to divide the image.
@@ -24,6 +25,13 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     -------
     comparison : 2-D array
         Image showing the differences.
+
+    Notes
+    -----
+    `diff` computes the absolute difference between the two images.
+    `bend` computes the mean value.
+    `checkerboard` makes tiles of dimension `n_tiles` that display
+    alternatively the first and the second image.
     """
     img1 = img_as_float64(image1)
     img2 = img_as_float64(image2)
