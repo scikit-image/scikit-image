@@ -37,12 +37,13 @@ img = data.astronaut()
 img = rgb2gray(img)
 
 s = np.linspace(0, 2*np.pi, 400)
-x = 220 + 100*np.cos(s)
-y = 100 + 100*np.sin(s)
-init = np.array([x, y]).T
+r = 100 + 100*np.sin(s)
+c = 220 + 100*np.cos(s)
+init = np.array([r, c]).T
 
 snake = active_contour(gaussian(img, 3),
-                       init, alpha=0.015, beta=10, gamma=0.001)
+                       init, alpha=0.015, beta=10, gamma=0.001,
+                       coordinates='rc')
 
 fig, ax = plt.subplots(figsize=(7, 7))
 ax.imshow(img, cmap=plt.cm.gray)
@@ -61,12 +62,13 @@ plt.show()
 
 img = data.text()
 
-x = np.linspace(5, 424, 100)
-y = np.linspace(136, 50, 100)
-init = np.array([x, y]).T
+r = np.linspace(136, 50, 100)
+c = np.linspace(5, 424, 100)
+init = np.array([r, c]).T
 
-snake = active_contour(gaussian(img, 1), init, bc='fixed',
-                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
+snake = active_contour(gaussian(img, 1), init, boundary_condition='fixed',
+                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1,
+                       coordinates='rc')
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.imshow(img, cmap=plt.cm.gray)
