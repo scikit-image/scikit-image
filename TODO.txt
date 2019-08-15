@@ -47,7 +47,7 @@ Other
   to > 1.15.x in ``skimage/util/arraycrop.py``.
 * When minimum supported version of ``scipy`` reaches 0.18, use
   ``scipy.fftpack.next_fast_len`` directly in
-  ``skimage.feature.masked_register_translation``.
+  ``skimage._shared.fft``.
 * Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
   `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
   in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
@@ -58,3 +58,5 @@ Other
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
+* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
+  the minimum supported version of ``scipy`` reaches 1.4.
