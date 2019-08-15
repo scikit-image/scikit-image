@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 
-from skimage import restoration, data, color, img_as_float, measure
-from skimage.measure import compare_psnr
+from skimage import restoration, data, color, img_as_float
+from skimage.metrics import structural_similarity
+from skimage.metrics import peak_signal_noise_ratio
 from skimage.restoration._denoise import _wavelet_threshold
 import pywt
 
@@ -130,8 +131,8 @@ def test_denoise_tv_chambolle_weighting():
     w = 0.2
     denoised_2d = restoration.denoise_tv_chambolle(img2d, weight=w)
     denoised_4d = restoration.denoise_tv_chambolle(img4d, weight=w)
-    assert_(measure.compare_ssim(denoised_2d,
-                                 denoised_4d[:, :, 0, 0]) > 0.99)
+    assert_(structural_similarity(denoised_2d,
+                                  denoised_4d[:, :, 0, 0]) > 0.99)
 
 
 def test_denoise_tv_bregman_2d():
@@ -313,15 +314,15 @@ def test_denoise_nl_means_2d_multichannel():
     for fast_mode in [True, False]:
         for s in [sigma, 0]:
             for n_channels in [2, 3, 6]:
-                psnr_noisy = compare_psnr(img[..., :n_channels],
-                                          imgn[..., :n_channels])
+                psnr_noisy = peak_signal_noise_ratio(img[..., :n_channels],
+                                                     imgn[..., :n_channels])
                 denoised = restoration.denoise_nl_means(imgn[..., :n_channels],
                                                         3, 5, h=0.75 * sigma,
                                                         fast_mode=fast_mode,
                                                         multichannel=True,
                                                         sigma=s)
-                psnr_denoised = compare_psnr(denoised[..., :n_channels],
-                                             img[..., :n_channels])
+                psnr_denoised = peak_signal_noise_ratio(
+                    denoised[..., :n_channels], img[..., :n_channels])
                 # make sure noise is reduced
                 assert_(psnr_denoised > psnr_noisy)
 
@@ -331,18 +332,18 @@ def test_denoise_nl_means_3d():
     img[5:-5, 5:-5, 2:-2] = 1.
     sigma = 0.3
     imgn = img + sigma * np.random.randn(*img.shape)
-    psnr_noisy = compare_psnr(img, imgn)
+    psnr_noisy = peak_signal_noise_ratio(img, imgn)
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75 * sigma,
                                                 fast_mode=True,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
-        assert_(compare_psnr(img, denoised) > psnr_noisy)
+        assert_(peak_signal_noise_ratio(img, denoised) > psnr_noisy)
         denoised = restoration.denoise_nl_means(imgn, 3, 4, h=0.75 * sigma,
                                                 fast_mode=False,
                                                 multichannel=False, sigma=s)
         # make sure noise is reduced
-        assert_(compare_psnr(img, denoised) > psnr_noisy)
+        assert_(peak_signal_noise_ratio(img, denoised) > psnr_noisy)
 
 
 def test_denoise_nl_means_multichannel():
@@ -355,8 +356,8 @@ def test_denoise_nl_means_multichannel():
         imgn, 3, 4, 0.6 * sigma, fast_mode=True, multichannel=True)
     denoised_ok_multichannel = restoration.denoise_nl_means(
         imgn, 3, 4, 0.6 * sigma, fast_mode=True, multichannel=False)
-    psnr_wrong = compare_psnr(img, denoised_wrong_multichannel)
-    psnr_ok = compare_psnr(img, denoised_ok_multichannel)
+    psnr_wrong = peak_signal_noise_ratio(img, denoised_wrong_multichannel)
+    psnr_ok = peak_signal_noise_ratio(img, denoised_ok_multichannel)
     assert_(psnr_ok > psnr_wrong)
 
 
@@ -399,8 +400,8 @@ def test_wavelet_denoising():
             denoised = restoration.denoise_wavelet(noisy, sigma=sigma,
                                                    multichannel=multichannel,
                                                    convert2ycbcr=convert2ycbcr)
-        psnr_noisy = compare_psnr(img, noisy)
-        psnr_denoised = compare_psnr(img, denoised)
+        psnr_noisy = peak_signal_noise_ratio(img, noisy)
+        psnr_denoised = peak_signal_noise_ratio(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
 
         # Verify that SNR is improved with internally estimated sigma
@@ -408,8 +409,8 @@ def test_wavelet_denoising():
             denoised = restoration.denoise_wavelet(noisy,
                                                    multichannel=multichannel,
                                                    convert2ycbcr=convert2ycbcr)
-        psnr_noisy = compare_psnr(img, noisy)
-        psnr_denoised = compare_psnr(img, denoised)
+        psnr_noisy = peak_signal_noise_ratio(img, noisy)
+        psnr_denoised = peak_signal_noise_ratio(img, denoised)
         assert_(psnr_denoised > psnr_noisy)
 
         # SNR is improved less with 1 wavelet level than with the default.
@@ -417,7 +418,7 @@ def test_wavelet_denoising():
                                                  multichannel=multichannel,
                                                  wavelet_levels=1,
                                                  convert2ycbcr=convert2ycbcr)
-        psnr_denoised_1 = compare_psnr(img, denoised_1)
+        psnr_denoised_1 = peak_signal_noise_ratio(img, denoised_1)
         assert_(psnr_denoised > psnr_denoised_1)
         assert_(psnr_denoised_1 > psnr_noisy)
 
@@ -443,8 +444,8 @@ def test_wavelet_threshold():
     with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
         denoised = _wavelet_threshold(noisy, wavelet='db1', method=None,
                                       threshold=sigma)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
     # either method or threshold must be defined
@@ -484,8 +485,8 @@ def test_wavelet_denoising_nd():
             with expected_warnings([anticipated_warnings]):
                 # Verify that SNR is improved with internally estimated sigma
                 denoised = restoration.denoise_wavelet(noisy, method=method)
-            psnr_noisy = compare_psnr(img, noisy)
-            psnr_denoised = compare_psnr(img, denoised)
+            psnr_noisy = peak_signal_noise_ratio(img, noisy)
+            psnr_denoised = peak_signal_noise_ratio(img, denoised)
             assert_(psnr_denoised > psnr_noisy)
 
 
@@ -511,9 +512,9 @@ def test_wavelet_denoising_levels():
         denoised = restoration.denoise_wavelet(noisy, wavelet=wavelet)
     denoised_1 = restoration.denoise_wavelet(noisy, wavelet=wavelet,
                                              wavelet_levels=1)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
-    psnr_denoised_1 = compare_psnr(img, denoised_1)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
+    psnr_denoised_1 = peak_signal_noise_ratio(img, denoised_1)
 
     # multi-level case should outperform single level case
     assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
@@ -665,7 +666,9 @@ def test_cycle_spinning_multichannel():
                                                max_shifts=max_shifts,
                                                func_kw=func_kw,
                                                multichannel=multichannel)
-            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+            psnr = peak_signal_noise_ratio(img, dn)
+            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+            assert_(psnr_cc > psnr)
 
         for shift_steps in valid_steps:
             with expected_warnings([PYWAVELET_ND_INDEXING_WARNING,
@@ -675,7 +678,9 @@ def test_cycle_spinning_multichannel():
                                                shift_steps=shift_steps,
                                                func_kw=func_kw,
                                                multichannel=multichannel)
-            assert_(compare_psnr(img, dn_cc) > compare_psnr(img, dn))
+            psnr = peak_signal_noise_ratio(img, dn)
+            psnr_cc = peak_signal_noise_ratio(img, dn_cc)
+            assert_(psnr_cc > psnr)
 
         for max_shifts in invalid_shifts:
             with testing.raises(ValueError):
