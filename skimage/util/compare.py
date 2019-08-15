@@ -7,6 +7,8 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     """
     Return an image showing the differences between two images.
 
+    .. versionadded:: 0.16
+
     Parameters
     ----------
     image1, image2 : 2-D array
