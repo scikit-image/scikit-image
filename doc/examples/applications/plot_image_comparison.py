@@ -3,6 +3,10 @@
 Visual image comparison
 =======================
 
+Image comparison is particularly useful when performing image processing tasks
+such as exposure manipulations, filtering, and restauration.
+
+This example shows how to easily compare two images with various approaches.
 
 """
 import matplotlib.pyplot as plt
@@ -26,7 +30,7 @@ blend_rotated = compare_images(img1, img2, method='blend')
 # Checkerboard
 # ============
 #
-# The checkerboard method alternates tiles from the first and the second
+# The `checkerboard` method alternates tiles from the first and the second
 # images.
 
 fig = plt.figure(figsize=(8, 9))
@@ -51,6 +55,7 @@ plt.plot()
 # Diff
 # ====
 #
+# The `diff` method computes the absolute difference between the two images.
 
 fig = plt.figure(figsize=(8, 9))
 
@@ -74,6 +79,7 @@ plt.plot()
 # Blend
 # =====
 #
+# `blend` is the result of the average of the two images.
 
 fig = plt.figure(figsize=(8, 9))
 
