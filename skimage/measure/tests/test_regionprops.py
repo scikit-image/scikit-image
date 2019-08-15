@@ -232,7 +232,6 @@ def test_bounded_mask():
     assert_array_equal(img, SAMPLE_3D[1:4, 1:3, 1:3])
 
 def test_full_mask():
-    
     img = regionprops(SAMPLE_MULTI_REGION)[2]
     assert_array_equal(img.full_mask, SAMPLE_MULTI_REGION_3_ONLY.astype(bool))
 
@@ -243,7 +242,6 @@ def test_label():
     label = regionprops(SAMPLE_3D)[0].label
     assert_array_equal(label, 1)
 
-
 def test_filled_area():
     area = regionprops(SAMPLE)[0].filled_area
     assert area == np.sum(SAMPLE)
@@ -253,18 +251,15 @@ def test_filled_area():
     area = regionprops(SAMPLE_mod)[0].filled_area
     assert area == np.sum(SAMPLE)
 
-
 def test_filled_image():
     img = regionprops(SAMPLE)[0].filled_image
     assert_array_equal(img, SAMPLE)
-
 
 def test_major_axis_length():
     length = regionprops(SAMPLE)[0].major_axis_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 16.7924234999)
-
 
 def test_max_intensity():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
@@ -439,33 +434,6 @@ def test_invalid_size():
     with testing.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
-
-# def test_equals():
-    # arr = np.zeros((100, 100), dtype=np.int)
-    # arr[0:25, 0:25] = 1
-    # arr[50:99, 50:99] = 2
-
-    # regions = regionprops(arr)
-    # r1 = regions[0]
-
-    # regions = regionprops(arr)
-    # r2 = regions[0]
-    # r3 = regions[1]
-
-    # assert_equal(r1 == r2, True, "Same regionprops are not equal")
-    # assert_equal(r1 != r3, True, "Different regionprops are equal")
-
-
-# def test_iterate_all_props():
-    # region = regionprops(SAMPLE)[0]
-    # p0 = {p: region[p] for p in region}
-
-    # region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
-    # p1 = {p: region[p] for p in region}
-
-    # assert len(p0) < len(p1)
-
-    
 def test_cache_on():
     region = regionprops(SAMPLE, cache=True)[0]
     a0 = region.area
@@ -474,7 +442,7 @@ def test_cache_on():
     assert 'area' in region._cache
     
     a1 = region._cache['area']
-    assert_equal( a0, a1 )
+    assert_equal(a0, a1)
     assert a0 is a1
 
 def test_cache_off():
@@ -484,5 +452,3 @@ def test_cache_off():
     # Make sure object is not in cache
     assert 'area' not in region._cache
     assert len(region._cache) == 0
-    
-
