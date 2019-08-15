@@ -7,10 +7,11 @@ from skimage.data import camera, binary_blobs
 from scipy.ndimage import fourier_shift
 from skimage import img_as_float
 from skimage._shared import testing
+from skimage._shared.fft import fftmodule as fft
 
 
 def test_correlation():
-    reference_image = np.fft.fftn(camera())
+    reference_image = fft.fftn(camera())
     shift = (-7, 12)
     shifted_image = fourier_shift(reference_image, shift)
 
@@ -22,7 +23,7 @@ def test_correlation():
 
 
 def test_subpixel_precision():
-    reference_image = np.fft.fftn(camera())
+    reference_image = fft.fftn(camera())
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
@@ -36,8 +37,8 @@ def test_subpixel_precision():
 def test_real_input():
     reference_image = camera()
     subpixel_shift = (-2.4, 1.32)
-    shifted_image = fourier_shift(np.fft.fftn(reference_image), subpixel_shift)
-    shifted_image = np.fft.ifftn(shifted_image)
+    shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
+    shifted_image = fft.ifftn(shifted_image)
 
     # subpixel precision
     result, error, diffphase = register_translation(reference_image,
@@ -47,7 +48,7 @@ def test_real_input():
 
 def test_size_one_dimension_input():
     # take a strip of the input image
-    reference_image = np.fft.fftn(camera()[:, 15]).reshape((-1, 1))
+    reference_image = fft.fftn(camera()[:, 15]).reshape((-1, 1))
     subpixel_shift = (-2.4, 4)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
@@ -60,7 +61,7 @@ def test_size_one_dimension_input():
 
 def test_3d_input():
     phantom = img_as_float(binary_blobs(length=32, n_dim=3))
-    reference_image = np.fft.fftn(phantom)
+    reference_image = fft.fftn(phantom)
     shift = (-2., 1., 5.)
     shifted_image = fourier_shift(reference_image, shift)
 
@@ -104,7 +105,7 @@ def test_wrong_input():
 
 def test_4d_input_pixel():
     phantom = img_as_float(binary_blobs(length=32, n_dim=4))
-    reference_image = np.fft.fftn(phantom)
+    reference_image = fft.fftn(phantom)
     shift = (-2., 1., 5., -3)
     shifted_image = fourier_shift(reference_image, shift)
     result, error, diffphase = register_translation(reference_image,
@@ -115,7 +116,7 @@ def test_4d_input_pixel():
 
 def test_4d_input_subpixel():
     phantom = img_as_float(binary_blobs(length=32, n_dim=4))
-    reference_image = np.fft.fftn(phantom)
+    reference_image = fft.fftn(phantom)
     subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
     result, error, diffphase = register_translation(reference_image,
