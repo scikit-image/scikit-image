@@ -909,11 +909,11 @@ def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
         `(M, 2)` array of `(col, row)` coordinates in the output image
     k_ang : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: `k_ang = nrows / (2 * np.pi)`
+        image to angle: ``k_ang = nrows / (2 * np.pi)``
     k_rad : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: `k_rad = ncols / radius`
+        image: ``k_rad = ncols / radius``
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
@@ -940,11 +940,11 @@ def _log_polar_mapping(output_coords, k_ang, k_rad, center):
         `(M, 2)` array of `(col, row)` coordinates in the output image
     k_ang : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: `k_ang = nrows / (2 * np.pi)`
+        image to angle: ``k_ang = nrows / (2 * np.pi)``
     k_rad : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: `k_rad = width / np.log(radius)`
+        image: ``k_rad = width / np.log(radius)``
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
