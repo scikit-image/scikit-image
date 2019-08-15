@@ -6,7 +6,7 @@ Visual image comparison
 
 """
 import matplotlib.pyplot as plt
-
+from matplotlib.gridspec import GridSpec
 
 from skimage import data, transform, exposure
 from skimage.util import compare_images
@@ -29,14 +29,20 @@ blend_rotated = compare_images(img1, img2, method='blend')
 # The checkerboard method alternates tiles from the first and the second
 # images.
 
-fig, ax = plt.subplots(ncols=3, figsize=(15, 5))
-ax[0].imshow(img1, cmap='gray')
-ax[0].set_title('Original')
-ax[1].imshow(img1_equalized, cmap='gray')
-ax[1].set_title('Equalized')
-ax[2].imshow(comp_equalized, cmap='gray')
-ax[2].set_title('Checkerboard comparison')
-for a in ax:
+fig = plt.figure(figsize=(8, 9))
+
+gs = GridSpec(3, 2)
+ax0 = fig.add_subplot(gs[0, 0])
+ax1 = fig.add_subplot(gs[0, 1])
+ax2 = fig.add_subplot(gs[1:, :])
+
+ax0.imshow(img1, cmap='gray')
+ax0.set_title('Original')
+ax1.imshow(img1_equalized, cmap='gray')
+ax1.set_title('Equalized')
+ax2.imshow(comp_equalized, cmap='gray')
+ax2.set_title('Checkerboard comparison')
+for a in (ax0, ax1, ax2):
     a.axis('off')
 plt.tight_layout()
 plt.plot()
@@ -46,7 +52,22 @@ plt.plot()
 # ====
 #
 
-plt.imshow(diff_rotated, cmap='gray')
+fig = plt.figure(figsize=(8, 9))
+
+gs = GridSpec(3, 2)
+ax0 = fig.add_subplot(gs[0, 0])
+ax1 = fig.add_subplot(gs[0, 1])
+ax2 = fig.add_subplot(gs[1:, :])
+
+ax0.imshow(img1, cmap='gray')
+ax0.set_title('Original')
+ax1.imshow(img1_equalized, cmap='gray')
+ax1.set_title('Rotated')
+ax2.imshow(diff_rotated, cmap='gray')
+ax2.set_title('Diff comparison')
+for a in (ax0, ax1, ax2):
+    a.axis('off')
+plt.tight_layout()
 plt.plot()
 
 ######################################################################
@@ -54,5 +75,20 @@ plt.plot()
 # =====
 #
 
-plt.imshow(blend_rotated, cmap='gray')
+fig = plt.figure(figsize=(8, 9))
+
+gs = GridSpec(3, 2)
+ax0 = fig.add_subplot(gs[0, 0])
+ax1 = fig.add_subplot(gs[0, 1])
+ax2 = fig.add_subplot(gs[1:, :])
+
+ax0.imshow(img1, cmap='gray')
+ax0.set_title('Original')
+ax1.imshow(img1_equalized, cmap='gray')
+ax1.set_title('Rotated')
+ax2.imshow(blend_rotated, cmap='gray')
+ax2.set_title('Blend comparison')
+for a in (ax0, ax1, ax2):
+    a.axis('off')
+plt.tight_layout()
 plt.plot()
