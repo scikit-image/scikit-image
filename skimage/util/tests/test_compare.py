@@ -1,7 +1,23 @@
 import numpy as np
+
 from skimage._shared.testing import assert_array_equal
+from skimage._shared import testing
 
 from skimage.util.compare import compare_images
+
+
+def test_compate_images_ValueError_shape():
+    img1 = np.zeros((10, 10), dtype=np.uint8)
+    img2 = np.zeros((10, 1), dtype=np.uint8)
+    with testing.raises(ValueError):
+        compare_images(img1, img2)
+
+
+def test_compate_images_ValueError_dtype():
+    img1 = np.zeros((10, 10), dtype=np.uint8)
+    img2 = np.zeros((10, 10), dtype=np.uint16)
+    with testing.raises(ValueError):
+        compare_images(img1, img2)
 
 
 def test_compare_images_diff():
@@ -14,6 +30,7 @@ def test_compare_images_diff():
     result = compare_images(img1, img2, method='diff')
     assert_array_equal(result, expected_result)
 
+
 def test_compare_images_blend():
     img1 = np.zeros((10, 10), dtype=np.uint8)
     img1[3:8, 3:8] = 255
@@ -25,6 +42,7 @@ def test_compare_images_blend():
     result = compare_images(img1, img2, method='blend')
     assert_array_equal(result, expected_result)
 
+
 def test_compare_images_checkerboard_default():
     img1 = np.zeros((2**4, 2**4), dtype=np.uint8)
     img2 = np.full(img1.shape, fill_value=255, dtype=np.uint8)
@@ -35,6 +53,7 @@ def test_compare_images_checkerboard_default():
         assert_array_equal(res[i, :], exp_row1)
     for i in (2, 3, 6, 7, 10, 11, 14, 15):
         assert_array_equal(res[i, :], exp_row2)
+
 
 def test_compare_images_checkerboard_tuple():
     img1 = np.zeros((2**4, 2**4), dtype=np.uint8)
