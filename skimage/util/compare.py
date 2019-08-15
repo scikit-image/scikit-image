@@ -1,5 +1,5 @@
 import numpy as np
-from ..util import img_as_float64
+from ..util import img_as_float
 from itertools import product
 
 
@@ -38,8 +38,8 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     if image1.dtype != image2.dtype:
         raise ValueError('Images must have the same dtype.')
 
-    img1 = img_as_float64(image1)
-    img2 = img_as_float64(image2)
+    img1 = img_as_float(image1)
+    img2 = img_as_float(image2)
 
     if method == 'diff':
         comparison = np.abs(img2 - img1)
