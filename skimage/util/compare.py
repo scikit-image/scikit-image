@@ -12,7 +12,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     Parameters
     ----------
     image1, image2 : 2-D array
-        Images to process, must be of the same shape and dtype.
+        Images to process, must be of the same shape.
     method : string, optional
         Method used for the comparison.
         Valid values are {'diff', 'blend', 'checkerboard'}.
@@ -35,8 +35,6 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     """
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
-    if image1.dtype != image2.dtype:
-        raise ValueError('Images must have the same dtype.')
 
     img1 = img_as_float(image1)
     img2 = img_as_float(image2)

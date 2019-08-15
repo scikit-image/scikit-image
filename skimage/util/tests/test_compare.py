@@ -13,13 +13,6 @@ def test_compate_images_ValueError_shape():
         compare_images(img1, img2)
 
 
-def test_compate_images_ValueError_dtype():
-    img1 = np.zeros((10, 10), dtype=np.uint8)
-    img2 = np.zeros((10, 10), dtype=np.uint16)
-    with testing.raises(ValueError):
-        compare_images(img1, img2)
-
-
 def test_compare_images_diff():
     img1 = np.zeros((10, 10), dtype=np.uint8)
     img1[3:8, 3:8] = 255
