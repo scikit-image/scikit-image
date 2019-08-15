@@ -2,7 +2,7 @@ from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes_lewiner
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
-from ._regionprops import regionprops, perimeter, regionprops_table
+from ._regionprops import regionprops, perimeter, regionprops_table, RegionProperties
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
@@ -20,6 +20,7 @@ from .entropy import shannon_entropy
 __all__ = ['find_contours',
            'regionprops',
            'regionprops_table',
+           'RegionProperties',
            'perimeter',
            'approximate_polygon',
            'subdivide_polygon',

@@ -41,13 +41,17 @@ def label(input, neighbors=None, background=None, return_num=False,
 
     Returns
     -------
-    labels : ndarray of dtype int
+    labels : ndarray of dtype int (signed, 32-bit)
         Labeled array, where all connected regions are assigned the
         same integer value.
+        
+        Tip: In most applications the number of distinct regions is unlikely require a 32-bit integer. 
+        Users may consider casting to a smaller data-type to save memory. See :func:`numpy.ndarray.astype`.
+      
     num : int, optional
         Number of labels, which equals the maximum label index and is only
         returned if return_num is `True`.
-
+    
     See Also
     --------
     regionprops
