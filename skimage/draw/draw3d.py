@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
 
 
-def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
+def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False, center=(0, 0, 0)):
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
     on grid with specified `spacing`.
@@ -33,6 +33,8 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     if (a <= 0) or (b <= 0) or (c <= 0):
         raise ValueError('Parameters a, b, and c must all be > 0')
 
+    # Receiving the center coordinates
+    a_center, b_center, c_center = center
     offset = np.r_[1, 1, 1] * np.r_[spacing]
 
     # Calculate limits, and ensure output volume is odd & symmetric
@@ -52,13 +54,13 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
                        low[2]:high[2]:spacing[2]]
 
     if not levelset:
-        arr = ((x / float(a)) ** 2 +
-               (y / float(b)) ** 2 +
-               (z / float(c)) ** 2) <= 1
+        arr = (((x - a_center) / float(a)) ** 2 +
+               ((y - b_center) / float(b)) ** 2 +
+               ((z - c_center) / float(c)) ** 2) <= 1
     else:
-        arr = ((x / float(a)) ** 2 +
-               (y / float(b)) ** 2 +
-               (z / float(c)) ** 2) - 1
+        arr = (((x - a_center) / float(a)) ** 2 +
+               ((y - b_center) / float(b)) ** 2 +
+               ((z - c_center) / float(c)) ** 2) - 1
 
     return arr
 
