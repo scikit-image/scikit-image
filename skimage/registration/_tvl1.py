@@ -51,8 +51,7 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
     """
 
-    grid = np.array(
-        np.meshgrid(*[np.arange(n) for n in I0.shape], indexing='ij'))
+    grid = np.meshgrid(*[np.arange(n) for n in I0.shape], indexing='ij')
 
     f0 = lambda_ * tau
     f1 = dt / tau
@@ -99,7 +98,7 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
             for idx in range(flow.shape[0]):
                 s_p[0] = idx
-                for _ in range(niter):
+                for _ in range(2):
                     for ax in range(flow.shape[0]):
                         s_g[0] = ax
                         s_g[ax+1] = slice(0, -1)
