@@ -21,8 +21,7 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
     I1 : ~numpy.ndarray
         The second gray scale image of the sequence.
     flow0 : ~numpy.ndarray
-        Initialization for the horizontal component of the vector
-        field.
+        Vector field initialization.
     dt : float
         Time step of the numerical scheme. Convergence is proved for
         values dt < 0.125, but it can be larger for faster
@@ -136,8 +135,10 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
 def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
          tol=1e-4, prefilter=False):
-    """Coarse to fine TV-L1 optical flow estimator. A popular algorithm
-    intrudced by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
+    """Coarse to fine TV-L1 optical flow estimator.
+
+    TV-L1 ia popular algorithm for optical flow estimation intrudced
+    by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
 
     Parameters
     ----------
@@ -169,9 +170,8 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
 
     Returns
     -------
-    u, v : tuple[~numpy.ndarray]
-        The horizontal and vertical components of the estimated
-        optical flow.
+    flow : tuple[~numpy.ndarray]
+        The estimated optical flow.
 
     References
     ----------
