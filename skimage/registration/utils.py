@@ -23,9 +23,8 @@ def resize_flow(flow, shape):
 
     Returns
     -------
-    ru, rv : tuple[~numpy.ndarray]
-        The resized and rescaled horizontal and vertical components of
-        the motion field.
+    rflow : ~numpy.ndarray
+        The resized and rescaled motion field.
 
     """
 
@@ -92,9 +91,8 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
 
     Returns
     -------
-    u, v : tuple[~numpy.ndarray]
-        The horizontal and vertical components of the estimated
-        optical flow.
+    flow : ~numpy.ndarray
+        The estimated optical flow.
 
     """
 
