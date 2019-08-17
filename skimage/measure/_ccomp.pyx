@@ -371,10 +371,6 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
         # use the full connectivity by default
         connectivity = ndim
     elif neighbors is not None:
-        # not sure why stacklevel should only be 2 not 3. Maybe cython
-        # is stripping away a stacklevel????
-        warn("The argument 'neighbors' is deprecated, use 'connectivity' "
-             "instead", stacklevel=2)
         # backwards-compatible neighbors recalc to connectivity,
         if neighbors == 4:
             connectivity = 1
@@ -383,6 +379,13 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
         else:
             raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
                              % neighbors)
+        # not sure why stacklevel should only be 2 not 3. Maybe cython
+        # is stripping away a stacklevel????
+        warn("The argument 'neighbors' is deprecated and will be removed in "
+             "scikit-image 0.18, use 'connectivity' instead. "
+             "For neighbors={neighbors}, use connectivity={connectivity}"
+             "".format(neighbors=neighbors, connectivity=connectivity),
+             stacklevel=2)
 
     if not 1 <= connectivity <= ndim:
         raise ValueError(
