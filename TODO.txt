@@ -21,12 +21,6 @@ Version 0.17
 Version 0.18
 ------------
 
-* In ``skimage/meausre/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors``.
-
-Version 0.18
-------------
-
 * Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
 * The following functions are deprecated and should be removed in 0.18:
@@ -37,6 +31,8 @@ Version 0.18
 * `skimage/measure/tests/test_simple_metrics.py` should also be removed
 * make coordinates='rc' the default in ``segmentation.active_contour``
 * remove deprecated ``bc`` argument in ``segmentation.active_contour``
+* In ``skimage/meausre/_ccomp.label_cython`` remove the deprecated parameter
+  ``neighbors``.
 
 Other
 -----
