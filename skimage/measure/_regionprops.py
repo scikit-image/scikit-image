@@ -681,6 +681,7 @@ class RegionProperties(object):
                                  'max_intensity',
                                  'mean_intensity',
                                  'min_intensity',
+                                 'total_intensity',
                                  'weighted_moments',
                                  'weighted_moments_central',
                                  'weighted_centroid',
@@ -861,7 +862,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
-        ``image`` and ``coords``.
+        ``bounded_mask`` and ``coords``.
 
     Returns
     -------
@@ -890,7 +891,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     "image" (the image of a region varies in size depending on the region
     size), an object array will be used, with the corresponding property name
     as the key.
-
+    
     Examples
     --------
     >>> from skimage import data, util, measure

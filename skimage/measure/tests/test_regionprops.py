@@ -2,7 +2,11 @@ import math
 import functools
 
 import numpy as np
-from skimage.measure._regionprops import (regionprops, PROPS, perimeter)
+from numpy import array
+from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          _props_to_dict,
+                                          regionprops_table,
+                                          OBJECT_COLUMNS, COL_DTYPES)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
@@ -434,6 +438,30 @@ def test_invalid_size():
     with testing.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
+def test_equals():
+    arr = np.zeros((100, 100), dtype=np.int)
+    arr[0:25, 0:25] = 1
+    arr[50:99, 50:99] = 2
+
+    regions = regionprops(arr)
+    r1 = regions[0]
+
+    regions = regionprops(arr)
+    r2 = regions[0]
+    r3 = regions[1]
+
+    assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    assert_equal(r1 != r3, True, "Different regionprops are equal")
+
+def test_iterate_all_props():
+    region = regionprops(SAMPLE)[0]
+    p0 = {p: region[p] for p in region}
+
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    p1 = {p: region[p] for p in region}
+
+    assert len(p0) < len(p1)
+
 def test_cache_on():
     region = regionprops(SAMPLE, cache=True)[0]
     a0 = region.area
@@ -452,3 +480,42 @@ def test_cache_off():
     # Make sure object is not in cache
     assert 'area' not in region._cache
     assert len(region._cache) == 0
+
+
+def test_props_to_dict():
+    regions = regionprops(SAMPLE)
+    out = _props_to_dict(regions)
+    assert out == {'label': array([1]),
+                   'bbox-0': array([0]), 'bbox-1': array([0]),
+                   'bbox-2': array([10]), 'bbox-3': array([18])}
+
+    regions = regionprops(SAMPLE)
+    out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
+                         separator='+')
+    assert out == {'label': array([1]), 'area': array([180]),
+                   'bbox+0': array([0]), 'bbox+1': array([0]),
+                   'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_regionprops_table():
+    out = regionprops_table(SAMPLE)
+    assert out == {'label': array([1]),
+                   'bbox-0': array([0]), 'bbox-1': array([0]),
+                   'bbox-2': array([10]), 'bbox-3': array([18])}
+
+    out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
+                            separator='+')
+    assert out == {'label': array([1]), 'area': array([180]),
+                   'bbox+0': array([0]), 'bbox+1': array([0]),
+                   'bbox+2': array([10]), 'bbox+3': array([18])}
+
+
+def test_props_dict_complete():
+    region = regionprops(SAMPLE)[0]
+    properties = [s for s in dir(region) if not s.startswith('_')]
+    assert set(properties) == set(PROPS.values())
+
+
+def test_column_dtypes_complete():
+    assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+    
