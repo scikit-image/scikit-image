@@ -767,7 +767,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     properties), and so on.
 
     For multidimensional properties that don't have a fixed size, such as
-    "image" (the image of a region varies in size depending on the region
+    "bounded_mask" (this varies in size depending on the region
     size), an object array will be used, with the corresponding property name
     as the key.
 
@@ -888,7 +888,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     properties), and so on.
 
     For multidimensional properties that don't have a fixed size, such as
-    "image" (the image of a region varies in size depending on the region
+    "bounded_mask" (this varies in size depending on the region
     size), an object array will be used, with the corresponding property name
     as the key.
     
