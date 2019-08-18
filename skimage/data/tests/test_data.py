@@ -103,5 +103,5 @@ def test_lfw_subset():
 
 def test_cell():
     """ Test that "cell" image can be loaded. """
-    data.page()
+    data.cell()
 
