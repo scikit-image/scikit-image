@@ -1,9 +1,7 @@
-import os
 import itertools
 
 import numpy as np
-from skimage import data_dir
-from skimage.io import imread
+from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, iradon, iradon_sart, rescale
 
 from skimage._shared.utils import convert_to_float
@@ -12,8 +10,7 @@ from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 
 
-PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                 as_gray=True)[::2, ::2]
+PHANTOM = shepp_logan_phantom()[::2, ::2]
 PHANTOM = rescale(PHANTOM, 0.5, order=1,
                   mode='constant', anti_aliasing=False, multichannel=False)
 
