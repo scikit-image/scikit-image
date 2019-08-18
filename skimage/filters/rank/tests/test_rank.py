@@ -1,11 +1,8 @@
-import os
-import pytest
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
 from skimage._shared import testing
 
-import skimage
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk
@@ -13,7 +10,8 @@ from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, parametrize
+from skimage._shared.testing import test_parallel, parametrize, fetch
+import pytest
 
 # To be removed along with tophat and bottomhat functions.
 all_rank_filters.remove('tophat')
@@ -70,20 +68,13 @@ def test_subtract_mean_underflow_correction(dtype):
 
     assert np.all(result == expected_val)
 
-    # Input: [10, 10, 40]
-    shift = 10
-    arr[0, 2] += arr.shape[1] * shift
-    result = subtract_mean(arr, selem)
 
-    if dtype == np.uint8:
-        expected_val -= shift // 2
-    else:
-        expected_val += shift
-
-    assert result[0, 1] == expected_val
+@pytest.fixture(scope='module')
+def refs():
+    yield np.load(fetch("data/rank_filter_tests.npz"))
 
 
-class TestRank:
+class TestRank():
     def setup(self):
         np.random.seed(0)
         # This image is used along with @test_parallel
@@ -92,14 +83,12 @@ class TestRank:
         # Set again the seed for the other tests.
         np.random.seed(0)
         self.selem = morphology.disk(1)
-        self.refs = np.load(os.path.join(skimage.data_dir,
-                                         "rank_filter_tests.npz"))
 
     @parametrize('filter', all_rank_filters)
-    def test_rank_filter(self, filter):
+    def test_rank_filter(self, filter, refs):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
-            expected = self.refs[filter]
+            expected = refs[filter]
             result = getattr(rank, filter)(self.image, self.selem)
             if filter == "entropy":
                 # There may be some arch dependent rounding errors

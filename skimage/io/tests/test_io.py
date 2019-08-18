@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import numpy as np
-from skimage import io, data_dir
+from skimage import io
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
@@ -37,9 +37,9 @@ def test_stack_non_array():
 
 def test_imread_file_url():
     # tweak data path so that file URI works on both unix and windows.
-    data_path = data_dir.lstrip(os.path.sep)
+    data_path = str(testing.fetch('data/camera.png'))
     data_path = data_path.replace(os.path.sep, '/')
-    image_url = 'file:///{0}/camera.png'.format(data_path)
+    image_url = 'file:///{0}'.format(data_path)
     image = io.imread(image_url)
     assert image.shape == (512, 512)
 
