@@ -62,8 +62,16 @@ matrix:
       python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
-      python: 3.7
+      python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+    - os: linux
+      python: 3.7
+      # Testing and installing from sdist will ensure that tests do not
+      # depend on pooch to pass
+      # pooch is used as an optional dependency to download datasets on the fly
+      # users installing scikit-image in development mode do not require
+      # pooch to run the tests
+      env: INSTALL_FROM_SDIST=1
       dist: xenial # Required for Python 3.7
       services:
         - xvfb

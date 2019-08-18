@@ -11,6 +11,7 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('feature', parent_package, top_path)
     config.add_data_dir('tests')
+    config.add_data_files('orb_descriptor_positions.txt')
 
     cython(['corner_cy.pyx',
             'censure_cy.pyx',
