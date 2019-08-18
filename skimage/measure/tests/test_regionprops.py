@@ -283,6 +283,11 @@ def test_min_intensity():
     assert_almost_equal(intensity, 1)
 
 
+def test_total_intensity():
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                            )[0].total_intensity
+    assert_equal(intensity, 74)
+
 def test_minor_axis_length():
     length = regionprops(SAMPLE)[0].minor_axis_length
     # MATLAB has different interpretation of ellipse than found in literature,
