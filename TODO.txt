@@ -60,3 +60,7 @@ Other
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
   the minimum supported version of ``scipy`` reaches 1.4.
+* When Python 3.8 is released, increment the version number on the last OSX
+  build to use Python 3.8 instead of 3.7.
+* When Python 3.8 is released, add entries to the build matrix in appveyor.
+* When Python 3.8 is released, add entries to the build matrix in azure.
