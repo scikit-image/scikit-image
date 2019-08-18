@@ -49,7 +49,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
         stepx = int(shapex / n_tiles[0])
         stepy = int(shapey / n_tiles[1])
         for i, j in product(range(n_tiles[0]), range(n_tiles[1])):
-            if (i+j) % 2 == 0:
+            if (i + j) % 2 == 0:
                 mask[i*stepx:(i+1)*stepx, j*stepy:(j+1)*stepy] = True
         comparison = np.zeros_like(img1)
         comparison[mask] = img1[mask]
