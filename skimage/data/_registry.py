@@ -60,6 +60,7 @@ registry = {
     "color/tests/data/luv_array_d75_10.npy": "e1cc70d56eb6789633d4c2a4059b9533f616a7c8592c9bd342403e41d72f45e4",
     "color/tests/data/luv_array_d75_2.npy": "07db3bd59bd89de8e5ff62dad786fe5f4b299133495ba9bea30495b375133a98",
     "color/tests/data/luv_array_e_2.npy": "41b1037d81b267305ffe9e8e97e0affa9fa54b18e60413b01b8f11861cb32213",
+    "color/tests/ciede2000_test_data.txt": "2e005c6f76ddfb7bbcc8f68490f1f7b4b4a2a4b06b36a80c985677a2799c0e40",
     "data/astronaut.png": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
     "data/brick.png": "7966caf324f6ba843118d98f7a07746d22f6a343430add0233eca5f6eaaa8fcf",
     "data/cell.png": "8d23a7fb81f7cc877cd09f330357fc7f595651306e84e17252f6e0a1b3f61515",
