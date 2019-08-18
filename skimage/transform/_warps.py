@@ -979,8 +979,9 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     radius : float, optional
         Radius of the circle that bounds the area to be transformed.
     output_shape : tuple (row, col), optional
-    scaling : {'linear', 'log'}
-        Specify whether the image warp is polar or log-polar
+    scaling : {'linear', 'log'}, optional
+        Specify whether the image warp is polar or log-polar. Defaults to
+        'linear'.
     **kwargs : keyword arguments
         Passed to `transform.warp`.
 
@@ -1033,6 +1034,8 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     elif scaling == 'log':
         k_rad = width / np.log(radius)
         map_func = _log_polar_mapping
+    else:
+        raise ValueError("Scaling value must be in {'linear', 'log'}")
 
     k_ang = height / (2 * np.pi)
     warp_args = {'k_ang': k_ang, 'k_rad': k_rad, 'center': center}

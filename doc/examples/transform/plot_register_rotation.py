@@ -21,23 +21,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.draw import circle, set_color
 from skimage.feature import register_translation
 from skimage.transform import warp_polar, rotate
 from skimage.util import img_as_float
 
-radius = 250
+radius = 705
 angle = 35
-image = data.astronaut()
+image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
 image_polar = warp_polar(image, radius=radius)
 rotated_polar = warp_polar(rotated, radius=radius)
-
-# highlight region to be transformed
-rr, cc = circle(256, 256, radius)
-set_color(image, (rr, cc), color=(1, 1, 0), alpha=0.2)
-set_color(rotated, (rr, cc), color=(1, 1, 0), alpha=0.2)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -52,8 +46,10 @@ ax[3].imshow(rotated_polar)
 plt.show()
 
 shifts, error, phasediff = register_translation(image_polar, rotated_polar)
-print(f"Expected value for counterclockwise rotation in degrees: {angle}")
-print(f"Recovered value for counterclockwise rotation: {shifts[0]}")
+print("Expected value for counterclockwise rotation in degrees: "
+      "{}".format(angle))
+print("Recovered value for counterclockwise rotation: "
+      "{}".format(shifts[0]))
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
@@ -61,24 +57,16 @@ print(f"Recovered value for counterclockwise rotation: {shifts[0]}")
 
 from skimage.transform import rescale
 
-radius = 250
-angle = 53
+# radius must be large enough to capture useful info in larger image
+radius = 1500
+angle = 53.7
 scale = 2.2
-image = data.astronaut()
+image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
 rescaled = rescale(rotated, scale, multichannel=True)
 image_polar = warp_polar(image, radius=radius, scaling='log')
 rescaled_polar = warp_polar(rescaled, radius=radius, scaling='log')
-
-# highlight region to be transformed
-im_center_r, im_center_c = (int(x / 2) for x in image.shape[:2])
-rr, cc = circle(im_center_r, im_center_c, radius)
-set_color(image, (rr, cc), color=(1, 1, 0), alpha=0.2)
-
-res_center_r, res_center_c = (int(x / 2) for x in rescaled.shape[:2])
-rr, cc = circle(res_center_r, res_center_c, radius)
-set_color(rescaled, (rr, cc), color=(1, 1, 0), alpha=0.2)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -92,15 +80,17 @@ ax[3].set_title("Log-Polar-Transformed Rotated and Rescaled")
 ax[3].imshow(rescaled_polar)
 plt.show()
 
-shifts, error, phasediff = register_translation(image_polar, rescaled_polar)
+# setting `upsample_factor` can increase precision
+tparams = register_translation(image_polar, rescaled_polar, upsample_factor=20)
+shifts, error, phasediff = tparams
 shiftr, shiftc = shifts[:2]
 
 # Calculate scale factor from translation
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
 
-print(f"Expected value for counterclockwise rotation in degrees: {angle}")
-print(f"Recovered value for counterclockwise rotation: {shiftr}")
+print("Expected value for cc rotation in degrees: {}".format(angle))
+print("Recovered value for cc rotation: {}".format(shiftr))
 print()
-print(f"Expected value for scaling difference: {scale}")
-print(f"Recovered value for scaling difference: {shift_scale}")
+print("Expected value for scaling difference: {}".format(scale))
+print("Recovered value for scaling difference: {}".format(shift_scale))
