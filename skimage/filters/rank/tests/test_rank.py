@@ -44,6 +44,11 @@ def refs():
     yield np.load(fetch("data/rank_filter_tests.npz"))
 
 
+@pytest.fixture(scope='module')
+def refs():
+    yield np.load(fetch("data/rank_filter_tests.npz"))
+
+
 class TestRank():
     def setup(self):
         np.random.seed(0)
