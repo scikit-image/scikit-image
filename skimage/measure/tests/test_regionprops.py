@@ -1,11 +1,12 @@
 import math
+import functools
 
 import numpy as np
 from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          _parse_docs, _props_to_dict,
-                                          regionprops_table, OBJECT_COLUMNS,
-                                          COL_DTYPES)
+                                          _props_to_dict,
+                                          regionprops_table,
+                                          OBJECT_COLUMNS, COL_DTYPES)
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
                                      assert_array_almost_equal, assert_equal)
@@ -31,6 +32,21 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+SAMPLE_MULTI_REGION = np.array(
+    [[5, 0, 1, 0, 2],
+     [5, 1, 3, 3, 0],
+     [5, 1, 3, 3, 0],
+     [5, 0, 0, 3, 3],
+     [0, 0, 0, 0, 0]]
+)
+
+SAMPLE_MULTI_REGION_3_ONLY = np.array(
+    [[0, 0, 0, 0, 0],
+     [0, 0, 3, 3, 0],
+     [0, 0, 3, 3, 0],
+     [0, 0, 0, 3, 3],
+     [0, 0, 0, 0, 0]]
+)
 
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
@@ -212,13 +228,16 @@ def test_moments_hu():
     assert_array_almost_equal(hu, ref)
 
 
-def test_image():
-    img = regionprops(SAMPLE)[0].image
+def test_bounded_mask():
+    img = regionprops(SAMPLE)[0].bounded_mask
     assert_array_equal(img, SAMPLE)
 
-    img = regionprops(SAMPLE_3D)[0].image
+    img = regionprops(SAMPLE_3D)[0].bounded_mask
     assert_array_equal(img, SAMPLE_3D[1:4, 1:3, 1:3])
 
+def test_full_mask():
+    img = regionprops(SAMPLE_MULTI_REGION)[2]
+    assert_array_equal(img.full_mask, SAMPLE_MULTI_REGION_3_ONLY.astype(bool))
 
 def test_label():
     label = regionprops(SAMPLE)[0].label
@@ -226,7 +245,6 @@ def test_label():
 
     label = regionprops(SAMPLE_3D)[0].label
     assert_array_equal(label, 1)
-
 
 def test_filled_area():
     area = regionprops(SAMPLE)[0].filled_area
@@ -237,18 +255,15 @@ def test_filled_area():
     area = regionprops(SAMPLE_mod)[0].filled_area
     assert area == np.sum(SAMPLE)
 
-
 def test_filled_image():
     img = regionprops(SAMPLE)[0].filled_image
     assert_array_equal(img, SAMPLE)
-
 
 def test_major_axis_length():
     length = regionprops(SAMPLE)[0].major_axis_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 16.7924234999)
-
 
 def test_max_intensity():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
@@ -267,6 +282,11 @@ def test_min_intensity():
                             )[0].min_intensity
     assert_almost_equal(intensity, 1)
 
+
+def test_total_intensity():
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                            )[0].total_intensity
+    assert_equal(intensity, 74)
 
 def test_minor_axis_length():
     length = regionprops(SAMPLE)[0].minor_axis_length
@@ -423,7 +443,6 @@ def test_invalid_size():
     with testing.raises(ValueError):
         regionprops(SAMPLE, wrong_intensity_sample)
 
-
 def test_equals():
     arr = np.zeros((100, 100), dtype=np.int)
     arr[0:25, 0:25] = 1
@@ -439,7 +458,6 @@ def test_equals():
     assert_equal(r1 == r2, True, "Same regionprops are not equal")
     assert_equal(r1 != r3, True, "Different regionprops are equal")
 
-
 def test_iterate_all_props():
     region = regionprops(SAMPLE)[0]
     p0 = {p: region[p] for p in region}
@@ -449,43 +467,24 @@ def test_iterate_all_props():
 
     assert len(p0) < len(p1)
 
+def test_cache_on():
+    region = regionprops(SAMPLE, cache=True)[0]
+    a0 = region.area
+    
+    # Make sure object is put into cache
+    assert 'area' in region._cache
+    
+    a1 = region._cache['area']
+    assert_equal(a0, a1)
+    assert a0 is a1
 
-def test_cache():
-    region = regionprops(SAMPLE)[0]
-    f0 = region.filled_image
-    region._label_image[:10] = 1
-    f1 = region.filled_image
-
-    # Changed underlying image, but cache keeps result the same
-    assert_array_equal(f0, f1)
-
-    # Now invalidate cache
-    region._cache_active = False
-    f1 = region.filled_image
-
-    assert np.any(f0 != f1)
-
-
-def test_docstrings_and_props():
-    def foo():
-        """foo"""
-
-    has_docstrings = bool(foo.__doc__)
-
-    region = regionprops(SAMPLE)[0]
-
-    docs = _parse_docs()
-    props = [m for m in dir(region) if not m.startswith('_')]
-
-    nr_docs_parsed = len(docs)
-    nr_props = len(props)
-    if has_docstrings:
-        assert_equal(nr_docs_parsed, nr_props)
-        ds = docs['weighted_moments_normalized']
-        assert 'iteration' not in ds
-        assert len(ds.split('\n')) > 3
-    else:
-        assert_equal(nr_docs_parsed, 0)
+def test_cache_off():
+    region = regionprops(SAMPLE, cache=False)[0]
+    a0 = region.area
+    
+    # Make sure object is not in cache
+    assert 'area' not in region._cache
+    assert len(region._cache) == 0
 
 
 def test_props_to_dict():
@@ -498,7 +497,7 @@ def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -511,7 +510,7 @@ def test_regionprops_table():
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -524,3 +523,4 @@ def test_props_dict_complete():
 
 def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+    
