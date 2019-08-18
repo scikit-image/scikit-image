@@ -120,11 +120,10 @@ def _fetch(data_filename):
 if has_pooch:
     # Pooch expects a `+` to exist in development versions.
     # Since scikit-image doesn't follow that convention, we have to manually
-    # provide it with the URL and set the version to None
-    if 'dev' in Version(__version__).version:
-        pooch_version = __version__.replace('.dev', '+')
-    else:
-        pooch_version = __version__
+    # remove `.dev` with a `+` if it exists.
+    # This helps pooch understand that it should look in master
+    # to find the required files
+    pooch_version = __version__.replace('.dev', '+')
     url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
 
     # Create a new friend to manage your sample data storage
