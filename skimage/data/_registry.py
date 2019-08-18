@@ -126,6 +126,15 @@ registry = {
     "feature/tests/data/TransformedX-130Y130.png": "1cda90ed69c921eb7605b73b76d141cf4ea03fb8ce3336445ca08080e40d7375",
     "feature/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
     "feature/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
+    # Data below here isn't distributed in github, and individual URLs must
+    # be added to the urls dictionary below
+    # For files on osf.io, the SHA-2 seems to be providing the SHA256 hash
+    "data/schizonts.zip": "6bec7ae303423164c54ad7144d5700c9beae69e06ada3b9bc351ea1a3f0ca1ae",
+}
+
+registry_urls={
+    # TODO: Remove the schizonts dataset before merging into master
+    "data/schizonts.zip": "https://files.osf.io/v1/resources/svpfu/providers/osfstorage/5a162bbf9ad5a10269cc1d4f?action=download&version=2&direct"
 }
 
 legacy_registry = {

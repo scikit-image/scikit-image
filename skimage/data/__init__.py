@@ -15,7 +15,7 @@ from distutils.version import LooseVersion as Version
 
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
-from ._registry import registry, legacy_registry
+from ._registry import registry, legacy_registry, registry_urls
 
 from .. import __version__
 
@@ -140,6 +140,7 @@ if has_pooch:
         version=pooch_version,
         env="SKIMAGE_DATADIR",
         registry=registry,
+        urls=registry_urls,
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
