@@ -39,7 +39,6 @@ def test_otsu_edge_case():
     assert result[1, 1] in [141, 172]
 
 
-
 @pytest.fixture(scope='module')
 def refs():
     yield np.load(fetch("data/rank_filter_tests.npz"))
