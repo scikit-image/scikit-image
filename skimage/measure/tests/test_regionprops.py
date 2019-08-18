@@ -513,9 +513,6 @@ def test_regionprops_table():
 def test_props_dict_complete():
     region = regionprops(SAMPLE)[0]
     properties = [s for s in dir(region) if not s.startswith('_')]
-    print (properties)
-    print ('')
-    print (PROPS.values())
     assert set(properties) == set(PROPS.values())
 
 
