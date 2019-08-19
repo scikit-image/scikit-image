@@ -94,3 +94,15 @@ print("Recovered value for cc rotation: {}".format(shiftr))
 print()
 print("Expected value for scaling difference: {}".format(scale))
 print("Recovered value for scaling difference: {}".format(shift_scale))
+
+######################################################################
+# Register rotation and scaling on a translated image
+# =================================================================
+#
+# The above examples only work when the images to be registered share a
+# center. However, it is more often the case that there is also a translation
+# component to the difference between two images to be registered. One
+# approach to register rotation, scaling and translation is to first correct
+# for rotation and scaling, then solve for translation. It is possible to
+# resolve rotation and scaling differences for translated images by working on
+# the magnitude spectra of the fourier transformed images.
