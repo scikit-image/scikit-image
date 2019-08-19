@@ -49,9 +49,9 @@ def ellipse(r, c, r_radius, c_radius, orientation=0, shape=None, rotation=None):
     r, c : float
         Center coordinate of the ellipse.
     r_radius, c_radius : float
-        Minor and major semi-axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
+        Semi-minor and semi-major axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     orientation : float, optional (default : 0)
-        Major axis orientation in counter clockwise direction as radians.
+        Semi-major axis orientation in counter clockwise direction as radians.
     shape : tuple, optional (default : None)
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
@@ -69,7 +69,7 @@ def ellipse(r, c, r_radius, c_radius, orientation=0, shape=None, rotation=None):
     >>> from skimage.draw import ellipse
     >>> img = np.zeros((10, 12), dtype=np.uint8)
     >>> rr, cc = ellipse(r=5, c=6, r_radius=3, c_radius=5,
-                         orientation=np.deg2rad(30))
+    ...                  orientation=1/6*np.pi)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -578,8 +578,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
 
 
 def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
-    """Generate coordinates of pixels corresponding to the perimeter of an
-    ellipse.
+    """Generate coordinates of pixels for an ellipse perimeter.
 
     Parameters
     ----------
@@ -587,9 +586,9 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
         Center coordinate of the ellipse.
     r_radius, c_radius : int
         Minor and major semi-axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
-    orientation : float, optional (default : 0)
+    orientation : float, optional
         Major axis orientation in clockwise direction as radians.
-    shape : tuple, optional (default : None)
+    shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for ellipses that exceed the image
         size. If None, the full extent of the ellipse is used.
