@@ -1,13 +1,13 @@
-"""
+r"""
 ===================================
 Polar and Log-Polar Transformations
 ===================================
 
 Rotation differences between two images can be converted to translation
-differences along the angular coordinate (:math:`\\theta`) axis of the
+differences along the angular coordinate (:math:`\theta`) axis of the
 polar-transformed images. Scaling differences can be converted to translation
-differences along the radial coordinate (:math:`\\rho`) axis if it
-is first log transformed (i.e., :math:`\\rho = \ln\sqrt{x^2 + y^2}`). Thus,
+differences along the radial coordinate (:math:`\rho`) axis if it
+is first log transformed (i.e., :math:`\rho = \ln\sqrt{x^2 + y^2}`). Thus,
 in this example, we use phase correlation (``feature.register_translation``)
 to recover rotation and scaling differences between two images that share a
 center point.
