@@ -29,7 +29,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     Notes
     -----
     `diff` computes the absolute difference between the two images.
-    `bend` computes the mean value.
+    `blend` computes the mean value.
     `checkerboard` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
