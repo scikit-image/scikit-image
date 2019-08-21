@@ -106,3 +106,25 @@ print("Recovered value for scaling difference: {}".format(shift_scale))
 # for rotation and scaling, then solve for translation. It is possible to
 # resolve rotation and scaling differences for translated images by working on
 # the magnitude spectra of the fourier transformed images.
+
+from skimage.transform import warp
+from skimage.color import rgb2gray
+from scipy.ndimage import fourier_shift
+
+angle = 30
+scale = 1.9
+shift = (40, 30)
+
+image = rgb2gray(data.retina())
+rotated = rotate(image, angle)
+rescaled = rescale(rotated, scale)
+# need to create translated image now
+
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+ax = axes.ravel()
+ax[0].set_title("Original")
+ax[0].imshow(image)
+ax[1].set_title("Shifted Image")
+ax[1].imshow(full_shift)
+plt.show()
