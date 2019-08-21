@@ -1011,7 +1011,7 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     Perform a log-polar warp on a grayscale image while specifying center,
     radius, and output shape:
 
-    >>> warped = warp_polar(image, (100,100), 100,
+    >>> warped = warp_polar(image, (100,100), radius=100,
     ...                     output_shape=image.shape, scaling='log')
 
     Perform a log-polar warp on a color image:
