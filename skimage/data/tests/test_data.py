@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.data as data
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
 
 
 def test_astronaut():
@@ -102,6 +102,9 @@ def test_lfw_subset():
 
 
 def test_cell():
-    """ Test that "cell" image can be loaded. """
+    """ Test that "cell" image can be loaded."""
+    # Needs pooch, or git development. using testing.fetch will
+    # cause the test to be skipped instead of failing if neither of
+    # those two conditions are met.
+    fetch('data/cells.png')
     data.cell()
-
