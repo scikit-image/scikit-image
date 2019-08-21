@@ -11,58 +11,57 @@ from skimage.transform import warp
 from .utils import coarse_to_fine
 
 
-def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
+def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
+          tol, prefilter):
     """TV-L1 solver for optical flow estimation.
 
     Parameters
     ----------
-    I0 : ~numpy.ndarray
+    image0 : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    I1 : ~numpy.ndarray
+    image1 : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
-    flow0 : ~numpy.ndarray
+    flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         Initialization for the horizontal component of the vector
         field.
-    dt : float
-        Time step of the numerical scheme. Convergence is proved for
-        values dt < 0.125, but it can be larger for faster
-        convergence.
-    lambda_ : float
-        Attachement parameter. The smaller this parameter is,
+    attachment : float
+        Attachment parameter. The smaller this parameter is,
         the smoother is the solutions.
-    tau : float
+    tightness : float
         Tightness parameter. It should have a small value in order to
         maintain attachement and regularization parts in
         correspondence.
     nwarp : int
-        Number of times I1 is warped.
+        Number of times image1 is warped.
     niter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
         between two consecutive values of (u, v).
     prefilter : bool
-        whether to prefilter the estimated optical flow before each
+        Whether to prefilter the estimated optical flow before each
         image warp.
 
     Returns
     -------
-    flow : ~numpy.ndarray
+    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
         The estimated optical flow.
 
     """
 
     grid = np.array(
-        np.meshgrid(*[np.arange(n) for n in I0.shape], indexing='ij'))
+        np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij'))
 
-    f0 = lambda_ * tau
-    f1 = dt / tau
-    tol *= I0.size
+    dt = 0.5/image0.ndim
+    reg_niter = 2
+    f0 = attachment * tightness
+    f1 = dt / tightness
+    tol *= image0.size
 
-    flow = flow0
+    flow_current = flow_previous = flow0
 
-    g = np.zeros((I0.ndim, ) + I0.shape)
-    proj = np.zeros((I0.ndim, I0.ndim, ) + I0.shape)
+    g = np.zeros((image0.ndim, ) + image0.shape)
+    proj = np.zeros((image0.ndim, image0.ndim, ) + image0.shape)
 
     s_g = [slice(None), ] * g.ndim
     s_p = [slice(None), ] * proj.ndim
@@ -70,41 +69,42 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
     for _ in range(nwarp):
         if prefilter:
-            flow = ndi.filters.median_filter(flow, [1]+I0.ndim*[3])
+            flow_current = ndi.median_filter(flow_current,
+                                             [1]+image0.ndim*[3])
 
-        wI1 = warp(I1, grid+flow, mode='nearest')
-        grad = np.array(np.gradient(wI1))
+        image1_warp = warp(image1, grid+flow_current, mode='nearest')
+        grad = np.array(np.gradient(image1_warp))
         NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
 
-        rho_0 = wI1 - I0 - (grad*flow0).sum(0)
+        rho_0 = image1_warp - image0 - (grad*flow_current).sum(0)
 
         for _ in range(niter):
 
             # Data term
 
-            rho = rho_0 + (grad*flow).sum(0)
+            rho = rho_0 + (grad*flow_current).sum(0)
 
             idx = abs(rho) <= f0 * NI
 
-            flow_ = flow
+            flow_auxiliary = flow_current
 
-            flow_[:, idx] -= rho[idx]*grad[:, idx]/NI[idx]
+            flow_auxiliary[:, idx] -= rho[idx]*grad[:, idx]/NI[idx]
 
             idx = ~idx
             srho = f0 * np.sign(rho[idx])
-            flow_[:, idx] -= srho*grad[:, idx]
+            flow_auxiliary[:, idx] -= srho*grad[:, idx]
 
             # Regularization term
-            flow = flow_.copy()
+            flow_current = flow_auxiliary.copy()
 
-            for idx in range(flow.shape[0]):
+            for idx in range(image0.ndim):
                 s_p[0] = idx
-                for _ in range(niter):
-                    for ax in range(flow.shape[0]):
+                for _ in range(reg_niter):
+                    for ax in range(image0.ndim):
                         s_g[0] = ax
                         s_g[ax+1] = slice(0, -1)
-                        g[tuple(s_g)] = np.diff(flow[idx], axis=ax)
+                        g[tuple(s_g)] = np.diff(flow_current[idx], axis=ax)
                         s_g[ax+1] = slice(None)
 
                     norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
@@ -115,7 +115,7 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
 
                     # d will be the (negative) divergence of p[idx]
                     d = -proj[idx].sum(0)
-                    for ax in range(flow.shape[0]):
+                    for ax in range(image0.ndim):
                         s_p[1] = ax
                         s_p[ax+2] = slice(0, -1)
                         s_d[ax] = slice(1, None)
@@ -123,55 +123,57 @@ def _tvl1(I0, I1, flow0, dt, lambda_, tau, nwarp, niter, tol, prefilter):
                         s_p[ax+2] = slice(None)
                         s_d[ax] = slice(None)
 
-                    flow[idx] = flow_[idx] + d
+                    flow_current[idx] = flow_auxiliary[idx] + d
 
-        flow0 -= flow
-        if (flow0*flow0).sum() < tol:
+        flow_previous -= flow_current  # The difference as stopping criteria
+        if (flow_previous*flow_previous).sum() < tol:
             break
 
-        flow0 = flow
+        flow_previous = flow_current
 
-    return flow
+    return flow_current
 
 
-def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
-         tol=1e-4, prefilter=False):
-    """Coarse to fine TV-L1 optical flow estimator. A popular algorithm
+def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
+                      nwarp=5, niter=10, tol=1e-4, prefilter=False):
+    """Coarse to fine optical flow estimator.
+
+    The TV-L1 solver is applyed at each level of the image
+    pyramid. TV-L1 is a popular algorithm for optical flow estimation
     intrudced by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
+
+    Notes
+    -----
+    Color images are not supported.
 
     Parameters
     ----------
-    I0 : ~numpy.ndarray
+    image0 : ndarray
         The first gray scale image of the sequence.
-    I1 : ~numpy.ndarray
+    image1 : ndarray
         The second gray scale image of the sequence.
-    dt : float
-        Time step of the numerical scheme. Convergence is proved for
-        values dt < 0.125, but it can be larger for faster
-        convergence.
-    lambda_ : float
-        Attachement parameter. The smaller this parameter is,
-        the smoother is the solutions.
-    tau : float
+    attachment : float
+        Attachment parameter. The smaller this parameter is,
+        the smoother the returned result will be.
+    tightness : float
         Tightness parameter. It should have a small value in order to
         maintain attachement and regularization parts in
         correspondence.
     nwarp : int
-        Number of times I1 is warped.
+        Number of times image1 is warped.
     niter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
         between two consecutive values of (u, v).
     prefilter : bool
-        whether to prefilter the estimated optical flow before each
-        image warp.
+        Whether to prefilter the estimated optical flow before each
+        image warp. This helps to remove the potential outliers.
 
     Returns
     -------
-    u, v : tuple[~numpy.ndarray]
-        The horizontal and vertical components of the estimated
-        optical flow.
+    flow : ndarray
+        The estimated optical flow.
 
     References
     ----------
@@ -192,16 +194,16 @@ def tvl1(I0, I1, dt=0.2, lambda_=15, tau=0.3, nwarp=5, niter=10,
     >>> from skimage.color import rgb2gray
     >>> from skimage.data import stereo_motorcycle
     >>> from skimage.registration import tvl1
-    >>> I0, I1, disp = stereo_motorcycle()
+    >>> image0, image1, disp = stereo_motorcycle()
     >>> # --- Convert the images to gray level: color is not supported.
-    >>> I0 = rgb2gray(I0)
-    >>> I1 = rgb2gray(I1)
-    >>> flow = tvl1(I1, I0)
+    >>> image0 = rgb2gray(image0)
+    >>> image1 = rgb2gray(image1)
+    >>> flow = tvl1(image1, image0)
 
     """
 
-    solver = partial(_tvl1, dt=dt, lambda_=lambda_, tau=tau,
-                     nwarp=nwarp, niter=niter, tol=tol,
-                     prefilter=prefilter)
+    solver = partial(_tvl1, attachment=attachment,
+                     tightness=tightness, nwarp=nwarp, niter=niter,
+                     tol=tol, prefilter=prefilter)
 
-    return coarse_to_fine(I0, I1, solver)
+    return coarse_to_fine(image0, image1, solver)
