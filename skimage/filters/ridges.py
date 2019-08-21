@@ -376,17 +376,18 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     # Check deprecated keyword parameters
     if beta1:
         warn('Use keyword parameter `beta` instead of `beta1` which '
-             'will be removed in version 0.17.')
+             'will be removed in version 0.17.', stacklevel=2)
         beta = beta1
 
     if beta2:
         warn('Use keyword parameter `gamma` instead of `beta2` which '
-             'will be removed in version 0.17.')
+             'will be removed in version 0.17.', stacklevel=2)
         gamma = beta2
 
     if scale_range and scale_step:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
-             '`scale_range` which will be removed in version 0.17.')
+             '`scale_range` which will be removed in version 0.17.',
+             stacklevel=2)
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
     # Check image dimensions

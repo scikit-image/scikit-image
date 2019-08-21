@@ -126,7 +126,8 @@ def convex_hull_object(image, neighbors=8):
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
 
-    labeled_im = label(image, neighbors, background=0)
+    connectivity = neighbors // 4
+    labeled_im = label(image, connectivity=connectivity, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 

@@ -24,6 +24,7 @@ __all__ = ['data_dir',
            'binary_blobs',
            'brick',
            'camera',
+           'cell',
            'checkerboard',
            'chelsea',
            'clock',
@@ -372,7 +373,7 @@ def cell():
 
     References
     ----------
-    ..[1]: Paul Müller, Mirjam Schürmann, Salvatore Girardo, Gheorghe Cojoc,
+    .. [1] Paul Müller, Mirjam Schürmann, Salvatore Girardo, Gheorghe Cojoc,
            and Jochen Guck. "Accurate evaluation of size and refractive index
            for spherical objects in quantitative phase imaging." Optics Express
            26(8): 10729-10743 (2018). :DOI:`10.1364/OE.26.010729`

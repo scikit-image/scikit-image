@@ -50,12 +50,22 @@ matrix:
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.6
+      env: PYTHONOPTIMIZE=2
+    - os: linux
+      python: 3.6
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
+      services:
+        - xvfb
+    - os: linux
+      python: 3.7
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:
         - xvfb
     # When 3.8 gets released, and dependencies have built wheels, enable
