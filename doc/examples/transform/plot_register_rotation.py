@@ -30,8 +30,8 @@ angle = 35
 image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
-image_polar = warp_polar(image, radius=radius)
-rotated_polar = warp_polar(rotated, radius=radius)
+image_polar = warp_polar(image, radius=radius, multichannel=True)
+rotated_polar = warp_polar(rotated, radius=radius, multichannel=True)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -65,8 +65,10 @@ image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
 rescaled = rescale(rotated, scale, multichannel=True)
-image_polar = warp_polar(image, radius=radius, scaling='log')
-rescaled_polar = warp_polar(rescaled, radius=radius, scaling='log')
+image_polar = warp_polar(image, radius=radius,
+                         scaling='log', multichannel=True)
+rescaled_polar = warp_polar(rescaled, radius=radius,
+                            scaling='log', multichannel=True)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()

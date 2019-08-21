@@ -900,20 +900,20 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
     return warped
 
 
-def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
+def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
     """Inverse mapping function to convert from cartesion to polar coordinates
 
     Parameters
     ----------
     output_coords : ndarray
         `(M, 2)` array of `(col, row)` coordinates in the output image
-    k_ang : float
+    k_angle : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: ``k_ang = nrows / (2 * np.pi)``
-    k_rad : float
+        image to angle: ``k_angle = nrows / (2 * np.pi)``
+    k_radius : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: ``k_rad = ncols / radius``
+        image: ``k_radius = ncols / radius``
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
@@ -924,27 +924,27 @@ def _linear_polar_mapping(output_coords, k_ang, k_rad, center):
         `(M, 2)` array of `(col, row)` coordinates in the input image that
         correspond to the `output_coords` given as input.
     """
-    angle = output_coords[:, 1] / k_ang
-    rr = ((output_coords[:, 0] / k_rad) * np.sin(angle)) + center[0]
-    cc = ((output_coords[:, 0] / k_rad) * np.cos(angle)) + center[1]
+    angle = output_coords[:, 1] / k_angle
+    rr = ((output_coords[:, 0] / k_radius) * np.sin(angle)) + center[0]
+    cc = ((output_coords[:, 0] / k_radius) * np.cos(angle)) + center[1]
     coords = np.column_stack((cc, rr))
     return coords
 
 
-def _log_polar_mapping(output_coords, k_ang, k_rad, center):
+def _log_polar_mapping(output_coords, k_angle, k_radius, center):
     """Inverse mapping function to convert from cartesion to polar coordinates
 
     Parameters
     ----------
     output_coords : ndarray
         `(M, 2)` array of `(col, row)` coordinates in the output image
-    k_ang : float
+    k_angle : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: ``k_ang = nrows / (2 * np.pi)``
-    k_rad : float
+        image to angle: ``k_angle = nrows / (2 * np.pi)``
+    k_radius : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: ``k_rad = width / np.log(radius)``
+        image: ``k_radius = width / np.log(radius)``
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
@@ -955,22 +955,23 @@ def _log_polar_mapping(output_coords, k_ang, k_rad, center):
         `(M, 2)` array of `(col, row)` coordinates in the input image that
         correspond to the `output_coords` given as input.
     """
-    angle = output_coords[:, 1] / k_ang
-    rr = ((np.exp(output_coords[:, 0] / k_rad)) * np.sin(angle)) + center[0]
-    cc = ((np.exp(output_coords[:, 0] / k_rad)) * np.cos(angle)) + center[1]
+    angle = output_coords[:, 1] / k_angle
+    rr = ((np.exp(output_coords[:, 0] / k_radius)) * np.sin(angle)) + center[0]
+    cc = ((np.exp(output_coords[:, 0] / k_radius)) * np.cos(angle)) + center[1]
     coords = np.column_stack((cc, rr))
     return coords
 
 
-def warp_polar(image, center=None, radius=None, output_shape=None,
-               scaling='linear', **kwargs):
-    """Remaps image to polor or log-polar coordinates space.
+def warp_polar(image, center=None, *, radius=None, output_shape=None,
+               scaling='linear', multichannel=False, **kwargs):
+    """Remap image to polor or log-polar coordinates space.
 
     Parameters
     ----------
-    image : ndarray (2-D or 3-D)
-        Input image. If array has 3 dimensions (e.g., 2-D color image),
-        the transformation is applied to the first two axes.
+    image : ndarray
+        Input image. Only 2-D arrays are accepted by default. If
+        `multichannel=True`, 3-D arrays are accepted and the last axis is
+        interpreted as multiple channels.
     center : tuple (row, col), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
@@ -982,6 +983,10 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
     scaling : {'linear', 'log'}, optional
         Specify whether the image warp is polar or log-polar. Defaults to
         'linear'.
+    multichannel : bool, optional
+        Whether the image is a 3-D array in which the third axis is to be
+        interpreted as multiple channels. If set to `False` (default), only 2-D
+        arrays are accepted.
     **kwargs : keyword arguments
         Passed to `transform.warp`.
 
@@ -992,24 +997,36 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
 
     Examples
     --------
-    Perform a basic polar warp:
+    Perform a basic polar warp on a grayscale image:
 
     >>> from skimage import data
     >>> from skimage.transform import warp_polar
     >>> image = data.checkerboard()
     >>> warped = warp_polar(image)
 
-    Perform a log-polar warp:
+    Perform a log-polar warp on a grayscale image:
 
     >>> warped = warp_polar(image, scaling='log')
 
-    Perform a log-polar warp while specifying center, radius, and output shape:
+    Perform a log-polar warp on a grayscale image while specifying center,
+    radius, and output shape:
 
     >>> warped = warp_polar(image, (100,100), 100,
     ...                     output_shape=image.shape, scaling='log')
+
+    Perform a log-polar warp on a color image:
+
+    >>> image = data.astronaut()
+    >>> warped = warp_polar(image, scaling='log', multichannel=True)
     """
-    if image.ndim > 3 or image.ndim < 2:
-        raise ValueError("Input array must be 2 or 3 dimensions,"
+    if image.ndim != 2 and not multichannel:
+        raise ValueError("Input array must be 2 dimensions "
+                         "when `multichannel=False`,"
+                         " got {}".format(image.ndim))
+
+    if image.ndim != 3 and multichannel:
+        raise ValueError("Input array must be 3 dimensions "
+                         "when `multichannel=True`,"
                          " got {}".format(image.ndim))
 
     if center is None:
@@ -1029,16 +1046,16 @@ def warp_polar(image, center=None, radius=None, output_shape=None,
         width = output_shape[1]
 
     if scaling == 'linear':
-        k_rad = width / radius
+        k_radius = width / radius
         map_func = _linear_polar_mapping
     elif scaling == 'log':
-        k_rad = width / np.log(radius)
+        k_radius = width / np.log(radius)
         map_func = _log_polar_mapping
     else:
         raise ValueError("Scaling value must be in {'linear', 'log'}")
 
-    k_ang = height / (2 * np.pi)
-    warp_args = {'k_ang': k_ang, 'k_rad': k_rad, 'center': center}
+    k_angle = height / (2 * np.pi)
+    warp_args = {'k_angle': k_angle, 'k_radius': k_radius, 'center': center}
 
     warped = warp(image, map_func, map_args=warp_args,
                   output_shape=output_shape, **kwargs)
