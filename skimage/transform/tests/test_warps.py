@@ -595,3 +595,19 @@ def test_log_warp_polar():
     peaks = peak_local_max(profile)
     gaps = peaks[:-1]-peaks[1:]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
+
+
+def test_invalid_scaling_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling='invalid')
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling=None)
+
+
+def test_invalid_dimensions_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 3)), (5, 5))
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
