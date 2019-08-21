@@ -1,12 +1,25 @@
 import numpy as np
 
-from skimage import transform
+from skimage.exposure import histogram_matching
+from skimage import exposure
 from skimage import data
 
 from skimage._shared.testing import assert_array_almost_equal, \
     assert_almost_equal
 
 import pytest
+
+
+@pytest.mark.parametrize('array, template, expected_array', [
+    (np.arange(10), np.arange(100), np.arange(9, 100, 10)),
+    (np.random.rand(4), np.ones(3), np.ones(4))
+])
+def test_match_array_values(array, template, expected_array):
+    # when
+    matched = histogram_matching._match_cumulative_cdf(array, template)
+
+    # then
+    assert_array_almost_equal(matched, expected_array)
 
 
 class TestMatchHistogram:
@@ -24,7 +37,7 @@ class TestMatchHistogram:
         all channels and all values of matched"""
 
         # when
-        matched = transform.match_histograms(image, reference, multichannel=True)
+        matched = exposure.match_histograms(image, reference, multichannel=True)
 
         matched_pdf = self._calculate_image_empirical_pdf(matched)
         reference_pdf = self._calculate_image_empirical_pdf(reference)
@@ -45,7 +58,7 @@ class TestMatchHistogram:
     ])
     def test_raises_value_error_on_channels_mismatch(self, image, reference):
         with pytest.raises(ValueError):
-            transform.match_histograms(image, reference)
+            exposure.match_histograms(image, reference)
 
     @classmethod
     def _calculate_image_empirical_pdf(cls, image):
