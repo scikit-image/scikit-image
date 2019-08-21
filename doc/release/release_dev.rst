@@ -13,7 +13,7 @@ https://scikit-image.org
 
 
 This release of scikit-image drops support for Python 3.5.
-This release of scikit-image officially supports for Python 3.6 and 3.7.
+This release of scikit-image officially supports Python 3.6 and 3.7.
 
 New Features
 ------------
