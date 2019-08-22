@@ -104,6 +104,7 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
                        get_pyramid(skimage.img_as_float32(I1),
                                    downscale, nlevel, min_size)))
 
+    # Initialization to 0 at coarsest level.
     flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape)
 
     flow = solver(pyramid[0][0], pyramid[0][1], flow)

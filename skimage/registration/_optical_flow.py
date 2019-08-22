@@ -22,8 +22,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
     image1 : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
     flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
-        Initialization for the horizontal component of the vector
-        field.
+        Initialization for the vector field.
     attachment : float
         Attachment parameter. The smaller this parameter is,
         the smoother is the solutions.
@@ -113,7 +112,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
                     proj[idx] -= dt * g
                     proj[idx] /= norm
 
-                    # d will be the (negative) divergence of p[idx]
+                    # d will be the (negative) divergence of proj[idx]
                     d = -proj[idx].sum(0)
                     for ax in range(image0.ndim):
                         s_p[1] = ax
