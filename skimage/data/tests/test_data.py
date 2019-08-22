@@ -106,5 +106,5 @@ def test_cell():
     # Needs pooch, or git development. using testing.fetch will
     # cause the test to be skipped instead of failing if neither of
     # those two conditions are met.
-    fetch('data/cells.png')
+    fetch('data/cell.png')
     data.cell()
