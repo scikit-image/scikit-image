@@ -153,7 +153,9 @@ install:
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
-        pip install --no-build-isolation .;
+        # installing in editable mdoe avoids many downloads from pooch
+        # installing from SDIST will help test the other cases
+        pip install --no-build-isolation -e .;
       fi
     # Install testing requirements
     - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
