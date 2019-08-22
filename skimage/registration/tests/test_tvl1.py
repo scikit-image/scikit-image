@@ -1,13 +1,13 @@
 import numpy as np
 from skimage._shared import testing
-from skimage.registration import tvl1
+from skimage.registration import optical_flow_tvl1
 
 
 def test_no_motion():
     rnd = np.random.RandomState(0)
     img = rnd.normal(size=(256, 256))
 
-    u, v = tvl1(img, img)
+    u, v = optical_flow_tvl1(img, img)
 
     assert np.all(u == 0)
     assert np.all(v == 0)
@@ -18,4 +18,4 @@ def test_incompatible_shapes():
     I0 = rnd.normal(size=(256, 256))
     I1 = rnd.normal(size=(255, 256))
     with testing.raises(ValueError):
-        u, v = tvl1(I0, I1)
+        u, v = optical_flow_tvl1(I0, I1)

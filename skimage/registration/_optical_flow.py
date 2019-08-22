@@ -45,7 +45,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
     Returns
     -------
     flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
-        The estimated optical flow.
+        The estimated optical flow components for each axis.
 
     """
 
@@ -148,9 +148,9 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
 
     Parameters
     ----------
-    image0 : ndarray
+    image0 : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    image1 : ndarray
+    image1 : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
     attachment : float
         Attachment parameter. The smaller this parameter is,
@@ -172,8 +172,8 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
 
     Returns
     -------
-    flow : ndarray
-        The estimated optical flow.
+    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
+        The estimated optical flow components for each axis.
 
     References
     ----------

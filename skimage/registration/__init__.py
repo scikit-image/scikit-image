@@ -1,1 +1,1 @@
-from ._tvl1 import optical_flow_tvl1
+from ._optical_flow import optical_flow_tvl1
