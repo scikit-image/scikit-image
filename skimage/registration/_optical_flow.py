@@ -152,12 +152,12 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     image1 : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
     attachment : float
-        Attachment parameter. The smaller this parameter is,
-        the smoother the returned result will be.
+        Attachment parameter (:math:`\lambda` in [1]_). The smaller
+        this parameter is, the smoother the returned result will be.
     tightness : float
-        Tightness parameter. It should have a small value in order to
-        maintain attachement and regularization parts in
-        correspondence.
+        Tightness parameter (:math:`\tau` in [1]_). It should have
+        a small value in order to maintain attachement and
+        regularization parts in correspondence.
     nwarp : int
         Number of times image1 is warped.
     niter : int
