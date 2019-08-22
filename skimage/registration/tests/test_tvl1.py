@@ -3,14 +3,22 @@ from skimage._shared import testing
 from skimage.registration import optical_flow_tvl1
 
 
-def test_no_motion():
+def test_no_motion_2d():
     rnd = np.random.RandomState(0)
     img = rnd.normal(size=(256, 256))
 
-    u, v = optical_flow_tvl1(img, img)
+    flow = optical_flow_tvl1(img, img)
 
-    assert np.all(u == 0)
-    assert np.all(v == 0)
+    assert np.all(flow == 0)
+
+
+def test_no_motion_3d():
+    rnd = np.random.RandomState(0)
+    img = rnd.normal(size=(256, 256, 256))
+
+    flow = optical_flow_tvl1(img, img)
+
+    assert np.all(flow == 0)
 
 
 def test_incompatible_shapes():
