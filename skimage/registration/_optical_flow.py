@@ -140,7 +140,7 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
 
     The TV-L1 solver is applyed at each level of the image
     pyramid. TV-L1 is a popular algorithm for optical flow estimation
-    intrudced by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
+    introduced by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
 
     Notes
     -----
