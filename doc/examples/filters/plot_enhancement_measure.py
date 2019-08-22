@@ -50,12 +50,12 @@ compare_side_by_side(before=img_rgb, after=equalize_adapthist(image=img_rgb,
 # On the other hand, the `astronaut` image was enhanced by adaptive
 # histogram equalization with `256*3` bins. Histogram equalization
 # brought out details and the EME value is higher than before the transform.
-
-############################################################################
+#
 # References
 # ----------
+#
 # .. [1] Sos S. Agaian, Karen Panetta, and Artyom M. Grigoryan.
-# "A new measure of image enhancement.",
-# IASTED International Conference on Signal Processing
-# & Communication, Citeseer, 2000,
-# :DOI:10.1.1.35.4021
+#        "A new measure of image enhancement.",
+#        IASTED International Conference on Signal Processing
+#        & Communication, Citeseer, 2000,
+#        :DOI:10.1.1.35.4021
