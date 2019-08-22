@@ -197,7 +197,7 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     >>> # --- Convert the images to gray level: color is not supported.
     >>> image0 = rgb2gray(image0)
     >>> image1 = rgb2gray(image1)
-    >>> flow = tvl1(image1, image0)
+    >>> flow = optical_flow_tvl1(image1, image0)
 
     """
 
