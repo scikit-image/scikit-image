@@ -4,8 +4,9 @@
 """
 
 import numpy as np
-import skimage
-from skimage.transform import pyramid_reduce, resize
+from skimage.transform import pyramid_reduce
+from skimage.util.dtype import convert
+from scipy import ndimage as ndi
 
 
 def resize_flow(flow, shape):
@@ -28,15 +29,14 @@ def resize_flow(flow, shape):
 
     """
 
-    scale = np.array([n / o for n, o in zip(shape, flow.shape[1:])],
-                     dtype='float32')
+    scale = [n / o for n, o in zip(shape, flow.shape[1:])]
+    scale_factor = np.array(scale, dtype=flow.dtype)
 
     for _ in shape:
-        scale = scale[..., np.newaxis]
+        scale_factor = scale_factor[..., np.newaxis]
 
-    rflow = scale*resize(flow, (flow.shape[0],) + shape, order=1,
-                         preserve_range=True,
-                         anti_aliasing=False).astype('float32')
+    rflow = scale_factor*ndi.zoom(flow, [1] + scale, order=0,
+                                  mode='nearest', prefilter=False)
 
     return rflow
 
@@ -75,7 +75,8 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     return pyramid[::-1]
 
 
-def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
+def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
+                   dtype='float32'):
     """Generic coarse to fine solver.
 
     Parameters
@@ -92,6 +93,8 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
         The maximum number of pyramid levels.
     min_size : int
         The minimum size for any dimension of the pyramid levels.
+    dtype : dtype
+        Output data type.
 
     Returns
     -------
@@ -103,14 +106,18 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
     if I0.shape != I1.shape:
         raise ValueError("Input images should have the same shape")
 
-    pyramid = list(zip(get_pyramid(skimage.img_as_float32(I0),
+    if np.dtype(dtype).char not in 'efdg':
+        raise ValueError("Only floating point data type are valid"
+                         " for optical flow")
+
+    pyramid = list(zip(get_pyramid(convert(I0, dtype),
                                    downscale, nlevel, min_size),
-                       get_pyramid(skimage.img_as_float32(I1),
+                       get_pyramid(convert(I1, dtype),
                                    downscale, nlevel, min_size)))
 
     # Initialization to 0 at coarsest level.
     flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape,
-                    dtype='float32')
+                    dtype=dtype)
 
     flow = solver(pyramid[0][0], pyramid[0][1], flow)
 

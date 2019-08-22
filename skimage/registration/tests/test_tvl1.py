@@ -27,3 +27,10 @@ def test_incompatible_shapes():
     I1 = rnd.normal(size=(255, 256))
     with testing.raises(ValueError):
         u, v = optical_flow_tvl1(I0, I1)
+
+
+def test_wrong_dtype():
+    rnd = np.random.RandomState(0)
+    img = rnd.normal(size=(256, 256))
+    with testing.raises(ValueError):
+        u, v = optical_flow_tvl1(img, img, dtype='int')
