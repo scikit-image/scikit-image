@@ -192,7 +192,7 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     --------
     >>> from skimage.color import rgb2gray
     >>> from skimage.data import stereo_motorcycle
-    >>> from skimage.registration import tvl1
+    >>> from skimage.registration import optical_flow_tvl1
     >>> image0, image1, disp = stereo_motorcycle()
     >>> # --- Convert the images to gray level: color is not supported.
     >>> image0 = rgb2gray(image0)
