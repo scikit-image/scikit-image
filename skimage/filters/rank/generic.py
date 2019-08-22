@@ -947,7 +947,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Entropy_%28information_theory%29
+    .. [1] `https://en.wikipedia.org/wiki/Entropy_(information_theory) <https://en.wikipedia.org/wiki/Entropy_(information_theory)>`_
 
     Examples
     --------
