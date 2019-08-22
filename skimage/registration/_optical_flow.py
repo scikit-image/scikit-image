@@ -49,7 +49,8 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
     """
 
     grid = np.array(
-        np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij'))
+        np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij'),
+        dtype='float32')
 
     dt = 0.5/image0.ndim
     reg_niter = 2
@@ -59,8 +60,9 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
     flow_current = flow_previous = flow0
 
-    g = np.zeros((image0.ndim, ) + image0.shape)
-    proj = np.zeros((image0.ndim, image0.ndim, ) + image0.shape)
+    g = np.zeros((image0.ndim, ) + image0.shape, dtype='float32')
+    proj = np.zeros((image0.ndim, image0.ndim, ) + image0.shape,
+                    dtype='float32')
 
     s_g = [slice(None), ] * g.ndim
     s_p = [slice(None), ] * proj.ndim

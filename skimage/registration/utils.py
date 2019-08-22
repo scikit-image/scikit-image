@@ -28,13 +28,17 @@ def resize_flow(flow, shape):
 
     """
 
-    scale = np.array([n / o for n, o in zip(shape, flow.shape[1:])])
+    scale = np.array([n / o for n, o in zip(shape, flow.shape[1:])],
+                     dtype='float32')
 
     for _ in shape:
         scale = scale[..., np.newaxis]
 
-    return scale*resize(flow, (flow.shape[0],) + shape, order=0,
-                        preserve_range=True, anti_aliasing=False)
+    rflow = scale*resize(flow, (flow.shape[0],) + shape, order=1,
+                         preserve_range=True,
+                         anti_aliasing=False).astype('float32')
+
+    return rflow
 
 
 def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
@@ -105,7 +109,8 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
                                    downscale, nlevel, min_size)))
 
     # Initialization to 0 at coarsest level.
-    flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape)
+    flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape,
+                    dtype='float32')
 
     flow = solver(pyramid[0][0], pyramid[0][1], flow)
 
