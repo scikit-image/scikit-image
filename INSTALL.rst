@@ -100,13 +100,13 @@ Build Requirements
 * `Numpy >= 1.11 <http://numpy.scipy.org/>`__
 * `Cython >= 0.23.4 <http://www.cython.org/>`__
 
-Build Requirements (docs)
--------------------------
+Documentation Requirements
+--------------------------
 
 .. include:: ../../requirements/docs.txt
    :literal:
 
-Runtime requirements
+Runtime Requirements
 --------------------
 
 .. include:: ../../requirements/default.txt
@@ -135,14 +135,22 @@ functionality is only available with the following installed:
 * `imread <http://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
 
-Testing requirements
+Testing Requirements
 --------------------
 
 .. include:: ../../requirements/test.txt
    :literal:
 
-Documentation requirements
---------------------------
+Warnings during testing phase
+-----------------------------
 
-.. include:: ../../requirements/docs.txt
-   :literal:
+Scikit-image tries to catch all warnings in its development builds to ensure
+that crucial warnings from dependencies are not missed.  This might cause
+certain tests to fail if you are building scikit-image with versions of
+dependencies that were not tested at the time of the release. To disable
+failures on warnings, export the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
+tests::
+
+   export SKIMAGE_TEST_STRICT_WARNINGS=False
+   pytest --pyargs skimage

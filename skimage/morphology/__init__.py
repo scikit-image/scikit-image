@@ -6,8 +6,7 @@ from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from ..measure._label import label
 from .watershed import watershed
-from ._skeletonize import skeletonize, medial_axis, thin
-from ._skeletonize_3d import skeletonize_3d
+from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes

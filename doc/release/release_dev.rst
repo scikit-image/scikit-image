@@ -15,96 +15,51 @@ https://scikit-image.org
 
 New Features
 ------------
-
-- unsharp mask filtering (#2772)
-- New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
-- Image translation registration for masked data
-  (``skimage.feature.masked_register_translation``)
-- Flood fill, fully n-dimensional with tolerance supported (#3245)
+- Added majority rank filter - ``filters.rank.majority``.
 
 
 Improvements
 ------------
 
-- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
-  improved with a new Cython-based implementation. #3022
-- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
-  new optional dependency).
-- Performance is now monitored by
-  `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
-  results will appear at https://pandas.pydata.org/speed/
-
 
 API Changes
 -----------
-
-- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
-  removed. Use parameter ``data_range`` instead.
-- imageio is now the preferred plugin for reading and writing images.
-- imageio is now a dependency of scikit-image.
-- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
-  with numpy 1.15
-- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
-  base10 instead of the natural logarithm as discussed in issue #2995.
-- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to ``False``.
-- Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to ``True``.
-- Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to ``True``.
-- Default value of ``mode`` parameter in ``skimage.transform.swirl``
-  has been set to ``reflect``.
-- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters.threshold_local`` instead.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
-- Default value of ``mode`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``reflect``.
-- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``True``.
-- Removed the ``skimage.test`` function. This functionality can be achieved
-  by calling ``pytest`` directly.
-- ``skimage.transform.seam_carve`` has been removed because the algorithm is
-  patented.
+- Deprecated subpackage ``skimage.novice`` has been removed.
+- Default value of ``multichannel`` parameters has been set to False in
+  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``, and
+  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
+  anymore, so, please, make sure that the parameter is fixed to a proper value.
+- Deprecated argument ``visualise`` has been removed from
+  ``skimage.feature.hog``. Use ``visualize`` instead.¨
+- ``skimage.transform.seam_carve`` has been completely removed from the
+  library due to licensing restrictions.
+- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
+  ``skimage.io.imread``. Use ``as_gray`` instead.
+- Parameter ``min_size`` has been removed from
+  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
+- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
+  removed.
+- ``skimage.measure._regionprops`` has been completely switched to using
+  row-column coordinates. Old x-y interface is not longer available.
+- Default value of ``behavior`` parameter has been set to ``ndimage`` in
+  ``skimage.filters.median``.
+- Parameter ``flatten`` in `skimage.io.imread` has been removed in
+  favor of ``as_gray``.
+- Parameters ``Hxx, Hxy, Hyy`` have been removed from
+  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
+- Default value of ``order`` parameter has been set to ``rc`` in
+  ``skimage.feature.hessian_matrix``.
+- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
 
 
 Bugfixes
 --------
 
-- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
-  no longer raise an error if any dimension of the image is smaller 3 and
-  the keyword ``allow_borders`` was false.
-- ``skimage.morphology.local_maxima`` and ``skimage.morphology.local_minima``
-  will return a boolean array instead of an array of 0s and 1s if the
-  parameter ``indices`` was false.
-
 
 Deprecations
 ------------
-
-- Python 2 support has been dropped. Users should have Python >= 3.5.
-- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
-- ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
-  ``anti_aliasing`` has been enabled by default.
-- ``regionprops`` will use row-column coordinates in 0.16. You can start
-  using them now with ``regionprops(..., coordinates='rc')``. You can silence
-  warning messages, and retain the old behavior, with
-  ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error. This change has a number of consequences.
-  Specifically, the "orientation" region property will measure the
-  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
-  row-column coordinates.
-- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
-  and will be removed in 0.16. Use ``area_threshold`` instead.
-- ``skimage.filters.median`` will change behavior in the future to have an
-  identical behavior as ``scipy.ndimage.median_filter``. This behavior can be
-  set already using ``behavior='ndimage'``. In 0.16, it will be the default
-  behavior and removed in 0.17 as well as the parameter of the previous
-  behavior (i.e., ``mask``, ``shift_x``, ``shift_y``) will be removed.
 
 
 Contributors to this release

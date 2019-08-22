@@ -26,7 +26,7 @@ class TestSkeletonize():
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
         with testing.raises(ValueError):
-            skeletonize(im)
+            skeletonize(im, method='zhang')
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
@@ -180,6 +180,19 @@ class TestMedialAxis():
         result = medial_axis(np.zeros((10, 10), bool),
                              np.zeros((10, 10), bool))
         assert np.all(result == False)
+
+    def test_vertical_line(self):
+        '''Test a thick vertical line, issue #3861'''
+        img = np.zeros((9, 9))
+        img[:, 2] = 1
+        img[:, 3] = 1
+        img[:, 4] = 1
+
+        expected = np.full(img.shape, False)
+        expected[:, 3] = True
+
+        result = medial_axis(img)
+        assert_array_equal(result, expected)
 
     def test_01_01_rectangle(self):
         '''Test skeletonize on a rectangle'''

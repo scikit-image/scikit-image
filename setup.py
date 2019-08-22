@@ -16,7 +16,12 @@ MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
 URL = 'https://scikit-image.org'
 LICENSE = 'Modified BSD'
-DOWNLOAD_URL = 'https://github.com/scikit-image/scikit-image'
+DOWNLOAD_URL = 'https://scikit-image.org/download.html'
+PROJECT_URLS = {
+    "Bug Tracker": 'https://github.com/scikit-image/scikit-image/issues',
+    "Documentation": 'https://scikit-image.org/docs/stable/',
+    "Source Code": 'https://github.com/scikit-image/scikit-image'
+}
 
 import os
 import sys
@@ -112,8 +117,22 @@ with open('skimage/__init__.py') as fid:
             VERSION = line.strip().split()[-1][1:-1]
             break
 
-with open('requirements/default.txt') as fid:
-    INSTALL_REQUIRES = [l.strip() for l in fid.readlines() if l]
+
+def parse_requirements_file(filename):
+    with open(filename) as fid:
+        requires = [l.strip() for l in fid.readlines() if l]
+
+    return requires
+
+
+INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
+# The `requirements/extras.txt` file is explicitely omitted because
+# it contains requirements that do not have wheels uploaded to pip
+# for the platforms we wish to support.
+extras_require = {
+    dep : parse_requirements_file('requirements/' + dep + '.txt')
+    for dep in ['docs', 'optional', 'test']
+}
 
 # requirements for those browsing PyPI
 REQUIRES = [r.replace('>=', ' (>= ') + ')' for r in INSTALL_REQUIRES]
@@ -184,6 +203,7 @@ if __name__ == "__main__":
         url=URL,
         license=LICENSE,
         download_url=DOWNLOAD_URL,
+        project_urls=PROJECT_URLS,
         version=VERSION,
 
         classifiers=[
@@ -207,6 +227,7 @@ if __name__ == "__main__":
         ],
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
+        extras_require=extras_require,
         python_requires='>=3.5',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,

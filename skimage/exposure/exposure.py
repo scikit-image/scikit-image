@@ -61,8 +61,8 @@ def _bincount_histogram(image, source_range):
     if source_range not in ['image', 'dtype']:
         raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
-        image_min = np.min(image).astype(np.int64)
-        image_max = np.max(image).astype(np.int64)
+        image_min = int(image.min().astype(np.int64))
+        image_max = int(image.max().astype(np.int64))
     elif source_range == 'dtype':
         image_min, image_max = dtype_limits(image, clip_negative=False)
     image, offset = _offset_array(image, image_min, image_max)
@@ -348,8 +348,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     image = np.clip(image, imin, imax)
 
-    image = (image - imin) / float(imax - imin)
-    return np.array(image * (omax - omin) + omin, dtype=dtype)
+    if imin != imax:
+        image = (image - imin) / float(imax - imin)
+    return np.asarray(image * (omax - omin) + omin, dtype=dtype)
 
 
 def _assert_non_negative(image):

@@ -8,7 +8,6 @@ from skimage.viewer.widgets import (
     Slider, OKCancelButtons, SaveButtons, ComboBox, CheckBox, Text)
 from skimage.viewer.plugins.base import Plugin
 
-from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import assert_almost_equal, assert_equal
 
@@ -108,13 +107,11 @@ def test_save_buttons():
 
     # call the save functions directly
     sv.save_to_stack()
-    with expected_warnings(['precision loss']):
-        sv.save_to_file(filename)
+    sv.save_to_file(filename)
 
     img = data.imread(filename)
 
-    with expected_warnings(['precision loss']):
-        assert_almost_equal(img, img_as_uint(viewer.image))
+    assert_almost_equal(img, img_as_uint(viewer.image))
 
     img = io.pop()
     assert_almost_equal(img, viewer.image)

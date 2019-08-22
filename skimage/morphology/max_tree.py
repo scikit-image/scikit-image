@@ -39,8 +39,7 @@ References:
 
 import numpy as np
 
-from .watershed import _validate_connectivity
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import invert
 
 from . import _max_tree
@@ -446,8 +445,8 @@ def area_closing(image, area_threshold=64, connectivity=1,
     a size of 8.
 
 
-    Note
-    ----
+    Notes
+    -----
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:
@@ -554,8 +553,8 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     The remaining minima have all a maximal extension of at least 3.
 
 
-    Note
-    ----
+    Notes
+    -----
     If a max-tree representation (parent and tree_traverser) are given to the
     function, they must be calculated from the inverted image for this
     function, i.e.:

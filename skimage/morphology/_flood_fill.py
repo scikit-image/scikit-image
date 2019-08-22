@@ -9,7 +9,7 @@ import warnings
 
 from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
                       _fast_pad)
-from .watershed import _offsets_to_raveled_neighbors
+from ._util import _offsets_to_raveled_neighbors
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 
@@ -173,8 +173,9 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     Fill connected ones with 5, with full connectivity (diagonals included):
 
     >>> mask = flood(image, (1, 1))
-    >>> image[mask] = 5
-    >>> image
+    >>> image_flooded = image.copy()
+    >>> image_flooded[mask] = 5
+    >>> image_flooded
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 5, 5, 0, 2, 2, 0],
            [0, 5, 5, 0, 2, 2, 0],
@@ -183,18 +184,20 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     Fill connected ones with 5, excluding diagonal points (connectivity 1):
 
     >>> mask = flood(image, (1, 1), connectivity=1)
-    >>> image[mask] = 1
-    >>> image
+    >>> image_flooded = image.copy()
+    >>> image_flooded[mask] = 5
+    >>> image_flooded
     array([[0, 0, 0, 0, 0, 0, 0],
-           [0, 1, 1, 0, 2, 2, 0],
-           [0, 1, 1, 0, 2, 2, 0],
-           [5, 0, 0, 0, 0, 0, 3]])
+           [0, 5, 5, 0, 2, 2, 0],
+           [0, 5, 5, 0, 2, 2, 0],
+           [1, 0, 0, 0, 0, 0, 3]])
 
     Fill with a tolerance:
 
     >>> mask = flood(image, (0, 0), tolerance=1)
-    >>> image[mask] = 5
-    >>> image
+    >>> image_flooded = image.copy()
+    >>> image_flooded[mask] = 5
+    >>> image_flooded
     array([[5, 5, 5, 5, 5, 5, 5],
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 2, 2, 5],
