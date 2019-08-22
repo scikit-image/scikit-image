@@ -7,8 +7,8 @@ from scipy.ndimage import maximum_filter, minimum_filter
 from warnings import warn
 import numpy as np
 from ..metrics.simple_metrics import (mean_squared_error,
-                                       peak_signal_noise_ratio,
-                                       normalized_root_mse)
+                                      peak_signal_noise_ratio,
+                                      normalized_root_mse)
 
 __all__ = ['compare_mse',
            'compare_nrmse',
@@ -131,7 +131,8 @@ def enhancement_measure(image: np.ndarray,
         It is a way of quantifying improvement of the image after enhancement.
 
         The function uses a sliding window of user-provided size to measure
-        the mean of log of maximal and minimal intensity ratio within the window.
+        the mean of log of maximal and minimal intensity ratio
+        within the window.
 
         Parameters
         ----------
@@ -172,4 +173,3 @@ def enhancement_measure(image: np.ndarray,
                     minimum_filter(image, size=size) + eps)
     eme = np.mean(20 * np.log(eme + eps))
     return eme
-=======

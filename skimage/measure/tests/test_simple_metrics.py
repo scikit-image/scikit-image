@@ -1,12 +1,18 @@
 import numpy as np
 
 import skimage.data
-from skimage.measure import compare_psnr, compare_nrmse, compare_mse, enhancement_measure
+from skimage.measure import (compare_psnr,
+                             compare_nrmse,
+                             compare_mse,
+                             enhancement_measure)
 from skimage.metrics import peak_signal_noise_ratio
 from skimage.metrics import normalized_root_mse
 from skimage.metrics import mean_squared_error
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal, assert_greater, assert_less
+from skimage._shared.testing import (assert_equal,
+                                     assert_almost_equal,
+                                     assert_greater,
+                                     assert_less)
 from skimage._shared._warnings import expected_warnings
 from skimage.exposure import equalize_hist, adjust_gamma
 
@@ -90,9 +96,9 @@ def test_EME_greyscale():
                 enhancement_measure(enhanced))
     assert_less(enhancement_measure(orig, size=5),
                 enhancement_measure(enhanced, size=5))
-
     assert_less(enhancement_measure(orig, size=11),
                 enhancement_measure(enhanced, size=11))
+
 
 def test_EME_color():
     orig = skimage.data.astronaut()
@@ -101,5 +107,4 @@ def test_EME_color():
                 enhancement_measure(enhanced, size=3, eps=1))
     assert_less(enhancement_measure(orig, size=7),
                 enhancement_measure(enhanced, size=7))
-        normalized_root_mse(x, x, 'foo')
-
+    normalized_root_mse(x, x, 'foo')
