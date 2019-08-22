@@ -16,14 +16,14 @@ def resize_flow(flow, shape):
 
     Parameters
     ----------
-    flow : ~numpy.ndarray
+    flow : ndarray
         The motion field to be processed.
     shape : iterable
         Couple of integers representing the output shape.
 
     Returns
     -------
-    rflow : ~numpy.ndarray
+    rflow : ndarray
         The resized and rescaled motion field.
 
     """
@@ -42,7 +42,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
 
     Parameters
     ----------
-    I : ~numpy.ndarray
+    I : ndarray
         The image to be preprocessed (Gray scale or RGB).
     downscale : float
         The pyramid downscale factor.
@@ -53,7 +53,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
 
     Returns
     -------
-    pyramid : list[~numpy.ndarray]
+    pyramid : list[ndarray]
         The coarse to fine images pyramid.
 
     """
@@ -76,9 +76,9 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
 
     Parameters
     ----------
-    I0 : ~numpy.ndarray
+    I0 : ndarray
         The first gray scale image of the sequence.
-    I1 : ~numpy.ndarray
+    I1 : ndarray
         The second gray scale image of the sequence.
     solver : callable
         The solver applyed at each pyramid level.
@@ -91,8 +91,8 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16):
 
     Returns
     -------
-    flow : ~numpy.ndarray
-        The estimated optical flow.
+    flow : ndarray
+        The estimated optical flow components for each axis.
 
     """
 
