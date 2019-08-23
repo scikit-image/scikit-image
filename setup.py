@@ -36,11 +36,11 @@ from distutils.errors import CompileError, LinkError
 from numpy.distutils.command.build_ext import build_ext
 
 
-if sys.version_info < (3, 5):
+if sys.version_info < (3, 6):
 
     error = """Python {py} detected.
 
-scikit-image 0.15+ support only Python 3.5 and above.
+scikit-image 0.16+ supports only Python 3.6 and above.
 
 For Python 2.7, please install the 0.14.x Long Term Support using:
 
@@ -215,7 +215,6 @@ if __name__ == "__main__":
             'Programming Language :: C',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3 :: Only',
@@ -228,7 +227,7 @@ if __name__ == "__main__":
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
         extras_require=extras_require,
-        python_requires='>=3.5',
+        python_requires='>=3.6',
         packages=setuptools.find_packages(exclude=['doc', 'benchmarks']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file
