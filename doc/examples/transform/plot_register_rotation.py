@@ -47,9 +47,9 @@ plt.show()
 
 shifts, error, phasediff = register_translation(image_polar, rotated_polar)
 print("Expected value for counterclockwise rotation in degrees: "
-      "{}".format(angle))
+      f"{angle}")
 print("Recovered value for counterclockwise rotation: "
-      "{}".format(shifts[0]))
+      f"{shifts[0]}")
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
@@ -91,8 +91,8 @@ shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
 
-print("Expected value for cc rotation in degrees: {}".format(angle))
-print("Recovered value for cc rotation: {}".format(shiftr))
+print(f"Expected value for cc rotation in degrees: {angle}")
+print(f"Recovered value for cc rotation: {shiftr}")
 print()
-print("Expected value for scaling difference: {}".format(scale))
-print("Recovered value for scaling difference: {}".format(shift_scale))
+print(f"Expected value for scaling difference: {scale}")
+print(f"Recovered value for scaling difference: {shift_scale}")
