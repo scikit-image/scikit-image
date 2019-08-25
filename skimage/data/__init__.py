@@ -65,8 +65,8 @@ def load(f, as_gray=False):
     img : ndarray
         Image loaded from ``skimage.data_dir``.
 
-    Note
-    ----
+    Notes
+    -----
     This functions is deprecated and will be removed in 0.18.
     """
     warn('This function is deprecated and will be removed in 0.18. '
