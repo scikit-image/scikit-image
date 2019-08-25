@@ -21,7 +21,7 @@ including `Anaconda <https://www.anaconda.com/download/>`_,
 `Python(x,y) <https://python-xy.github.io/>`_ and
 `WinPython <https://winpython.github.io/>`_.
 
-On all other systems, install it via shell/command prompt::
+On all major operating systems, install it via shell/command prompt::
 
   pip install scikit-image
 
@@ -29,8 +29,8 @@ If you are running Anaconda or miniconda, use::
 
   conda install -c conda-forge scikit-image
 
-`Windows binaries <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__
-are also kindly provided by Christoph Gohlke.
+The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__
+or `Christoph Gohlke's website (Windows only) <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__.
 
 2. Development Installation:
 ----------------------------
