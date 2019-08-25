@@ -29,6 +29,9 @@ If you are running Anaconda or miniconda, use::
 
   conda install -c conda-forge scikit-image
 
+`Windows binaries <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__
+are also kindly provided by Christoph Gohlke.
+
 2. Development Installation:
 ----------------------------
 
@@ -75,7 +78,6 @@ our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _python.org: http://python.org/
-.. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
