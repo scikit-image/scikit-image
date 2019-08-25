@@ -93,7 +93,7 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     return mask
 
 
-def convex_hull_object(image, neighbors=None, connectivity=None):
+def convex_hull_object(image, neighbors=None, *, connectivity=None):
     r"""Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
