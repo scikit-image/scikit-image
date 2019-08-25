@@ -103,10 +103,10 @@ def convex_hull_object(image, neighbors=None, connectivity=None):
     ----------
     image : (M, N) ndarray
         Binary input image.
-    neighbors : {4, 8}, int
+    neighbors : {4, 8}, int, optional
         Whether to use 4 or 8 adjacent pixels as neighbors.
         If ``None``, set to 8. **Deprecated, use** ``connectivity`` **instead.**
-    connectivity : {1, 2}, int
+    connectivity : {1, 2}, int, optional
         Determines the neighbors of each pixel. Adjacent elements
         within a squared distance of ``connectivity`` from pixel center
         are considered neighbors. If ``None``, set to 2::
@@ -125,7 +125,7 @@ def convex_hull_object(image, neighbors=None, connectivity=None):
 
     Notes
     -----
-    This function uses `skimage.morphology.label` to define unique objects,
+    This function uses ``skimage.morphology.label`` to define unique objects,
     finds the convex hull of each using ``convex_hull_image``, and combines
     these regions with logical OR. Be aware the convex hulls of unconnected
     objects may overlap in the result. If this is suspected, consider using
