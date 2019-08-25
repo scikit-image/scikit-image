@@ -119,7 +119,7 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 4), expected4)
+    assert_array_equal(convex_hull_object(image, connectivity=1), expected4)
 
     expected8 = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -132,10 +132,13 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 8), expected8)
+    assert_array_equal(convex_hull_object(image, connectivity=2), expected8)
 
     with testing.raises(ValueError):
-        convex_hull_object(image, 7)
+        convex_hull_object(image, connectivity=3)
+
+    with expected_warnings('`neighbors` is deprecated'):
+        convex_hull_object(image, neighbors=4)
 
 
 def test_non_c_contiguous():

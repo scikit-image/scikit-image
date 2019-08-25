@@ -31,8 +31,10 @@ Version 0.18
 * `skimage/measure/tests/test_simple_metrics.py` should also be removed
 * make coordinates='rc' the default in ``segmentation.active_contour``
 * remove deprecated ``bc`` argument in ``segmentation.active_contour``
-* In ``skimage/meausre/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors``.
+* In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
+  ``neighbors`` and update the tests.
+* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
+  ``neighbors`` and update the tests.
 
 Other
 -----
