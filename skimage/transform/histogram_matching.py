@@ -6,9 +6,9 @@ def _match_cumulative_cdf(source, template):
     Return modified source array so that the cumulative density function of
     its values matches the cumulative density function of the template.
     """
-    src_values, src_unique_indices, src_counts = np.unique(source.ravel(),
-                                                           return_inverse=True,
-                                                           return_counts=True)
+    _, src_unique_indices, src_counts = np.unique(source.ravel(),
+                                                  return_inverse=True,
+                                                  return_counts=True)
     tmpl_values, tmpl_counts = np.unique(template.ravel(), return_counts=True)
 
     # calculate normalized quantiles for each array
@@ -19,11 +19,16 @@ def _match_cumulative_cdf(source, template):
     return interp_a_values[src_unique_indices].reshape(source.shape)
 
 
-
 def match_histograms(image, reference, multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
+
+    For color image assume to use another colour space then RGB since the colour
+    transitions are not very smooth. For example having red source image
+    and green template image may not produce expected result. Therefore you may
+    get better results by first converting your images to "continuous" color
+    space like HSV and after histogram matching converting back to RGB. [2]
 
     Parameters
     ----------
@@ -48,12 +53,10 @@ def match_histograms(image, reference, multichannel=False):
 
     References
     ----------
-    .. [1] http://paulbourke.net/miscellaneous/equalisation/
+     .. [1] http://paulbourke.net/miscellaneous/equalisation/
+     .. [2] https://www.researchgate.net/post/Histogram_matching_for_color_images
 
     """
-    shape = image.shape
-    image_dtype = image.dtype
-
     if image.ndim != reference.ndim:
         raise ValueError('Image and reference must have the same number of channels.')
 
@@ -64,8 +67,8 @@ def match_histograms(image, reference, multichannel=False):
 
         matched = np.empty(image.shape, dtype=image.dtype)
         for channel in range(image.shape[-1]):
-            matched_channel = _match_cumulative_cdf(image[..., channel], reference[..., channel])
-            matched[..., channel] = matched_channel
+            matched[..., channel] = _match_cumulative_cdf(image[..., channel],
+                                                          reference[..., channel])
     else:
         matched = _match_cumulative_cdf(image, reference)
 
