@@ -30,8 +30,8 @@ angle = 35
 image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
-image_polar = warp_polar(image, radius=radius)
-rotated_polar = warp_polar(rotated, radius=radius)
+image_polar = warp_polar(image, radius=radius, multichannel=True)
+rotated_polar = warp_polar(rotated, radius=radius, multichannel=True)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -47,9 +47,9 @@ plt.show()
 
 shifts, error, phasediff = register_translation(image_polar, rotated_polar)
 print("Expected value for counterclockwise rotation in degrees: "
-      "{}".format(angle))
+      f"{angle}")
 print("Recovered value for counterclockwise rotation: "
-      "{}".format(shifts[0]))
+      f"{shifts[0]}")
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
@@ -65,8 +65,10 @@ image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
 rescaled = rescale(rotated, scale, multichannel=True)
-image_polar = warp_polar(image, radius=radius, scaling='log')
-rescaled_polar = warp_polar(rescaled, radius=radius, scaling='log')
+image_polar = warp_polar(image, radius=radius,
+                         scaling='log', multichannel=True)
+rescaled_polar = warp_polar(rescaled, radius=radius,
+                            scaling='log', multichannel=True)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -89,8 +91,8 @@ shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
 
-print("Expected value for cc rotation in degrees: {}".format(angle))
-print("Recovered value for cc rotation: {}".format(shiftr))
+print(f"Expected value for cc rotation in degrees: {angle}")
+print(f"Recovered value for cc rotation: {shiftr}")
 print()
 print("Expected value for scaling difference: {}".format(scale))
 print("Recovered value for scaling difference: {}".format(shift_scale))

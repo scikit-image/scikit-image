@@ -49,7 +49,7 @@ plt.gray()
 sigma_est = estimate_sigma(noisy, multichannel=True, average_sigmas=True)
 # Due to clipping in random_noise, the estimate will be a bit smaller than the
 # specified sigma.
-print("Estimated Gaussian noise standard deviation = {}".format(sigma_est))
+print(f"Estimated Gaussian noise standard deviation = {sigma_est}")
 
 im_bayes = denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
                            method='BayesShrink', mode='soft')

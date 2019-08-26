@@ -451,7 +451,8 @@ def test_iterate_all_props():
 
 
 def test_cache():
-    region = regionprops(SAMPLE)[0]
+    SAMPLE_mod = SAMPLE.copy()
+    region = regionprops(SAMPLE_mod)[0]
     f0 = region.filled_image
     region._label_image[:10] = 1
     f1 = region.filled_image
@@ -498,7 +499,7 @@ def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -511,7 +512,7 @@ def test_regionprops_table():
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 

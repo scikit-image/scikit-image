@@ -539,10 +539,10 @@ def test_linear_polar_mapping():
                              [1, 100],
                              [100, 1],
                              [170.00357134, 170.00357134]])
-    k_ang = 360 / (2 * np.pi)
-    k_rad = 1
+    k_angle = 360 / (2 * np.pi)
+    k_radius = 1
     center = (100, 100)
-    coords = _linear_polar_mapping(output_coords, k_ang, k_rad, center)
+    coords = _linear_polar_mapping(output_coords, k_angle, k_radius, center)
     assert np.allclose(coords, ground_truth)
 
 
@@ -563,10 +563,10 @@ def test_log_polar_mapping():
                              [4.5007414, 100],
                              [100, 4.5007414],
                              [167.52817336, 167.52817336]])
-    k_ang = 360 / (2 * np.pi)
-    k_rad = 100 / np.log(100)
+    k_angle = 360 / (2 * np.pi)
+    k_radius = 100 / np.log(100)
     center = (100, 100)
-    coords = _log_polar_mapping(output_coords, k_ang, k_rad, center)
+    coords = _log_polar_mapping(output_coords, k_angle, k_radius, center)
     assert np.allclose(coords, ground_truth)
 
 
@@ -595,3 +595,19 @@ def test_log_warp_polar():
     peaks = peak_local_max(profile)
     gaps = peaks[:-1]-peaks[1:]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
+
+
+def test_invalid_scaling_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling='invalid')
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), scaling=None)
+
+
+def test_invalid_dimensions_polar():
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 3)), (5, 5))
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
+    with testing.raises(ValueError):
+        warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)

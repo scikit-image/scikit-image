@@ -43,17 +43,24 @@ notifications:
 matrix:
   include:
     - os: linux
-      python: 3.5
+      python: 3.6
       env: OPTIONAL_DEPS=1 WITH_PYSIDE=1 BUILD_DOCS=1 INSTALL_FROM_SDIST=1
     - os: linux
-      python: 3.5
+      python: 3.6
       env: QT=PyQt5 MINIMUM_REQUIREMENTS=1
     - os: linux
-      python: 3.5
-      env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
+      python: 3.6
+      env: PYTHONOPTIMIZE=2
     - os: linux
       python: 3.6
+      env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
+    - os: linux
+      python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      services:
+        - xvfb
     - os: linux
       python: 3.7
       dist: xenial # Required for Python 3.7
@@ -61,9 +68,22 @@ matrix:
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:
         - xvfb
+    # When 3.8 gets released, and dependencies have built wheels, enable
+    # this build
+    # - os: linux
+    #   python: 3.8
+    #   env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
+    #   dist: xenial # Required for Python 3.7
+    #   sudo: true   # travis-ci/travis-ci#9069
+    #   services:
+    #     - xvfb
     - os: linux
-      python: 3.6
+      python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      services:
+        - xvfb
     # For smooth deployment, the osx_image here should match
     # what we set in the wheel generation travis images.
     # If not set, it will use the default version from Travis
@@ -71,15 +91,17 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.5
+      env: TRAVIS_PYTHON_VERSION=3.6
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.6 OPTIONAL_DEPS=1 EXTRA_DEPS=0
-    - os: osx
-      osx_image: xcode9.4
-      language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.7
+      env: TRAVIS_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+    # When 3.8 gets released, and dependencies have built wheels, enable
+    # this build
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   language: objective-c
+    #   env: TRAVIS_PYTHON_VERSION=3.8
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
