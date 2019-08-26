@@ -5,6 +5,7 @@ from numpy import array
 
 from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          crofton_perimeter,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
                                           COL_DTYPES)
@@ -326,6 +327,13 @@ def test_perimeter():
 
     per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 46.8284271247)
+
+def test_crofton_perimeter():
+    per = regionprops(SAMPLE)[0].crofton_perimeter
+    assert_almost_equal(per, 58.1194640914)
+
+    per = crofton_perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    assert_almost_equal(per, 54.0509485728)
 
 
 def test_solidity():

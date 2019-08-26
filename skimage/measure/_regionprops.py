@@ -9,7 +9,7 @@ from . import _moments
 from functools import wraps
 
 
-__all__ = ['regionprops', 'perimeter']
+__all__ = ['regionprops', 'perimeter', 'crofton_perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -49,7 +49,8 @@ PROPS = {
     'Moments': 'moments',
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
-    'Perimeter': 'perimeter',
+    'Perimeter': 'perimeter', 
+    'CroftonPerimeter':'crofton_perimeter',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -99,6 +100,7 @@ COL_DTYPES = {
     'moments_normalized': float,
     'orientation': float,
     'perimeter': float,
+    'crofton_perimeter': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -331,6 +333,11 @@ class RegionProperties:
     @only2d
     def perimeter(self):
         return perimeter(self.image, 4)
+
+    @property
+    @only2d
+    def crofton_perimeter(self):
+        return crofton_perimeter(self.image, 4)
 
     @property
     def solidity(self):
@@ -762,6 +769,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **crofton_perimeter** : float
+        Perimeter of object approximate by the Crofton formula in 4 directions.
+        Uses 4-connectivity by default.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -937,6 +947,63 @@ def perimeter(image, neighbourhood=4):
     total_perimeter = perimeter_histogram @ perimeter_weights
     return total_perimeter
 
+
+def crofton_perimeter(image, neighbourhood=4):
+    """Calculate total perimeter of all objects in binary image, based on
+    Crofton formula
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        2D binary image.
+    neighbourhood : 4 or 8, optional
+        Neighborhood connectivity for border pixel determination. It is used to
+        compute the contour. A higher neighbourhood widens the border on which
+        the perimeter is computed.
+
+    Returns
+    -------
+    perimeter : float
+        Total perimeter of all objects in binary image.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Crofton_formula
+    .. [2] S. Rivollier. Analyse d’image geometrique et morphometrique par 
+           diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
+           2010.
+           Ecole Nationale Superieure des Mines de Saint-Etienne.
+           https://tel.archives-ouvertes.fr/tel-00560838
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> # coins image (binary)
+    >>> img_coins = data.coins() > 110
+    >>> # total perimeter of all objects in the image
+    >>> crofton_perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    8144.578...
+    >>> crofton_perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    7837.077...
+
+    """    
+    if image.ndim != 2:
+        raise NotImplementedError('`crofton_perimeter` supports 2D images only')
+
+    image = image.astype(np.uint8)
+    XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
+                                   mode='constant', cval=0)
+
+    h = np.bincount(XF.ravel(),minlength=16);
+    
+    if neighbourhood == 4:
+        coefs = [0,np.pi/2,0,0,0,np.pi/2,0,0,np.pi/2,np.pi,0,0,np.pi/2,np.pi,0,0];
+    else:
+        coefs = [0,np.pi/4*(1+1/(np.sqrt(2))),np.pi/(4*np.sqrt(2)),np.pi/(2*np.sqrt(2)),0,np.pi/4*(1+1/(np.sqrt(2))),0,np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,np.pi/(4*np.sqrt(2)),np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,0,0];
+
+    total_perimeter = np.sum(h*coefs)
+    return total_perimeter
 
 def _parse_docs():
     import re
