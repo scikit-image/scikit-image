@@ -181,6 +181,19 @@ class TestMedialAxis():
                              np.zeros((10, 10), bool))
         assert np.all(result == False)
 
+    def test_vertical_line(self):
+        '''Test a thick vertical line, issue #3861'''
+        img = np.zeros((9, 9))
+        img[:, 2] = 1
+        img[:, 3] = 1
+        img[:, 4] = 1
+
+        expected = np.full(img.shape, False)
+        expected[:, 3] = True
+
+        result = medial_axis(img)
+        assert_array_equal(result, expected)
+
     def test_01_01_rectangle(self):
         '''Test skeletonize on a rectangle'''
         image = np.zeros((9, 15), bool)

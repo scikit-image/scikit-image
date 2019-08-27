@@ -179,7 +179,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
                 dtype = "uint{}".format(mnew)
             n = int(np.ceil(n / 2) * 2)
             warn("Downcasting {} to {} without scaling because max "
-                 "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype))
+                 "value {} fits in {}".format(a.dtype, dtype, a.max(), dtype),
+                 stacklevel=3)
             return a.astype(_dtype_bits(kind, m))
         elif n == m:
             return a.copy() if copy else a

@@ -1,9 +1,18 @@
 import numpy as np
-from scipy.fftpack import fft, ifft, fftfreq
+
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
+from .._shared.fft import fftmodule
 from warnings import warn
+
+if fftmodule is np.fft:
+    # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
+    # (fftpack preserves single precision while numpy.fft does not)
+    from scipy.fftpack import fft, ifft
+else:
+    fft = fftmodule.fft
+    ifft = fftmodule.ifft
 
 
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
@@ -84,7 +93,8 @@ def radon(image, theta=None, circle=True):
         padded_image = np.pad(image, pad_width, mode='constant',
                               constant_values=0)
     # padded_image is always square
-    assert padded_image.shape[0] == padded_image.shape[1]
+    if padded_image.shape[0] != padded_image.shape[1]:
+        raise ValueError('padded_image must be a square')
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
     center = padded_image.shape[0] // 2
 
@@ -205,7 +215,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    # This computation lessens artifacts and removes a small bias as 
+    # This computation lessens artifacts and removes a small bias as
     # explained in [1], Chap 3. Equation 61
     n1 = np.arange(0, projection_size_padded / 2 + 1, dtype=np.int)
     n2 = np.arange(projection_size_padded / 2 - 1, 0, -1, dtype=np.int)
@@ -213,11 +223,11 @@ def iradon(radon_image, theta=None, output_size=None,
     f = np.zeros(projection_size_padded)
     f[0] = 0.25
     f[1::2] = -1 / (np.pi * n[1::2])**2
-    
+
     # Computing the ramp filter from the fourier transform of is frequency domain representation
     # lessens artifacts and removes a small bias as explained in [1], Chap 3. Equation 61
     fourier_filter = 2 * np.real(fft(f))         # ramp filter
-    omega = 2 * np.pi * fftfreq(projection_size_padded)
+    omega = 2 * np.pi * fftmodule.fftfreq(projection_size_padded)
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
@@ -226,13 +236,13 @@ def iradon(radon_image, theta=None, output_size=None,
     elif filter == "cosine":
         freq = (0.5 * np.arange(0, projection_size_padded)
                 / projection_size_padded)
-        cosine_filter = np.fft.fftshift(np.sin(2 * np.pi * np.abs(freq)))
+        cosine_filter = fftmodule.fftshift(np.sin(2 * np.pi * np.abs(freq)))
         fourier_filter *= cosine_filter
     elif filter == "hamming":
-        hamming_filter = np.fft.fftshift(np.hamming(projection_size_padded))
+        hamming_filter = fftmodule.fftshift(np.hamming(projection_size_padded))
         fourier_filter *= hamming_filter
     elif filter == "hann":
-        hanning_filter = np.fft.fftshift(np.hanning(projection_size_padded))
+        hanning_filter = fftmodule.fftshift(np.hanning(projection_size_padded))
         fourier_filter *= hanning_filter
     elif filter is None:
         fourier_filter[:] = 1

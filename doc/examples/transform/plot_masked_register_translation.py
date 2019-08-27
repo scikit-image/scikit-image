@@ -6,14 +6,14 @@ Masked Normalized Cross-Correlation
 In this example, we use the masked normalized cross-correlation to identify the relative shift
 between two similar images containing invalid data.
 
-In this case, the images cannot simply be masked before computing the cross-correlation, 
+In this case, the images cannot simply be masked before computing the cross-correlation,
 as the masks will influence the computation. The influence of the masks must be removed from
 the cross-correlation, as is described in [1]_.
 
-In this example, we register the translation between two images. However, one of the 
+In this example, we register the translation between two images. However, one of the
 images has about 25% of the pixels which are corrupted.
 
-.. [1] D. Padfield, "Masked object registration in the Fourier domain" 
+.. [1] D. Padfield, "Masked object registration in the Fourier domain"
        IEEE Transactions on Image Processing (2012). :DOI:`10.1109/TIP.2011.2181402`
 
 """
@@ -33,23 +33,23 @@ from scipy import ndimage as ndi
 image = data.camera()
 shift = (-22, 13)
 
-corrupted_pixels = np.random.choice([False, True], 
-                                    size = image.shape, 
+corrupted_pixels = np.random.choice([False, True],
+                                    size = image.shape,
                                     p = [0.25, 0.75])
 
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = ndi.shift(image, shift)
 offset_image *= corrupted_pixels
-print("Known offset (row, col): {}".format(shift))
+print(f"Known offset (row, col): {shift}")
 
 # Determine what the mask is based on which pixels are invalid
-# In this case, we know what the mask should be since we corrupted 
+# In this case, we know what the mask should be since we corrupted
 # the pixels ourselves
 mask = corrupted_pixels
 
 detected_shift = masked_register_translation(image, offset_image, mask)
 
-print("Detected pixel offset (row, col): {}".format(-detected_shift))
+print(f"Detected pixel offset (row, col): {-detected_shift}")
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)
@@ -72,19 +72,19 @@ ax3.set_title('Masked pixels')
 plt.show()
 
 ##################################################
-# Solid masks are another illustrating example. In this case, we have a 
-# limited view of an image and an offset image. The masks for these images 
+# Solid masks are another illustrating example. In this case, we have a
+# limited view of an image and an offset image. The masks for these images
 # need not be the same. The `masked_register_translation` function will correctly identify
 # which part of the images should be compared.
 image = data.camera()
 shift = (-22, 13)
 
-rr1, cc1 = draw.ellipse(259, 248, 
-                      r_radius = 125, c_radius = 100, 
+rr1, cc1 = draw.ellipse(259, 248,
+                      r_radius = 125, c_radius = 100,
                       shape = image.shape)
 
-rr2, cc2 = draw.ellipse(300, 200, 
-                        r_radius = 110, c_radius = 180, 
+rr2, cc2 = draw.ellipse(300, 200,
+                        r_radius = 110, c_radius = 180,
                         shape = image.shape)
 
 mask1 = np.zeros_like(image, dtype = np.bool)
@@ -96,11 +96,11 @@ offset_image = ndi.shift(image, shift)
 image *= mask1
 offset_image *= mask2
 
-print("Known offset (row, col): {}".format(shift))
+print(f"Known offset (row, col): {shift}")
 
 detected_shift = masked_register_translation(image, offset_image, mask1, mask2)
 
-print("Detected pixel offset (row, col): {}".format(-detected_shift))
+print(f"Detected pixel offset (row, col): {-detected_shift}")
 
 fig = plt.figure(figsize=(8,3))
 ax1 = plt.subplot(1, 2, 1)

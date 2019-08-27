@@ -91,7 +91,7 @@ def view_as_blocks(arr_in, block_shape):
 
     if not arr_in.flags.contiguous:
         warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
-                            "array without copying."))
+                            "array without copying."), stacklevel=2)
 
     arr_in = np.ascontiguousarray(arr_in)
 
@@ -244,7 +244,7 @@ def view_as_windows(arr_in, window_shape, step=1):
     # -- build rolling window view
     if not arr_in.flags.contiguous:
         warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
-                            "array without copying."))
+                            "array without copying."), stacklevel=2)
 
     arr_in = np.ascontiguousarray(arr_in)
 

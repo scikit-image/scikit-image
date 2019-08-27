@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import fftconvolve
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def _window_sum_2d(image, window_shape):
@@ -110,7 +110,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]])
     """
-    assert_nD(image, (2, 3))
+    check_nD(image, (2, 3))
 
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
