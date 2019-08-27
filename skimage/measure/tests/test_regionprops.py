@@ -3,7 +3,7 @@ import math
 import numpy as np
 from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          crofton_perimeter,
+                                          crofton_perimeter, euler_number,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
                                           COL_DTYPES)
@@ -185,12 +185,19 @@ def test_equiv_diameter():
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 1
+    assert en == 2
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == 0
+    assert en == 1
+    
+    en = euler_number(SAMPLE, 8);
+    assert en == 0;
+    
+    en = euler_number(SAMPLE_mod, 8);
+    assert en == -1
+    
 
 
 def test_extent():
@@ -328,10 +335,10 @@ def test_perimeter():
 
 def test_crofton_perimeter():
     per = regionprops(SAMPLE)[0].crofton_perimeter
-    assert_almost_equal(per, 58.1194640914)
-
-    per = crofton_perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 54.0509485728)
+
+    per = crofton_perimeter(SAMPLE.astype('double'), directions=2)
+    assert_almost_equal(per, 58.1194640914)
 
 
 def test_solidity():
