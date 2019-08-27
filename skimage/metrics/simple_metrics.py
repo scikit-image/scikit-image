@@ -32,6 +32,12 @@ def mean_squared_error(im1, im2):
     mse : float
         The mean-squared error (MSE) metric.
 
+    Notes
+    -----
+    .. versionchanged:: 0.16
+        This function was renamed from ``skimage.measure.compare_mse`` to
+        ``skimage.metrics.mean_squared_error``.
+
     """
     check_shape_equality(im1, im2)
     im1, im2 = _as_floats(im1, im2)
@@ -71,6 +77,12 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     -------
     nrmse : float
         The NRMSE metric.
+
+    Notes
+    -----
+    .. versionchanged:: 0.16
+        This function was renamed from ``skimage.measure.compare_nrmse`` to
+        ``skimage.metrics.normalized_root_mse``.
 
     References
     ----------
@@ -113,6 +125,12 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     psnr : float
         The PSNR metric.
 
+    Notes
+    -----
+    .. versionchanged:: 0.16
+        This function was renamed from ``skimage.measure.compare_psnr`` to
+        ``skimage.metrics.peak_singal_noise_ratio``.
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
@@ -123,7 +141,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     if data_range is None:
         if im_true.dtype != im_test.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im_true.")
+                 "im_true.", stacklevel=2)
         dmin, dmax = dtype_range[im_true.dtype.type]
         true_min, true_max = np.min(im_true), np.max(im_true)
         if true_max > dmax or true_min < dmin:
