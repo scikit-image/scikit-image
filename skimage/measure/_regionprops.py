@@ -2,6 +2,7 @@ from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
+from skimage.util import pad
 
 from ._label import label
 from . import _moments
@@ -9,7 +10,7 @@ from . import _moments
 from functools import wraps
 
 
-__all__ = ['regionprops', 'perimeter', 'crofton_perimeter']
+__all__ = ['regionprops', 'euler_number', 'perimeter', 'crofton_perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -220,10 +221,14 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        euler_array = self.filled_image != self.image
-        _, num = label(euler_array, connectivity=self._ndim, return_num=True,
-                       background=0)
-        return -num + 1
+        
+        if self._ndim == 2:
+            return euler_number(self.image, 4);
+        else:
+            euler_array = self.filled_image != self.image
+            _, num = label(euler_array, connectivity=self._ndim, return_num=True,
+                           background=0)
+            return -num + 1
 
     @property
     def extent(self):
@@ -881,6 +886,62 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     return regions
 
+def euler_number(image, neighbourhood=4):
+    """Calculate the Euler characteristic in 2D binary image, that characterize
+    the topology of the objects.
+    
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        2D binary image
+    neighbourhood : 4 or 8, optional
+        Neighborhood connectivity for object determination. If object is 
+        4-connected, then background is 8-connected, and conversely.
+
+    Returns
+    -------
+    euler_number : int
+        Euler characteristic
+    
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Crofton_formula
+    .. [2] S. Rivollier. Analyse d’image geometrique et morphometrique par 
+           diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
+           2010.
+           Ecole Nationale Superieure des Mines de Saint-Etienne.
+           https://tel.archives-ouvertes.fr/tel-00560838
+           
+    Examples
+    --------
+    >>> SAMPLE = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                    [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+    ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+    ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
+    >>> euler_number(SAMPLE)  # doctest: +ELLIPSIS
+    2...
+    >>> euler_number(SAMPLE, neighbourhood=8)  # doctest: +ELLIPSIS
+    0...
+   """
+    F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]);
+    image = (image>0).astype(np.int);
+    image = pad(image, ((1,1),), mode='constant');
+    XF = ndi.convolve(image, F, mode='constant', cval=0)
+    edges = np.arange(0, 17 ,1);
+    h,edges = np.histogram(XF[:],bins=edges);
+    
+    if neighbourhood==4:
+        coefs =[ 0,  1,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0,  0];
+    else:
+        coefs =[ 0,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0, -1,  0];
+        
+    return np.sum(h*coefs);
 
 def perimeter(image, neighbourhood=4):
     """Calculate total perimeter of all objects in binary image.
@@ -948,18 +1009,19 @@ def perimeter(image, neighbourhood=4):
     return total_perimeter
 
 
-def crofton_perimeter(image, neighbourhood=4):
+def crofton_perimeter(image, directions=4):
     """Calculate total perimeter of all objects in binary image, based on
-    Crofton formula
+    Crofton formula. Be aware that there is no unique perimeter function, which 
+    all are approximations.
 
     Parameters
     ----------
     image : (N, M) ndarray
         2D binary image.
-    neighbourhood : 4 or 8, optional
-        Neighborhood connectivity for border pixel determination. It is used to
-        compute the contour. A higher neighbourhood widens the border on which
-        the perimeter is computed.
+    directions : 2 or 4, optional
+        Number of directions used to approximate the Crofton perimeter. By 
+        default, 4 is used: it should be more precise. Computation time is the 
+        same in both cases.
 
     Returns
     -------
@@ -982,9 +1044,9 @@ def crofton_perimeter(image, neighbourhood=4):
     >>> # coins image (binary)
     >>> img_coins = data.coins() > 110
     >>> # total perimeter of all objects in the image
-    >>> crofton_perimeter(img_coins, neighbourhood=4)  # doctest: +ELLIPSIS
+    >>> crofton_perimeter(img_coins, directions=2)  # doctest: +ELLIPSIS
     8144.578...
-    >>> crofton_perimeter(img_coins, neighbourhood=8)  # doctest: +ELLIPSIS
+    >>> crofton_perimeter(img_coins, directions=4)  # doctest: +ELLIPSIS
     7837.077...
 
     """    
@@ -997,12 +1059,13 @@ def crofton_perimeter(image, neighbourhood=4):
 
     h = np.bincount(XF.ravel(),minlength=16);
     
-    if neighbourhood == 4:
+    # definition of the LUT
+    if directions == 2:
         coefs = [0,np.pi/2,0,0,0,np.pi/2,0,0,np.pi/2,np.pi,0,0,np.pi/2,np.pi,0,0];
     else:
         coefs = [0,np.pi/4*(1+1/(np.sqrt(2))),np.pi/(4*np.sqrt(2)),np.pi/(2*np.sqrt(2)),0,np.pi/4*(1+1/(np.sqrt(2))),0,np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,np.pi/(4*np.sqrt(2)),np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,0,0];
 
-    total_perimeter = np.sum(h*coefs)
+    total_perimeter = coefs@h
     return total_perimeter
 
 def _parse_docs():
