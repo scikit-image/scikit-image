@@ -113,7 +113,7 @@ def _get_grid_centroids(image, n_centroids):
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, mask=None):
+         slic_zero=False, start_label=0, mask=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -162,6 +162,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         in most of the cases.
     slic_zero: bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
+    start_label: int, optional
+        The labels' index start. Should be 0 or 1.
     mask : 2D ndarray, optional
         if provided, superpixels are computed only where mask is True,
         and seed points are iteratively placed over the masked area to
@@ -176,8 +178,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     Raises
     ------
     ValueError
-        If ``convert2lab`` is set to ``True`` but the last array
+        * If ``convert2lab`` is set to ``True`` but the last array
         dimension is not of length 3.
+        * if ``start_label`` is not 0 or 1.
 
     Notes
     -----
@@ -199,6 +202,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
       transform is used to homogeneously place seed points over the
       mask, otherwise, the exact euclidian distance transform is used.
 
+    * `start_label` is introduced to handle the issue [4]_. The labels
+      indexing starting at 0 will be deprecated in future versions. If
+      `mask` is not `None` labels indexing starts at 1 and masked area
+      is set to 0.
+
     References
     ----------
     .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
@@ -206,6 +214,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
     .. [2] http://ivrg.epfl.ch/research/superpixels#SLICO
     .. [3] https://arxiv.org/pdf/1606.09518.pdf
+    .. [4] https://github.com/scikit-image/scikit-image/issues/3722
 
     Examples
     --------
@@ -243,6 +252,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         elif image.shape[-1] == 3:
             image = rgb2lab(image)
 
+    if start_label not in [0, 1]:
+        raise ValueError("start_label should be 0 or 1.")
+
+    if start_label == 0:
+        warnings.warn("Labels' indexing start from 0. " +
+                      "In future version it will start from 1. " +
+                      "To disable this warning, use start_label=1.",
+                      DeprecationWarning)
+
     # initialize cluster centroids for desired number of segments
     update_centroids = False
     if use_mask:
@@ -258,10 +276,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
         mask = np.ones((0, 1, 1), dtype=np.bool)
-        start_label = 0
-        warnings.warn("Labels' indexing start from 0. " +
-                      "In future version it will start from 1.",
-                      DeprecationWarning)
 
     if spacing is None:
         spacing = np.ones(3)
