@@ -178,9 +178,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     Raises
     ------
     ValueError
-        * If ``convert2lab`` is set to ``True`` but the last array
+        If ``convert2lab`` is set to ``True`` but the last array
         dimension is not of length 3.
-        * if ``start_label`` is not 0 or 1.
+    ValueError
+        If ``start_label`` is not 0 or 1.
 
     Notes
     -----
