@@ -187,20 +187,33 @@ def test_equiv_diameter():
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 2
+    assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == 1
-    
-    en = euler_number(SAMPLE, 8);
-    assert en == 0;
-    
-    en = euler_number(SAMPLE_mod, 8);
     assert en == -1
     
-
+    en = euler_number(SAMPLE, 4);
+    assert en == 2;
+    
+    en = euler_number(SAMPLE_mod, 4);
+    assert en == 1
+    
+    en = euler_number(SAMPLE_3D, 6);
+    assert en == 1
+    
+    en = euler_number(SAMPLE_3D, 26);
+    assert en == 1
+    
+    SAMPLE_3D_2 = np.zeros((100,100,100));
+    SAMPLE_3D_2[40:60, 40:60, 40:60]=1;
+    en = euler_number(SAMPLE_3D_2, 26);
+    assert en == 1
+    
+    SAMPLE_3D_2[45:55,45:55,45:55] = 0;
+    en = euler_number(SAMPLE_3D_2, 26);
+    assert en == 2
 
 def test_extent():
     extent = regionprops(SAMPLE)[0].extent
@@ -337,10 +350,10 @@ def test_perimeter():
 
 def test_crofton_perimeter():
     per = regionprops(SAMPLE)[0].crofton_perimeter
-    assert_almost_equal(per, 54.0509485728)
+    assert_almost_equal(per, 61.0800637973)
 
     per = crofton_perimeter(SAMPLE.astype('double'), directions=2)
-    assert_almost_equal(per, 58.1194640914)
+    assert_almost_equal(per, 64.4026493985)
 
 
 def test_solidity():

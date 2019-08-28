@@ -221,14 +221,10 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        
-        if self._ndim == 2:
-            return euler_number(self.image, 4);
-        else:
-            euler_array = self.filled_image != self.image
-            _, num = label(euler_array, connectivity=self._ndim, return_num=True,
-                           background=0)
-            return -num + 1
+        if self._ndim <2 or self._ndim>3:
+            raise NotImplementedError('Euler number is not implemented for '
+                                      'non 2D or 3D images')
+        return euler_number(self.image, 8);
 
     @property
     def extent(self):
@@ -776,7 +772,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         through the centers of border pixels using a 4-connectivity.
     **crofton_perimeter** : float
         Perimeter of object approximate by the Crofton formula in 4 directions.
-        Uses 4-connectivity by default.
+        Uses 4 directions by default.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -886,17 +882,20 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     return regions
 
-def euler_number(image, neighbourhood=4):
+def euler_number(image, neighbourhood=8):
     """Calculate the Euler characteristic in 2D binary image, that characterize
     the topology of the objects.
     
     Parameters
     ----------
     image: (N, M) ndarray
-        2D binary image
-    neighbourhood : 4 or 8, optional
+        2D image. If image is not binary, all strictly greater than zero values 
+        are considered as the object.
+    neighbourhood : 4 or 8 for 2D images, 6 or 26 for 3D images, optional
         Neighborhood connectivity for object determination. If object is 
         4-connected, then background is 8-connected, and conversely.
+        8-connectivity is used by default for 2D images.
+        26-connectivity is used by default for 3D images.
 
     Returns
     -------
@@ -905,15 +904,26 @@ def euler_number(image, neighbourhood=4):
     
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Crofton_formula
-    .. [2] S. Rivollier. Analyse d’image geometrique et morphometrique par 
+    .. [1] S. Rivollier. Analyse d’image geometrique et morphometrique par 
            diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
            2010.
            Ecole Nationale Superieure des Mines de Saint-Etienne.
            https://tel.archives-ouvertes.fr/tel-00560838
-           
+    .. [2] Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of 
+           Discretized Sets - On the Choice of Adjacency in Homogeneous Lattices. 
+           In: Mecke K., Stoyan D. (eds) Morphology of Condensed Matter. 
+           Lecture Notes in Physics, vol 600. Springer, Berlin, Heidelberg
+    
     Examples
     --------
+    >>> import numpy as np
+    >>> SAMPLE = np.zeros((100,100,100));
+    >>> SAMPLE[40:60, 40:60, 40:60]=1
+    >>> euler_number(SAMPLE) # doctest: +ELLIPSIS
+    1...
+    >>> SAMPLE[45:55,45:55,45:55] = 0;
+    >>> euler_number(SAMPLE) # doctest: +ELLIPSIS
+    2...
     >>> SAMPLE = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -925,23 +935,60 @@ def euler_number(image, neighbourhood=4):
     ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
     ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
     >>> euler_number(SAMPLE)  # doctest: +ELLIPSIS
-    2...
-    >>> euler_number(SAMPLE, neighbourhood=8)  # doctest: +ELLIPSIS
     0...
-   """
-    F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]);
+    >>> euler_number(SAMPLE, neighbourhood=4)  # doctest: +ELLIPSIS
+    2...
+    """ 
+    
+    # as image can be a label image, transform it to binary
     image = (image>0).astype(np.int);
     image = pad(image, ((1,1),), mode='constant');
-    XF = ndi.convolve(image, F, mode='constant', cval=0)
-    edges = np.arange(0, 17 ,1);
-    h,edges = np.histogram(XF[:],bins=edges);
-    
-    if neighbourhood==4:
-        coefs =[ 0,  1,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0,  0];
-    else:
-        coefs =[ 0,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0, -1,  0];
+
+    if np.ndim(image)==2:
         
-    return np.sum(h*coefs);
+        F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]);
+        if neighbourhood==4:
+            coefs =[ 0,  1,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0,  0];
+        else:
+            coefs =[ 0,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0, -1,  0];
+        bins=16
+    else: # 3D images
+        F = np.array([[[0,0,0],[0,0,0],[0,0,0]],
+              [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
+              [[0,0,0],[0,16,64],[0,32,128]]])
+        coefs26=np.array([0, 1, 1, 0, 1, 0, -2, -1, 1, -2, 0, -1, 0, -1, -1, 0,
+                         1, 0, -2, -1, -2, -1, -1, -2, -6, -3, -3, -2, -3, -2, 0, -1,
+                         1, -2, 0, -1, -6, -3, -3, -2, -2, -1, -1, -2, -3, 0, -2, -1,
+                         0, -1, -1, 0, -3, -2, 0, -1, -3, 0, -2, -1, 0, 1, 1, 0,
+                         1, -2, -6, -3, 0, -1, -3, -2, -2, -1, -3, 0, -1, -2, -2, -1,
+                         0, -1, -3, -2, -1, 0, 0, -1, -3, 0, 0, 1, -2, -1, 1, 0, 
+                         -2, -1, -3, 0, -3, 0, 0, 1, -1, 4, 0, 3, 0, 3, 1, 2,
+                         -1, -2, -2, -1, -2, -1, 1, 0, 0, 3, 1, 2, 1, 2, 2, 1, 
+                         1, -6, -2, -3, -2, -3, -1, 0, 0, -3, -1, -2, -1, -2, -2, -1,
+                         -2, -3, -1, 0, -1, 0, 4, 3, -3, 0, 0, 1, 0, 1, 3, 2,
+                         0, -3, -1, -2, -3, 0, 0, 1, -1, 0, 0, -1, -2, 1, -1, 0, 
+                         -1, -2, -2, -1, 0, 1, 3, 2, -2, 1, -1, 0, 1, 2, 2, 1, 
+                         0, -3, -3, 0, -1, -2, 0, 1, -1, 0, -2, 1, 0, -1, -1, 0,
+                         -1, -2, 0, 1, -2, -1, 3, 2, -2, 1, 1, 2, -1, 0, 2, 1, 
+                         -1, 0, -2, 1, -2, 1, 1, 2, -2, 3, -1, 2, -1, 2, 0, 1, 
+                         0, -1, -1, 0, -1, 0, 2, 1, -1, 2, 0, 1, 0, 1, 1, 0, ]);
+        
+        if neighbourhood==6:
+            coefs = np.flip(coefs26);
+        else:
+            coefs = coefs26;
+        bins=256;
+   
+    
+    XF = ndi.convolve(image, F, mode='constant', cval=0)   
+    h = np.bincount(XF.ravel(),minlength=bins);
+    
+    if np.ndim(image)==2:    
+        return coefs@h;
+    else:
+        return np.int(1./8 * coefs@h)
+
+
 
 def perimeter(image, neighbourhood=4):
     """Calculate total perimeter of all objects in binary image.
@@ -1017,11 +1064,12 @@ def crofton_perimeter(image, directions=4):
     Parameters
     ----------
     image : (N, M) ndarray
-        2D binary image.
+        2D image. If image is not binary, all strictly greater than zero values 
+        are considered as the object.
     directions : 2 or 4, optional
         Number of directions used to approximate the Crofton perimeter. By 
-        default, 4 is used: it should be more precise. Computation time is the 
-        same in both cases.
+        default, 4 is used: it should be more precise than 2. 
+        Computation time is the same in both cases.
 
     Returns
     -------
@@ -1053,7 +1101,9 @@ def crofton_perimeter(image, directions=4):
     if image.ndim != 2:
         raise NotImplementedError('`crofton_perimeter` supports 2D images only')
 
-    image = image.astype(np.uint8)
+    # as image could be a label image, transform it to binary image
+    image = (image>0).astype(np.uint8)
+    image = pad(image, ((1,1),), mode='constant');
     XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
                                    mode='constant', cval=0)
 
