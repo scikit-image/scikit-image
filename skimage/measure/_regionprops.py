@@ -50,8 +50,8 @@ PROPS = {
     'Moments': 'moments',
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
-    'Perimeter': 'perimeter', 
-    'CroftonPerimeter':'crofton_perimeter',
+    'Perimeter': 'perimeter',
+    'CroftonPerimeter': 'crofton_perimeter',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -221,10 +221,10 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        if self._ndim <2 or self._ndim>3:
+        if self._ndim < 2 or self._ndim > 3:
             raise NotImplementedError('Euler number is not implemented for '
                                       'non 2D or 3D images')
-        return euler_number(self.image, 8);
+        return euler_number(self.image, 8)
 
     @property
     def extent(self):
@@ -882,10 +882,11 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
     return regions
 
+
 def euler_number(image, neighbourhood=8):
     """Calculate the Euler characteristic in 2D binary image, that characterize
     the topology of the objects.
-    
+
     Parameters
     ----------
     image: (N, M) ndarray
@@ -901,19 +902,19 @@ def euler_number(image, neighbourhood=8):
     -------
     euler_number : int
         Euler characteristic
-    
+
     References
     ----------
     .. [1] S. Rivollier. Analyse d’image geometrique et morphometrique par 
            diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
-           2010.
-           Ecole Nationale Superieure des Mines de Saint-Etienne.
+           2010. Ecole Nationale Superieure des Mines de Saint-Etienne.
            https://tel.archives-ouvertes.fr/tel-00560838
     .. [2] Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of 
-           Discretized Sets - On the Choice of Adjacency in Homogeneous Lattices. 
-           In: Mecke K., Stoyan D. (eds) Morphology of Condensed Matter. 
-           Lecture Notes in Physics, vol 600. Springer, Berlin, Heidelberg
-    
+           Discretized Sets - On the Choice of Adjacency in Homogeneous 
+           Lattices. In: Mecke K., Stoyan D. (eds) Morphology of Condensed 
+           Matter. Lecture Notes in Physics, vol 600. Springer, Berlin, 
+           Heidelberg.
+
     Examples
     --------
     >>> import numpy as np
@@ -938,56 +939,56 @@ def euler_number(image, neighbourhood=8):
     0...
     >>> euler_number(SAMPLE, neighbourhood=4)  # doctest: +ELLIPSIS
     2...
-    """ 
-    
-    # as image can be a label image, transform it to binary
-    image = (image>0).astype(np.int);
-    image = pad(image, ((1,1),), mode='constant');
+    """
 
-    if np.ndim(image)==2:
-        
-        F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]);
-        if neighbourhood==4:
-            coefs =[ 0,  1,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0,  0];
+    # as image can be a label image, transform it to binary
+    image = (image > 0).astype(np.int)
+    image = pad(image, ((1, 1),), mode='constant')
+
+    if np.ndim(image) == 2:
+
+        F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
+        if neighbourhood == 4:
+            coefs = [0,  1,  0,  0,  0,  0,  0, -
+                     1,  0,  1,  0,  0,  0,  0,  0,  0]
         else:
-            coefs =[ 0,  0,  0,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0,  0, -1,  0];
-        bins=16
-    else: # 3D images
-        F = np.array([[[0,0,0],[0,0,0],[0,0,0]],
-              [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
-              [[0,0,0],[0,16,64],[0,32,128]]])
-        coefs26=np.array([0, 1, 1, 0, 1, 0, -2, -1, 1, -2, 0, -1, 0, -1, -1, 0,
-                         1, 0, -2, -1, -2, -1, -1, -2, -6, -3, -3, -2, -3, -2, 0, -1,
-                         1, -2, 0, -1, -6, -3, -3, -2, -2, -1, -1, -2, -3, 0, -2, -1,
-                         0, -1, -1, 0, -3, -2, 0, -1, -3, 0, -2, -1, 0, 1, 1, 0,
-                         1, -2, -6, -3, 0, -1, -3, -2, -2, -1, -3, 0, -1, -2, -2, -1,
-                         0, -1, -3, -2, -1, 0, 0, -1, -3, 0, 0, 1, -2, -1, 1, 0, 
-                         -2, -1, -3, 0, -3, 0, 0, 1, -1, 4, 0, 3, 0, 3, 1, 2,
-                         -1, -2, -2, -1, -2, -1, 1, 0, 0, 3, 1, 2, 1, 2, 2, 1, 
-                         1, -6, -2, -3, -2, -3, -1, 0, 0, -3, -1, -2, -1, -2, -2, -1,
-                         -2, -3, -1, 0, -1, 0, 4, 3, -3, 0, 0, 1, 0, 1, 3, 2,
-                         0, -3, -1, -2, -3, 0, 0, 1, -1, 0, 0, -1, -2, 1, -1, 0, 
-                         -1, -2, -2, -1, 0, 1, 3, 2, -2, 1, -1, 0, 1, 2, 2, 1, 
-                         0, -3, -3, 0, -1, -2, 0, 1, -1, 0, -2, 1, 0, -1, -1, 0,
-                         -1, -2, 0, 1, -2, -1, 3, 2, -2, 1, 1, 2, -1, 0, 2, 1, 
-                         -1, 0, -2, 1, -2, 1, 1, 2, -2, 3, -1, 2, -1, 2, 0, 1, 
-                         0, -1, -1, 0, -1, 0, 2, 1, -1, 2, 0, 1, 0, 1, 1, 0, ]);
-        
-        if neighbourhood==6:
-            coefs = np.flip(coefs26);
+            coefs = [0,  0,  0,  0,  0,  0, -1,
+                     0,  1,  0,  0,  0,  0,  0, -1,  0]
+        bins = 16
+    else:  # 3D images
+        F = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                      [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
+                      [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
+        coefs26 = np.array([0, 1, 1, 0, 1, 0, -2, -1, 1, -2, 0, -1, 0, -1, -1, 0,
+                            1, 0, -2, -1, -2, -1, -1, -2, -6, -3, -3, -2, -3, -2, 0, -1,
+                            1, -2, 0, -1, -6, -3, -3, -2, -2, -1, -1, -2, -3, 0, -2, -1,
+                            0, -1, -1, 0, -3, -2, 0, -1, -3, 0, -2, -1, 0, 1, 1, 0,
+                            1, -2, -6, -3, 0, -1, -3, -2, -2, -1, -3, 0, -1, -2, -2, -1,
+                            0, -1, -3, -2, -1, 0, 0, -1, -3, 0, 0, 1, -2, -1, 1, 0,
+                            -2, -1, -3, 0, -3, 0, 0, 1, -1, 4, 0, 3, 0, 3, 1, 2,
+                            -1, -2, -2, -1, -2, -1, 1, 0, 0, 3, 1, 2, 1, 2, 2, 1,
+                            1, -6, -2, -3, -2, -3, -1, 0, 0, -3, -1, -2, -1, -2, -2, -1,
+                            -2, -3, -1, 0, -1, 0, 4, 3, -3, 0, 0, 1, 0, 1, 3, 2,
+                            0, -3, -1, -2, -3, 0, 0, 1, -1, 0, 0, -1, -2, 1, -1, 0,
+                            -1, -2, -2, -1, 0, 1, 3, 2, -2, 1, -1, 0, 1, 2, 2, 1,
+                            0, -3, -3, 0, -1, -2, 0, 1, -1, 0, -2, 1, 0, -1, -1, 0,
+                            -1, -2, 0, 1, -2, -1, 3, 2, -2, 1, 1, 2, -1, 0, 2, 1,
+                            -1, 0, -2, 1, -2, 1, 1, 2, -2, 3, -1, 2, -1, 2, 0, 1,
+                            0, -1, -1, 0, -1, 0, 2, 1, -1, 2, 0, 1, 0, 1, 1, 0, ])
+
+        if neighbourhood == 6:
+            coefs = np.flip(coefs26)
         else:
-            coefs = coefs26;
-        bins=256;
-   
-    
-    XF = ndi.convolve(image, F, mode='constant', cval=0)   
-    h = np.bincount(XF.ravel(),minlength=bins);
-    
-    if np.ndim(image)==2:    
-        return coefs@h;
+            coefs = coefs26
+        bins = 256
+
+    XF = ndi.convolve(image, F, mode='constant', cval=0)
+    h = np.bincount(XF.ravel(), minlength=bins)
+
+    if np.ndim(image) == 2:
+        return coefs@h
     else:
         return np.int(1./8 * coefs@h)
-
 
 
 def perimeter(image, neighbourhood=4):
@@ -1043,7 +1044,7 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
     perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
-                                                           [ 2, 1,  2],
+                                                           [2, 1,  2],
                                                            [10, 2, 10]]),
                                    mode='constant', cval=0)
 
@@ -1097,26 +1098,30 @@ def crofton_perimeter(image, directions=4):
     >>> crofton_perimeter(img_coins, directions=4)  # doctest: +ELLIPSIS
     7837.077...
 
-    """    
+    """
     if image.ndim != 2:
-        raise NotImplementedError('`crofton_perimeter` supports 2D images only')
+        raise NotImplementedError(
+            '`crofton_perimeter` supports 2D images only')
 
     # as image could be a label image, transform it to binary image
-    image = (image>0).astype(np.uint8)
-    image = pad(image, ((1,1),), mode='constant');
+    image = (image > 0).astype(np.uint8)
+    image = pad(image, ((1, 1),), mode='constant')
     XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
-                                   mode='constant', cval=0)
+                      mode='constant', cval=0)
 
-    h = np.bincount(XF.ravel(),minlength=16);
-    
+    h = np.bincount(XF.ravel(), minlength=16)
+
     # definition of the LUT
     if directions == 2:
-        coefs = [0,np.pi/2,0,0,0,np.pi/2,0,0,np.pi/2,np.pi,0,0,np.pi/2,np.pi,0,0];
+        coefs = [0, np.pi/2, 0, 0, 0, np.pi/2, 0, 0,
+                 np.pi/2, np.pi, 0, 0, np.pi/2, np.pi, 0, 0]
     else:
-        coefs = [0,np.pi/4*(1+1/(np.sqrt(2))),np.pi/(4*np.sqrt(2)),np.pi/(2*np.sqrt(2)),0,np.pi/4*(1+1/(np.sqrt(2))),0,np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,np.pi/(4*np.sqrt(2)),np.pi/(4*np.sqrt(2)),np.pi/4,np.pi/2,0,0];
+        coefs = [0, np.pi/4*(1+1/(np.sqrt(2))), np.pi/(4*np.sqrt(2)), np.pi/(2*np.sqrt(2)), 0, np.pi/4*(1+1/(np.sqrt(2))),
+                 0, np.pi/(4*np.sqrt(2)), np.pi/4, np.pi/2, np.pi/(4*np.sqrt(2)), np.pi/(4*np.sqrt(2)), np.pi/4, np.pi/2, 0, 0]
 
     total_perimeter = coefs@h
     return total_perimeter
+
 
 def _parse_docs():
     import re

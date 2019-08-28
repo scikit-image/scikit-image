@@ -2,7 +2,7 @@ from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes_lewiner
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
-from ._regionprops import (regionprops, perimeter, 
+from ._regionprops import (regionprops, perimeter,
                            crofton_perimeter, euler_number, regionprops_table)
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim

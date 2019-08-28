@@ -193,27 +193,28 @@ def test_euler_number():
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
-    
-    en = euler_number(SAMPLE, 4);
-    assert en == 2;
-    
-    en = euler_number(SAMPLE_mod, 4);
-    assert en == 1
-    
-    en = euler_number(SAMPLE_3D, 6);
-    assert en == 1
-    
-    en = euler_number(SAMPLE_3D, 26);
-    assert en == 1
-    
-    SAMPLE_3D_2 = np.zeros((100,100,100));
-    SAMPLE_3D_2[40:60, 40:60, 40:60]=1;
-    en = euler_number(SAMPLE_3D_2, 26);
-    assert en == 1
-    
-    SAMPLE_3D_2[45:55,45:55,45:55] = 0;
-    en = euler_number(SAMPLE_3D_2, 26);
+
+    en = euler_number(SAMPLE, 4)
     assert en == 2
+
+    en = euler_number(SAMPLE_mod, 4)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 6)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 26)
+    assert en == 1
+
+    SAMPLE_3D_2 = np.zeros((100, 100, 100))
+    SAMPLE_3D_2[40:60, 40:60, 40:60] = 1
+    en = euler_number(SAMPLE_3D_2, 26)
+    assert en == 1
+
+    SAMPLE_3D_2[45:55, 45:55, 45:55] = 0
+    en = euler_number(SAMPLE_3D_2, 26)
+    assert en == 2
+
 
 def test_extent():
     extent = regionprops(SAMPLE)[0].extent
@@ -223,13 +224,13 @@ def test_extent():
 def test_moments_hu():
     hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
-         3.27117627e-01,
-         2.63869194e-02,
-         2.35390060e-02,
-         1.23151193e-03,
-         1.38882330e-06,
-         -2.72586158e-05,
-         -6.48350653e-06
+        3.27117627e-01,
+        2.63869194e-02,
+        2.35390060e-02,
+        1.23151193e-03,
+        1.38882330e-06,
+        -2.72586158e-05,
+        -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -348,6 +349,7 @@ def test_perimeter():
     per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 46.8284271247)
 
+
 def test_crofton_perimeter():
     per = regionprops(SAMPLE)[0].crofton_perimeter
     assert_almost_equal(per, 61.0800637973)
@@ -416,9 +418,9 @@ def test_weighted_moments_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_normalized
     ref = np.array(
-        [[       np.nan,        np.nan, 0.2301467830, -0.0162529732],
-         [       np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
-         [ 0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
+        [[np.nan,        np.nan, 0.2301467830, -0.0162529732],
+         [np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
+         [0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
          [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
