@@ -32,7 +32,7 @@ for d in [2,4]:
     for i in angles:
 
         rotated_square=rotate(square, i, order=0); # nearest neighbor
-        p.append(crofton_perimeter(rotated_square, n));
+        p.append(crofton_perimeter(rotated_square, d));
     plt.plot(angles, p);
         
 plt.xlabel('Rotation angle');
