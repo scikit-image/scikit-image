@@ -39,7 +39,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
         The details will be amplified with this factor. The factor could be 0
         or negative. Typically, it is a small positive number, e.g. 1.0.
     multichannel : bool, optional
-        If True, the last `image` dimension is considered as a color channel,
+        If True, the last ``image`` dimension is considered as a color channel,
         otherwise as spatial. Color channels are processed individually.
     preserve_range: bool, optional
         Whether to keep the original range of values. Otherwise, the input

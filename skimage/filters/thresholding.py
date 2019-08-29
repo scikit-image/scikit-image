@@ -159,8 +159,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
 
-        * 'generic': use custom function (see `param` parameter)
-        * 'gaussian': apply gaussian filter (see `param` parameter for custom\
+        * 'generic': use custom function (see ``param`` parameter)
+        * 'gaussian': apply gaussian filter (see ``param`` parameter for custom\
                       sigma value)
         * 'mean': apply arithmetic mean filter
         * 'median': apply median rank filter
@@ -253,7 +253,7 @@ def threshold_otsu(image, nbins=256):
     Raises
     ------
     ValueError
-         If `image` only contains a single grayscale value.
+         If ``image`` only contains a single grayscale value.
 
     References
     ----------
@@ -338,7 +338,7 @@ def threshold_yen(image, nbins=256):
     """
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
-    # returns `bin_centers` containing only one value. Speed up with it.
+    # returns ``bin_centers`` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
 
@@ -494,8 +494,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
 
     Notes
     -----
-    See Li and Lee, 1993 [1]_; this is the objective function `threshold_li`
-    minimizes. This function can be improved but this implementation most
+    See Li and Lee, 1993 [1]_; this is the objective function ``threshold_li``     minimizes. This function can be improved but this implementation most
     closely matches equation 8 in [1]_ and equations 1-3 in [2]_.
 
     References
@@ -647,7 +646,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 def threshold_minimum(image, nbins=256, max_iter=10000):
     """Return threshold value based on minimum method.
 
-    The histogram of the input `image` is computed and smoothed until there are
+    The histogram of the input ``image`` is computed and smoothed until there are
     only two maxima. Then the minimum in between is the threshold value.
 
     Parameters
@@ -850,7 +849,7 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
+            msg = ('Window size for ``threshold_sauvola`` or '
                    '`threshold_niblack` must not be even on any dimension. '
                    'Got {}'.format(axis_sizes))
             raise ValueError(msg)
@@ -1039,23 +1038,20 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 def apply_hysteresis_threshold(image, low, high):
     """Apply hysteresis thresholding to `image`.
 
-    This algorithm finds regions where `image` is greater than `high`
-    OR `image` is greater than `low` *and* that region is connected to
+    This algorithm finds regions where ``image`` is greater than `high`
+    OR ``image`` is greater than `low` *and* that region is connected to
     a region greater than `high`.
 
     Parameters
     ----------
     image : array, shape (M,[ N, ..., P])
         Grayscale input image.
-    low : float, or array of same shape as `image`
-        Lower threshold.
-    high : float, or array of same shape as `image`
-        Higher threshold.
+    low : float, or array of same shape as ``image``         Lower threshold.
+    high : float, or array of same shape as ``image``         Higher threshold.
 
     Returns
     -------
-    thresholded : array of bool, same shape as `image`
-        Array in which `True` indicates the locations where `image`
+    thresholded : array of bool, same shape as ``image``         Array in which ``True`` indicates the locations where `image`
         was above the hysteresis threshold.
 
     Examples

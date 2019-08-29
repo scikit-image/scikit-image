@@ -29,8 +29,7 @@ def rank_order(image):
         `image`.
 
     original_values: 1-D ndarray
-        Unique original values of `image`
-
+        Unique original values of ``image`` 
     Examples
     --------
     >>> a = np.array([[1, 4, 5], [4, 4, 1], [5, 1, 1]])

@@ -26,11 +26,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         The ``output`` parameter passes an array in which to store the
         filter output.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are
-        handled, where `cval` is the value when mode is equal to
+        The ``mode`` parameter determines how the array borders are
+        handled, where ``cval`` is the value when mode is equal to
         'constant'. Default is 'nearest'.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
     multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
