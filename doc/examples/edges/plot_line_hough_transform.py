@@ -72,12 +72,13 @@ from matplotlib import cm
 
 
 # Constructing test image
-image = np.zeros((100, 100))
-idx = np.arange(25, 75)
+image = np.zeros((200, 200))
+idx = np.arange(25, 175)
 image[idx[::-1], idx] = 255
 image[idx, idx] = 255
 
 # Classic straight-line Hough transform
+# Set a precision of 0.5 degree.
 tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
 h, theta, d = hough_line(image, theta=tested_angles)
 
