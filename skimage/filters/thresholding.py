@@ -227,8 +227,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)
     else:
-        raise ValueError("Invalid method specified. Please use `generic`, "
-                         "`gaussian`, `mean`, or `median`.")
+        raise ValueError("Invalid method specified. Please use ``generic``, "
+                         "`gaussian`, ``mean``, or `median`.")
 
     return thresh_image - offset
 
@@ -292,8 +292,8 @@ def threshold_otsu(image, nbins=256):
     mean2 = (np.cumsum((hist * bin_centers)[::-1]) / weight2[::-1])[::-1]
 
     # Clip ends to align class 1 and class 2 variables:
-    # The last value of `weight1`/`mean1` should pair with zero values in
-    # `weight2`/`mean2`, which do not exist.
+    # The last value of ``weight1``/``mean1`` should pair with zero values in
+    # ``weight2``/`mean2`, which do not exist.
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
@@ -612,7 +612,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
                    .format(initial_guess, image_min, image_max))
             raise ValueError(msg)
     else:
-        raise TypeError('Incorrect type for `initial_guess`; should be '
+        raise TypeError('Incorrect type for ``initial_guess``; should be '
                         'a floating point value, or a function mapping an '
                         'array to a floating point value.')
 
@@ -1036,11 +1036,11 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
 
 def apply_hysteresis_threshold(image, low, high):
-    """Apply hysteresis thresholding to `image`.
+    """Apply hysteresis thresholding to ``image``.
 
-    This algorithm finds regions where ``image`` is greater than `high`
-    OR ``image`` is greater than `low` *and* that region is connected to
-    a region greater than `high`.
+    This algorithm finds regions where ``image`` is greater than ``high``
+    OR ``image`` is greater than ``low`` *and* that region is connected to
+    a region greater than ``high``.
 
     Parameters
     ----------
@@ -1051,7 +1051,7 @@ def apply_hysteresis_threshold(image, low, high):
 
     Returns
     -------
-    thresholded : array of bool, same shape as ``image``         Array in which ``True`` indicates the locations where `image`
+    thresholded : array of bool, same shape as ``image``         Array in which ``True`` indicates the locations where ``image``
         was above the hysteresis threshold.
 
     Examples

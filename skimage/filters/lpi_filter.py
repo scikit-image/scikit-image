@@ -49,7 +49,7 @@ class LPIFilter2D(object):
         Parameters
         ----------
         impulse_response : callable `f(r, c, **filter_params)`
-            Function that yields the impulse response.  ``r`` and `c` are
+            Function that yields the impulse response.  ``r`` and ``c`` are
             1-dimensional vectors that represent row and column positions, in
             other words coordinates are (r[0],c[0]),(r[0],c[1]) etc.
             `**filter_params` are passed through.

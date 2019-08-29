@@ -14,7 +14,7 @@ import numpy as np
 def rank_order(image):
     """Return an image of the same shape where each pixel is the
     index of the pixel value in the ascending order of the unique
-    values of `image`, aka the rank-order value.
+    values of ``image``, aka the rank-order value.
 
     Parameters
     ----------
@@ -24,9 +24,9 @@ def rank_order(image):
     -------
     labels: ndarray of type np.uint32, of shape image.shape
         New array where each pixel has the rank-order value of the
-        corresponding pixel in `image`. Pixel values are between 0 and
+        corresponding pixel in ``image``. Pixel values are between 0 and
         n - 1, where n is the number of distinct unique values in
-        `image`.
+        ``image``.
 
     original_values: 1-D ndarray
         Unique original values of ``image`` 
