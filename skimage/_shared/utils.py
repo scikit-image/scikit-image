@@ -226,7 +226,7 @@ def check_random_state(seed):
 
 
 def convert_to_float(image, preserve_range):
-    """Convert input image to double image with the appropriate range.
+    """Convert input image to float image with the appropriate range.
 
     Parameters
     ----------
@@ -243,7 +243,8 @@ def convert_to_float(image, preserve_range):
         Transformed version of the input.
     """
     if preserve_range:
-        image = image.astype(np.double)
+        if image.dtype.char not in 'df':
+            image = image.astype(np.double)
     else:
         image = img_as_float(image)
     return image
