@@ -1,4 +1,3 @@
-import cython
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -843,7 +842,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
         if matrix is not None:
             matrix = matrix.astype(image.dtype)
-            ctype = cython.float if image.dtype.char == 'f' else cython.double
+            ctype = 'float' if image.dtype.char == 'f' else 'double'
             if image.ndim == 2:
                 warped = _warp_fast[ctype](image, matrix,
                                            output_shape=output_shape,
