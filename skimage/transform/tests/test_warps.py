@@ -331,6 +331,22 @@ def test_resize3d_bilinear():
     assert_almost_equal(resized, ref)
 
 
+def test_resize_dtype():
+    x = np.zeros((5, 5))
+    x_f32 = x.astype(np.float32)
+    x_u8 = x.astype(np.uint8)
+    x_b = x.astype(bool)
+
+    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
+    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
+    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+
+
 def test_swirl():
     image = img_as_float(data.checkerboard())
 
