@@ -348,8 +348,8 @@ def threshold_yen(image, nbins=256):
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
-    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
-    # in crit. ImageJ Yen implementation replaces those values by zero.
+    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid
+    # '-inf' in crit. ImageJ Yen implementation replaces those values by zero.
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     return bin_centers[crit.argmax()]
@@ -494,7 +494,8 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
 
     Notes
     -----
-    See Li and Lee, 1993 [1]_; this is the objective function ``threshold_li``     minimizes. This function can be improved but this implementation most
+    See Li and Lee, 1993 [1]_; this is the objective function ``threshold_li``
+    minimizes. This function can be improved but this implementation most
     closely matches equation 8 in [1]_ and equations 1-3 in [2]_.
 
     References
@@ -646,8 +647,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 def threshold_minimum(image, nbins=256, max_iter=10000):
     """Return threshold value based on minimum method.
 
-    The histogram of the input ``image`` is computed and smoothed until there are
-    only two maxima. Then the minimum in between is the threshold value.
+    The histogram of the input ``image`` is computed and smoothed until
+    there are only two maxima. Then the minimum in between is the threshold
+    value.
 
     Parameters
     ----------
@@ -799,7 +801,7 @@ def threshold_triangle(image, nbins=256):
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
-    arg_low_level, arg_high_level = np.where(hist>0)[0][[0, -1]]
+    arg_low_level, arg_high_level = np.where(hist > 0)[0][[0, -1]]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
@@ -1046,12 +1048,15 @@ def apply_hysteresis_threshold(image, low, high):
     ----------
     image : array, shape (M,[ N, ..., P])
         Grayscale input image.
-    low : float, or array of same shape as ``image``         Lower threshold.
-    high : float, or array of same shape as ``image``         Higher threshold.
+    low : float, or array of same shape as ``image``
+        Lower threshold.
+    high : float, or array of same shape as ``image``
+        Higher threshold.
 
     Returns
     -------
-    thresholded : array of bool, same shape as ``image``         Array in which ``True`` indicates the locations where ``image``
+    thresholded : array of bool, same shape as ``image``
+        Array in which ``True`` indicates the locations where ``image``
         was above the hysteresis threshold.
 
     Examples
