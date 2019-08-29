@@ -4,6 +4,7 @@ from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
+from .._shared.utils import convert_to_float
 from warnings import warn
 
 if fftmodule is np.fft:
@@ -62,6 +63,8 @@ def radon(image, theta=None, circle=True):
     if theta is None:
         theta = np.arange(180)
 
+    image = convert_to_float(image, preserve_range=True)
+
     if circle:
         radius = min(image.shape) // 2
         c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
@@ -107,13 +110,14 @@ def radon(image, theta=None, circle=True):
 
     def build_rotation(theta):
         T = np.deg2rad(theta)
-        R = np.array([[np.cos(T), np.sin(T), 0],
-                      [-np.sin(T), np.cos(T), 0],
+        c, s = np.cos(T), np.sin(T)
+        R = np.array([[c, s, 0],
+                      [-s, c, 0],
                       [0, 0, 1]])
         return shift1.dot(R).dot(shift0)
 
-    for i in range(len(theta)):
-        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
+    for i, t in enumerate(theta):
+        rotated = _warp_fast(padded_image, build_rotation(t))
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
