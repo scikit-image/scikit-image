@@ -78,7 +78,8 @@ image[idx[::-1], idx] = 255
 image[idx, idx] = 255
 
 # Classic straight-line Hough transform
-h, theta, d = hough_line(image)
+tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
+h, theta, d = hough_line(image, theta=tested_angles)
 
 # Generating figure 1
 fig, axes = plt.subplots(1, 3, figsize=(15, 6))
@@ -98,10 +99,10 @@ ax[1].axis('image')
 
 ax[2].imshow(image, cmap=cm.gray)
 for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
-    y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
-    y1 = (dist - image.shape[1] * np.cos(angle)) / np.sin(angle)
-    ax[2].plot((0, image.shape[1]), (y0, y1), '-r')
-ax[2].set_xlim((0, image.shape[1]))
+    origin = np.array((0, image.shape[1]))
+    y0, y1 = (dist - origin * np.cos(angle)) / np.sin(angle)
+    ax[2].plot(origin, (y0, y1), '-r')
+ax[2].set_xlim(origin)
 ax[2].set_ylim((image.shape[0], 0))
 ax[2].set_axis_off()
 ax[2].set_title('Detected lines')
