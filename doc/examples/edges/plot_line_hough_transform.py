@@ -23,9 +23,10 @@ the length of that segment, :math:`r`, and the angle it makes with the x-axis,
 The Hough transform constructs a histogram array representing the parameter
 space (i.e., an :math:`M \\times N` matrix, for :math:`M` different values of
 the radius and :math:`N` different values of :math:`\\theta`).  For each
-parameter combination, :math:`r` and :math:`\\theta`, we then find the number of
-non-zero pixels in the input image that would fall close to the corresponding
-line, and increment the array at position :math:`(r, \\theta)` appropriately.
+parameter combination, :math:`r` and :math:`\\theta`, we then find the number
+of non-zero pixels in the input image that would fall close to the
+corresponding line, and increment the array at position :math:`(r, \\theta)`
+appropriately.
 
 We can think of each non-zero pixel "voting" for potential line candidates. The
 local maxima in the resulting histogram indicates the parameters of the most
@@ -55,10 +56,14 @@ References
        Conference on Computer Vision and Pattern Recognition, 1999.
 
 """
+
+######################
+# Line Hough Transform
+# ====================
+
 import numpy as np
 
-from skimage.transform import (hough_line, hough_line_peaks,
-                               probabilistic_hough_line)
+from skimage.transform import hough_line, hough_line_peaks
 from skimage.feature import canny
 from skimage import data
 
@@ -103,6 +108,13 @@ ax[2].set_title('Detected lines')
 
 plt.tight_layout()
 plt.show()
+
+
+###############################
+# Probabilistic Hough Transform
+# =============================
+
+from skimage.transform import probabilistic_hough_line
 
 # Line finding using the Probabilistic Hough Transform
 image = data.camera()
