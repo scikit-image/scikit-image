@@ -293,7 +293,7 @@ def threshold_otsu(image, nbins=256):
 
     # Clip ends to align class 1 and class 2 variables:
     # The last value of ``weight1``/``mean1`` should pair with zero values in
-    # ``weight2``/`mean2`, which do not exist.
+    # ``weight2``/``mean2``, which do not exist.
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
