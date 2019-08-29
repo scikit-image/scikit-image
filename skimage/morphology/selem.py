@@ -54,7 +54,7 @@ def rectangle(width, height, dtype=np.uint8):
         pixel belongs to the neighborhood.
 
     """
-    return np.ones((width, height), dtype=dtype)
+    return np.ones((height, width), dtype=dtype)
 
 
 def diamond(radius, dtype=np.uint8):
