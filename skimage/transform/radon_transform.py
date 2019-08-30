@@ -4,6 +4,7 @@ from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
+from .._shared.utils import convert_to_float
 from warnings import warn
 
 if fftmodule is np.fft:
@@ -18,7 +19,7 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True):
+def radon(image, theta=None, circle=True, preserve_range=False):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -35,6 +36,10 @@ def radon(image, theta=None, circle=True):
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -61,6 +66,8 @@ def radon(image, theta=None, circle=True):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
+
+    image = convert_to_float(image, preserve_range)
 
     if circle:
         radius = min(image.shape) // 2
@@ -107,13 +114,14 @@ def radon(image, theta=None, circle=True):
 
     def build_rotation(theta):
         T = np.deg2rad(theta)
-        R = np.array([[np.cos(T), np.sin(T), 0],
-                      [-np.sin(T), np.cos(T), 0],
+        c, s = np.cos(T), np.sin(T)
+        R = np.array([[c, s, 0],
+                      [-s, c, 0],
                       [0, 0, 1]])
-        return shift1.dot(R).dot(shift0)
+        return shift1.dot(R).dot(shift0).astype(image.dtype)
 
-    for i in range(len(theta)):
-        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
+    for i, t in enumerate(theta):
+        rotated = _warp_fast(padded_image, build_rotation(t))
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
