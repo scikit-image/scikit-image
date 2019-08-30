@@ -18,18 +18,18 @@ def rank_order(image):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
 
     Returns
     -------
-    labels: ndarray of type np.uint32, of shape image.shape
+    labels : ndarray of type np.uint32, of shape image.shape
         New array where each pixel has the rank-order value of the
         corresponding pixel in ``image``. Pixel values are between 0 and
         n - 1, where n is the number of distinct unique values in
         ``image``.
-
-    original_values: 1-D ndarray
+    original_values : 1-D ndarray
         Unique original values of ``image``
+
     Examples
     --------
     >>> a = np.array([[1, 4, 5], [4, 4, 1], [5, 1, 1]])
