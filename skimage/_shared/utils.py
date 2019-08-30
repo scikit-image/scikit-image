@@ -228,9 +228,6 @@ def check_random_state(seed):
 def convert_to_float(image, preserve_range):
     """Convert input image to float image with the appropriate range.
 
-    Floating point types will maintain their precision, while integer
-    types will be converted to double.
-
     Parameters
     ----------
     image : ndarray
@@ -239,6 +236,10 @@ def convert_to_float(image, preserve_range):
         Determines if the range of the image should be kept or transformed
         using img_as_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
+
+    Notes:
+    ------
+    * Input images with `float32` data type are not upcasted.
 
     Returns
     -------
