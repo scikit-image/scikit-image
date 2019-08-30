@@ -915,7 +915,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None, num_peaks_per_label=np.inf):
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
