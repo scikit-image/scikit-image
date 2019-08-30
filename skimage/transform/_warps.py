@@ -842,6 +842,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
         if matrix is not None:
             matrix = matrix.astype(image.dtype)
+            # Manage _warp_fast specialization according to input data
+            # type floating point precision (single or double)
             ctype = 'float' if image.dtype.char == 'f' else 'double'
             if image.ndim == 2:
                 warped = _warp_fast[ctype](image, matrix,
