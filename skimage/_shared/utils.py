@@ -247,7 +247,9 @@ def convert_to_float(image, preserve_range):
 
     """
     if preserve_range:
-        if not np.issubdtype(image.dtype, np.floating):
+        # Convert image to double only if is not single or double
+        # precision float
+        if image.dtype.char not in 'df':
             image = image.astype(np.double)
     else:
         image = img_as_float(image)
