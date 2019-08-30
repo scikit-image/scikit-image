@@ -94,8 +94,8 @@ shift_scale = 1 / (np.exp(shiftc / klog))
 print(f"Expected value for cc rotation in degrees: {angle}")
 print(f"Recovered value for cc rotation: {shiftr}")
 print()
-print("Expected value for scaling difference: {}".format(scale))
-print("Recovered value for scaling difference: {}".format(shift_scale))
+print(f"Expected value for scaling difference: {scale}")
+print(f"Recovered value for scaling difference: {shift_scale}")
 
 ######################################################################
 # Register rotation and scaling on a translated image
@@ -109,24 +109,80 @@ print("Recovered value for scaling difference: {}".format(shift_scale))
 # resolve rotation and scaling differences for translated images by working on
 # the magnitude spectra of the fourier transformed images.
 
-from skimage.transform import warp
 from skimage.color import rgb2gray
-from scipy.ndimage import fourier_shift
+from skimage.exposure import rescale_intensity, equalize_hist
+from skimage import draw, filters
+from scipy.fftpack import fft2, fftshift
 
-angle = 30
-scale = 1.9
-shift = (40, 30)
+angle = 12
+scale = 1.2
+shiftr = 30
+shiftc = 15
+
+def create_image_pair(image, angle, scale, shiftr, shiftc):
+    translated = image[shiftr:, shiftc:]
+    rotated = rotate(translated, angle)
+    rescaled = rescale(rotated, scale)
+
+    shaper, shapec = image.shape
+    rts_image = rescaled[:shaper, :shapec]
+    return image, rts_image
 
 image = rgb2gray(data.retina())
-rotated = rotate(image, angle)
-rescaled = rescale(rotated, scale)
-# need to create translated image now
+image, rts_image = create_image_pair(image, angle=angle, scale=scale,
+                                     shiftr=shiftr, shiftc=shiftc)
 
+warped_image = warp_polar(image, scaling="log")
+warped_rts = warp_polar(rts_image, scaling="log")
 
-fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+# When center is not shared, log-polar transform is not helpful!
+fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
-ax[0].set_title("Original")
+ax[0].set_title("Original Image")
 ax[0].imshow(image)
-ax[1].set_title("Shifted Image")
-ax[1].imshow(full_shift)
+ax[1].set_title("Modified Image")
+ax[1].imshow(rts_image)
+ax[2].set_title("Log-Polar-Transformed Original")
+ax[2].imshow(warped_image)
+ax[3].set_title("Log-Polar-Transformed Modified")
+ax[3].imshow(warped_rts)
 plt.show()
+
+# Window the images and take the magnitude of the FFT
+
+def window_image(image, window_diameter=0.8, window_decay=10):
+    """window_diameter is relative to length of shortest axis
+    window_decay determines steepness of window edges (higher is steeper)"""
+    window_center = np.divide(image.shape, 2)
+    radius = (window_diameter * np.min(image.shape)) / 2
+    window = np.zeros_like(image)
+    rr, cc = draw.circle(window_center[0], window_center[1], radius)
+    window[rr, cc] = 1
+    window = filters.gaussian(window, sigma=(radius / window_decay))
+    return image * window
+
+image = window_image(image)
+rts_image = window_image(rts_image)
+
+plt.imshow(image)
+plt.imshow(rts_image)
+
+image_fs = np.abs(fftshift(fft2(image)))
+rts_fs = np.abs(fftshift(fft2(rts_image)))
+
+
+plt.imshow(np.log(image_fs))
+plt.imshow(np.log(rts_fs))
+
+warped_image_fs = warp_polar(image_fs, output_shape=image_fs.shape, scaling="log", order=0)
+warped_rts_fs = warp_polar(rts_fs, output_shape=rts_fs.shape, scaling="log", order=0)
+
+warped_image_fs = warped_image_fs[:int(warped_image_fs.shape[0]/2),400:1000]
+warped_rts_fs = warped_rts_fs[:int(warped_rts_fs.shape[0]/2),400:1000]
+
+plt.imshow(np.log(warped_image_fs))
+plt.imshow(np.log(warped_rts_fs))
+
+
+output = register_translation(warped_image_fs, warped_rts_fs, upsample_factor=50)
+print(output)
