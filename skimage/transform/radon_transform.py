@@ -4,7 +4,6 @@ from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
-from .._shared.utils import convert_to_float
 from warnings import warn
 
 if fftmodule is np.fft:
@@ -26,7 +25,7 @@ def radon(image, theta=None, circle=True):
 
     Parameters
     ----------
-    image : array_like
+    image : array_like, dtype=float
         Input image. The rotation axis will be located in the pixel with
         indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
     theta : array_like, dtype=float, optional
@@ -62,8 +61,6 @@ def radon(image, theta=None, circle=True):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
-
-    image = convert_to_float(image, preserve_range=True)
 
     if circle:
         radius = min(image.shape) // 2
@@ -110,14 +107,13 @@ def radon(image, theta=None, circle=True):
 
     def build_rotation(theta):
         T = np.deg2rad(theta)
-        c, s = np.cos(T), np.sin(T)
-        R = np.array([[c, s, 0],
-                      [-s, c, 0],
+        R = np.array([[np.cos(T), np.sin(T), 0],
+                      [-np.sin(T), np.cos(T), 0],
                       [0, 0, 1]])
         return shift1.dot(R).dot(shift0)
 
-    for i, t in enumerate(theta):
-        rotated = _warp_fast(padded_image, build_rotation(t))
+    for i in range(len(theta)):
+        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
