@@ -228,6 +228,9 @@ def check_random_state(seed):
 def convert_to_float(image, preserve_range):
     """Convert input image to float image with the appropriate range.
 
+    Floating point types will maintain their precision, while integer
+    types will be converted to double.
+
     Parameters
     ----------
     image : ndarray
@@ -241,6 +244,7 @@ def convert_to_float(image, preserve_range):
     -------
     image : ndarray
         Transformed version of the input.
+
     """
     if preserve_range:
         if image.dtype.char not in 'df':

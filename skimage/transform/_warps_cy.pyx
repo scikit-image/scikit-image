@@ -17,11 +17,11 @@ cdef inline void _transform_metric(floating x, floating y, floating* H,
 
     Parameters
     ----------
-    x, y : double
+    x, y : floating
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *floating
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *floating
         Output coordinate.
 
     """
@@ -35,11 +35,11 @@ cdef inline void _transform_affine(floating x, floating y, floating* H,
 
     Parameters
     ----------
-    x, y : double
+    x, y : floating
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *floating
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *floating
         Output coordinate.
 
     """
@@ -53,11 +53,11 @@ cdef inline void _transform_projective(floating x, floating y, floating* H,
 
     Parameters
     ----------
-    x, y : double
+    x, y : floating
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *floating
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *floating
         Output coordinate.
 
     """
