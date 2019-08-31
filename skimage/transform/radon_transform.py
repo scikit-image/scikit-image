@@ -26,10 +26,10 @@ def radon(image, theta=None, circle=True, preserve_range=False):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : array_like
         Input image. The rotation axis will be located in the pixel with
         indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
-    theta : array_like, dtype=float, optional
+    theta : array_like, optional
         Projection angles (in degrees). If `None`, the value is set to
         np.arange(180).
     circle : boolean, optional
