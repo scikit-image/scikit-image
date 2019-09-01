@@ -118,7 +118,7 @@ def radon(image, theta=None, circle=True, preserve_range=False):
         R = np.array([[c, s, 0],
                       [-s, c, 0],
                       [0, 0, 1]])
-        return shift1.dot(R).dot(shift0).astype(image.dtype)
+        return shift1.dot(R).dot(shift0)
 
     for i, t in enumerate(theta):
         rotated = _warp_fast(padded_image, build_rotation(t))
