@@ -227,7 +227,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         ndi.median_filter(image, block_size, output=thresh_image, mode=mode,
                           cval=cval)
     else:
-        raise ValueError("Invalid method specified. Please use ``generic``, "
+        raise ValueError("Invalid method specified. Please use `generic`, "
                          "`gaussian`, ``mean``, or `median`.")
 
     return thresh_image - offset
