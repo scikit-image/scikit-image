@@ -380,7 +380,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         beta = beta1
 
     if beta2:
-        warn('Use keyword parameter ``gamma`` instead of ``beta2`` which '
+        warn('Use keyword parameter `gamma` instead of `beta2` which '
              'will be removed in version 0.17.', stacklevel=2)
         gamma = beta2
 
