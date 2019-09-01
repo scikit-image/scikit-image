@@ -228,7 +228,7 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
                           cval=cval)
     else:
         raise ValueError("Invalid method specified. Please use `generic`, "
-                         "`gaussian`, ``mean``, or `median`.")
+                         "`gaussian`, `mean`, or `median`.")
 
     return thresh_image - offset
 
