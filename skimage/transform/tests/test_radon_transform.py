@@ -84,6 +84,7 @@ circles_for_test_radon_center = [False, True]
 dtype_for_test_radon_center = [np.float64, np.float32, np.uint8, bool]
 preserve_range_for_test_radon_center = [False, True]
 
+
 @testing.parametrize("shape, circle, dtype, preserve_range",
                      itertools.product(shapes_for_test_radon_center,
                                        circles_for_test_radon_center,
