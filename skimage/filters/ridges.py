@@ -385,7 +385,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         gamma = beta2
 
     if scale_range and scale_step:
-        warn('Use keyword parameter ``sigmas`` instead of ``scale_range`` and '
+        warn('Use keyword parameter `sigmas` instead of `scale_range` and '
              '`scale_range` which will be removed in version 0.17.',
              stacklevel=2)
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
