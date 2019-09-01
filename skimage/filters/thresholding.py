@@ -613,7 +613,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
                    .format(initial_guess, image_min, image_max))
             raise ValueError(msg)
     else:
-        raise TypeError('Incorrect type for ``initial_guess``; should be '
+        raise TypeError('Incorrect type for `initial_guess`; should be '
                         'a floating point value, or a function mapping an '
                         'array to a floating point value.')
 
