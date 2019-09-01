@@ -375,7 +375,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
     # Check deprecated keyword parameters
     if beta1:
-        warn('Use keyword parameter ``beta`` instead of ``beta1`` which '
+        warn('Use keyword parameter `beta` instead of `beta1` which '
              'will be removed in version 0.17.', stacklevel=2)
         beta = beta1
 
