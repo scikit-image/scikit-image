@@ -79,33 +79,20 @@ def check_radon_center(shape, circle, dtype, preserve_range):
     assert np.std(sinogram_max) < 1e-6
 
 
-shapes_for_test_radon_center = [(16, 16), (17, 17)]
-circles_for_test_radon_center = [False, True]
-dtype_for_test_radon_center = [np.float64, np.float32, np.uint8, bool]
-preserve_range_for_test_radon_center = [False, True]
-
-
-@testing.parametrize("shape, circle, dtype, preserve_range",
-                     itertools.product(shapes_for_test_radon_center,
-                                       circles_for_test_radon_center,
-                                       dtype_for_test_radon_center,
-                                       preserve_range_for_test_radon_center))
+@testing.parametrize("shape", [(16, 16), (17, 17)])
+@testing.parametrize("circle", [False, True])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
 def test_radon_center(shape, circle, dtype, preserve_range):
     check_radon_center(shape, circle, dtype, preserve_range)
 
 
-rectangular_shapes = [(32, 16), (33, 17)]
-dtype_for_test_radon_center = [np.float64, np.float32, np.uint8, bool]
-preserve_range_for_test_radon_center = [True, False]
-
-
-# @testing.parametrize("shape", rectangular_shapes)
-@testing.parametrize("shape, dtype, preserve_range",
-                     itertools.product(rectangular_shapes,
-                                       dtype_for_test_radon_center,
-                                       preserve_range_for_test_radon_center))
-def test_radon_center_rectangular(shape, dtype, preserve_range):
-    check_radon_center(shape, False, dtype, preserve_range)
+@testing.parametrize("shape", [(32, 16), (33, 17)])
+@testing.parametrize("circle", [False])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
+def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
+    check_radon_center(shape, circle, dtype, preserve_range)
 
 
 def check_iradon_center(size, theta, circle):
@@ -154,7 +141,7 @@ circles_for_test_iradon_center = [False, True]
 @testing.parametrize("size, theta, circle",
                      itertools.product(sizes_for_test_iradon_center,
                                        thetas_for_test_iradon_center,
-                                       circles_for_test_radon_center))
+                                       circles_for_test_iradon_center))
 def test_iradon_center(size, theta, circle):
     check_iradon_center(size, theta, circle)
 
