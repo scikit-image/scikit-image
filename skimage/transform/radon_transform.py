@@ -123,9 +123,9 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
 
     def build_rotation(theta):
         T = np.deg2rad(theta)
-        c, s = np.cos(T), np.sin(T)
-        R = np.array([[c, s, 0],
-                      [-s, c, 0],
+        cos_T, sin_T = np.cos(T), np.sin(T)
+        R = np.array([[cos_T, sin_T, 0],
+                      [-sin_T, cos_T, 0],
                       [0, 0, 1]])
         return shift1.dot(R).dot(shift0)
 
