@@ -19,7 +19,7 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, preserve_range=False):
+def radon(image, theta=None, circle=True, preserve_range=None):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -66,6 +66,11 @@ def radon(image, theta=None, circle=True, preserve_range=False):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
+
+    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
+        warn('Image dtype is not float. To keep old behavior, '
+             'set preserve_range to True.',
+             DeprecationWarning)
 
     image = convert_to_float(image, preserve_range)
 
