@@ -792,8 +792,9 @@ def rectangle(start, end=None, extent=None, shape=None):
     tl, br = _rectangle_slice(start=start, end=end, extent=extent)
 
     if shape is not None:
-        br = np.minimum(shape, br)
-        tl = np.maximum(np.zeros_like(shape), tl)
+        n_dim = len(start)
+        br = np.minimum(shape[0:n_dim], br)
+        tl = np.maximum(np.zeros_like(shape[0:n_dim]), tl)
     coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
                                                                tuple(br))])
     return coords
