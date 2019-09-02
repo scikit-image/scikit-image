@@ -1,7 +1,7 @@
 import numpy as np
 
 from scipy.interpolate import interp1d
-from ._warps_cy import _warp_fast
+from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
 from warnings import warn
@@ -62,26 +62,25 @@ def radon(image, theta=None, circle=True):
     if theta is None:
         theta = np.arange(180)
 
+    shape_min = min(image.shape)
+
     if circle:
-        radius = min(image.shape) // 2
-        c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
-        reconstruction_circle = ((c0 - image.shape[0] // 2) ** 2
-                                 + (c1 - image.shape[1] // 2) ** 2)
-        reconstruction_circle = reconstruction_circle <= radius ** 2
+        img_shape = np.array(image.shape)
+        radius = shape_min // 2
+        coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]])
+        dist = ((coords - img_shape // 2) ** 2).sum(0)
+        reconstruction_circle = dist <= radius ** 2
         if not np.all(reconstruction_circle | (image == 0)):
             warn('Radon transform: image must be zero outside the '
                  'reconstruction circle')
         # Crop image to make it square
-        slices = []
-        for d in (0, 1):
-            if image.shape[d] > min(image.shape):
-                excess = image.shape[d] - min(image.shape)
-                slices.append(slice(int(np.ceil(excess / 2)),
-                                    int(np.ceil(excess / 2)
-                                        + min(image.shape))))
+        slices = ()
+        for val in image.shape:
+            if val > shape_min:
+                start = int(np.ceil((val - shape_min) / 2))
+                slices += (slice(start, start + shape_min), )
             else:
-                slices.append(slice(None))
-        slices = tuple(slices)
+                slices += (slice(None), )
         padded_image = image[slices]
     else:
         diagonal = np.sqrt(2) * max(image.shape)
@@ -95,25 +94,21 @@ def radon(image, theta=None, circle=True):
     # padded_image is always square
     if padded_image.shape[0] != padded_image.shape[1]:
         raise ValueError('padded_image must be a square')
-    radon_image = np.zeros((padded_image.shape[0], len(theta)))
     center = padded_image.shape[0] // 2
 
-    shift0 = np.array([[1, 0, -center],
-                       [0, 1, -center],
-                       [0, 0, 1]])
-    shift1 = np.array([[1, 0, center],
-                       [0, 1, center],
-                       [0, 0, 1]])
+    shift0 = np.eye(3)
+    shift0[:2, 2] = -center
+    shift1 = np.eye(3)
+    shift1[:2, 2] = center
+    R = np.eye(3)
 
-    def build_rotation(theta):
-        T = np.deg2rad(theta)
-        R = np.array([[np.cos(T), np.sin(T), 0],
-                      [-np.sin(T), np.cos(T), 0],
-                      [0, 0, 1]])
-        return shift1.dot(R).dot(shift0)
-
-    for i in range(len(theta)):
-        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
+    radon_image = np.zeros((padded_image.shape[0], len(theta)))
+    for i, angle in enumerate(theta):
+        T = np.deg2rad(angle)
+        cos_T, sin_T = np.cos(T), np.sin(T)
+        R[:2, :2] = [[cos_T, sin_T],
+                     [-sin_T, cos_T]]
+        rotated = warp(padded_image, shift1.dot(R).dot(shift0))
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
