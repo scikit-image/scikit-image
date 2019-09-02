@@ -19,7 +19,7 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, preserve_range=None):
+def radon(image, theta=None, circle=True, *, preserve_range=None):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -68,9 +68,13 @@ def radon(image, theta=None, circle=True, preserve_range=None):
         theta = np.arange(180)
 
     if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. To keep old behavior, '
-             'set preserve_range to True.',
+        warn('Image dtype is not float. By default radon will assume'
+             'you want to preserve the range of your image'
+             '(preserve_range=True). In scikit-image 0.18 this behavior will'
+             'change to preserve_range=False. To avoid this warning,'
+             'explictiely specify the preserve_range parameter.',
              DeprecationWarning)
+        preserve_range = True
 
     image = convert_to_float(image, preserve_range)
 
