@@ -68,12 +68,12 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
         theta = np.arange(180)
 
     if preserve_range is None and np.issubdtype(image.dtype, np.integer):
-        warn('Image dtype is not float. By default radon will assume'
-             'you want to preserve the range of your image'
-             '(preserve_range=True). In scikit-image 0.18 this behavior will'
-             'change to preserve_range=False. To avoid this warning,'
+        warn('Image dtype is not float. By default radon will assume '
+             'you want to preserve the range of your image '
+             '(preserve_range=True). In scikit-image 0.18 this behavior will '
+             'change to preserve_range=False. To avoid this warning, '
              'explictiely specify the preserve_range parameter.',
-             DeprecationWarning)
+             stacklevel=2)
         preserve_range = True
 
     image = convert_to_float(image, preserve_range)
