@@ -38,6 +38,11 @@ Version 0.18
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 
+Version 0.19
+------------
+
+* Remove argument ``rotation`` in `skimage.draw.ellipse`.
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``

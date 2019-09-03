@@ -56,6 +56,10 @@ API Changes
 - Default value of ``order`` parameter has been set to ``rc`` in
   ``skimage.feature.hessian_matrix``.
 - ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
+- In `skimage.draw.ellipse`, the argument ``rotation`` will be replaced with
+``orientation`` in version 0.19.
+- In `skimage.draw.ellipse`, the argument ``orientation`` will come before
+the argument ``shape`` in version 0.19.
 
 
 Bugfixes

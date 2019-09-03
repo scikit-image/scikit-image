@@ -5,7 +5,7 @@ from ._draw import (_coords_inside_image, _line, _line_aa,
                     _polygon, _ellipse_perimeter,
                     _circle_perimeter, _circle_perimeter_aa,
                     _bezier_curve)
-
+from warnings import warn
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
     """Generate coordinates of points within ellipse bounded by shape.
@@ -41,27 +41,26 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
-    """Generate coordinates of pixels within ellipse.
+def ellipse(r, c, r_radius, c_radius, orientation=0, shape=None, rotation=None):
+    """Generate coordinates of pixels corresponding to an ellipse.
 
     Parameters
     ----------
-    r, c : double
-        Centre coordinate of ellipse.
-    r_radius, c_radius : double
-        Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
-    shape : tuple, optional
+    r, c : float
+        Center coordinate of the ellipse.
+    r_radius, c_radius : float
+        Semi-minor and semi-major axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
+    orientation : float, optional (default : 0)
+        Semi-major axis orientation in counter clockwise direction as radians.
+    shape : tuple, optional (default : None)
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extent of the ellipse are used.
-    rotation : float, optional (default 0.)
-        Set the ellipse rotation (rotation) in range (-PI, PI)
-        in contra clock wise direction, so PI/2 degree means swap ellipse axis
+        If None, the full extent of the ellipse are used.
 
     Returns
     -------
-    rr, cc : ndarray of int
-        Pixel coordinates of ellipse.
+    rr, cc : ndarray
+        Indices of pixels that belong to the ellipse.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
@@ -69,7 +68,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     --------
     >>> from skimage.draw import ellipse
     >>> img = np.zeros((10, 12), dtype=np.uint8)
-    >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
+    >>> rr, cc = ellipse(r=5, c=6, r_radius=3, c_radius=5,
+    ...                  orientation=1/6*np.pi)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -90,13 +90,14 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
         ((x * cos(alpha) + y * sin(alpha)) / x_radius) ** 2 +
         ((x * sin(alpha) - y * cos(alpha)) / y_radius) ** 2 = 1
 
+    Note that the positions of `ellipse` without specified `shape` can also
+    have negative values, as this is correct on the plane. On the other hand,
+    using these ellipse positions for an image afterwards may lead to a slice
+    of the ellipse to appear on the other side of image, since
+    ``image[-1, -1] = image[end-1, end-1]``. For instance,
 
-    Note that the positions of `ellipse` without specified `shape` can have
-    also, negative values, as this is correct on the plane. On the other hand
-    using these ellipse positions for an image afterwards may lead to appearing
-    on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
-
-    >>> rr, cc = ellipse(1, 2, 3, 6)
+    >>> parameters = (1, 2, 3, 6)
+    >>> rr, cc = ellipse(*parameters)
     >>> img = np.zeros((6, 12), dtype=np.uint8)
     >>> img[rr, cc] = 1
     >>> img
@@ -107,22 +108,33 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
+    # <-- Starting deprecation warnings: rotation -> orientation,
+    # shape <-> orientation.
+    if rotation is not None:
+        warn('The keyword rotation will be replaced with orientation in version '
+             '0.19.', DeprecationWarning, stacklevel=2)
+        orientation = rotation
+    if shape is not None or not isinstance(shape, tuple):
+        warn('The order of the keywords shape and orientation will be changed '
+             'in version 0.19.', FutureWarning, stacklevel=2)
+    # <-- Ending deprecation warnings: rotation -> orientation,
+    # shape <-> orientation.
 
     center = np.array([r, c])
     radii = np.array([r_radius, c_radius])
-    # allow just rotation with in range +/- 180 degree
-    rotation %= np.pi
+    # allow orientation only within range +/- pi
+    orientation %= np.pi
 
-    # compute rotated radii by given rotation
-    r_radius_rot = abs(r_radius * np.cos(rotation)) \
-                   + c_radius * np.sin(rotation)
-    c_radius_rot = r_radius * np.sin(rotation) \
-                   + abs(c_radius * np.cos(rotation))
+    # compute rotated radii by given orientation
+    r_radius_orientation = abs(r_radius * np.cos(orientation)) \
+                           + c_radius * np.sin(orientation)
+    c_radius_orientation = r_radius * np.sin(orientation) \
+                           + abs(c_radius * np.cos(orientation))
     # The upper_left and lower_right corners of the smallest rectangle
     # containing the ellipse.
-    radii_rot = np.array([r_radius_rot, c_radius_rot])
-    upper_left = np.ceil(center - radii_rot).astype(int)
-    lower_right = np.floor(center + radii_rot).astype(int)
+    radii_orientation = np.array([r_radius_orientation, c_radius_orientation])
+    upper_left = np.ceil(center - radii_orientation).astype(int)
+    lower_right = np.floor(center + radii_orientation).astype(int)
 
     if shape is not None:
         # Constrain upper_left and lower_right by shape boundary.
@@ -132,7 +144,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     shifted_center = center - upper_left
     bounding_shape = lower_right - upper_left + 1
 
-    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radii, rotation)
+    rr, cc = _ellipse_in_shape(bounding_shape, shifted_center, radii,
+                               orientation)
     rr.flags.writeable = True
     cc.flags.writeable = True
     rr += upper_left[0]
@@ -565,15 +578,15 @@ def circle_perimeter_aa(r, c, radius, shape=None):
 
 
 def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
-    """Generate ellipse perimeter coordinates.
+    """Generate coordinates of pixels for an ellipse perimeter.
 
     Parameters
     ----------
     r, c : int
-        Centre coordinate of ellipse.
+        Center coordinate of the ellipse.
     r_radius, c_radius : int
-        Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
-    orientation : double, optional
+        Minor and major semi-axes, where ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
+    orientation : float, optional
         Major axis orientation in clockwise direction as radians.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
@@ -582,7 +595,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
 
     Returns
     -------
-    rr, cc : (N,) ndarray of int
+    rr, cc : ndarray
         Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
