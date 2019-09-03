@@ -1,6 +1,7 @@
 import numpy as np
 
 from scipy.interpolate import interp1d
+from scipy.ndimage.measurements import find_objects
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
@@ -62,25 +63,18 @@ def radon(image, theta=None, circle=True):
     if theta is None:
         theta = np.arange(180)
 
-    shape_min = min(image.shape)
-
     if circle:
-        img_shape = np.array(image.shape)
+        shape_min = min(image.shape)
         radius = shape_min // 2
+        img_shape = np.array(image.shape)
         coords = np.array(np.ogrid[:image.shape[0], :image.shape[1]])
         dist = ((coords - img_shape // 2) ** 2).sum(0)
-        reconstruction_circle = dist <= radius ** 2
-        if not np.all(reconstruction_circle | (image == 0)):
+        outside_reconstruction_circle = dist > radius ** 2
+        if np.any(image[outside_reconstruction_circle]):
             warn('Radon transform: image must be zero outside the '
                  'reconstruction circle')
         # Crop image to make it square
-        slices = ()
-        for val in image.shape:
-            if val > shape_min:
-                start = int(np.ceil((val - shape_min) / 2))
-                slices += (slice(start, start + shape_min), )
-            else:
-                slices += (slice(None), )
+        slices = find_objects((~outside_reconstruction_circle).astype(int))[0]
         padded_image = image[slices]
     else:
         diagonal = np.sqrt(2) * max(image.shape)
@@ -91,24 +85,20 @@ def radon(image, theta=None, circle=True):
         pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
         padded_image = np.pad(image, pad_width, mode='constant',
                               constant_values=0)
+
     # padded_image is always square
     if padded_image.shape[0] != padded_image.shape[1]:
         raise ValueError('padded_image must be a square')
     center = padded_image.shape[0] // 2
-
-    shift0 = np.eye(3)
-    shift0[:2, 2] = -center
-    shift1 = np.eye(3)
-    shift1[:2, 2] = center
-    R = np.eye(3)
-
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
+
     for i, angle in enumerate(theta):
         T = np.deg2rad(angle)
         cos_T, sin_T = np.cos(T), np.sin(T)
-        R[:2, :2] = [[cos_T, sin_T],
-                     [-sin_T, cos_T]]
-        rotated = warp(padded_image, shift1.dot(R).dot(shift0))
+        R = np.array([[cos_T, sin_T, -center * (cos_T + sin_T - 1)],
+                      [-sin_T, cos_T, -center * (cos_T - sin_T - 1)],
+                      [0, 0, 1]])
+        rotated = warp(padded_image, R, clip=False)
         radon_image[:, i] = rotated.sum(0)
     return radon_image
 
@@ -121,6 +111,64 @@ def _sinogram_circle_to_square(sinogram):
     pad_before = new_center - old_center
     pad_width = ((pad_before, pad - pad_before), (0, 0))
     return np.pad(sinogram, pad_width, mode='constant', constant_values=0)
+
+
+def _get_fourier_filter(size, filter_name):
+    """Construct the Fourier filter
+
+    This computation lessens artifacts and removes a small bias as
+    explained in [1], Chap 3. Equation 61
+
+    Parameters
+    ----------
+    size: int
+        filter size.
+    filter_name: str, optional
+        Filter used in frequency domain filtering. Ramp filter used by
+        default.  Filters available: ramp, shepp-logan, cosine,
+        hamming, hann.  Assign None to use no filter.
+
+    Returns
+    -------
+        fourier_filter: ndarray
+            The computed Fourier filter.
+
+    References
+    ----------
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
+           Imaging", IEEE Press 1988.
+
+    """
+    n = np.concatenate((np.arange(0, size / 2 + 1, dtype=np.int),
+                        np.arange(size / 2 - 1, 0, -1, dtype=np.int)))
+    f = np.zeros(size)
+    f[0] = 0.25
+    f[1::2] = -1 / (np.pi * n[1::2])**2
+
+    # Computing the ramp filter from the fourier transform of its
+    # frequency domain representation lessens artifacts and removes a
+    # small bias as explained in [1], Chap 3. Equation 61
+    fourier_filter = 2 * np.real(fft(f))         # ramp filter
+    if filter_name == "ramp":
+        pass
+    elif filter_name == "shepp-logan":
+        # Start from first element to avoid divide by zero
+        omega = np.pi * fftmodule.fftfreq(size)
+        fourier_filter[1:] *= np.sin(omega[1:]) / (omega[1:])
+    elif filter_name == "cosine":
+        freq = np.linspace(0, 1, size, endpoint=False)
+        cosine_filter = fftmodule.fftshift(np.sin(np.pi * freq))
+        fourier_filter *= cosine_filter
+    elif filter_name == "hamming":
+        hamming_filter = fftmodule.fftshift(np.hamming(size))
+        fourier_filter *= hamming_filter
+    elif filter_name == "hann":
+        hanning_filter = fftmodule.fftshift(np.hanning(size))
+        fourier_filter *= hanning_filter
+    elif filter_name is None:
+        fourier_filter[:] = 1
+
+    return fourier_filter[:, np.newaxis]
 
 
 def iradon(radon_image, theta=None, output_size=None,
@@ -180,101 +228,66 @@ def iradon(radon_image, theta=None, output_size=None,
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
+
     if theta is None:
-        m, n = radon_image.shape
-        theta = np.linspace(0, 180, n, endpoint=False)
-    else:
-        theta = np.asarray(theta)
-    if len(theta) != radon_image.shape[1]:
+        theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
+
+    angles_count = len(theta)
+    if angles_count != radon_image.shape[1]:
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
+
     interpolation_types = ('linear', 'nearest', 'cubic')
     if interpolation not in interpolation_types:
         raise ValueError("Unknown interpolation: %s" % interpolation)
-    if not output_size:
+
+    filter_types = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None]
+    if filter not in filter_types:
+        raise ValueError("Unknown filter: %s" % filter)
+
+    img_shape = radon_image.shape[0]
+    if output_size is None:
         # If output size not specified, estimate from input radon image
         if circle:
-            output_size = radon_image.shape[0]
+            output_size = img_shape
         else:
-            output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2
-                                               / 2.0)))
+            output_size = int(np.floor(np.sqrt((img_shape) ** 2 / 2.0)))
+
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
+        img_shape = radon_image.shape[0]
 
-    th = (np.pi / 180.0) * theta
-    # resize image to next power of two (but no less than 64) for
+    # Resize image to next power of two (but no less than 64) for
     # Fourier analysis; speeds up Fourier and lessens artifacts
-    projection_size_padded = \
-        max(64, int(2 ** np.ceil(np.log2(2 * radon_image.shape[0]))))
-    pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
+    projection_size_padded = max(64, int(2 ** np.ceil(np.log2(2 * img_shape))))
+    pad_width = ((0, projection_size_padded - img_shape), (0, 0))
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
-    # Construct the Fourier filter
-    # This computation lessens artifacts and removes a small bias as
-    # explained in [1], Chap 3. Equation 61
-    n1 = np.arange(0, projection_size_padded / 2 + 1, dtype=np.int)
-    n2 = np.arange(projection_size_padded / 2 - 1, 0, -1, dtype=np.int)
-    n = np.concatenate((n1, n2))
-    f = np.zeros(projection_size_padded)
-    f[0] = 0.25
-    f[1::2] = -1 / (np.pi * n[1::2])**2
-
-    # Computing the ramp filter from the fourier transform of is frequency domain representation
-    # lessens artifacts and removes a small bias as explained in [1], Chap 3. Equation 61
-    fourier_filter = 2 * np.real(fft(f))         # ramp filter
-    omega = 2 * np.pi * fftmodule.fftfreq(projection_size_padded)
-    if filter == "ramp":
-        pass
-    elif filter == "shepp-logan":
-        # Start from first element to avoid divide by zero
-        fourier_filter[1:] *= np.sin(omega[1:] / 2) / (omega[1:] / 2)
-    elif filter == "cosine":
-        freq = (0.5 * np.arange(0, projection_size_padded)
-                / projection_size_padded)
-        cosine_filter = fftmodule.fftshift(np.sin(2 * np.pi * np.abs(freq)))
-        fourier_filter *= cosine_filter
-    elif filter == "hamming":
-        hamming_filter = fftmodule.fftshift(np.hamming(projection_size_padded))
-        fourier_filter *= hamming_filter
-    elif filter == "hann":
-        hanning_filter = fftmodule.fftshift(np.hanning(projection_size_padded))
-        fourier_filter *= hanning_filter
-    elif filter is None:
-        fourier_filter[:] = 1
-    else:
-        raise ValueError("Unknown filter: %s" % filter)
     # Apply filter in Fourier domain
-    projection = fft(img, axis=0) * fourier_filter[:, np.newaxis]
-    radon_filtered = np.real(ifft(projection, axis=0))
-
-    # Resize filtered image back to original size
-    radon_filtered = radon_filtered[:radon_image.shape[0], :]
-    reconstructed = np.zeros((output_size, output_size))
-    # Determine the center of the projections (= center of sinogram)
-    mid_index = radon_image.shape[0] // 2
-
-    [X, Y] = np.mgrid[0:output_size, 0:output_size]
-    xpr = X - int(output_size) // 2
-    ypr = Y - int(output_size) // 2
+    fourier_filter = _get_fourier_filter(projection_size_padded, filter)
+    projection = fft(img, axis=0) * fourier_filter
+    radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
     # Reconstruct image by interpolation
-    for i in range(len(theta)):
-        t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
-        x = np.arange(radon_filtered.shape[0]) - mid_index
-        if interpolation == 'linear':
-            backprojected = np.interp(t, x, radon_filtered[:, i],
-                                      left=0, right=0)
-        else:
-            interpolant = interp1d(x, radon_filtered[:, i], kind=interpolation,
-                                   bounds_error=False, fill_value=0)
-            backprojected = interpolant(t)
-        reconstructed += backprojected
-    if circle:
-        radius = output_size // 2
-        reconstruction_circle = (xpr ** 2 + ypr ** 2) <= radius ** 2
-        reconstructed[~reconstruction_circle] = 0.
+    reconstructed = np.zeros((output_size, output_size))
+    radius = output_size // 2
+    xpr, ypr = np.mgrid[:output_size, :output_size] - radius
+    x = np.arange(img_shape) - img_shape // 2
 
-    return reconstructed * np.pi / (2 * len(th))
+    for col, angle in zip(radon_filtered.T, np.deg2rad(theta)):
+        t = ypr * np.cos(angle) - xpr * np.sin(angle)
+        if interpolation == 'linear':
+            reconstructed += np.interp(t, x, col, left=0, right=0)
+        else:
+            interpolant = interp1d(x, col, kind=interpolation,
+                                   bounds_error=False, fill_value=0)
+            reconstructed += interpolant(t)
+
+    if circle:
+        out_reconstruction_circle = (xpr ** 2 + ypr ** 2) > radius ** 2
+        reconstructed[out_reconstruction_circle] = 0.
+
+    return reconstructed * np.pi / (2 * angles_count)
 
 
 def order_angles_golden_ratio(theta):
