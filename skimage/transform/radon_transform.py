@@ -6,6 +6,7 @@ from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
 from warnings import warn
+from functools import partial
 
 if fftmodule is np.fft:
     # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
@@ -277,11 +278,11 @@ def iradon(radon_image, theta=None, output_size=None,
     for col, angle in zip(radon_filtered.T, np.deg2rad(theta)):
         t = ypr * np.cos(angle) - xpr * np.sin(angle)
         if interpolation == 'linear':
-            reconstructed += np.interp(t, x, col, left=0, right=0)
+            interpolant = partial(np.interp, xp=x, fp=col, left=0, right=0)
         else:
             interpolant = interp1d(x, col, kind=interpolation,
                                    bounds_error=False, fill_value=0)
-            reconstructed += interpolant(t)
+        reconstructed += interpolant(t)
 
     if circle:
         out_reconstruction_circle = (xpr ** 2 + ypr ** 2) > radius ** 2
