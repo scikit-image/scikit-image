@@ -139,11 +139,11 @@ def _get_fourier_filter(size, filter_name):
            Imaging", IEEE Press 1988.
 
     """
-    n = np.concatenate((np.arange(0, size / 2 + 1, dtype=np.int),
-                        np.arange(size / 2 - 1, 0, -1, dtype=np.int)))
+    n = np.concatenate((np.arange(1, size / 2 + 1, 2, dtype=np.int),
+                        np.arange(size / 2 - 1, 0, -2, dtype=np.int)))
     f = np.zeros(size)
     f[0] = 0.25
-    f[1::2] = -1 / (np.pi * n[1::2])**2
+    f[1::2] = -1 / (np.pi * n) ** 2
 
     # Computing the ramp filter from the fourier transform of its
     # frequency domain representation lessens artifacts and removes a
@@ -153,18 +153,16 @@ def _get_fourier_filter(size, filter_name):
         pass
     elif filter_name == "shepp-logan":
         # Start from first element to avoid divide by zero
-        omega = np.pi * fftmodule.fftfreq(size)
-        fourier_filter[1:] *= np.sin(omega[1:]) / (omega[1:])
+        omega = np.pi * fftmodule.fftfreq(size)[1:]
+        fourier_filter[1:] *= np.sin(omega) / omega
     elif filter_name == "cosine":
-        freq = np.linspace(0, 1, size, endpoint=False)
-        cosine_filter = fftmodule.fftshift(np.sin(np.pi * freq))
+        freq = np.pi * np.linspace(0, 1, size, endpoint=False)
+        cosine_filter = fftmodule.fftshift(np.sin(freq))
         fourier_filter *= cosine_filter
     elif filter_name == "hamming":
-        hamming_filter = fftmodule.fftshift(np.hamming(size))
-        fourier_filter *= hamming_filter
+        fourier_filter *= fftmodule.fftshift(np.hamming(size))
     elif filter_name == "hann":
-        hanning_filter = fftmodule.fftshift(np.hanning(size))
-        fourier_filter *= hanning_filter
+        fourier_filter *= fftmodule.fftshift(np.hanning(size))
     elif filter_name is None:
         fourier_filter[:] = 1
 
