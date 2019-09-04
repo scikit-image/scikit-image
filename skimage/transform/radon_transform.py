@@ -93,8 +93,7 @@ def radon(image, theta=None, circle=True):
     center = padded_image.shape[0] // 2
     radon_image = np.zeros((padded_image.shape[0], len(theta)))
 
-    for i, angle in enumerate(theta):
-        T = np.deg2rad(angle)
+    for i, T in enumerate(np.deg2rad(theta)):
         cos_T, sin_T = np.cos(T), np.sin(T)
         R = np.array([[cos_T, sin_T, -center * (cos_T + sin_T - 1)],
                       [-sin_T, cos_T, -center * (cos_T - sin_T - 1)],
