@@ -1,14 +1,15 @@
 def fft(x,n=None,axis=1,overwrite_x=False):
-    from .._shared.fft import fftmodule
+    from .._shared.fft import fftmodule #shared fft /module/ for np and scipy
+                                        #likely a better way to just hijack the existing failover
     try:
         import gputools.fft
-        if (overwrite_x == True and n == None):
+        if (overwrite_x == True and n == None): # the only conditions that gputools supports
             print("using gpu")
             return gputools.fft(x)
         else:
-            print("falling back to fftmodule")
+            print("falling back to fftmodule") 
             return fftmodule.fftn(x,n,axis,overwrite_x)
-    except ImportError:
+    except ImportError: # instant fallback
         return fftmodule.fftn(x,n,axis,overwrite_x)
 
 def fftconvolve():
