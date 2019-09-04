@@ -1,3 +1,29 @@
+Announcement: scikit-image 0.14.4
+=================================
+
+We're happy to announce the release of scikit-image v0.14.4!
+
+As a reminder, 0.14.x is the final version of scikit-image with support for
+Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
+are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
+This is a bugfix release, and contains the following changes from v0.14.3:
+
+Bug Fixes
+---------
+- Fix float32 support in denoise_bilateral and denoise_tv_bregman (#3937)
+- Fixup test for RANSAC: don't pick duplicate samples #3901 (#3916)
+
+Other Pull Requests
+-------------------
+- Backport PR #3943 on branch v0.14.x (Update the joblib link in tutorial_parallelization.rst) (#3944)
+
+3 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Alexandre de Siqueira
+- Juan Nunez-Iglesias
+- Mark Harfouche
+
 Announcement: scikit-image 0.14.3
 =================================
 
