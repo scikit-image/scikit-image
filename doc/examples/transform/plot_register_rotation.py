@@ -110,7 +110,6 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # the magnitude spectra of the fourier transformed images.
 
 from skimage.color import rgb2gray
-from skimage.exposure import rescale_intensity, equalize_hist
 from skimage import draw, filters
 from scipy.fftpack import fft2, fftshift
 
@@ -119,14 +118,15 @@ scale = 1.2
 shiftr = 30
 shiftc = 15
 
+
 def create_image_pair(image, angle, scale, shiftr, shiftc):
     translated = image[shiftr:, shiftc:]
     rotated = rotate(translated, angle)
     rescaled = rescale(rotated, scale)
-
     shaper, shapec = image.shape
     rts_image = rescaled[:shaper, :shapec]
     return image, rts_image
+
 
 image = rgb2gray(data.retina())
 image, rts_image = create_image_pair(image, angle=angle, scale=scale,
@@ -148,8 +148,16 @@ ax[3].set_title("Log-Polar-Transformed Modified")
 ax[3].imshow(warped_rts)
 plt.show()
 
-# Window the images and take the magnitude of the FFT
+# Use a difference of gaussians approach to enhance image features
+def dog(image, sigma1, sigma2):
+    image = filters.gaussian(image, sigma1) - filters.gaussian(image, sigma2)
+    return image
 
+
+image = dog(image, 5, 20)
+rts_image = dog(rts_image, 5, 20)
+
+# Window the images and take the magnitude of the FFT
 def window_image(image, window_diameter=0.8, window_decay=10):
     """window_diameter is relative to length of shortest axis
     window_decay determines steepness of window edges (higher is steeper)"""
@@ -161,28 +169,21 @@ def window_image(image, window_diameter=0.8, window_decay=10):
     window = filters.gaussian(window, sigma=(radius / window_decay))
     return image * window
 
+
 image = window_image(image)
 rts_image = window_image(rts_image)
-
-plt.imshow(image)
-plt.imshow(rts_image)
-
 image_fs = np.abs(fftshift(fft2(image)))
 rts_fs = np.abs(fftshift(fft2(rts_image)))
 
+shape = image_fs.shape
+radius = shape[0] / 8
+warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
+                             scaling='log', order=0)
+warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
+                           scaling='log', order=0)
 
-plt.imshow(np.log(image_fs))
-plt.imshow(np.log(rts_fs))
-
-warped_image_fs = warp_polar(image_fs, output_shape=image_fs.shape, scaling="log", order=0)
-warped_rts_fs = warp_polar(rts_fs, output_shape=rts_fs.shape, scaling="log", order=0)
-
-warped_image_fs = warped_image_fs[:int(warped_image_fs.shape[0]/2),400:1000]
-warped_rts_fs = warped_rts_fs[:int(warped_rts_fs.shape[0]/2),400:1000]
-
-plt.imshow(np.log(warped_image_fs))
-plt.imshow(np.log(warped_rts_fs))
-
-
-output = register_translation(warped_image_fs, warped_rts_fs, upsample_factor=50)
+warped_image_fs = warped_image_fs[:int(shape[0]/2), :]
+warped_rts_fs = warped_rts_fs[:int(shape[0]/2), :]
+output = register_translation(warped_image_fs, warped_rts_fs,
+                              upsample_factor=10)
 print(output)

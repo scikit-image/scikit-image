@@ -272,3 +272,6 @@
 
 - Taylor D. Scott
   Simplified _upsampled_dft and extended register_translation to nD images.
+
+- David J. Mellert
+  polar and log-polar warping
