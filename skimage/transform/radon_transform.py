@@ -324,28 +324,29 @@ def order_angles_golden_ratio(theta):
     """
     interval = 180
 
-    def angle_distance(a, b):
-        difference = a - b
-        return min(abs(difference % interval), abs(difference % -interval))
-
-    remaining = list(np.argsort(theta))   # indices into theta
+    remaining_indices = list(np.argsort(theta))   # indices into theta
     # yield an arbitrary angle to start things off
-    index = remaining.pop(0)
-    angle = theta[index]
-    yield index
+    angle = theta[remaining_indices[0]]
+    yield remaining_indices.pop(0)
     # determine subsequent angles using the golden ratio method
     angle_increment = interval * (1 - (np.sqrt(5) - 1) / 2)
-    while remaining:
+    while remaining_indices:
+        remaining_angles = theta[remaining_indices]
         angle = (angle + angle_increment) % interval
-        insert_point = np.searchsorted(theta[remaining], angle)
-        index_below = insert_point - 1
-        index_above = 0 if insert_point == len(remaining) else insert_point
-        distance_below = angle_distance(angle, theta[remaining[index_below]])
-        distance_above = angle_distance(angle, theta[remaining[index_above]])
+        index_above = np.searchsorted(remaining_angles, angle)
+        index_below = index_above - 1
+        index_above %= len(remaining_indices)
+
+        diff_below = abs(angle - remaining_angles[index_below])
+        distance_below = min(diff_below % interval, diff_below % -interval)
+
+        diff_above = abs(angle - remaining_angles[index_above])
+        distance_above = min(diff_above % interval, diff_above % -interval)
+
         if distance_below < distance_above:
-            yield remaining.pop(index_below)
+            yield remaining_indices.pop(index_below)
         else:
-            yield remaining.pop(index_above)
+            yield remaining_indices.pop(index_above)
 
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
