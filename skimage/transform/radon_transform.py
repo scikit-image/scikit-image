@@ -2,6 +2,7 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 from scipy.ndimage.measurements import find_objects
+from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
@@ -325,7 +326,7 @@ def order_angles_golden_ratio(theta):
     angle = theta[remaining_indices[0]]
     yield remaining_indices.pop(0)
     # determine subsequent angles using the golden ratio method
-    angle_increment = interval * (1 - (np.sqrt(5) - 1) / 2)
+    angle_increment = interval / golden_ratio ** 2
     while remaining_indices:
         remaining_angles = theta[remaining_indices]
         angle = (angle + angle_increment) % interval
