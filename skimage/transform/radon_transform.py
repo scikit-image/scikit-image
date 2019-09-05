@@ -21,8 +21,7 @@ __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
 def radon(image, theta=None, circle=True):
-    """
-    Calculates the radon transform of an image given specified
+    """Calculates the radon transform of an image given specified
     projection angles.
 
     Parameters
@@ -124,9 +123,9 @@ def _get_fourier_filter(size, filter_name):
     size: int
         filter size.
     filter_name: str
-        Filter used in frequency domain filtering. Ramp filter used by
-        default. Filters available: ramp, shepp-logan, cosine,
-        hamming, hann. Assign None to use no filter.
+        Filter used in frequency domain filtering. Filters available:
+        ramp, shepp-logan, cosine, hamming, hann. Assign None to use
+        no filter.
 
     Returns
     -------
@@ -171,8 +170,7 @@ def _get_fourier_filter(size, filter_name):
 
 def iradon(radon_image, theta=None, output_size=None,
            filter="ramp", interpolation="linear", circle=True):
-    """
-    Inverse radon transform.
+    """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
     back projection algorithm.
@@ -181,9 +179,9 @@ def iradon(radon_image, theta=None, output_size=None,
     ----------
     radon_image : array_like, dtype=float
         Image containing radon transform (sinogram). Each column of
-        the image corresponds to a projection along a different angle. The
-        tomography rotation axis should lie at the pixel index
-        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        the image corresponds to a projection along a different
+        angle. The tomography rotation axis should lie at the pixel
+        index ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
@@ -289,9 +287,8 @@ def iradon(radon_image, theta=None, output_size=None,
 
 
 def order_angles_golden_ratio(theta):
-    """
-    Order angles to reduce the amount of correlated information
-    in subsequent projections.
+    """Order angles to reduce the amount of correlated information in
+    subsequent projections.
 
     Parameters
     ----------
@@ -319,6 +316,7 @@ def order_angles_golden_ratio(theta):
     .. [2] Winkelmann, Stefanie, et al. "An optimal radial profile order
            based on the Golden Ratio for time-resolved MRI."
            Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
+
     """
     interval = 180
 
@@ -349,8 +347,7 @@ def order_angles_golden_ratio(theta):
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                 clip=None, relaxation=0.15):
-    """
-    Inverse radon transform
+    """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using a single iteration of
     the Simultaneous Algebraic Reconstruction Technique (SART) algorithm.
@@ -419,6 +416,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
            Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
     .. [5] Kaczmarz' method, Wikipedia,
            https://en.wikipedia.org/wiki/Kaczmarz_method
+
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')
