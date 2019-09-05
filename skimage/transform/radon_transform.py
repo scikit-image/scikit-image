@@ -155,7 +155,7 @@ def _get_fourier_filter(size, filter_name):
         omega = np.pi * fftmodule.fftfreq(size)[1:]
         fourier_filter[1:] *= np.sin(omega) / omega
     elif filter_name == "cosine":
-        freq = np.pi * np.linspace(0, 1, size, endpoint=False)
+        freq = np.linspace(0, np.pi, size, endpoint=False)
         cosine_filter = fftmodule.fftshift(np.sin(freq))
         fourier_filter *= cosine_filter
     elif filter_name == "hamming":
