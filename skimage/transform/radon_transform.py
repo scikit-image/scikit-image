@@ -121,7 +121,7 @@ def _get_fourier_filter(size, filter_name):
     Parameters
     ----------
     size: int
-        filter size.
+        filter size. Must be even.
     filter_name: str
         Filter used in frequency domain filtering. Filters available:
         ramp, shepp-logan, cosine, hamming, hann. Assign None to use
