@@ -114,24 +114,24 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def _get_fourier_filter(size, filter_name):
-    """Construct the Fourier filter
+    """Construct the Fourier filter.
 
     This computation lessens artifacts and removes a small bias as
-    explained in [1], Chap 3. Equation 61
+    explained in [1], Chap 3. Equation 61.
 
     Parameters
     ----------
     size: int
         filter size.
-    filter_name: str, optional
+    filter_name: str
         Filter used in frequency domain filtering. Ramp filter used by
-        default.  Filters available: ramp, shepp-logan, cosine,
-        hamming, hann.  Assign None to use no filter.
+        default. Filters available: ramp, shepp-logan, cosine,
+        hamming, hann. Assign None to use no filter.
 
     Returns
     -------
-        fourier_filter: ndarray
-            The computed Fourier filter.
+    fourier_filter: ndarray
+        The computed Fourier filter.
 
     References
     ----------
@@ -239,7 +239,7 @@ def iradon(radon_image, theta=None, output_size=None,
     if interpolation not in interpolation_types:
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
-    filter_types = ['ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None]
+    filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
     if filter not in filter_types:
         raise ValueError("Unknown filter: %s" % filter)
 
