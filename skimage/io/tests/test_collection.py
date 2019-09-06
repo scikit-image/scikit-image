@@ -23,9 +23,24 @@ def test_string_sort():
     sorted_filenames = sorted(filenames, key=alphanumeric_key)
     assert_equal(sorted_filenames, sorted_filenames)
 
+def test_imagecollection_input():
+    """Test function for ImageCollection. The new behavior (implemented
+    in 0.16) allows the `pattern` argument to accept a list of strings
+    as the input.
+
+    Notes
+    -----
+        If correct, `images` will receive three images.
+    """
+    pattern = [os.path.join(data_dir, pic)
+               for pic in ['palette_gray.png',
+                           'chessboard_GRAY_U16.tif',
+                           'rocket.jpg']]
+    images = ImageCollection(pattern)
+    assert len(images) == 3
+
 
 class TestImageCollection(TestCase):
-
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png']]
 
@@ -87,6 +102,6 @@ class TestImageCollection(TestCase):
         expected_shape = (len(self.images_matched),) + self.images[0].shape
         assert_equal(array.shape, expected_shape)
 
-    def test_concatentate_mismatched_image_shapes(self):
+    def test_concatenate_mismatched_image_shapes(self):
         with testing.raises(ValueError):
             self.images.concatenate()
