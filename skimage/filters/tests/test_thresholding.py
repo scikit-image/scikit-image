@@ -290,6 +290,20 @@ def test_li_constant_image_with_nan():
     assert threshold_li(image) == 8
 
 
+def test_li_pathological_arrays():
+    # See https://github.com/scikit-image/scikit-image/issues/4140
+    a = np.array([0, 0, 1, 0, 0, 1, 0, 1])
+    b = np.array([0, 0, 0.1, 0, 0, 0.1, 0, 0.1])
+    c = np.array([0, 0, 0.1, 0, 0, 0.1, 0.01, 0.1])
+    d = np.array([0, 0, 1, 0, 0, 1, 0.5, 1])
+    e = np.array([1, 1])
+    f = np.array([1, 2])
+    arrays = [a, b, c, d, e, f]
+    thresholds = [threshold_li(arr) for arr in arrays]
+    print(thresholds)
+    assert np.all(np.isfinite(thresholds))
+
+
 def test_yen_camera_image():
     camera = skimage.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
