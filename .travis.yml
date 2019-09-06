@@ -5,6 +5,9 @@
 
 # See tools/travis/notes.txt for some guidelines
 
+# If this is ever changed to xenial (Ubuntu 16.04), make sure to enable the
+# xvfb service
+dist: trusty
 language: python
 sudo: false
 cache:
