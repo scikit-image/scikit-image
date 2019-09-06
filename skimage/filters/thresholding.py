@@ -581,6 +581,10 @@ def threshold_li(image):
     tolerance = np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate
+    # it is important that t_next "straddles" some data, ie it should be
+    # greater than or equal to the min and less than or equal to the max.
+    # see https://github.com/scikit-image/scikit-image/issues/4140
+    # t_curr should be more than tolerance away from t_next.
     t_next = np.mean(image)
     t_curr = t_next - 2 * tolerance
 
