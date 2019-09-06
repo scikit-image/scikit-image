@@ -581,8 +581,8 @@ def threshold_li(image):
     tolerance = np.min(np.diff(np.unique(image))) / 2
 
     # Initial estimate
-    t_curr = np.mean(image)
-    t_next = t_curr + 2 * tolerance
+    t_next = np.mean(image)
+    t_curr = t_next - 2 * tolerance
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
