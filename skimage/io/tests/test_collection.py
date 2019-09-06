@@ -23,6 +23,7 @@ def test_string_sort():
     sorted_filenames = sorted(filenames, key=alphanumeric_key)
     assert_equal(sorted_filenames, sorted_filenames)
 
+
 def test_imagecollection_input():
     """Test function for ImageCollection. The new behavior (implemented
     in 0.16) allows the `pattern` argument to accept a list of strings

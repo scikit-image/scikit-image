@@ -121,7 +121,7 @@ class ImageCollection(object):
 
     Notes
     -----
-    Note that files are always stored in alphanumerical order. Also note
+    Note that files are always returned in alphanumerical order. Also note
     that slicing returns a new ImageCollection, *not* a view into the data.
 
     If multiple patterns are entered as a single string, they should be
