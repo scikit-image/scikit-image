@@ -130,8 +130,6 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 2',
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.4',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Topic :: Scientific/Engineering',
@@ -142,7 +140,7 @@ if __name__ == "__main__":
         ],
         install_requires=INSTALL_REQUIRES,
         requires=REQUIRES,
-        python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+        python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*',
         packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False,  # the package can run out of an .egg file

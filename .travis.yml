@@ -5,6 +5,9 @@
 
 # See tools/travis/notes.txt for some guidelines
 
+# If this is ever changed to xenial (Ubuntu 16.04), make sure to enable the
+# xvfb service
+dist: trusty
 language: python
 sudo: false
 cache:
@@ -40,7 +43,6 @@ notifications:
 
 matrix:
   include:
-    # 2.7 build (until 0.14 is release)
     - os: linux
       python: 2.7
       env: WITH_PYAMG=1 QT=PyQt4
@@ -50,10 +52,6 @@ matrix:
     - os: linux
       python: 2.7
       env: MINIMUM_REQUIREMENTS=1
-    - os: linux
-      python: 3.4
-    - os: linux
-      python: 3.5
     - os: linux
       python: 3.6
       env: QT=PyQt5 WITH_PYAMG=1 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
@@ -71,6 +69,12 @@ matrix:
     # what we set in the wheel generation travis images.
     # If not set, it will use the default version from Travis
     # https://docs.travis-ci.com/user/reference/osx/#xcode-version
+    - os: linux
+      python: 3.7
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      services:
+        - xvfb
     - os: osx
       osx_image: xcode9.4
       language: objective-c
