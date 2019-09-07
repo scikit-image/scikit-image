@@ -326,7 +326,6 @@ def test_li_pathological_arrays():
     f = np.array([1, 2])
     arrays = [a, b, c, d, e, f]
     thresholds = [threshold_li(arr) for arr in arrays]
-    print(thresholds)
     assert np.all(np.isfinite(thresholds))
 
 
