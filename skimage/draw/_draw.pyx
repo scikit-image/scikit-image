@@ -2,41 +2,11 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import math
 import numpy as np
 
 cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
-
-
-def _coords_inside_image(rr, cc, shape, val=None):
-    """
-    Return the coordinates inside an image of a given shape.
-
-    Parameters
-    ----------
-    rr, cc : (N,) ndarray of int
-        Indices of pixels.
-    shape : tuple
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates.  Must be at least length 2. Only the first two values
-        are used to determine the extent of the input image.
-    val : (N, D) ndarray of float, optional
-        Values of pixels at coordinates ``[rr, cc]``.
-
-    Returns
-    -------
-    rr, cc : (M,) array of int
-        Row and column indices of valid pixels (i.e. those inside `shape`).
-    val : (M, D) array of float, optional
-        Values at `rr, cc`. Returned only if `val` is given as input.
-    """
-    mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
-    if val is None:
-        return rr[mask], cc[mask]
-    else:
-        return rr[mask], cc[mask], val[mask]
 
 
 def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
@@ -247,31 +217,21 @@ def _polygon(r, c, shape):
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
-                      method, shape):
-    """Generate circle perimeter coordinates.
+def _circle_perimeter(Py_ssize_t radius, method):
+    """Generate circle perimeter coordinates around point (0, 0).
 
     Parameters
     ----------
-    r_o, c_o : int
-        Centre coordinate of circle.
     radius : int
-        Radius of circle.
+        Radius of the circle.
     method : {'bresenham', 'andres'}
-        bresenham : Bresenham method (default)
-        andres : Andres method
-    shape : tuple
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for circles that exceed the image size.
-        If None, the full extent of the circle is used.
+        The method to use (see notes).
 
     Returns
     -------
     rr, cc : (N,) ndarray of int
-        Bresenham and Andres' method:
-        Indices of pixels that belong to the circle perimeter.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        Indices of pixels that belong to the circle perimeter. Negative values
+        are likely.
 
     Notes
     -----
@@ -288,16 +248,11 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     .. [2] E. Andres, "Discrete circles, rings and spheres", Computers &
            Graphics, 18 (1994) 695-706.
     """
-
     cdef list rr = list()
     cdef list cc = list()
-
     cdef Py_ssize_t c = 0
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
-
-    cdef double dceil = 0
-    cdef double dceil_prev = 0
 
     cdef char cmethod
     if method == 'bresenham':
@@ -332,34 +287,22 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
                 r = r - 1
                 c = c + 1
 
-    if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp) + r_o,
-                                    np.array(cc, dtype=np.intp) + c_o,
-                                    shape)
-    return (np.array(rr, dtype=np.intp) + r_o,
-            np.array(cc, dtype=np.intp) + c_o)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
-def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
-                         Py_ssize_t radius, shape):
-    """Generate anti-aliased circle perimeter coordinates.
+def _circle_perimeter_aa(Py_ssize_t radius):
+    """Generate anti-aliased circle perimeter coordinates around (0, 0).
 
     Parameters
     ----------
-    r_o, c_o : int
-        Centre coordinate of circle.
     radius : int
-        Radius of circle.
-    shape : tuple
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for circles that exceed the image
-        size. If None, the full extent of the circle is used.
+        Radius of the circle.
 
     Returns
     -------
     rr, cc, val : (N,) ndarray (int, int, float)
-        Indices of pixels (`rr`, `cc`) and intensity values (`val`).
-        ``img[rr, cc] = val``.
+        Indices of pixels (`rr`, `cc`) and intensity values (`val`). Indices
+        likely contain negative values.
 
     Notes
     -----
@@ -371,7 +314,6 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
     .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
            Computer Graphics, 25 (1991) 143-152.
     """
-
     cdef Py_ssize_t c = 0
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
@@ -398,18 +340,20 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
         val.extend([1 - dceil, dceil] * 8)
         dceil_prev = dceil
 
-    if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp) + r_o,
-                                    np.array(cc, dtype=np.intp) + c_o,
-                                    shape,
-                                    val=np.array(val, dtype=np.float))
-    return (np.array(rr, dtype=np.intp) + r_o,
-            np.array(cc, dtype=np.intp) + c_o,
-            np.array(val, dtype=np.float))
+    return (
+        np.array(rr, dtype=np.intp),
+        np.array(cc, dtype=np.intp),
+        np.array(val, dtype=np.float),
+    )
 
 
-def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
-                       Py_ssize_t c_radius, double orientation, shape):
+def _ellipse_perimeter(
+    Py_ssize_t r_o,
+    Py_ssize_t c_o,
+    Py_ssize_t r_radius,
+    Py_ssize_t c_radius,
+    double orientation,
+):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -420,27 +364,21 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
         Minor and major semi-axes. ``(r/r_radius)**2 + (c/c_radius)**2 = 1``.
     orientation : double
         Major axis orientation in clockwise direction as radians.
-    shape : tuple
-        Image shape which is used to determine the maximum extent of output pixel
-        coordinates. This is useful for ellipses that exceed the image size.
-        If None, the full extent of the ellipse is used.
 
     Returns
     -------
     rr, cc : (N,) ndarray of int
-        Indices of pixels that belong to the ellipse perimeter.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        Indices of pixels that belong to the ellipse perimeter. Negative values
+        are likely.
 
     References
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
     """
-
     # If both radii == 0, return the center to avoid infinite loop in 2nd set
     if r_radius == 0 and c_radius == 0:
-        return np.array(r_o), np.array(c_o)
+        return np.array([r_o], dtype=np.intp), np.array([c_o], dtype=np.intp)
 
     # Pixels
     cdef list rr = list()
@@ -526,9 +464,6 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
         rr.extend(rr_t)
         cc.extend(cc_t)
 
-    if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp),
-                                    np.array(cc, dtype=np.intp), shape)
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
@@ -663,7 +598,7 @@ def _bezier_segment(Py_ssize_t r0, Py_ssize_t c0,
 def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
                   Py_ssize_t r1, Py_ssize_t c1,
                   Py_ssize_t r2, Py_ssize_t c2,
-                  double weight, shape):
+                  double weight):
     """Generate Bezier curve coordinates.
 
     Parameters
@@ -676,17 +611,11 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
         Coordinates of the last control point.
     weight : double
         Middle control point weight, it describes the line tension.
-    shape : tuple
-        Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for curves that exceed the image
-        size. If None, the full extent of the curve is used.
 
     Returns
     -------
     rr, cc : (N,) ndarray of int
-        Indices of pixels that belong to the Bezier curve.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
+        Indices of N generated points that belong to the Bezier curve.
 
     Notes
     -----
@@ -775,7 +704,4 @@ def _bezier_curve(Py_ssize_t r0, Py_ssize_t c0,
     cc.extend(cc_t)
     rr.extend(rr_t)
 
-    if shape is not None:
-        return _coords_inside_image(np.array(rr, dtype=np.intp),
-                                    np.array(cc, dtype=np.intp), shape)
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
