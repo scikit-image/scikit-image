@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+
 from skimage._shared.testing import test_parallel
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_equal
@@ -314,6 +316,15 @@ def test_circle_perimeter_andres():
     assert_array_equal(img, img_)
 
 
+@pytest.mark.parametrize("method", ["bresenham", "andres"])
+@pytest.mark.parametrize("radius", [0, 10, 200])
+def test_circle_perimeter_duplicates(method, radius):
+        """Check that returned points don't contain duplicates."""
+        rr, cc = circle_perimeter(0, 0, radius, method)
+        points = list(zip(rr, cc))
+        assert len(points) == len(set(points))
+
+
 def test_circle_perimeter_aa():
     img = np.zeros((15, 15), 'uint8')
     rr, cc, val = circle_perimeter_aa(7, 7, 0)
@@ -356,6 +367,15 @@ def test_circle_perimeter_aa_shape():
     rr, cc, val = circle_perimeter_aa(7 + shift, 10, 9, shape=None)
     img_[rr, cc] = val * 255
     assert_array_equal(img, img_[shift:-shift, :])
+
+
+@pytest.mark.parametrize("radius", [0, 10, 200])
+def test_circle_perimeter_duplicates(radius):
+        """Check that returned points don't contain duplicates."""
+        rr, cc, val = circle_perimeter_aa(0, 0, radius)
+        assert rr.shape == val.shape
+        points = list(zip(rr, cc))
+        assert len(points) == len(set(points))
 
 
 def test_ellipse_trivial():
@@ -696,6 +716,14 @@ def test_ellipse_perimeter_shape():
     rr, cc = ellipse_perimeter(7 + shift, 10, 9, 9, 0, shape=None)
     img_[rr, cc] = 1
     assert_array_equal(img, img_[shift:-shift, :])
+
+
+@pytest.mark.parametrize("radius", [0, 10, 200])
+def test_ellipse_perimeter_duplicates(radius):
+    """Check that returned points don't contain duplicates."""
+    rr, cc = ellipse_perimeter(0, 0, radius, radius // 2)
+    points = list(zip(rr, cc))
+    assert len(points) == len(set(points))
 
 
 def test_bezier_segment_straight():

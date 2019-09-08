@@ -558,10 +558,10 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
         raise TypeError("r and c must be integers")
 
     rr, cc = _circle_perimeter(radius, method)
-    # Adjust coordinates by center
+    rr, cc = np.unique(np.stack([rr, cc]), axis=1)
+
     rr += r
     cc += c
-
     if shape is not None:
         keep = _inside_image(rr, cc, shape)
         rr = rr[keep]
@@ -622,12 +622,14 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     """
     if not np.can_cast(r, np.integer) or not np.can_cast(c, np.integer):
         raise TypeError("r and c must be integers")
-
     rr, cc, val = _circle_perimeter_aa(radius)
-    # Adjust coordinates by center
+    (rr, cc), unique_indices = np.unique(
+        np.stack([rr, cc]), return_index=True, axis=1
+    )
+    val = val[unique_indices]
+
     rr += r
     cc += c
-
     if shape is not None:
         keep = _inside_image(rr, cc, shape)
         rr = rr[keep]
@@ -706,6 +708,8 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     rr, cc = _ellipse_perimeter(r, c, r_radius, c_radius, orientation)
+    rr, cc = np.unique(np.stack([rr, cc]), axis=1)
+
     if shape is not None:
         keep = _inside_image(rr, cc, shape)
         rr = rr[keep]
