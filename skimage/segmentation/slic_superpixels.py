@@ -113,7 +113,7 @@ def _get_grid_centroids(image, n_centroids):
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=None,
          enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=0, mask=None):
+         slic_zero=False, start_label=None, mask=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -253,14 +253,19 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         elif image.shape[-1] == 3:
             image = rgb2lab(image)
 
+    if start_label is None:
+        if use_mask:
+            start_label = 1
+        else:
+            warnings.warn("Labels' indexing start from 0. " +
+                          "In future version it will start from 1. " +
+                          "To disable this warning, explicitely " +
+                          "specify the start_label parameter.",
+                          stacklevel=2)
+            start_label = 0
+
     if start_label not in [0, 1]:
         raise ValueError("start_label should be 0 or 1.")
-
-    if start_label == 0:
-        warnings.warn("Labels' indexing start from 0. " +
-                      "In future version it will start from 1. " +
-                      "To disable this warning, use start_label=1.",
-                      DeprecationWarning)
 
     # initialize cluster centroids for desired number of segments
     update_centroids = False
@@ -273,7 +278,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         # Step 1 of the algorithm [3]_
         centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
         update_centroids = True
-        start_label = 1
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
         mask = np.ones((0, 1, 1), dtype=np.bool)

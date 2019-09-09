@@ -21,6 +21,7 @@ Version 0.17
 Version 0.18
 ------------
 
+* Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
 * Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
 * The following functions are deprecated and should be removed in 0.18:
