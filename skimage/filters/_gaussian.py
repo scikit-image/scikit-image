@@ -26,21 +26,21 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         The ``output`` parameter passes an array in which to store the
         filter output.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are
-        handled, where `cval` is the value when mode is equal to
+        The ``mode`` parameter determines how the array borders are
+        handled, where ``cval`` is the value when mode is equal to
         'constant'. Default is 'nearest'.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0
     multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
         channels. If True, each channel is filtered separately (channels are
-        not mixed together). Only 3 channels are supported. If `None`,
+        not mixed together). Only 3 channels are supported. If ``None``,
         the function will attempt to guess this, and raise a warning if
         ambiguous, when the array has shape (M, N, 3).
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of ``img_as_float``.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     truncate : float, optional
@@ -128,7 +128,7 @@ def _guess_spatial_dimensions(image):
     Returns
     -------
     spatial_dims : int or None
-        The number of spatial dimensions of `image`. If ambiguous, the value
+        The number of spatial dimensions of ``image``. If ambiguous, the value
         is ``None``.
 
     Raises
