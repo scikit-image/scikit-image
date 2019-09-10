@@ -940,7 +940,7 @@ def euler_number(image, neighbourhood=8):
                             0, -1, -1, 0, -1, 0, 2, 1, -1, 2, 0, 1, 0, 1, 1, 0, ])
 
         if neighbourhood == 6:
-            coefs = np.flip(coefs26, tuple(range(coefs26.ndim)))
+            coefs = coefs26[::-1]
         else:
             coefs = coefs26
         bins = 256
