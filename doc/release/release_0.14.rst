@@ -1,3 +1,31 @@
+Announcement: scikit-image 0.14.5
+=================================
+
+We're happy to announce the release of scikit-image v0.14.5!
+
+As a reminder, 0.14.x is the final version of scikit-image with support for
+Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
+are using Python 3.5 or later, you should upgrade to scikit-image 0.15.x.
+
+This is a bugfix release, and contains the following changes from v0.14.4:
+
+
+Bug Fixes
+---------
+- Fix threshold_li initial guess (#4142)
+
+2 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Juan Nunez-Iglesias
+- Mark Harfouche
+
+
+3 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- François Boulogne
+- Juan Nunez-Iglesias
+- Mark Harfouche
+
 Announcement: scikit-image 0.14.4
 =================================
 
