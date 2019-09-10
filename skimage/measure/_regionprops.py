@@ -771,7 +771,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
     **crofton_perimeter** : float
-        Perimeter of object approximate by the Crofton formula in 4 directions.
+        Perimeter of object approximated by the Crofton formula in 4 directions.
         Uses 4 directions by default.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
@@ -886,14 +886,17 @@ def regionprops(label_image, intensity_image=None, cache=True,
 def euler_number(image, neighbourhood=8):
     """Calculate the Euler characteristic in 2D binary image, that characterize
     the topology of the objects.
+    
+    A neighbourhood configuration is constructed (see variable config), 
+    and a LUT is applied for each configuration.
 
     Parameters
     ----------
-    image: (N, M) ndarray
-        2D image. If image is not binary, all strictly greater than zero values 
+    image: (N, M) ndarray, 2D or 3D
+        If image is not binary, all strictly greater than zero values
         are considered as the object.
     neighbourhood : 4 or 8 for 2D images, 6 or 26 for 3D images, optional
-        Neighborhood connectivity for object determination. If object is 
+        Neighborhood connectivity for object determination. If object is
         4-connected, then background is 8-connected, and conversely.
         8-connectivity is used by default for 2D images.
         26-connectivity is used by default for 3D images.
@@ -905,14 +908,14 @@ def euler_number(image, neighbourhood=8):
 
     References
     ----------
-    .. [1] S. Rivollier. Analyse d’image geometrique et morphometrique par 
+    .. [1] S. Rivollier. Analyse d’image geometrique et morphometrique par
            diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
            2010. Ecole Nationale Superieure des Mines de Saint-Etienne.
            https://tel.archives-ouvertes.fr/tel-00560838
-    .. [2] Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of 
-           Discretized Sets - On the Choice of Adjacency in Homogeneous 
-           Lattices. In: Mecke K., Stoyan D. (eds) Morphology of Condensed 
-           Matter. Lecture Notes in Physics, vol 600. Springer, Berlin, 
+    .. [2] Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of
+           Discretized Sets - On the Choice of Adjacency in Homogeneous
+           Lattices. In: Mecke K., Stoyan D. (eds) Morphology of Condensed
+           Matter. Lecture Notes in Physics, vol 600. Springer, Berlin,
            Heidelberg.
 
     Examples
@@ -947,34 +950,50 @@ def euler_number(image, neighbourhood=8):
 
     if np.ndim(image) == 2:
 
-        F = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
+        config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
         if neighbourhood == 4:
-            coefs = [0,  1,  0,  0,  0,  0,  0, -
-                     1,  0,  1,  0,  0,  0,  0,  0,  0]
+            coefs = [0, 1, 0, 0, 0, 0, 0,
+                     -1, 0, 1, 0, 0, 0, 0, 0, 0]
         else:
-            coefs = [0,  0,  0,  0,  0,  0, -1,
-                     0,  1,  0,  0,  0,  0,  0, -1,  0]
+            coefs = [0, 0, 0, 0, 0, 0, -1,
+                     0, 1, 0, 0, 0, 0, 0, -1, 0]
         bins = 16
     else:  # 3D images
-        F = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                      [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
-                      [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
-        coefs26 = np.array([0, 1, 1, 0, 1, 0, -2, -1, 1, -2, 0, -1, 0, -1, -1, 0,
-                            1, 0, -2, -1, -2, -1, -1, -2, -6, -3, -3, -2, -3, -2, 0, -1,
-                            1, -2, 0, -1, -6, -3, -3, -2, -2, -1, -1, -2, -3, 0, -2, -1,
-                            0, -1, -1, 0, -3, -2, 0, -1, -3, 0, -2, -1, 0, 1, 1, 0,
-                            1, -2, -6, -3, 0, -1, -3, -2, -2, -1, -3, 0, -1, -2, -2, -1,
-                            0, -1, -3, -2, -1, 0, 0, -1, -3, 0, 0, 1, -2, -1, 1, 0,
-                            -2, -1, -3, 0, -3, 0, 0, 1, -1, 4, 0, 3, 0, 3, 1, 2,
-                            -1, -2, -2, -1, -2, -1, 1, 0, 0, 3, 1, 2, 1, 2, 2, 1,
-                            1, -6, -2, -3, -2, -3, -1, 0, 0, -3, -1, -2, -1, -2, -2, -1,
-                            -2, -3, -1, 0, -1, 0, 4, 3, -3, 0, 0, 1, 0, 1, 3, 2,
-                            0, -3, -1, -2, -3, 0, 0, 1, -1, 0, 0, -1, -2, 1, -1, 0,
-                            -1, -2, -2, -1, 0, 1, 3, 2, -2, 1, -1, 0, 1, 2, 2, 1,
-                            0, -3, -3, 0, -1, -2, 0, 1, -1, 0, -2, 1, 0, -1, -1, 0,
-                            -1, -2, 0, 1, -2, -1, 3, 2, -2, 1, 1, 2, -1, 0, 2, 1,
-                            -1, 0, -2, 1, -2, 1, 1, 2, -2, 3, -1, 2, -1, 2, 0, 1,
-                            0, -1, -1, 0, -1, 0, 2, 1, -1, 2, 0, 1, 0, 1, 1, 0, ])
+        config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                           [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
+                           [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
+        coefs26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
+                            1, -2, 0, -1, 0, -1, -1, 0,
+                            1, 0, -2, -1, -2, -1, -1, -2,
+                            -6, -3, -3, -2, -3, -2, 0, -1,
+                            1, -2, 0, -1, -6, -3, -3, -2,
+                            -2, -1, -1, -2, -3, 0, -2, -1,
+                            0, -1, -1, 0, -3, -2, 0, -1,
+                            -3, 0, -2, -1, 0, 1, 1, 0,
+                            1, -2, -6, -3, 0, -1, -3, -2,
+                            -2, -1, -3, 0, -1, -2, -2, -1,
+                            0, -1, -3, -2, -1, 0, 0, -1,
+                            -3, 0, 0, 1, -2, -1, 1, 0,
+                            -2, -1, -3, 0, -3, 0, 0, 1,
+                            -1, 4, 0, 3, 0, 3, 1, 2,
+                            -1, -2, -2, -1, -2, -1, 1,
+                            0, 0, 3, 1, 2, 1, 2, 2, 1,
+                            1, -6, -2, -3, -2, -3, -1, 0,
+                            0, -3, -1, -2, -1, -2, -2, -1,
+                            -2, -3, -1, 0, -1, 0, 4, 3,
+                            -3, 0, 0, 1, 0, 1, 3, 2,
+                            0, -3, -1, -2, -3, 0, 0, 1,
+                            -1, 0, 0, -1, -2, 1, -1, 0,
+                            -1, -2, -2, -1, 0, 1, 3, 2,
+                            -2, 1, -1, 0, 1, 2, 2, 1,
+                            0, -3, -3, 0, -1, -2, 0, 1,
+                            -1, 0, -2, 1, 0, -1, -1, 0,
+                            -1, -2, 0, 1, -2, -1, 3, 2,
+                            -2, 1, 1, 2, -1, 0, 2, 1,
+                            -1, 0, -2, 1, -2, 1, 1, 2,
+                            -2, 3, -1, 2, -1, 2, 0, 1,
+                            0, -1, -1, 0, -1, 0, 2, 1,
+                            -1, 2, 0, 1, 0, 1, 1, 0, ])
 
         if neighbourhood == 6:
             coefs = coefs26[::-1]
@@ -982,7 +1001,7 @@ def euler_number(image, neighbourhood=8):
             coefs = coefs26
         bins = 256
 
-    XF = ndi.convolve(image, F, mode='constant', cval=0)
+    XF = ndi.convolve(image, config, mode='constant', cval=0)
     h = np.bincount(XF.ravel(), minlength=bins)
 
     if np.ndim(image) == 2:
@@ -1065,7 +1084,7 @@ def crofton_perimeter(image, directions=4):
     Parameters
     ----------
     image : (N, M) ndarray
-        2D image. If image is not binary, all strictly greater than zero values 
+        2D image. If image is not binary, all values strictly greater than zero 
         are considered as the object.
     directions : 2 or 4, optional
         Number of directions used to approximate the Crofton perimeter. By 
@@ -1097,7 +1116,6 @@ def crofton_perimeter(image, directions=4):
     8144.578...
     >>> crofton_perimeter(img_coins, directions=4)  # doctest: +ELLIPSIS
     7837.077...
-
     """
     if image.ndim != 2:
         raise NotImplementedError(

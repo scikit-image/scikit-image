@@ -206,6 +206,7 @@ def test_euler_number():
     en = euler_number(SAMPLE_3D, 26)
     assert en == 1
 
+    # for convex body, Euler number is 1
     SAMPLE_3D_2 = np.zeros((100, 100, 100))
     SAMPLE_3D_2[40:60, 40:60, 40:60] = 1
     en = euler_number(SAMPLE_3D_2, 26)
