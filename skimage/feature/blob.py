@@ -126,7 +126,7 @@ def _blob_overlap(blob1, blob2):
         return _compute_sphere_overlap(d, r1, r2)
 
 
-def _prune_blobs(blobs_array, overlap):
+def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
     """Eliminated blobs with area overlap.
 
     Parameters
@@ -141,15 +141,18 @@ def _prune_blobs(blobs_array, overlap):
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
+    sigma_dim : int, optional
+        The number of columns in ``blobs_array`` corresponding to sigmas rather
+        than positions.
 
     Returns
     -------
     A : ndarray
         `array` with overlapping blobs removed.
     """
-    sigma = blobs_array[:, -1].max()
+    sigma = blobs_array[:, -sigma_dim].max()
     distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
-    tree = spatial.cKDTree(blobs_array[:, :-1])
+    tree = spatial.cKDTree(blobs_array[:, :-sigma_dim])
     pairs = np.array(list(tree.query_pairs(distance)))
     if len(pairs) == 0:
         return blobs_array
@@ -157,6 +160,8 @@ def _prune_blobs(blobs_array, overlap):
         for (i, j) in pairs:
             blob1, blob2 = blobs_array[i], blobs_array[j]
             if _blob_overlap(blob1, blob2) > overlap:
+                # note: this test works even in the anisotropic case because
+                # all sigmas increase together.
                 if blob1[-1] > blob2[-1]:
                     blob2[-1] = 0
                 else:
@@ -307,7 +312,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     # Remove sigma index and replace with sigmas
     lm = np.hstack([lm[:, :-1], sigmas_of_peaks])
 
-    return _prune_blobs(lm, overlap)
+    sigma_dim = sigmas_of_peaks.shape[1]
+
+    return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
@@ -457,7 +464,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     # Remove sigma index and replace with sigmas
     lm = np.hstack([lm[:, :-1], sigmas_of_peaks])
 
-    return _prune_blobs(lm, overlap)
+    sigma_dim = sigmas_of_peaks.shape[1]
+
+    return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
 def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
