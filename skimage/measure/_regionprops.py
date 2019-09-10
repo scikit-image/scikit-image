@@ -842,7 +842,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
                    'in rc (row-column) coordinates. Please remove '
                    '`coordinates="rc"` from all calls to regionprops before '
                    'updating scikit-image.')
-            warn(msg, stacklevel=2)
+            warn(msg, stacklevel=2, category=FutureWarning)
         else:
             msg = ('Values other than "rc" for the "coordinates" argument '
                    'to skimage.measure.regionprops are no longer supported. '
