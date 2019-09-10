@@ -622,7 +622,7 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
 
 def regionprops(label_image, intensity_image=None, cache=True,
                 coordinates=None):
-    """Measure properties of labeled image regions.
+    r"""Measure properties of labeled image regions.
 
     Parameters
     ----------
@@ -645,6 +645,17 @@ def regionprops(label_image, intensity_image=None, cache=True,
     coordinates : DEPRECATED
         This argument is deprecated and will be removed in a future version
         of scikit-image.
+
+        See :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
+        for more details.
+
+        .. deprecated:: 0.16.0
+            Use "rc" coordinates everywhere. It may be sufficient to call
+            ``numpy.transpose`` on your label image to get the same values as
+            0.15 and earlier. However, for some properties, the transformation
+            will be less trivial. For example, the new orientation is
+            :math:`\frac{\pi}{2}` plus the old orientation.
+
 
     Returns
     -------
