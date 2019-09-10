@@ -329,7 +329,7 @@ def test_blob_doh_log_scale():
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)
-    thresh = 4
+    thresh = 10
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
