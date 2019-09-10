@@ -91,6 +91,11 @@ def test_blob_dog():
     xs, ys = circle(5, 5, 5)
     img[xs, ys] = 255
 
+
+def test_blob_dog_excl_border():
+    img = np.ones((512, 512))
+    xs, ys = circle(5, 5, 5)
+    img[xs, ys] = 255
     blobs = blob_dog(
         img,
         min_sigma=1.5,
@@ -186,6 +191,8 @@ def test_blob_log():
     img_empty = np.zeros((100,100))
     assert blob_log(img_empty).size == 0
 
+
+def test_blob_log_3d():
     # Testing 3D
     r = 6
     pad = 10
@@ -201,6 +208,8 @@ def test_blob_log():
     assert b[2] == r + pad + 1
     assert abs(math.sqrt(3) * b[3] - r) < 1
 
+
+def test_blob_log_3d_anisotropic():
     # Testing 3D anisotropic
     r = 6
     pad = 10
@@ -222,8 +231,8 @@ def test_blob_log():
     assert abs(math.sqrt(3) * b[4] - r) < 1
     assert abs(math.sqrt(3) * b[5] - r) < 1
 
-    # Testing exclude border
 
+def test_blob_log_exclude_border():
     # image where blob is 5 px from borders, radius 5
     img = np.ones((512, 512))
     xs, ys = circle(5, 5, 5)
@@ -294,7 +303,22 @@ def test_blob_doh():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 50) <= thresh
 
-    # Testing log scale
+
+def test_blob_doh_log_scale():
+    img = np.ones((512, 512), dtype=np.uint8)
+
+    xs, ys = circle(400, 130, 20)
+    img[xs, ys] = 255
+
+    xs, ys = circle(460, 50, 30)
+    img[xs, ys] = 255
+
+    xs, ys = circle(100, 300, 40)
+    img[xs, ys] = 255
+
+    xs, ys = circle(200, 350, 50)
+    img[xs, ys] = 255
+
     blobs = blob_doh(
         img,
         min_sigma=1,
@@ -302,6 +326,10 @@ def test_blob_doh():
         num_sigma=10,
         log_scale=True,
         threshold=.05)
+
+    radius = lambda x: x[2]
+    s = sorted(blobs, key=radius)
+    thresh = 4
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
@@ -323,6 +351,8 @@ def test_blob_doh():
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 50) <= thresh
 
+
+def test_blob_doh_no_peaks():
     # Testing no peaks
     img_empty = np.zeros((100,100))
     assert blob_doh(img_empty).size == 0
