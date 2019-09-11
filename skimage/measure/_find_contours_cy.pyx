@@ -4,6 +4,8 @@
 #cython: wraparound=False
 import numpy as np
 
+cdef extern from "numpy/npy_math.h":
+    bint npy_isnan(double x)
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
@@ -13,7 +15,8 @@ cdef inline double _get_fraction(double from_value, double to_value,
 
 
 def iterate_and_store(double[:, :] array,
-                      double level, Py_ssize_t vertex_connect_high):
+                      double level, Py_ssize_t vertex_connect_high,
+                      nodata=None):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,
@@ -24,6 +27,13 @@ def iterate_and_store(double[:, :] array,
     """
     if array.shape[0] < 2 or array.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
+
+    cdef bint _nodata_enabled
+    cdef double _nd = 0
+
+    _nodata_enabled = nodata is not None
+    if _nodata_enabled:
+        _nd = <double>nodata
 
     cdef list arc_list = []
     cdef Py_ssize_t n
@@ -93,6 +103,13 @@ def iterate_and_store(double[:, :] array,
             coords[0] += 1
             coords[1] = 0
 
+        if _nodata_enabled:
+            if npy_isnan(_nd):
+                if (npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr)):
+                    continue
+            else:
+                if ul == _nd or ur == _nd or ll == _nd or lr == _nd:
+                    continue
 
         square_case = 0
         if (ul > level): square_case += 1
