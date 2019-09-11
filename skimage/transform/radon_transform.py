@@ -1,7 +1,6 @@
 import numpy as np
 
 from scipy.interpolate import interp1d
-from scipy.ndimage.measurements import find_objects
 from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
@@ -75,7 +74,10 @@ def radon(image, theta=None, circle=True):
             warn('Radon transform: image must be zero outside the '
                  'reconstruction circle')
         # Crop image to make it square
-        slices = find_objects((~outside_reconstruction_circle).astype(int))[0]
+        slices = tuple(slice(int(np.ceil(excess / 2)),
+                             int(np.ceil(excess / 2) + shape_min))
+                       if excess > 0 else slice(None)
+                       for excess in (img_shape - shape_min))
         padded_image = image[slices]
     else:
         diagonal = np.sqrt(2) * max(image.shape)
