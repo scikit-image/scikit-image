@@ -8,7 +8,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from skimage.transform import warp
 
-from .utils import coarse_to_fine
+from ._optical_flow_utils import coarse_to_fine
 
 
 def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
