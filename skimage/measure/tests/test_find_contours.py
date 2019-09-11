@@ -10,7 +10,7 @@ a[1:-1, 1] = 0
 a[1, 1:-1] = 0
 
 b = np.copy(a)
-b[7:,:] = np.nan
+b[7:, :] = np.nan
 
 x, y = np.mgrid[-1:1:5j, -1:1:5j]
 r = np.sqrt(x**2 + y**2)
@@ -47,6 +47,7 @@ def test_binary():
     assert len(contours) == 1
     assert_array_equal(contours[0][::-1], ref)
 
+
 def test_nodata():
     ref = [[6. ,  1.5],
            [5. ,  1.5],
@@ -71,9 +72,11 @@ def test_nodata():
            [4. ,  0.5],
            [5. ,  0.5],
            [6. ,  0.5]]
-    contours = find_contours(b, 0.5, positive_orientation='high', nodata=np.nan)
+    contours = find_contours(b, 0.5, positive_orientation='high',
+                             nodata=np.nan)
     assert len(contours) == 1
     assert_array_equal(contours[0][::-1], ref)
+
 
 def test_float():
     contours = find_contours(r, 0.5)

@@ -117,7 +117,8 @@ def find_contours(array, level,
     if array.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     level = float(level)
-    if nodata is not None: nodata = float(nodata)
+    if nodata is not None:
+        nodata = float(nodata)
     if (fully_connected not in _param_options or
        positive_orientation not in _param_options):
         raise ValueError('Parameters "fully_connected" and'
