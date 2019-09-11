@@ -138,15 +138,11 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
                       nwarp=5, niter=10, tol=1e-4, prefilter=False,
                       dtype='float32'):
-    """Coarse to fine optical flow estimator.
+    r"""Coarse to fine optical flow estimator.
 
-    The TV-L1 solver is applyed at each level of the image
+    The TV-L1 solver is applied at each level of the image
     pyramid. TV-L1 is a popular algorithm for optical flow estimation
     introduced by Zack et al. [1]_, improved in [2]_ and detailed in [3]_.
-
-    Notes
-    -----
-    Color images are not supported.
 
     Parameters
     ----------
@@ -180,6 +176,10 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     -------
     flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
+
+    Notes
+    -----
+    Color images are not supported.
 
     References
     ----------
