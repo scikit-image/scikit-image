@@ -9,12 +9,11 @@ from ._quickshift_cy import _quickshift_cython
 
 
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
-               return_tree=False, sigma=0, convert2lab=True, random_seed=42):
+               return_tree=False, sigma=0, convert2lab=True, random_seed=42, 
+               full_search=False):
     """Segments image using quickshift clustering in Color-(x,y) space.
-
     Produces an oversegmentation of the image using the quickshift mode-seeking
     algorithm.
-
     Parameters
     ----------
     image : (width, height, channels) ndarray
@@ -37,18 +36,18 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
         segmentation. For this purpose, the input is assumed to be RGB.
     random_seed : int, optional
         Random seed used for breaking ties.
-
+    full_search : bool
+        Wether to extend search to always find the nearest node with higer 
+        density. Will return a single tree if max_dist is large enough.
     Returns
     -------
     segment_mask : (width, height) ndarray
         Integer mask indicating segment labels.
-
     Notes
     -----
     The authors advocate to convert the image to Lab color space prior to
     segmentation, though this is not strictly necessary. For this to work, the
     image must be given in RGB format.
-
     References
     ----------
     .. [1] Quick shift and kernel methods for mode seeking,
@@ -70,5 +69,6 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     segment_mask = _quickshift_cython(
         image, kernel_size=kernel_size, max_dist=max_dist,
-        return_tree=return_tree, random_seed=random_seed)
+        return_tree=return_tree, random_seed=random_seed, 
+        full_search=full_search)
     return segment_mask
