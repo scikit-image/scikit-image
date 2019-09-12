@@ -5,6 +5,7 @@ from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
+from .._shared.utils import deprecate_arg
 from warnings import warn
 from functools import partial
 
@@ -171,6 +172,7 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
+@deprecate_arg({'filter': 'filter_name'})
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
