@@ -1,3 +1,4 @@
+from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
@@ -619,8 +620,9 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
-def regionprops(label_image, intensity_image=None, cache=True):
-    """Measure properties of labeled image regions.
+def regionprops(label_image, intensity_image=None, cache=True,
+                coordinates=None):
+    r"""Measure properties of labeled image regions.
 
     Parameters
     ----------
@@ -640,6 +642,20 @@ def regionprops(label_image, intensity_image=None, cache=True):
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
+    coordinates : DEPRECATED
+        This argument is deprecated and will be removed in a future version
+        of scikit-image.
+
+        See :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
+        for more details.
+
+        .. deprecated:: 0.16.0
+            Use "rc" coordinates everywhere. It may be sufficient to call
+            ``numpy.transpose`` on your label image to get the same values as
+            0.15 and earlier. However, for some properties, the transformation
+            will be less trivial. For example, the new orientation is
+            :math:`\frac{\pi}{2}` plus the old orientation.
+
 
     Returns
     -------
@@ -818,6 +834,22 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     if not np.issubdtype(label_image.dtype, np.integer):
         raise TypeError('Label image must be of integer type.')
+
+    if coordinates is not None:
+        if coordinates == 'rc':
+            msg = ('The coordinates keyword argument to skimage.measure.'
+                   'regionprops is deprecated. All features are now computed '
+                   'in rc (row-column) coordinates. Please remove '
+                   '`coordinates="rc"` from all calls to regionprops before '
+                   'updating scikit-image.')
+            warn(msg, stacklevel=2, category=FutureWarning)
+        else:
+            msg = ('Values other than "rc" for the "coordinates" argument '
+                   'to skimage.measure.regionprops are no longer supported. '
+                   'You should update your code to use "rc" coordinates and '
+                   'stop using the "coordinates" argument, or use skimage '
+                   'version 0.15.x or earlier.')
+            raise ValueError(msg)
 
     regions = []
 
