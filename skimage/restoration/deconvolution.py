@@ -359,7 +359,7 @@ def richardson_lucy(image, psf, iterations=10, clip=True):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
-       [2] D.S.C.Biggs and M. Andrews, "Acceleration of iterative image 
+    .. [2] D.S.C.Biggs and M. Andrews, "Acceleration of iterative image 
        restoration algorithms," Appl. Opt. 36(8), 1766–1775 (1997).    
     """
     # compute the times for direct convolution and the fft method. The fft is of
@@ -380,8 +380,6 @@ def richardson_lucy(image, psf, iterations=10, clip=True):
     psf = psf.astype(np.float)    
     psf_mirror = psf[::-1, ::-1]
     im_deconv = image
-    im_deconv_mid = np.zeros_like(image)
-    v = np.zeros_like(image)
     #initial iteration
     relative_blur = image / convolve_method(im_deconv, psf, 'same')
     im_deconv_mid = im_deconv * convolve_method(relative_blur, psf_mirror,
@@ -389,20 +387,20 @@ def richardson_lucy(image, psf, iterations=10, clip=True):
     v = im_deconv_mid - im_deconv
     np.clip(v, 0, v)           
     im_deconv = im_deconv_mid
-    np.clip(im_deconv, 0, im_deconv)
+    np.clip(im_deconv, 0, out = im_deconv)
     
-    for iter in range(iterations-1):
+    for _ in range(iterations):
         im_deconv_mid_prev = im_deconv_mid
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
         im_deconv_mid = im_deconv * convolve_method(relative_blur, psf_mirror,
                                                     'same')
         v_prev = v
         v = im_deconv_mid - im_deconv
-        np.clip(v, 0, v) 
+        np.clip(v, 0, out = v) 
         alpha = (v_prev * v).sum() / ((v_prev * v_prev).sum() + 2e-15)
         alpha = np.clip(alpha, 0, 1)
         im_deconv = im_deconv_mid + alpha * (im_deconv_mid - im_deconv_mid_prev)
-        np.clip(im_deconv, 0, im_deconv)
+        np.clip(im_deconv, 0, out = im_deconv)
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
