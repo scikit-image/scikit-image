@@ -685,8 +685,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
-        Euler characteristic of region. Computed as number of objects (= 1)
-        subtracted by number of holes (8-connectivity).
+        Euler characteristic of the set of non-zero pixels. 
+        Computed as number of connected components subtracted by number of 
+        holes (8-connectivity in 2D). 
+        In 3D, it also involves the number of tunnels (26-connectivity in 3D).
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -847,10 +849,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
 
 def euler_number(image, neighbourhood=8):
-    """Calculate the Euler characteristic in 2D binary image, that characterize
-    the topology of the objects.
+    """Calculate the Euler characteristic in 2D or 3D binary image, 
+    that characterizes the topology of the objects.
     
-    A neighbourhood configuration is constructed (see variable config), 
+    A neighbourhood configuration is constructed, 
     and a LUT is applied for each configuration.
 
     Parameters
@@ -901,15 +903,19 @@ def euler_number(image, neighbourhood=8):
     ...                    [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
     ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
     ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
-    >>> euler_number(SAMPLE)  # doctest: +ELLIPSIS
+    >>> euler_number(SAMPLE)  # doctest:
     0...
-    >>> euler_number(SAMPLE, neighbourhood=4)  # doctest: +ELLIPSIS
+    >>> euler_number(SAMPLE, neighbourhood=4)  # doctest:
     2...
     """
 
     # as image can be a label image, transform it to binary
     image = (image > 0).astype(np.int)
     image = pad(image, ((1, 1),), mode='constant')
+    
+    # config variable is an adjacency configuration. A coefficient given by 
+    # variable coefs is attributed to each configuration in order to get
+    # the Euler characteristic.
 
     if np.ndim(image) == 2:
 
@@ -1041,8 +1047,8 @@ def perimeter(image, neighbourhood=4):
 
 def crofton_perimeter(image, directions=4):
     """Calculate total perimeter of all objects in binary image, based on
-    Crofton formula. Be aware that there is no unique perimeter function, which 
-    all are approximations.
+    Crofton formula. As measure.perimeter, this function returns an 
+    approximation of the perimeter in continuous space.
 
     Parameters
     ----------
