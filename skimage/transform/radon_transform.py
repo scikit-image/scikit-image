@@ -172,7 +172,7 @@ def _get_fourier_filter(size, filter_name):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=True):
+           filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -191,7 +191,7 @@ def iradon(radon_image, theta=None, output_size=None,
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int, optional
         Number of rows and columns in the reconstruction.
-    filter : str, optional
+    filter_name : str, optional
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
         Assign None to use no filter.
@@ -241,8 +241,8 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
     filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
-    if filter not in filter_types:
-        raise ValueError("Unknown filter: %s" % filter)
+    if filter_name not in filter_types:
+        raise ValueError("Unknown filter: %s" % filter_name)
 
     img_shape = radon_image.shape[0]
     if output_size is None:
@@ -263,7 +263,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = np.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Apply filter in Fourier domain
-    fourier_filter = _get_fourier_filter(projection_size_padded, filter)
+    fourier_filter = _get_fourier_filter(projection_size_padded, filter_name)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
