@@ -222,8 +222,8 @@ class RegionProperties:
     @property
     def euler_number(self):
         if self._ndim < 2 or self._ndim > 3:
-            raise NotImplementedError('Euler number is not implemented for '
-                                      'non 2D or 3D images')
+            raise NotImplementedError('Euler number is implemented for '
+                                      '2D or 3D images only')
         return euler_number(self.image, 8)
 
     @property
@@ -709,7 +709,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Euler characteristic of the set of non-zero pixels. 
         Computed as number of connected components subtracted by number of 
         holes (8-connectivity in 2D). 
-        In 3D, it also involves the number of tunnels (26-connectivity in 3D).
+        In 3D, it also involves the number of tunnels (26-connectivity).
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -773,8 +773,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
     **crofton_perimeter** : float
-        Perimeter of object approximated by the Crofton formula in 4 directions.
-        Uses 4 directions by default.
+        Perimeter of object approximated by the Crofton formula in 4 
+        directions.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -886,16 +886,16 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
 
 def euler_number(image, neighbourhood=8):
-    """Calculate the Euler characteristic in 2D or 3D binary image, 
-    that characterizes the topology of the objects.
-    
-    A neighbourhood configuration is constructed, 
-    and a LUT is applied for each configuration.
+    """Calculate the Euler characteristic in binary image.
+
+    A neighbourhood configuration is constructed, and a LUT is applied for 
+    each configuration.
 
     Parameters
     ----------
-    image: (N, M) ndarray, 2D or 3D
-        If image is not binary, all strictly greater than zero values
+    image: (N, M) ndarray or (N, M, D) ndarray.
+        2D or 3D images.
+        If image is not binary, all values strictly greater than zero
         are considered as the object.
     neighbourhood : 4 or 8 for 2D images, 6 or 26 for 3D images, optional
         Neighborhood connectivity for object determination. If object is
@@ -906,7 +906,12 @@ def euler_number(image, neighbourhood=8):
     Returns
     -------
     euler_number : int
-        Euler characteristic
+        Euler characteristic of the set of all objects in the image.
+
+    Notes
+    -----
+    The Euler characteristic is an integer number that describes the 
+    topology of the set of all objects in the input image.
 
     References
     ----------
@@ -949,8 +954,8 @@ def euler_number(image, neighbourhood=8):
     # as image can be a label image, transform it to binary
     image = (image > 0).astype(np.int)
     image = pad(image, ((1, 1),), mode='constant')
-    
-    # config variable is an adjacency configuration. A coefficient given by 
+
+    # config variable is an adjacency configuration. A coefficient given by
     # variable coefs is attributed to each configuration in order to get
     # the Euler characteristic.
 
@@ -1083,9 +1088,7 @@ def perimeter(image, neighbourhood=4):
 
 
 def crofton_perimeter(image, directions=4):
-    """Calculate total perimeter of all objects in binary image, based on
-    Crofton formula. As measure.perimeter, this function returns an 
-    approximation of the perimeter in continuous space.
+    """Calculate total perimeter of all objects in binary image.
 
     Parameters
     ----------
@@ -1101,6 +1104,17 @@ def crofton_perimeter(image, directions=4):
     -------
     perimeter : float
         Total perimeter of all objects in binary image.
+
+    Notes
+    -----
+    This measure is based on Crofton formula [1], which is an interesting 
+    measure coming from the integral geometry. It is defined for general curve
+    length evaluation via a double integral along all directions. In a discrete
+    space, 2 or 4 directions give a quite good approximation, 4 being more
+    precise than 2 because it can investigate more complex shapes.
+
+    As measure.perimeter, this function returns an approximation of the 
+    perimeter in continuous space.
 
     References
     ----------
