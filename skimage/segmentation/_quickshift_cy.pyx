@@ -9,7 +9,6 @@ cimport numpy as cnp
 from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
 
-
 def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                        double max_dist, bint return_tree, int random_seed,
                        bint full_search):
@@ -31,7 +30,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     random_seed : int
         Random seed used for breaking ties.
     full_search : bool
-        Wether to extend search to always find the nearest node with higer 
+        Wether to extend search to always find the nearest node with higher
         density. Will return a single tree if max_dist is large enough.
     Returns
     -------
@@ -40,12 +39,6 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     """
 
     random_state = np.random.RandomState(random_seed)
-
-    # TODO join orphaned roots?
-    # Some nodes might not have a point of higher density within the
-    # search window. We could do a global search over these in the end.
-    # Reference implementation doesn't do that, though, and it only has
-    # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
     cdef double inv_kernel_size_sqr = -0.5 / (kernel_size * kernel_size)
@@ -105,11 +98,11 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                 c_min = max(c - window_size, 0)
                 c_max = min(c + window_size + 1, width)
                 r_min = max(r - window_size, 0)
-                r_max = min(r + window_size + 1, height)  
+                r_max = min(r + window_size + 1, height)
                 c_min_old = 0
                 c_max_old = 0
                 r_min_old = 0
-                r_max_old = 0            
+                r_max_old = 0
                 # increase search window until you find a parent
                 # or until you have searched all the image
                 while closest == DBL_MAX and \

@@ -9,7 +9,7 @@ from ._quickshift_cy import _quickshift_cython
 
 
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
-               return_tree=False, sigma=0, convert2lab=True, random_seed=42, 
+               return_tree=False, sigma=0, convert2lab=True, random_seed=42,
                full_search=False):
     """Segments image using quickshift clustering in Color-(x,y) space.
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -37,7 +37,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     random_seed : int, optional
         Random seed used for breaking ties.
     full_search : bool
-        Wether to extend search to always find the nearest node with higer 
+        Wether to extend search to always find the nearest node with higher
         density. Will return a single tree if max_dist is large enough.
     Returns
     -------
@@ -69,6 +69,6 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     segment_mask = _quickshift_cython(
         image, kernel_size=kernel_size, max_dist=max_dist,
-        return_tree=return_tree, random_seed=random_seed, 
+        return_tree=return_tree, random_seed=random_seed,
         full_search=full_search)
     return segment_mask
