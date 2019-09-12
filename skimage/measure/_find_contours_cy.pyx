@@ -28,10 +28,9 @@ def iterate_and_store(double[:, :] array,
     if array.shape[0] < 2 or array.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
 
-    cdef bint _nodata_enabled
+    cdef bint _nodata_enabled = nodata is not None
     cdef double _nd = 0
 
-    _nodata_enabled = nodata is not None
     if _nodata_enabled:
         _nd = <double>nodata
 
@@ -105,7 +104,7 @@ def iterate_and_store(double[:, :] array,
 
         if _nodata_enabled:
             if npy_isnan(_nd):
-                if (npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr)):
+                if npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr):
                     continue
             else:
                 if ul == _nd or ur == _nd or ll == _nd or lr == _nd:
