@@ -7,7 +7,6 @@ cimport numpy as cnp
 
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
-    double NAN "NPY_NAN"
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
