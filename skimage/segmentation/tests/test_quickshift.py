@@ -53,7 +53,7 @@ def test_color():
                       sigma=0, full_search=True)
     # we expect 1 segment:
     assert_equal(len(np.unique(seg3)), 1)
-    assert_array_equal(seg, 0)
+    assert_array_equal(seg3, 0)
 
     # tests for full_search option with the tree
     seg4 = quickshift(img, random_seed=0, max_dist=1000, kernel_size=10,
