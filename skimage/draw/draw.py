@@ -1,3 +1,5 @@
+import operator
+
 import numpy as np
 
 from .._shared._geometry import polygon_clip
@@ -554,14 +556,15 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    if not np.can_cast(r, np.integer) or not np.can_cast(c, np.integer):
-        raise TypeError("r and c must be integers")
-
     rr, cc = _circle_perimeter(radius, method)
     rr, cc = np.unique(np.stack([rr, cc]), axis=1)
 
-    rr += r
-    cc += c
+    try:
+        rr += operator.index(r)
+        cc += operator.index(c)
+    except TypeError as e:
+        raise TypeError("r and c must be integers") from e
+
     if shape is not None:
         keep = _inside_image(rr, cc, shape)
         rr = rr[keep]
@@ -620,16 +623,18 @@ def circle_perimeter_aa(r, c, radius, shape=None):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
-    if not np.can_cast(r, np.integer) or not np.can_cast(c, np.integer):
-        raise TypeError("r and c must be integers")
     rr, cc, val = _circle_perimeter_aa(radius)
     (rr, cc), unique_indices = np.unique(
         np.stack([rr, cc]), return_index=True, axis=1
     )
     val = val[unique_indices]
 
-    rr += r
-    cc += c
+    try:
+        rr += operator.index(r)
+        cc += operator.index(c)
+    except TypeError as e:
+        raise TypeError("r and c must be integers") from e
+
     if shape is not None:
         keep = _inside_image(rr, cc, shape)
         rr = rr[keep]
