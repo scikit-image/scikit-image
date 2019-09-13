@@ -13,7 +13,7 @@ def test_deprecated_arg():
 
     # Assert that the DeprecationWarning is raised when the deprecated
     # argument name is used and that the reasult is valid
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(FutureWarning):
         assert foo(0, old_arg1=1) == (0, 1, None)
 
     # Assert that nothing happens when the function is called with the
