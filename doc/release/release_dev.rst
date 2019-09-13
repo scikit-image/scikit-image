@@ -66,6 +66,8 @@ Deprecations
 ------------
 - Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
   deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+- Parameter ``filter`` in ``skimage.transform.iradon`` has been
+  deprecated in favor of ``filter_name``.
 
 
 Contributors to this release
