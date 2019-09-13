@@ -35,11 +35,12 @@ class deprecate_arg:
 
     def __init__(self, arg_mapping, removed_version=None):
         self.arg_mapping = arg_mapping
-        self.warning_msg = "'%s' is a deprecated argument name for %s. "
+        self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+                            "for `{func_name}`. ")
         if removed_version is not None:
-            self.warning_msg += "It will be removed in version %s" % (
-                removed_version)
-        self.warning_msg += "Use '%s' instead."
+            self.warning_msg += (f"It will be removed in version "
+                                 "{removed_version}. ")
+        self.warning_msg += "Use '{new_arg}' instead."
 
     def __call__(self, func):
         @functools.wraps(func)
@@ -47,9 +48,9 @@ class deprecate_arg:
             for old_arg, new_arg in self.arg_mapping.items():
                 if old_arg in kwargs:
                     #  warn that the function interface has changed:
-                    warnings.warn(self.warning_msg %
-                                  (old_arg, func.__name__, new_arg),
-                                  DeprecationWarning)
+                    warnings.warn(self.warning_msg.format(
+                        old_arg=old_arg, func_name=func.__name__,
+                        new_arg=new_arg), DeprecationWarning)
                     # Substitute new_arg to old_arg
                     kwargs[new_arg] = kwargs.pop(old_arg)
 
