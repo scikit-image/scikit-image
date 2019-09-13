@@ -3,9 +3,8 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 
-ctypedef np.uint8_t DTYPE_BOOL_t
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
     double NAN "NPY_NAN"
@@ -19,7 +18,7 @@ cdef inline double _get_fraction(double from_value, double to_value,
 
 def iterate_and_store(double[:, :] array,
                       double level, Py_ssize_t vertex_connect_high,
-                      np.ndarray[DTYPE_BOOL_t, cast=True, ndim=2] mask):
+                      cnp.uint8_t[:, :] mask):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,

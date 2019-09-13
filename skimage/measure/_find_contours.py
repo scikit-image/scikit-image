@@ -118,9 +118,9 @@ def find_contours(array, level,
         raise ValueError('Only 2D arrays are supported.')
     level = float(level)
     if mask is None:
-        mask = np.ones_like(array, dtype=bool)
+        mask = np.ones_like(array, dtype=np.uint8)
     else:
-        mask = np.asarray(mask, dtype=bool)
+        mask = np.asarray(mask, dtype=np.uint8)
         if mask.shape != array.shape:
             raise ValueError('Parameters "array" and "mask" must have same shape.')
     if (fully_connected not in _param_options or
