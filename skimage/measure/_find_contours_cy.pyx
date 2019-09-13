@@ -54,7 +54,6 @@ def iterate_and_store(double[:, :] array,
                                         * (array.shape[1] - 1)
 
     cdef unsigned char square_case = 0
-    cdef unsigned char nan_count = 0
     cdef tuple top, bottom, left, right
     cdef double ul, ur, ll, lr
     cdef Py_ssize_t r0, r1, c0, c1
@@ -89,11 +88,10 @@ def iterate_and_store(double[:, :] array,
         r0, c0 = coords[0], coords[1]
         r1, c1 = r0 + 1, c0 + 1
 
-        # Overwrite with NaN where mask is false
-        ul = array[r0, c0] if mask[r0, c0] else NAN
-        ur = array[r0, c1] if mask[r0, c1] else NAN
-        ll = array[r1, c0] if mask[r1, c0] else NAN
-        lr = array[r1, c1] if mask[r1, c1] else NAN
+        ul = array[r0, c0]
+        ur = array[r0, c1]
+        ll = array[r1, c0]
+        lr = array[r1, c1]
 
         # now in advance the coords indices
         if coords[1] < array.shape[1] - 2:
@@ -102,64 +100,20 @@ def iterate_and_store(double[:, :] array,
             coords[0] += 1
             coords[1] = 0
 
+        # Skip this square if any of the four input values are masked out.
+        if not (mask[r0, c0] and mask[r0, c1] and
+                mask[r1, c0] and mask[r1, c1]):
+            continue
+
+        # Skip this square if any of the four input values are NaN.
+        if npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr):
+            continue
+
         square_case = 0
         if (ul > level): square_case += 1
         if (ur > level): square_case += 2
         if (ll > level): square_case += 4
         if (lr > level): square_case += 8
-
-        # We need to handle missing data.
-        # (This could either be in the form of NaNs present in the input array,
-        # or could be the result of masking.)
-        # Start by counting the number of missing data values.
-        nan_count = 0
-        if npy_isnan(ul): nan_count += 1
-        if npy_isnan(ur): nan_count += 1
-        if npy_isnan(ll): nan_count += 1
-        if npy_isnan(lr): nan_count += 1
-
-        if nan_count > 1:
-            # If a square has 2 or more missing values, we cannot correctly
-            # infer the presence of any contour line segments within it;
-            # so just move to the next square.
-            continue
-        elif nan_count == 1:
-            # There is (up to symmetry) one square arrangement containing a
-            # missing value in which we can unambiguously draw an isoline
-            # segment:
-            # The arrangement +-
-            #                 -x (where x denotes a missing value)
-            # should have the same contour line as case 1.
-            # After symmetry, there are 8 cases, which are enumerated here.
-
-            # If we match any of them, we adjust square_case to look like
-            # case 1 (or the symmetric equivalent) and fall through.
-            # Note that NaN values always read as low, since NaN > level
-            # is always false; so for +-+x arrangements we don't have to
-            # adjust square_case:
-            if square_case == 1 and npy_isnan(lr):
-                pass
-            elif square_case == 2 and npy_isnan(ll):
-                pass
-            elif square_case == 4 and npy_isnan(ur):
-                pass
-            elif square_case == 8 and npy_isnan(ul):
-                pass
-
-            # For -+-x arrangements, we adjust square_case to mark the NaN
-            # as high, not low:
-            elif square_case == 6 and npy_isnan(lr):
-                square_case = 14
-            elif square_case == 9 and npy_isnan(ll):
-                square_case = 13
-            elif square_case == 9 and npy_isnan(ur):
-                square_case = 11
-            elif square_case == 6 and npy_isnan(ul):
-                square_case = 7
-
-            # If we don't match any, we don't add any contour in this square.
-            else:
-                continue
 
         if (square_case != 0 and square_case != 15):
             # only do anything if there's a line passing through the

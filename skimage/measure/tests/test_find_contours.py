@@ -73,12 +73,8 @@ mask_contour = [
 ]
 
 mask = np.ones((8, 8), dtype=bool)
-# Some missing data that should result in target hole in the contour:
+# Some missing data that should result in a hole in the contour:
 mask[7, 0:3] = False
-
-# Some missing data that shouldn't change anything:
-mask[0, 7] = False
-mask[2, 7] = False
 
 
 def test_nodata():
