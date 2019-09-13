@@ -249,44 +249,45 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
     grid = np.meshgrid(*[np.arange(n, dtype=dtype) for n in image0.shape],
                        indexing='ij')
 
-    size = 2*rad+1
+    size = 2 * rad + 1
 
     if gaussian:
         s = size / 4
-        filter_func = partial(ndi.gaussian_filter, sigma=(0, )+ndim*(s, ),
+        filter_func = partial(ndi.gaussian_filter, sigma=(0, ) + ndim * (s, ),
                               mode='mirror')
     else:
-        filter_func = partial(ndi.uniform_filter, size=(1, )+ndim*(size, ),
+        filter_func = partial(ndi.uniform_filter, size=(1, ) + ndim * (size, ),
                               mode='mirror')
 
     flow = flow0
-    coef = np.zeros((int((ndim*(ndim+1))/2+ndim), )+image0.shape, dtype=dtype)
-    A = np.zeros(image0.shape+(ndim, ndim), dtype=dtype)
-    b = np.zeros(image0.shape+(ndim, ), dtype=dtype)
+    coef = np.zeros((int((ndim * (ndim + 1)) / 2 + ndim), ) + image0.shape,
+                    dtype=dtype)
+    A = np.zeros(image0.shape + (ndim, ndim), dtype=dtype)
+    b = np.zeros(image0.shape + (ndim, ), dtype=dtype)
 
     for _ in range(nwarp):
         if prefilter:
             flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
 
-        wimage1 = warp(image1, grid+flow, mode='nearest')
-        grad = np.array(np.gradient(wimage1))
-        It = wimage1 - image0 - (grad*flow).sum(0)
+        image1_warp = warp(image1, grid + flow, mode='nearest')
+        grad = np.array(np.gradient(image1_warp))
+        It = image1_warp - image0 - (grad*flow).sum(0)
 
         k = 0
         for i in range(ndim):
             for j in range(i, ndim):
-                coef[k] = grad[i]*grad[j]
+                coef[k] = grad[i] * grad[j]
                 k += 1
-            coef[i-ndim] = -grad[i]*It
+            coef[i - ndim] = -grad[i] * It
 
         filter_func(coef, output=coef)
 
         k = 0
         for i in range(ndim):
             A[..., i, i] = coef[k]
-            b[..., i] = coef[i-ndim]
+            b[..., i] = coef[i - ndim]
             k += 1
-            for j in range(i+1, ndim):
+            for j in range(i + 1, ndim):
                 A[..., i, j] = A[..., j, i] = coef[k]
                 k += 1
 
@@ -295,7 +296,7 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
         b[idx] = 0
 
         flow = np.transpose(np.linalg.solve(A, b),
-                            (ndim, )+tuple(range(ndim)))
+                            (ndim, ) + tuple(range(ndim)))
 
     return flow
 
