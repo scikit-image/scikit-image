@@ -3,9 +3,12 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
+cimport numpy as np
 
+ctypedef np.uint8_t DTYPE_BOOL_t
 cdef extern from "numpy/npy_math.h":
     bint npy_isnan(double x)
+    double NAN "NPY_NAN"
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
@@ -16,7 +19,7 @@ cdef inline double _get_fraction(double from_value, double to_value,
 
 def iterate_and_store(double[:, :] array,
                       double level, Py_ssize_t vertex_connect_high,
-                      nodata=None):
+                      np.ndarray[DTYPE_BOOL_t, cast=True, ndim=2] mask):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,
@@ -24,15 +27,11 @@ def iterate_and_store(double[:, :] array,
     nonzero, high-values pixels are considered to be face+vertex
     connected into objects; otherwise low-valued pixels are.
 
+    Positions where the boolean array mask is False are considered
+    as not containing data.
     """
     if array.shape[0] < 2 or array.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
-
-    cdef bint _nodata_enabled = nodata is not None
-    cdef double _nd = 0
-
-    if _nodata_enabled:
-        _nd = <double>nodata
 
     cdef list arc_list = []
     cdef Py_ssize_t n
@@ -56,6 +55,7 @@ def iterate_and_store(double[:, :] array,
                                         * (array.shape[1] - 1)
 
     cdef unsigned char square_case = 0
+    cdef unsigned char nan_count = 0
     cdef tuple top, bottom, left, right
     cdef double ul, ur, ll, lr
     cdef Py_ssize_t r0, r1, c0, c1
@@ -90,10 +90,11 @@ def iterate_and_store(double[:, :] array,
         r0, c0 = coords[0], coords[1]
         r1, c1 = r0 + 1, c0 + 1
 
-        ul = array[r0, c0]
-        ur = array[r0, c1]
-        ll = array[r1, c0]
-        lr = array[r1, c1]
+        # Overwrite with NaN where mask is false
+        ul = array[r0, c0] if mask[r0, c0] else NAN
+        ur = array[r0, c1] if mask[r0, c1] else NAN
+        ll = array[r1, c0] if mask[r1, c0] else NAN
+        lr = array[r1, c1] if mask[r1, c1] else NAN
 
         # now in advance the coords indices
         if coords[1] < array.shape[1] - 2:
@@ -102,19 +103,64 @@ def iterate_and_store(double[:, :] array,
             coords[0] += 1
             coords[1] = 0
 
-        if _nodata_enabled:
-            if npy_isnan(_nd):
-                if npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr):
-                    continue
-            else:
-                if ul == _nd or ur == _nd or ll == _nd or lr == _nd:
-                    continue
-
         square_case = 0
         if (ul > level): square_case += 1
         if (ur > level): square_case += 2
         if (ll > level): square_case += 4
         if (lr > level): square_case += 8
+
+        # We need to handle missing data.
+        # (This could either be in the form of NaNs present in the input array,
+        # or could be the result of masking.)
+        # Start by counting the number of missing data values.
+        nan_count = 0
+        if npy_isnan(ul): nan_count += 1
+        if npy_isnan(ur): nan_count += 1
+        if npy_isnan(ll): nan_count += 1
+        if npy_isnan(lr): nan_count += 1
+
+        if nan_count > 1:
+            # If a square has 2 or more missing values, we cannot correctly
+            # infer the presence of any contour line segments within it;
+            # so just move to the next square.
+            continue
+        elif nan_count == 1:
+            # There is (up to symmetry) one square arrangement containing a
+            # missing value in which we can unambiguously draw an isoline
+            # segment:
+            # The arrangement +-
+            #                 -x (where x denotes a missing value)
+            # should have the same contour line as case 1.
+            # After symmetry, there are 8 cases, which are enumerated here.
+
+            # If we match any of them, we adjust square_case to look like
+            # case 1 (or the symmetric equivalent) and fall through.
+            # Note that NaN values always read as low, since NaN > level
+            # is always false; so for +-+x arrangements we don't have to
+            # adjust square_case:
+            if square_case == 1 and npy_isnan(lr):
+                pass
+            elif square_case == 2 and npy_isnan(ll):
+                pass
+            elif square_case == 4 and npy_isnan(ur):
+                pass
+            elif square_case == 8 and npy_isnan(ul):
+                pass
+
+            # For -+-x arrangements, we adjust square_case to mark the NaN
+            # as high, not low:
+            elif square_case == 6 and npy_isnan(lr):
+                square_case = 14
+            elif square_case == 9 and npy_isnan(ll):
+                square_case = 13
+            elif square_case == 9 and npy_isnan(ur):
+                square_case = 11
+            elif square_case == 6 and npy_isnan(ul):
+                square_case = 7
+
+            # If we don't match any, we don't add any contour in this square.
+            else:
+                continue
 
         if (square_case != 0 and square_case != 15):
             # only do anything if there's a line passing through the
