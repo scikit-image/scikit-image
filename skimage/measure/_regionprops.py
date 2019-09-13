@@ -833,7 +833,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        raise TypeError('use ndimage.label to label the connected components of the image.')
+        raise TypeError('Use ndimage.label to label the connected components of the image.')
 
     if coordinates is not None:
         if coordinates == 'rc':
