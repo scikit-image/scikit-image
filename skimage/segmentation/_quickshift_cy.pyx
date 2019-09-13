@@ -9,6 +9,7 @@ cimport numpy as cnp
 from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
 
+
 def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                        double max_dist, bint return_tree, int random_seed,
                        bint full_search):
@@ -56,6 +57,14 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     cdef int window_size
     cdef double* current_pixel_ptr
 
+    # this will break ties that otherwise would give us headache
+    densities += random_state.normal(scale=0.00001, size=(height, width))
+    # default parent to self
+    cdef Py_ssize_t[:, ::1] parent = \
+        np.arange(width * height, dtype=np.intp).reshape(height, width)
+    cdef double[:, ::1] dist_parent = np.zeros((height, width),
+                                               dtype=np.double)
+
     # compute densities
     with nogil:
         current_pixel_ptr = &image[0, 0, 0]
@@ -79,16 +88,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                         densities[r, c] += exp(dist * inv_kernel_size_sqr)
                 current_pixel_ptr += channels
 
-    # this will break ties that otherwise would give us headache
-    densities += random_state.normal(scale=0.00001, size=(height, width))
-
-    # default parent to self
-    cdef Py_ssize_t[:, ::1] parent = \
-        np.arange(width * height, dtype=np.intp).reshape(height, width)
-    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
-
-    # find nearest node with higher density
-    with nogil:
+        # find nearest node with higher density
         current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
             for c in range(width):
@@ -106,17 +106,17 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                 # increase search window until you find a parent
                 # or until you have searched all the image
                 while closest == DBL_MAX and \
-                        not(c_min == 0 and c_max == width and \
-                         r_min == 0 and r_max == height):
+                    not(c_min_old == 0 and c_max_old == width and
+                        r_min_old == 0 and r_max_old == height):
                     for r_ in range(r_min, r_max):
                         for c_ in range(c_min, c_max):
                             # no need to check the previous search window again
-                            if not (c_min_old <= c_ < c_max_old and \
+                            if not (c_min_old <= c_ < c_max_old and
                                     r_min_old <= r_ < r_max_old) and \
                                     densities[r_, c_] > current_density:
                                 dist = 0
-                                # We compute the distances twice since otherwise
-                                # we get crazy memory overhead
+                                # We compute the distances twice since
+                                # otherwise we get crazy memory overhead
                                 # (width * height * windowsize**2)
                                 for channel in range(channels):
                                     t = (current_pixel_ptr[channel] -
