@@ -271,7 +271,7 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
 
         image1_warp = warp(image1, grid + flow, mode='nearest')
         grad = np.array(np.gradient(image1_warp))
-        It = image1_warp - image0 - (grad*flow).sum(0)
+        It = image1_warp - image0 - (grad * flow).sum(0)
 
         k = 0
         for i in range(ndim):
