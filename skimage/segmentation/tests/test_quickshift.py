@@ -57,7 +57,7 @@ def test_color():
 
     # tests for full_search option with the tree
     seg4 = quickshift(img, random_seed=0, max_dist=1000, kernel_size=10,
-                      sigma=0, full_search=True, return_tree=True)
+                      sigma=0, ratio=0.5, full_search=True, return_tree=True)
     dist_to_parent = np.array(seg4[2]).astype('uint32')
     # we expect 1 root, 3 root children and all the other pixels have a
     # distance of 1:
