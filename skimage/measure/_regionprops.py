@@ -223,7 +223,7 @@ class RegionProperties:
         if self._ndim < 2 or self._ndim > 3:
             raise NotImplementedError('Euler number is implemented for '
                                       '2D or 3D images only')
-        return euler_number(self.image, 8)
+        return euler_number(self.image, self._ndim)
 
     @property
     def extent(self):
@@ -687,8 +687,8 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **euler_number** : int
         Euler characteristic of the set of non-zero pixels. 
         Computed as number of connected components subtracted by number of 
-        holes (8-connectivity in 2D). 
-        In 3D, it also involves the number of tunnels (26-connectivity).
+        holes (input.ndim connectivity). In 3D, it also involves the number of 
+        tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -848,7 +848,7 @@ def regionprops(label_image, intensity_image=None, cache=True):
     return regions
 
 
-def euler_number(image, neighbourhood=8):
+def euler_number(image, connectivity=None):
     """Calculate the Euler characteristic in binary image.
 
     A neighbourhood configuration is constructed, and a LUT is applied for 
@@ -860,11 +860,15 @@ def euler_number(image, neighbourhood=8):
         2D or 3D images.
         If image is not binary, all values strictly greater than zero
         are considered as the object.
-    neighbourhood : 4 or 8 for 2D images, 6 or 26 for 3D images, optional
-        Neighborhood connectivity for object determination. If object is
-        4-connected, then background is 8-connected, and conversely.
-        8-connectivity is used by default for 2D images.
-        26-connectivity is used by default for 3D images.
+    connectivity : int, optional
+        Maximum number of orthogonal hops to consider a pixel/voxel
+        as a neighbor.
+        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
+        connectivity of ``input.ndim`` is used.
+        4 or 8 neighborhoods are defined for 2D images (connectivity 1 and 2, 
+        respectively).
+        6 or 26 neighborhoods are defined for 3D images, (connectivity 1 and 3,
+        respectively). Connectivity 2 is not defined. 
 
     Returns
     -------
@@ -874,7 +878,8 @@ def euler_number(image, neighbourhood=8):
     Notes
     -----
     The Euler characteristic is an integer number that describes the 
-    topology of the set of all objects in the input image.
+    topology of the set of all objects in the input image. If object is
+    4-connected, then background is 8-connected, and conversely.
 
     References
     ----------
@@ -918,14 +923,21 @@ def euler_number(image, neighbourhood=8):
     image = (image > 0).astype(np.int)
     image = pad(image, ((1, 1),), mode='constant')
 
+    # check connectivity
+    if connectivity is None:
+        connectivity = image.ndim
+
+    if image.ndim==3 and connectivity==2:
+        raise NotImplementedError('For 3D images, Euler number is implemented '
+                                  'for connectivities 1 and 3 only')
+
     # config variable is an adjacency configuration. A coefficient given by
     # variable coefs is attributed to each configuration in order to get
     # the Euler characteristic.
-
-    if np.ndim(image) == 2:
+    if image.ndim == 2:
 
         config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
-        if neighbourhood == 4:
+        if connectivity == 1:
             coefs = [0, 1, 0, 0, 0, 0, 0,
                      -1, 0, 1, 0, 0, 0, 0, 0, 0]
         else:
@@ -969,7 +981,7 @@ def euler_number(image, neighbourhood=8):
                             0, -1, -1, 0, -1, 0, 2, 1,
                             -1, 2, 0, 1, 0, 1, 1, 0, ])
 
-        if neighbourhood == 6:
+        if connectivity == 1:
             coefs = coefs26[::-1]
         else:
             coefs = coefs26
@@ -978,7 +990,7 @@ def euler_number(image, neighbourhood=8):
     XF = ndi.convolve(image, config, mode='constant', cval=0)
     h = np.bincount(XF.ravel(), minlength=bins)
 
-    if np.ndim(image) == 2:
+    if image.ndim == 2:
         return coefs@h
     else:
         return np.int(1./8 * coefs@h)

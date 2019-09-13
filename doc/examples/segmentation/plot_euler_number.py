@@ -92,9 +92,10 @@ def display_voxels(volume):
     ax = make_ax()
     ax.voxels(x, y, z, filled, facecolors=fcolors)
 
-    # Compute Euler number in 6 and 26 neighbourhood configuration
-    e26 = euler_number(volume, neighbourhood=26)
-    e6 = euler_number(volume, neighbourhood=6)
+    # Compute Euler number in 6 and 26 neighbourhood configuration, that 
+    # correspond to 1 and 3 connectivity, respectively
+    e26 = euler_number(volume, connectivity=3)
+    e6  = euler_number(volume, connectivity=1)
     plt.title('Euler number for N26: {}, for N6: {}'.format(e26, e6))
 
     plt.show()
