@@ -42,6 +42,7 @@ class deprecate_arg:
         self.warning_msg += "Use '%s' instead."
 
     def __call__(self, func):
+        @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             for old_arg, new_arg in self.arg_mapping.items():
                 if old_arg in kwargs:
