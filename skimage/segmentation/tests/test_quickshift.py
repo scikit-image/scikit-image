@@ -22,6 +22,14 @@ def test_grey():
         hist = np.histogram(img[seg == i], bins=[0, 0.1, 0.3, 0.5, 1])[0]
         assert_greater(hist[i], 20)
 
+    seg4 = quickshift(img, random_seed=0, max_dist=1000, kernel_size=10,
+                      sigma=0, ratio=0.5, full_search=True, return_tree=True,
+                      convert2lab=False)
+    dist_to_parent = np.array(seg4[2]).astype('uint32')
+    # we expect 1 root, all the other pixels have a distance of 1:
+    assert_equal(np.sum(dist_to_parent == 0), 1)
+    assert_equal(np.sum(dist_to_parent == 1), 419)
+
 
 def test_color():
     rnd = np.random.RandomState(0)

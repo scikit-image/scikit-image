@@ -1,11 +1,11 @@
 """
-====================================================
-Comparison of segmentation and superpixel algorithms
-====================================================
+=============================================================
+Comparison of quickshift with and without full_search enabled
+=============================================================
 
 This example compares the computation of a complete superpixel hierarchy
 with the default which is to limit the parent to a local neighborhood
-of each pixel. When using ``full_search=True``the algorithm will return
+of each pixel. When using ``full_search=True`` the algorithm will return
 a single tree for the whole image provided that ``max_dist`` is large enough
 or that ``return_tree=True``.
 

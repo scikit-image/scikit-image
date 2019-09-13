@@ -14,8 +14,10 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                        double max_dist, bint return_tree, int random_seed,
                        bint full_search):
     """Segments image using quickshift clustering in Color-(x,y) space.
+
     Produces an oversegmentation of the image using the quickshift mode-seeking
     algorithm.
+
     Parameters
     ----------
     image : (width, height, channels) ndarray
@@ -33,6 +35,7 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     full_search : bool
         Wether to extend search to always find the nearest node with higher
         density. Will return a single tree if max_dist is large enough.
+
     Returns
     -------
     segment_mask : (width, height) ndarray
