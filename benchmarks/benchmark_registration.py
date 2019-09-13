@@ -11,4 +11,7 @@ class RegistrationSuite(object):
         self.I1 = rgb2gray(I1)
 
     def time_tvl1(self):
-        registration.tvl1(self.I0, self.I1)
+        registration.optical_flow_tvl1(self.I0, self.I1)
+
+    def time_ilk(self):
+        registration.optical_flow_ilk(self.I0, self.I1)
