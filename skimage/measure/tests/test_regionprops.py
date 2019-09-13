@@ -194,26 +194,26 @@ def test_euler_number():
     en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
 
-    en = euler_number(SAMPLE, 4)
+    en = euler_number(SAMPLE, 1)
     assert en == 2
 
-    en = euler_number(SAMPLE_mod, 4)
+    en = euler_number(SAMPLE_mod, 1)
     assert en == 1
 
-    en = euler_number(SAMPLE_3D, 6)
+    en = euler_number(SAMPLE_3D, 1)
     assert en == 1
 
-    en = euler_number(SAMPLE_3D, 26)
+    en = euler_number(SAMPLE_3D, 3)
     assert en == 1
 
     # for convex body, Euler number is 1
     SAMPLE_3D_2 = np.zeros((100, 100, 100))
     SAMPLE_3D_2[40:60, 40:60, 40:60] = 1
-    en = euler_number(SAMPLE_3D_2, 26)
+    en = euler_number(SAMPLE_3D_2, 3)
     assert en == 1
 
     SAMPLE_3D_2[45:55, 45:55, 45:55] = 0
-    en = euler_number(SAMPLE_3D_2, 26)
+    en = euler_number(SAMPLE_3D_2, 3)
     assert en == 2
 
 
