@@ -50,7 +50,7 @@ class deprecate_arg:
                     #  warn that the function interface has changed:
                     warnings.warn(self.warning_msg.format(
                         old_arg=old_arg, func_name=func.__name__,
-                        new_arg=new_arg), DeprecationWarning)
+                        new_arg=new_arg), DeprecationWarning, stacklevel=2)
                     # Substitute new_arg to old_arg
                     kwargs[new_arg] = kwargs.pop(old_arg)
 
