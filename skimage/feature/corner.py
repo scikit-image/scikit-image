@@ -586,7 +586,7 @@ def corner_shi_tomasi(image, sigma=1):
     return response
 
 
-def corner_foerstner(image, sigma=1):
+def corner_foerstner(image, accuracy_thresh, roundness_thresh, sigma=1):
     """Compute Foerstner corner measure response image.
 
     This corner detector uses information from the auto-correlation matrix A::
@@ -597,23 +597,25 @@ def corner_foerstner(image, sigma=1):
     Where imx and imy are first derivatives, averaged with a gaussian filter.
     The corner measure is then defined as::
 
-        w = det(A) / trace(A)           (size of error ellipse)
-        q = 4 * det(A) / trace(A)**2    (roundness of error ellipse)
+        det(A) / trace(A)           (size of error ellipse)
+        4 * det(A) / trace(A)**2    (roundness of error ellipse)
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    accuracy_thresh : float
+        Threshold value for the size of the error ellispse.
+    roundness_thresh : float
+        Threshold value for the roundness of the error ellispse.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
         weighting function for the auto-correlation matrix.
 
     Returns
     -------
-    w : ndarray
-        Error ellipse sizes.
-    q : ndarray
-        Roundness of error ellipse.
+    response : ndarray
+        Foerstner response image.
 
     References
     ----------
@@ -640,16 +642,11 @@ def corner_foerstner(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> w, q = corner_foerstner(square)
-    >>> accuracy_thresh = 0.5
-    >>> roundness_thresh = 0.3
-    >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> corner_peaks(corner_foerstner(square, accuracy_thresh=0.5, roundness_thresh=0.3), min_distance=1)
     array([[2, 2],
            [2, 7],
            [7, 2],
            [7, 7]])
-
     """
 
     Axx, Axy, Ayy = structure_tensor(image, sigma)
@@ -667,7 +664,9 @@ def corner_foerstner(image, sigma=1):
     w[mask] = detA[mask] / traceA[mask]
     q[mask] = 4 * detA[mask] / traceA[mask] ** 2
 
-    return w, q
+    response = (q > roundness_thresh) * (w > accuracy_thresh) * w
+
+    return response
 
 
 def corner_fast(image, n=12, threshold=0.15):
