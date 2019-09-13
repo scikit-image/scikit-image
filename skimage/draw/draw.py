@@ -550,7 +550,8 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     Wu's method draws anti-aliased circle. This implementation doesn't use
     lookup table optimization.
 
-    To apply circle_perimeter_aa to color images use function draw.set_color.
+    Use the function ``draw.set_color`` to apply ``circle_perimeter_aa``
+    results to color images.
 
     References
     ----------
