@@ -50,7 +50,6 @@ class deprecate_arg:
                                   (old_arg, func.__name__, new_arg),
                                   DeprecationWarning)
                     # Substitute new_arg to old_arg
-                    print(kwargs)
                     kwargs[new_arg] = kwargs.pop(old_arg)
 
             # Call the function with the fixed arguments
