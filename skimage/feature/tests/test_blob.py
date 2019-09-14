@@ -408,6 +408,16 @@ def test_blob_overlap_3d_anisotropic():
     assert_almost_equal(overlap, 0.48125)
 
 
+def test_blob_log_anisotropic():
+    image = np.zeros((50, 50))
+    image[20, 10:20] = 1
+    isotropic_blobs = blob_log(image, min_sigma=0.5, max_sigma=2, num_sigma=3)
+    assert len(isotropic_blobs) > 1  # many small blobs found in line
+    ani_blobs = blob_log(image, min_sigma=[0.5, 5], max_sigma=[2, 20],
+                         num_sigma=3)  # 10x anisotropy, line is 1x10
+    assert len(ani_blobs) == 1  # single anisotropic blob found
+
+
 def test_blob_log_overlap_3d_anisotropic():
     r1, r2 = 7, 6
     pad1, pad2 = 11, 12
