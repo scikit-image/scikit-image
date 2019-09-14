@@ -408,7 +408,6 @@ def test_blob_overlap_3d_anisotropic():
     assert_almost_equal(overlap, 0.48125)
 
 
-
 def test_bloh_log_overlap_3d_anisotropic():
     r1, r2 = 7, 6
     pad1, pad2 = 11, 12
@@ -420,7 +419,8 @@ def test_bloh_log_overlap_3d_anisotropic():
                      mode='constant')
     im3 = np.logical_or(blob1, blob2)
 
-    blobs = blob_log(im3,  min_sigma=[2, 2.01, 2.005], max_sigma=10, overlap=0.1)
+    blobs = blob_log(im3, min_sigma=[2, 2.01, 2.005],
+                     max_sigma=10, overlap=0.1)
     assert len(blobs) == 1
 
     # Two circles with distance between centers equal to radius
