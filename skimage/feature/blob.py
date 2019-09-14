@@ -451,8 +451,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # computing gaussian laplace
     # average s**2 provides scale invariance
-    gl_images = [-gaussian_laplace(image, s) * s ** 2
-                 for s in np.mean(sigma_list, axis=1)]
+    gl_images = [-gaussian_laplace(image, s) * np.mean(s) ** 2
+                 for s in sigma_list]
 
     image_cube = np.stack(gl_images, axis=-1)
 
