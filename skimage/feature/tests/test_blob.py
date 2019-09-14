@@ -378,7 +378,7 @@ def test_blob_doh_overlap():
     assert len(blobs) == 1
 
 
-def test_bloh_log_overlap_3d():
+def test_blob_log_overlap_3d():
     r1, r2 = 7, 6
     pad1, pad2 = 11, 12
     blob1 = ellipsoid(r1, r1, r1)
@@ -408,7 +408,7 @@ def test_blob_overlap_3d_anisotropic():
     assert_almost_equal(overlap, 0.48125)
 
 
-def test_bloh_log_overlap_3d_anisotropic():
+def test_blob_log_overlap_3d_anisotropic():
     r1, r2 = 7, 6
     pad1, pad2 = 11, 12
     blob1 = ellipsoid(r1, r1, r1)
