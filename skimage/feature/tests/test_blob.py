@@ -392,11 +392,20 @@ def test_bloh_log_overlap_3d():
     blobs = blob_log(im3,  min_sigma=2, max_sigma=10, overlap=0.1)
     assert len(blobs) == 1
 
-    # Two circles with distance between centers equal to radius
-    overlap = _blob_overlap(np.array([0, 0, 10 / math.sqrt(2)]),
-                            np.array([0, 10, 10 / math.sqrt(2)]))
-    assert_almost_equal(overlap,
-                        1./math.pi * (2 * math.acos(1./2) - math.sqrt(3)/2.))
+
+def test_blob_overlap_3d_anisotropic():
+    # Two spheres with distance between centers equal to radius
+    # One sphere is much smaller than the other so about half of it is within
+    # the bigger sphere.
+    s3 = math.sqrt(3)
+    overlap = _blob_overlap(np.array([0, 0,  0, 2 / s3, 10 / s3, 10 / s3]),
+                            np.array([0, 0, 10, 0.2 / s3, 1 / s3, 1 / s3]),
+                            sigma_dim=3)
+    assert_almost_equal(overlap, 0.48125)
+    overlap = _blob_overlap(np.array([0, 0, 0, 2 / s3, 10 / s3, 10 / s3]),
+                            np.array([2, 0, 0, 0.2 / s3, 1 / s3, 1 / s3]),
+                            sigma_dim=3)
+    assert_almost_equal(overlap, 0.48125)
 
 
 

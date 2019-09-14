@@ -81,10 +81,11 @@ def _compute_sphere_overlap(d, r1, r2):
     return vol / (4./3 * math.pi * min(r1, r2) ** 3)
 
 
-def _blob_overlap(blob1, blob2):
+def _blob_overlap(blob1, blob2, *, sigma_dim=1):
     """Finds the overlapping area fraction between two blobs.
 
-    Returns a float representing fraction of overlapped area.
+    Returns a float representing fraction of overlapped area. Note that 0.0
+    is *always* returned for dimension greater than 3.
 
     Parameters
     ----------
@@ -98,31 +99,45 @@ def _blob_overlap(blob1, blob2):
         where ``row, col`` (or ``(pln, row, col)``) are coordinates
         of blob and ``sigma`` is the standard deviation of the Gaussian kernel
         which detected the blob.
+    sigma_dim : int, optional
+        The dimensionality of the sigma value. Can be 1 or the same as the
+        dimensionality of the blob space (2 or 3).
 
     Returns
     -------
     f : float
         Fraction of overlapped area (or volume in 3D).
     """
-    n_dim = len(blob1) - 1
-    root_ndim = sqrt(n_dim)
+    ndim = len(blob1) - sigma_dim
+    if ndim > 3:
+        return 0.0
+    root_ndim = sqrt(ndim)
 
-    # extent of the blob is given by sqrt(2)*scale
-    r1 = blob1[-1] * root_ndim
-    r2 = blob2[-1] * root_ndim
+    # we divide coordinates by sigma * sqrt(ndim) to rescale space to isotropy,
+    # giving spheres of radius = 1 or < 1.
+    if blob1[-1] > blob2[-1]:
+        max_sigma = blob1[-sigma_dim:]
+        r1 = 1
+        r2 = blob2[-1] / blob1[-1]
+    else:
+        max_sigma = blob2[-sigma_dim:]
+        r2 = 1
+        r1 = blob1[-1] / blob2[-1]
+    pos1 = blob1[:ndim] / (max_sigma * root_ndim)
+    pos2 = blob2[:ndim] / (max_sigma * root_ndim)
 
-    d = sqrt(np.sum((blob1[:-1] - blob2[:-1])**2))
-    if d > r1 + r2:
-        return 0
+    d = np.sqrt(np.sum((pos2 - pos1)**2))
+    if d > r1 + r2:  # centers farther than sum of radii, so no overlap
+        return 0.0
 
-    # one blob is inside the other, the smaller blob must die
+    # one blob is inside the other
     if d <= abs(r1 - r2):
-        return 1
+        return 1.0
 
-    if n_dim == 2:
+    if ndim == 2:
         return _compute_disk_overlap(d, r1, r2)
 
-    else:  # http://mathworld.wolfram.com/Sphere-SphereIntersection.html
+    else:  # ndim=3 http://mathworld.wolfram.com/Sphere-SphereIntersection.html
         return _compute_sphere_overlap(d, r1, r2)
 
 
@@ -151,7 +166,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
         `array` with overlapping blobs removed.
     """
     sigma = blobs_array[:, -sigma_dim].max()
-    distance = 2 * sigma * sqrt(blobs_array.shape[1] - 1)
+    distance = 2 * sigma * sqrt(blobs_array.shape[1] - sigma_dim)
     tree = spatial.cKDTree(blobs_array[:, :-sigma_dim])
     pairs = np.array(list(tree.query_pairs(distance)))
     if len(pairs) == 0:
@@ -159,7 +174,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
     else:
         for (i, j) in pairs:
             blob1, blob2 = blobs_array[i], blobs_array[j]
-            if _blob_overlap(blob1, blob2) > overlap:
+            if _blob_overlap(blob1, blob2, sigma_dim=sigma_dim) > overlap:
                 # note: this test works even in the anisotropic case because
                 # all sigmas increase together.
                 if blob1[-1] > blob2[-1]:
