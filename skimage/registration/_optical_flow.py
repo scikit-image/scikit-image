@@ -271,14 +271,14 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
 
         image1_warp = warp(image1, grid + flow, mode='nearest')
         grad = np.array(np.gradient(image1_warp))
-        It = image1_warp - image0 - (grad * flow).sum(0)
+        It = (grad * flow).sum(0) + image0 - image1_warp
 
         k = 0
         for i in range(ndim):
             for j in range(i, ndim):
                 coef[k] = grad[i] * grad[j]
                 k += 1
-            coef[i - ndim] = -grad[i] * It
+            coef[i - ndim] = grad[i] * It
 
         filter_func(coef, output=coef)
 
