@@ -3,7 +3,7 @@ import math
 import numpy as np
 from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
-                                          crofton_perimeter, euler_number,
+                                          perimeter_crofton, euler_number,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
                                           COL_DTYPES)
@@ -349,11 +349,11 @@ def test_perimeter():
     assert_almost_equal(per, 46.8284271247)
 
 
-def test_crofton_perimeter():
-    per = regionprops(SAMPLE)[0].crofton_perimeter
+def test_perimeter_crofton():
+    per = regionprops(SAMPLE)[0].perimeter_crofton
     assert_almost_equal(per, 61.0800637973)
 
-    per = crofton_perimeter(SAMPLE.astype('double'), directions=2)
+    per = perimeter_crofton(SAMPLE.astype('double'), directions=2)
     assert_almost_equal(per, 64.4026493985)
 
 

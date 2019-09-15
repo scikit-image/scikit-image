@@ -3,7 +3,7 @@ from ._marching_cubes_lewiner import marching_cubes_lewiner
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
 from ._regionprops import (regionprops, perimeter,
-                           crofton_perimeter, euler_number, regionprops_table)
+                           perimeter_crofton, euler_number, regionprops_table)
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
@@ -22,7 +22,7 @@ __all__ = ['find_contours',
            'regionprops',
            'regionprops_table',
            'perimeter',
-           'crofton_perimeter',
+           'perimeter_crofton',
            'euler_number',
            'approximate_polygon',
            'subdivide_polygon',
