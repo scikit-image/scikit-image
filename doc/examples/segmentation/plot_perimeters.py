@@ -9,7 +9,7 @@ its rotated version.
 
 """
 from skimage.measure import perimeter
-from skimage.measure import crofton_perimeter
+from skimage.measure import perimeter_crofton
 from skimage.transform import rotate
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,14 +43,14 @@ for index, obj in enumerate([square, disk]):
             p.append(perimeter(rotated, n))
         ax[index].plot(angles, p)
 
-    # 2 or 4 directions can be used by measure.crofton_perimeter
+    # 2 or 4 directions can be used by measure.perimeter_crofton
     for d in [2, 4]:
         p = []
         angles = range(90)
         for i in angles:
             # rotation and perimeter evaluation
             rotated = rotate(obj, i, order=0)
-            p.append(crofton_perimeter(rotated, d))
+            p.append(perimeter_crofton(rotated, d))
         ax[index].plot(angles, p)
 
     ax[index].set_xlabel('Rotation angle')

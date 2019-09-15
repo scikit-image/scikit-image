@@ -10,7 +10,7 @@ from . import _moments
 from functools import wraps
 
 
-__all__ = ['regionprops', 'euler_number', 'perimeter', 'crofton_perimeter']
+__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -51,7 +51,7 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
-    'CroftonPerimeter': 'crofton_perimeter',
+    'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -101,7 +101,7 @@ COL_DTYPES = {
     'moments_normalized': float,
     'orientation': float,
     'perimeter': float,
-    'crofton_perimeter': float,
+    'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -337,8 +337,8 @@ class RegionProperties:
 
     @property
     @only2d
-    def crofton_perimeter(self):
-        return crofton_perimeter(self.image, 4)
+    def perimeter_crofton(self):
+        return perimeter_crofton(self.image, 4)
 
     @property
     def solidity(self):
@@ -772,7 +772,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
-    **crofton_perimeter** : float
+    **perimeter_crofton** : float
         Perimeter of object approximated by the Crofton formula in 4 
         directions.
     **slice** : tuple of slices
@@ -1099,7 +1099,7 @@ def perimeter(image, neighbourhood=4):
     return total_perimeter
 
 
-def crofton_perimeter(image, directions=4):
+def perimeter_crofton(image, directions=4):
     """Calculate total perimeter of all objects in binary image.
 
     Parameters
@@ -1144,14 +1144,14 @@ def crofton_perimeter(image, directions=4):
     >>> # coins image (binary)
     >>> img_coins = data.coins() > 110
     >>> # total perimeter of all objects in the image
-    >>> crofton_perimeter(img_coins, directions=2)  # doctest: +ELLIPSIS
+    >>> perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
     8144.578...
-    >>> crofton_perimeter(img_coins, directions=4)  # doctest: +ELLIPSIS
+    >>> perimeter_crofton(img_coins, directions=4)  # doctest: +ELLIPSIS
     7837.077...
     """
     if image.ndim != 2:
         raise NotImplementedError(
-            '`crofton_perimeter` supports 2D images only')
+            '`perimeter_crofton` supports 2D images only')
 
     # as image could be a label image, transform it to binary image
     image = (image > 0).astype(np.uint8)
