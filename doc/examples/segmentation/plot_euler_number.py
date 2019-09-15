@@ -35,8 +35,8 @@ SAMPLE = np.array(
 )
 
 plt.imshow(SAMPLE, cmap=plt.cm.gray)
-e4 = euler_number(SAMPLE, 4)
-e8 = euler_number(SAMPLE, 8)
+e4 = euler_number(SAMPLE, connectivity=1)
+e8 = euler_number(SAMPLE, connectivity=2)
 plt.title('Euler number for N4: {}, for N8: {}'.format(e4, e8))
 plt.show()
 
