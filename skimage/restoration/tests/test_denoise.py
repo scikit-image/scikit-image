@@ -1,7 +1,6 @@
 import itertools
 import numpy as np
 import pytest
-from pytest import warns
 
 from skimage import restoration, data, color, img_as_float
 from skimage.metrics import structural_similarity
