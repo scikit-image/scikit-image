@@ -1147,7 +1147,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     # building the lookup tables.
     # step 1: calculating the diagonal.
     momP = np.diagflat(prob)
-    momS = np.diagflat(np.arange(nbins)*prob)
+    momS = np.diagflat(np.arange(nbins) * prob)
 
     # step 2: calculating the first row.
     momP[1, 2:] = np.cumsum(prob[2:])
