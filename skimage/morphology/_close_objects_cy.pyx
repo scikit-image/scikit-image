@@ -106,9 +106,10 @@ cdef inline void _remove_object(
     queue_ptr :
         Pointer to initialized queue.
     """
-    cdef Py_ssize_t i, point, neighbor
+    cdef Py_ssize_t i, point, neighbor, max_index
     cdef cnp.uint32_t label
 
+    max_index = image.shape[0]
     queue_clear(queue_ptr)
     queue_push(queue_ptr, &start_index)
     image[start_index] = 0
@@ -116,6 +117,8 @@ cdef inline void _remove_object(
     while queue_pop(queue_ptr, &point):
         for i in range(neighbor_offsets.shape[0]):
             neighbor = point + neighbor_offsets[i]
+            if not 0 <= neighbor < max_index:
+                continue
             # The algorithm might cross the image edge when two objects are
             # neighbors in the raveled view -> check label to avoid that
             if image[neighbor] == 1 and labels[neighbor] == label:
