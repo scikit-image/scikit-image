@@ -22,6 +22,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_extrema_cy.pyx'], working_path=base_path)
     cython(['_flood_fill_cy.pyx'], working_path=base_path)
     cython(['_max_tree.pyx'], working_path=base_path)
+    cython(['_close_objects_cy.pyx'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -40,6 +41,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_extrema_cy', sources=['_extrema_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_close_objects_cy', sources=['_close_objects_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

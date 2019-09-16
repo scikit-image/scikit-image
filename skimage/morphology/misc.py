@@ -1,9 +1,17 @@
 """Miscellaneous morphology functions."""
-import numpy as np
+
+
 import functools
+
+import numpy as np
 from scipy import ndimage as ndi
+from scipy.spatial import cKDTree
+
 from .._shared.utils import warn
+from . import _util
 from .selem import _default_selem
+from ._close_objects_cy import _remove_close_objects
+
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
@@ -225,3 +233,129 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
         out = np.logical_not(out)
 
     return out
+
+
+def remove_close_objects(
+    image,
+    minimal_distance,
+    selem=None,
+    connectivity=None,
+    priority=None,
+    inplace=False,
+):
+    """Remove objects until a minimal distance is ensured.
+
+    Iterates over all objects (connected pixels that are True) inside an image
+    and removes neighboring objects until all remaining ones are at least a
+    minimal euclidean distance from each other.
+
+    Parameters
+    ----------
+    image : ndarray
+        An n-dimensional boolean array.
+    minimal_distance : int or float
+        The minimal allowed euclidean distance between objects. Must be
+        positive.
+    selem : ndarray, optional
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
+        considered as part of the neighborhood.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is less than or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
+    priority : ndarray, optional
+        An array matching `image` in shape that gives a priority for each
+        object in `image`. Objects with a lower value are removed until all
+        remaining objects fulfill the distance requirement. If not given,
+        objects are iterated in row-major (C-style) order with decreasing
+        priority.
+    inplace : bool, optional
+        Whether to modify `image` inplace or return a new array.
+
+    Returns
+    -------
+    result : ndarray
+        Array of the same shape as `image` with objects violating the distance
+        condition removed.
+
+    Notes
+    -----
+    This function uses an KDTree internally to efficiently find neighboring
+    objects.
+
+    Examples
+    --------
+    >>> from skimage.morphology import remove_close_objects
+    >>> remove_close_objects(np.array([True, False, True]), 2)
+    array([ True, False, False])
+    >>> image = np.array(
+    ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+    ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ...      [0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0],
+    ...      [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]],
+    ...     dtype=np.uint8
+    ... )
+    >>> result = remove_close_objects(
+    ...     image.view(bool), minimal_distance=3, priority=image
+    ... )
+    >>> result.view(np.uint8)
+    array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+           [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]], dtype=uint8)
+    """
+    if minimal_distance < 0:
+        raise ValueError(
+            f"minimal_distance must be >= 0, was {minimal_distance}"
+        )
+    image = np.asarray(image)
+    if not inplace:
+        image = image.copy()
+    image = image.astype(np.uint8, casting="safe", copy=False)
+
+    selem = _util._resolve_neighborhood(selem, connectivity, image.ndim)
+    neighbor_offsets = _util._offsets_to_raveled_neighbors(
+        image.shape, selem, center=((1,) * image.ndim)
+    )
+
+    labels = np.empty_like(image, dtype=np.uint32)
+    ndi.label(image, selem, output=labels)
+
+    raveled_indices = np.nonzero(image.ravel())[0]
+    if priority is not None:
+        if image.shape != priority.shape:
+            raise ValueError(
+                "priority must have same shape as image: "
+                f"{priority.shape} != {image.shape}"
+            )
+        sort = np.argsort(priority.ravel()[raveled_indices])[::-1]
+        raveled_indices = raveled_indices[sort]
+
+    indices = np.unravel_index(raveled_indices, image.shape)
+    kdtree = cKDTree(
+        data=np.asarray(indices, dtype=np.float64).T,
+        balanced_tree=True,
+    )
+
+    _remove_close_objects(
+        image=image.ravel(),
+        labels=labels.ravel(),
+        indices=raveled_indices,
+        neighbor_offsets=neighbor_offsets,
+        kdtree=kdtree,
+        minimal_distance=minimal_distance,
+        shape=image.shape
+    )
+    return image.view(np.bool)
