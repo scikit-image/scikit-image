@@ -1,5 +1,10 @@
 import numpy as np
-from skimage.morphology import remove_small_objects, remove_small_holes
+import pytest
+from skimage.morphology import (
+    remove_small_objects,
+    remove_small_holes,
+    remove_close_objects,
+)
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_equal
@@ -188,3 +193,57 @@ def test_float_input_holes():
     float_test = np.random.rand(5, 5)
     with testing.raises(TypeError):
         remove_small_holes(float_test)
+
+
+class Test_remove_close_objects:
+
+    @pytest.mark.parametrize("minimal_distance", [10, 20, 30, 49])
+    def test_linspace_1d(self, minimal_distance):
+        max_step = 50
+        offset = np.linspace(1, max_step, max_step, dtype=np.intp)[::-1]
+        positions = np.cumsum(offset)
+        x = np.zeros(positions.max() + 2, dtype=np.bool_)
+        x[positions] = 1
+        y = remove_close_objects(x, minimal_distance=minimal_distance)
+        diff = np.diff(np.nonzero(y)[0])
+        assert diff.min() == minimal_distance + 1
+
+    def test_handcrafted_2d(self):
+        a = np.array(
+            [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+             [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+             [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 3, 0, 0, 0, 5, 0, 0, 0, 0],
+             [2, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]],
+            dtype=np.uint8
+        )
+        desired = np.array(
+            [[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+             [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]],
+            dtype=np.bool_
+        )
+
+        image = a.astype(np.bool_)
+        result = remove_close_objects(image, minimal_distance=3, priority=a)
+        assert_array_equal(result, desired)
+
+    @pytest.mark.parametrize("ndim", [1, 2, 3, 4, 5])
+    def test_large_objects_nd(self, ndim):
+        shape = (5,) * ndim
+        a = np.ones(shape, dtype=np.uint8)
+        a[2, ...] = 0
+        desired = a.astype(np.bool)
+        desired[2:, ...] = False
+
+        image = a.astype(np.bool_)
+        result = remove_close_objects(image, minimal_distance=2)
+        assert_array_equal(result, desired)
