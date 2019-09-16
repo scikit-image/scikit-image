@@ -5,11 +5,9 @@ connected to a given seed point with a different value.
 """
 
 import numpy as np
-import warnings
 
-from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
-                      _fast_pad)
-from ._util import _offsets_to_raveled_neighbors
+from ._util import (_resolve_neighborhood, _set_edge_values_inplace,
+                    _fast_pad, _offsets_to_raveled_neighbors)
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 
