@@ -51,7 +51,7 @@ def _round_safe(coords):
     return _round_function(coords).astype(int)
 
 
-def line_nd(start, stop, *, endpoint=False, round=True):
+def line_nd(start, stop, *, endpoint=False, integer=True):
     """Draw a single-pixel thick line in n dimensions.
 
     The line produced will be ndim-connected. That is, two subsequent
@@ -67,7 +67,7 @@ def line_nd(start, stop, *, endpoint=False, round=True):
     endpoint : bool, optional
         Whether to include the endpoint in the returned line. Defaults
         to False, which allows for easy drawing of multi-point paths.
-    round : bool, optional
+    integer : bool, optional
         Whether to round the coordinates to integer. If True (default),
         the returned coordinates can be used to directly index into an
         array. `False` could be used for e.g. vector drawing.
@@ -102,7 +102,7 @@ def line_nd(start, stop, *, endpoint=False, round=True):
     coords = []
     for dim in range(len(start)):
         dimcoords = np.linspace(start[dim], stop[dim], npoints, endpoint)
-        if round:
+        if integer:
             dimcoords = _round_safe(dimcoords).astype(int)
         coords.append(dimcoords)
     return coords
