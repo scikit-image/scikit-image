@@ -11,3 +11,8 @@ def test_empty_line():
 def test_zero_line():
     coords = line_nd((-1, -1), (2, 2))
     assert_equal(coords, [[-1, 0, 1], [-1, 0, 1]])
+
+
+def test_no_round():
+    coords = line_nd((0.5, 0), (2.5, 0), integer=False, endpoint=True)
+    assert_equal(coords, [[0.5, 1.5, 2.5], [0, 0, 0]])
