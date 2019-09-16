@@ -1,3 +1,6 @@
+"""Utility functions used in the morphology subpackage."""
+
+
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -83,3 +86,122 @@ def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
                np.ravel_multi_index(center, image_shape, order=order))
     squared_distances = np.sum((connection_indices - center) ** 2, axis=1)
     return offsets[np.argsort(squared_distances)]
+
+
+def _resolve_neighborhood(selem, connectivity, ndim):
+    """Validate or create structuring element for use in `local_maxima`.
+
+    Depending on the values of `connectivity` and `selem` this function
+    either creates a new structuring element (`selem` is None) using
+    `connectivity` or validates the given structuring element (`selem` is not
+    None).
+
+    Parameters
+    ----------
+    selem : array-like or None
+        The structuring element to validate. See same argument in
+        `local_maxima`.
+    connectivity : int or None
+        A number used to determine the neighborhood of each evaluated pixel.
+        See same argument in `local_maxima`.
+    ndim : int
+        Number of dimensions `selem` ought to have.
+
+    Returns
+    -------
+    selem : ndarray
+        Validated or new structuring element specifying the neighborhood.
+    """
+    if selem is None:
+        if connectivity is None:
+            connectivity = ndim
+        selem = ndi.generate_binary_structure(ndim, connectivity)
+    else:
+        # Validate custom structured element
+        selem = np.asarray(selem, dtype=np.bool)
+        # Must specify neighbors for all dimensions
+        if selem.ndim != ndim:
+            raise ValueError(
+                "structuring element and image must have the same number of "
+                "dimensions"
+            )
+        # Must only specify direct neighbors
+        if any(s != 3 for s in selem.shape):
+            raise ValueError("dimension size in structuring element is not 3")
+
+    return selem
+
+
+def _set_edge_values_inplace(image, value):
+    """Set edge values along all axes to a constant value.
+
+    Parameters
+    ----------
+    image : ndarray
+        The array to modify inplace.
+    value : scalar
+        The value to use. Should be compatible with `image`'s dtype.
+
+    Examples
+    --------
+    >>> image = np.zeros((4, 5), dtype=int)
+    >>> _set_edge_values_inplace(image, 1)
+    >>> image
+    array([[1, 1, 1, 1, 1],
+           [1, 0, 0, 0, 1],
+           [1, 0, 0, 0, 1],
+           [1, 1, 1, 1, 1]])
+    """
+    for axis in range(image.ndim):
+        sl = [slice(None)] * image.ndim
+        # Set edge in front
+        sl[axis] = 0
+        image[tuple(sl)] = value
+        # Set edge to the end
+        sl[axis] = -1
+        image[tuple(sl)] = value
+
+
+def _fast_pad(image, value):
+    """Pad an array on all axes with one constant value.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image to pad.
+    value : scalar
+         The value to use. Should be compatible with `image`'s dtype.
+
+    Returns
+    -------
+    padded_image : ndarray
+        The new image.
+
+    Notes
+    -----
+    The output of this function is equivalent to::
+
+        np.pad(image, mode="constant", constant_values=value)
+
+    However, this method needs to only allocate and copy once which can result
+    in significant speed gains if `image` is large.
+
+    Examples
+    --------
+    >>> _fast_pad(np.zeros((2, 3), dtype=int), 4)
+    array([[4, 4, 4, 4, 4],
+           [4, 0, 0, 0, 4],
+           [4, 0, 0, 0, 4],
+           [4, 4, 4, 4, 4]])
+    """
+    # Allocate padded image
+    new_shape = np.array(image.shape) + 2
+    new_image = np.empty(new_shape, dtype=image.dtype, order="C")
+
+    # Copy old image into new space
+    original_slice = tuple(slice(1, -1) for _ in range(image.ndim))
+    new_image[original_slice] = image
+    # and set the edge values
+    _set_edge_values_inplace(new_image, value)
+
+    return new_image
