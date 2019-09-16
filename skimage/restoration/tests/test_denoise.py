@@ -404,8 +404,8 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
                                                multichannel=multichannel,
                                                convert2ycbcr=convert2ycbcr,
                                                rescale_sigma=True)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
     # Verify that SNR is improved with internally estimated sigma
@@ -414,8 +414,8 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
                                                multichannel=multichannel,
                                                convert2ycbcr=convert2ycbcr,
                                                rescale_sigma=True)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
     # SNR is improved less with 1 wavelet level than with the default.
@@ -426,7 +426,7 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
             wavelet_levels=1,
             convert2ycbcr=convert2ycbcr,
             rescale_sigma=True)
-    psnr_denoised_1 = compare_psnr(img, denoised_1)
+    psnr_denoised_1 = peak_signal_noise_ratio(img, denoised_1)
     assert_(psnr_denoised > psnr_denoised_1)
     assert_(psnr_denoised_1 > psnr_noisy)
 
@@ -498,10 +498,11 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                                rescale_sigma=True)
 
     data_range = x.max() - x.min()
-    psnr_noisy = compare_psnr(x, noisy, data_range=data_range)
+    psnr_noisy = peak_signal_noise_ratio(x, noisy, data_range=data_range)
     clipped = np.dtype(dtype).kind != 'f'
     if not clipped:
-        psnr_denoised = compare_psnr(x, denoised, data_range=data_range)
+        psnr_denoised = peak_signal_noise_ratio(x, denoised,
+                                                data_range=data_range)
 
         # output's max value is not substantially smaller than x's
         assert_(denoised.max() > 0.9 * x.max())
@@ -509,8 +510,8 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
         # have to compare to x_as_float in integer input cases
         x_as_float = img_as_float(x)
         f_data_range = x_as_float.max() - x_as_float.min()
-        psnr_denoised = compare_psnr(x_as_float, denoised,
-                                     data_range=f_data_range)
+        psnr_denoised = peak_signal_noise_ratio(x_as_float, denoised,
+                                                data_range=f_data_range)
 
         # output has been clipped to expected range
         assert_(denoised.max() <= 1.0)
@@ -583,8 +584,8 @@ def test_wavelet_denoising_nd(rescale_sigma, method, ndim):
         denoised = restoration.denoise_wavelet(
             noisy, method=method,
             rescale_sigma=rescale_sigma)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
     assert_(psnr_denoised > psnr_noisy)
 
 
@@ -619,9 +620,9 @@ def test_wavelet_denoising_levels(rescale_sigma):
         denoised_1 = restoration.denoise_wavelet(noisy, wavelet=wavelet,
                                                  wavelet_levels=1,
                                                  rescale_sigma=rescale_sigma)
-    psnr_noisy = compare_psnr(img, noisy)
-    psnr_denoised = compare_psnr(img, denoised)
-    psnr_denoised_1 = compare_psnr(img, denoised_1)
+    psnr_noisy = peak_signal_noise_ratio(img, noisy)
+    psnr_denoised = peak_signal_noise_ratio(img, denoised)
+    psnr_denoised_1 = peak_signal_noise_ratio(img, denoised_1)
 
     # multi-level case should outperform single level case
     assert_(psnr_denoised > psnr_denoised_1 > psnr_noisy)
