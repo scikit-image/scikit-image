@@ -1141,35 +1141,32 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     # histogram ignores nbins for integer arrays.
     nbins = len(bin_centers)
 
-    # defining arrays to store the zeroth (momP, cumulative probability)
-    # and first (momS, mean) moments, and the variance between classes
-    # (var_btwcls).
-    momP, momS, var_btwcls = [np.zeros((nbins, nbins)) for n in range(3)]
+    # Compute the zeroth (momP, cumulative probability) and first
+    # (momS, mean) moments
 
     # building the lookup tables.
     # step 1: calculating the diagonal.
-    for u in range(1, nbins):
-        momP[u, u] = prob[u]
-        momS[u, u] = u * prob[u]
+    momP = np.diagflat(prob)
+    momS = np.diagflat(np.arange(nbins)*prob)
 
     # step 2: calculating the first row.
-    for u in range(1, nbins-1):
-        momP[1, u+1] = momP[1, u] + prob[u+1]
-        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
+    momP[1, 2:] = np.cumsum(prob[2:])
+    momS[1, 2:] = np.cumsum(np.arange(2, nbins) * prob[2:])
 
     # step 3: calculating the other rows recursively.
-    for u in range(2, nbins):
-        for v in range(u+1, nbins):
-            momP[u, v] = momP[1, v] - momP[1, u-1]
-            momS[u, v] = momS[1, v] - momS[1, u-1]
+    upper_tri = np.triu_indices_from(momP[2:, 2:], 1)
+
+    momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
+                               - np.repeat(momP[1, 1:-2],
+                                           np.arange(nbins-3, 0, -1)))
+    momS[2:, 2:][upper_tri] = (momS[1, 2:][upper_tri[1]]
+                               - np.repeat(momS[1, 1:-2],
+                                           np.arange(nbins-3, 0, -1)))
 
     # step 4: calculating the between class variance.
-    for u in range(1, nbins):
-        for v in range(u+1, nbins):
-            if (momP[u, v] != 0):
-                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
-            else:
-                var_btwcls[u, v] = 0
+    var_btwcls = np.zeros_like(momP)
+    idx = momP > 0
+    var_btwcls[idx] = momS[idx] ** 2 / momP[idx]
 
     # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.
