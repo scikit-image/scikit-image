@@ -1158,10 +1158,10 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
                                - np.repeat(momP[1, 1:-2],
-                                           np.arange(nbins-3, 0, -1)))
+                                           np.arange(nbins - 3, 0, -1)))
     momS[2:, 2:][upper_tri] = (momS[1, 2:][upper_tri[1]]
                                - np.repeat(momS[1, 1:-2],
-                                           np.arange(nbins-3, 0, -1)))
+                                           np.arange(nbins - 3, 0, -1)))
 
     # step 4: calculating the between class variance.
     var_btwcls = np.zeros_like(momP)
