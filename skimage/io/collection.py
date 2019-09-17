@@ -57,11 +57,11 @@ def alphanumeric_key(s):
 
     Parameters
     ----------
-    s: string
+    s : string
 
     Returns
     -------
-    k: a list of strings and ints
+    k : a list of strings and ints
 
     Examples
     --------
@@ -100,33 +100,29 @@ class ImageCollection(object):
 
     Parameters
     ----------
-    load_pattern : str or list
-        Pattern glob or filenames to load. The path can be absolute or
-        relative. Also see implementation notes below.
+    load_pattern : str or list of str
+        Pattern string or list of strings to load. The filename path can be
+        absolute or relative.
     conserve_memory : bool, optional
-        If True, never keep more than one in memory at a specific
-        time.  Otherwise, images will be cached once they are loaded.
+        If True, `ImageCollection` does not keep more than one in memory at a
+        specific time. Otherwise, images will be cached once they are loaded.
 
     Other parameters
     ----------------
     load_func : callable
-        ``imread`` by default.  See notes below.
+        ``imread`` by default. See notes below.
 
     Attributes
     ----------
     files : list of str
-        If a glob string is given for `load_pattern`, this attribute
-        stores the expanded file list.  Otherwise, this is simply
-        equal to `load_pattern`.
+        If a pattern string is given for `load_pattern`, this attribute
+        stores the expanded file list. Otherwise, this is equal to
+        `load_pattern`.
 
     Notes
     -----
     Note that files are always returned in alphanumerical order. Also note
     that slicing returns a new ImageCollection, *not* a view into the data.
-
-    If multiple patterns are entered as a single string, they should be
-    separated by os.pathsep, e.g. '/tmp/work/*.png:/tmp/other/*.jpg' in
-    Unix-like systems, or '/tmp/work/*.png;/tmp/other/*.jpg' in Windows.
 
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
@@ -172,8 +168,6 @@ class ImageCollection(object):
     (200, 200)
 
     >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
-
-    >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
