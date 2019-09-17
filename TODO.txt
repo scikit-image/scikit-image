@@ -21,6 +21,8 @@ Version 0.17
 Version 0.18
 ------------
 
+* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
+  deprecation warning.
 * Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
 * The following functions are deprecated and should be removed in 0.18:
