@@ -6,16 +6,19 @@ Euler number
 This example shows an illustration of the computation of the Euler number
 in 2D and 3D objects.
 
-For 2D objects, Euler number if the number of objects minus the number of 
-holes. Notice that if an object is 8-connected, its complementary set is 
-4-connected, and conversely.
+For 2D objects, Euler number if the number of objects minus the number of
+holes. Notice that if an object is 8-connected, its complementary set is
+4-connected, and conversely. It is also possible to compute the number of
+objects using `measure.label`, and to deduce the number of holes from the
+difference between the two numbers.
 
-For 3D objects, the number of tunnels has to be taken into account. If an 
+For 3D objects, the Euler number is obtained as the difference
+between the number of objects and the number of tunnels, or loops. If an
 object is 26-connected, its complementary set is 6-connected, and conversely.
 
 """
 from mpl_toolkits.mplot3d import Axes3D
-from skimage.measure import euler_number
+from skimage.measure import euler_number, label
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -33,11 +36,18 @@ SAMPLE = np.array(
      [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
      [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]]
 )
+SAMPLE = np.pad(SAMPLE, 1, mode='constant')
+
 
 plt.imshow(SAMPLE, cmap=plt.cm.gray)
+plt.axis('off')
 e4 = euler_number(SAMPLE, connectivity=1)
+object_nb_4 = label(SAMPLE, connectivity=1).max()
+holes_nb_4 = object_nb_4 - e4
 e8 = euler_number(SAMPLE, connectivity=2)
-plt.title('Euler number for N4: {}, for N8: {}'.format(e4, e8))
+object_nb_8 = label(SAMPLE, connectivity=2).max()
+holes_nb_8 = object_nb_8 - e8
+plt.title('Euler number for N4: {} ({} objects, {} holes), \n for N8: {} ({} objects, {} holes)'.format(e4, object_nb_4, holes_nb_4, e8, object_nb_8, holes_nb_8))
 plt.show()
 
 """
@@ -112,7 +122,7 @@ cube[c, c, c] = False
 display_voxels(cube)
 
 # Add a concavity that connects previous hole
-cube[c, 0:c, c] = False
+cube[c, :, c] = False
 display_voxels(cube)
 
 # Add a new hole
