@@ -951,9 +951,9 @@ def euler_number(image, connectivity=None):
     ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
     ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
     >>> euler_number(SAMPLE)  # doctest:
-    0...
-    >>> euler_number(SAMPLE, neighbourhood=4)  # doctest:
-    2...
+    0
+    >>> euler_number(SAMPLE, connectivity=1)  # doctest:
+    2
     """
 
     # as image can be a label image, transform it to binary
