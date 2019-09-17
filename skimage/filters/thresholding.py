@@ -1146,6 +1146,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     # building the lookup tables.
     # step 1: calculating the diagonal.
+    prob[0] = 0
     momP = np.diagflat(prob)
     momS = np.diagflat(np.arange(nbins) * prob)
 
@@ -1153,7 +1154,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     momP[1, 2:] = np.cumsum(prob[2:])
     momS[1, 2:] = np.cumsum(np.arange(2, nbins) * prob[2:])
 
-    # step 3: calculating the other rows recursively.
+    # step 3: the other rows are recursively computed as:
+    # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
     upper_tri = np.triu_indices_from(momP[2:, 2:], 1)
 
     momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
