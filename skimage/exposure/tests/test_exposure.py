@@ -445,7 +445,7 @@ def test_adjust_gamma_neggative():
 
 def test_adjust_log_1x1_shape():
     """Check that the shape is maintained"""
-    img = np.ones([1,1])
+    img = np.ones([1, 1])
     result = exposure.adjust_log(img, 1)
     assert img.shape == result.shape
 
@@ -491,7 +491,7 @@ def test_adjust_inv_log():
 
 def test_adjust_sigmoid_1x1_shape():
     """Check that the shape is maintained"""
-    img = np.ones([1,1])
+    img = np.ones([1, 1])
     result = exposure.adjust_sigmoid(img, 1, 5)
     assert img.shape == result.shape
 
