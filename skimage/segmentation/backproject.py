@@ -1,7 +1,9 @@
 import numpy as np
-from skimage.color import rgb2hsv
-from skimage.exposure import rescale_intensity, histogram
 from scipy.ndimage import convolve
+
+from ..color import rgb2hsv
+from ..exposure import rescale_intensity, histogram
+from ..util import img_as_ubyte
 
 # kernel for final convolution
 disc = np.array([[0, 0, 1, 0, 0],
