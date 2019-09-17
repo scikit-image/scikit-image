@@ -143,14 +143,6 @@ def test_view_as_windows_with_skip():
     assert_equal(C.shape, (1, 1, 2, 2))
 
 
-def test_views_non_contiguous():
-    A = np.arange(16).reshape((4, 4))
-    A = A[::2, :]
-
-    assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
-    assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
-
-
 def test_view_as_windows_step_tuple():
     A = np.arange(24).reshape((6, 4))
     B = view_as_windows(A, (3, 2), step=3)
