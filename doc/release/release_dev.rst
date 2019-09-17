@@ -56,10 +56,13 @@ API Changes
 - Default value of ``order`` parameter has been set to ``rc`` in
   ``skimage.feature.hessian_matrix``.
 - ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
-
+- ``skimage.measure.euler_number`` is added to handle different adjacency
+  configurations. See also bugfixes.
 
 Bugfixes
 --------
+- Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
+  The bug is corrected. It is defined for 2D and 3D objects.
 
 
 Deprecations

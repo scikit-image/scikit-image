@@ -1,6 +1,7 @@
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
+from skimage.util import pad
 
 from ._label import label
 from . import _moments
@@ -8,7 +9,7 @@ from . import _moments
 from functools import wraps
 
 
-__all__ = ['regionprops', 'perimeter']
+__all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -49,6 +50,7 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
+    'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
     'Slice': 'slice',
@@ -98,6 +100,7 @@ COL_DTYPES = {
     'moments_normalized': float,
     'orientation': float,
     'perimeter': float,
+    'perimeter_crofton': float,
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
@@ -217,10 +220,10 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        euler_array = self.filled_image != self.image
-        _, num = label(euler_array, connectivity=self._ndim, return_num=True,
-                       background=0)
-        return -num + 1
+        if self._ndim < 2 or self._ndim > 3:
+            raise NotImplementedError('Euler number is implemented for '
+                                      '2D or 3D images only')
+        return euler_number(self.image, self._ndim)
 
     @property
     def extent(self):
@@ -330,6 +333,11 @@ class RegionProperties:
     @only2d
     def perimeter(self):
         return perimeter(self.image, 4)
+
+    @property
+    @only2d
+    def perimeter_crofton(self):
+        return perimeter_crofton(self.image, 4)
 
     @property
     def solidity(self):
@@ -677,8 +685,10 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
     **euler_number** : int
-        Euler characteristic of region. Computed as number of objects (= 1)
-        subtracted by number of holes (8-connectivity).
+        Euler characteristic of the set of non-zero pixels. 
+        Computed as number of connected components subtracted by number of 
+        holes (input.ndim connectivity). In 3D, it also involves the number of 
+        tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -741,6 +751,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
     **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
+    **perimeter_crofton** : float
+        Perimeter of object approximated by the Crofton formula in 4 
+        directions.
     **slice** : tuple of slices
         A slice to extract the object from the source image.
     **solidity** : float
@@ -835,6 +848,154 @@ def regionprops(label_image, intensity_image=None, cache=True):
     return regions
 
 
+def euler_number(image, connectivity=None):
+    """Calculate the Euler characteristic in binary image.
+
+    A neighbourhood configuration is constructed, and a LUT is applied for 
+    each configuration.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray or (N, M, D) ndarray.
+        2D or 3D images.
+        If image is not binary, all values strictly greater than zero
+        are considered as the object.
+    connectivity : int, optional
+        Maximum number of orthogonal hops to consider a pixel/voxel
+        as a neighbor.
+        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
+        connectivity of ``input.ndim`` is used.
+        4 or 8 neighborhoods are defined for 2D images (connectivity 1 and 2, 
+        respectively).
+        6 or 26 neighborhoods are defined for 3D images, (connectivity 1 and 3,
+        respectively). Connectivity 2 is not defined. 
+
+    Returns
+    -------
+    euler_number : int
+        Euler characteristic of the set of all objects in the image.
+
+    Notes
+    -----
+    The Euler characteristic is an integer number that describes the 
+    topology of the set of all objects in the input image. If object is
+    4-connected, then background is 8-connected, and conversely.
+
+    References
+    ----------
+    .. [1] S. Rivollier. Analyse d’image geometrique et morphometrique par
+           diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
+           2010. Ecole Nationale Superieure des Mines de Saint-Etienne.
+           https://tel.archives-ouvertes.fr/tel-00560838
+    .. [2] Ohser J., Nagel W., Schladitz K. (2002) The Euler Number of
+           Discretized Sets - On the Choice of Adjacency in Homogeneous
+           Lattices. In: Mecke K., Stoyan D. (eds) Morphology of Condensed
+           Matter. Lecture Notes in Physics, vol 600. Springer, Berlin,
+           Heidelberg.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> SAMPLE = np.zeros((100,100,100));
+    >>> SAMPLE[40:60, 40:60, 40:60]=1
+    >>> euler_number(SAMPLE) # doctest: +ELLIPSIS
+    1...
+    >>> SAMPLE[45:55,45:55,45:55] = 0;
+    >>> euler_number(SAMPLE) # doctest: +ELLIPSIS
+    2...
+    >>> SAMPLE = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                    [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+    ...                    [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+    ...                    [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]])
+    >>> euler_number(SAMPLE)  # doctest:
+    0...
+    >>> euler_number(SAMPLE, neighbourhood=4)  # doctest:
+    2...
+    """
+
+    # as image can be a label image, transform it to binary
+    image = (image > 0).astype(np.int)
+    image = pad(image, ((1, 1),), mode='constant')
+
+    # check connectivity
+    if connectivity is None:
+        connectivity = image.ndim
+
+    if image.ndim==3 and connectivity==2:
+        raise NotImplementedError('For 3D images, Euler number is implemented '
+                                  'for connectivities 1 and 3 only')
+
+    # config variable is an adjacency configuration. A coefficient given by
+    # variable coefs is attributed to each configuration in order to get
+    # the Euler characteristic.
+    if image.ndim == 2:
+
+        config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
+        if connectivity == 1:
+            coefs = [0, 1, 0, 0, 0, 0, 0,
+                     -1, 0, 1, 0, 0, 0, 0, 0, 0]
+        else:
+            coefs = [0, 0, 0, 0, 0, 0, -1,
+                     0, 1, 0, 0, 0, 0, 0, -1, 0]
+        bins = 16
+    else:  # 3D images
+        config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                           [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
+                           [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
+        coefs26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
+                            1, -2, 0, -1, 0, -1, -1, 0,
+                            1, 0, -2, -1, -2, -1, -1, -2,
+                            -6, -3, -3, -2, -3, -2, 0, -1,
+                            1, -2, 0, -1, -6, -3, -3, -2,
+                            -2, -1, -1, -2, -3, 0, -2, -1,
+                            0, -1, -1, 0, -3, -2, 0, -1,
+                            -3, 0, -2, -1, 0, 1, 1, 0,
+                            1, -2, -6, -3, 0, -1, -3, -2,
+                            -2, -1, -3, 0, -1, -2, -2, -1,
+                            0, -1, -3, -2, -1, 0, 0, -1,
+                            -3, 0, 0, 1, -2, -1, 1, 0,
+                            -2, -1, -3, 0, -3, 0, 0, 1,
+                            -1, 4, 0, 3, 0, 3, 1, 2,
+                            -1, -2, -2, -1, -2, -1, 1,
+                            0, 0, 3, 1, 2, 1, 2, 2, 1,
+                            1, -6, -2, -3, -2, -3, -1, 0,
+                            0, -3, -1, -2, -1, -2, -2, -1,
+                            -2, -3, -1, 0, -1, 0, 4, 3,
+                            -3, 0, 0, 1, 0, 1, 3, 2,
+                            0, -3, -1, -2, -3, 0, 0, 1,
+                            -1, 0, 0, -1, -2, 1, -1, 0,
+                            -1, -2, -2, -1, 0, 1, 3, 2,
+                            -2, 1, -1, 0, 1, 2, 2, 1,
+                            0, -3, -3, 0, -1, -2, 0, 1,
+                            -1, 0, -2, 1, 0, -1, -1, 0,
+                            -1, -2, 0, 1, -2, -1, 3, 2,
+                            -2, 1, 1, 2, -1, 0, 2, 1,
+                            -1, 0, -2, 1, -2, 1, 1, 2,
+                            -2, 3, -1, 2, -1, 2, 0, 1,
+                            0, -1, -1, 0, -1, 0, 2, 1,
+                            -1, 2, 0, 1, 0, 1, 1, 0, ])
+
+        if connectivity == 1:
+            coefs = coefs26[::-1]
+        else:
+            coefs = coefs26
+        bins = 256
+
+    XF = ndi.convolve(image, config, mode='constant', cval=0)
+    h = np.bincount(XF.ravel(), minlength=bins)
+
+    if image.ndim == 2:
+        return coefs@h
+    else:
+        return np.int(1./8 * coefs@h)
+
+
 def perimeter(image, neighbourhood=4):
     """Calculate total perimeter of all objects in binary image.
 
@@ -888,7 +1049,7 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
     perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
-                                                           [ 2, 1,  2],
+                                                           [2, 1,  2],
                                                            [10, 2, 10]]),
                                    mode='constant', cval=0)
 
@@ -898,6 +1059,80 @@ def perimeter(image, neighbourhood=4):
     # as much time)
     perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
     total_perimeter = perimeter_histogram @ perimeter_weights
+    return total_perimeter
+
+
+def perimeter_crofton(image, directions=4):
+    """Calculate total perimeter of all objects in binary image.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        2D image. If image is not binary, all values strictly greater than zero 
+        are considered as the object.
+    directions : 2 or 4, optional
+        Number of directions used to approximate the Crofton perimeter. By 
+        default, 4 is used: it should be more precise than 2. 
+        Computation time is the same in both cases.
+
+    Returns
+    -------
+    perimeter : float
+        Total perimeter of all objects in binary image.
+
+    Notes
+    -----
+    This measure is based on Crofton formula [1], which is an interesting 
+    measure coming from the integral geometry. It is defined for general curve
+    length evaluation via a double integral along all directions. In a discrete
+    space, 2 or 4 directions give a quite good approximation, 4 being more
+    precise than 2 because it can investigate more complex shapes.
+
+    As measure.perimeter, this function returns an approximation of the 
+    perimeter in continuous space.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Crofton_formula
+    .. [2] S. Rivollier. Analyse d’image geometrique et morphometrique par 
+           diagrammes de forme et voisinages adaptatifs generaux. PhD thesis,
+           2010.
+           Ecole Nationale Superieure des Mines de Saint-Etienne.
+           https://tel.archives-ouvertes.fr/tel-00560838
+
+    Examples
+    --------
+    >>> from skimage import data, util
+    >>> from skimage.measure import label
+    >>> # coins image (binary)
+    >>> img_coins = data.coins() > 110
+    >>> # total perimeter of all objects in the image
+    >>> perimeter_crofton(img_coins, directions=2)  # doctest: +ELLIPSIS
+    8144.578...
+    >>> perimeter_crofton(img_coins, directions=4)  # doctest: +ELLIPSIS
+    7837.077...
+    """
+    if image.ndim != 2:
+        raise NotImplementedError(
+            '`perimeter_crofton` supports 2D images only')
+
+    # as image could be a label image, transform it to binary image
+    image = (image > 0).astype(np.uint8)
+    image = pad(image, ((1, 1),), mode='constant')
+    XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
+                      mode='constant', cval=0)
+
+    h = np.bincount(XF.ravel(), minlength=16)
+
+    # definition of the LUT
+    if directions == 2:
+        coefs = [0, np.pi/2, 0, 0, 0, np.pi/2, 0, 0,
+                 np.pi/2, np.pi, 0, 0, np.pi/2, np.pi, 0, 0]
+    else:
+        coefs = [0, np.pi/4*(1+1/(np.sqrt(2))), np.pi/(4*np.sqrt(2)), np.pi/(2*np.sqrt(2)), 0, np.pi/4*(1+1/(np.sqrt(2))),
+                 0, np.pi/(4*np.sqrt(2)), np.pi/4, np.pi/2, np.pi/(4*np.sqrt(2)), np.pi/(4*np.sqrt(2)), np.pi/4, np.pi/2, 0, 0]
+
+    total_perimeter = coefs@h
     return total_perimeter
 
 

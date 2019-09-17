@@ -3,6 +3,7 @@ import math
 import numpy as np
 from numpy import array
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
+                                          perimeter_crofton, euler_number,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
                                           COL_DTYPES)
@@ -184,12 +185,34 @@ def test_equiv_diameter():
 
 def test_euler_number():
     en = regionprops(SAMPLE)[0].euler_number
-    assert en == 1
+    assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     en = regionprops(SAMPLE_mod)[0].euler_number
-    assert en == 0
+    assert en == -1
+
+    en = euler_number(SAMPLE, 1)
+    assert en == 2
+
+    en = euler_number(SAMPLE_mod, 1)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 1)
+    assert en == 1
+
+    en = euler_number(SAMPLE_3D, 3)
+    assert en == 1
+
+    # for convex body, Euler number is 1
+    SAMPLE_3D_2 = np.zeros((100, 100, 100))
+    SAMPLE_3D_2[40:60, 40:60, 40:60] = 1
+    en = euler_number(SAMPLE_3D_2, 3)
+    assert en == 1
+
+    SAMPLE_3D_2[45:55, 45:55, 45:55] = 0
+    en = euler_number(SAMPLE_3D_2, 3)
+    assert en == 2
 
 
 def test_extent():
@@ -200,13 +223,13 @@ def test_extent():
 def test_moments_hu():
     hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
-         3.27117627e-01,
-         2.63869194e-02,
-         2.35390060e-02,
-         1.23151193e-03,
-         1.38882330e-06,
-         -2.72586158e-05,
-         -6.48350653e-06
+        3.27117627e-01,
+        2.63869194e-02,
+        2.35390060e-02,
+        1.23151193e-03,
+        1.38882330e-06,
+        -2.72586158e-05,
+        -6.48350653e-06
     ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
@@ -326,6 +349,14 @@ def test_perimeter():
     assert_almost_equal(per, 46.8284271247)
 
 
+def test_perimeter_crofton():
+    per = regionprops(SAMPLE)[0].perimeter_crofton
+    assert_almost_equal(per, 61.0800637973)
+
+    per = perimeter_crofton(SAMPLE.astype('double'), directions=2)
+    assert_almost_equal(per, 64.4026493985)
+
+
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
     # determined with MATLAB
@@ -386,9 +417,9 @@ def test_weighted_moments_normalized():
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_normalized
     ref = np.array(
-        [[       np.nan,        np.nan, 0.2301467830, -0.0162529732],
-         [       np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
-         [ 0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
+        [[np.nan,        np.nan, 0.2301467830, -0.0162529732],
+         [np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
+         [0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
          [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
