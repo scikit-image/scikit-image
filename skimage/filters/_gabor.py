@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 from .._shared.utils import check_nD
-
+from .._shared.gpu.convolve import convolve
 
 __all__ = ['gabor_kernel', 'gabor']
 
@@ -171,7 +171,7 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
                      offset)
 
-    filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
-    filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)
+    filtered_real = convolve(image, np.real(g), mode=mode, cval=cval)
+    filtered_imag = convolve(image, np.imag(g), mode=mode, cval=cval)
 
     return filtered_real, filtered_imag

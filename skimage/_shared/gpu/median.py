@@ -1,5 +1,5 @@
 
-from ..filters import median as cpuMedian
+from skimage.filters import median as cpuMedian
 
 import gputools 
 def median(image,selem=None,out=None,mask=None,shift_x=False,shift_y=False,mode='nearest',cval=0.0,behavior='ndimage'):
