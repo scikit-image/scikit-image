@@ -40,10 +40,7 @@ def _interpolate_image(image, multichannel=False):
 
 
 def _generate_mask(shape, idx, stride=3):
-    """
-    Generate a uniformly gridded boolean mask of shape `shape`,
-    containing ones separated by `stride` along each dimension, with offset
-    controlled by `idx`.
+    """Generate slices of uniformly-spaced points in an array.
 
     Parameters
     ----------
@@ -68,9 +65,7 @@ def _generate_mask(shape, idx, stride=3):
 
 def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
                       masks=None, denoiser_kwargs=None):
-    """
-    Apply a J-invariant version of `denoise_function`, generated with an
-    iterated masking and interpolation procedure.
+    """Apply a J-invariant version of `denoise_function`.
 
     Parameters
     ----------
@@ -92,8 +87,6 @@ def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
 
     Returns
     -------
-    best_denoise_function : function
-        The optimal J-invariant version of `denoise_function`.
     output : ndarray
         Denoised image, of same shape as `image`.
     """
@@ -119,8 +112,9 @@ def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
 
 
 def _product_from_dict(dictionary):
-    """
-    Convert a dict of lists into a list of dicts whose values consist of the
+    """Utility function to convert parameter ranges to parameter combinations.
+
+    Converts a dict of lists into a list of dicts whose values consist of the
     cartesian product of the values in the original dict.
 
     Parameters
@@ -128,11 +122,11 @@ def _product_from_dict(dictionary):
     dictionary : dict of lists
         Dictionary of lists to be multiplied.
 
-    Returns
-    -------
-    selections : list of dicts
-        List of dicts representing the cartesian product of the values
-        in `dictionary`.
+    Yields
+    ------
+    selections : dicts of values
+        Dicts containing individual combinations of the values in the input
+        dict.
     """
     keys = dictionary.keys()
     for element in product(*dictionary.values()):
@@ -141,10 +135,10 @@ def _product_from_dict(dictionary):
 
 def calibrate_denoiser(image, denoise_function, parameter_ranges, *,
                        stride=4, multichannel=False, approximate_loss=True):
-    """
-    Calibrate a denoising function, yielding a J-invariant version
-    of `denoise_function` with the optimal parameter values for denoising
-    the input image.
+    """Calibrate a denoising function and return optimal J-invariant version.
+
+    The returned function is partially evaluated with optimal parameter values
+    set for denoising the input image.
 
     Parameters
     ----------
@@ -223,10 +217,7 @@ def calibrate_denoiser(image, denoise_function, parameter_ranges, *,
 
 def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
                               stride=4, multichannel=False, approximate_loss=True):
-    """
-    Calibrate a denoising function, yielding a J-invariant version
-    of `denoise_function` with the optimal parameter values for denoising
-    the input image.
+    """Return a parameter search history with losses for a denoise function.
 
     Parameters
     ----------
