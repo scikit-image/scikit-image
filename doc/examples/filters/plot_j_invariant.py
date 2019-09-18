@@ -50,8 +50,8 @@ fig, axes = plt.subplots(1, 3, sharey=True, figsize=(15, 5))
 
 for ax, img, title in zip(axes,
                           [noisy, default_output, calibrated_output],
-                          ["Noisy Image", "Denoised (Default)",
-                           "Denoised (Calibrated)"]):
+                          ['Noisy Image', 'Denoised (Default)',
+                           'Denoised (Calibrated)']):
     ax.imshow(img)
     ax.set_title(title)
     ax.set_yticks([])
@@ -111,28 +111,28 @@ ax_image = [plt.subplot(gs[2, i]) for i in range(3)]
 ax1.plot(sigma_range, self_supervised_loss, color='C0',
          label='Self-Supervised Loss')
 ax1.scatter(sigma_range[opt_idx], self_supervised_loss[opt_idx] + 0.0003,
-            marker="v", color='red', label='optimal sigma')
+            marker='v', color='red', label='optimal sigma')
 
 ax1.set_ylabel('MSE')
 ax1.set_xticks([])
 ax1.legend()
-ax1.set_title("Self-Supervised Loss")
+ax1.set_title('Self-Supervised Loss')
 
 ax2.plot(sigma_range, ground_truth_loss, color='C0', linestyle='--',
          label='Ground Truth Loss')
 ax2.scatter(sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.0003,
-            marker="v", color='red', label='optimal sigma')
+            marker='v', color='red', label='optimal sigma')
 ax2.set_ylabel('MSE')
 ax2.legend()
 ax2.set_xlabel('sigma')
-ax2.set_title("Ground-Truth Loss")
+ax2.set_title('Ground-Truth Loss')
 
 for i in range(3):
     ax = ax_image[i]
     ax.set_xticks([])
     ax.set_yticks([])
     ax.imshow(get_inset(denoised_invariant[plot_idx[i]]))
-    ax.set_xlabel("sigma = " + str(np.round(sigma_range[plot_idx[i]], 2)))
+    ax.set_xlabel('sigma = ' + str(np.round(sigma_range[plot_idx[i]], 2)))
 
 for spine in ax_image[1].spines.values():
     spine.set_edgecolor('red')
@@ -172,13 +172,14 @@ ax.plot(sigma_range, ground_truth_loss_invariant, color='C0', linestyle='--',
 ax.plot(sigma_range, ground_truth_loss_original, color='C1', linestyle='--',
         label='Original')
 ax.scatter(sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.001,
-           marker="v", color='red')
+           marker='v', color='red')
 ax.legend()
 ax.set_title(
-    "J-Invariant Denoiser Has Comparable Or "
-    "Better Performance At Same Parameters")
-ax.set_ylabel("MSE")
-ax.set_xlabel("sigma")
+    'J-Invariant Denoiser Has Comparable Or '
+    'Better Performance At Same Parameters'
+)
+ax.set_ylabel('MSE')
+ax.set_xlabel('sigma')
 
 #####################################################################
 # Comparing Different Classes of Denoiser
@@ -205,7 +206,7 @@ parameters_tested_tv, losses_tv = calibrate_denoiser_search(
                                     noisy,
                                     denoise_tv_chambolle,
                                     denoise_parameters=parameter_ranges_tv)
-print("Minimum self-supervised loss TV: {:.4f}".format(np.min(losses_tv)))
+print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
 denoised_calibrated_tv = invariant_denoise(noisy, denoise_tv_chambolle,
@@ -220,8 +221,7 @@ parameters_tested_wavelet, losses_wavelet = calibrate_denoiser_search(
                                                 noisy,
                                                 denoise_wavelet,
                                                 parameter_ranges_wavelet)
-print("Minimum self-supervised loss wavelet: {:.4f}".format(
-    np.min(losses_wavelet)))
+print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
 denoised_calibrated_wavelet = invariant_denoise(noisy, denoise_wavelet,
@@ -240,7 +240,7 @@ parameter_ranges_nl = {'sigma': np.arange(0.01, 0.3, 0.03)}
 parameters_tested_nl, losses_nl = calibrate_denoiser_search(noisy,
                                                             denoise_nl_means,
                                                             parameter_ranges_nl)
-print("Minimum self-supervised loss NL means: {:.4f}".format(np.min(losses_nl)))
+print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
 denoised_calibrated_nl = invariant_denoise(noisy, denoise_nl_means,
@@ -250,19 +250,19 @@ denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 psnr_calibrated_nl = psnr(denoised_calibrated_nl, image)
 psnr_default_nl = psnr(denoised_default_nl, image)
 
-print("                       PSNR")
-print("NL means (Default)   : {:.1f}".format(psnr_default_nl))
-print("NL means (Calibrated): {:.1f}".format(psnr_calibrated_nl))
-print("Wavelet  (Default)   : {:.1f}".format(psnr_default_wavelet))
-print("Wavelet  (Calibrated): {:.1f}".format(psnr_calibrated_wavelet))
-print("TV norm  (Default)   : {:.1f}".format(psnr_default_tv))
-print("TV norm  (Calibrated): {:.1f}".format(psnr_calibrated_tv))
+print(f'                       PSNR')
+print(f'NL means (Default)   : {psnr_default_nl:.1f}')
+print(f'NL means (Calibrated): {psnr_calibrated_nl:.1f}')
+print(f'Wavelet  (Default)   : {psnr_default_wavelet:.1f}')
+print(f'Wavelet  (Calibrated): {psnr_calibrated_wavelet:.1f}')
+print(f'TV norm  (Default)   : {psnr_default_tv:.1f}')
+print(f'TV norm  (Calibrated): {psnr_calibrated_tv:.1f}')
 
 plt.subplots(figsize=(10, 12))
 plt.imshow(noisy, cmap='Greys_r')
 plt.xticks([])
 plt.yticks([])
-plt.title("Noisy Image")
+plt.title('Noisy Image')
 
 get_inset = lambda x: x[0:100, -140:]
 
@@ -273,17 +273,17 @@ for ax in axes.ravel():
     ax.set_yticks([])
 
 axes[0, 0].imshow(get_inset(denoised_default_nl), cmap='Greys_r')
-axes[0, 0].set_title("NL Means Default")
+axes[0, 0].set_title('NL Means Default')
 axes[1, 0].imshow(get_inset(denoised_calibrated_nl), cmap='Greys_r')
-axes[1, 0].set_title("NL Means Calibrated")
+axes[1, 0].set_title('NL Means Calibrated')
 axes[0, 1].imshow(get_inset(denoised_default_wavelet), cmap='Greys_r')
-axes[0, 1].set_title("Wavelet Default")
+axes[0, 1].set_title('Wavelet Default')
 axes[1, 1].imshow(get_inset(denoised_calibrated_wavelet), cmap='Greys_r')
-axes[1, 1].set_title("Wavelet Calibrated")
+axes[1, 1].set_title('Wavelet Calibrated')
 axes[0, 2].imshow(get_inset(denoised_default_tv), cmap='Greys_r')
-axes[0, 2].set_title("TV Norm Default")
+axes[0, 2].set_title('TV Norm Default')
 axes[1, 2].imshow(get_inset(denoised_calibrated_tv), cmap='Greys_r')
-axes[1, 2].set_title("TV Norm Calibrated")
+axes[1, 2].set_title('TV Norm Calibrated')
 
 for spine in axes[1, 2].spines.values():
     spine.set_edgecolor('red')
