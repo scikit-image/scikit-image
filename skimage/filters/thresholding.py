@@ -1175,6 +1175,6 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, nbins)
 
     # correcting threshold values.
-    idx_thresh = bin_centers[:-1][aux_thresh.astype('int')]
+    idx_thresh = bin_centers[aux_thresh.astype('int')]
 
     return idx_thresh

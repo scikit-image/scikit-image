@@ -85,16 +85,25 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
     cdef double part_sigma
 
     if divisions-1 == depth:
-        for idx in range(min_val, max_val-divisions+depth):
+        idx_tuple[divisions] = min_val
+        part_sigma = 0
+        for idd in range(divisions+1):
+            part_sigma += var_btwcls[1 + idx_tuple[idd], idx_tuple[idd+1]]
+        # checking if partial sigma is higher than maximum sigma
+        if max_sigma < part_sigma:
+            aux_thresh[:] = idx_tuple[1:-1]
+            max_sigma = part_sigma
+        for idx in range(min_val+1, max_val-1):
             # starting calculations
-            idx_tuple[depth+1] = idx
-            part_sigma = 0
-            for idd in range(divisions+1):
-                part_sigma += var_btwcls[1 + idx_tuple[idd], idx_tuple[idd+1]]
-                # checking if partial sigma is higher than maximum sigma
-                if max_sigma < part_sigma:
-                    aux_thresh[:idd] = idx_tuple[1:idd + 1]
-                    max_sigma = part_sigma
+            part_sigma -= (var_btwcls[idx, idx_tuple[divisions+1]]
+                           + var_btwcls[1 + idx_tuple[depth], idx-1])
+            part_sigma += (var_btwcls[1 + idx, idx_tuple[divisions+1]]
+                           + var_btwcls[1 + idx_tuple[depth], idx])
+            idx_tuple[divisions] = idx
+            # checking if partial sigma is higher than maximum sigma
+            if max_sigma < part_sigma:
+                aux_thresh[:] = idx_tuple[1:-1]
+                max_sigma = part_sigma
     else:
         for idx in range(min_val, max_val-divisions+depth):
             idx_tuple[depth+1] = idx
