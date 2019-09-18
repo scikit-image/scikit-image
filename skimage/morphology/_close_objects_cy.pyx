@@ -60,7 +60,7 @@ def _remove_close_objects(
     try:
         for i in range(indices.shape[0]):
             index_i = indices[i]
-            if image[index_i] != 1:
+            if image[index_i] == 0:
                 continue
 
             in_range = kdtree.query_ball_point(
@@ -69,7 +69,7 @@ def _remove_close_objects(
             for j in in_range:
                 index_j = indices[j]
                 if (
-                    image[index_j] == 1
+                    image[index_j] > 0
                     and labels[index_i] != labels[index_j]
                 ):
                     _remove_object(
@@ -121,6 +121,6 @@ cdef inline void _remove_object(
                 continue
             # The algorithm might cross the image edge when two objects are
             # neighbors in the raveled view -> check label to avoid that
-            if image[neighbor] == 1 and labels[neighbor] == label:
+            if image[neighbor] > 0 and labels[neighbor] == label:
                 queue_push(queue_ptr, &neighbor)
                 image[neighbor] = 0

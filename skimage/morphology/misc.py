@@ -308,14 +308,14 @@ def remove_close_objects(
     ...     image.view(bool), minimal_distance=3, priority=image
     ... )
     >>> result.view(np.uint8)
-    array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-           [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
-           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+           [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+           [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]], dtype=uint8)
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]], dtype=uint8)
     """
     if not np.can_cast(image, bool, casting="same_kind"):
         # Cython doesn't support boolean memoryviews yet

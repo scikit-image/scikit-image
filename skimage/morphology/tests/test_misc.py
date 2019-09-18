@@ -280,3 +280,20 @@ class Test_remove_close_objects:
         )
         desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)
+
+    @pytest.mark.parametrize("dtype", [np.uint8, np.int8])
+    def test_view_on_byte_sized(self, dtype):
+        """Test behavior if image is a view on 1 byte sized numeric dtypes."""
+        image = np.array([-2, 0, 2], dtype=dtype)
+
+        # When using a view, object values don't change
+        result_view = remove_close_objects(image.view(bool), 2)
+        desired_view = np.array([-2, 0, 0], dtype=dtype)
+        assert result_view.dtype is np.dtype(bool)
+        assert_array_equal(result_view.view(dtype), desired_view)
+
+        # When using astype, the object values > 0 are replaced with 1
+        result_astype = remove_close_objects(image.astype(bool), 2)
+        desired_astype = np.array([1, 0, 0], dtype=np.uint8)
+        assert_array_equal(result_astype, result_view)
+        assert_array_equal(result_astype.view(np.uint8), desired_astype)
