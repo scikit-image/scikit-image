@@ -8,7 +8,8 @@ cimport numpy as cnp
 cimport cython
 from itertools import combinations
 
-def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
+def _find_threshold_multiotsu(double [:, ::1] momS,
+                              double [:, ::1] momP,
                               Py_ssize_t classes,
                               Py_ssize_t bins):
     """
@@ -34,6 +35,7 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
     cdef double part_sigma = 0
     # max_sigma is the maximum variance between classes.
     cdef double max_sigma = 0
+    cdef double [:, ::1] var_btwcls
 
     py_aux_thresh = np.empty(classes - 1, dtype=np.intp)
     cdef Py_ssize_t[::1] aux_thresh = py_aux_thresh
@@ -41,12 +43,27 @@ def _find_threshold_multiotsu(double [:, ::1] var_btwcls,
     idx_tuple[classes] = bins - 1
 
     with nogil:
-        _find_best_rec(var_btwcls=var_btwcls, min_val=0,
+        _get_between_class_var(momS=momS, momP=momP, bins=bins)
+        _find_best_rec(var_btwcls=momS, min_val=0,
                        max_val=bins-1, idx_tuple=idx_tuple,
                        divisions=classes-1, depth=0, max_sigma=0,
                        aux_thresh=aux_thresh)
 
     return py_aux_thresh
+
+
+cdef void _get_between_class_var(double [:, ::1] momS,
+                                 double [:, ::1] momP,
+                                 Py_ssize_t bins) nogil:
+    cdef cnp.intp_t i, j
+
+    for i in range(bins):
+        for j in range(i, bins):
+            if momP[i, j] > 0:
+                momS[i, j] *= momS[i, j]
+                momS[i, j] /= momP[i, j]
+            else:
+              momS[i, j] = 0
 
 
 cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
@@ -94,7 +111,7 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
             aux_thresh[:] = idx_tuple[1:-1]
             max_sigma = part_sigma
         for idx in range(min_val+1, max_val-1):
-            # starting calculations
+            # update partial sigma
             part_sigma -= (var_btwcls[idx, idx_tuple[divisions+1]]
                            + var_btwcls[1 + idx_tuple[depth], idx-1])
             part_sigma += (var_btwcls[1 + idx, idx_tuple[divisions+1]]

@@ -1165,14 +1165,9 @@ def threshold_multiotsu(image, classes=3, nbins=256):
                                - np.repeat(momS[1, 1:-2],
                                            np.arange(nbins - 3, 0, -1)))
 
-    # step 4: calculating the between class variance.
-    var_btwcls = np.zeros_like(momP)
-    idx = momP > 0
-    var_btwcls[idx] = momS[idx] ** 2 / momP[idx]
-
     # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.
-    aux_thresh = _find_threshold_multiotsu(var_btwcls, classes, nbins)
+    aux_thresh = _find_threshold_multiotsu(momS, momP, classes, nbins)
 
     # correcting threshold values.
     idx_thresh = bin_centers[aux_thresh.astype('int')]
