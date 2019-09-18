@@ -550,6 +550,9 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     Wu's method draws anti-aliased circle. This implementation doesn't use
     lookup table optimization.
 
+    Use the function ``draw.set_color`` to apply ``circle_perimeter_aa``
+    results to color images.
+
     References
     ----------
     .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
@@ -572,6 +575,11 @@ def circle_perimeter_aa(r, c, radius, shape=None):
            [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
+
+    >>> from skimage import data, draw
+    >>> image = data.chelsea()
+    >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
+    >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """
     return _circle_perimeter_aa(r, c, radius, shape)
 
