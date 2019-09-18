@@ -1,4 +1,5 @@
-from itertools import product
+import itertools
+import functools
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -8,8 +9,7 @@ from ..util import img_as_float
 
 
 def _interpolate_image(image, multichannel=False):
-    """
-    Interpolate `image`, replacing each pixel with the average of its neighbors.
+    """Replacing each pixel in ``image`` with the average of its neighbors.
 
     Parameters
     ----------
@@ -39,25 +39,49 @@ def _interpolate_image(image, multichannel=False):
     return interp
 
 
-def _generate_mask(shape, idx, stride=3):
+def _generate_grid_slice(shape, *, offset, stride=3):
     """Generate slices of uniformly-spaced points in an array.
 
     Parameters
     ----------
     shape : tuple of int
         Shape of the mask.
-    idx : int
-        The offset of the grid of ones. Iterating over `idx` will cover the
-        entire array.
-    stride : int
+    offset : int
+        The offset of the grid of ones. Iterating over ``offset`` will cover
+        the entire array. It should be between 0 and ``stride ** ndim``, not
+        inclusive, where ``ndim = len(shape)``.
+    stride : int, optional
         The spacing between ones, used in each dimension.
 
     Returns
     -------
     mask : ndarray
         The mask.
+
+    Examples
+    --------
+    >>> shape = (4, 4)
+    >>> array = np.zeros(shape, dtype=int)
+    >>> grid_slice = _generate_grid_slice(shape, offset=0, stride=2)
+    >>> array[grid_slice] = 1
+    >>> print(array)
+    [[1 0 1 0]
+     [0 0 0 0]
+     [1 0 1 0]
+     [0 0 0 0]]
+
+    Changing the offset moves the location of the 1s:
+
+    >>> array = np.zeros(shape, dtype=int)
+    >>> grid_slice = _generate_grid_slice(shape, offset=3, stride=2)
+    >>> array[grid_slice] = 1
+    >>> print(array)
+    [[0 0 0 0]
+     [0 1 0 1]
+     [0 0 0 0]
+     [0 1 0 1]]
     """
-    phases = np.unravel_index(idx, (stride,) * len(shape))
+    phases = np.unravel_index(offset, (stride,) * len(shape))
     mask = tuple(slice(p, None, stride) for p in phases)
 
     return mask
@@ -100,7 +124,8 @@ def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
     if masks is None:
         spatialdims = image.ndim if not multichannel else image.ndim - 1
         n_masks = stride ** spatialdims
-        masks = (_generate_mask(image.shape[:spatialdims], idx, stride=stride)
+        masks = (_generate_grid_slice(image.shape[:spatialdims],
+                                      offset=idx, stride=stride)
                  for idx in range(n_masks))
 
     for mask in masks:
@@ -129,11 +154,11 @@ def _product_from_dict(dictionary):
         dict.
     """
     keys = dictionary.keys()
-    for element in product(*dictionary.values()):
+    for element in itertools.product(*dictionary.values()):
         yield dict(zip(keys, element))
 
 
-def calibrate_denoiser(image, denoise_function, parameter_ranges, *,
+def calibrate_denoiser(image, denoise_function, *, denoise_parameters,
                        stride=4, multichannel=False, approximate_loss=True):
     """Calibrate a denoising function and return optimal J-invariant version.
 
@@ -146,7 +171,7 @@ def calibrate_denoiser(image, denoise_function, parameter_ranges, *,
         Input data to be denoised (converted using `img_as_float`).
     denoise_function : function
         Denoising function to be calibrated.
-    parameter_ranges : dict of list
+    denoise_parameters : dict of list
         Ranges of parameters for `denoise_function` to be calibrated over.
     stride : int, optional
         Stride used in masking procedure that converts `denoise_function`
@@ -191,32 +216,37 @@ def calibrate_denoiser(image, denoise_function, parameter_ranges, *,
     >>> import numpy as np
     >>> img = color.rgb2gray(data.astronaut()[:50, :50])
     >>> noisy = img + 0.5 * img.std() * np.random.randn(*img.shape)
-    >>> parameter_ranges = {'sigma': np.arange(0.1, 0.4, 0.02)}
-    >>> denoising_function = calibrate_denoiser(noisy, denoise_wavelet, parameter_ranges)
+    >>> parameters = {'sigma': np.arange(0.1, 0.4, 0.02)}
+    >>> denoising_function = calibrate_denoiser(noisy, denoise_wavelet,
+    ...                                         denoise_parameters=parameters)
     >>> denoised_img = denoising_function(img)
 
     """
-    parameters_tested, losses = calibrate_denoiser_search(image,
-                                                          denoise_function,
-                                                          parameter_ranges,
-                                                          stride=stride,
-                                                          multichannel=multichannel,
-                                                          approximate_loss=approximate_loss)
+    parameters_tested, losses = calibrate_denoiser_search(
+        image, denoise_function,
+        denoise_parameters=denoise_parameters,
+        stride=stride,
+        multichannel=multichannel,
+        approximate_loss=approximate_loss
+    )
 
     idx = np.argmin(losses)
     best_parameters = parameters_tested[idx]
 
-    best_denoise_function = lambda x: invariant_denoise(x,
-                                                        denoise_function,
-                                                        stride=stride,
-                                                        multichannel=multichannel,
-                                                        denoiser_kwargs=best_parameters)
+    best_denoise_function = functools.partial(
+        invariant_denoise,
+        denoise_function=denoise_function,
+        stride=stride,
+        multichannel=multichannel,
+        denoiser_kwargs=best_parameters,
+    )
 
     return best_denoise_function
 
 
-def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
-                              stride=4, multichannel=False, approximate_loss=True):
+def calibrate_denoiser_search(image, denoise_function, *, denoise_parameters,
+                              stride=4, multichannel=False,
+                              approximate_loss=True):
     """Return a parameter search history with losses for a denoise function.
 
     Parameters
@@ -225,7 +255,7 @@ def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
         Input data to be denoised (converted using `img_as_float`).
     denoise_function : function
         Denoising function to be calibrated.
-    parameter_ranges : dict of list
+    denoise_parameters : dict of list
         Ranges of parameters for `denoise_function` to be calibrated over.
     stride : int, optional
         Stride used in masking procedure that converts `denoise_function`
@@ -247,28 +277,30 @@ def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
         Self-supervised loss for each set of parameters in `parameters_tested`.
     """
     image = img_as_float(image)
-    parameters_tested = list(_product_from_dict(parameter_ranges))
+    parameters_tested = list(_product_from_dict(denoise_parameters))
     losses = []
 
     for denoiser_kwargs in parameters_tested:
         if not approximate_loss:
-            denoised = invariant_denoise(image,
-                                         denoise_function,
-                                         stride=stride,
-                                         multichannel=multichannel,
-                                         denoiser_kwargs=denoiser_kwargs)
+            denoised = invariant_denoise(
+                image, denoise_function,
+                stride=stride,
+                multichannel=multichannel,
+                denoiser_kwargs=denoiser_kwargs
+            )
             loss = compare_mse(denoised, image)
         else:
             spatialdims = image.ndim if not multichannel else image.ndim - 1
             n_masks = stride ** spatialdims
-            mask = _generate_mask(image.shape[:spatialdims], n_masks // 2,
-                                  stride=stride)
+            mask = _generate_grid_slice(image.shape[:spatialdims],
+                                        offset=n_masks // 2, stride=stride)
 
-            masked_denoised = invariant_denoise(image,
-                                                denoise_function,
-                                                masks=[mask],
-                                                multichannel=multichannel,
-                                                denoiser_kwargs=denoiser_kwargs)
+            masked_denoised = invariant_denoise(
+                image, denoise_function,
+                masks=[mask],
+                multichannel=multichannel,
+                denoiser_kwargs=denoiser_kwargs
+            )
 
             loss = compare_mse(masked_denoised[mask], image[mask])
 

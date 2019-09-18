@@ -41,7 +41,7 @@ default_output = denoise_wavelet(noisy, multichannel=True)
 
 calibrated_denoiser = calibrate_denoiser(noisy,
                                          denoise_wavelet,
-                                         parameter_ranges,
+                                         denoise_parameters=parameter_ranges,
                                          multichannel=True)
 
 calibrated_output = calibrated_denoiser(noisy)
@@ -204,7 +204,7 @@ parameter_ranges_tv = {'weight': np.arange(0.01, 0.3, 0.02)}
 parameters_tested_tv, losses_tv = calibrate_denoiser_search(
                                     noisy,
                                     denoise_tv_chambolle,
-                                    parameter_ranges_tv)
+                                    denoise_parameters=parameter_ranges_tv)
 print("Minimum self-supervised loss TV: {:.4f}".format(np.min(losses_tv)))
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
