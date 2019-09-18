@@ -7,7 +7,7 @@ from ..measure import compare_mse
 from ..util import img_as_float
 
 
-def interpolate_image(image, multichannel=False):
+def _interpolate_image(image, multichannel=False):
     """
     Interpolate `image`, replacing each pixel with the average of its neighbors.
 
@@ -39,7 +39,7 @@ def interpolate_image(image, multichannel=False):
     return interp
 
 
-def generate_mask(shape, idx, stride=3):
+def _generate_mask(shape, idx, stride=3):
     """
     Generate a uniformly gridded boolean mask of shape `shape`,
     containing ones separated by `stride` along each dimension, with offset
@@ -101,13 +101,13 @@ def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
     if denoiser_kwargs is None:
         denoiser_kwargs = {}
 
-    interp = interpolate_image(image, multichannel=multichannel)
+    interp = _interpolate_image(image, multichannel=multichannel)
     output = np.zeros(image.shape)
 
     if masks is None:
         spatialdims = image.ndim if not multichannel else image.ndim - 1
         n_masks = stride ** spatialdims
-        masks = (generate_mask(image.shape[:spatialdims], idx, stride=stride)
+        masks = (_generate_mask(image.shape[:spatialdims], idx, stride=stride)
                  for idx in range(n_masks))
 
     for mask in masks:
@@ -118,7 +118,7 @@ def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
     return output
 
 
-def product_from_dict(dictionary):
+def _product_from_dict(dictionary):
     """
     Convert a dict of lists into a list of dicts whose values consist of the
     cartesian product of the values in the original dict.
@@ -256,7 +256,7 @@ def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
         Self-supervised loss for each set of parameters in `parameters_tested`.
     """
     image = img_as_float(image)
-    parameters_tested = list(product_from_dict(parameter_ranges))
+    parameters_tested = list(_product_from_dict(parameter_ranges))
     losses = []
 
     for denoiser_kwargs in parameters_tested:
@@ -270,8 +270,8 @@ def calibrate_denoiser_search(image, denoise_function, parameter_ranges, *,
         else:
             spatialdims = image.ndim if not multichannel else image.ndim - 1
             n_masks = stride ** spatialdims
-            mask = generate_mask(image.shape[:spatialdims], n_masks // 2,
-                                 stride=stride)
+            mask = _generate_mask(image.shape[:spatialdims], n_masks // 2,
+                                  stride=stride)
 
             masked_denoised = invariant_denoise(image,
                                                 denoise_function,
