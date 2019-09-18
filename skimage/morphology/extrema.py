@@ -10,7 +10,6 @@ Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
 """
 import numpy as np
-from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn

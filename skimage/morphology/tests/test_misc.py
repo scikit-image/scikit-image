@@ -202,14 +202,16 @@ class Test_remove_close_objects:
         max_step = 50
         offset = np.linspace(1, max_step, max_step, dtype=np.intp)[::-1]
         positions = np.cumsum(offset)
-        x = np.zeros(positions.max() + 2, dtype=np.bool_)
-        x[positions] = 1
-        y = remove_close_objects(x, minimal_distance=minimal_distance)
-        diff = np.diff(np.nonzero(y)[0])
+        image = np.zeros(positions.max() + 2, dtype=bool)
+        image[positions] = 1
+
+        result = remove_close_objects(image, minimal_distance=minimal_distance)
+
+        diff = np.diff(np.nonzero(result)[0])
         assert diff.min() == minimal_distance + 1
 
     def test_handcrafted_2d(self):
-        a = np.array(
+        priority = np.array(
             [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
              [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
              [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -229,11 +231,13 @@ class Test_remove_close_objects:
              [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]],
-            dtype=np.bool_
+            dtype=bool
         )
 
-        image = a.astype(np.bool_)
-        result = remove_close_objects(image, minimal_distance=3, priority=a)
+        image = priority.astype(bool)
+        result = remove_close_objects(
+            image, minimal_distance=3, priority=priority
+        )
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("ndim", [1, 2, 3, 4, 5])
@@ -241,9 +245,38 @@ class Test_remove_close_objects:
         shape = (5,) * ndim
         a = np.ones(shape, dtype=np.uint8)
         a[2, ...] = 0
-        desired = a.astype(np.bool)
+        desired = a.astype(bool)
         desired[2:, ...] = False
+        image = a.astype(bool)
 
-        image = a.astype(np.bool_)
         result = remove_close_objects(image, minimal_distance=2)
+        assert_array_equal(result, desired)
+
+    @pytest.mark.parametrize("value", [True, False])
+    def test_constant(self, value):
+        image = np.empty((10, 10), dtype=bool)
+        image.fill(value)
+
+        result = remove_close_objects(image, 3)
+        assert_array_equal(image, result)
+
+    def test_empty(self):
+        image = np.empty((3, 3, 0), dtype=np.bool_)
+        result = remove_close_objects(image, 3)
+        assert_equal(image, result)
+
+    def test_priority(self):
+        image = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], dtype=bool)
+
+        # Default priority is row-major (C-style) order
+        result = remove_close_objects(image, 3)
+        desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
+        assert_array_equal(result, desired)
+
+        # But given a priority that order can be overuled
+        priority = np.array([[0, 0, 1], [0, 0, 0], [2, 0, 0]], dtype=int)
+        result = remove_close_objects(
+            image, minimal_distance=3, priority=priority
+        )
+        desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)

@@ -238,10 +238,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
 def remove_close_objects(
     image,
     minimal_distance,
+    *,
     selem=None,
     connectivity=None,
     priority=None,
-    inplace=False,
+    inplace=None,
 ):
     """Remove objects until a minimal distance is ensured.
 
@@ -278,7 +279,7 @@ def remove_close_objects(
 
     Returns
     -------
-    result : ndarray
+    out : ndarray
         Array of the same shape as `image` with objects violating the distance
         condition removed.
 
@@ -291,7 +292,7 @@ def remove_close_objects(
     --------
     >>> from skimage.morphology import remove_close_objects
     >>> remove_close_objects(np.array([True, False, True]), 2)
-    array([ True, False, False])
+    array([ True, False, False], dtype=bool)
     >>> image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -316,14 +317,23 @@ def remove_close_objects(
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]], dtype=uint8)
     """
+    if not np.can_cast(image, bool, casting="same_kind"):
+        # Cython doesn't support boolean memoryviews yet
+        # https://github.com/cython/cython/issues/2204
+        # and we use np.uint8_t as a workaround -> check here so we can safely
+        # call `image.view(np.uint8)` before passing to Cython
+        raise TypeError("image it must be a binary dtype")
+
     if minimal_distance < 0:
         raise ValueError(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
-    image = np.asarray(image)
+
     if not inplace:
-        image = image.copy()
-    image = image.astype(np.uint8, casting="safe", copy=False)
+        image = np.array(image, dtype=bool, order="C", copy=True)
+
+    if image.size == 0:
+        return image
 
     selem = _util._resolve_neighborhood(selem, connectivity, image.ndim)
     neighbor_offsets = _util._offsets_to_raveled_neighbors(
@@ -334,6 +344,11 @@ def remove_close_objects(
     ndi.label(image, selem, output=labels)
 
     raveled_indices = np.nonzero(image.ravel())[0]
+    if raveled_indices.size == 0:
+        # required, cKDTree doesn't support empty input for earlier versions
+        # https://github.com/scipy/scipy/pull/10457
+        return image
+
     if priority is not None:
         if image.shape != priority.shape:
             raise ValueError(
@@ -350,7 +365,9 @@ def remove_close_objects(
     )
 
     _remove_close_objects(
-        image=image.ravel(),
+        # Cython doesn't support boolean memoryviews yet
+        # https://github.com/cython/cython/issues/2204
+        image=image.view(np.uint8).ravel(),
         labels=labels.ravel(),
         indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
@@ -358,4 +375,4 @@ def remove_close_objects(
         minimal_distance=minimal_distance,
         shape=image.shape
     )
-    return image.view(np.bool)
+    return image
