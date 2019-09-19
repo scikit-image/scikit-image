@@ -71,7 +71,7 @@ cdef void _set_var_btwcls(double [:, ::1] momP, double [:, ::1] momS,
     cdef cnp.intp_t i, j
 
     for i in range(bins):
-        for j in range(i, bins):
+        for j in range(i+1, bins):
             if momP[i, j] > 0:
                 momS[i, j] = momS[i, j] * momS[i, j] / momP[i, j]
             else:
