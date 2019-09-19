@@ -100,8 +100,8 @@ def iterate_and_store(double[:, :] array,
             coords[1] = 0
 
         # Skip this square if any of the four input values are masked out.
-        if not (mask[r0, c0] and mask[r0, c1] and
-                mask[r1, c0] and mask[r1, c1]):
+        if mask is not None and not (mask[r0, c0] and mask[r0, c1] and
+                                     mask[r1, c0] and mask[r1, c1]):
             continue
 
         # Skip this square if any of the four input values are NaN.
