@@ -195,7 +195,7 @@ def test_float_input_holes():
         remove_small_holes(float_test)
 
 
-class Test_remove_close_objects:
+class TestRemoveCloseObjects:
 
     @pytest.mark.parametrize("minimal_distance", [10, 20, 30, 49])
     def test_linspace_1d(self, minimal_distance):

@@ -16,13 +16,12 @@ def configuration(parent_package='', top_path=None):
             '_skeletonize_cy.pyx',
             '_convex_hull.pyx',
             '_greyreconstruct.pyx',
-            '_extrema_cy.pyx'], working_path=base_path)
+            '_extrema_cy.pyx',
+            '_close_objects_cy.pyx'], working_path=base_path)
     # _skeletonize_3d uses c++, so it must be cythonized separately
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
-    cython(['_extrema_cy.pyx'], working_path=base_path)
     cython(['_flood_fill_cy.pyx'], working_path=base_path)
     cython(['_max_tree.pyx'], working_path=base_path)
-    cython(['_close_objects_cy.pyx'], working_path=base_path)
 
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
