@@ -1134,10 +1134,10 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> regions_colorized = label2rgb(regions)
     """
     # calculating the histogram and the probability of each gray level.
-    hist, bin_centers = histogram(image.ravel(),
+    prob, bin_centers = histogram(image.ravel(),
                                   nbins=nbins,
-                                  source_range='image')
-    prob = hist / image.size
+                                  source_range='image',
+                                  normalize=True)
     # histogram ignores nbins for integer arrays.
     nbins = len(bin_centers)
 
@@ -1146,13 +1146,14 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     # building the lookup tables.
     # step 1: calculating the diagonal.
-    prob[0] = 0
+    # prob[0] = 0
     momP = np.diagflat(prob)
     momS = np.diagflat(np.arange(nbins) * prob)
 
     # step 2: calculating the first row.
     momP[1, 2:] = np.cumsum(prob[2:])
     momS[1, 2:] = np.cumsum(np.arange(2, nbins) * prob[2:])
+    # momS[1, 2:] = np.cumsum(bin_centers[2:] * prob[2:])
 
     # step 3: the other rows are recursively computed as:
     # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
@@ -1170,6 +1171,6 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     aux_thresh = _find_threshold_multiotsu(momS, momP, classes, nbins)
 
     # correcting threshold values.
-    idx_thresh = bin_centers[aux_thresh.astype('int')]
+    idx_thresh = bin_centers[aux_thresh]
 
     return idx_thresh
