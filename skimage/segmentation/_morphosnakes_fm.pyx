@@ -4,7 +4,6 @@ from libcpp.vector cimport vector
 cimport numpy as cnp
 import numpy as np
 
-ctypedef cnp.int32_t INT_T
 
 def to_numpy(x):
     return np.asarray(x,dtype = np.int8)
@@ -15,17 +14,17 @@ cdef extern from "_morphosnakes.h":
                                      int nx, int ny)
     void evolve_edge_2d(double *image, 
                         unsigned char* levelset, 
-                        INT_T *counter,
+                        long *counter,
                         vector[point2d] &edge_points, 
                         int nx, int ny,
                         double lambda2, double lambda2)
     void fast_marching_dilation_2d(vector[point2d] &edge, 
                                    unsigned char* levelset, 
-                                   INT_T *counter,
+                                   long *counter,
                                    int nx, int ny) 
     void fast_marching_erosion_2d(vector[point2d] &edge, 
                                   unsigned char* levelset, 
-                                  INT_T *counter,
+                                  long *counter,
                                   int nx, int ny) 
     void sort_edge2d(vector[point2d] &edge)  
     void sort_edge3d(vector[point3d] &edge)      
@@ -35,13 +34,13 @@ cdef extern from "_morphosnakes.h":
                                      int nx, int ny, int nz)
     void evolve_edge_3d(double *image, 
                         unsigned char* levelset, 
-                        INT_T *counter,
+                        long *counter,
                         vector[point3d] &edge_points, 
                         int nx, int ny, int nz,
                         double lambda2, double lambda2)
-    void fast_marching_dilation_3d(vector[point3d] &edge, unsigned char* levelset, INT_T *counter,
+    void fast_marching_dilation_3d(vector[point3d] &edge, unsigned char* levelset, long *counter,
                           int nx, int ny, int nz)
-    void fast_marching_erosion_3d(vector[point3d] &edge, unsigned char* levelset, INT_T *counter,
+    void fast_marching_erosion_3d(vector[point3d] &edge, unsigned char* levelset, long *counter,
                           int nx, int ny, int nz)
 
 
@@ -49,7 +48,7 @@ cdef extern from "_morphosnakes.h":
 @cython.wraparound(False)
 def _morphological_chan_vese_2d(double[:, ::1] image,
                             unsigned char[:, ::1] u,
-                            INT_T[:,  ::1] counter,
+                            long[:,  ::1] counter,
                             int iterations, 
                             int smoothing=1, 
                             double lambda1=1, 
@@ -91,7 +90,7 @@ def _morphological_chan_vese_2d(double[:, ::1] image,
 @cython.wraparound(False)
 def _morphological_chan_vese_3d(double[:, :, ::1] image,
                             unsigned char[:, :, ::1] u,
-                            INT_T[:, :, ::1] counter,
+                            long[:, :, ::1] counter,
                             int iterations, 
                             int smoothing=1, 
                             double lambda1=1, 

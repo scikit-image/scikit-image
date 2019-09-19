@@ -220,7 +220,7 @@ bool is_edge(uint8_t *levelset, point2d point, int nx, int ny)
   return false;
 }
 
-void update_edge(uint8_t *levelset, int *counter, std::vector<point2d> &edge_points,
+void update_edge(uint8_t *levelset, long *counter, std::vector<point2d> &edge_points,
                  int nx, int ny)
 {
 
@@ -248,7 +248,7 @@ void update_edge(uint8_t *levelset, int *counter, std::vector<point2d> &edge_poi
 
 void check_and_add_edges(std::vector<point2d> &edge_points,
                          std::vector<point2d> &unchecked_points, uint8_t *levelset,
-                         int *counter, int nx, int ny)
+                         long *counter, int nx, int ny)
 {
 
   // counter[0] += 1;
@@ -294,7 +294,7 @@ void check_and_add_edges(std::vector<point2d> &edge_points,
 }
 } // namespace pysnakes2d
 
-void evolve_edge_2d(double *image, uint8_t *levelset, int *counter,
+void evolve_edge_2d(double *image, uint8_t *levelset, long *counter,
                     std::vector<point2d> &edge_points, int nx, int ny, double lambda1,
                     double lambda2)
 {
@@ -423,7 +423,7 @@ std::vector<point2d> get_edge_list_2d(uint8_t *levelset, int nx, int ny)
 }
 
 void fast_marching_erosion_2d(std::vector<point2d> &edge_points, uint8_t *levelset,
-                              int *counter, int nx, int ny)
+                              long *counter, int nx, int ny)
 {
 
   int const stride_x = 1;
@@ -509,7 +509,7 @@ void fast_marching_erosion_2d(std::vector<point2d> &edge_points, uint8_t *levels
 }
 
 void fast_marching_dilation_2d(std::vector<point2d> &edge_points, uint8_t *levelset,
-                               int *counter, int nx, int ny)
+                               long *counter, int nx, int ny)
 {
   int const stride_x = 1;
   int const stride_y = nx;
@@ -633,7 +633,7 @@ bool is_edge(uint8_t *levelset, point3d point, int nx, int ny, int nz)
   return false;
 }
 
-void update_edge(uint8_t *levelset, int *counter, std::vector<point3d> &edge_points,
+void update_edge(uint8_t *levelset, long *counter, std::vector<point3d> &edge_points,
                  int nx, int ny, int nz)
 {
   counter[0] += 1;
@@ -663,7 +663,7 @@ void update_edge(uint8_t *levelset, int *counter, std::vector<point3d> &edge_poi
 
 void check_and_add_edges(std::vector<point3d> &edge_points,
                          std::vector<point3d> &unchecked_points, uint8_t *levelset,
-                         int *counter, int nx, int ny, int nz)
+                         long *counter, int nx, int ny, int nz)
 {
 
   counter[0] += 1;
@@ -725,7 +725,7 @@ void check_and_add_edges(std::vector<point3d> &edge_points,
 
 } // namespace pysnakes3d
 
-void evolve_edge_3d(double *image, uint8_t *levelset, int *counter,
+void evolve_edge_3d(double *image, uint8_t *levelset, long *counter,
                     std::vector<point3d> &edge_points, int nx, int ny, int nz,
                     double lambda1, double lambda2)
 {
@@ -832,7 +832,7 @@ void evolve_edge_3d(double *image, uint8_t *levelset, int *counter,
 }
 
 void fast_marching_erosion_3d(std::vector<point3d> &edge_points, uint8_t *levelset,
-                              int *counter, int nx, int ny, int nz)
+                              long *counter, int nx, int ny, int nz)
 {
 
   int const stride_x = 1;
@@ -929,7 +929,7 @@ void fast_marching_erosion_3d(std::vector<point3d> &edge_points, uint8_t *levels
 }
 
 void fast_marching_dilation_3d(std::vector<point3d> &edge_points, uint8_t *levelset,
-                               int *counter, int nx, int ny, int nz)
+                               long *counter, int nx, int ny, int nz)
 {
   int const stride_x = 1;
   int const stride_y = nx;
