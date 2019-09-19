@@ -3,6 +3,7 @@ from skimage.measure import find_contours
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
+from pytest import raises
 
 
 a = np.ones((8, 8), dtype=np.float32)
@@ -91,6 +92,12 @@ def test_mask():
     contours = find_contours(a, 0.5, positive_orientation='high', mask=mask)
     assert len(contours) == 1
     assert_array_equal(contours[0], mask_contour)
+
+
+def test_mask_shape():
+    bad_mask = np.ones((8, 7), dtype=bool)
+    with raises(ValueError, match='shape'):
+        find_contours(a, 0, mask=bad_mask)
 
 
 def test_float():
