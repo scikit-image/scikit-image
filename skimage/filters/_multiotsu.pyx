@@ -71,7 +71,8 @@ cdef void _set_var_btwcls(double [:, ::1] momP, double [:, ::1] momS,
     cdef cnp.intp_t i, j
 
     for i in range(bins):
-        for j in range(i+1, bins):
+        # momS[i, i] = 0
+        for j in range(i, bins):
             if momP[i, j] > 0:
                 momS[i, j] = momS[i, j] * momS[i, j] / momP[i, j]
             else:
@@ -138,7 +139,7 @@ cdef double _find_best_rec(double[:, ::1] var_btwcls, cnp.intp_t min_val,
         for idx in range(min_val, max_val-divisions+depth+1):
             idx_tuple[depth+1] = idx
             max_sigma = _find_best_rec(
-                var_btwcls=var_btwcls, min_val=idx+1, max_val=max_val,
+                var_btwcls=var_btwcls, min_val=idx, max_val=max_val,
                 idx_tuple=idx_tuple, divisions=divisions, depth=depth+1,
                 max_sigma=max_sigma, aux_thresh=aux_thresh)
 
