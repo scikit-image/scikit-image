@@ -14,7 +14,7 @@ def morphological_chan_vese_fm(image, iterations, init_level_set='checkerboard',
     borders. It is required that the inside of the object looks different on
     average than the outside (i.e., the inner area of the object should be
     darker or lighter than the outer area on average). This is a faster version
-    of morphological_chan_vese, based on
+    of morphological_chan_vese, based on:
 
     Luis Alvarez, Luis Baumela, Pablo Márquez-Neila, and Pedro Henríquez,
     A Real Time Morphological Snakes Algorithm, Image Processing On Line,

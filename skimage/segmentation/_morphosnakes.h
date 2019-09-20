@@ -8,8 +8,6 @@
 #include <cassert>
 #include <vector>
 
-#include <algorithm>
-
 #if defined(_OPENMP)
 #include <omp.h>
 #else
@@ -28,10 +26,10 @@ typedef struct point2d
   int x, y;
 } point2d;
 
-bool is_inside(int t_xi, int t_L) { return (t_xi >= 0) && (t_xi < t_L); }
-bool is_central(int t_xi, int t_L) { return (t_xi > 0) && (t_xi < t_L - 1); }
+bool is_inside(int const t_xi, int const t_L) { return (t_xi >= 0) && (t_xi < t_L); }
+bool is_central(int const t_xi, int const t_L) { return (t_xi > 0) && (t_xi < t_L - 1); }
 
-bool SId_2d_borders(int xi, int yi, uint8_t *levelset, int nx, int ny)
+bool SId_2d_borders(int const xi, int const yi, uint8_t const *levelset, int const nx, int const ny)
 {
   // All diagonal elements for the borders are zero
   // only non-diagonal masks are relevant
@@ -52,7 +50,7 @@ bool SId_2d_borders(int xi, int yi, uint8_t *levelset, int nx, int ny)
   return false;
 }
 
-bool SId_3d_borders(int xi, int yi, int zi, uint8_t *levelset, int nx, int ny, int nz)
+bool SId_3d_borders(int const xi, int const yi, int const zi, uint8_t const *levelset, int const nx, int const ny, int const nz)
 {
   // All diagonal elements for the borders are zero
   // only non-diagonal masks are relevant
@@ -79,7 +77,7 @@ bool SId_3d_borders(int xi, int yi, int zi, uint8_t *levelset, int nx, int ny, i
   return false;
 }
 
-bool ISd_2d_borders(int xi, int yi, uint8_t *levelset, int nx, int ny)
+bool ISd_2d_borders(int const xi, int yi, uint8_t *levelset, int const nx, int const ny)
 {
   // I defined a bidirectional macro for the dilations,
   // outside coordinates are mapped back to INDEX, i.e. constant
@@ -108,7 +106,7 @@ bool ISd_2d_borders(int xi, int yi, uint8_t *levelset, int nx, int ny)
   }
   return ISd_2d_any_bidir(levelset, index, nstride_x, stride_x, nstride_y, stride_y);
 }
-bool ISd_3d_borders(int xi, int yi, int zi, uint8_t *levelset, int nx, int ny, int nz)
+bool ISd_3d_borders(int const xi, int yi, int zi, uint8_t *levelset, int const nx, int const ny, int const nz)
 {
   // I defined a bidirectional macro for the dilations,
   // outside coordinates are mapped back to INDEX, i.e. constant
@@ -145,17 +143,12 @@ bool ISd_3d_borders(int xi, int yi, int zi, uint8_t *levelset, int nx, int ny, i
   {
     stride_z = 0;
   }
-  // printf("ISd_3d_borders (%d,%d,%d)/(%d,%d,%d)\n", xi, yi, zi, nx, ny, nz);
-  // printf("strides (%d,%d,%d)/(%d,%d,%d)\n", nstride_x, nstride_y, nstride_z,
-  // stride_x,
-  //       stride_y, stride_z);
-
   return ISd_3d_any_bidir(levelset, index, nstride_x, stride_x, nstride_y, stride_y,
                           nstride_z, stride_z);
 }
 
 template <unsigned int N>
-double masked_average(double *image, uint8_t *mask, int size)
+double masked_average(double const *image, uint8_t const *mask, int const size)
 {
   double cumulative_sum = 0;
   int counter = 0;
@@ -174,25 +167,26 @@ double masked_average(double *image, uint8_t *mask, int size)
   return cumulative_sum / counter;
 }
 
+// The parallel processing of new points based on
+// https://stackoverflow.com/a/36356923
 template <class T>
-void reduce(std::vector<T> *v1, int begin, int end)
+void reduce(std::vector<T> *v1, int const begin, int const end)
 {
   if (end - begin == 1)
     return;
   int pivot = (begin + end) / 2;
-  // not uspported in MSVC
-  //#pragma omp task
+#pragma omp task
   reduce(v1, begin, pivot);
+#pragma omp task
   reduce(v1, pivot, end);
-  // not uspported in MSVC
-  // #pragma omp taskwait
+#pragma omp taskwait
   v1[begin].insert(v1[begin].end(), v1[pivot].begin(), v1[pivot].end());
 }
 
 namespace pysnakes2d
 {
 
-bool is_edge(uint8_t *levelset, point2d point, int nx, int ny)
+bool is_edge(uint8_t const *levelset, point2d const point, int const nx, int const ny)
 {
   int const xi = point.x;
   int const yi = point.y;
@@ -207,7 +201,7 @@ bool is_edge(uint8_t *levelset, point2d point, int nx, int ny)
   }
 
   int const index = xi + stride_y * yi;
-  // Define border as a not 1 valued voxel with an 6 connected active neighbour
+  // Define border as a not 1 valued pixel with a 4 connected active neighbour
   if (levelset[index] == 1)
   {
     return false;
@@ -226,12 +220,12 @@ bool is_edge(uint8_t *levelset, point2d point, int nx, int ny)
   return false;
 }
 
-void update_edge(uint8_t *levelset, long *counter, std::vector<point2d> &edge_points,
-                 int nx, int ny)
+void update_edge(uint8_t const *levelset, long *counter, std::vector<point2d> &edge_points,
+                 int const nx, int const ny)
 {
 
   counter[nx * ny] += 1;
-  int current_iteration = counter[nx * ny];
+  int const current_iteration = counter[nx * ny];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -253,12 +247,11 @@ void update_edge(uint8_t *levelset, long *counter, std::vector<point2d> &edge_po
 }
 
 void check_and_add_edges(std::vector<point2d> &edge_points,
-                         std::vector<point2d> &unchecked_points, uint8_t *levelset,
-                         long *counter, int nx, int ny)
+                         std::vector<point2d> const &unchecked_points, uint8_t const *levelset,
+                         long *counter, int const nx, int const ny)
 {
 
-  // counter[nx*ny*nz] += 1;
-  int current_iteration = counter[nx * ny];
+  int const current_iteration = counter[nx * ny];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -300,19 +293,19 @@ void check_and_add_edges(std::vector<point2d> &edge_points,
 }
 } // namespace pysnakes2d
 
-void evolve_edge_2d(double *image, uint8_t *levelset, long *counter,
-                    std::vector<point2d> &edge_points, int nx, int ny, double lambda1,
-                    double lambda2)
+void evolve_edge_2d(double const *image, uint8_t *levelset, long *counter,
+                    std::vector<point2d> &edge_points, int const nx, int const ny, double const lambda1,
+                    double const lambda2)
 {
 
   int const stride_x = 1;
   int const stride_y = nx;
 
-  double c0 = masked_average<0>(image, levelset, nx * ny);
-  double c1 = masked_average<1>(image, levelset, nx * ny);
+  double const c0 = masked_average<0>(image, levelset, nx * ny);
+  double const c1 = masked_average<1>(image, levelset, nx * ny);
 
   counter[nx * ny] += 1;
-  int current_iteration = counter[nx * ny];
+  int const current_iteration = counter[nx * ny];
 
   std::vector<point2d> changed_add, changed_remove;
   std::vector<point2d> *changed_add_p, *changed_remove_p;
@@ -343,7 +336,7 @@ void evolve_edge_2d(double *image, uint8_t *levelset, long *counter,
 
               if (counter[index] != current_iteration)
               {
-                // possible race
+                // possible race, cleared up at check
                 counter[index] = current_iteration;
 
                 bool gx = levelset[index + stride_x] != levelset[index - stride_x];
@@ -398,7 +391,7 @@ void evolve_edge_2d(double *image, uint8_t *levelset, long *counter,
   return;
 }
 
-std::vector<point2d> get_edge_list_2d(uint8_t *levelset, int nx, int ny)
+std::vector<point2d> get_edge_list_2d(uint8_t const *levelset, int const nx, int const ny)
 {
 
   int const stride_x = 1;
@@ -429,7 +422,7 @@ std::vector<point2d> get_edge_list_2d(uint8_t *levelset, int nx, int ny)
 }
 
 void fast_marching_erosion_2d(std::vector<point2d> &edge_points, uint8_t *levelset,
-                              long *counter, int nx, int ny)
+                              long *counter, int const nx, int const ny)
 {
 
   int const stride_x = 1;
@@ -515,7 +508,7 @@ void fast_marching_erosion_2d(std::vector<point2d> &edge_points, uint8_t *levels
 }
 
 void fast_marching_dilation_2d(std::vector<point2d> &edge_points, uint8_t *levelset,
-                               long *counter, int nx, int ny)
+                               long *counter, int const nx, int const ny)
 {
   int const stride_x = 1;
   int const stride_y = nx;
@@ -600,7 +593,7 @@ void fast_marching_dilation_2d(std::vector<point2d> &edge_points, uint8_t *level
 namespace pysnakes3d
 {
 
-bool is_edge(uint8_t *levelset, point3d point, int nx, int ny, int nz)
+bool is_edge(uint8_t const *levelset, point3d const point, int const nx, int const ny, int const nz)
 {
   int const xi = point.x;
   int const yi = point.y;
@@ -612,7 +605,6 @@ bool is_edge(uint8_t *levelset, point3d point, int nx, int ny, int nz)
 
   int const index = xi + stride_y * yi + stride_z * zi;
 
-  // Keep level sed padded from border
   if (xi < 0 || yi < 0 || zi < 0 || xi > nx - 1 || yi > ny - 1 || zi > nz - 1)
   {
     return false;
@@ -639,8 +631,8 @@ bool is_edge(uint8_t *levelset, point3d point, int nx, int ny, int nz)
   return false;
 }
 
-void update_edge(uint8_t *levelset, long *counter, std::vector<point3d> &edge_points,
-                 int nx, int ny, int nz)
+void update_edge(uint8_t const *levelset, long *counter, std::vector<point3d> &edge_points,
+                 int const nx, int const ny, int const nz)
 {
   counter[nx * ny * nz] += 1;
   int current_iteration = counter[nx * ny * nz];
@@ -668,8 +660,8 @@ void update_edge(uint8_t *levelset, long *counter, std::vector<point3d> &edge_po
 }
 
 void check_and_add_edges(std::vector<point3d> &edge_points,
-                         std::vector<point3d> &unchecked_points, uint8_t *levelset,
-                         long *counter, int nx, int ny, int nz)
+                         std::vector<point3d> const &unchecked_points, uint8_t const *levelset,
+                         long *counter, int const nx, int const ny, int const nz)
 {
 
   counter[nx * ny * nz] += 1;
@@ -731,9 +723,9 @@ void check_and_add_edges(std::vector<point3d> &edge_points,
 
 } // namespace pysnakes3d
 
-void evolve_edge_3d(double *image, uint8_t *levelset, long *counter,
-                    std::vector<point3d> &edge_points, int nx, int ny, int nz,
-                    double lambda1, double lambda2)
+void evolve_edge_3d(double const *image, uint8_t *levelset, long *counter,
+                    std::vector<point3d> &edge_points, int const nx, int const ny, int const nz,
+                    double const lambda1, double const lambda2)
 {
 
   int const stride_x = 1;
@@ -838,7 +830,7 @@ void evolve_edge_3d(double *image, uint8_t *levelset, long *counter,
 }
 
 void fast_marching_erosion_3d(std::vector<point3d> &edge_points, uint8_t *levelset,
-                              long *counter, int nx, int ny, int nz)
+                              long *counter, int const nx, int const ny, int const nz)
 {
 
   int const stride_x = 1;
@@ -935,7 +927,7 @@ void fast_marching_erosion_3d(std::vector<point3d> &edge_points, uint8_t *levels
 }
 
 void fast_marching_dilation_3d(std::vector<point3d> &edge_points, uint8_t *levelset,
-                               long *counter, int nx, int ny, int nz)
+                               long *counter, int const nx, int const ny, int const nz)
 {
   int const stride_x = 1;
   int const stride_y = nx;
@@ -1028,7 +1020,7 @@ void fast_marching_dilation_3d(std::vector<point3d> &edge_points, uint8_t *level
   return;
 }
 
-std::vector<point3d> get_edge_list_3d(uint8_t *levelset, int nx, int ny, int nz)
+std::vector<point3d> get_edge_list_3d(uint8_t const *levelset, int const nx, int const ny, int const nz)
 {
 
   int const stride_x = 1;
@@ -1065,7 +1057,7 @@ std::vector<point3d> get_edge_list_3d(uint8_t *levelset, int nx, int ny, int nz)
 
 struct sortfunc
 {
-  bool operator()(const point2d &left, const point2d &right) const
+  bool operator()(point2d const &left, point2d const &right) const
   {
     if (left.y != right.y)
     {
@@ -1073,7 +1065,7 @@ struct sortfunc
     }
     return left.x < right.x;
   }
-  bool operator()(const point3d &left, const point3d &right) const
+  bool operator()(point3d const &left, point3d const &right) const
   {
     if (left.z != right.z)
     {
