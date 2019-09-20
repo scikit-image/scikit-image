@@ -51,6 +51,7 @@ top_level = segments_quick[0]
 parents = np.array(segments_quick[1]).astype('uint32')
 dist_to_parent = np.array(segments_quick[2]).astype('uint32')
 
+# compute a partial tree of the image
 segments_quick_partial = quickshift(img, kernel_size=3, max_dist=1000,
                                     ratio=0.5, return_tree=True,
                                     full_search=False)
@@ -59,6 +60,9 @@ parents_partial = np.array(segments_quick_partial[1]).astype('uint32')
 dist_to_parent_partial = np.array(segments_quick_partial[2]).astype('uint32')
 
 fig, ax = plt.subplots(3, 2, figsize=(20, 20), sharex=True, sharey=True)
+fig.suptitle('This figure shows the outputs from the quickshift function.\n'
+             'The left column uses fullsearch=True while the right column '
+             'does not.', fontsize=12)
 
 ax[0, 0].imshow(segments_quick[0])
 ax[0, 0].set_title("top level full search")
@@ -82,7 +86,7 @@ plt.tight_layout()
 plt.show()
 
 
-# perform multilevel segmentation
+# perform multilevel segmentation i.e. segment based on the tree hierarchy
 def multilevel_segment(parents):
     parents_display = parents.copy()
     parents_display_old = np.zeros_like(parents_display)
@@ -105,6 +109,9 @@ plt.set_cmap('viridis')
 fig, ax = plt.subplots(max(nb_levels, nb_levels_partial), 2, figsize=(20,
                        max(nb_levels, nb_levels_partial) * 10),
                        sharex=True, sharey=True)
+fig.suptitle('Segment the image based on the tree hierachy levels. \nThe left '
+             'column uses fullsearch=True while the right column does not.',
+             fontsize=12)
 for i in range(nb_levels):
     ax[i, 0].imshow(ims[i])
     ax[i, 0].set_title("full search level " + str(i))
@@ -119,7 +126,7 @@ plt.tight_layout()
 plt.show()
 
 
-# perform multiscale segmentation
+# perform multiscale segmentation i.e. segment based on the distance to parent
 def multiscale_segment(segments_quick, nb_scales, min_scale):
     ims = []
     last_scale = 0
@@ -147,6 +154,9 @@ plt.set_cmap('viridis')
 fig, ax = plt.subplots(max(len(ims), len(ims_partial)), 2,
                        figsize=(20, max(len(ims), len(ims_partial)) * 10),
                        sharex=True, sharey=True)
+fig.suptitle('Segment the image based on the distance to parent (scale). \n'
+             'The left column uses fullsearch=True while the right column '
+             'does not.', fontsize=12)
 for i in range(len(ims)):
     ax[i, 0].imshow(ims[i])
     ax[i, 0].set_title("full search scale " + str(2**(min_scale+i)))
