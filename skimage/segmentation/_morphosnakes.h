@@ -230,8 +230,8 @@ void update_edge(uint8_t *levelset, long *counter, std::vector<point2d> &edge_po
                  int nx, int ny)
 {
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny] += 1;
+  int current_iteration = counter[nx * ny];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -257,8 +257,8 @@ void check_and_add_edges(std::vector<point2d> &edge_points,
                          long *counter, int nx, int ny)
 {
 
-  // counter[0] += 1;
-  int current_iteration = counter[0];
+  // counter[nx*ny*nz] += 1;
+  int current_iteration = counter[nx * ny];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -311,8 +311,8 @@ void evolve_edge_2d(double *image, uint8_t *levelset, long *counter,
   double c0 = masked_average<0>(image, levelset, nx * ny);
   double c1 = masked_average<1>(image, levelset, nx * ny);
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny] += 1;
+  int current_iteration = counter[nx * ny];
 
   std::vector<point2d> changed_add, changed_remove;
   std::vector<point2d> *changed_add_p, *changed_remove_p;
@@ -435,8 +435,8 @@ void fast_marching_erosion_2d(std::vector<point2d> &edge_points, uint8_t *levels
   int const stride_x = 1;
   int const stride_y = nx;
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny] += 1;
+  int current_iteration = counter[nx * ny];
 
   std::vector<point2d> changed;
   std::vector<point2d> *changed_p;
@@ -520,8 +520,8 @@ void fast_marching_dilation_2d(std::vector<point2d> &edge_points, uint8_t *level
   int const stride_x = 1;
   int const stride_y = nx;
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny] += 1;
+  int current_iteration = counter[nx * ny];
 
   std::vector<point2d> changed;
   std::vector<point2d> *changed_p;
@@ -642,8 +642,8 @@ bool is_edge(uint8_t *levelset, point3d point, int nx, int ny, int nz)
 void update_edge(uint8_t *levelset, long *counter, std::vector<point3d> &edge_points,
                  int nx, int ny, int nz)
 {
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny * nz] += 1;
+  int current_iteration = counter[nx * ny * nz];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -672,8 +672,8 @@ void check_and_add_edges(std::vector<point3d> &edge_points,
                          long *counter, int nx, int ny, int nz)
 {
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny * nz] += 1;
+  int current_iteration = counter[nx * ny * nz];
 
   int const stride_x = 1;
   int const stride_y = nx;
@@ -743,8 +743,8 @@ void evolve_edge_3d(double *image, uint8_t *levelset, long *counter,
   double c0 = masked_average<0>(image, levelset, nx * ny * nz);
   double c1 = masked_average<1>(image, levelset, nx * ny * nz);
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny * nz] += 1;
+  int current_iteration = counter[nx * ny * nz];
 
   std::vector<point3d> changed_add, changed_remove;
   std::vector<point3d> *changed_add_p, *changed_remove_p;
@@ -845,8 +845,8 @@ void fast_marching_erosion_3d(std::vector<point3d> &edge_points, uint8_t *levels
   int const stride_y = nx;
   int const stride_z = nx * ny;
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny * nz] += 1;
+  int current_iteration = counter[nx * ny * nz];
 
   std::vector<point3d> changed;
   std::vector<point3d> *changed_p;
@@ -941,8 +941,8 @@ void fast_marching_dilation_3d(std::vector<point3d> &edge_points, uint8_t *level
   int const stride_y = nx;
   int const stride_z = nx * ny;
 
-  counter[0] += 1;
-  int current_iteration = counter[0];
+  counter[nx * ny * nz] += 1;
+  int current_iteration = counter[nx * ny * nz];
 
   std::vector<point3d> changed;
   std::vector<point3d> *changed_p;

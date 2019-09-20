@@ -48,7 +48,7 @@ cdef extern from "_morphosnakes.h":
 @cython.wraparound(False)
 def _morphological_chan_vese_2d(double[:, ::1] image,
                             unsigned char[:, ::1] u,
-                            long[:,  ::1] counter,
+                            long[::1] counter,
                             int iterations, 
                             int smoothing=1, 
                             double lambda1=1, 
@@ -63,19 +63,19 @@ def _morphological_chan_vese_2d(double[:, ::1] image,
     for i in range(iterations):
         evolve_edge_2d(&image[0,0],
                     &u[0,0], 
-                    &counter[0,0], 
+                    &counter[0], 
                     edge_points, u.shape[1],u.shape[0],lambda1,lambda2) 
 
                  
         # Smoothing
         for _ in range(smoothing):
             if smooth_counter % 2 == 0:
-                fast_marching_dilation_2d(edge_points, &u[ 0,0], &counter[ 0,0], u.shape[1],u.shape[0])
-                fast_marching_erosion_2d(edge_points, &u[ 0,0], &counter[ 0,0], u.shape[1],u.shape[0])
+                fast_marching_dilation_2d(edge_points, &u[ 0,0], &counter[ 0], u.shape[1],u.shape[0])
+                fast_marching_erosion_2d(edge_points, &u[ 0,0], &counter[ 0], u.shape[1],u.shape[0])
 
             else:
-                fast_marching_erosion_2d(edge_points, &u[ 0,0], &counter[ 0,0], u.shape[1],u.shape[0])
-                fast_marching_dilation_2d(edge_points, &u[ 0,0], &counter[ 0,0], u.shape[1],u.shape[0])
+                fast_marching_erosion_2d(edge_points, &u[ 0,0], &counter[ 0], u.shape[1],u.shape[0])
+                fast_marching_dilation_2d(edge_points, &u[ 0,0], &counter[ 0], u.shape[1],u.shape[0])
 
             smooth_counter=smooth_counter+1
         sort_edge2d(edge_points)   
@@ -90,7 +90,7 @@ def _morphological_chan_vese_2d(double[:, ::1] image,
 @cython.wraparound(False)
 def _morphological_chan_vese_3d(double[:, :, ::1] image,
                             unsigned char[:, :, ::1] u,
-                            long[:, :, ::1] counter,
+                            long[::1] counter,
                             int iterations, 
                             int smoothing=1, 
                             double lambda1=1, 
@@ -106,7 +106,7 @@ def _morphological_chan_vese_3d(double[:, :, ::1] image,
     for _ in range(iterations):
         evolve_edge_3d(&image[0,0,0],
                     &u[0,0,0], 
-                    &counter[0,0,0],  
+                    &counter[0],  
                     edge_points,u.shape[2], u.shape[1],u.shape[0],lambda1,lambda2) 
 
 
@@ -114,21 +114,14 @@ def _morphological_chan_vese_3d(double[:, :, ::1] image,
         for _ in range(smoothing):
         
             if smooth_counter % 2 == 0:
-                fast_marching_dilation_3d(edge_points, &u[0, 0,0], &counter[0, 0,0],u.shape[2], u.shape[1],u.shape[0])
-                fast_marching_erosion_3d(edge_points, &u[0, 0,0], &counter[0, 0,0],u.shape[2], u.shape[1],u.shape[0])
+                fast_marching_dilation_3d(edge_points, &u[0, 0,0], &counter[0],u.shape[2], u.shape[1],u.shape[0])
+                fast_marching_erosion_3d(edge_points, &u[0, 0,0], &counter[0],u.shape[2], u.shape[1],u.shape[0])
             else:
-                fast_marching_erosion_3d(edge_points, &u[0, 0,0], &counter[0, 0,0],u.shape[2], u.shape[1],u.shape[0])
-                fast_marching_dilation_3d(edge_points, &u[0, 0,0], &counter[0, 0,0],u.shape[2], u.shape[1],u.shape[0])
+                fast_marching_erosion_3d(edge_points, &u[0, 0,0], &counter[0],u.shape[2], u.shape[1],u.shape[0])
+                fast_marching_dilation_3d(edge_points, &u[0, 0,0], &counter[0],u.shape[2], u.shape[1],u.shape[0])
             smooth_counter+=1
         
         sort_edge3d(edge_points)        
         iter_callback(to_numpy(u))
 
     return to_numpy(u)
-
-
-
-
-
-
-
