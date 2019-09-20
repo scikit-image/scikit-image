@@ -20,7 +20,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_morphosnakes_fm', sources=['_morphosnakes_fm.cpp'],
-                         include_dirs=[get_numpy_include_dirs()], language="c++",
+                         include_dirs=[get_numpy_include_dirs()],
+                         language="c++",
                          extra_compile_args=["-std=c++11"],
                          extra_link_args=["-std=c++11"])
     config.add_extension('_quickshift_cy', sources=['_quickshift_cy.c'],

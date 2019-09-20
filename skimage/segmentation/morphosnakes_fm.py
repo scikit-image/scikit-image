@@ -84,7 +84,7 @@ def morphological_chan_vese_fm(image, iterations, init_level_set='checkerboard',
     init_level_set = _init_level_set(init_level_set, image.shape)
     _check_input(image, init_level_set)
     u = np.uint8(init_level_set > 0)
-    counter = np.zeros(np.prod(u.shape)+1, dtype=np.int_)
+    counter = np.zeros(np.prod(u.shape) + 1, dtype=np.int_)
 
     if image.ndim == 2:
         return _morphological_chan_vese_2d(
