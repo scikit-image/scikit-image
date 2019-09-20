@@ -1151,8 +1151,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     momS = np.diagflat(np.arange(nbins) * prob)
 
     # step 2: calculating the first row.
-    momP[1, 2:] = np.cumsum(prob[2:])
-    momS[1, 2:] = np.cumsum(np.arange(2, nbins) * prob[2:])
+    momP[1, 2:] = prob[1] + np.cumsum(prob[2:])
+    momS[1, 2:] = prob[1] + np.cumsum(np.arange(2, nbins) * prob[2:])
 
     # step 3: the other rows are recursively computed as:
     # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
