@@ -437,16 +437,14 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     max_sigma = np.asarray(max_sigma, dtype=float)
 
     if log_scale:
-        start = np.log10(min_sigma)
-        stop = np.log10(max_sigma)
-        sigma_list = np.stack([np.logspace(_start, _stop, num_sigma)
-                               for _start, _stop in zip(start, stop)],
-                              axis=1)
-        # The line below may only be used with numpy 1.16 and above
-        # https://github.com/numpy/numpy/commit/58ebb6a7d77cf89afeb888a70aff23e03d213788
-        # sigma_list = np.logspace(start, stop, num_sigma)
+        # for anisotropic data, we use the "highest resolution/variance" axis
+        standard_axis = np.argmax(min_sigma)
+        start = np.log10(min_sigma[standard_axis])
+        stop = np.log10(max_sigma[standard_axis])
+        scale = np.logspace(start, stop, num_sigma)[:, np.newaxis]
+        sigma_list = scale * min_sigma / np.max(min_sigma)
     else:
-        scale = np.linspace(0, 1, num_sigma)[:, None]
+        scale = np.linspace(0, 1, num_sigma)[:, np.newaxis]
         sigma_list = scale * (max_sigma - min_sigma) + min_sigma
 
     # computing gaussian laplace
