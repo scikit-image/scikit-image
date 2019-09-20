@@ -4,7 +4,8 @@ from ._morphosnakes_fm import _morphological_chan_vese_2d
 from ._morphosnakes_fm import _morphological_chan_vese_3d
 
 
-def morphological_chan_vese_fm(image, iterations, init_level_set='checkerboard',
+def morphological_chan_vese_fm(image, iterations,
+                               init_level_set='checkerboard',
                                smoothing=1, lambda1=1, lambda2=1,
                                iter_callback=lambda x: None):
     """Morphological Active Contours without Edges (MorphACWE)
@@ -83,14 +84,16 @@ def morphological_chan_vese_fm(image, iterations, init_level_set='checkerboard',
 
     init_level_set = _init_level_set(init_level_set, image.shape)
     _check_input(image, init_level_set)
-    u = np.uint8(init_level_set > 0)
-    counter = np.zeros(np.prod(u.shape) + 1, dtype=np.int_)
+    init_level_set = np.uint8(init_level_set > 0)
+    counter = np.zeros(np.prod(init_level_set.shape) + 1, dtype=np.int_)
 
     if image.ndim == 2:
         return _morphological_chan_vese_2d(
-            image, u, counter, iterations, smoothing, lambda1, lambda2, iter_callback
+            image, init_level_set, counter, iterations, smoothing,
+            lambda1, lambda2, iter_callback
         )
     if image.ndim == 3:
         return _morphological_chan_vese_3d(
-            image, u, counter, iterations, smoothing, lambda1, lambda2, iter_callback
+            image, init_level_set, counter, iterations, smoothing,
+            lambda1, lambda2, iter_callback
         )
