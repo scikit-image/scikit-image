@@ -105,4 +105,4 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
         if integer:
             dimcoords = _round_safe(dimcoords).astype(int)
         coords.append(dimcoords)
-    return coords
+    return tuple(coords)
