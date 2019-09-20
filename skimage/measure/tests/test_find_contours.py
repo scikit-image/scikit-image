@@ -100,6 +100,12 @@ def test_mask_shape():
         find_contours(a, 0, mask=bad_mask)
 
 
+def test_mask_dtype():
+    bad_mask = np.ones((8,8), dtype=np.uint8)
+    with raises(TypeError, match='binary'):
+        find_contours(a, 0, mask=bad_mask)
+
+
 def test_float():
     contours = find_contours(r, 0.5)
     assert len(contours) == 1
