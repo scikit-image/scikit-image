@@ -6,7 +6,6 @@
 #include "snakes3d_operators_bidir.h"
 #include <algorithm>
 #include <cassert>
-#include <omp.h>
 #include <vector>
 
 #include <algorithm>
