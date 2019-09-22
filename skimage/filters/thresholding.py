@@ -298,6 +298,7 @@ def threshold_otsu(image, nbins=256):
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
+    print(idx)
     threshold = bin_centers[:-1][idx]
     return threshold
 
@@ -1101,7 +1102,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Returns
     -------
-    idx_thresh : array
+    thresh_vals : array
         Array containing the threshold values for the desired classes.
 
     Notes
@@ -1139,43 +1140,13 @@ def threshold_multiotsu(image, classes=3, nbins=256):
                                   nbins=nbins,
                                   source_range='image',
                                   normalize=True)
+
     # histogram ignores nbins for integer arrays.
     nbins = len(bin_centers)
 
-    # # Compute the zeroth (momP, cumulative probability) and first
-    # # (momS, mean) moments
+    # Get threshold indices
+    thresh_idx = _get_multiotsu_thresh_indices(prob, classes-1, nbins)
 
-    # # building the lookup tables.
-    # # step 1: calculating the diagonal.
-    # # prob[0] = 0
-    # momP = np.diagflat(prob)
-    # momS = np.diagflat(np.arange(nbins) * prob)
+    thresh_vals = bin_centers[thresh_idx]
 
-    # # step 2: calculating the first row.
-    # momP[1, 2:] = prob[1] + np.cumsum(prob[2:])
-    # momS[1, 2:] = prob[1] + np.cumsum(np.arange(2, nbins) * prob[2:])
-
-    # # step 3: the other rows are recursively computed as:
-    # # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
-    # upper_tri = np.triu_indices_from(momP[2:, 2:], 1)
-
-    # momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
-    #                            - np.repeat(momP[1, 1:-2],
-    #                                        np.arange(nbins - 3, 0, -1)))
-    # momS[2:, 2:][upper_tri] = (momS[1, 2:][upper_tri[1]]
-    #                            - np.repeat(momS[1, 1:-2],
-    #                                        np.arange(nbins - 3, 0, -1)))
-
-    # # finding max threshold candidates, depending on classes.
-    # # number of thresholds is equal to number of classes - 1.
-    # aux_thresh = _find_threshold_multiotsu(momS, momP, classes, nbins)
-
-    # # correcting threshold values.
-    # idx_thresh = bin_centers[aux_thresh]
-
-    thresh_indices = _get_multiotsu_thresh_indices(prob, classes-1, nbins)
-
-    # correcting threshold values.
-    idx_thresh = bin_centers[thresh_indices]
-
-    return idx_thresh
+    return thresh_vals
