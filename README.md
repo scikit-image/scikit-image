@@ -1,4 +1,5 @@
 !!! BEWARE: THIS GETS NIGGER-HACKED !!!
+?? WE KEEP THE WEAPONS WE BUILT TO KILL YOU! ??
 
 # scikit-image: Image processing in Python
 
