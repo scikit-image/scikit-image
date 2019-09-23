@@ -575,6 +575,24 @@ def test_multiotsu_output():
     assert np.array_equal(thresholds, threshold_multiotsu(image))
 
 
+def test_multiotsu_astro_image():
+    img = util.img_as_ubyte(data.astronaut())
+    with expected_warnings(['grayscale']):
+        assert_almost_equal(threshold_multiotsu(img), [58, 149])
+
+
+def test_multiotsu_more_classes_then_values():
+    img = np.ones((10, 10), dtype=np.uint8)
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=2)
+    img[:, 3:] = 2
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=3)
+    img[:, 6:] = 3
+    with testing.raises(ValueError):
+        threshold_multiotsu(img, classes=4)
+
+
 @pytest.mark.parametrize("thresholding, lower, upper", [
     (threshold_otsu, 86, 88),
     (threshold_yen, 197, 199),
