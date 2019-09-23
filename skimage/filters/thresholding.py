@@ -1108,8 +1108,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     Raises
     ------
     ValueError
-         If ``image`` less grayscale value then requested number of
-         classes.
+         If ``image`` contains less grayscale value then requested
+         number of classes.
 
     Notes
     -----

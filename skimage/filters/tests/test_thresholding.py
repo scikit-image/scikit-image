@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
+from skimage.color import rgb2gray
 from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
@@ -535,10 +536,20 @@ def test_niblack_sauvola_pathological_image():
 
 
 def test_bimodal_multiotsu_hist():
-    image = data.camera()
-    thr_otsu = threshold_otsu(image)
-    thr_multi = threshold_multiotsu(image, classes=2)
-    assert thr_otsu == thr_multi
+
+    names = ('camera', 'moon', 'coins', 'text', 'clock', 'page')
+
+    for name in names:
+        img = getattr(data, name)()
+
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
+
+    names = ('chelsea', 'coffee', 'astronaut', 'rocket')
+
+    for name in names:
+        img = rgb2gray(getattr(data, name)())
+
+        assert threshold_otsu(img) == threshold_multiotsu(img, 2)
 
 
 def test_check_multiotsu_results():
@@ -556,11 +567,11 @@ def test_check_multiotsu_results():
 def test_multiotsu_output():
     image = np.zeros((100, 100), dtype='int')
     coords = [(25, 25), (50, 50), (75, 75)]
-    values = [64, 128, 192]
+    values = [64, 128, 194]
     for coor, val in zip(coords, values):
         rr, cc = circle(coor[1], coor[0], 20)
         image[rr, cc] = val
-    thresholds = [64, 128]
+    thresholds = [1, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image))
 
 
