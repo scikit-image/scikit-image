@@ -416,7 +416,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     out = ((image / scale) ** gamma) * scale * gain
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def adjust_log(image, gain=1, inv=False):
@@ -459,7 +459,7 @@ def adjust_log(image, gain=1, inv=False):
         return dtype(out)
 
     out = np.log2(1 + image / scale) * scale * gain
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
@@ -508,7 +508,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
         return dtype(out)
 
     out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
