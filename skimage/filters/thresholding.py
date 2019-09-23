@@ -1121,6 +1121,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
+    The input image must be grayscale.
+
     References
     ----------
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
@@ -1140,9 +1142,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
 
-    Notes
     -----
-    The input image must be grayscale.
 
     """
 
