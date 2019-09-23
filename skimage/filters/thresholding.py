@@ -1167,12 +1167,12 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     else:
         # Get threshold indices
         try:
-            thresh_idx = _get_multiotsu_thresh_indices_lut(prob, classes-1)
+            thresh_idx = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
         except MemoryError:
             # Don't use LUT if the number of bins is too large (if the
             # image is uint16 for example): in this case, the
             # allocated memory is too large.
-            thresh_idx = _get_multiotsu_thresh_indices(prob, classes-1)
+            thresh_idx = _get_multiotsu_thresh_indices(prob, classes - 1)
 
     thresh_vals = bin_centers[thresh_idx]
 
