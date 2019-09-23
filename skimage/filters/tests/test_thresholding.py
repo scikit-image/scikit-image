@@ -565,7 +565,7 @@ def test_multiotsu_output():
     assert np.array_equal(thresholds, threshold_multiotsu(image))
 
     image = color.rgb2gray(data.astronaut())
-    assert 0.438 < threshold_multiotsu(image, 2) < 0.440
+    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
