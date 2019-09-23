@@ -298,7 +298,6 @@ def threshold_otsu(image, nbins=256):
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
-    print(idx)
     threshold = bin_centers[:-1][idx]
     return threshold
 
