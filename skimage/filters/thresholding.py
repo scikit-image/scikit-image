@@ -1142,8 +1142,6 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
 
-    -----
-
     """
 
     if len(image.shape) > 2 and image.shape[-1] in (3, 4):
