@@ -8,7 +8,7 @@ from ..exposure import histogram
 from .._shared.utils import check_nD, warn
 from ..transform import integral_image
 from ..util import crop, dtype_limits
-from ..filters._multiotsu import (#_find_threshold_multiotsu,
+from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
                                   _get_multiotsu_thresh_indices)
 
 
@@ -1105,6 +1105,12 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     thresh_vals : array
         Array containing the threshold values for the desired classes.
 
+    Raises
+    ------
+    ValueError
+         If ``image`` less grayscale value then requested number of
+         classes.
+
     Notes
     -----
     The threshold values are chosen in a way that maximizes the variance
@@ -1134,18 +1140,40 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     >>> thresholds = threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
+
+    Notes
+    -----
+    The input image must be grayscale.
+
     """
+
+    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+        msg = ("threshold_multiotsu is expected to work correctly only for "
+               "grayscale images; image shape {0} looks like an RGB image")
+        warn(msg.format(image.shape))
+
     # calculating the histogram and the probability of each gray level.
     prob, bin_centers = histogram(image.ravel(),
                                   nbins=nbins,
                                   source_range='image',
                                   normalize=True)
 
-    # histogram ignores nbins for integer arrays.
-    nbins = len(bin_centers)
-
-    # Get threshold indices
-    thresh_idx = _get_multiotsu_thresh_indices(prob, classes-1, nbins)
+    nvalues = np.count_nonzero(prob)
+    if nvalues < classes:
+        msg = ("The input image has only {} different values. "
+               "It can not be thresholded in {} classes")
+        raise ValueError(msg.format(nvalues, classes))
+    elif nvalues == classes:
+        thresh_idx = np.where(prob > 0)[0][:-1]
+    else:
+        # Get threshold indices
+        try:
+            thresh_idx = _get_multiotsu_thresh_indices_lut(prob, classes-1)
+        except MemoryError:
+            # Don't use LUT if the number of bins is too large (if the
+            # image is uint16 for example): in this case, the
+            # allocated memory is too large.
+            thresh_idx = _get_multiotsu_thresh_indices(prob, classes-1)
 
     thresh_vals = bin_centers[thresh_idx]
 
