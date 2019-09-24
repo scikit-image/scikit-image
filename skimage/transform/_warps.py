@@ -406,11 +406,18 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
     cval : float, optional
         Constant padding value if image is not perfectly divisible by the
         integer factors.
+    clip : bool, optional
+        Unused, but kept here for API consistency with the other transforms
+        in this module. (The local mean will never fall outside the range
+        of values in the input image, assuming the provided `cval` also
+        falls within that range.)
 
     Returns
     -------
     image : ndarray
         Down-sampled image with same number of dimensions as input image.
+        For integer inputs, the output dtype will be ``float64``.
+        See :func:`numpy.mean` for details.
 
     Examples
     --------
