@@ -19,6 +19,15 @@ Abstract
 The abstract should be a short description of what the SKIP will achieve.
 
 
+Motivation and Scope
+--------------------
+
+This section describes the need for the proposed change. It should describe the
+existing problem, who it affects, what it is trying to solve, and why. This
+section should explicitly address the scope of and key requirements for the
+proposed change.
+
+
 Detailed description
 --------------------
 
