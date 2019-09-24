@@ -6,6 +6,7 @@ SKIP 0 — Purpose and Process
 
 :Author: Jarrod Millman <millman@berkeley.edu>
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
+:Author: Stéfan van der Walt <stefanv@berkeley.edu>
 :Status: Active
 :Type: Process
 :Created: 2019-07-30
@@ -43,7 +44,7 @@ There are three kinds of SKIPs:
    general guidelines or information to the Python community, but does not
    propose a new feature. Informational SKIPs do not necessarily represent a
    scikit-image community consensus or recommendation, so users and
-   implementers are free to ignore Informational SKIPs or follow their advice.
+   implementers are free to ignore Informational SKIPs.
 
 3. A **Process** SKIP describes a process surrounding scikit-image, or
    proposes a change to (or an event in) a process. Process SKIPs are
@@ -59,20 +60,18 @@ SKIP Workflow
 -------------
 
 The SKIP process begins with a new idea for scikit-image.  It is highly
-recommended that a single SKIP contain a single key proposal or new
+recommended that a single SKIP contains a single key proposal or new
 idea. Small enhancements or patches often don't need
 a SKIP and can be injected into the scikit-image development workflow
 with a pull request to the scikit-image `repo`_. The more focused the
-SKIP, the more successful it tends to be.
-
-If in doubt, split your SKIP into several well-focused ones.
+SKIP, the more likely it is to be accepted.
 
 Each SKIP must have a champion---someone who writes the SKIP using the style
 and format described below, shepherds the discussions in the appropriate
 forums, and attempts to build community consensus around the idea.  The SKIP
 champion (a.k.a. Author) should first attempt to ascertain whether the idea is
 suitable for a SKIP. Posting to the scikit-image `mailing list`_ is the best
-way to go about doing this.
+way to do this.
 
 The proposal should be submitted as a draft SKIP via a `GitHub pull
 request`_ to the ``doc/source/skips`` directory with the name
@@ -83,18 +82,19 @@ Once the PR is in place, the SKIP should be announced on the mailing
 list for discussion (comments on the PR itself should be restricted to
 minor editorial and technical fixes).
 
-At the earliest convenience, the PR should be merged (regardless of
-whether it is accepted during discussion).  Additional PRs may be made
-by the Author to update or expand the SKIP, or by maintainers to set
-its status, discussion URL, etc.
+At the earliest convenience, the PR should be merged (regardless of whether it
+is accepted during discussion). A SKIP that outlines a coherent argument and
+that is considered reasonably complete should be merged optimistically,
+regardless of whether it is accepted during discussion. Additional PRs may be
+made by the author to update or expand the SKIP, or by maintainers to set its
+status, discussion URL, etc.
 
 Standards Track SKIPs consist of two parts, a design document and a
 reference implementation. It is generally recommended that at least a
 prototype implementation be co-developed with the SKIP, as ideas that sound
-good in principle sometimes turn out to be impractical when subjected to the
-test of implementation. Often it makes sense for the prototype implementation
-to be made available as PR to the scikit-image repo (making sure to appropriately
-mark the PR as a WIP).
+good in principle sometimes turn out to be impractical. Often it makes sense
+for the prototype implementation to be made available as PR to the scikit-image
+repo, as long as it is properly marked as WIP (work in progress).
 
 
 Review and Resolution
@@ -203,8 +203,9 @@ If there *are* substantive objections, then the SKIP remains in
 ``Draft`` state, discussion continues as normal, and it can be
 proposed for acceptance again later once the objections are resolved.
 
-In unusual cases, the `scikit-image Steering Council`_ may be asked to decide
-whether a controversial SKIP is ``Accepted``.
+In unusual cases, when no consensus can be reached between core developers, the
+`scikit-image Steering Council`_ may be asked to decide whether a controversial
+SKIP is ``Accepted``.
 
 
 Maintenance
