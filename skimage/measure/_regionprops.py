@@ -927,7 +927,7 @@ def euler_number(image, connectivity=None):
     if connectivity is None:
         connectivity = image.ndim
 
-    if image.ndim==3 and connectivity==2:
+    if image.ndim == 3 and connectivity == 2:
         raise NotImplementedError('For 3D images, Euler number is implemented '
                                   'for connectivities 1 and 3 only')
 
@@ -1071,8 +1071,8 @@ def perimeter_crofton(image, directions=4):
         2D image. If image is not binary, all values strictly greater than zero 
         are considered as the object.
     directions : 2 or 4, optional
-        Number of directions used to approximate the Crofton perimeter. By 
-        default, 4 is used: it should be more precise than 2. 
+        Number of directions used to approximate the Crofton perimeter. By
+        default, 4 is used: it should be more accurate than 2.
         Computation time is the same in both cases.
 
     Returns
