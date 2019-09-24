@@ -29,12 +29,12 @@ as well as the contributor and core developer guides. Decisions about the API
 and the future of the library would be referenced against this document. (See
 :ref:`governance`.)
 
-In July 2018, I published a blog post that broadly outlined what I would want
-from a roadmap for scikit-image [1]_, but requested comments from the community
-before it would be finalized. I consider that we have collected comments for
-long enough and can move forward with formal adoption. Most comments were
-positive, so below I'll just summarize the “negative” comments under “rejected
-ideas”.
+In July 2018, I (Juan) published a blog post that broadly outlined what I would
+want from a roadmap for scikit-image [1]_, but requested comments from the
+community before it would be finalized. I consider that we have collected
+comments for long enough and can move forward with formal adoption. Most
+comments were positive, so below I'll just summarize the “negative” comments
+under “rejected ideas”.
 
 Detailed description
 --------------------
@@ -55,7 +55,7 @@ Implementation
 Our mission
 ***********
 
-scikit-image aims to be the essential toolkit for scientific image analysis in
+scikit-image aims to be the reference library for scientific image analysis in
 Python. We accomplish this by:
 
 - being **easy to use and install**. We are careful in taking on new
@@ -64,7 +64,7 @@ Python. We accomplish this by:
   outputs.
 - providing a **consistent API**. Conceptually identical arguments have the
   same name and position in a function signature.
-- **ensuring accuracy**. Test coverage is close to 100% and code is reviewed by
+- **ensuring correctness**. Test coverage is close to 100% and code is reviewed by
   at least two core developers before being included in the library.
 - **caring for users’ data**. We have a functional [2]_ API and don't modify
   input arrays unless explicitly directed to do so.
