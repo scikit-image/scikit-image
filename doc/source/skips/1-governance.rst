@@ -97,11 +97,14 @@ values <values>` of the scikit-image project.
 
 Scikit-image uses a “consensus seeking” process for making decisions. The group
 tries to find a resolution that has no open objections among core developers.
-If no option can be found without objections, the decision is escalated to the
-SC, which will itself use consensus seeking to come to a resolution. In the
-unlikely event that there is still a deadlock, the proposal will move forward
-if it has the support of a simple majority of the SC. Any vote must be
-backed by a :ref:`scikit-image proposal (SKIP) <skip>`.
+Core developers are expected to distinguish between fundamental objections to a
+proposal and minor perceived flaws that they can live with, and not hold up the
+decision-making process for the latter.  If no option can be found without
+objections, the decision is escalated to the SC, which will itself use
+consensus seeking to come to a resolution. In the unlikely event that there is
+still a deadlock, the proposal will move forward if it has the support of a
+simple majority of the SC. Any vote must be backed by a :ref:`scikit-image
+proposal (SKIP) <skip>`.
 
 Decisions (in addition to adding core developers and SC membership as above)
 are made according to the following rules:
