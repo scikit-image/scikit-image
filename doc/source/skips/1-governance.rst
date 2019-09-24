@@ -43,15 +43,14 @@ Core developers
 ---------------
 Core developers are community members that have demonstrated continued
 commitment to the project through ongoing engagement with the community. They
-have shown they can be trusted to maintain scikit-image with care. Being a core
-developer allows contributors to more easily carry on with their project
-related activities by giving them direct access to the project’s repository and
-is represented as being an organization member on the scikit-image
-`GitHub organization <https://github.com/orgs/scikit-image/people>`_.
-Core developers are expected to review code contributions, can merge approved
-pull requests, can cast votes for and against merging a pull-request, and can
-be involved in deciding major changes to the API. Core developers are expected
-to adhere to the :ref:`core developer guide <core_dev>`.
+have shown they can be trusted to maintain scikit-image with care. Becoming a
+core developer allows contributors to merge approved pull requests, cast votes
+for and against merging a pull-request, and be involved in deciding major
+changes to the API, and thereby more easily carry on with their project related
+activities. Core developers appear as organization members on the scikit-image
+`GitHub organization <https://github.com/orgs/scikit-image/people>`_. Core
+developers are expected to review code contributions while adhering to the
+:ref:`core developer guide <core_dev>`.
 
 New core developers can be nominated by any existing core developer.
 Discussion about new core developer nominations is one of the few activities
@@ -126,7 +125,8 @@ are made according to the following rules:
   decision-making process outlined above.
 
 - **Changes to this governance model or our mission, vision, and values**
-  require a :ref:`skip` and follow the decision-making process outlined above.
+  require a :ref:`skip` and follow the decision-making process outlined above,
+  *unless* there is unanimous agreement from core developers on the change.
 
 If a veto is cast on a lazy consensus, the proposer can appeal to the
 community and core developers and the change can be approved or rejected using
