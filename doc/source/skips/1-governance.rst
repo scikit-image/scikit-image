@@ -138,22 +138,10 @@ Improvement proposals (SKIPs)
 =============================
 
 For all votes, a formal proposal must have been made public and discussed
-before the vote. The lifetime of a SKIP detailed in :ref:`skip0`. We briefly
-describe the process of opening a SKIP here. First, a proposal is brought up as
-either a GitHub issue or a post to the mailing list. After sufficient
-discussion, the core advocate(s) of the proposal must consolidate the
-discussion into a single document, called a SciKit-Image Proposal (SKIP), with
-appropriate references to the original discussion, accurately representing the
-pros and cons brought up by each participant.
-
-To submit a SKIP, the advocate should copy the `SKIP template
-<https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips/template.rst>`_,
-and give it a new name in the same directory, for example,
-``35-currying-all-functions.rst``. You should then fill in each section with
-appropriate links to prior discussions. Finally, the SKIP should be submitted
-as a pull request (see the :ref:`contributing guide <howto_contribute>`).
-
-For a more detailed overview of the SKIP process, see :ref:`skip0`.
+before the vote. After discussion has taken place, the key advocate of the
+proposal must create a consolidated document summarizing the discussion, called
+a SKIP, on which the core team votes. The lifetime of a SKIP detailed in
+:ref:`skip0`.
 
 A list of all existing SKIPs is available :ref:`here <skip_list>`.
 
