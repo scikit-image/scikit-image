@@ -1,7 +1,7 @@
 import numpy as np
 
-from skimage.transform import histogram_matching
-from skimage import transform
+from skimage.exposure import histogram_matching
+from skimage import exposure
 from skimage import data
 
 from skimage._shared.testing import assert_array_almost_equal, \
@@ -37,7 +37,7 @@ class TestMatchHistogram:
         all channels and all values of matched"""
 
         # when
-        matched = transform.match_histograms(image, reference, multichannel=True)
+        matched = exposure.match_histograms(image, reference, multichannel=True)
 
         matched_pdf = self._calculate_image_empirical_pdf(matched)
         reference_pdf = self._calculate_image_empirical_pdf(reference)
@@ -58,7 +58,7 @@ class TestMatchHistogram:
     ])
     def test_raises_value_error_on_channels_mismatch(self, image, reference):
         with pytest.raises(ValueError):
-            transform.match_histograms(image, reference)
+            exposure.match_histograms(image, reference)
 
     @classmethod
     def _calculate_image_empirical_pdf(cls, image):
