@@ -22,6 +22,8 @@ Version 0.18
 ------------
 
 * Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
+* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
+  deprecation warning.
 * Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
 * The following functions are deprecated and should be removed in 0.18:
@@ -38,6 +40,7 @@ Version 0.18
 * In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
+* In ``skimage/transform`` remove histogram_matching.py.
 
 Other
 -----

@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 from numpy import array
+
+from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
@@ -525,3 +527,10 @@ def test_props_dict_complete():
 
 def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+
+
+def test_deprecated_coords_argument():
+    with expected_warnings(['coordinates keyword argument']):
+        region = regionprops(SAMPLE, coordinates='rc')
+    with testing.raises(ValueError):
+        region = regionprops(SAMPLE, coordinates='xy')
