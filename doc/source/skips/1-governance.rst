@@ -67,22 +67,23 @@ The Steering Council (SC) members are core developers who have additional
 responsibilities to ensure the smooth running of the project. SC members are
 expected to participate in strategic planning, approve changes to the
 governance model, and make decisions about funding granted to the project
-itself. (Funding to community members is theirs to pursue and
-manage.) The purpose of the SC is to ensure smooth progress from the
-big-picture perspective. Changes that impact the full project require a
-synthetic analysis and a consensus that is both explicit and informed. When the
-core developer community (including the SC members) fails to reach such a
-consensus in a reasonable timeframe, the SC is the entity to resolve the issue.
+itself. (Funding to community members is theirs to pursue and manage.) The
+purpose of the SC is to ensure smooth progress from the big-picture
+perspective. Changes that impact the full project require a synthetic analysis
+and a consensus that is both explicit and informed. When the core developer
+community (including the SC members) fails to reach such a consensus in a
+reasonable timeframe, the SC is the entity that resolves the issue.
 
-Membership of the SC is updated by nomination by a core developer. Nominees
-should have demonstrated long-term, continued commitment to the project and its
-:ref:`values`. A nomination will result in discussion that cannot take more
-than a month and then admission to the SC by consensus. SC members who do not
-actively engage with the SC duties are expected to resign.
+The steering council is fixed in size to five members. This may be expanded in
+the future. The initial steering council of scikit-image consists of Stéfan
+van der Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
+Zachary Pincus. The SC membership is revisited every January. SC members who do
+not actively engage with the SC duties are expected to resign. New members are
+added by nomination by a core developer. Nominees should have demonstrated
+long-term, continued commitment to the project and its :ref:`values`. A
+nomination will result in discussion that cannot take more than a month and
+then admission to the SC by consensus.
 
-The initial Steering Council of scikit-image consists of Stéfan van der
-Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
-Zachary Pincus.
 
 Decision Making Process
 =======================
