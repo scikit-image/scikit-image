@@ -5,7 +5,7 @@ from scipy.constants import golden_ratio
 from ._warps import warp
 from ._radon_transform import sart_projection_update
 from .._shared.fft import fftmodule
-from .._shared.utils import deprecate_arg
+from .._shared.utils import deprecate_arg, convert_to_float
 from warnings import warn
 from functools import partial
 
@@ -21,22 +21,27 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True):
-    """Calculates the radon transform of an image given specified
+def radon(image, theta=None, circle=True, *, preserve_range=None):
+    """
+    Calculates the radon transform of an image given specified
     projection angles.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : array_like
         Input image. The rotation axis will be located in the pixel with
         indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
-    theta : array_like, dtype=float, optional
+    theta : array_like, optional
         Projection angles (in degrees). If `None`, the value is set to
         np.arange(180).
     circle : boolean, optional
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -63,6 +68,17 @@ def radon(image, theta=None, circle=True):
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
+
+    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
+        warn('Image dtype is not float. By default radon will assume '
+             'you want to preserve the range of your image '
+             '(preserve_range=True). In scikit-image 0.18 this behavior will '
+             'change to preserve_range=False. To avoid this warning, '
+             'explictiely specify the preserve_range parameter.',
+             stacklevel=2)
+        preserve_range = True
+
+    image = convert_to_float(image, preserve_range)
 
     if circle:
         shape_min = min(image.shape)

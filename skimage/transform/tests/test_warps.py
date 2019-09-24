@@ -163,6 +163,11 @@ def test_rotate_resize_center():
     assert_equal(x45, ref_x45)
 
 
+def test_rotate_resize_90():
+    x90 = rotate(np.zeros((470, 230), dtype=np.double), 90, resize=True)
+    assert x90.shape == (230, 470)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
