@@ -120,7 +120,7 @@ def find_contours(array, level,
     if mask is not None:
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
-        mask = np.asarray(mask, dtype=np.uint8)
+        mask = mask.view(np.uint8)
         if mask.shape != array.shape:
             raise ValueError('Parameters "array" and "mask"'
                              ' must have same shape.')
