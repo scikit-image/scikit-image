@@ -11,7 +11,7 @@
 :Status: Draft
 :Type: Process
 :Created: 2019-07-02
-:Resolved:
+:Resolved: 2019-09-25
 :Resolution:
 :Version effective: 0.16
 
