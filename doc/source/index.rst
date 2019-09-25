@@ -1,8 +1,8 @@
 ****************************
-skimage |version| docs
+scikit-image |version| docs
 ****************************
 
-Scikit-image is an image processing toolbox for SciPy_.  View the latest
+scikit-image is an image processing toolbox for SciPy_.  View the latest
 `release notes here <release_notes_and_installation.html>`_.
 
 .. _SciPy: http://www.scipy.org
@@ -25,21 +25,31 @@ Sections
    auto_examples/index
    release_notes_and_installation
    core_developer
+   skips/index
+   values
 
 .. list-table::
    :class: contentstable
 
    * - `Overview <overview.html>`_
 
-       Introduction to skimage.
+       Introduction to scikit-image.
 
      - `API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
 
-       Documentation for the functions included in skimage.
+       Documentation for the functions included in scikit-image.
+
+   * - `Mission statement <values.html>`_
+
+       Our mission, vision and values.
+
+     - `Governance <skips/0-governance.html>`_
+
+       How decisions are made in scikit-image.
 
    * - `Installation Steps <install.html>`_
 
-       How to install skimage.
+       How to install scikit-image.
 
      - `User Guide <user_guide.html>`_
 
