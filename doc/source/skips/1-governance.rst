@@ -12,11 +12,11 @@ SKIP 1 — scikit-image governance and decision-making
 :Author: Mark Harfouche
 :Author: Lars Grüter
 :Author: Egor Panfilov
-:Status: Draft
+:Status: Final
 :Type: Process
 :Created: 2019-07-02
-:Resolved:
-:Resolution:
+:Resolved: 2019-07-25
+:Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
 
 Abstract
