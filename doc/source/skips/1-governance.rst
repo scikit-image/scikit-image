@@ -1,5 +1,9 @@
 .. _governance:
 
+====================================================
+SKIP 1 — scikit-image governance and decision-making
+====================================================
+
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
 :Author: Stéfan van der Walt <stefanv@berkeley.edu>
 :Author: Josh Warner
@@ -15,9 +19,8 @@
 :Resolution:
 :skimage-Version: 0.16
 
-===========================================
-scikit-image governance and decision-making
-===========================================
+Abstract
+========
 
 The purpose of this document is to formalize the governance process used by the
 scikit-image project, to clarify how decisions are made and how the various
@@ -111,6 +114,7 @@ then admission to the SC by consensus.
 
 Decision Making Process
 =======================
+
 Decisions about the future of the project are made through discussion with all
 members of the community. All non-sensitive project management discussion takes
 place on the project `mailing list <mailto:scikit-image@python.org>`_
