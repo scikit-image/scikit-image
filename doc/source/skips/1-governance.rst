@@ -32,12 +32,37 @@ resolved.
 Roles And Responsibilities
 ==========================
 
+The Community
+-------------
+The scikit-image community consists of anyone using or working with the project
+in any way.
+
 Contributors
 ------------
-Contributors are community members who contribute in concrete ways to the
-project. Anyone can become a contributor, and contributions can take many forms
-– not only code – as detailed in the
-:ref:`contributors guide <howto_contribute>`.
+A community member can become a contributor by interacting directly with the
+project in concrete ways, such as:
+
+- proposing a change to the code via a GitHub pull request;
+- reporting issues on our
+  `GitHub issues page <https://github.com/scikit-image/scikit-image/issues>`_;
+- proposing a change to the documentation,
+  `website <https://github.com/scikit-image/scikit-image-web>`_, or
+  `tutorials <https://github.com/scikit-image/skimage-tutorials>`_ via a
+  GitHub pull request;
+- discussing the design of the library, website, or tutorials on the
+  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_,
+  in the
+  `project chat room <skimage.zulipchat.com/>`_, or in existing issues and pull
+  requests; or
+- Reviewing
+  `open pull requests <https://github.com/scikit-image/scikit-image/pulls>`_,
+
+among other possibilities. Any community member can become a contributor, and
+all are encouraged to do so. By contributing to the project, community members
+can directly help to shape its future.
+
+Contributors are encouraged to read the
+:ref:`contributing guide <howto_contribute>`.
 
 Core developers
 ---------------
