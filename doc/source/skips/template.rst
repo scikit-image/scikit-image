@@ -1,8 +1,8 @@
-.. _skip-template::
+.. _skip_template:
 
-==============================
-SKIP Template and Instructions
-==============================
+==================================
+SKIP X — Template and Instructions
+==================================
 
 :Author: <list of authors' real names and, optionally, email addresses>
 :Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn |
@@ -31,11 +31,16 @@ proposed change.
 Detailed description
 --------------------
 
-This section describes the need for the SKIP. It should describe the
-existing problem that it is trying to solve and why this SKIP makes the
-situation better. It should include examples of how the new functionality
-would be used and perhaps some real-world use cases.
+This section should provide a detailed description of the proposed change. It
+should include examples of how the new functionality would be used, intended
+use-cases, and pseudocode illustrating its use.
 
+Related Work
+------------
+
+This section should list relevant and/or similar technologies, possibly in
+other libraries. It does not need to be comprehensive, just list the major
+examples of prior and relevant art.
 
 Implementation
 --------------

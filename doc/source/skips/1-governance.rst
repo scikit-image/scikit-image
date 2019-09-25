@@ -1,5 +1,9 @@
 .. _governance:
 
+====================================================
+SKIP 1 — scikit-image governance and decision-making
+====================================================
+
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
 :Author: Stéfan van der Walt <stefanv@berkeley.edu>
 :Author: Josh Warner
@@ -8,16 +12,15 @@
 :Author: Mark Harfouche
 :Author: Lars Grüter
 :Author: Egor Panfilov
-:Status: Draft
+:Status: Final
 :Type: Process
 :Created: 2019-07-02
-:Resolved:
-:Resolution:
+:Resolved: 2019-07-25
+:Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
 
-===========================================
-scikit-image governance and decision-making
-===========================================
+Abstract
+========
 
 The purpose of this document is to formalize the governance process used by the
 scikit-image project, to clarify how decisions are made and how the various
@@ -50,7 +53,7 @@ project in concrete ways, such as:
   `tutorials <https://github.com/scikit-image/skimage-tutorials>`_ via a
   GitHub pull request;
 - discussing the design of the library, website, or tutorials on the
-  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_,
+  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_,
   in the
   `project chat room <skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
@@ -67,7 +70,7 @@ Contributors are encouraged to read the
 Core developers
 ---------------
 Core developers are community members that have demonstrated continued
-commitment to the project through ongoing engagement with the community. They
+commitment to the project through ongoing contributions. They
 have shown they can be trusted to maintain scikit-image with care. Becoming a
 core developer allows contributors to merge approved pull requests, cast votes
 for and against merging a pull-request, and be involved in deciding major
@@ -111,9 +114,11 @@ then admission to the SC by consensus.
 
 Decision Making Process
 =======================
+
 Decisions about the future of the project are made through discussion with all
 members of the community. All non-sensitive project management discussion takes
-place on the project `mailing list <mailto:scikit-image@python.org>`_
+place on the project
+`mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_
 and the `issue tracker <https://github.com/scikit-image/scikit-image/issues>`_.
 Occasionally, sensitive discussion may occur on a private list.
 
@@ -154,8 +159,8 @@ are made according to the following rules:
   *unless* there is unanimous agreement from core developers on the change.
 
 If a veto is cast on a lazy consensus, the proposer can appeal to the
-community and core developers and the change can be approved or rejected using
-the decision making procedure outlined above.
+community and core developers and the change can be approved or rejected by
+escalating to the SC, and if necessary, a SKIP (see below).
 
 .. _skip:
 

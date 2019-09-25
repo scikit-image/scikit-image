@@ -13,7 +13,7 @@ SKIP 0 — Purpose and Process
 
 
 What is a SKIP?
---------------
+---------------
 
 SKIP stands for SciKit-Image Proposal. A SKIP is a design document providing
 information to the community, or describing a new feature for
@@ -75,7 +75,7 @@ way to do this.
 The proposal should be submitted as a draft SKIP via a `GitHub pull
 request`_ to the ``doc/source/skips`` directory with the name
 ``skip-<n>.rst`` where ``<n>`` is an appropriately assigned number (e.g.,
-``skip-35.rst``). The draft must use the :ref:`skip-template` file.
+``skip-35.rst``). The draft must use the :ref:`skip_template` file.
 
 Once the PR is in place, the SKIP should be announced on the mailing
 list for discussion (comments on the PR itself should be restricted to
@@ -152,7 +152,7 @@ meant to be completed, e.g. SKIP 0 (this SKIP).
 
 
 How a SKIP becomes Accepted
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A SKIP is ``Accepted`` by consensus of all interested contributors. We
 need a concrete way to tell whether consensus has been reached. When
@@ -224,7 +224,7 @@ Format and Template
 -------------------
 
 SKIPs are UTF-8 encoded text files using the reStructuredText_ format.  Please
-see the :ref:`skip-template` file and the reStructuredTextPrimer_ for more
+see the :ref:`skip_template` file and the reStructuredTextPrimer_ for more
 information.  We use Sphinx_ to convert SKIPs to HTML for viewing on the web
 [2]_.
 
