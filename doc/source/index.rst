@@ -55,17 +55,17 @@ Sections
 
        Usage guidelines.
 
-   * - `Glossary <glossary.html>`_
+     - `Glossary <glossary.html>`_
 
        Definitions of common terms.
 
-     - `Contribute <contribute.html>`_
+   * - `Contribute <contribute.html>`_
 
        Take part in development.  Core developers, please `read your guide
        <core_developer.html>`_.
 
 
-   * - `Examples <auto_examples/index.html>`_
+     - `Examples <auto_examples/index.html>`_
 
        Introductory examples
 

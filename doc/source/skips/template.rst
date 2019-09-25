@@ -1,4 +1,4 @@
-.. _skip-template::
+.. _skip_template:
 
 ==================================
 SKIP X — Template and Instructions
