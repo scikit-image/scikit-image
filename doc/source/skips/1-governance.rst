@@ -93,10 +93,10 @@ expected to participate in strategic planning, approve changes to the
 governance model, and make decisions about funding granted to the project
 itself. (Funding to community members is theirs to pursue and manage.) The
 purpose of the SC is to ensure smooth progress from the big-picture
-perspective. Changes that impact the full project require a synthetic analysis
-and a consensus that is both explicit and informed. When the core developer
-community (including the SC members) fails to reach such a consensus in a
-reasonable timeframe, the SC is the entity that resolves the issue.
+perspective. Changes that impact the full project require analysis informed by
+long experience with both the project and the larger ecosystem. When the core
+developer community (including the SC members) fails to reach such a consensus
+in a reasonable timeframe, the SC is the entity that resolves the issue.
 
 The steering council is fixed in size to five members. This may be expanded in
 the future. The initial steering council of scikit-image consists of Stéfan
