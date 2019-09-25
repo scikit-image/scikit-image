@@ -1,7 +1,7 @@
 .. _values:
 
 ======================================
-SKIP-1: scikit-image mission statement
+SKIP-2: scikit-image mission statement
 ======================================
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
@@ -18,7 +18,7 @@ SKIP-1: scikit-image mission statement
 :Created: 2018-12-08
 :Resolved:
 :Resolution:
-:Version effective: 0.16
+:skimage-Version: 0.16
 
 Abstract
 --------
