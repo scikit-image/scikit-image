@@ -25,7 +25,7 @@ def iterate_and_store(double[:, :] array,
     nonzero, high-values pixels are considered to be face+vertex
     connected into objects; otherwise low-valued pixels are.
 
-    Positions where the boolean array mask is False are considered
+    Positions where the boolean array ``mask`` is ``False`` are considered
     as not containing data.
     """
     if array.shape[0] < 2 or array.shape[1] < 2:
