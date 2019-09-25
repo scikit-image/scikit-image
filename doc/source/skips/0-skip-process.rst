@@ -59,10 +59,9 @@ There are three kinds of SKIPs:
 SKIP Workflow
 -------------
 
-The SKIP process begins with a new idea for scikit-image.  It is highly
-recommended that a single SKIP contains a single key proposal or new
-idea. Small enhancements or patches often don't need
-a SKIP and can be injected into the scikit-image development workflow
+The SKIP process begins with a new idea for scikit-image. A SKIP should contain
+a single key proposal or new idea. Small enhancements or patches often don't
+need a SKIP and can be injected into the scikit-image development workflow
 with a pull request to the scikit-image `repo`_. The more focused the
 SKIP, the more likely it is to be accepted.
 
@@ -212,9 +211,9 @@ Maintenance
 ^^^^^^^^^^^
 
 In general, Standards track SKIPs are no longer modified after they have
-reached the Final state as the code and project documentation are considered
-the ultimate reference for the implemented feature.
-However, finalized Standards track SKIPs may be updated as needed.
+reached the Final state, as the code and project documentation are considered
+the ultimate reference for the implemented feature. They may, however, be
+updated under special circumstances.
 
 Process SKIPs may be updated over time to reflect changes
 to development practices and other details. The precise process followed in

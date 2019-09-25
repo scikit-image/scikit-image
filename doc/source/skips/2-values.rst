@@ -94,8 +94,7 @@ Our values
   Core developers take an active role in finishing documentation examples.
 - We don't do magic. We use NumPy arrays instead of fancy façade objects
   [#np]_, and we prefer to educate users rather than make decisions on their
-  behalf.  This does not preclude sensible defaults, but it does preclude
-  *value-dependent* behavior that is not controllable by the user. [4]_
+  behalf.  This does not preclude sensible defaults. [4]_
 
 This document
 *************
