@@ -11,7 +11,7 @@
 :Status: Draft
 :Type: Process
 :Created: 2019-07-02
-:Resolved: 2019-09-25
+:Resolved:
 :Resolution:
 :skimage-Version: 0.16
 
