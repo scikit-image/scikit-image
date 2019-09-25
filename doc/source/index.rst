@@ -39,19 +39,19 @@ Sections
 
        Documentation for the functions included in scikit-image.
 
-   * - `Mission statement <values.html>`_
+     - `Mission statement <values.html>`_
 
        Our mission, vision and values.
 
-     - `Governance <skips/0-governance.html>`_
+     - `Governance <skips/1-governance.html>`_
 
        How decisions are made in scikit-image.
 
-   * - `Installation Steps <install.html>`_
+     - `Installation Steps <install.html>`_
 
        How to install scikit-image.
 
-     - `User Guide <user_guide.html>`_
+   * - `User Guide <user_guide.html>`_
 
        Usage guidelines.
 
@@ -59,7 +59,7 @@ Sections
 
        Definitions of common terms.
 
-   * - `Contribute <contribute.html>`_
+     - `Contribute <contribute.html>`_
 
        Take part in development.  Core developers, please `read your guide
        <core_developer.html>`_.
