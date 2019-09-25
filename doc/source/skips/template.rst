@@ -83,7 +83,7 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
 
 .. [1] CC0 1.0 Universal (CC0 1.0) Public Domain Dedication,
    https://creativecommons.org/publicdomain/zero/1.0/
-.. [2] : https://dancohen.org/2013/11/26/cc0-by/
+.. [2] https://dancohen.org/2013/11/26/cc0-by/
 
 
 Copyright
@@ -92,4 +92,3 @@ Copyright
 This document is dedicated to the public domain with the Creative Commons CC0
 license [1]_. Attribution to this source is encouraged where appropriate, as per
 CC0+BY [2]_.
-
