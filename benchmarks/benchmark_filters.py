@@ -6,14 +6,15 @@ from skimage import data, filters
 
 class FiltersSuite:
     """Benchmark for filter routines in scikit-image."""
-    def setup(self):
-        self.image = np.random.random((4000, 4000))
-        self.image[:2000, :2000] += 1
-        self.image[3000:, 3000] += 0.5
+    def setup(self):    
+        self.image = np.random.random((400, 400))
+        self.image[:200, :200] += 1
+        self.image[300:, 300] += 0.5
 
     def time_sobel(self):
         filters.sobel(self.image)
-
+    def time_gabor(self):
+        filters.gabor(self.image,0.1 )
 
 class MultiOtsu(object):
     """Benchmarks for MultiOtsu threshold."""
