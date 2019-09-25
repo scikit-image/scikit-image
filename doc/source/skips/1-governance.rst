@@ -154,8 +154,8 @@ are made according to the following rules:
   *unless* there is unanimous agreement from core developers on the change.
 
 If a veto is cast on a lazy consensus, the proposer can appeal to the
-community and core developers and the change can be approved or rejected using
-the decision making procedure outlined above.
+community and core developers and the change can be approved or rejected by
+escalating to the SC, and if necessary, a SKIP (see below).
 
 .. _skip:
 
