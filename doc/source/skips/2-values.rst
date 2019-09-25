@@ -68,7 +68,7 @@ Python. We accomplish this by:
   at least two core developers before being included in the library.
 - **caring for users’ data**. We have a functional [2]_ API and don't modify
   input arrays unless explicitly directed to do so.
-- promoting **education in image processing** with extensive pedagogical
+- promoting **education in image processing**, with extensive pedagogical
   documentation.
 
 Our values
@@ -170,8 +170,13 @@ References
 .. [7] https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099
 .. [8] https://github.com/scikit-image/scikit-image/pull/3585
 .. [9] https://forum.image.sc/t/request-for-comment-road-to-scikit-image-1-0/20099/3
+.. [10] CC0 1.0 Universal (CC0 1.0) Public Domain Dedication,
+   https://creativecommons.org/publicdomain/zero/1.0/
+.. [11] https://dancohen.org/2013/11/26/cc0-by/
 
 Copyright
 ---------
 
-This document has been placed in the public domain.
+This document is dedicated to the public domain with the Creative Commons CC0
+license [10]_. Attribution to this source is encouraged where appropriate, as per
+CC0+BY [11]_.
