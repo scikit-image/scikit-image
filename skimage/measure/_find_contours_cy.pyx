@@ -3,7 +3,10 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
+cimport numpy as cnp
 
+cdef extern from "numpy/npy_math.h":
+    bint npy_isnan(double x)
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
@@ -13,7 +16,8 @@ cdef inline double _get_fraction(double from_value, double to_value,
 
 
 def iterate_and_store(double[:, :] array,
-                      double level, Py_ssize_t vertex_connect_high):
+                      double level, Py_ssize_t vertex_connect_high,
+                      cnp.uint8_t[:, :] mask):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,
@@ -21,6 +25,8 @@ def iterate_and_store(double[:, :] array,
     nonzero, high-values pixels are considered to be face+vertex
     connected into objects; otherwise low-valued pixels are.
 
+    Positions where the boolean array mask is False are considered
+    as not containing data.
     """
     if array.shape[0] < 2 or array.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
@@ -93,6 +99,14 @@ def iterate_and_store(double[:, :] array,
             coords[0] += 1
             coords[1] = 0
 
+        # Skip this square if any of the four input values are masked out.
+        if mask is not None and not (mask[r0, c0] and mask[r0, c1] and
+                                     mask[r1, c0] and mask[r1, c1]):
+            continue
+
+        # Skip this square if any of the four input values are NaN.
+        if npy_isnan(ul) or npy_isnan(ur) or npy_isnan(ll) or npy_isnan(lr):
+            continue
 
         square_case = 0
         if (ul > level): square_case += 1
