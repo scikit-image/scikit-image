@@ -13,7 +13,7 @@
 :Created: 2019-07-02
 :Resolved: 2019-09-25
 :Resolution:
-:Version effective: 0.16
+:skimage-Version: 0.16
 
 ===========================================
 scikit-image governance and decision-making
