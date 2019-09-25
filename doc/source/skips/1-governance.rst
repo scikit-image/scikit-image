@@ -67,7 +67,7 @@ Contributors are encouraged to read the
 Core developers
 ---------------
 Core developers are community members that have demonstrated continued
-commitment to the project through ongoing engagement with the community. They
+commitment to the project through ongoing contributions. They
 have shown they can be trusted to maintain scikit-image with care. Becoming a
 core developer allows contributors to merge approved pull requests, cast votes
 for and against merging a pull-request, and be involved in deciding major
