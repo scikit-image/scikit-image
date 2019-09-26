@@ -7,7 +7,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, warn
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -576,7 +576,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(image):
+def skeletonize_3d(image, *, img=None):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -587,6 +587,14 @@ def skeletonize_3d(image):
     image : ndarray, 2D or 3D
         A binary image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
+
+    Other Parameters
+    ----------------
+    img : DEPRECATED
+        Synonym for `image`.
+
+        .. deprecated:: 0.16
+           Will be removed in 0.17.
 
     Returns
     -------
@@ -617,11 +625,14 @@ def skeletonize_3d(image):
            Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
 
     """
+    if img is not None:
+        image = img
+        warn('Using img as a keyword argument to skeletonize_3d is deprecated.'
+             ' Use image instead.')
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          "got image.ndim = %s instead." % image.ndim)
-
     image = np.ascontiguousarray(image)
     image = img_as_ubyte(img, force_copy=False)
 
