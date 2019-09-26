@@ -35,7 +35,7 @@ def find_contours(array, level,
     mask : 2D ndarray of bool, or None
         A boolean mask, True where we want to draw contours.
         Note that NaN values are always excluded from the considered region
-        (`mask` is set to ``False`` wherever `array` is ``NaN``).
+        (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
