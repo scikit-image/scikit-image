@@ -8,6 +8,7 @@ _param_options = ('high', 'low')
 
 def find_contours(array, level,
                   fully_connected='low', positive_orientation='low',
+                  *,
                   mask=None):
     """Find iso-valued contours in a 2D array for a given level value.
 
@@ -33,8 +34,8 @@ def find_contours(array, level,
          on the left of the contour. (See below for details.)
     mask : 2D ndarray of bool, or None
         A boolean mask, True where we want to draw contours.
-        Note that NaN values are always excluded from the considered region (
-        i.e. mask=False is forced where where array is NaN).
+        Note that NaN values are always excluded from the considered region
+        (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
