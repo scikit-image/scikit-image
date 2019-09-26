@@ -40,7 +40,7 @@ def test_2d_motion():
     # Estimate the flow
     flow = optical_flow_ilk(image0, image1)
     # Assert that the average absolute error is less then half a pixel
-    assert abs(flow - gt_flow) .mean() < 0.5
+    assert abs(flow - gt_flow).mean() < 0.5
 
 
 def test_3d_motion():
