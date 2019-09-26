@@ -591,7 +591,8 @@ def farid(image, *, mask=None):
     >>> edges = filters.farid(camera)
     """
     check_nD(image, 2)
-    out = np.sqrt(farid_h(image, mask=mask) ** 2 + farid_v(image, mask=mask) ** 2)
+    out = np.sqrt(farid_h(image, mask=mask) ** 2
+                  + farid_v(image, mask=mask) ** 2)
     out /= np.sqrt(2)
     return out
 
