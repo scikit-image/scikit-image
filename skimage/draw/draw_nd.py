@@ -81,7 +81,7 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     --------
     >>> lin = line_nd((1, 1), (5, 2.5), endpoint=False)
     >>> lin
-    [array([1, 2, 3, 4]), array([1, 1, 2, 2])]
+    (array([1, 2, 3, 4]), array([1, 1, 2, 2]))
     >>> im = np.zeros((6, 5), dtype=int)
     >>> im[lin] = 1
     >>> im
@@ -92,7 +92,7 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0]])
     >>> line_nd([2, 1, 1], [5, 5, 2.5], endpoint=True)
-    [array([2, 3, 4, 4, 5]), array([1, 2, 3, 4, 5]), array([1, 1, 2, 2, 2])]
+    (array([2, 3, 4, 4, 5]), array([1, 2, 3, 4, 5]), array([1, 1, 2, 2, 2]))
     """
     start = np.asarray(start)
     stop = np.asarray(stop)
