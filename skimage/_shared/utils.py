@@ -239,7 +239,7 @@ def convert_to_float(image, preserve_range):
 
     Notes:
     ------
-    * Input images with `float32` data type are not upcasted.
+    * Input images with `float32` data type are not upcast.
 
     Returns
     -------
