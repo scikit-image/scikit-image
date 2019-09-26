@@ -8,8 +8,7 @@ __all__ = ['variation_of_information']
 
 def variation_of_information(im_true=None, im_test=None, *, table=None,
                              ignore_labels=[], normalize=False):
-    """
-    Return symmetric conditional entropies associated with the VI. [1]_
+    """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
@@ -94,7 +93,9 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
     if table is None:
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
-            im_true, im_test, ignore_labels, normalize=normalize)
+            im_true, im_test,
+            ignore_labels=ignore_labels, normalize=normalize
+        )
 
     else:
         pxy = table
