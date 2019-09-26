@@ -634,7 +634,7 @@ def skeletonize_3d(image, *, img=None):
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          "got image.ndim = %s instead." % image.ndim)
     image = np.ascontiguousarray(image)
-    image = img_as_ubyte(img, force_copy=False)
+    image = img_as_ubyte(image, force_copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
