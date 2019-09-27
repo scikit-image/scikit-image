@@ -574,9 +574,6 @@ def test_multiotsu_output():
     thresholds = [1, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image))
 
-    image = rgb2gray(data.astronaut())
-    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
-
 
 def test_multiotsu_astro_image():
     img = util.img_as_ubyte(data.astronaut())
