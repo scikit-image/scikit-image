@@ -150,7 +150,7 @@ def test_float32_passthrough():
 
 
 float_dtype_list = [float, np.float, np.double, np.single, np.float32,
-                    'float32', 'float64']
+                    np.float64, 'float32', 'float64']
 
 
 def test_float_conversion_dtype():
