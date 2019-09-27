@@ -284,7 +284,7 @@ def remove_close_objects(
 
     Notes
     -----
-    This function uses an KDTree internally to efficiently find neighboring
+    This function uses a KDTree internally to efficiently find neighboring
     objects.
 
     In case the `priority` assigns the same value to different objects the
@@ -307,8 +307,7 @@ def remove_close_objects(
     ...      [0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0],
     ...      [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]],
-    ...     dtype=np.uint8
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
     >>> result = remove_close_objects(
     ...     image, minimal_distance=3, priority=image
@@ -321,7 +320,7 @@ def remove_close_objects(
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]], dtype=uint8)
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]])
     """
     if minimal_distance < 0:
         raise ValueError(

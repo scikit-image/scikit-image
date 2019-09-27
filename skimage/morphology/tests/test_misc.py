@@ -259,9 +259,9 @@ class TestRemoveCloseObjects:
     def test_large_objects_nd(self, ndim):
         shape = (5,) * ndim
         a = np.ones(shape, dtype=np.uint8)
-        a[2, ...] = 0
+        a[-2, ...] = 0
         desired = a.astype(bool)
-        desired[:2, ...] = False
+        desired[-2:, ...] = False
         image = a.astype(bool)
 
         result = remove_close_objects(image, minimal_distance=2)
@@ -321,3 +321,12 @@ class TestRemoveCloseObjects:
         image = np.array([True, False, True])
         with pytest.raises(ValueError, match="must be >= 0"):
             remove_close_objects(image, minimal_distance)
+
+    def test_non_zero(self):
+        # Check an object with different values is recognized as one as long
+        # as they aren't zero
+        image = np.array([1, 0, 0, -1, 2, 99, -10])
+        desired = np.array([1, 0, 0, 0, 0, 0, 0])
+        priority = np.arange(image.size)[::-1]
+        result = remove_close_objects(image, 3, priority=priority)
+        assert_array_equal(result, desired)
