@@ -90,7 +90,7 @@ def test_optical_flow_dtype():
     # Assert that floating point precision does not affect the quality
     # of the estimated flow
 
-    assert abs(flow_f64 - flow_f32) .mean() < 1e-3
+    assert abs(flow_f64 - flow_f32).mean() < 1e-3
 
 
 def test_incompatible_shapes():
