@@ -4,9 +4,9 @@
 """
 
 import numpy as np
-from skimage.transform import pyramid_reduce
-from skimage.util.dtype import convert
 from scipy import ndimage as ndi
+from ..transform import pyramid_reduce
+from ..util.dtype import convert
 
 
 def resize_flow(flow, shape):
