@@ -246,14 +246,14 @@ def remove_close_objects(
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that are True) inside an image
-    and removes neighboring objects until all remaining ones are at least a
-    minimal euclidean distance from each other.
+    Iterates over all objects (connected pixels that aren't zero) inside an
+    image and removes neighboring objects until all remaining ones are at least
+    a minimal euclidean distance from each other.
 
     Parameters
     ----------
     image : ndarray
-        An n-dimensional boolean array.
+        An n-dimensional array.
     minimal_distance : int or float
         Objects whose euclidean distance is not greater than this value are
         considered to close. Must be positive.
@@ -311,9 +311,9 @@ def remove_close_objects(
     ...     dtype=np.uint8
     ... )
     >>> result = remove_close_objects(
-    ...     image.view(bool), minimal_distance=3, priority=image
+    ...     image, minimal_distance=3, priority=image
     ... )
-    >>> result.view(np.uint8)
+    >>> result
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
            [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
            [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -323,22 +323,14 @@ def remove_close_objects(
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]], dtype=uint8)
     """
-    if not np.can_cast(image, bool, casting="same_kind"):
-        # Cython doesn't support boolean memoryviews yet
-        # https://github.com/cython/cython/issues/2204
-        # and we use np.uint8_t as a workaround -> check here so we can safely
-        # call `image.view(np.uint8)` before passing to Cython
-        raise TypeError("image it must be a binary dtype")
-
     if minimal_distance < 0:
         raise ValueError(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
-
     if not inplace:
-        image = np.array(image, dtype=bool, order="C", copy=True)
-
+        image = np.array(image, order="C", copy=True)
     if image.size == 0:
+        # _offsets_to_raveled_neighbors doesn't support emtpy images
         return image
 
     selem = _util._resolve_neighborhood(selem, connectivity, image.ndim)
@@ -376,10 +368,17 @@ def remove_close_objects(
         balanced_tree=True,
     )
 
-    _remove_close_objects(
+    if np.can_cast(image, bool, casting="no"):
         # Cython doesn't support boolean memoryviews yet
         # https://github.com/cython/cython/issues/2204
-        image=image.view(np.uint8).ravel(),
+        # and we use np.uint8_t as a workaround
+        image = image.view(np.uint8)
+        image_is_bool = True
+    else:
+        image_is_bool = False
+
+    _remove_close_objects(
+        image=image.ravel(),
         labels=labels,
         indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
@@ -387,4 +386,7 @@ def remove_close_objects(
         minimal_distance=minimal_distance,
         shape=image.shape
     )
+
+    if image_is_bool:
+        image = image.view(bool)  # Restore original dtype
     return image

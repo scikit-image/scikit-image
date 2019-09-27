@@ -197,18 +197,33 @@ def test_float_input_holes():
 
 class TestRemoveCloseObjects:
 
-    @pytest.mark.parametrize("minimal_distance", [10, 20, 30, 49])
-    def test_linspace_1d(self, minimal_distance):
-        max_step = 50
-        offset = np.linspace(1, max_step, max_step, dtype=np.intp)[::-1]
-        positions = np.cumsum(offset)
-        image = np.zeros(positions.max() + 2, dtype=bool)
-        image[positions] = 1
+    supported_dtypes = [
+        bool,
+        np.uint8,
+        np.uint16,
+        np.uint32,
+        np.uint64,
+        np.int8,
+        np.int16,
+        np.int32,
+        np.int64,
+        np.float32,
+        np.float64,
+    ]
+
+    @pytest.mark.parametrize("minimal_distance", [2.1, 5, 30.99, 49])
+    @pytest.mark.parametrize("dtype", supported_dtypes)
+    def test_minimal_distance_1d(self, minimal_distance, dtype):
+        # First 3 objects are only just to close, last one is just far enough
+        d = int(np.floor(minimal_distance))
+        image = np.zeros(d * 3 + 2, dtype=dtype)
+        image[[0, d, 2 * d, 3 * d + 1]] = -1  # Negative values are objects
+        desired = np.zeros_like(image, dtype=dtype)
+        desired[[0, 2 * d, 3 * d + 1]] = -1
 
         result = remove_close_objects(image, minimal_distance=minimal_distance)
-
-        diff = np.diff(np.nonzero(result)[0])
-        assert diff.min() == minimal_distance + 1
+        assert result.dtype == desired.dtype
+        assert_array_equal(result, desired)
 
     def test_handcrafted_2d(self):
         priority = np.array(
@@ -246,7 +261,7 @@ class TestRemoveCloseObjects:
         a = np.ones(shape, dtype=np.uint8)
         a[2, ...] = 0
         desired = a.astype(bool)
-        desired[2:, ...] = False
+        desired[:2, ...] = False
         image = a.astype(bool)
 
         result = remove_close_objects(image, minimal_distance=2)
@@ -268,32 +283,41 @@ class TestRemoveCloseObjects:
     def test_priority(self):
         image = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], dtype=bool)
 
-        # Default priority is row-major (C-style) order
+        # Default priority is reverse row-major (C-style) order
         result = remove_close_objects(image, 3)
-        desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
+        desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)
 
-        # But given a priority that order can be overuled
-        priority = np.array([[0, 0, 1], [0, 0, 0], [2, 0, 0]], dtype=int)
+        # Assigning priority with equal values shows same order
+        priority = np.array([[0, 0, 2], [0, 0, 0], [2, 0, 0]], dtype=int)
         result = remove_close_objects(
             image, minimal_distance=3, priority=priority
         )
         desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)
 
-    @pytest.mark.parametrize("dtype", [np.uint8, np.int8])
-    def test_view_on_byte_sized(self, dtype):
-        """Test behavior if image is a view on 1 byte sized numeric dtypes."""
-        image = np.array([-2, 0, 2], dtype=dtype)
+        # But given a priority that order can be overuled
+        priority = np.array([[0, 0, 2], [0, 0, 0], [1, 0, 0]], dtype=int)
+        result = remove_close_objects(
+            image, minimal_distance=3, priority=priority
+        )
+        desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
+        assert_array_equal(result, desired)
 
-        # When using a view, object values don't change
-        result_view = remove_close_objects(image.view(bool), 2)
-        desired_view = np.array([-2, 0, 0], dtype=dtype)
-        assert result_view.dtype is np.dtype(bool)
-        assert_array_equal(result_view.view(dtype), desired_view)
+    def test_inplace(self):
+        image = np.array([True, False, True])
+        image_copy = image.copy()
+        desired = np.array([False, False, True], dtype=bool)
 
-        # When using astype, the object values > 0 are replaced with 1
-        result_astype = remove_close_objects(image.astype(bool), 2)
-        desired_astype = np.array([1, 0, 0], dtype=np.uint8)
-        assert_array_equal(result_astype, result_view)
-        assert_array_equal(result_astype.view(np.uint8), desired_astype)
+        # By default input image is not modified
+        remove_close_objects(image, 2)
+        assert_array_equal(image, image_copy)
+
+        remove_close_objects(image, 2, inplace=True)
+        assert_array_equal(image, desired)
+
+    @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
+    def test_negative_minimal_distance(self, minimal_distance):
+        image = np.array([True, False, True])
+        with pytest.raises(ValueError, match="must be >= 0"):
+            remove_close_objects(image, minimal_distance)

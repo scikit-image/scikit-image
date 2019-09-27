@@ -18,8 +18,21 @@ ctypedef Py_ssize_t QueueItem
 include "_queue_with_history.pxi"
 
 
+ctypedef fused dtype_t:
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.float32_t
+    cnp.float64_t
+
+
 def _remove_close_objects(
-    cnp.uint8_t[::1] image not None,
+    dtype_t[::1] image not None,
     cnp.uint32_t[::1] labels not None,
     Py_ssize_t[::1] indices not None,
     Py_ssize_t[::1] neighbor_offsets not None,
@@ -69,7 +82,7 @@ def _remove_close_objects(
             for j in in_range:
                 index_j = indices[j]
                 if (
-                    image[index_j] > 0
+                    image[index_j] != 0
                     and labels[index_i] != labels[index_j]
                 ):
                     _remove_object(
@@ -84,7 +97,7 @@ def _remove_close_objects(
 
 
 cdef inline void _remove_object(
-    cnp.uint8_t[::1] image,
+    dtype_t[::1] image,
     cnp.uint32_t[::1] labels,
     Py_ssize_t start_index,
     Py_ssize_t[::1] neighbor_offsets,
@@ -121,6 +134,6 @@ cdef inline void _remove_object(
                 continue
             # The algorithm might cross the image edge when two objects are
             # neighbors in the raveled view -> check label to avoid that
-            if image[neighbor] > 0 and labels[neighbor] == label:
+            if image[neighbor] != 0 and labels[neighbor] == label:
                 queue_push(queue_ptr, &neighbor)
                 image[neighbor] = 0
