@@ -242,7 +242,7 @@ def remove_close_objects(
     selem=None,
     connectivity=None,
     priority=None,
-    inplace=None,
+    inplace=False,
 ):
     """Remove objects until a minimal distance is ensured.
 
@@ -255,8 +255,8 @@ def remove_close_objects(
     image : ndarray
         An n-dimensional boolean array.
     minimal_distance : int or float
-        The minimal allowed euclidean distance between objects. Must be
-        positive.
+        Objects whose euclidean distance is not greater than this value are
+        considered to close. Must be positive.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
@@ -270,10 +270,9 @@ def remove_close_objects(
         `selem` is not None.
     priority : ndarray, optional
         An array matching `image` in shape that gives a priority for each
-        object in `image`. Objects with a lower value are removed until all
-        remaining objects fulfill the distance requirement. If not given,
-        objects are iterated in row-major (C-style) order with decreasing
-        priority.
+        object in `image`. Objects with a lower value are removed first until
+        all remaining objects fulfill the distance requirement. If not given,
+        objects with a lower number of samples are removed first.
     inplace : bool, optional
         Whether to modify `image` inplace or return a new array.
 
@@ -287,6 +286,13 @@ def remove_close_objects(
     -----
     This function uses an KDTree internally to efficiently find neighboring
     objects.
+
+    In case the `priority` assigns the same value to different objects the
+    function falls back to an object's label id as returned by
+    scipy.ndimage.label_.
+
+    .. _scipy.ndimage.label:
+       https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
 
     Examples
     --------
@@ -342,6 +348,16 @@ def remove_close_objects(
 
     labels = np.empty_like(image, dtype=np.uint32)
     ndi.label(image, selem, output=labels)
+    labels = labels.ravel()
+
+    if priority is None:
+        bins = np.bincount(labels)
+        priority = bins[labels]  # Replace label id with bin count
+    elif image.shape != priority.shape:
+        raise ValueError(
+            "priority must have same shape as image: "
+            f"{priority.shape} != {image.shape}"
+        )
 
     raveled_indices = np.nonzero(image.ravel())[0]
     if raveled_indices.size == 0:
@@ -349,14 +365,10 @@ def remove_close_objects(
         # https://github.com/scipy/scipy/pull/10457
         return image
 
-    if priority is not None:
-        if image.shape != priority.shape:
-            raise ValueError(
-                "priority must have same shape as image: "
-                f"{priority.shape} != {image.shape}"
-            )
-        sort = np.argsort(priority.ravel()[raveled_indices])[::-1]
-        raveled_indices = raveled_indices[sort]
+    # Use stable sort to make sorting behavior more transparent in the likely
+    # event that objects have the same priority
+    sort = np.argsort(priority.ravel()[raveled_indices], kind="stable")[::-1]
+    raveled_indices = raveled_indices[sort]
 
     indices = np.unravel_index(raveled_indices, image.shape)
     kdtree = cKDTree(
@@ -368,7 +380,7 @@ def remove_close_objects(
         # Cython doesn't support boolean memoryviews yet
         # https://github.com/cython/cython/issues/2204
         image=image.view(np.uint8).ravel(),
-        labels=labels.ravel(),
+        labels=labels,
         indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
         kdtree=kdtree,
