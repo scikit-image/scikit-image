@@ -4,9 +4,8 @@
 """
 
 import numpy as np
-from skimage.transform import pyramid_reduce
-from skimage.util.dtype import convert
-from scipy import ndimage as ndi
+from ..transform import pyramid_reduce, resize
+from ..util.dtype import convert
 
 
 def resize_flow(flow, shape):
@@ -35,8 +34,10 @@ def resize_flow(flow, shape):
     for _ in shape:
         scale_factor = scale_factor[..., np.newaxis]
 
-    rflow = scale_factor*ndi.zoom(flow, [1] + scale, order=0,
-                                  mode='nearest', prefilter=False)
+    rflow = scale_factor*resize(flow, (flow.shape[0], ) + shape,
+                                order=0, mode='edge',
+                                preserve_range=True,
+                                anti_aliasing=False, clip=False)
 
     return rflow
 
