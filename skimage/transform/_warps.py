@@ -373,7 +373,7 @@ def rotate(image, angle, resize=False, center=None, order=1, mode='constant',
         maxr = corners[:, 1].max()
         out_rows = maxr - minr + 1
         out_cols = maxc - minc + 1
-        output_shape = np.ceil((out_rows, out_cols))
+        output_shape = np.around((out_rows, out_cols))
 
         # fit output image in new shape
         translation = (minc, minr)
@@ -406,11 +406,18 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
     cval : float, optional
         Constant padding value if image is not perfectly divisible by the
         integer factors.
+    clip : bool, optional
+        Unused, but kept here for API consistency with the other transforms
+        in this module. (The local mean will never fall outside the range
+        of values in the input image, assuming the provided `cval` also
+        falls within that range.)
 
     Returns
     -------
     image : ndarray
         Down-sampled image with same number of dimensions as input image.
+        For integer inputs, the output dtype will be ``float64``.
+        See :func:`numpy.mean` for details.
 
     Examples
     --------
@@ -841,17 +848,19 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = np.linalg.inv(inverse_map.__self__.params)
 
         if matrix is not None:
-            matrix = matrix.astype(np.double)
+            matrix = matrix.astype(image.dtype)
+            ctype = 'float32_t' if image.dtype == np.float32 else 'float64_t'
             if image.ndim == 2:
-                warped = _warp_fast(image, matrix,
-                                    output_shape=output_shape,
-                                    order=order, mode=mode, cval=cval)
+                warped = _warp_fast[ctype](image, matrix,
+                                           output_shape=output_shape,
+                                           order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
-                    dims.append(_warp_fast(image[..., dim], matrix,
-                                           output_shape=output_shape,
-                                           order=order, mode=mode, cval=cval))
+                    dims.append(_warp_fast[ctype](image[..., dim], matrix,
+                                                  output_shape=output_shape,
+                                                  order=order, mode=mode,
+                                                  cval=cval))
                 warped = np.dstack(dims)
 
     if warped is None:

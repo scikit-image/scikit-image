@@ -567,12 +567,15 @@ def test_check_multiotsu_results():
 def test_multiotsu_output():
     image = np.zeros((100, 100), dtype='int')
     coords = [(25, 25), (50, 50), (75, 75)]
-    values = [64, 128, 194]
+    values = [64, 128, 192]
     for coor, val in zip(coords, values):
         rr, cc = circle(coor[1], coor[0], 20)
         image[rr, cc] = val
     thresholds = [1, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image))
+
+    image = rgb2gray(data.astronaut())
+    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
 
 
 def test_multiotsu_astro_image():
