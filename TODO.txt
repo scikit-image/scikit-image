@@ -69,3 +69,5 @@ Other
   build to use Python 3.8 instead of 3.7.
 * When Python 3.8 is released, add entries to the build matrix in appveyor.
 * When Python 3.8 is released, add entries to the build matrix in azure.
+* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
+  vectorized version of ``np.linspace``.

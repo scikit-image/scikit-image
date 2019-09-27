@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
+from skimage import color
 from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
@@ -562,6 +563,9 @@ def test_multiotsu_output():
         image[rr, cc] = val
     thresholds = [64, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image))
+
+    image = color.rgb2gray(data.astronaut())
+    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [

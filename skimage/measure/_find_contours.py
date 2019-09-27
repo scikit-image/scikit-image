@@ -7,7 +7,9 @@ _param_options = ('high', 'low')
 
 
 def find_contours(array, level,
-                  fully_connected='low', positive_orientation='low'):
+                  fully_connected='low', positive_orientation='low',
+                  *,
+                  mask=None):
     """Find iso-valued contours in a 2D array for a given level value.
 
     Uses the "marching squares" method to compute a the iso-valued contours of
@@ -30,6 +32,10 @@ def find_contours(array, level,
          contours will wind counter- clockwise around elements below the
          iso-value. Alternately, this means that low-valued elements are always
          on the left of the contour. (See below for details.)
+    mask : 2D ndarray of bool, or None
+        A boolean mask, True where we want to draw contours.
+        Note that NaN values are always excluded from the considered region
+        (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
@@ -58,7 +64,8 @@ def find_contours(array, level,
     with the 'fully_connected' parameter.
 
     Output contours are not guaranteed to be closed: contours which intersect
-    the array edge will be left open. All other contours will be closed. (The
+    the array edge or a masked-off region (either where mask is False or where
+    array is NaN) will be left open. All other contours will be closed. (The
     closed-ness of a contours can be tested by checking whether the beginning
     point is the same as the end point.)
 
@@ -111,12 +118,20 @@ def find_contours(array, level,
     if array.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     level = float(level)
+    if mask is not None:
+        if not np.can_cast(mask.dtype, bool, casting='safe'):
+            raise TypeError('Parameter "mask" must be a binary array.')
+        mask = mask.view(np.uint8)
+        if mask.shape != array.shape:
+            raise ValueError('Parameters "array" and "mask"'
+                             ' must have same shape.')
     if (fully_connected not in _param_options or
        positive_orientation not in _param_options):
         raise ValueError('Parameters "fully_connected" and'
         ' "positive_orientation" must be either "high" or "low".')
     point_list = _find_contours_cy.iterate_and_store(array, level,
-                                                     fully_connected == 'high')
+                                                     fully_connected == 'high',
+                                                     mask=mask)
     contours = _assemble_contours(_take_2(point_list))
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]
