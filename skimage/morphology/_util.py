@@ -54,14 +54,14 @@ def _validate_connectivity(image_dim, connectivity, offset):
     return c_connectivity, offset
 
 
-def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
+def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     """Compute offsets to a samples neighbors if the image would be raveled.
 
     Parameters
     ----------
     image_shape : tuple
         The shape of the image for which the offsets are computed.
-    structure : ndarray
+    selem : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
     center : sequence
@@ -73,23 +73,36 @@ def _offsets_to_raveled_neighbors(image_shape, structure, center, order='C'):
         Linear offsets to a samples neighbors in the raveled image, sorted by
         their Euclidean distance from the center.
 
+    Raises
+    ------
+    ValueError
+        If `image_shape` describes a dimension of zero length.
+
     Examples
     --------
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
-    structure = structure.copy()  # Don't modify original input
-    structure[tuple(center)] = 0  # Ignore the center; it's not a neighbor
-    connection_indices = np.transpose(np.nonzero(structure))
-    offsets = (np.ravel_multi_index(connection_indices.T, image_shape,
-                                    order=order) -
-               np.ravel_multi_index(center, image_shape, order=order))
-    squared_distances = np.sum((connection_indices - center) ** 2, axis=1)
-    return offsets[np.argsort(squared_distances)]
+    selem = selem.copy()  # Don't modify original input
+    selem[tuple(center)] = 0  # Ignore the center; it's not a neighbor
+    selem_indices = np.nonzero(selem)
+
+    offsets = (
+        np.ravel_multi_index(selem_indices, image_shape, order=order)
+        - np.ravel_multi_index(center, image_shape, order=order)
+    )
+
+    # Sort by distance to center
+    squared_distances = np.sum(
+        (np.transpose(selem_indices) - center) ** 2, axis=1
+    )
+    offsets = offsets[np.argsort(squared_distances)]
+
+    return offsets
 
 
 def _resolve_neighborhood(selem, connectivity, ndim):
-    """Validate or create structuring element for use in `local_maxima`.
+    """Validate or create structuring element.
 
     Depending on the values of `connectivity` and `selem` this function
     either creates a new structuring element (`selem` is None) using
@@ -103,7 +116,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         `local_maxima`.
     connectivity : int or None
         A number used to determine the neighborhood of each evaluated pixel.
-        See same argument in `local_maxima`.
+        Defaults to `ndim` if `None` is given.
     ndim : int
         Number of dimensions `selem` ought to have.
 
@@ -153,17 +166,13 @@ def _set_edge_values_inplace(image, value):
            [1, 1, 1, 1, 1]])
     """
     for axis in range(image.ndim):
-        sl = [slice(None)] * image.ndim
-        # Set edge in front
-        sl[axis] = 0
-        image[tuple(sl)] = value
-        # Set edge to the end
-        sl[axis] = -1
-        image[tuple(sl)] = value
+        # Index first and last element in each dimension
+        sl = (slice(None),) * axis + ((0, -1),) + (...,)
+        image[sl] = value
 
 
 def _fast_pad(image, value):
-    """Pad an array on all axes with one constant value.
+    """Pad an array on all axes by one with a value.
 
     Parameters
     ----------
@@ -181,10 +190,13 @@ def _fast_pad(image, value):
     -----
     The output of this function is equivalent to::
 
-        np.pad(image, mode="constant", constant_values=value)
+        np.pad(image, 1, mode="constant", constant_values=value)
 
-    However, this method needs to only allocate and copy once which can result
-    in significant speed gains if `image` is large.
+    Up to version 1.17 `numpy.pad` uses concatenation to create padded arrays
+    while this method needs to only allocate and copy once. This can result
+    in significant speed gains if `image` has a large number of dimensions.
+    Thus this function may be safely removed once that version is the minimum
+    required by scikit-image.
 
     Examples
     --------
@@ -199,8 +211,8 @@ def _fast_pad(image, value):
     new_image = np.empty(new_shape, dtype=image.dtype, order="C")
 
     # Copy old image into new space
-    original_slice = tuple(slice(1, -1) for _ in range(image.ndim))
-    new_image[original_slice] = image
+    sl = (slice(1, -1),) * image.ndim
+    new_image[sl] = image
     # and set the edge values
     _set_edge_values_inplace(new_image, value)
 
