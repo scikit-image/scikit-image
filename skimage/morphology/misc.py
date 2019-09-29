@@ -298,7 +298,7 @@ def remove_close_objects(
     --------
     >>> from skimage.morphology import remove_close_objects
     >>> remove_close_objects(np.array([True, False, True]), 2)
-    array([ True, False, False], dtype=bool)
+    array([False, False,  True], dtype=bool)
     >>> image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -309,10 +309,7 @@ def remove_close_objects(
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
-    >>> result = remove_close_objects(
-    ...     image, minimal_distance=3, priority=image
-    ... )
-    >>> result
+    >>> remove_close_objects(image, minimal_distance=3, priority=image)
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
            [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
            [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
