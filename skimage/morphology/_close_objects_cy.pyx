@@ -33,7 +33,7 @@ ctypedef fused dtype_t:
 
 def _remove_close_objects(
     dtype_t[::1] image not None,
-    cnp.uint32_t[::1] labels not None,
+    Py_ssize_t[::1] labels not None,
     Py_ssize_t[::1] indices not None,
     Py_ssize_t[::1] neighbor_offsets not None,
     kdtree,
@@ -99,7 +99,7 @@ def _remove_close_objects(
 
 cdef inline void _remove_object(
     dtype_t[::1] image,
-    cnp.uint32_t[::1] labels,
+    Py_ssize_t[::1] labels,
     Py_ssize_t start_index,
     Py_ssize_t[::1] neighbor_offsets,
     QueueWithHistory* queue_ptr,

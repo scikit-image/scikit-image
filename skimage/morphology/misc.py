@@ -338,7 +338,7 @@ def remove_close_objects(
     )
 
     # Label objects, only samples where labels != 0 are evaluated
-    labels = np.empty_like(image, dtype=np.uint32)
+    labels = np.empty_like(image, dtype=np.intp)
     ndi.label(image, selem, output=labels)
 
     if priority is None:
