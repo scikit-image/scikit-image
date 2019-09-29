@@ -363,7 +363,7 @@ def remove_close_objects(
 
     # Use stable sort to make sorting behavior more transparent in the likely
     # event that objects have the same priority
-    sort = np.argsort(priority[raveled_indices], kind="stable")[::-1]
+    sort = np.argsort(priority[raveled_indices], kind="mergesort")[::-1]
     raveled_indices = raveled_indices[sort]
 
     indices = np.unravel_index(raveled_indices, image.shape)
