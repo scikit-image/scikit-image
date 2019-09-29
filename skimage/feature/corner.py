@@ -921,9 +921,9 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     This differs from `skimage.feature.peak_local_max` in that it suppresses
     multiple connected peaks with the same accumulator value.
 
-    Note that the `num_peaks` limit is applied *before* suppression of 
-    connected peaks. If you want to limit the number of peaks 
-    *after suppression*, you should set `num_peaks=np.inf` and 
+    Note that the `num_peaks` limit is applied *before* suppression of
+    connected peaks. If you want to limit the number of peaks
+    *after suppression*, you should set `num_peaks=np.inf` and
     post-process the output of this function.
 
     Parameters
