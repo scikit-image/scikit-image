@@ -330,3 +330,14 @@ class TestRemoveCloseObjects:
         priority = np.arange(image.size)[::-1]
         result = remove_close_objects(image, 3, priority=priority)
         assert_array_equal(result, desired)
+
+    def test_diagonal_selem(self):
+        # Given a constant image and a diagonal structuring element, two
+        # objects are detected similar to black and white on a checkerboard
+        selem = np.array([[1, 0, 1], [0, 0, 0], [1, 0, 1]], dtype=bool)
+        image = np.ones((100, 50))
+        desired = np.array([[1, 0] * 25, [0, 1] * 25] * 50, dtype=image.dtype)
+
+        result = remove_close_objects(image, 1, selem=selem)
+        assert_array_equal(result, desired)
+

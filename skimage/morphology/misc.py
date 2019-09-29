@@ -246,9 +246,9 @@ def remove_close_objects(
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that aren't zero) inside an
-    image and removes neighboring objects until all remaining ones are at least
-    a minimal euclidean distance from each other.
+    Iterates over all objects (connected pixels that aren't zero or `False`)
+    inside an image and removes neighboring objects until all remaining ones
+    are at least a minimal euclidean distance from each other.
 
     Parameters
     ----------
@@ -284,12 +284,12 @@ def remove_close_objects(
 
     Notes
     -----
-    This function uses a KDTree internally to efficiently find neighboring
-    objects.
-
     In case the `priority` assigns the same value to different objects the
     function falls back to an object's label id as returned by
     scipy.ndimage.label_.
+
+    This function uses a KDTree internally to efficiently find neighboring
+    objects.
 
     .. _scipy.ndimage.label:
        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
@@ -337,20 +337,28 @@ def remove_close_objects(
         image.shape, selem, center=((1,) * image.ndim)
     )
 
+    # Label objects, only samples where labels != 0 are evaluated
     labels = np.empty_like(image, dtype=np.uint32)
     ndi.label(image, selem, output=labels)
-    labels = labels.ravel()
 
     if priority is None:
-        bins = np.bincount(labels)
-        priority = bins[labels]  # Replace label id with bin count
+        bins = np.bincount(labels.ravel())
+        priority = bins[labels.ravel()]  # Replace label id with bin count
     elif image.shape != priority.shape:
         raise ValueError(
             "priority must have same shape as image: "
             f"{priority.shape} != {image.shape}"
         )
+    else:
+        priority = priority.ravel()
 
-    raveled_indices = np.nonzero(image.ravel())[0]
+    # Safely ignore points that don't lie on an objects surface
+    # This reduces the size of the KDTree and the number of points that
+    # need to be evaluated
+    labels[ndi.binary_erosion(labels, structure=selem)] = 0
+
+    labels = labels.ravel()
+    raveled_indices = np.nonzero(labels)[0]
     if raveled_indices.size == 0:
         # required, cKDTree doesn't support empty input for earlier versions
         # https://github.com/scipy/scipy/pull/10457
@@ -358,7 +366,7 @@ def remove_close_objects(
 
     # Use stable sort to make sorting behavior more transparent in the likely
     # event that objects have the same priority
-    sort = np.argsort(priority.ravel()[raveled_indices], kind="stable")[::-1]
+    sort = np.argsort(priority[raveled_indices], kind="stable")[::-1]
     raveled_indices = raveled_indices[sort]
 
     indices = np.unravel_index(raveled_indices, image.shape)

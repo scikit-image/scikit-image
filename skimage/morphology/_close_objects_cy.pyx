@@ -53,7 +53,8 @@ def _remove_close_objects(
     labels :
         An array with labels for each object in `image` matching it in shape.
     indices :
-        Indices into `image` that determines the priority.
+        Indices into `image` and `labels` that determines the iteration order
+        and thus which objects take precedence.
     neighbor_offsets :
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
@@ -105,19 +106,23 @@ cdef inline void _remove_object(
 ):
     """Remove single connected object.
     
-    Performs a flood-fill on the object with the value 0.
+    Performs a flood-fill on the object with the value 0. Samples with a label
+    id == 0 and an image value != 0 are considered to be inside the evaluated
+    object. 
 
     Parameters
     ----------
     image :
         The raveled view of a n-dimensional array. which is modified inplace.
+    labels :
+        An array with labels for each object in `image` matching it in shape.
     start_index :
         Start position for the flood-fill.
     neighbor_offsets :
         A one-dimensional array that contains the offsets to find the
         connected neighbors for any index in `image`.
     queue_ptr :
-        Pointer to initialized queue.
+        Pointer to initialized (!) queue.
     """
     cdef Py_ssize_t i, point, neighbor, max_index
     cdef cnp.uint32_t label
@@ -127,13 +132,17 @@ cdef inline void _remove_object(
     queue_push(queue_ptr, &start_index)
     image[start_index] = 0
     label = labels[start_index]
+
     while queue_pop(queue_ptr, &point):
         for i in range(neighbor_offsets.shape[0]):
             neighbor = point + neighbor_offsets[i]
+            # Bounds checking because image wasn't padded to signal the edge
             if not 0 <= neighbor < max_index:
                 continue
+
             # The algorithm might cross the image edge when two objects are
-            # neighbors in the raveled view -> check label to avoid that
-            if image[neighbor] != 0 and labels[neighbor] == label:
+            # neighbors in the raveled view -> check that the label id is
+            # either the same (object's surface) or 0 (inside object).
+            if image[neighbor] != 0 and labels[neighbor] in (0, label):
                 queue_push(queue_ptr, &neighbor)
                 image[neighbor] = 0
