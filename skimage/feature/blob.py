@@ -165,7 +165,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
     A : ndarray
         `array` with overlapping blobs removed.
     """
-    sigma = blobs_array[:, -sigma_dim].max()
+    sigma = blobs_array[:, -sigma_dim:].max()
     distance = 2 * sigma * sqrt(blobs_array.shape[1] - sigma_dim)
     tree = spatial.cKDTree(blobs_array[:, :-sigma_dim])
     pairs = np.array(list(tree.query_pairs(distance)))
