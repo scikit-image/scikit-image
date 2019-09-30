@@ -34,10 +34,10 @@ def resize_flow(flow, shape):
     for _ in shape:
         scale_factor = scale_factor[..., np.newaxis]
 
-    rflow = scale_factor*resize(flow, (flow.shape[0], ) + shape,
-                                order=1, mode='edge',
-                                preserve_range=True,
-                                anti_aliasing=False, clip=False)
+    rflow = scale_factor * resize(flow, (flow.shape[0], ) + shape,
+                                  order=1, mode='edge',
+                                  preserve_range=True,
+                                  anti_aliasing=False, clip=False)
 
     return rflow
 
