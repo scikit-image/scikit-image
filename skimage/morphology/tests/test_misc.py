@@ -341,3 +341,9 @@ class TestRemoveCloseObjects:
         result = remove_close_objects(image, 1, selem=selem)
         assert_array_equal(result, desired)
 
+    def test_nan(self):
+        # Check that NaNs are treated as objects
+        image = np.array([np.nan, np.nan, np.nan, 0, np.nan, np.nan, np.nan])
+        desired = np.array([0, 0, 0, 0, np.nan, np.nan, np.nan])
+        result = remove_close_objects(image, 2)
+        assert_array_equal(result, desired)

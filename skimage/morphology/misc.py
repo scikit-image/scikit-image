@@ -246,9 +246,9 @@ def remove_close_objects(
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that aren't zero or `False`)
+    Iterates over all objects (connected pixels that aren't zero or ``False``)
     inside an image and removes neighboring objects until all remaining ones
-    are at least a minimal euclidean distance from each other.
+    are more than a minimal euclidean distance from each other.
 
     Parameters
     ----------
@@ -286,13 +286,16 @@ def remove_close_objects(
     -----
     In case the `priority` assigns the same value to different objects the
     function falls back to an object's label id as returned by
-    scipy.ndimage.label_.
+    ``scipy.ndimage.label(image, selem)`` [1]_.
+
+    NaNs are treated as != 0 and are thus considered objects (or part of one).
 
     This function uses a KDTree internally to efficiently find neighboring
     objects.
 
-    .. _scipy.ndimage.label:
-       https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
+    References
+    ----------
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
 
     Examples
     --------
@@ -368,7 +371,8 @@ def remove_close_objects(
 
     indices = np.unravel_index(raveled_indices, image.shape)
     kdtree = cKDTree(
-        data=np.asarray(indices, dtype=np.float64).T,
+        # `data` is cast to C-order in cKDTree
+        data=np.asarray(indices, dtype=np.float64, order="F").transpose(),
         balanced_tree=True,
     )
 
@@ -384,7 +388,7 @@ def remove_close_objects(
     _remove_close_objects(
         image=image.ravel(),
         labels=labels,
-        indices=raveled_indices,
+        raveled_indices=raveled_indices,
         neighbor_offsets=neighbor_offsets,
         kdtree=kdtree,
         minimal_distance=minimal_distance,

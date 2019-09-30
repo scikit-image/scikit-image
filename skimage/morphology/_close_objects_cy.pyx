@@ -34,7 +34,7 @@ ctypedef fused dtype_t:
 def _remove_close_objects(
     dtype_t[::1] image not None,
     Py_ssize_t[::1] labels not None,
-    Py_ssize_t[::1] indices not None,
+    Py_ssize_t[::1] raveled_indices not None,
     Py_ssize_t[::1] neighbor_offsets not None,
     kdtree,
     cnp.float64_t minimal_distance,
@@ -52,7 +52,7 @@ def _remove_close_objects(
         The raveled view of a n-dimensional array. which is modified inplace.
     labels :
         An array with labels for each object in `image` matching it in shape.
-    indices :
+    raveled_indices :
         Indices into `image` and `labels` that determines the iteration order
         and thus which objects take precedence.
     neighbor_offsets :
@@ -64,6 +64,15 @@ def _remove_close_objects(
         The minimal allowed euclidean distance between objects.
     shape :
         The shape of the unraveled `image`.
+
+    Notes
+    -----
+    This function and its partner function :func:`~._remove_object` can deal
+    with objects where `labels` is 0 inside objects as long as its enclosing
+    surface points (in the sense of the neighborhood) are labeled.
+    This significantly improves the performance by reducing number of queries
+    to the KDTree and its size.
+    This effect grows with the size to surface ratio of all evaluated objects.
     """
     cdef:
         Py_ssize_t i, j, index_i, index_j
@@ -72,16 +81,20 @@ def _remove_close_objects(
 
     queue_init(&queue, 64)
     try:
-        for i in range(indices.shape[0]):
-            index_i = indices[i]
+        for i in range(raveled_indices.shape[0]):
+            index_i = raveled_indices[i]
+
+            # Skip if point is part of a removed object
             if image[index_i] == 0:
                 continue
 
             in_range = kdtree.query_ball_point(
                 np.unravel_index(index_i, shape), minimal_distance
             )
+
+            # Remove objects in `in_range` that don't share the same label id
             for j in in_range:
-                index_j = indices[j]
+                index_j = raveled_indices[j]
                 if (
                     image[index_j] != 0
                     and labels[index_i] != labels[index_j]
