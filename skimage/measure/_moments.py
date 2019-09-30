@@ -95,10 +95,10 @@ def moments_coords_central(coords, center=None, order=3):
 
     >>> coords2 = np.concatenate((coords, [[17, 17]]), axis=0)
     >>> np.round(moments_coords_central(coords2), 2)
-    array([[ 17.  ,   0.  ,  22.12,  -2.49],
-           [  0.  ,   3.53,   1.73,   7.4 ],
-           [ 25.88,   6.02,  36.63,   8.83],
-           [  4.15,  19.17,  14.8 ,  39.6 ]])
+    array([[17.  ,  0.  , 22.12, -2.49],
+           [ 0.  ,  3.53,  1.73,  7.4 ],
+           [25.88,  6.02, 36.63,  8.83],
+           [ 4.15, 19.17, 14.8 , 39.6 ]])
 
     Image moments and central image moments are equivalent (by definition)
     when the center is (0, 0):
