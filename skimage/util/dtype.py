@@ -95,9 +95,8 @@ def _dtype_bits(kind, bits, itemsize=1):
 
     """
 
-    compare_bits_to = bits.__le__ if kind == 'u' else bits.__lt__
-
-    s = next(i for i in (itemsize, ) + (2, 4, 8) if compare_bits_to(i * 8))
+    s = next(i for i in (itemsize, ) + (2, 4, 8) if
+             bits < (i * 8) or (bits == (i * 8) and kind == 'u'))
 
     return np.dtype(kind + str(s))
 
