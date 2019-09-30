@@ -80,9 +80,7 @@ class RemoveCloseObjects(object):
 
     def time_remove_close_objects(self, minimal_distance):
         morphology.remove_close_objects(
-            self.objects,
-            minimal_distance=minimal_distance,
-            priority=self.objects,
+            self.objects, minimal_distance=minimal_distance
         )
 
     def peakmem_reference(self, *args):
