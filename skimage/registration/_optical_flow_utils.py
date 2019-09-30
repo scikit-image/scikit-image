@@ -76,7 +76,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
 
 
 def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
-                   dtype='float32'):
+                   single_precision=True):
     """Generic coarse to fine solver.
 
     Parameters
@@ -93,8 +93,9 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
         The maximum number of pyramid levels.
     min_size : int
         The minimum size for any dimension of the pyramid levels.
-    dtype : dtype
-        Output data type.
+    single_precision : bool
+        If True, single precision float is used. Double precision
+        float is used otherwise.
 
     Returns
     -------
@@ -106,9 +107,10 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
     if I0.shape != I1.shape:
         raise ValueError("Input images should have the same shape")
 
-    if np.dtype(dtype).char not in 'efdg':
-        raise ValueError("Only floating point data type are valid"
-                         " for optical flow")
+    if single_precision:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
     pyramid = list(zip(get_pyramid(convert(I0, dtype),
                                    downscale, nlevel, min_size),

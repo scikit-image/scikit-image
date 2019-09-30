@@ -137,7 +137,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
 def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
                       nwarp=5, niter=10, tol=1e-4, prefilter=False,
-                      dtype='float32'):
+                      single_precision=True):
     r"""Coarse to fine optical flow estimator.
 
     The TV-L1 solver is applied at each level of the image
@@ -167,10 +167,11 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     prefilter : bool
         Whether to prefilter the estimated optical flow before each
         image warp. This helps to remove the potential outliers.
-    dtype : dtype
-        Output data type: must be floating point. Single precision
-        provides good results and saves memory usage and computation
-        time compared to double precision.
+    single_precision : bool
+        If True, single precision float is used. Double precision
+        float is used otherwise. Single precision provides good
+        results and saves memory usage and computation time compared
+        to double precision.
 
     Returns
     -------
@@ -212,4 +213,5 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
                      tightness=tightness, nwarp=nwarp, niter=niter,
                      tol=tol, prefilter=prefilter)
 
-    return coarse_to_fine(image0, image1, solver, dtype=dtype)
+    return coarse_to_fine(image0, image1, solver,
+                          single_precision=single_precision)
