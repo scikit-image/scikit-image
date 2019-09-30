@@ -219,11 +219,9 @@ def mark_boundaries(image, label_img, color=(1, 1, 0),
         # each original line - except for the last axis which holds
         # the RGB information. ``ndi.zoom`` then performs the (cubic)
         # interpolation, filling in the values of the interposed pixels
-        # marked = ndi.zoom(marked, [2 - 1/s for s in marked.shape[:-1]] + [1],
-        #                   mode='reflect')
         shape_out = [2 * s - 1 for s in marked.shape[:-1]] + [marked.shape[-1]]
-        marked = resize(marked, shape_out, order=3, mode='reflect',
-                        preserve_range=True, anti_aliasing=True)
+        marked = resize(marked, shape_out, order=3, mode='symmetric',
+                        preserve_range=False, clip=True)
     boundaries = find_boundaries(label_img, mode=mode,
                                  background=background_label)
     if outline_color is not None:
