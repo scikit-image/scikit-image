@@ -8,16 +8,16 @@ cimport numpy as cnp
 cimport cython
 
 
-def _get_multiotsu_thresh_indices_lut(double [::1] prob,
+def _get_multiotsu_thresh_indices_lut(float [::1] prob,
                                       Py_ssize_t thresh_count):
 
     cdef Py_ssize_t nbins = prob.shape[0]
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef double [:, ::1] H = np.zeros((nbins, nbins))
-    cdef double [::1] P = np.empty(nbins)
-    cdef double [::1] S = np.empty(nbins)
+    cdef float [:, ::1] H = np.zeros((nbins, nbins), dtype=np.float32)
+    cdef float [::1] P = np.empty(nbins, dtype=np.float32)
+    cdef float [::1] S = np.empty(nbins, dtype=np.float32)
 
     with nogil:
         _set_var_btwcls(prob, nbins, H, P, S)
@@ -30,15 +30,15 @@ def _get_multiotsu_thresh_indices_lut(double [::1] prob,
     return py_thresh_indices
 
 
-def _get_multiotsu_thresh_indices(double [::1] prob, Py_ssize_t thresh_count):
+def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
 
     cdef Py_ssize_t nbins = prob.shape[0]
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef double [:, ::1] H = np.zeros((nbins, nbins))
-    cdef double [::1] P = np.empty(nbins)
-    cdef double [::1] S = np.empty(nbins)
+    cdef float [:, ::1] H = np.zeros((nbins, nbins))
+    cdef float [::1] P = np.empty(nbins)
+    cdef float [::1] S = np.empty(nbins)
 
     with nogil:
         _set_moment_lut_first_row(prob, nbins, P, S)
@@ -51,10 +51,10 @@ def _get_multiotsu_thresh_indices(double [::1] prob, Py_ssize_t thresh_count):
     return py_thresh_indices
 
 
-cdef void _set_moment_lut_first_row(double [::1] prob,
+cdef void _set_moment_lut_first_row(float [::1] prob,
                                     Py_ssize_t nbins,
-                                    double [::1] P,
-                                    double [::1] S) nogil:
+                                    float [::1] P,
+                                    float [::1] S) nogil:
     cdef cnp.intp_t i
 
     P[0] = prob[0]
@@ -64,10 +64,10 @@ cdef void _set_moment_lut_first_row(double [::1] prob,
         S[i] = S[i-1] + i*prob[i]
 
 
-cdef double _get_var_btwclas(double [::1] P, double [::1] S,
-                             Py_ssize_t i, Py_ssize_t j) nogil:
+cdef float _get_var_btwclas(float [::1] P, float [::1] S,
+                            Py_ssize_t i, Py_ssize_t j) nogil:
 
-    cdef double Pij, Sij
+    cdef float Pij, Sij
 
     if i == 0:
         if P[i] > 0:
@@ -80,12 +80,12 @@ cdef double _get_var_btwclas(double [::1] P, double [::1] S,
     return 0
 
 
-cdef double _set_thresh_indices(double[::1] P, double[::1] S,
-                                Py_ssize_t hist_idx,
-                                Py_ssize_t thresh_idx, Py_ssize_t nbins,
-                                Py_ssize_t thresh_count, double sigma_max,
-                                Py_ssize_t[::1] current_indices,
-                                Py_ssize_t[::1] thresh_indices) nogil:
+cdef float _set_thresh_indices(float[::1] P, float[::1] S,
+                               Py_ssize_t hist_idx,
+                               Py_ssize_t thresh_idx, Py_ssize_t nbins,
+                               Py_ssize_t thresh_count, float sigma_max,
+                               Py_ssize_t[::1] current_indices,
+                               Py_ssize_t[::1] thresh_indices) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -127,7 +127,7 @@ cdef double _set_thresh_indices(double[::1] P, double[::1] S,
 
     """
     cdef cnp.intp_t idx
-    cdef double sigma
+    cdef float sigma
 
     if thresh_idx < thresh_count:
 
@@ -157,11 +157,11 @@ cdef double _set_thresh_indices(double[::1] P, double[::1] S,
     return sigma_max
 
 
-cdef void _set_var_btwcls(double [::1] prob,
+cdef void _set_var_btwcls(float [::1] prob,
                           Py_ssize_t nbins,
-                          double [:, ::1] H,
-                          double [::1] P,
-                          double [::1] S) nogil:
+                          float [:, ::1] H,
+                          float [::1] P,
+                          float [::1] S) nogil:
     """Build the between classes variance lookup table.
 
     The between classes variance are stored in H. P and S are buffers
@@ -190,7 +190,7 @@ cdef void _set_var_btwcls(double [::1] prob,
 
     """
     cdef cnp.intp_t i, j
-    cdef double Pij, Sij
+    cdef float Pij, Sij
 
     P[0] = prob[0]
     S[0] = prob[0]
@@ -208,11 +208,11 @@ cdef void _set_var_btwcls(double [::1] prob,
                 H[i, j] = (Sij**2)/Pij
 
 
-cdef double _set_thresh_indices_lut(double[:, ::1] H, Py_ssize_t hist_idx,
-                                    Py_ssize_t thresh_idx, Py_ssize_t nbins,
-                                    Py_ssize_t thresh_count, double sigma_max,
-                                    Py_ssize_t[::1] current_indices,
-                                    Py_ssize_t[::1] thresh_indices) nogil:
+cdef float _set_thresh_indices_lut(float[:, ::1] H, Py_ssize_t hist_idx,
+                                   Py_ssize_t thresh_idx, Py_ssize_t nbins,
+                                   Py_ssize_t thresh_count, float sigma_max,
+                                   Py_ssize_t[::1] current_indices,
+                                   Py_ssize_t[::1] thresh_indices) nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -257,7 +257,7 @@ cdef double _set_thresh_indices_lut(double[:, ::1] H, Py_ssize_t hist_idx,
 
     """
     cdef cnp.intp_t idx
-    cdef double sigma
+    cdef float sigma
 
     if thresh_idx < thresh_count:
 

@@ -1154,6 +1154,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
                                   nbins=nbins,
                                   source_range='image',
                                   normalize=True)
+    prob = prob.astype('float32')
 
     nvalues = np.count_nonzero(prob)
     if nvalues < classes:
