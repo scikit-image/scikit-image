@@ -930,6 +930,13 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     --------
     skimage.feature.peak_local_max
 
+    Notes
+    -----
+    The `num_peaks` limit is applied before suppression of
+    connected peaks. If you want to limit the number of peaks
+    after suppression, you should set `num_peaks=np.inf` and
+    post-process the output of this function.
+
     Examples
     --------
     >>> from skimage.feature import peak_local_max
