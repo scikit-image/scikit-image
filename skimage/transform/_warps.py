@@ -1072,8 +1072,9 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     return warped
 
 
-def _resize_weights(old_size, new_size, reflect=False):
-    """Create a weight matrix for resizing with the local mean along an axis.
+def _local_mean_weights(old_size, new_size, reflect=False):
+    """Create a weight matrix for resizing with the local mean along an
+    axis.
 
     Parameters
     ----------
@@ -1087,6 +1088,7 @@ def _resize_weights(old_size, new_size, reflect=False):
     Returns
     -------
     NumPy array with shape (new_size, old_size). Rows sum to 1.
+
     """
     if reflect:
         old, new = old_size - 1, new_size - 1
@@ -1104,18 +1106,13 @@ def _resize_weights(old_size, new_size, reflect=False):
                        old_breaks[np.newaxis, :-1])
 
     weights = np.maximum(upper - lower, 0)
-    weights /= np.sum(weights, axis=1, keepdims=True)
+    weights /= weights.sum(axis=1, keepdims=True)
 
     return weights
 
 
 def resize_local_mean(image, output_shape, reflect_axes=None):
     """Resize an array with the local mean / bilinear scaling.
-
-    Works for both upsampling and downsampling in a fashion equivalent
-    to block_mean and zoom, but allows for resizing by non-integer
-    multiples. Prefer block_mean and zoom when possible, as this
-    implementation is probably slower.
 
     Parameters
     ----------
@@ -1126,27 +1123,60 @@ def resize_local_mean(image, output_shape, reflect_axes=None):
         `dim` is not provided, the number of channels is preserved. In case the
         number of input channels does not equal the number of output channels a
         n-dimensional interpolation is applied.
+    reflect_axes : iterable, optional
+        Axes over which reflect boundary conditions will be applyed.
 
     Returns
     -------
-    Array resized to shape.
+    Array resized to output_shape.
 
-    Raises:
-      ValueError: if any values in reflect_axes fall outside the interval
-        [-array.ndim, array.ndim).
+    Raises
+    ------
+    ValueError if any values in reflect_axes fall outside the interval
+    [-image.ndim, image.ndim).
+
+    Notes
+    -----
+    Works for both upsampling and downsampling in a fashion equivalent
+    to block_mean and zoom, but allows for resizing by non-integer
+    multiples. Prefer block_mean and zoom when possible, as this
+    implementation is probably slower.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import resize_local_mean
+    >>> image = data.camera()
+    >>> resize_local_mean(image, (100, 100)).shape
+    (100, 100)
 
     """
-    reflect_axes_set = set()
-    for axis in reflect_axes:
-        if not -image.ndim <= axis < image.ndim:
-            raise ValueError('invalid axis: {}'.format(axis))
-        reflect_axes_set.add(axis % image.ndim)
+    output_shape = tuple(output_shape)
+    output_ndim = len(output_shape)
+    input_shape = image.shape
+    if output_ndim > image.ndim:
+        # append dimensions to input_shape
+        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
+        image = np.reshape(image, input_shape)
+    elif output_ndim == image.ndim - 1:
+        # multichannel case: append shape of last axis
+        output_shape = output_shape + (image.shape[-1], )
+    elif output_ndim < image.ndim - 1:
+        raise ValueError("output_shape length cannot be smaller than the image "
+                         "number of dimensions")
+
+    if reflect_axis is not None:
+        reflect_axes_set = set()
+        for axis in reflect_axes:
+            if not -image.ndim <= axis < image.ndim:
+                raise ValueError('invalid axis: {}'.format(axis))
+            reflect_axes_set.add(axis % image.ndim)
 
     output = image
     for axis, (old_size, new_size) in enumerate(zip(image.shape,
                                                     output_shape)):
         reflect = axis in reflect_axes_set
-        weights = _resize_weights(old_size, new_size, reflect=reflect)
+        weights = _local_mean_weights(old_size, new_size, reflect=reflect)
         product = np.tensordot(output, weights, [[axis], [-1]])
         output = np.moveaxis(product, -1, axis)
 
