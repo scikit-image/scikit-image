@@ -41,7 +41,7 @@ def variation_of_information(image0=None, image1=None, *, table=None,
         Pages 873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
     """
     h0g1, h1g0 = _vi_tables(image0, image1, table=table,
-                            ignore_labels=ignore_labels, normalize=True)
+                            ignore_labels=ignore_labels)
     # false splits, false merges
     return np.array([h1g0.sum(), h0g1.sum()])
 
