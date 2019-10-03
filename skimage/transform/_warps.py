@@ -1136,10 +1136,10 @@ def _local_mean_weights(old_size, new_size, grid_mode, dtype):
         new_breaks = np.linspace(0, old_size, num=new_size + 1, dtype=dtype)
     else:
         old, new = old_size - 1, new_size - 1
-        old_breaks = np.pad(np.linspace(0.5, old-0.5, old, dtype=dtype),
+        old_breaks = np.pad(np.linspace(0.5, old - 0.5, old, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
         val = 0.5 * old / new
-        new_breaks = np.pad(np.linspace(val, old-val, new, dtype=dtype),
+        new_breaks = np.pad(np.linspace(val, old - val, new, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
 
     upper = np.minimum(new_breaks[1:, np.newaxis], old_breaks[np.newaxis, 1:])
@@ -1188,7 +1188,8 @@ def resize_local_mean(image, output_shape, grid_mode=True,
     (100, 100)
 
     """
-    resized, output_shape = _preprocess_resize_output_shape(image, output_shape)
+    resized, output_shape = _preprocess_resize_output_shape(image,
+                                                            output_shape)
 
     resized = convert_to_float(resized, preserve_range)
     dtype = resized.dtype
