@@ -11,7 +11,7 @@ from skimage.transform import warp
 from ._optical_flow_utils import coarse_to_fine
 
 
-def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
+def _tvl1(image0, image1, flow0, attachment, tightness, num_warp, num_iter,
           tol, prefilter):
     """TV-L1 solver for optical flow estimation.
 
@@ -30,9 +30,9 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
         Tightness parameter. It should have a small value in order to
         maintain attachement and regularization parts in
         correspondence.
-    nwarp : int
+    num_warp : int
         Number of times image1 is warped.
-    niter : int
+    num_iter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
@@ -53,7 +53,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
                        indexing='ij')
 
     dt = 0.5/image0.ndim
-    reg_niter = 2
+    reg_num_iter = 2
     f0 = attachment * tightness
     f1 = dt / tightness
     tol *= image0.size
@@ -68,7 +68,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
     s_p = [slice(None), ] * proj.ndim
     s_d = [slice(None), ] * (proj.ndim-2)
 
-    for _ in range(nwarp):
+    for _ in range(num_warp):
         if prefilter:
             flow_current = ndi.median_filter(flow_current,
                                              [1]+image0.ndim*[3])
@@ -80,7 +80,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
         rho_0 = image1_warp - image0 - (grad*flow_current).sum(0)
 
-        for _ in range(niter):
+        for _ in range(num_iter):
 
             # Data term
 
@@ -101,7 +101,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
             for idx in range(image0.ndim):
                 s_p[0] = idx
-                for _ in range(reg_niter):
+                for _ in range(reg_num_iter):
                     for ax in range(image0.ndim):
                         s_g[0] = ax
                         s_g[ax+1] = slice(0, -1)
@@ -136,7 +136,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
 
 def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
-                      nwarp=5, niter=10, tol=1e-4, prefilter=False,
+                      num_warp=5, num_iter=10, tol=1e-4, prefilter=False,
                       dtype='float32'):
     r"""Coarse to fine optical flow estimator.
 
@@ -157,9 +157,9 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
         Tightness parameter (:math:`\tau` in [1]_). It should have
         a small value in order to maintain attachement and
         regularization parts in correspondence.
-    nwarp : int
+    num_warp : int
         Number of times image1 is warped.
-    niter : int
+    num_iter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
@@ -209,7 +209,7 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     """
 
     solver = partial(_tvl1, attachment=attachment,
-                     tightness=tightness, nwarp=nwarp, niter=niter,
+                     tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
     return coarse_to_fine(image0, image1, solver, dtype=dtype)
