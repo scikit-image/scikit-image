@@ -4,16 +4,15 @@ from ._contingency_table import contingency_table
 __all__ = ['adapted_rand_error']
 
 
-def adapted_rand_error(label_image_true=None, label_image_test=None,
-                       *,
-                       table=None, ignore_labels=(0,)):
+def adapted_rand_error(image_true=None, image_test=None, *, table=None,
+                       ignore_labels=(0,)):
     r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
     ----------
-    label_image_true : ndarray of int
+    image_true : ndarray of int
         Ground-truth label image, same shape as im_test.
-    label_image_test : ndarray of int
+    image_test : ndarray of int
         Test image.
     table : scipy.sparse array in crs format, optional
         A contingency table built with skimage.evaluate.contingency_table.
@@ -47,11 +46,11 @@ def adapted_rand_error(label_image_true=None, label_image_test=None,
            for connectomics. Front. Neuroanat. 9:142.
            :DOI:`10.3389/fnana.2015.00142`
     """
-    if label_image_test is not None and label_image_true is not None:
-        check_shape_equality(label_image_true, label_image_test)
+    if image_test is not None and image_true is not None:
+        check_shape_equality(image_true, image_test)
 
     if table is None:
-        p_ij = contingency_table(label_image_true, label_image_test,
+        p_ij = contingency_table(image_true, image_test,
                                  ignore_labels=ignore_labels, normalize=False)
     else:
         p_ij = table
