@@ -16,6 +16,54 @@ HOMOGRAPHY_TRANSFORMS = (
 )
 
 
+def _preprocess_resize_output_shape(image, output_shape):
+    """Validate resize output shape according to input image.
+
+    Parameters
+    ----------
+    image: ndarray
+        Image to be resized.
+    output_shape: tuple or ndarray
+        Size of the generated output image `(rows, cols[, ...][, dim])`. If
+        `dim` is not provided, the number of channels is preserved.
+
+    Returns
+    -------
+    image: ndarray
+        The input image reshaped if its number of dimensions is not
+        equal to output_shape_length.
+    output_shape: tuple
+        The output image converted to tuple.
+
+    Raises
+    ------
+    ValueError:
+        If output_shape length is smaller than the image number of
+        dimensions
+
+    Notes
+    -----
+    The input image is reshaped if its number of dimensions is not
+    equal to output_shape_length.
+
+    """
+    output_shape = tuple(np.ravel(output_shape))
+    output_ndim = len(output_shape)
+    input_shape = image.shape
+    if output_ndim > image.ndim:
+        # append dimensions to input_shape
+        input_shape += (1, ) * (output_ndim - image.ndim)
+        image = np.reshape(image, input_shape)
+    elif output_ndim == image.ndim - 1:
+        # multichannel case: append shape of last axis
+        output_shape = output_shape + (image.shape[-1], )
+    elif output_ndim < image.ndim - 1:
+        raise ValueError("output_shape length cannot be smaller than the "
+                         "image number of dimensions")
+
+    return image, output_shape
+
+
 def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
            preserve_range=False, anti_aliasing=True, anti_aliasing_sigma=None):
     """Resize image to match a certain size.
@@ -86,19 +134,9 @@ def resize(image, output_shape, order=1, mode='reflect', cval=0, clip=True,
     (100, 100)
 
     """
-    output_shape = tuple(output_shape)
-    output_ndim = len(output_shape)
+
+    image, output_shape = _preprocess_resize_output_shape(image, output_shape)
     input_shape = image.shape
-    if output_ndim > image.ndim:
-        # append dimensions to input_shape
-        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
-        image = np.reshape(image, input_shape)
-    elif output_ndim == image.ndim - 1:
-        # multichannel case: append shape of last axis
-        output_shape = output_shape + (image.shape[-1], )
-    elif output_ndim < image.ndim - 1:
-        raise ValueError("len(output_shape) cannot be smaller than the image "
-                         "dimensions")
 
     factors = (np.asarray(input_shape, dtype=float) /
                np.asarray(output_shape, dtype=float))
@@ -1072,9 +1110,8 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     return warped
 
 
-def _local_mean_weights(old_size, new_size, reflect=False):
-    """Create a weight matrix for resizing with the local mean along an
-    axis.
+def _local_mean_weights(old_size, new_size, grid_mode, dtype):
+    """Create a 2D weight matrix for resizing with the local mean.
 
     Parameters
     ----------
@@ -1082,24 +1119,28 @@ def _local_mean_weights(old_size, new_size, reflect=False):
         Old size.
     new_size: int
         New size.
-    reflect: bool
-        Whether to use reflecting boundary conditions or not.
+    grid_mode : bool
+        Whether to use grid data model of pixel/voxel model for
+        average weights computation.
+    dtype: dtype
+        Output array data type.
 
     Returns
     -------
-    NumPy array with shape (new_size, old_size). Rows sum to 1.
+    weights: (new_size, old_size) array
+        Rows sum to 1.
 
     """
-    if reflect:
+    if grid_mode:
+        old_breaks = np.linspace(0, old_size, num=old_size + 1, dtype=dtype)
+        new_breaks = np.linspace(0, old_size, num=new_size + 1, dtype=dtype)
+    else:
         old, new = old_size - 1, new_size - 1
-        old_breaks = np.pad(np.linspace(0.5, old-0.5, old),
+        old_breaks = np.pad(np.linspace(0.5, old-0.5, old, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
         val = 0.5 * old / new
-        new_breaks = np.pad(np.linspace(val, old-val, new),
+        new_breaks = np.pad(np.linspace(val, old-val, new, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
-    else:
-        old_breaks = np.linspace(0, old_size, num=old_size + 1)
-        new_breaks = np.linspace(0, old_size, num=new_size + 1)
 
     upper = np.minimum(new_breaks[1:, np.newaxis], old_breaks[np.newaxis, 1:])
     lower = np.maximum(new_breaks[:-1, np.newaxis],
@@ -1111,7 +1152,8 @@ def _local_mean_weights(old_size, new_size, reflect=False):
     return weights
 
 
-def resize_local_mean(image, output_shape, reflect_axes=None):
+def resize_local_mean(image, output_shape, grid_mode=True,
+                      preserve_range=False):
     """Resize an array with the local mean / bilinear scaling.
 
     Parameters
@@ -1123,24 +1165,19 @@ def resize_local_mean(image, output_shape, reflect_axes=None):
         `dim` is not provided, the number of channels is preserved. In case the
         number of input channels does not equal the number of output channels a
         n-dimensional interpolation is applied.
-    reflect_axes : iterable, optional
-        Axes over which reflect boundary conditions will be applyed.
+    grid_mode : bool, optional
+        Whether to use grid data model of pixel/voxel model for
+        average weights computation.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
-    Array resized to output_shape.
-
-    Raises
-    ------
-    ValueError if any values in reflect_axes fall outside the interval
-    [-image.ndim, image.ndim).
-
-    Notes
-    -----
-    Works for both upsampling and downsampling in a fashion equivalent
-    to block_mean and zoom, but allows for resizing by non-integer
-    multiples. Prefer block_mean and zoom when possible, as this
-    implementation is probably slower.
+    resized : ndarray
+        Resized version of the input.
 
     Examples
     --------
@@ -1151,33 +1188,17 @@ def resize_local_mean(image, output_shape, reflect_axes=None):
     (100, 100)
 
     """
-    output_shape = tuple(output_shape)
-    output_ndim = len(output_shape)
-    input_shape = image.shape
-    if output_ndim > image.ndim:
-        # append dimensions to input_shape
-        input_shape = input_shape + (1, ) * (output_ndim - image.ndim)
-        image = np.reshape(image, input_shape)
-    elif output_ndim == image.ndim - 1:
-        # multichannel case: append shape of last axis
-        output_shape = output_shape + (image.shape[-1], )
-    elif output_ndim < image.ndim - 1:
-        raise ValueError("output_shape length cannot be smaller than the image "
-                         "number of dimensions")
+    resized, output_shape = _preprocess_resize_output_shape(image, output_shape)
 
-    if reflect_axis is not None:
-        reflect_axes_set = set()
-        for axis in reflect_axes:
-            if not -image.ndim <= axis < image.ndim:
-                raise ValueError('invalid axis: {}'.format(axis))
-            reflect_axes_set.add(axis % image.ndim)
+    resized = convert_to_float(resized, preserve_range)
+    dtype = resized.dtype
 
-    output = image
     for axis, (old_size, new_size) in enumerate(zip(image.shape,
                                                     output_shape)):
-        reflect = axis in reflect_axes_set
-        weights = _local_mean_weights(old_size, new_size, reflect=reflect)
-        product = np.tensordot(output, weights, [[axis], [-1]])
-        output = np.moveaxis(product, -1, axis)
+        if old_size == new_size:
+            continue
+        weights = _local_mean_weights(old_size, new_size, grid_mode, dtype)
+        product = np.tensordot(resized, weights, [[axis], [-1]])
+        resized = np.moveaxis(product, -1, axis)
 
-    return output
+    return resized
