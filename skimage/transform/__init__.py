@@ -13,7 +13,8 @@ from ._geometric import (estimate_transform,
                          EssentialMatrixTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import (swirl, resize, rotate, rescale,
-                     downscale_local_mean, warp, warp_coords, warp_polar)
+                     downscale_local_mean, warp, warp_coords, warp_polar,
+                     resize_local_mean)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 
@@ -48,6 +49,7 @@ __all__ = ['match_histograms',
            'PiecewiseAffineTransform',
            'swirl',
            'resize',
+           'resize_local_mean',
            'rotate',
            'rescale',
            'downscale_local_mean',
