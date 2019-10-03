@@ -20,9 +20,11 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     ----------
     im_true, im_test : ndarray of int
         Label images / segmentations, must have same shape.
-    table : scipy.sparse array in crs format, optional
+    table : scipy.sparse array in csr format, optional
         A contingency table built with skimage.evaluate.contingency_table.
         If None, it will be computed with skimage.evaluate.contingency_table.
+        If given, the entropies will be computed from this table and any images
+        will be ignored.
     ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
@@ -48,8 +50,8 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
 
 
 def _xlogx(x):
-    """
-    Compute x * log_2(x).
+    """Compute x * log_2(x).
+
     We define 0 * log_2(0) = 0
 
     Parameters
@@ -73,13 +75,16 @@ def _xlogx(x):
 
 
 def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
-    """
-    Compute probability tables used for calculating VI.
+    """Compute probability tables used for calculating VI.
 
     Parameters
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
+    table : csr matrix, optional
+        Pre-computed contingency table.
+    ignore_labels : sequence of int, optional
+        Labels to ignore when computing scores.
 
     Returns
     -------
@@ -116,8 +121,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
 
 
 def _invert_nonzero(arr):
-    """
-    Compute the inverse of the non-zero elements of arr, not changing 0.
+    """Compute the inverse of the non-zero elements of arr, not changing 0.
 
     Parameters
     ----------
