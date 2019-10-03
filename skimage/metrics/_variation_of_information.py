@@ -7,7 +7,7 @@ __all__ = ['variation_of_information']
 
 
 def variation_of_information(im_true=None, im_test=None, *, table=None,
-                             ignore_labels=[], normalize=False):
+                             ignore_labels=(), normalize=False):
     """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
@@ -23,7 +23,7 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
     table : scipy.sparse array in crs format, optional
         A contingency table built with skimage.evaluate.contingency_table.
         If None, it will be computed with skimage.evaluate.contingency_table.
-    ignore_labels : list of int, optional
+    ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
     normalize : bool, optional
@@ -72,8 +72,7 @@ def _xlogx(x):
     return y
 
 
-def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
-               normalize=False):
+def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     """
     Compute probability tables used for calculating VI.
 
@@ -94,7 +93,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
             im_true, im_test,
-            ignore_labels=ignore_labels, normalize=normalize
+            ignore_labels=ignore_labels, normalize=True
         )
 
     else:
