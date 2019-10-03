@@ -52,12 +52,12 @@ def test_PSNR_errors():
 def test_NRMSE():
     x = np.ones(4)
     y = np.asarray([0., 2., 2., 2.])
-    assert_equal(normalized_root_mse(y, x, 'mean'), 1 / np.mean(y))
-    assert_equal(normalized_root_mse(y, x, 'Euclidean'), 1 / np.sqrt(3))
-    assert_equal(normalized_root_mse(y, x, 'min-max'), 1 / (y.max() - y.min()))
+    assert_equal(normalized_root_mse(y, x), 1 / np.mean(y))
+    assert_equal(normalized_root_mse(y, x), 1 / np.sqrt(3))
+    assert_equal(normalized_root_mse(y, x), 1 / (y.max() - y.min()))
 
     # mixed precision inputs are allowed
-    assert_almost_equal(normalized_root_mse(y, np.float32(x), 'min-max'),
+    assert_almost_equal(normalized_root_mse(y, np.float32(x)),
                         1 / (y.max() - y.min()))
 
 
@@ -77,4 +77,4 @@ def test_NRMSE_errors():
         normalized_root_mse(x[:-1], x)
     # invalid normalization name
     with testing.raises(ValueError):
-        normalized_root_mse(x, x, 'foo')
+        normalized_root_mse(x, x)
