@@ -139,7 +139,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
 def optical_flow_tvl1(reference_image, moving_image,
                       *,
                       attachment=15, tightness=0.3, num_warp=5, num_iter=10,
-                      tol=1e-4, prefilter=False, dtype='float32'):
+                      tol=1e-4, prefilter=False, dtype=np.float32):
     r"""Coarse to fine optical flow estimator.
 
     The TV-L1 solver is applied at each level of the image
