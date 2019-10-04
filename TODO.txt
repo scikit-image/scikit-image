@@ -1,16 +1,12 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-Version 0.16
+Version 0.17
 ------------
 
 * Update RELEASE.txt regarding Azure Pipelines after making changes to
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.17
-------------
-
 * In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
   and ``shift_y``.
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
