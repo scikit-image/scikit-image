@@ -239,6 +239,7 @@ def remove_close_objects(
     image,
     minimal_distance,
     *,
+    p_norm=2,
     selem=None,
     connectivity=None,
     priority=None,
@@ -248,15 +249,18 @@ def remove_close_objects(
 
     Iterates over all objects (connected pixels that aren't zero or ``False``)
     inside an image and removes neighboring objects until all remaining ones
-    are more than a minimal euclidean distance from each other.
+    are more than a minimal distance from each other.
 
     Parameters
     ----------
     image : ndarray
         An n-dimensional array.
     minimal_distance : int or float
-        Objects whose euclidean distance is not greater than this value are
-        considered to close. Must be positive.
+        Objects whose distance is not greater than this value are considered
+        to close. Must be positive.
+    p_norm : int or float, optional
+        The Minkowski p-norm used to calculate the distance between objects.
+        Defaults to 2 which corresponds to the Euclidean distance.
     selem : ndarray, optional
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
@@ -282,16 +286,20 @@ def remove_close_objects(
         Array of the same shape as `image` with objects violating the distance
         condition removed.
 
+    See Also
+    --------
+    skimage.morphology.remove_small_objects
+
     Notes
     -----
     In case the `priority` assigns the same value to different objects the
     function falls back to an object's label id as returned by
     ``scipy.ndimage.label(image, selem)`` [1]_.
 
-    NaNs are treated as != 0 and are thus considered objects (or part of one).
+    NaNs are treated as != 0 and thus are considered objects (or part of one).
 
-    This function uses a KDTree internally to efficiently find neighboring
-    objects.
+    Setting `p_norm` to 1 will calculate the distance between objects as the
+    Manhatten distance, while ``np.inf`` corresponds to the Chebyshev distance.
 
     References
     ----------
@@ -392,7 +400,8 @@ def remove_close_objects(
         neighbor_offsets=neighbor_offsets,
         kdtree=kdtree,
         minimal_distance=minimal_distance,
-        shape=image.shape
+        p_norm=p_norm,
+        shape=image.shape,
     )
 
     if image_is_bool:

@@ -37,6 +37,7 @@ def _remove_close_objects(
     Py_ssize_t[::1] raveled_indices not None,
     Py_ssize_t[::1] neighbor_offsets not None,
     kdtree,
+    cnp.float64_t p_norm,
     cnp.float64_t minimal_distance,
     tuple shape,
 ):
@@ -62,6 +63,10 @@ def _remove_close_objects(
         A KDTree containing the coordinates of all objects in `image`.
     minimal_distance :
         The minimal allowed euclidean distance between objects.
+    p_norm :
+        Which Minkowski p-norm to use to calculate the distance between
+        objects. Defaults to 2 which corresponds to the Euclidean distance
+        while 1 corresponds to the Manatten distance.
     shape :
         The shape of the unraveled `image`.
 
@@ -89,7 +94,10 @@ def _remove_close_objects(
                 continue
 
             in_range = kdtree.query_ball_point(
-                np.unravel_index(index_i, shape), minimal_distance
+                np.unravel_index(index_i, shape),
+                r=minimal_distance,
+                p=p_norm,
+                return_sorted=False,
             )
 
             # Remove objects in `in_range` that don't share the same label id

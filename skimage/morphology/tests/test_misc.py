@@ -347,3 +347,37 @@ class TestRemoveCloseObjects:
         desired = np.array([0, 0, 0, 0, np.nan, np.nan, np.nan])
         result = remove_close_objects(image, 2)
         assert_array_equal(result, desired)
+
+    def test_p_norm(self):
+        image = np.array([[2, 0], [0, 1]])
+        removed = np.array([[2, 0], [0, 0]])
+
+        # p_norm=2, default (Euclidean distance)
+        result = remove_close_objects(
+            image, 1.4, connectivity=1, priority=image
+        )
+        assert_array_equal(result, image)
+        result = remove_close_objects(
+            image, np.sqrt(2), connectivity=1, priority=image
+        )
+        assert_array_equal(result, removed)
+
+        # p_norm=1 (Manhatten distance)
+        result = remove_close_objects(
+            image, 1.9, p_norm=1, connectivity=1, priority=image
+        )
+        assert_array_equal(result, image)
+        result = remove_close_objects(
+            image, 2, p_norm=1, connectivity=1, priority=image
+        )
+        assert_array_equal(result, removed)
+
+        # p_norm=np.inf (Chebyshev distance)
+        result = remove_close_objects(
+            image, 0.9, p_norm=np.inf, connectivity=1, priority=image
+        )
+        assert_array_equal(result, image)
+        result = remove_close_objects(
+            image, 1, p_norm=np.inf, connectivity=1, priority=image
+        )
+        assert_array_equal(result, removed)
