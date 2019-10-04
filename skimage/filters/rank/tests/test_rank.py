@@ -56,7 +56,7 @@ class TestRank():
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
-        @test_parallel()
+        @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
             result = getattr(rank, filter)(self.image, self.selem)
@@ -289,7 +289,8 @@ class TestRank():
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, disk(3))
-            out_f = func(image_float, disk(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
 
@@ -311,7 +312,8 @@ class TestRank():
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_u, disk(3))
-            out_s = func(image_s, disk(3))
+            with expected_warnings(["Possible precision loss"]):
+                out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
     @parametrize('method',

@@ -41,7 +41,7 @@ def imread(fname, dtype=None, **kwargs):
 
     # parse_kwargs will extract keyword arguments intended for the TiffFile
     # class and remove them from the kwargs dictionary in-place
-    tiff_keys = ['multifile', 'multifile_close', 'pages', 'fastij', 'is_ome']
+    tiff_keys = ['multifile', 'multifile_close', 'fastij', 'is_ome']
     kwargs_tiff = parse_kwargs(kwargs, *tiff_keys)
 
     # read and return tiff as numpy array

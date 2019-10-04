@@ -3,7 +3,7 @@ from itertools import cycle
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 __all__ = ['morphological_chan_vese',
            'morphological_geodesic_active_contour',
@@ -84,7 +84,7 @@ _curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
 
 def _check_input(image, init_level_set):
     """Check that shapes of `image` and `init_level_set` match."""
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     if len(image.shape) != len(init_level_set.shape):
         raise ValueError("The dimensions of the initial level set do not "
