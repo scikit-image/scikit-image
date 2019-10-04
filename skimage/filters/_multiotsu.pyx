@@ -275,6 +275,7 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           :DOI:`10.6688/JISE.2001.17.5.1`
 
     """
     cdef cnp.intp_t idx
