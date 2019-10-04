@@ -97,7 +97,6 @@ def _remove_close_objects(
                 np.unravel_index(index_i, shape),
                 r=minimal_distance,
                 p=p_norm,
-                return_sorted=False,
             )
 
             # Remove objects in `in_range` that don't share the same label id
