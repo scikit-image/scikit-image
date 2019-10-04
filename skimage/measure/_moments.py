@@ -94,7 +94,8 @@ def moments_coords_central(coords, center=None, order=3):
     point, this no longer holds:
 
     >>> coords2 = np.concatenate((coords, [[17, 17]]), axis=0)
-    >>> np.round(moments_coords_central(coords2), 2)
+    >>> np.round(moments_coords_central(coords2),
+    ...          decimals=2)  # doctest: +NORMALIZE_WHITESPACE
     array([[ 17.  ,   0.  ,  22.12,  -2.49],
            [  0.  ,   3.53,   1.73,   7.4 ],
            [ 25.88,   6.02,  36.63,   8.83],
