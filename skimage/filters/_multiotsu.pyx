@@ -76,9 +76,9 @@ cdef float _get_var_btwclas(float [::1] zeroth_moment,
         if zeroth_moment[i] > 0:
             return (first_moment[j]**2) / zeroth_moment[j]
     else:
-        zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i-1]
+        zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i - 1]
         if zeroth_moment_ij > 0:
-            first_moment_ij = first_moment[j] - first_moment[i-1]
+            first_moment_ij = first_moment[j] - first_moment[i - 1]
             return (first_moment_ij**2) / zeroth_moment_ij
     return 0
 
@@ -173,9 +173,9 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
     """Build the between classes variance lookup table.
 
     The between classes variance are stored in
-    var_btwcls. zeroth_moment and first_moment are buffers for storing
-    the first row of respectively the zeroth and first order moments
-    lookup table (see [1]).
+    `var_btwcls`. `zeroth_moment` and `first_moment` are buffers for
+    storing the first row of respectively the zeroth and first order
+    moments lookup table (respectively H, P and S in [1]).
 
     Parameters
     ----------
@@ -205,19 +205,19 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
     zeroth_moment[0] = prob[0]
     first_moment[0] = prob[0]
     for i in range(1, nbins):
-        zeroth_moment[i] = zeroth_moment[i-1] + prob[i]
-        first_moment[i] = first_moment[i-1] + i*prob[i]
+        zeroth_moment[i] = zeroth_moment[i - 1] + prob[i]
+        first_moment[i] = first_moment[i - 1] + i * prob[i]
         if zeroth_moment[i] > 0:
-            var_btwcls[i] = (first_moment[i]**2)/zeroth_moment[i]
+            var_btwcls[i] = (first_moment[i]**2) / zeroth_moment[i]
 
     idx = nbins
 
     for i in range(1, nbins):
         for j in range(i, nbins):
-            zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i-1]
+            zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i - 1]
             if zeroth_moment_ij > 0:
-                first_moment_ij = first_moment[j] - first_moment[i-1]
-                var_btwcls[idx] = (first_moment_ij**2)/zeroth_moment_ij
+                first_moment_ij = first_moment[j] - first_moment[i - 1]
+                var_btwcls[idx] = (first_moment_ij**2) / zeroth_moment_ij
             idx += 1
 
 
@@ -283,10 +283,10 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
 
     if thresh_idx < thresh_count:
 
-        for idx in range(hist_idx, nbins-thresh_count+thresh_idx):
+        for idx in range(hist_idx, nbins - thresh_count + thresh_idx):
             current_indices[thresh_idx] = idx
-            sigma_max = _set_thresh_indices_lut(var_btwcls, hist_idx=idx+1,
-                                                thresh_idx=thresh_idx+1,
+            sigma_max = _set_thresh_indices_lut(var_btwcls, hist_idx=idx + 1,
+                                                thresh_idx=thresh_idx + 1,
                                                 nbins=nbins,
                                                 thresh_count=thresh_count,
                                                 sigma_max=sigma_max,
@@ -297,11 +297,11 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
 
         sigma = (_get_var_btwclas_lut(var_btwcls, 0, current_indices[0], nbins)
                  + _get_var_btwclas_lut(var_btwcls,
-                                        current_indices[thresh_count-1]+1,
-                                        nbins-1, nbins))
-        for idx in range(thresh_count-1):
-            sigma += _get_var_btwclas_lut(var_btwcls, current_indices[idx]+1,
-                                          current_indices[idx+1], nbins)
+                                        current_indices[thresh_count - 1] + 1,
+                                        nbins - 1, nbins))
+        for idx in range(thresh_count - 1):
+            sigma += _get_var_btwclas_lut(var_btwcls, current_indices[idx] + 1,
+                                          current_indices[idx + 1], nbins)
 
         if sigma > sigma_max:
             sigma_max = sigma
