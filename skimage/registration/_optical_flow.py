@@ -11,15 +11,15 @@ from skimage.transform import warp
 from ._optical_flow_utils import coarse_to_fine
 
 
-def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
-          tol, prefilter):
+def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
+          num_warp, num_iter, tol, prefilter):
     """TV-L1 solver for optical flow estimation.
 
     Parameters
     ----------
-    image0 : ndarray, shape (M, N[, P[, ...]])
+    reference_image : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    image1 : ndarray, shape (M, N[, P[, ...]])
+    moving_image : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
     flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
@@ -30,9 +30,9 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
         Tightness parameter. It should have a small value in order to
         maintain attachement and regularization parts in
         correspondence.
-    nwarp : int
+    num_warp : int
         Number of times image1 is warped.
-    niter : int
+    num_iter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
@@ -48,39 +48,40 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
     """
 
-    dtype = image0.dtype
-    grid = np.meshgrid(*[np.arange(n, dtype=dtype) for n in image0.shape],
+    dtype = reference_image.dtype
+    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
+                         for n in reference_image.shape],
                        indexing='ij')
 
-    dt = 0.5/image0.ndim
-    reg_niter = 2
+    dt = 0.5 / reference_image.ndim
+    reg_num_iter = 2
     f0 = attachment * tightness
     f1 = dt / tightness
-    tol *= image0.size
+    tol *= reference_image.size
 
     flow_current = flow_previous = flow0
 
-    g = np.zeros((image0.ndim, ) + image0.shape, dtype=dtype)
-    proj = np.zeros((image0.ndim, image0.ndim, ) + image0.shape,
-                    dtype=dtype)
+    g = np.zeros((reference_image.ndim,) + reference_image.shape, dtype=dtype)
+    proj = np.zeros((reference_image.ndim, reference_image.ndim,)
+                    + reference_image.shape, dtype=dtype)
 
     s_g = [slice(None), ] * g.ndim
     s_p = [slice(None), ] * proj.ndim
     s_d = [slice(None), ] * (proj.ndim-2)
 
-    for _ in range(nwarp):
+    for _ in range(num_warp):
         if prefilter:
             flow_current = ndi.median_filter(flow_current,
-                                             [1]+image0.ndim*[3])
+                                             [1] + reference_image.ndim * [3])
 
-        image1_warp = warp(image1, grid+flow_current, mode='nearest')
+        image1_warp = warp(moving_image, grid + flow_current, mode='nearest')
         grad = np.array(np.gradient(image1_warp))
         NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
 
-        rho_0 = image1_warp - image0 - (grad*flow_current).sum(0)
+        rho_0 = image1_warp - reference_image - (grad * flow_current).sum(0)
 
-        for _ in range(niter):
+        for _ in range(num_iter):
 
             # Data term
 
@@ -99,10 +100,10 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
             # Regularization term
             flow_current = flow_auxiliary.copy()
 
-            for idx in range(image0.ndim):
+            for idx in range(reference_image.ndim):
                 s_p[0] = idx
-                for _ in range(reg_niter):
-                    for ax in range(image0.ndim):
+                for _ in range(reg_num_iter):
+                    for ax in range(reference_image.ndim):
                         s_g[0] = ax
                         s_g[ax+1] = slice(0, -1)
                         g[tuple(s_g)] = np.diff(flow_current[idx], axis=ax)
@@ -116,7 +117,7 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
 
                     # d will be the (negative) divergence of proj[idx]
                     d = -proj[idx].sum(0)
-                    for ax in range(image0.ndim):
+                    for ax in range(reference_image.ndim):
                         s_p[1] = ax
                         s_p[ax+2] = slice(0, -1)
                         s_d[ax] = slice(1, None)
@@ -135,9 +136,10 @@ def _tvl1(image0, image1, flow0, attachment, tightness, nwarp, niter,
     return flow_current
 
 
-def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
-                      nwarp=5, niter=10, tol=1e-4, prefilter=False,
-                      dtype='float32'):
+def optical_flow_tvl1(reference_image, moving_image,
+                      *,
+                      attachment=15, tightness=0.3, num_warp=5, num_iter=10,
+                      tol=1e-4, prefilter=False, dtype=np.float32):
     r"""Coarse to fine optical flow estimator.
 
     The TV-L1 solver is applied at each level of the image
@@ -146,9 +148,9 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
 
     Parameters
     ----------
-    image0 : ndarray, shape (M, N[, P[, ...]])
+    reference_image : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    image1 : ndarray, shape (M, N[, P[, ...]])
+    moving_image : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
     attachment : float
         Attachment parameter (:math:`\lambda` in [1]_). The smaller
@@ -157,9 +159,9 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
         Tightness parameter (:math:`\tau` in [1]_). It should have
         a small value in order to maintain attachement and
         regularization parts in correspondence.
-    nwarp : int
+    num_warp : int
         Number of times image1 is warped.
-    niter : int
+    num_iter : int
         Number of fixed point iteration.
     tol : float
         Tolerance used as stopping criterion based on the L² distance
@@ -209,7 +211,7 @@ def optical_flow_tvl1(image0, image1, *, attachment=15, tightness=0.3,
     """
 
     solver = partial(_tvl1, attachment=attachment,
-                     tightness=tightness, nwarp=nwarp, niter=niter,
+                     tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
-    return coarse_to_fine(image0, image1, solver, dtype=dtype)
+    return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)

@@ -8,23 +8,23 @@ __all__ = ['mean_squared_error',
            ]
 
 
-def _as_floats(im1, im2):
+def _as_floats(image0, image1):
     """
     Promote im1, im2 to nearest appropriate floating point precision.
     """
-    float_type = np.result_type(im1.dtype, im2.dtype, np.float32)
-    im1 = np.asarray(im1, dtype=float_type)
-    im2 = np.asarray(im2, dtype=float_type)
-    return im1, im2
+    float_type = np.result_type(image0.dtype, image1.dtype, np.float32)
+    image0 = np.asarray(image0, dtype=float_type)
+    image1 = np.asarray(image1, dtype=float_type)
+    return image0, image1
 
 
-def mean_squared_error(im1, im2):
+def mean_squared_error(image0, image1):
     """
     Compute the mean-squared error between two images.
 
     Parameters
     ----------
-    im1, im2 : ndarray
+    image0, image1 : ndarray
         Images.  Any dimensionality, must have same shape.
 
     Returns
@@ -39,23 +39,23 @@ def mean_squared_error(im1, im2):
         ``skimage.metrics.mean_squared_error``.
 
     """
-    check_shape_equality(im1, im2)
-    im1, im2 = _as_floats(im1, im2)
-    return np.mean((im1 - im2) ** 2, dtype=np.float64)
+    check_shape_equality(image0, image1)
+    image0, image1 = _as_floats(image0, image1)
+    return np.mean((image0 - image1) ** 2, dtype=np.float64)
 
 
-def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
+def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
     """
     Compute the normalized root mean-squared error (NRMSE) between two
     images.
 
     Parameters
     ----------
-    im_true : ndarray
+    image_true : ndarray
         Ground-truth image, same shape as im_test.
-    im_test : ndarray
+    image_test : ndarray
         Test image.
-    norm_type : {'euclidean', 'min-max', 'mean'}, optional
+    normalization : {'euclidean', 'min-max', 'mean'}, optional
         Controls the normalization method to use in the denominator of the
         NRMSE.  There is no standard method of normalization across the
         literature [1]_.  The methods available here are as follows:
@@ -89,31 +89,31 @@ def normalized_root_mse(im_true, im_test, norm_type='euclidean'):
     .. [1] https://en.wikipedia.org/wiki/Root-mean-square_deviation
 
     """
-    check_shape_equality(im_true, im_test)
-    im_true, im_test = _as_floats(im_true, im_test)
+    check_shape_equality(image_true, image_test)
+    image_true, image_test = _as_floats(image_true, image_test)
 
     # Ensure that both 'Euclidean' and 'euclidean' match
-    norm_type = norm_type.lower()
-    if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true * im_true), dtype=np.float64))
-    elif norm_type == 'min-max':
-        denom = im_true.max() - im_true.min()
-    elif norm_type == 'mean':
-        denom = im_true.mean()
+    normalization = normalization.lower()
+    if normalization == 'euclidean':
+        denom = np.sqrt(np.mean((image_true * image_true), dtype=np.float64))
+    elif normalization == 'min-max':
+        denom = image_true.max() - image_true.min()
+    elif normalization == 'mean':
+        denom = image_true.mean()
     else:
         raise ValueError("Unsupported norm_type")
-    return np.sqrt(mean_squared_error(im_true, im_test)) / denom
+    return np.sqrt(mean_squared_error(image_true, image_test)) / denom
 
 
-def peak_signal_noise_ratio(im_true, im_test, data_range=None):
+def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     """
     Compute the peak signal to noise ratio (PSNR) for an image.
 
     Parameters
     ----------
-    im_true : ndarray
+    image_true : ndarray
         Ground-truth image, same shape as im_test.
-    im_test : ndarray
+    image_test : ndarray
         Test image.
     data_range : int, optional
         The data range of the input image (distance between minimum and
@@ -136,14 +136,14 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
     .. [1] https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
 
     """
-    check_shape_equality(im_true, im_test)
+    check_shape_equality(image_true, image_test)
 
     if data_range is None:
-        if im_true.dtype != im_test.dtype:
+        if image_true.dtype != image_test.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
                  "im_true.", stacklevel=2)
-        dmin, dmax = dtype_range[im_true.dtype.type]
-        true_min, true_max = np.min(im_true), np.max(im_true)
+        dmin, dmax = dtype_range[image_true.dtype.type]
+        true_min, true_max = np.min(image_true), np.max(image_true)
         if true_max > dmax or true_min < dmin:
             raise ValueError(
                 "im_true has intensity values outside the range expected for "
@@ -154,7 +154,7 @@ def peak_signal_noise_ratio(im_true, im_test, data_range=None):
         else:
             data_range = dmax - dmin
 
-    im_true, im_test = _as_floats(im_true, im_test)
+    image_true, image_test = _as_floats(image_true, image_test)
 
-    err = mean_squared_error(im_true, im_test)
+    err = mean_squared_error(image_true, image_test)
     return 10 * np.log10((data_range ** 2) / err)

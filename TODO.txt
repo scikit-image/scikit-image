@@ -17,6 +17,7 @@ Version 0.17
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 * Remove ``rough_wall`` from ``skimage.data.__init__``.
+* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
 
 Version 0.18
 ------------
