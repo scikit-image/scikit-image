@@ -351,17 +351,22 @@ def test_num_peaks():
 def test_corner_peaks():
     response = np.zeros((10, 10))
     response[2:5, 2:5] = 1
+    response[8:10, 0:2] = 1
 
     corners = corner_peaks(response, exclude_border=False, min_distance=10,
                            threshold_rel=0)
     assert len(corners) == 1
 
+    corners = corner_peaks(response, exclude_border=False, min_distance=5,
+                           threshold_rel=0)
+    assert len(corners) == 2
+
     corners = corner_peaks(response, exclude_border=False, min_distance=1)
-    assert len(corners) == 4
+    assert len(corners) == 5
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1,
                            indices=False)
-    assert np.sum(corners) == 4
+    assert np.sum(corners) == 5
 
 
 def test_blank_image_nans():
