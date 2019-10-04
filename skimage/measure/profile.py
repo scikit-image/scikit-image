@@ -3,7 +3,8 @@ from scipy import ndimage as ndi
 
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=1, mode='constant', cval=0.0):
+                 order=1, mode='constant', cval=0.0,
+                 intensity_type='mean'):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -66,7 +67,15 @@ def profile_line(image, src, dst, linewidth=1,
     else:
         pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
-    intensities = pixels.mean(axis=1)
+
+    if intensity_type == 'mean':
+        intensities = pixels.mean(axis=1)
+    elif intensity_type == 'max' or 'maximum':
+        intensities = pixels.max(axis=1)
+    elif intensity_type == 'min' or 'minimum':
+        intensities = pixels.min(axis=1)
+    elif intensity_type == 'sum' or 'total':
+        intensities = pixels.sum(axis=1)
 
     return intensities
 
