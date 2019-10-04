@@ -536,19 +536,12 @@ def test_niblack_sauvola_pathological_image():
 
 
 def test_bimodal_multiotsu_hist():
-
-    names = ('camera', 'moon', 'coins', 'text', 'clock', 'page')
-
-    for name in names:
+    for name in ['camera', 'moon', 'coins', 'text', 'clock', 'page']:
         img = getattr(data, name)()
-
         assert threshold_otsu(img) == threshold_multiotsu(img, 2)
 
-    names = ('chelsea', 'coffee', 'astronaut', 'rocket')
-
-    for name in names:
+    for name in ['chelsea', 'coffee', 'astronaut', 'rocket']:
         img = rgb2gray(getattr(data, name)())
-
         assert threshold_otsu(img) == threshold_multiotsu(img, 2)
 
 
@@ -571,8 +564,8 @@ def test_multiotsu_output():
     for coor, val in zip(coords, values):
         rr, cc = circle(coor[1], coor[0], 20)
         image[rr, cc] = val
-    thresholds = [1, 128]
-    assert np.array_equal(thresholds, threshold_multiotsu(image))
+    thresholds = [0, 64, 128]
+    assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))
 
 
 def test_multiotsu_astro_image():
