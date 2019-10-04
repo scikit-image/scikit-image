@@ -1,7 +1,3 @@
-from distutils.version import LooseVersion
-from platform import python_version
-import functools
-import re
 import sys
 
 
@@ -9,6 +5,10 @@ def ensure_python_version(min_version):
     if not isinstance(min_version, tuple):
         min_version = (min_version, )
     if sys.version_info < min_version:
+        # since ensure_python_version is in the critical import path,
+        # we lazy import it.
+        from platform import python_version
+
         raise ImportError("""
 
 You are running scikit-image on an unsupported version of Python.
@@ -43,6 +43,10 @@ def _check_version(actver, version, cmp_op):
 
     Distributed under the terms of the BSD License.
     """
+    # since version_requirements.py is in the critical import path, we
+    # lazy import it
+    from distutils.version import LooseVersion
+
     try:
         if cmp_op == '>':
             return LooseVersion(actver) > LooseVersion(version)
@@ -98,6 +102,10 @@ def is_installed(name, version=None):
     if version is None:
         return True
     else:
+        # since version_requirements is in the critical import path,
+        # we lazy import re
+        import re
+
         match = re.search('[0-9]', version)
         assert match is not None, "Invalid version number"
         symb = version[:match.start()]
@@ -128,6 +136,10 @@ def require(name, version=None):
         A decorator that raises an ImportError if a function is run
         in the absence of the input dependency.
     """
+    # since version_requirements is in the critical import path, we lazy import
+    # functools
+    import functools
+
     def decorator(obj):
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):

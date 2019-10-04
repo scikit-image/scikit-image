@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from .. import img_as_float
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 from ..restoration.uft import laplacian
@@ -110,7 +110,7 @@ def sobel(image, mask=None):
     >>> from skimage import filters
     >>> edges = filters.sobel(camera)
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     out = np.sqrt(sobel_h(image, mask) ** 2 + sobel_v(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
@@ -142,7 +142,7 @@ def sobel_h(image, mask=None):
      -1  -2  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, HSOBEL_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -174,7 +174,7 @@ def sobel_v(image, mask=None):
       1   0  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, VSOBEL_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -258,7 +258,7 @@ def scharr_h(image, mask=None):
            Optimization of Kernel Based Image Derivatives.
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, HSCHARR_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -295,7 +295,7 @@ def scharr_v(image, mask=None):
            Optimization of Kernel Based Image Derivatives.
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, VSCHARR_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -339,7 +339,7 @@ def prewitt(image, mask=None):
     >>> from skimage import filters
     >>> edges = filters.prewitt(camera)
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     out = np.sqrt(prewitt_h(image, mask) ** 2 + prewitt_v(image, mask) ** 2)
     out /= np.sqrt(2)
     return out
@@ -371,7 +371,7 @@ def prewitt_h(image, mask=None):
      -1  -1  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, HPREWITT_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -403,7 +403,7 @@ def prewitt_v(image, mask=None):
       1   0  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, VPREWITT_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -438,7 +438,7 @@ def roberts(image, mask=None):
     >>> edges = filters.roberts(camera)
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     out = np.sqrt(roberts_pos_diag(image, mask) ** 2 +
                   roberts_neg_diag(image, mask) ** 2)
     out /= np.sqrt(2)
@@ -473,7 +473,7 @@ def roberts_pos_diag(image, mask=None):
       0  -1
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -507,7 +507,7 @@ def roberts_neg_diag(image, mask=None):
      -1   0
 
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
@@ -547,7 +547,7 @@ def laplace(image, ksize=3, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def farid(image, mask=None):
+def farid(image, *, mask=None):
     """Find the edge magnitude using the Farid transform.
 
     Parameters
@@ -590,13 +590,14 @@ def farid(image, mask=None):
     >>> from skimage import filters
     >>> edges = filters.farid(camera)
     """
-    assert_nD(image, 2)
-    out = np.sqrt(farid_h(image, mask) ** 2 + farid_v(image, mask) ** 2)
+    check_nD(image, 2)
+    out = np.sqrt(farid_h(image, mask=mask) ** 2
+                  + farid_v(image, mask=mask) ** 2)
     out /= np.sqrt(2)
     return out
 
 
-def farid_h(image, mask=None):
+def farid_h(image, *, mask=None):
     """Find the horizontal edges of an image using the Farid transform.
 
     Parameters
@@ -626,13 +627,13 @@ def farid_h(image, mask=None):
            directional derivative kernels", In: 7th International Conference on
            Computer Analysis of Images and Patterns, Kiel, Germany. Sep, 1997.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, HFARID_WEIGHTS)
     return _mask_filter_result(result, mask)
 
 
-def farid_v(image, mask=None):
+def farid_v(image, *, mask=None):
     """Find the vertical edges of an image using the Farid transform.
 
     Parameters
@@ -659,7 +660,7 @@ def farid_v(image, mask=None):
            multidimensional signals", IEEE Transactions on Image Processing
            13(4): 496-508, 2004. :DOI:`10.1109/TIP.2004.823819`
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image = img_as_float(image)
     result = convolve(image, VFARID_WEIGHTS)
     return _mask_filter_result(result, mask)

@@ -30,7 +30,7 @@ contours = measure.find_contours(r, 0.8)
 
 # Display the image and plot all contours found
 fig, ax = plt.subplots()
-ax.imshow(r, interpolation='nearest', cmap=plt.cm.gray)
+ax.imshow(r, cmap=plt.cm.gray)
 
 for n, contour in enumerate(contours):
     ax.plot(contour[:, 1], contour[:, 0], linewidth=2)

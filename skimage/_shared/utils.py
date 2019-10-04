@@ -9,7 +9,7 @@ from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn']
+           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -151,7 +151,14 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def assert_nD(array, ndim, arg_name='image'):
+def check_shape_equality(im1, im2):
+    """Raise an error if the shape do not match."""
+    if not im1.shape == im2.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
+
+
+def check_nD(array, ndim, arg_name='image'):
     """
     Verify an array meets the desired ndims and array isn't empty.
 
@@ -219,7 +226,7 @@ def check_random_state(seed):
 
 
 def convert_to_float(image, preserve_range):
-    """Convert input image to double image with the appropriate range.
+    """Convert input image to float image with the appropriate range.
 
     Parameters
     ----------
@@ -230,13 +237,21 @@ def convert_to_float(image, preserve_range):
         using img_as_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
+    Notes:
+    ------
+    * Input images with `float32` data type are not upcast.
+
     Returns
     -------
     image : ndarray
         Transformed version of the input.
+
     """
     if preserve_range:
-        image = image.astype(np.double)
+        # Convert image to double only if it is not single or double
+        # precision float
+        if image.dtype.char not in 'df':
+            image = image.astype(float)
     else:
         image = img_as_float(image)
     return image

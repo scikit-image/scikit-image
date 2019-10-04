@@ -22,7 +22,6 @@ import numpy as np
 cimport numpy as np
 from .fused_numerics cimport np_real_numeric, np_floats
 
-
 cdef inline Py_ssize_t round(np_floats r) nogil:
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
@@ -306,8 +305,8 @@ cdef inline np_real_numeric get_pixel2d(np_real_numeric* image,
 
 cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
                                         Py_ssize_t rows, Py_ssize_t cols,
-                                        Py_ssize_t dims, long r, long c,
-                                        long d, char mode,
+                                        Py_ssize_t dims, Py_ssize_t r,
+                                        Py_ssize_t c, Py_ssize_t d, char mode,
                                         np_real_numeric cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
@@ -328,7 +327,6 @@ cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
     -------
     out : np_real_numeric
         Pixel value at given position.
-
     """
     if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):

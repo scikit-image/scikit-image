@@ -267,6 +267,20 @@ def test_rescale_uint14_limits():
     assert_array_almost_equal(out, [0, uint14_max])
 
 
+def test_rescale_all_zeros():
+    image = np.zeros((2, 2), dtype=np.uint8)
+    out = exposure.rescale_intensity(image)
+    assert ~np.isnan(out).all()
+    assert_array_almost_equal(out, image)
+
+
+def test_rescale_same_values():
+    image = np.ones((2, 2))
+    out = exposure.rescale_intensity(image)
+    assert ~np.isnan(out).all()
+    assert_array_almost_equal(out, image)
+
+
 # Test adaptive histogram equalization
 # ====================================
 
@@ -362,6 +376,12 @@ def norm_brightness_err(img1, img2):
 # Test Gamma Correction
 # =====================
 
+def test_adjust_gamma_1x1_shape():
+    """Check that the shape is maintained"""
+    img = np.ones([1,1])
+    result = exposure.adjust_gamma(img, 1.5)
+    assert img.shape == result.shape
+
 
 def test_adjust_gamma_one():
     """Same image should be returned for gamma equal to one"""
@@ -423,6 +443,13 @@ def test_adjust_gamma_neggative():
 # Test Logarithmic Correction
 # ===========================
 
+def test_adjust_log_1x1_shape():
+    """Check that the shape is maintained"""
+    img = np.ones([1, 1])
+    result = exposure.adjust_log(img, 1)
+    assert img.shape == result.shape
+
+
 def test_adjust_log():
     """Verifying the output with expected results for logarithmic
     correction with multiplier constant multiplier equal to unity"""
@@ -461,6 +488,13 @@ def test_adjust_inv_log():
 
 # Test Sigmoid Correction
 # =======================
+
+def test_adjust_sigmoid_1x1_shape():
+    """Check that the shape is maintained"""
+    img = np.ones([1, 1])
+    result = exposure.adjust_sigmoid(img, 1, 5)
+    assert img.shape == result.shape
+
 
 def test_adjust_sigmoid_cutoff_one():
     """Verifying the output with expected results for sigmoid correction

@@ -17,7 +17,7 @@ import scipy.ndimage as ndi
 from scipy.ndimage import generate_binary_structure, binary_erosion, label
 from ..filters import gaussian
 from .. import dtype_limits, img_as_float
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def smooth_with_function_and_mask(image, function, mask):
@@ -154,7 +154,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
-    assert_nD(image, 2)
+    check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
