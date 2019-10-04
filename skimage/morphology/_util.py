@@ -101,13 +101,18 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     raveled_offsets = (offsets * ravel_factors).sum(axis=1)
 
     # Sort by distance
-    squared_distances = np.abs(offsets).sum(axis=1)
-    raveled_offsets = raveled_offsets[np.argsort(squared_distances)]
+    distances = np.abs(offsets).sum(axis=1)
+    raveled_offsets = raveled_offsets[np.argsort(distances)]
 
-    # Remove zeros (e.g. center) and duplicates which may occur if a dimension
-    # in `image_shape` is smaller than in `selem`
-    raveled_offsets = raveled_offsets[raveled_offsets.astype(bool)]
-    raveled_offsets = np.unique(raveled_offsets)
+    # In case any dimension in image_shape is smaller than selem.shape
+    # duplicates might occur, remove them
+    if any(x < y for x, y in zip(image_shape, selem.shape)):
+        # np.unique reorders, which we don't want
+        _, indices = np.unique(raveled_offsets, return_index=True)
+        raveled_offsets = raveled_offsets[np.sort(indices)]
+
+    # Remove "offset to center"
+    raveled_offsets = raveled_offsets[1:]
 
     return raveled_offsets
 
