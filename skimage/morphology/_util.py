@@ -59,46 +59,57 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
 
     Parameters
     ----------
-    image_shape : tuple
+    image_shape : sequence
         The shape of the image for which the offsets are computed.
     selem : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
     center : sequence
-        Tuple of indices specifying the center of `selem`.
+        Indices specifying the center of `selem`.
+    order : {"C", "F"}, optional
+        Whether the image described by `image_shape` is in row-major (C-style)
+        or column-major (Fortran-style) order.
 
     Returns
     -------
-    offsets : ndarray
+    raveled_offsets : ndarray
         Linear offsets to a samples neighbors in the raveled image, sorted by
-        their Euclidean distance from the center.
+        their distance from the center.
 
-    Raises
-    ------
-    ValueError
-        If `image_shape` describes a dimension of zero length.
+    Notes
+    -----
+    This function will return values even if `image_shape` contains a dimension
+    length that is smaller than `selem`.
 
     Examples
     --------
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
-    selem = selem.copy()  # Don't modify original input
-    selem[tuple(center)] = 0  # Ignore the center; it's not a neighbor
-    selem_indices = np.nonzero(selem)
+    selem_indices = np.array(np.nonzero(selem)).T
+    offsets = selem_indices - center
 
-    offsets = (
-        np.ravel_multi_index(selem_indices, image_shape, order=order)
-        - np.ravel_multi_index(center, image_shape, order=order)
-    )
+    if order == 'F':
+        offsets = offsets[:, ::-1]
+        image_shape = image_shape[::-1]
+    elif not order == 'C':
+        raise ValueError("order was not 'C' or 'F'")
 
-    # Sort by distance to center
-    squared_distances = np.sum(
-        (np.transpose(selem_indices) - center) ** 2, axis=1
-    )
-    offsets = offsets[np.argsort(squared_distances)]
+    # Scale offsets in each dimension and sum
+    ravel_factors = image_shape[1:] + (1,)
+    ravel_factors = np.cumprod(ravel_factors[::-1])[::-1]
+    raveled_offsets = (offsets * ravel_factors).sum(axis=1)
 
-    return offsets
+    # Sort by distance
+    squared_distances = np.abs(offsets).sum(axis=1)
+    raveled_offsets = raveled_offsets[np.argsort(squared_distances)]
+
+    # Remove zeros (e.g. center) and duplicates which may occur if a dimension
+    # in `image_shape` is smaller than in `selem`
+    raveled_offsets = raveled_offsets[raveled_offsets.astype(bool)]
+    raveled_offsets = np.unique(raveled_offsets)
+
+    return raveled_offsets
 
 
 def _resolve_neighborhood(selem, connectivity, ndim):
