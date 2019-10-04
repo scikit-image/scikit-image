@@ -15,13 +15,15 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef float [::1] H = np.zeros((nbins * (nbins + 1)) / 2, dtype=np.float32)
-    cdef float [::1] P = np.empty(nbins, dtype=np.float32)
-    cdef float [::1] S = np.empty(nbins, dtype=np.float32)
+    cdef float [::1] var_btwcls = np.zeros((nbins * (nbins + 1)) / 2,
+                                           dtype=np.float32)
+    cdef float [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
+    cdef float [::1] first_moment = np.empty(nbins, dtype=np.float32)
 
     with nogil:
-        _set_var_btwcls_lut(prob, nbins, H, P, S)
-        _set_thresh_indices_lut(H, hist_idx=0,
+        _set_var_btwcls_lut(prob, nbins, var_btwcls, zeroth_moment,
+                            first_moment)
+        _set_thresh_indices_lut(var_btwcls, hist_idx=0,
                                 thresh_idx=0, nbins=nbins,
                                 thresh_count=thresh_count, sigma_max=0,
                                 current_indices=current_indices,
@@ -36,13 +38,13 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef float [:, ::1] H = np.zeros((nbins, nbins))
-    cdef float [::1] P = np.empty(nbins)
-    cdef float [::1] S = np.empty(nbins)
+    cdef float [:, ::1] var_btwcls = np.zeros((nbins, nbins))
+    cdef float [::1] zeroth_moment = np.empty(nbins)
+    cdef float [::1] first_moment = np.empty(nbins)
 
     with nogil:
-        _set_moment_lut_first_row(prob, nbins, P, S)
-        _set_thresh_indices(P, S, hist_idx=0,
+        _set_moment_lut_zeroth_row(prob, nbins, zeroth_moment, first_moment)
+        _set_thresh_indices(zeroth_moment, first_moment, hist_idx=0,
                             thresh_idx=0, nbins=nbins,
                             thresh_count=thresh_count, sigma_max=0,
                             current_indices=current_indices,
@@ -51,36 +53,38 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
     return py_thresh_indices
 
 
-cdef void _set_moment_lut_first_row(float [::1] prob,
+cdef void _set_moment_lut_zeroth_row(float [::1] prob,
                                     Py_ssize_t nbins,
-                                    float [::1] P,
-                                    float [::1] S) nogil:
+                                    float [::1] zeroth_moment,
+                                    float [::1] first_moment) nogil:
     cdef cnp.intp_t i
 
-    P[0] = prob[0]
-    S[0] = prob[0]
+    zeroth_moment[0] = prob[0]
+    first_moment[0] = prob[0]
     for i in range(1, nbins):
-        P[i] = P[i-1] + prob[i]
-        S[i] = S[i-1] + i*prob[i]
+        zeroth_moment[i] = zeroth_moment[i - 1] + prob[i]
+        first_moment[i] = first_moment[i - 1] + i * prob[i]
 
 
-cdef float _get_var_btwclas(float [::1] P, float [::1] S,
+cdef float _get_var_btwclas(float [::1] zeroth_moment,
+                            float [::1] first_moment,
                             Py_ssize_t i, Py_ssize_t j) nogil:
 
-    cdef float Pij, Sij
+    cdef float zeroth_moment_ij, first_moment_ij
 
     if i == 0:
-        if P[i] > 0:
-            return (S[j]**2)/P[j]
+        if zeroth_moment[i] > 0:
+            return (first_moment[j]**2) / zeroth_moment[j]
     else:
-        Pij = P[j] - P[i-1]
-        if Pij > 0:
-            Sij = S[j] - S[i-1]
-            return (Sij**2)/Pij
+        zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i-1]
+        if zeroth_moment_ij > 0:
+            first_moment_ij = first_moment[j] - first_moment[i-1]
+            return (first_moment_ij**2) / zeroth_moment_ij
     return 0
 
 
-cdef float _set_thresh_indices(float[::1] P, float[::1] S,
+cdef float _set_thresh_indices(float[::1] zeroth_moment,
+                               float[::1] first_moment,
                                Py_ssize_t hist_idx,
                                Py_ssize_t thresh_idx, Py_ssize_t nbins,
                                Py_ssize_t thresh_count, float sigma_max,
@@ -95,7 +99,7 @@ cdef float _set_thresh_indices(float[::1] P, float[::1] S,
 
     Parameters
     ----------
-    H : (nbins, nbins) 2D array
+    var_btwcls : (nbins, nbins) 2D array
         Lookup table of variance between classes.
     hist_idx : int
         Current index in the histogram.
@@ -131,10 +135,12 @@ cdef float _set_thresh_indices(float[::1] P, float[::1] S,
 
     if thresh_idx < thresh_count:
 
-        for idx in range(hist_idx, nbins-thresh_count+thresh_idx):
+        for idx in range(hist_idx, nbins - thresh_count + thresh_idx):
             current_indices[thresh_idx] = idx
-            sigma_max = _set_thresh_indices(P, S, hist_idx=idx+1,
-                                            thresh_idx=thresh_idx+1,
+            sigma_max = _set_thresh_indices(zeroth_moment,
+                                            first_moment,
+                                            hist_idx=idx + 1,
+                                            thresh_idx=thresh_idx + 1,
                                             nbins=nbins,
                                             thresh_count=thresh_count,
                                             sigma_max=sigma_max,
@@ -143,13 +149,15 @@ cdef float _set_thresh_indices(float[::1] P, float[::1] S,
 
     else:
 
-        sigma = (_get_var_btwclas(P, S, 0, current_indices[0])
-                 + _get_var_btwclas(P, S,
-                                    current_indices[thresh_count-1]+1,
-                                    nbins-1))
-        for idx in range(thresh_count-1):
-            sigma += _get_var_btwclas(P, S, current_indices[idx]+1,
-                                      current_indices[idx+1])
+        sigma = (_get_var_btwclas(zeroth_moment, first_moment, 0,
+                                  current_indices[0])
+                 + _get_var_btwclas(zeroth_moment, first_moment,
+                                    current_indices[thresh_count - 1] + 1,
+                                    nbins - 1))
+        for idx in range(thresh_count - 1):
+            sigma += _get_var_btwclas(zeroth_moment, first_moment,
+                                      current_indices[idx] + 1,
+                                      current_indices[idx + 1])
         if sigma > sigma_max:
             sigma_max = sigma
             thresh_indices[:] = current_indices[:]
@@ -159,14 +167,15 @@ cdef float _set_thresh_indices(float[::1] P, float[::1] S,
 
 cdef void _set_var_btwcls_lut(float [::1] prob,
                               Py_ssize_t nbins,
-                              float [::1] H,
-                              float [::1] P,
-                              float [::1] S) nogil:
+                              float [::1] var_btwcls,
+                              float [::1] zeroth_moment,
+                              float [::1] first_moment) nogil:
     """Build the between classes variance lookup table.
 
-    The between classes variance are stored in H. P and S are buffers
-    for storing the first row of respectively the zeroth and first
-    order moments lookup table (see [1]).
+    The between classes variance are stored in
+    var_btwcls. zeroth_moment and first_moment are buffers for storing
+    the first row of respectively the zeroth and first order moments
+    lookup table (see [1]).
 
     Parameters
     ----------
@@ -174,12 +183,12 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
         Intensities probabilies.
     nbins: int
         The number of intensity values.
-    H: (nbins*(nbins + 1) /2) 1D array
+    var_btwcls: (nbins*(nbins + 1) /2) 1D array
         The Upper triangular part of the between classes variance
         lookup table.
-    P: (nbins, ) 1D array
+    zeroth_moment: (nbins, ) 1D array
         First row of the zeroth order moments LUT (see [1]).
-    S: (nbins, ) 1D array
+    first_moment: (nbins, ) 1D array
         First row of the first order moments LUT (see [1]).
 
     References
@@ -191,34 +200,34 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
 
     """
     cdef cnp.intp_t i, j, idx
-    cdef float Pij, Sij
+    cdef float zeroth_moment_ij, first_moment_ij
 
-    idx = 1
-    P[0] = prob[0]
-    S[0] = prob[0]
+    zeroth_moment[0] = prob[0]
+    first_moment[0] = prob[0]
     for i in range(1, nbins):
-        P[i] = P[i-1] + prob[i]
-        S[i] = S[i-1] + i*prob[i]
-        if P[i] > 0:
-            H[idx] = (S[i]**2)/P[i]
-        idx += 1
+        zeroth_moment[i] = zeroth_moment[i-1] + prob[i]
+        first_moment[i] = first_moment[i-1] + i*prob[i]
+        if zeroth_moment[i] > 0:
+            var_btwcls[i] = (first_moment[i]**2)/zeroth_moment[i]
+
+    idx = nbins
 
     for i in range(1, nbins):
         for j in range(i, nbins):
-            Pij = P[j] - P[i-1]
-            if Pij > 0:
-                Sij = S[j] - S[i-1]
-                H[idx] = (Sij**2)/Pij
+            zeroth_moment_ij = zeroth_moment[j] - zeroth_moment[i-1]
+            if zeroth_moment_ij > 0:
+                first_moment_ij = first_moment[j] - first_moment[i-1]
+                var_btwcls[idx] = (first_moment_ij**2)/zeroth_moment_ij
             idx += 1
 
 
-cdef float _get_var_btwclas_lut(float [::1] H, Py_ssize_t i,
+cdef float _get_var_btwclas_lut(float [::1] var_btwcls, Py_ssize_t i,
                                 Py_ssize_t j, Py_ssize_t nbins) nogil:
     cdef cnp.intp_t idx = (i * (2 * nbins - i + 1)) / 2 + j - i
-    return H[idx]
+    return var_btwcls[idx]
 
 
-cdef float _set_thresh_indices_lut(float[::1] H, Py_ssize_t hist_idx,
+cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
                                    Py_ssize_t thresh_idx, Py_ssize_t nbins,
                                    Py_ssize_t thresh_count, float sigma_max,
                                    Py_ssize_t[::1] current_indices,
@@ -231,11 +240,12 @@ cdef float _set_thresh_indices_lut(float[::1] H, Py_ssize_t hist_idx,
      sigma (see [1]).
 
     For any candidate current_indices {t_0, ..., t_n}, sigma equals
-    H[0, t_0] + H[t_0+1, t_1] + ... + H[t_(i-1) + 1, t_i] + ... H[t_n, nbins-1]
+    var_btwcls[0, t_0] + var_btwcls[t_0+1, t_1] +
+    ... + var_btwcls[t_(i-1) + 1, t_i] + ... var_btwcls[t_n, nbins-1]
 
     Parameters
     ----------
-    H: (nbins*(nbins + 1) /2) 1D array
+    var_btwcls: (nbins*(nbins + 1) /2) 1D array
         The Upper triangular part of the between classes variance
         lookup table.
     hist_idx : int
@@ -274,7 +284,7 @@ cdef float _set_thresh_indices_lut(float[::1] H, Py_ssize_t hist_idx,
 
         for idx in range(hist_idx, nbins-thresh_count+thresh_idx):
             current_indices[thresh_idx] = idx
-            sigma_max = _set_thresh_indices_lut(H, hist_idx=idx+1,
+            sigma_max = _set_thresh_indices_lut(var_btwcls, hist_idx=idx+1,
                                                 thresh_idx=thresh_idx+1,
                                                 nbins=nbins,
                                                 thresh_count=thresh_count,
@@ -284,12 +294,12 @@ cdef float _set_thresh_indices_lut(float[::1] H, Py_ssize_t hist_idx,
 
     else:
 
-        sigma = (_get_var_btwclas_lut(H, 0, current_indices[0], nbins)
-                 + _get_var_btwclas_lut(H,
+        sigma = (_get_var_btwclas_lut(var_btwcls, 0, current_indices[0], nbins)
+                 + _get_var_btwclas_lut(var_btwcls,
                                         current_indices[thresh_count-1]+1,
                                         nbins-1, nbins))
         for idx in range(thresh_count-1):
-            sigma += _get_var_btwclas_lut(H, current_indices[idx]+1,
+            sigma += _get_var_btwclas_lut(var_btwcls, current_indices[idx]+1,
                                           current_indices[idx+1], nbins)
 
         if sigma > sigma_max:
