@@ -355,14 +355,14 @@ def test_corner_peaks():
 
     corners = corner_peaks(response, exclude_border=False, min_distance=10,
                            threshold_rel=0)
-    assert len(corners) == 1
+    assert corners.shape == (1, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=5,
                            threshold_rel=0)
-    assert len(corners) == 2
+    assert corners.shape == (2, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1)
-    assert len(corners) == 5
+    assert corners.shape == (5, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1,
                            indices=False)
