@@ -239,10 +239,10 @@ def remove_close_objects(
     image,
     minimal_distance,
     *,
+    priority=None,
     p_norm=2,
     selem=None,
     connectivity=None,
-    priority=None,
     inplace=False,
 ):
     """Remove objects until a minimal distance is ensured.
@@ -258,6 +258,11 @@ def remove_close_objects(
     minimal_distance : int or float
         Objects whose distance is not greater than this value are considered
         to close. Must be positive.
+    priority : ndarray, optional
+        An array matching `image` in shape that gives a priority for each
+        object in `image`. Objects with a lower value are removed first until
+        all remaining objects fulfill the distance requirement. If not given,
+        objects with a lower number of samples are removed first.
     p_norm : int or float, optional
         The Minkowski p-norm used to calculate the distance between objects.
         Defaults to 2 which corresponds to the Euclidean distance.
@@ -272,11 +277,6 @@ def remove_close_objects(
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
-    priority : ndarray, optional
-        An array matching `image` in shape that gives a priority for each
-        object in `image`. Objects with a lower value are removed first until
-        all remaining objects fulfill the distance requirement. If not given,
-        objects with a lower number of samples are removed first.
     inplace : bool, optional
         Whether to modify `image` inplace or return a new array.
 
@@ -299,7 +299,7 @@ def remove_close_objects(
     NaNs are treated as != 0 and thus are considered objects (or part of one).
 
     Setting `p_norm` to 1 will calculate the distance between objects as the
-    Manhatten distance, while ``np.inf`` corresponds to the Chebyshev distance.
+    Manhatten distance while ``np.inf`` corresponds to the Chebyshev distance.
 
     References
     ----------
@@ -405,5 +405,5 @@ def remove_close_objects(
     )
 
     if image_is_bool:
-        image = image.view(bool)  # Restore original dtype
+        image = image.base  # Restore original dtype
     return image
