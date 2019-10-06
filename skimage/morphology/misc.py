@@ -10,7 +10,7 @@ from scipy.spatial import cKDTree
 from .._shared.utils import warn
 from . import _util
 from .selem import _default_selem
-from ._close_objects_cy import _remove_close_objects
+from ._near_objects_cy import _remove_near_objects
 
 
 # Our function names don't exactly correspond to ndimages.
@@ -235,7 +235,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_close_objects(
+def remove_near_objects(
     image,
     minimal_distance,
     *,
@@ -307,8 +307,8 @@ def remove_close_objects(
 
     Examples
     --------
-    >>> from skimage.morphology import remove_close_objects
-    >>> remove_close_objects(np.array([True, False, True]), 2)
+    >>> from skimage.morphology import remove_near_objects
+    >>> remove_near_objects(np.array([True, False, True]), 2)
     array([False, False,  True], dtype=bool)
     >>> image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -320,7 +320,7 @@ def remove_close_objects(
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
-    >>> remove_close_objects(image, minimal_distance=3, priority=image)
+    >>> remove_near_objects(image, minimal_distance=3, priority=image)
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
            [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
            [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -393,7 +393,7 @@ def remove_close_objects(
     else:
         image_is_bool = False
 
-    _remove_close_objects(
+    _remove_near_objects(
         image=image.ravel(),
         labels=labels,
         raveled_indices=raveled_indices,

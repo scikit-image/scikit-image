@@ -3,7 +3,7 @@ import pytest
 from skimage.morphology import (
     remove_small_objects,
     remove_small_holes,
-    remove_close_objects,
+    remove_near_objects,
 )
 
 from skimage._shared import testing
@@ -221,7 +221,7 @@ class TestRemoveCloseObjects:
         desired = np.zeros_like(image, dtype=dtype)
         desired[[0, 2 * d, 3 * d + 1]] = -1
 
-        result = remove_close_objects(image, minimal_distance=minimal_distance)
+        result = remove_near_objects(image, minimal_distance=minimal_distance)
         assert result.dtype == desired.dtype
         assert_array_equal(result, desired)
 
@@ -250,7 +250,7 @@ class TestRemoveCloseObjects:
         )
 
         image = priority.astype(bool)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, minimal_distance=3, priority=priority
         )
         assert_array_equal(result, desired)
@@ -264,7 +264,7 @@ class TestRemoveCloseObjects:
         desired[-2:, ...] = False
         image = a.astype(bool)
 
-        result = remove_close_objects(image, minimal_distance=2)
+        result = remove_near_objects(image, minimal_distance=2)
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("value", [True, False])
@@ -272,25 +272,25 @@ class TestRemoveCloseObjects:
         image = np.empty((10, 10), dtype=bool)
         image.fill(value)
 
-        result = remove_close_objects(image, 3)
+        result = remove_near_objects(image, 3)
         assert_array_equal(image, result)
 
     def test_empty(self):
         image = np.empty((3, 3, 0), dtype=np.bool_)
-        result = remove_close_objects(image, 3)
+        result = remove_near_objects(image, 3)
         assert_equal(image, result)
 
     def test_priority(self):
         image = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], dtype=bool)
 
         # Default priority is reverse row-major (C-style) order
-        result = remove_close_objects(image, 3)
+        result = remove_near_objects(image, 3)
         desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)
 
         # Assigning priority with equal values shows same order
         priority = np.array([[0, 0, 2], [0, 0, 0], [2, 0, 0]], dtype=int)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, minimal_distance=3, priority=priority
         )
         desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
@@ -298,7 +298,7 @@ class TestRemoveCloseObjects:
 
         # But given a priority that order can be overuled
         priority = np.array([[0, 0, 2], [0, 0, 0], [1, 0, 0]], dtype=int)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, minimal_distance=3, priority=priority
         )
         desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
@@ -310,17 +310,17 @@ class TestRemoveCloseObjects:
         desired = np.array([False, False, True], dtype=bool)
 
         # By default input image is not modified
-        remove_close_objects(image, 2)
+        remove_near_objects(image, 2)
         assert_array_equal(image, image_copy)
 
-        remove_close_objects(image, 2, inplace=True)
+        remove_near_objects(image, 2, inplace=True)
         assert_array_equal(image, desired)
 
     @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
     def test_negative_minimal_distance(self, minimal_distance):
         image = np.array([True, False, True])
         with pytest.raises(ValueError, match="must be >= 0"):
-            remove_close_objects(image, minimal_distance)
+            remove_near_objects(image, minimal_distance)
 
     def test_non_zero(self):
         # Check an object with different values is recognized as one as long
@@ -328,7 +328,7 @@ class TestRemoveCloseObjects:
         image = np.array([1, 0, 0, -1, 2, 99, -10])
         desired = np.array([1, 0, 0, 0, 0, 0, 0])
         priority = np.arange(image.size)[::-1]
-        result = remove_close_objects(image, 3, priority=priority)
+        result = remove_near_objects(image, 3, priority=priority)
         assert_array_equal(result, desired)
 
     def test_diagonal_selem(self):
@@ -338,14 +338,14 @@ class TestRemoveCloseObjects:
         image = np.ones((100, 50))
         desired = np.array([[1, 0] * 25, [0, 1] * 25] * 50, dtype=image.dtype)
 
-        result = remove_close_objects(image, 1, selem=selem)
+        result = remove_near_objects(image, 1, selem=selem)
         assert_array_equal(result, desired)
 
     def test_nan(self):
         # Check that NaNs are treated as objects
         image = np.array([np.nan, np.nan, np.nan, 0, np.nan, np.nan, np.nan])
         desired = np.array([0, 0, 0, 0, np.nan, np.nan, np.nan])
-        result = remove_close_objects(image, 2)
+        result = remove_near_objects(image, 2)
         assert_array_equal(result, desired)
 
     def test_p_norm(self):
@@ -353,31 +353,31 @@ class TestRemoveCloseObjects:
         removed = np.array([[2, 0], [0, 0]])
 
         # p_norm=2, default (Euclidean distance)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, 1.4, connectivity=1, priority=image
         )
         assert_array_equal(result, image)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, np.sqrt(2), connectivity=1, priority=image
         )
         assert_array_equal(result, removed)
 
         # p_norm=1 (Manhatten distance)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, 1.9, p_norm=1, connectivity=1, priority=image
         )
         assert_array_equal(result, image)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, 2, p_norm=1, connectivity=1, priority=image
         )
         assert_array_equal(result, removed)
 
         # p_norm=np.inf (Chebyshev distance)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, 0.9, p_norm=np.inf, connectivity=1, priority=image
         )
         assert_array_equal(result, image)
-        result = remove_close_objects(
+        result = remove_near_objects(
             image, 1, p_norm=np.inf, connectivity=1, priority=image
         )
         assert_array_equal(result, removed)

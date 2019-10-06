@@ -17,7 +17,7 @@ def configuration(parent_package='', top_path=None):
             '_convex_hull.pyx',
             '_greyreconstruct.pyx',
             '_extrema_cy.pyx',
-            '_close_objects_cy.pyx'], working_path=base_path)
+            '_near_objects_cy.pyx'], working_path=base_path)
     # _skeletonize_3d uses c++, so it must be cythonized separately
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
     cython(['_flood_fill_cy.pyx'], working_path=base_path)
@@ -41,7 +41,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_close_objects_cy', sources=['_close_objects_cy.c'],
+    config.add_extension('_near_objects_cy', sources=['_near_objects_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

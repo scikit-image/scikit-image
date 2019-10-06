@@ -10,7 +10,7 @@ from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import (remove_small_objects, remove_small_holes,
-                   remove_close_objects)
+                   remove_near_objects)
 from .extrema import h_minima, h_maxima, local_maxima, local_minima
 from ._flood_fill import flood, flood_fill
 from .max_tree import (max_tree, area_opening, area_closing,

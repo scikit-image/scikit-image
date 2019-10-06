@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 
-"""Cython code used in `remove_close_objects` function."""
+"""Cython code used in `remove_near_objects` function."""
 
 
 import numpy as np
@@ -31,7 +31,7 @@ ctypedef fused dtype_t:
     cnp.float64_t
 
 
-def _remove_close_objects(
+def _remove_near_objects(
     dtype_t[::1] image not None,
     Py_ssize_t[::1] labels not None,
     Py_ssize_t[::1] raveled_indices not None,

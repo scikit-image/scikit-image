@@ -68,7 +68,7 @@ class Skeletonize3d(object):
         morphology.skeletonize(self.image)
 
 
-class RemoveCloseObjects(object):
+class RemoveNearObjects(object):
 
     param_names = ["minimal_distance"]
     params = [5, 100]
@@ -78,8 +78,8 @@ class RemoveCloseObjects(object):
         image = color.rgb2gray(image)
         self.objects = image > 0.18  # Chosen with threshold_li
 
-    def time_remove_close_objects(self, minimal_distance):
-        morphology.remove_close_objects(
+    def time_remove_near_objects(self, minimal_distance):
+        morphology.remove_near_objects(
             self.objects, minimal_distance=minimal_distance
         )
 
@@ -99,8 +99,8 @@ class RemoveCloseObjects(object):
         """
         pass
 
-    def peakmem_remove_close_objects(self, minimal_distance):
-        morphology.remove_close_objects(
+    def peakmem_remove_near_objects(self, minimal_distance):
+        morphology.remove_near_objects(
             self.objects,
             minimal_distance=minimal_distance,
             priority=self.objects,
