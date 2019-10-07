@@ -57,7 +57,7 @@ project in concrete ways, such as:
   in the
   `project chat room <skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
-- Reviewing
+- reviewing
   `open pull requests <https://github.com/scikit-image/scikit-image/pulls>`_,
 
 among other possibilities. Any community member can become a contributor, and
