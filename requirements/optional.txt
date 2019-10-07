@@ -6,3 +6,20 @@ pyamg
 dask[array]>=0.15.0
 # cloudpickle is necessary to provide the 'processes' scheduler for dask
 cloudpickle>=0.2.1
+# gputools requirements
+appdirs==1.4.3
+configparser==4.0.2
+decorator==4.4.0
+funcsigs==1.0.2
+gputools==0.2.9
+Mako==1.1.0
+MarkupSafe==1.1.1
+numpy==1.17.2
+pkg-resources==0.0.0
+pyopencl==2019.1.1
+pytools==2019.1.1
+reikna==0.7.4
+scikit-tensor-py3==0.4.1
+scipy==1.3.1
+six==1.12.0
+
