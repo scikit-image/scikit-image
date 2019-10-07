@@ -61,3 +61,13 @@ The number of jobs can be specified.
         Parallel(n_jobs=4)(delayed(task)(i) for i in pics)
 
     %timeit joblib_loop()
+
+
+``apply_parallel`` Maps a function in parallel across an array.
+
+.. code-block:: python
+    
+    from skimage.util.apply_parallel import apply_parallel
+    apply_parallel(threshold_local, a, chunks=(6, 6), depth=5,
+                   extra_arguments=(3,),
+                   extra_keywords={'mode': 'reflect'})
