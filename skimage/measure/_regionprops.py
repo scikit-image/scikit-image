@@ -529,7 +529,10 @@ def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
                       cache=True, separator='-'):
-    """Find image properties and convert them into a dictionary
+    """Compute image properties and return them as a pandas-compatible table.
+
+    The table is a dictionary mapping column names to value arrays. See Notes
+    section below for details.
 
     Parameters
     ----------
