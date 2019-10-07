@@ -158,7 +158,7 @@ are made according to the following rules:
   require a :ref:`skip` and follow the decision-making process outlined above,
   *unless* there is unanimous agreement from core developers on the change.
 
-If a veto is cast on a lazy consensus, the proposer can appeal to the
+If an objection is raised on a lazy consensus, the proposer can appeal to the
 community and core developers and the change can be approved or rejected by
 escalating to the SC, and if necessary, a SKIP (see below).
 
