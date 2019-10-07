@@ -73,7 +73,12 @@ Sections
 
        Conditions on the use and redistribution of this package.
 
+   * - `SKIPs <skips/index.html>`_
 
+       SciKit-Image Proposals, documents describing major changes to the
+       library.
+
+     -
 
 Indices
 =======
