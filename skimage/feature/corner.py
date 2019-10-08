@@ -3,6 +3,7 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
+from scipy.spatial.distance import pdist
 
 from ..util import img_as_float
 from ..feature import peak_local_max
@@ -915,7 +916,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None):
+                 footprint=None, labels=None, metric='chebyshev'):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -925,6 +926,8 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     ----------
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
+    metric: str
+        The metric used for measuring the distance.
 
     See also
     --------
@@ -958,6 +961,9 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
 
     """
 
+    if metric not in ['chebyshev', 'euclidean']:
+        raise ValueError("metric should be 'chebyshev' or 'euclidean'.")
+
     peaks = peak_local_max(image, min_distance=min_distance,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
@@ -966,16 +972,34 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
                            footprint=footprint, labels=labels)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())
-        for r, c in coords:
-            if peaks[r, c]:
-                peaks[r - min_distance:r + min_distance + 1,
-                      c - min_distance:c + min_distance + 1] = False
-                peaks[r, c] = True
+        num_peaks = coords.shape[0]
+        # Compute the distance between each detected distance
+        dist = pdist(coords, metric)
+        rejected_peaks = set()
+        start = end = 0
+        step = num_peaks - 1
+        for i in range(num_peaks - 2):
+            end += step
+            if i in rejected_peaks:
+                start = end
+                step -= 1
+                continue
+            candidates = i + 1 + np.nonzero(dist[start:end] <= min_distance)[0]
+            rejected_peaks.update(candidates)
+            start = end
+            step -= 1
+
+        # Remove the peaks that are too close to each others
+        rejected_peaks = tuple(rejected_peaks)
+        if indices is True:
+            return np.delete(coords, rejected_peaks, axis=0)
+
+        peaks[tuple(coords[rejected_peaks, :].T)] = False
 
     if indices is True:
         return np.transpose(peaks.nonzero())
-    else:
-        return peaks
+
+    return peaks
 
 
 def corner_moravec(image, window_size=1):
