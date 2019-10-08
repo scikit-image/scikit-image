@@ -1110,7 +1110,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     Notes
     -----
     This implementation relies on a Cython function whose complexity
-    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
