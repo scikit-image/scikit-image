@@ -1085,7 +1085,7 @@ def apply_hysteresis_threshold(image, low, high):
 
 
 def threshold_multiotsu(image, classes=3, nbins=256):
-    r"""Generates multiple thresholds for an input image.
+    r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
 
     Parameters
     ----------
