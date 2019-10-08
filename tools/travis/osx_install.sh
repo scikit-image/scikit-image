@@ -1,7 +1,7 @@
 #!/bin/bash
 brew update
 brew install ccache
-brew tap caskroom/cask
+brew tap homebrew/homebrew-cask
 brew cask install basictex
 
 export PATH="$PATH:/Library/TeX/texbin"
