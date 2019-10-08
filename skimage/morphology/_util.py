@@ -59,13 +59,13 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
 
     Parameters
     ----------
-    image_shape : sequence
+    image_shape : tuple
         The shape of the image for which the offsets are computed.
     selem : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
-    center : sequence
-        Indices specifying the center of `selem`.
+    center : tuple
+        Tuple of indices to the center of `selem`.
     order : {"C", "F"}, optional
         Whether the image described by `image_shape` is in row-major (C-style)
         or column-major (Fortran-style) order.
@@ -86,6 +86,12 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     """
+    if not selem.ndim == len(image_shape) == len(center):
+        raise ValueError(
+            "number of dimensions in image_shape, selem and center "
+            "does not match"
+        )
+
     selem_indices = np.array(np.nonzero(selem)).T
     offsets = selem_indices - center
 
