@@ -14,7 +14,7 @@ https://scikit-image.org
 Starting from this release, scikit-image will follow the spirit of the recently
 introduced numpy deprecation policy -- NEP 29
 (https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
-Accordingly, scikit-image 0.16 drops the support for Python 3.5.
+Accordingly, scikit-image 0.16 drops support for Python 3.5.
 This release of scikit-image officially supports Python 3.6 and 3.7.
 
 New Features
@@ -23,18 +23,18 @@ New Features
   nrme, psd) and segmentation metrics (adapted rand error, variation of
   information) (#4025)
 - Added TV-L1 optical flow algorithm for registration --
-`skimage.registration.optical_flow_tvl1` (#3983)
+  `skimage.registration.optical_flow_tvl1` (#3983)
 - Added a function drawing a line in n-dimensional space -- `skimage.draw.line_nd`
   (#2043)
 - Added Farid & Simoncelli edge filters - `skimage.filters.farid`,
   `skimage.filters.farid_h`, and `skimage.filters.farid_v` (#3775)
-- Added Majority voting filter assigning to each pixel the most occuring value
-  within its neighboor -- `skimage.filters.majority` (#3836, #3839)
+- Added Majority voting filter assigning to each pixel the most commonly occuring value
+  within its neighborhood -- `skimage.filters.majority` (#3836, #3839)
 - Added multi-level threshold "multi-Otsu" method, a thresholding algorithm
   used to separate the pixels of an input image into several classes by
   maximizing the variances between classes --
   `skimage.filters.threshold_multiotsu` (#3872, #4174)
-- Added new data -- `skimage.data.shepp_logan_phantom`, `skimage.data.colorwheel`,
+- Added new example data -- `skimage.data.shepp_logan_phantom`, `skimage.data.colorwheel`,
   `skimage.data.brick`, `skimage.data.grass`, `skimage.data.roughwall`, `skimage.data.cell`
   (#3958, #3966)
 - Added function to find labeled image properties and convert them to
@@ -42,53 +42,53 @@ New Features
 - Added new function to convert a polygon into a mask -- `skimage.draw.poly2mask`  (#3971, #3977)
 - Added new visual image comparison helper `skimage.util.compare_images`,
   that returns an image showing the difference between two input images (#4089)
-- Added new function `skimage.transform.wrap_polar` to remap image into
+- Added new function `skimage.transform.warp_polar` to remap image into
   polar or log-polar coordinates. (#4097)
 
 Improvements
 ------------
 
 - RANSAC: new option to set initial samples selected for initialization (#2992)
-- Better repr and str for ``skimage.transform.ProjectiveTransform`` (#3525,
+- Better repr and str for `skimage.transform.ProjectiveTransform` (#3525,
   #3967)
 - Better error messages and data type stability to
-  ``skimage.segmentation.relabel_sequential`` (#3740)
+  `skimage.segmentation.relabel_sequential` (#3740)
 - Compatibility with dask for image thresholding methods (#3823)
-- ``skimage.io.ImageCollection`` can now receive lists of patterns (#3928)
-- Speed up ``skimage.feature.peak_local_max`` (#3984)
+- `skimage.io.ImageCollection` can now receive lists of patterns (#3928)
+- Speed up `skimage.feature.peak_local_max` (#3984)
 - Better error message when incorrect value for keyword argument `kind` in
-  ``skimage.color.label2rgb`` (#4055)
-- All functions from ``skimage.drawing`` now supports multi-channel 2D images (#4134)
+  `skimage.color.label2rgb` (#4055)
+- All functions from `skimage.drawing` now supports multi-channel 2D images (#4134)
 
 API Changes
 -----------
 - Deprecated subpackage ``skimage.novice`` has been removed.
 - Default value of ``multichannel`` parameters has been set to False in
-  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
-  ``skimage.transform.pyramid_laplacian``,
-  ``skimage.transform.pyramid_gaussian``, and
-  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
+  `skimage.transform.rescale`, `skimage.transform.pyramid_reduce`,
+  `skimage.transform.pyramid_laplacian`,
+  `skimage.transform.pyramid_gaussian`, and
+  `skimage.transform.pyramid_expand`. No guessing is performed for 3D arrays
   anymore, so, please, make sure that the parameter is fixed to a proper value.
 - Deprecated argument ``visualise`` has been removed from
-  ``skimage.feature.hog``. Use ``visualize`` instead.¨
-- ``skimage.transform.seam_carve`` has been completely removed from the
+  `skimage.feature.hog`. Use ``visualize`` instead.¨
+- `skimage.transform.seam_carve` has been completely removed from the
   library due to licensing restrictions.
-- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
-  ``skimage.io.imread``. Use ``as_gray`` instead.
+- Parameter ``as_grey`` has been removed from `skimage.data.load` and
+  `skimage.io.imread`. Use ``as_gray`` instead.
 - Parameter ``min_size`` has been removed from
-  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
-- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
+  `skimage.morphology.remove_small_holes`. Use ``area_threshold`` instead.
+- Deprecated ``correct_mesh_orientation`` in `skimage.measure` has been
   removed.
-- ``skimage.measure._regionprops`` has been completely switched to using
+- `skimage.measure._regionprops` has been completely switched to using
   row-column coordinates. Old x-y interface is not longer available.
 - Default value of ``behavior`` parameter has been set to ``ndimage`` in
-  ``skimage.filters.median``.
+  `skimage.filters.median`.
 - Parameter ``flatten`` in `skimage.io.imread` has been removed in
   favor of ``as_gray``.
 - Parameters ``Hxx, Hxy, Hyy`` have been removed from
-  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
+  `skimage.feature.corner.hessian_matrix_eigvals` in favor of ``H_elems``.
 - Default value of ``order`` parameter has been set to ``rc`` in
-  ``skimage.feature.hessian_matrix``.
+  `skimage.feature.hessian_matrix`.
 - ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
 
 Bugfixes
@@ -97,56 +97,56 @@ Bugfixes
 - Corrected error with scales attribute in ORB.detect_and_extract (#2835)
   The scales attribute wasn't taking into account the mask, and thus was using
   an incorrect array size.
-- Correct for bias in Inverse Radon Transform (``skimage.transform.irandon``) (#3067)
+- Correct for bias in Inverse Randon Transform (`skimage.transform.irandon`) (#3067)
   Fixed by using the Ramp filter equation in the spatial domain as described
   in the reference
 - Fix a rounding issue that caused  a rotated image to have a
-  different size than the input (``skimage.transform.rotate``)  (#3173)
+  different size than the input (`skimage.transform.rotate`)  (#3173)
 - RANSAC uses random subsets of the original data and not bootstraps. (#3901,
   #3915)
 - Canny now produces the same output regardless of dtype (#3919)
 - Geometry Transforms: avoid division by zero & some degenerate cases (#3926)
 - Fixed float32 support in denoise_bilateral and denoise_tv_bregman (#3936)
 - Fixed computation of Meijering filter and avoid ZeroDivisionError (#3957)
-- Fixed ``skimage.filters.threshold_li`` to prevent being stuck on stationnary
+- Fixed `skimage.filters.threshold_li` to prevent being stuck on stationnary
   points, and thus at local minima or maxima (#3966)
-- Edited ``skimage.exposure.rescale_intensity`` to return input image instead of
+- Edited `skimage.exposure.rescale_intensity` to return input image instead of
   nans when all 0 (#4015)
-- Fixed ``skimage.morphology.medial_axis``. A wrong indentation in Cython
+- Fixed `skimage.morphology.medial_axis`. A wrong indentation in Cython
   caused the function to not behave as intended. (#4060)
-- Fixed ``skimage.restoration.denoise_bilateral`` by correcting the padding in
+- Fixed `skimage.restoration.denoise_bilateral` by correcting the padding in
   the gaussian filter(#4080)
-- Fixed ``skimage.measure.find_contours`` when input image contains NaN.
+- Fixed `skimage.measure.find_contours` when input image contains NaN.
   Contours interesting NaN will be left open (#4150)
-- Fixed ``skimage.feature.blob_log`` and ``skimage.feature.blob_dog`` for 3D
+- Fixed `skimage.feature.blob_log` and `skimage.feature.blob_dog` for 3D
   images and anisotropic data (#4162)
-- Fixed ``skimage.exposure.adjust_gamma``, ``skimage.exposure.adjust_log``,
-  and ``skimage.exposure.adjust_sigmoid`` such that when provided with a 1 by
+- Fixed `skimage.exposure.adjust_gamma`, `skimage.exposure.adjust_log`,
+  and `skimage.exposure.adjust_sigmoid` such that when provided with a 1 by
   1 ndarray, it returns 1 by 1 ndarrays and not single number floats (#4169)
 
 Deprecations
 ------------
-- Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
+- Parameter ``neighbors`` in `skimage.measure.convex_hull_object` has been
   deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
-- The following functions are deprecated in favor of the ``skimage.evaluate``
+- The following functions are deprecated in favor of the `skimage.metrics`
   module (#4025):
 
-    - ``skimage.measure.compare_mse``
-    - ``skimage.measure.compare_nrmse``
-    - ``skimage.measure.compare_pnsr``
-    - ``skimage.measure.compare_ssim``
+    - `skimage.measure.compare_mse`
+    - `skimage.measure.compare_nrmse`
+    - `skimage.measure.compare_psnr`
+    - `skimage.measure.compare_ssim`
 
-- The function ``skimage.color.guess_spatial_dimensions`` is deprecated and
+- The function `skimage.color.guess_spatial_dimensions` is deprecated and
   will be removed in 0.18 (#4031)
-- The argument ``bc`` in ``skimage.segmentation.active_contour`` is
+- The argument ``bc`` in `skimage.segmentation.active_contour` is
   deprecated.
-- The function ``skimage.data.load`` is deprecated and will be removed in 0.18
+- The function `skimage.data.load` is deprecated and will be removed in 0.18
   (#4061)
-- The function ``skimage.transform.match_histogram`` is deprecated in favor of
-  ``skimage.exposure.match_histogram`` (#4107)
-- The parameter ``neighbors`` of ``skimage.morphology.convex_hull_object`` is
+- The function `skimage.transform.match_histogram` is deprecated in favor of
+  `skimage.exposure.match_histogram` (#4107)
+- The parameter ``neighbors`` of `skimage.morphology.convex_hull_object` is
   deprecated. 
-- The ``skimage.transform.radon_tranform`` function will convert input image
+- The `skimage.transform.randon_tranform` function will convert input image
   of integer type to float by default in 0.18. To preserve current behaviour,
   set the new argument ``preserve_range`` to True. (#4131)
 
@@ -314,7 +314,6 @@ Contributors to this release
 - Hadrien Mary
 - Hamdi Sahloul
 - holly-c-gibbs (Holly Gibbs)
-- holly-c-gibbs (holly-c-gibbs)
 - Huang-Wei Chang
 - i3v (i3v)
 - Jarrod Millman
@@ -327,7 +326,7 @@ Contributors to this release
 - Kaligule (Kaligule)
 - kczimm (kczimm)
 - Lars Grueter
-- leGIT-bot (leGIT-bot)
+- Shachar Ben Harim (leGIT-bot)
 - Luis F. de Figueiredo
 - Mark Harfouche
 - Mars Huang
@@ -335,7 +334,6 @@ Contributors to this release
 - Nelle Varoquaux
 - Ollin Boer Bohan
 - Patrick J Zager
-- Riadh
 - Riadh Fezzani
 - Ryan Avery
 - Srinath Kailasa

@@ -32,6 +32,9 @@ the corresponding release branch.
      the affected functions, elaborating on the changes and their
      consequences. If possible, organize semantically close PRs in groups.
 
+  5. Check for duplicate names in the automatically generated list of
+     contributors and reviewers
+
   5. Rename the file to ``doc/release/release_<major>.<minor>.txt``
 
   6. Copy ``doc/release/release_template.txt`` to
