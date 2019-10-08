@@ -6,7 +6,7 @@ Euler number
 This example shows an illustration of the computation of the Euler number
 in 2D and 3D objects.
 
-For 2D objects, Euler number if the number of objects minus the number of
+For 2D objects, Euler number is the number of objects minus the number of
 holes. Notice that if an object is 8-connected, its complementary set is
 4-connected, and conversely. It is also possible to compute the number of
 objects using `measure.label`, and to deduce the number of holes from the
