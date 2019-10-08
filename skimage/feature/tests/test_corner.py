@@ -363,6 +363,26 @@ def test_corner_peaks():
                            indices=False)
     assert np.sum(corners) == 4
 
+    # Test Euclidean distance
+
+    corners = corner_peaks(response, exclude_border=False,
+                           min_distance=2, metric='chebyshev')
+    assert len(corners) == 1
+
+    corners = corner_peaks(response, exclude_border=False,
+                           min_distance=2, metric='chebyshev',
+                           indices=False)
+    assert np.sum(corners) == 1
+
+    corners = corner_peaks(response, exclude_border=False,
+                           min_distance=2, metric='euclidean')
+    assert len(corners) == 2
+
+    corners = corner_peaks(response, exclude_border=False,
+                           min_distance=2, metric='euclidean',
+                           indices=False)
+    assert np.sum(corners) == 2
+
 
 def test_blank_image_nans():
     """Some of the corner detectors had a weakness in terms of returning
