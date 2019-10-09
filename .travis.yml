@@ -5,9 +5,9 @@
 
 # See tools/travis/notes.txt for some guidelines
 
-# If this is ever changed to xenial (Ubuntu 16.04), make sure to enable the
-# xvfb service
-dist: trusty
+dist: xenial
+services:
+  - xvfb
 language: python
 cache:
   # See https://docs.travis-ci.com/user/caching/#pip-cache
@@ -56,29 +56,17 @@ matrix:
     - os: linux
       python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
-      dist: xenial # Required for Python 3.7
-      services:
-        - xvfb
     - os: linux
       python: 3.7
-      dist: xenial # Required for Python 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
-      services:
-        - xvfb
     # When 3.8 gets released, and dependencies have built wheels, enable
     # this build
     # - os: linux
     #   python: 3.8
     #   env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
-    #   dist: xenial # Required for Python 3.7
-    #   services:
-    #     - xvfb
     - os: linux
       python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
-      dist: xenial # Required for Python 3.7
-      services:
-        - xvfb
     # For smooth deployment, the osx_image here should match
     # what we set in the wheel generation travis images.
     # If not set, it will use the default version from Travis
