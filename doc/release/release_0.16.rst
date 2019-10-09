@@ -12,8 +12,8 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 Starting from this release, scikit-image will follow the spirit of the recently
-introduced numpy deprecation policy -- NEP 29
-(https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
+introduced NumPy deprecation policy, `NEP 29
+<https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst>__`.
 Accordingly, scikit-image 0.16 drops support for Python 3.5.
 This release of scikit-image officially supports Python 3.6 and 3.7.
 
