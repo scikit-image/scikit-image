@@ -26,14 +26,15 @@ New Features
 - Introduced a new `skimage.evaluate` module containing simple metrics (mse,
   nrme, psd) and segmentation metrics (adapted rand error, variation of
   information) (#4025)
-- Added TV-L1 optical flow algorithm for registration --
+- Added n-dimensional TV-L1 optical flow algorithm for registration --
   `skimage.registration.optical_flow_tvl1` (#3983)
 - Added a function drawing a line in n-dimensional space -- `skimage.draw.line_nd`
   (#2043)
-- Added Farid & Simoncelli edge filters - `skimage.filters.farid`,
+- Added 2D Farid & Simoncelli edge filters - `skimage.filters.farid`,
   `skimage.filters.farid_h`, and `skimage.filters.farid_v` (#3775)
-- Added Majority voting filter assigning to each pixel the most commonly occuring value
-  within its neighborhood -- `skimage.filters.majority` (#3836, #3839)
+- Added 2D majority voting filter assigning to each pixel the most commonly
+  occurring value within its neighborhood -- `skimage.filters.majority`
+  (#3836, #3839)
 - Added multi-level threshold "multi-Otsu" method, a thresholding algorithm
   used to separate the pixels of an input image into several classes by
   maximizing the variances between classes --
