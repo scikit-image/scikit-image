@@ -17,6 +17,10 @@ introduced numpy deprecation policy -- NEP 29
 Accordingly, scikit-image 0.16 drops support for Python 3.5.
 This release of scikit-image officially supports Python 3.6 and 3.7.
 
+Special thanks to Matthias Bussonnier for `Frappuccino
+<https://github.com/Carreau/frappuccino>`__, which helped us catch all API
+changes and nail down the APIs for new features.
+
 New Features
 ------------
 - Introduced a new `skimage.evaluate` module containing simple metrics (mse,
