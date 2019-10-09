@@ -41,8 +41,8 @@ New Features
 - Added new example data -- `skimage.data.shepp_logan_phantom`, `skimage.data.colorwheel`,
   `skimage.data.brick`, `skimage.data.grass`, `skimage.data.roughwall`, `skimage.data.cell`
   (#3958, #3966)
-- Added function to find labeled image properties and convert them to
-  dictionary -- `skimage.measure.regionprops_table` (#3959)
+- Added function to compute and format image region properties as a table --
+  `skimage.measure.regionprops_table` (#3959)
 - Added new function to convert a polygon into a mask -- `skimage.draw.poly2mask`  (#3971, #3977)
 - Added new visual image comparison helper `skimage.util.compare_images`,
   that returns an image showing the difference between two input images (#4089)
