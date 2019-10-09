@@ -978,7 +978,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
         rejected_peaks = set()
         start = end = 0
         step = num_peaks - 1
-        for i in range(num_peaks - 2):
+        for i in range(num_peaks - 1):
             end += step
             if i in rejected_peaks:
                 start = end
