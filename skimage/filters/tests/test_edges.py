@@ -491,7 +491,8 @@ def test_vertical_mask_line(grad_func):
     expected[1:-1, 4:7] = 0  # but line and neighbors masked
 
     result = grad_func(hgrad, mask)
-    assert_allclose(result, expected) 
+    assert_allclose(result, expected,atol=1e-07,rtol=1e-08)
+
 
 def test_range():
     """Output of edge detection should be in [0, 1]"""
