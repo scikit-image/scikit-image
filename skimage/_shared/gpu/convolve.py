@@ -2,15 +2,6 @@ from scipy import ndimage as ndi
 import numpy as np
 import skimage._shared.gpu
 #setup the imports, attempt gputools, if not, fallback instantly
-#
-
-'''
-  mode_str = {"constant":"CLK_ADDRESS_CLAMP",
-                "wrap":"CLK_ADDRESS_REPEAT"}
-                "wrap":"CLK_ADDRESS_REPEAT",
-                "nearest":"CLK_ADDRESS_CLAMP_TO_EDGE",
-                "reflect":"CLK_ADDRESS_MIRRORED_REPEAT"}
-'''
 
 if(skimage._shared.gpu.use_gpu):
     import skimage._vendor.gputools as gputools
