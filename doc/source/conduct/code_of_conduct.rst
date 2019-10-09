@@ -114,9 +114,8 @@ advice, in confidence.
 You can report issues to the scikit-image Code of Conduct committee, at
 skimage-conduct@groups.io. Currently, the committee consists of:
 
--  (chair)
-- 
-- 
+- Emmanuelle Gouillart <emmanuelle.gouillard@normalesup.org> (chair)
+- Juan-Nunez Iglesias <jni@fastmail.com>
 
 If your report involves any members of the committee, or if they feel they have
 a conflict of interest in handling it, then they will recuse themselves from
