@@ -11,7 +11,7 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
-Starting from this release, scikit-image will follow the spirit of the recently
+Starting from this release, scikit-image will follow the recently
 introduced NumPy deprecation policy, `NEP 29
 <https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst>__`.
 Accordingly, scikit-image 0.16 drops support for Python 3.5.
@@ -23,31 +23,31 @@ changes and nail down the APIs for new features.
 
 New Features
 ------------
-- Introduced a new `skimage.evaluate` module containing simple metrics (mse,
+- New `skimage.evaluate` module containing simple metrics (mse,
   nrme, psd) and segmentation metrics (adapted rand error, variation of
   information) (#4025)
-- Added n-dimensional TV-L1 optical flow algorithm for registration --
+- n-dimensional TV-L1 optical flow algorithm for registration --
   `skimage.registration.optical_flow_tvl1` (#3983)
-- Added a function drawing a line in n-dimensional space -- `skimage.draw.line_nd`
+- Draw a line in an n-dimensional array -- `skimage.draw.line_nd`
   (#2043)
-- Added 2D Farid & Simoncelli edge filters - `skimage.filters.farid`,
+- 2D Farid & Simoncelli edge filters - `skimage.filters.farid`,
   `skimage.filters.farid_h`, and `skimage.filters.farid_v` (#3775)
-- Added 2D majority voting filter assigning to each pixel the most commonly
+- 2D majority voting filter assigning to each pixel the most commonly
   occurring value within its neighborhood -- `skimage.filters.majority`
   (#3836, #3839)
-- Added multi-level threshold "multi-Otsu" method, a thresholding algorithm
+- Multi-level threshold "multi-Otsu" method, a thresholding algorithm
   used to separate the pixels of an input image into several classes by
   maximizing the variances between classes --
   `skimage.filters.threshold_multiotsu` (#3872, #4174)
-- Added new example data -- `skimage.data.shepp_logan_phantom`, `skimage.data.colorwheel`,
+- New example data -- `skimage.data.shepp_logan_phantom`, `skimage.data.colorwheel`,
   `skimage.data.brick`, `skimage.data.grass`, `skimage.data.roughwall`, `skimage.data.cell`
   (#3958, #3966)
-- Added function to compute and format image region properties as a table --
+- Compute and format image region properties as a table --
   `skimage.measure.regionprops_table` (#3959)
-- Added new function to convert a polygon into a mask -- `skimage.draw.poly2mask`  (#3971, #3977)
-- Added new visual image comparison helper `skimage.util.compare_images`,
+- Convert a polygon into a mask -- `skimage.draw.poly2mask`  (#3971, #3977)
+- Visual image comparison helper `skimage.util.compare_images`,
   that returns an image showing the difference between two input images (#4089)
-- Added new function `skimage.transform.warp_polar` to remap image into
+- `skimage.transform.warp_polar` to remap image into
   polar or log-polar coordinates. (#4097)
 
 Improvements
@@ -58,7 +58,7 @@ Improvements
   #3967)
 - Better error messages and data type stability to
   `skimage.segmentation.relabel_sequential` (#3740)
-- Compatibility with dask for image thresholding methods (#3823)
+- Improved compatibility with dask arrays in some image thresholding methods (#3823)
 - `skimage.io.ImageCollection` can now receive lists of patterns (#3928)
 - Speed up `skimage.feature.peak_local_max` (#3984)
 - Better error message when incorrect value for keyword argument `kind` in
@@ -72,8 +72,8 @@ API Changes
   `skimage.transform.rescale`, `skimage.transform.pyramid_reduce`,
   `skimage.transform.pyramid_laplacian`,
   `skimage.transform.pyramid_gaussian`, and
-  `skimage.transform.pyramid_expand`. No guessing is performed for 3D arrays
-  anymore, so, please, make sure that the parameter is fixed to a proper value.
+  `skimage.transform.pyramid_expand`. Guessing is no longer performed for 3D
+  arrays.
 - Deprecated argument ``visualise`` has been removed from
   `skimage.feature.hog`. Use ``visualize`` instead.¨
 - `skimage.transform.seam_carve` has been completely removed from the
@@ -318,7 +318,7 @@ Contributors to this release
 - Gregory R. Lee
 - Hadrien Mary
 - Hamdi Sahloul
-- holly-c-gibbs (Holly Gibbs)
+- Holly Gibbs
 - Huang-Wei Chang
 - i3v (i3v)
 - Jarrod Millman
@@ -331,11 +331,11 @@ Contributors to this release
 - Kaligule (Kaligule)
 - kczimm (kczimm)
 - Lars Grueter
-- Shachar Ben Harim (leGIT-bot)
+- Shachar Ben Harim
 - Luis F. de Figueiredo
 - Mark Harfouche
 - Mars Huang
-- mellertd (Dave Mellert)
+- Dave Mellert
 - Nelle Varoquaux
 - Ollin Boer Bohan
 - Patrick J Zager
@@ -363,7 +363,7 @@ Reviewers for this release
 - Gregory R. Lee
 - Hadrien Mary
 - Hamdi Sahloul
-- holly-c-gibbs
+- Holly Gibbs
 - Jarrod Millman
 - Jirka Borovec
 - Johan Jeppsson
@@ -377,7 +377,7 @@ Reviewers for this release
 - leGIT-bot
 - Mark Harfouche
 - Mars Huang
-- mellertd
+- Dave Mellert
 - Paul Müller
 - Phil Starkey
 - Ralf Gommers
