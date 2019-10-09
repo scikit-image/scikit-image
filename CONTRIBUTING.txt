@@ -318,7 +318,7 @@ i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
 `pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
-(using ``easy_install pytest-cov``) and then run::
+(using ``pip install pytest-cov``) and then run::
 
   $ make coverage
 
