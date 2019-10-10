@@ -152,24 +152,24 @@ def optical_flow_tvl1(reference_image, moving_image,
         The first gray scale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
-    attachment : float
+    attachment : float, optional
         Attachment parameter (:math:`\lambda` in [1]_). The smaller
         this parameter is, the smoother the returned result will be.
-    tightness : float
+    tightness : float, optional
         Tightness parameter (:math:`\tau` in [1]_). It should have
         a small value in order to maintain attachement and
         regularization parts in correspondence.
-    num_warp : int
+    num_warp : int, optional
         Number of times image1 is warped.
-    num_iter : int
+    num_iter : int, optional
         Number of fixed point iteration.
-    tol : float
+    tol : float, optional
         Tolerance used as stopping criterion based on the L² distance
         between two consecutive values of (u, v).
-    prefilter : bool
+    prefilter : bool, optional
         Whether to prefilter the estimated optical flow before each
         image warp. This helps to remove the potential outliers.
-    dtype : dtype
+    dtype : dtype, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
         time compared to double precision.
@@ -188,14 +188,15 @@ def optical_flow_tvl1(reference_image, moving_image,
     .. [1] Zach, C., Pock, T., & Bischof, H. (2007, September). A
        duality based approach for realtime TV-L 1 optical flow. In Joint
        pattern recognition symposium (pp. 214-223). Springer, Berlin,
-       Heidelberg.
+       Heidelberg. :DOI:`10.1007/978-3-540-74936-3_22`
     .. [2] Wedel, A., Pock, T., Zach, C., Bischof, H., & Cremers,
        D. (2009). An improved algorithm for TV-L 1 optical flow. In
        Statistical and geometrical approaches to visual motion analysis
        (pp. 23-45). Springer, Berlin, Heidelberg.
+       :DOI:`10.1007/978-3-642-03061-1_2`
     .. [3] Pérez, J. S., Meinhardt-Llopis, E., & Facciolo,
        G. (2013). TV-L1 optical flow estimation. Image Processing On
-       Line, 2013, 137-150.
+       Line, 2013, 137-150. :DOI:`10.5201/ipol.2013.26`
 
     Examples
     --------
