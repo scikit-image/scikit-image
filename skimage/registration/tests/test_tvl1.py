@@ -77,25 +77,25 @@ def test_optical_flow_dtype():
     image0 = rnd.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow at double precision
-    flow_f64 = optical_flow_tvl1(image0, image1, attachment=5, dtype='float64')
+    flow_f64 = optical_flow_tvl1(image0, image1, attachment=5, dtype=np.float64)
 
-    assert flow_f64.dtype == 'float64'
+    assert flow_f64.dtype == np.float64
 
     # Estimate the flow at single precision
-    flow_f32 = optical_flow_tvl1(image0, image1, attachment=5, dtype='float32')
+    flow_f32 = optical_flow_tvl1(image0, image1, attachment=5, dtype=np.float32)
 
-    assert flow_f32.dtype == 'float32'
+    assert flow_f32.dtype == np.float32
 
     # Assert that floating point precision does not affect the quality
     # of the estimated flow
 
-    assert abs(flow_f64 - flow_f32) .mean() < 1e-3
+    assert np.abs(flow_f64 - flow_f32).mean() < 1e-3
 
 
 def test_incompatible_shapes():
     rnd = np.random.RandomState(0)
     I0 = rnd.normal(size=(256, 256))
-    I1 = rnd.normal(size=(255, 256))
+    I1 = rnd.normal(size=(128, 256))
     with testing.raises(ValueError):
         u, v = optical_flow_tvl1(I0, I1)
 
@@ -104,4 +104,4 @@ def test_wrong_dtype():
     rnd = np.random.RandomState(0)
     img = rnd.normal(size=(256, 256))
     with testing.raises(ValueError):
-        u, v = optical_flow_tvl1(img, img, dtype='int')
+        u, v = optical_flow_tvl1(img, img, dtype=np.int64)

@@ -26,12 +26,11 @@ def test_contingency_table():
 def test_vi():
     im_true = np.array([1, 2, 3, 4])
     im_test = np.array([1, 1, 8, 8])
-    assert_equal(np.sum(variation_of_information(
-        im_true, im_test, normalize=True)), 1)
+    assert_equal(np.sum(variation_of_information(im_true, im_test)), 1)
 
 
 def test_are():
     im_true = np.array([[2, 1], [1, 2]])
     im_test = np.array([[1, 2], [3, 1]])
-    assert_almost_equal(adapted_rand_error(im_true, im_test, normalize=False),
+    assert_almost_equal(adapted_rand_error(im_true, im_test),
                         (0.3333333, 0.5, 1.0))

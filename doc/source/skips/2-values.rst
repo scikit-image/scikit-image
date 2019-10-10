@@ -1,8 +1,8 @@
 .. _skip_values:
 
-======================================
-SKIP-2: scikit-image mission statement
-======================================
+=======================================
+SKIP 2 — scikit-image mission statement
+=======================================
 
 :Author: Juan Nunez-Iglesias <juan.nunez-iglesias@monash.edu>
 :Author: Stéfan van der Walt <stefanv@berkeley.edu>

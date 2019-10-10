@@ -19,7 +19,7 @@ def _match_cumulative_cdf(source, template):
     return interp_a_values[src_unique_indices].reshape(source.shape)
 
 
-def match_histograms(image, reference, multichannel=False):
+def match_histograms(image, reference, *, multichannel=False):
     """Adjust an image so that its cumulative histogram matches that of another.
 
     The adjustment is applied separately for each channel.
