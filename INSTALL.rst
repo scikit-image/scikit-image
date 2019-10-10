@@ -30,8 +30,6 @@ If you are running Anaconda or miniconda, use::
   conda install -c conda-forge scikit-image
 
 The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
-Unofficial wheels are also available from
-`Christoph Gohlke's website (Windows only) <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image>`__.
 
 2. Development Installation:
 ----------------------------
