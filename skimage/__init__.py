@@ -69,7 +69,7 @@ dtype_limits
 import sys
 
 
-__version__ = '0.16.0'
+__version__ = '0.16.1rc2'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))
