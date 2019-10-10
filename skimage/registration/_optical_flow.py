@@ -215,24 +215,25 @@ def optical_flow_tvl1(reference_image, moving_image,
                      tightness=tightness, num_warp=num_warp, num_iter=num_iter,
                      tol=tol, prefilter=prefilter)
 
-    return coarse_to_fine(image0, image1, solver, dtype=dtype)
+    return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
-def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
+def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
+         prefilter):
     """Iterative Lucas-Kanade (iLK) solver for optical flow estimation.
 
     Parameters
     ----------
-    image0 : ndarray, shape (M, N[, P[, ...]])
+    reference_image : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    image1 : ndarray, shape (M, N[, P[, ...]])
+    moving_image : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
-    flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
+    flow0 : ndarray, shape (reference_image.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
-    rad : int
+    radius : int
         Radius of the window considered around each pixel.
     nwarp : int
-        Number of times image1 is warped.
+        Number of times moving_image is warped.
     gaussian : bool
         if True, a gaussian kernel is used for the local
         intagration. Otherwise, a uniform kernel is used.
@@ -242,17 +243,17 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
 
     Returns
     -------
-    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape ((reference_image.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     """
-    dtype = image0.dtype
-    ndim = image0.ndim
+    dtype = reference_image.dtype
+    ndim = reference_image.ndim
 
-    grid = np.meshgrid(*[np.arange(n, dtype=dtype) for n in image0.shape],
-                       indexing='ij')
+    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
+                         for n in reference_image.shape], indexing='ij')
 
-    size = 2 * rad + 1
+    size = 2 * radius + 1
 
     if gaussian:
         s = size / 4
@@ -263,18 +264,18 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
                               mode='mirror')
 
     flow = flow0
-    coef = np.zeros((int((ndim * (ndim + 1)) / 2 + ndim), ) + image0.shape,
-                    dtype=dtype)
-    A = np.zeros(image0.shape + (ndim, ndim), dtype=dtype)
-    b = np.zeros(image0.shape + (ndim, ), dtype=dtype)
+    coef = np.zeros((int((ndim * (ndim + 1)) / 2 + ndim), )
+                    + reference_image.shape, dtype=dtype)
+    A = np.zeros(reference_image.shape + (ndim, ndim), dtype=dtype)
+    b = np.zeros(reference_image.shape + (ndim, ), dtype=dtype)
 
     for _ in range(nwarp):
         if prefilter:
             flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
 
-        image1_warp = warp(image1, grid + flow, mode='nearest')
-        grad = np.array(np.gradient(image1_warp))
-        It = (grad * flow).sum(0) + image0 - image1_warp
+        moving_image_warp = warp(moving_image, grid + flow, mode='nearest')
+        grad = np.array(np.gradient(moving_image_warp))
+        It = (grad * flow).sum(0) + reference_image - moving_image_warp
 
         k = 0
         for i in range(ndim):
@@ -304,8 +305,9 @@ def _ilk(image0, image1, flow0, rad, nwarp, gaussian, prefilter):
     return flow
 
 
-def optical_flow_ilk(image0, image1, rad=7, nwarp=10, gaussian=False,
-                     prefilter=False, dtype='float32'):
+def optical_flow_ilk(reference_image, moving_image, *,
+                     radius=7, nwarp=10, gaussian=False,
+                     prefilter=False, dtype=np.float32):
     """Coarse to fine optical flow estimator.
 
     The iterative Lucas-Kanade (iLK) solver is applied at each level
@@ -315,28 +317,28 @@ def optical_flow_ilk(image0, image1, rad=7, nwarp=10, gaussian=False,
 
     Parameters
     ----------
-    image0 : ndarray, shape (M, N[, P[, ...]])
+    reference_image : ndarray, shape (M, N[, P[, ...]])
         The first gray scale image of the sequence.
-    image1 : ndarray, shape (M, N[, P[, ...]])
+    moving_image : ndarray, shape (M, N[, P[, ...]])
         The second gray scale image of the sequence.
-    rad : int
+    radius : int, optional
         Radius of the window considered around each pixel.
-    nwarp : int
-        Number of times image1 is warped.
-    gaussian : bool
+    nwarp : int, optional
+        Number of times moving_image is warped.
+    gaussian : bool, optional
         if True, a gaussian kernel is used for the local
         intagration. Otherwise, a uniform kernel is used.
-    prefilter : bool
+    prefilter : bool, optional
         whether to prefilter the estimated optical flow before each
         image warp. This helps to remove the potential outliers.
-    dtype : dtype
+    dtype : dtype, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
         time compared to double precision.
 
     Returns
     -------
-    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape ((reference_image.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     References
@@ -344,26 +346,26 @@ def optical_flow_ilk(image0, image1, rad=7, nwarp=10, gaussian=False,
     .. [4] Le Besnerais, G., & Champagnat, F. (2005, September). Dense
        optical flow by iterative local window registration. In IEEE
        International Conference on Image Processing 2005 (Vol. 1,
-       pp. I-137). IEEE.
+       pp. I-137). IEEE. :DOI:`10.1109/ICIP.2005.1529706`
     .. [5] Plyer, A., Le Besnerais, G., & Champagnat,
        F. (2016). Massively parallel Lucas Kanade optical flow for
        real-time video processing applications. Journal of Real-Time
-       Image Processing, 11(4), 713-730.
+       Image Processing, 11(4), 713-730. :DOI:`10.1007/s11554-014-0423-0`
 
     Examples
     --------
     >>> from skimage.color import rgb2gray
     >>> from skimage.data import stereo_motorcycle
     >>> from skimage.registration import optical_flow_ilk
-    >>> image0, image1, disp = stereo_motorcycle()
+    >>> reference_image, moving_image, disp = stereo_motorcycle()
     >>> # --- Convert the images to gray level: color is not supported.
-    >>> image0 = rgb2gray(image0)
-    >>> image1 = rgb2gray(image1)
-    >>> flow = optical_flow_ilk(image1, image0)
+    >>> reference_image = rgb2gray(reference_image)
+    >>> moving_image = rgb2gray(moving_image)
+    >>> flow = optical_flow_ilk(moving_image, reference_image)
 
     """
 
-    solver = partial(_ilk, rad=rad, nwarp=nwarp, gaussian=gaussian,
+    solver = partial(_ilk, radius=radius, nwarp=nwarp, gaussian=gaussian,
                      prefilter=prefilter)
 
-    return coarse_to_fine(image0, image1, solver, dtype=dtype)
+    return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
