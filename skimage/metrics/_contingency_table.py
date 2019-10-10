@@ -4,7 +4,7 @@ import numpy as np
 __all__ = ['contingency_table']
 
 
-def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
+def contingency_table(im_true, im_test, *, ignore_labels=(), normalize=False):
     """
     Return the contingency table for all regions in matched segmentations.
 
@@ -14,7 +14,7 @@ def contingency_table(im_true, im_test, ignore_labels=[], normalize=False):
         Ground-truth label image, same shape as im_test.
     im_test : ndarray of int
         Test image.
-    ignore_labels : list of int, optional
+    ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
     normalize : bool

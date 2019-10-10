@@ -159,8 +159,8 @@ def threshold_local(image, block_size, method='gaussian', offset=0,
         Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
 
-        * 'generic': use custom function (see `param` parameter)
-        * 'gaussian': apply gaussian filter (see `param` parameter for custom\
+        * 'generic': use custom function (see ``param`` parameter)
+        * 'gaussian': apply gaussian filter (see ``param`` parameter for custom\
                       sigma value)
         * 'mean': apply arithmetic mean filter
         * 'median': apply median rank filter
@@ -253,7 +253,7 @@ def threshold_otsu(image, nbins=256):
     Raises
     ------
     ValueError
-         If `image` only contains a single grayscale value.
+         If ``image`` only contains a single grayscale value.
 
     References
     ----------
@@ -292,8 +292,8 @@ def threshold_otsu(image, nbins=256):
     mean2 = (np.cumsum((hist * bin_centers)[::-1]) / weight2[::-1])[::-1]
 
     # Clip ends to align class 1 and class 2 variables:
-    # The last value of `weight1`/`mean1` should pair with zero values in
-    # `weight2`/`mean2`, which do not exist.
+    # The last value of ``weight1``/``mean1`` should pair with zero values in
+    # ``weight2``/``mean2``, which do not exist.
     variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
@@ -338,7 +338,7 @@ def threshold_yen(image, nbins=256):
     """
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     # On blank images (e.g. filled with 0) with int dtype, `histogram()`
-    # returns `bin_centers` containing only one value. Speed up with it.
+    # returns ``bin_centers`` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
 
@@ -348,8 +348,8 @@ def threshold_yen(image, nbins=256):
     P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
-    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
-    # in crit. ImageJ Yen implementation replaces those values by zero.
+    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid
+    # '-inf' in crit. ImageJ Yen implementation replaces those values by zero.
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     return bin_centers[crit.argmax()]
@@ -494,7 +494,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
 
     Notes
     -----
-    See Li and Lee, 1993 [1]_; this is the objective function `threshold_li`
+    See Li and Lee, 1993 [1]_; this is the objective function ``threshold_li``
     minimizes. This function can be improved but this implementation most
     closely matches equation 8 in [1]_ and equations 1-3 in [2]_.
 
@@ -647,8 +647,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 def threshold_minimum(image, nbins=256, max_iter=10000):
     """Return threshold value based on minimum method.
 
-    The histogram of the input `image` is computed and smoothed until there are
-    only two maxima. Then the minimum in between is the threshold value.
+    The histogram of the input ``image`` is computed and smoothed until
+    there are only two maxima. Then the minimum in between is the threshold
+    value.
 
     Parameters
     ----------
@@ -800,7 +801,7 @@ def threshold_triangle(image, nbins=256):
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
-    arg_low_level, arg_high_level = np.where(hist>0)[0][[0, -1]]
+    arg_low_level, arg_high_level = np.where(hist > 0)[0][[0, -1]]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
@@ -1037,25 +1038,25 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
 
 def apply_hysteresis_threshold(image, low, high):
-    """Apply hysteresis thresholding to `image`.
+    """Apply hysteresis thresholding to ``image``.
 
-    This algorithm finds regions where `image` is greater than `high`
-    OR `image` is greater than `low` *and* that region is connected to
-    a region greater than `high`.
+    This algorithm finds regions where ``image`` is greater than ``high``
+    OR ``image`` is greater than ``low`` *and* that region is connected to
+    a region greater than ``high``.
 
     Parameters
     ----------
     image : array, shape (M,[ N, ..., P])
         Grayscale input image.
-    low : float, or array of same shape as `image`
+    low : float, or array of same shape as ``image``
         Lower threshold.
-    high : float, or array of same shape as `image`
+    high : float, or array of same shape as ``image``
         Higher threshold.
 
     Returns
     -------
-    thresholded : array of bool, same shape as `image`
-        Array in which `True` indicates the locations where `image`
+    thresholded : array of bool, same shape as ``image``
+        Array in which ``True`` indicates the locations where ``image``
         was above the hysteresis threshold.
 
     Examples
@@ -1084,7 +1085,11 @@ def apply_hysteresis_threshold(image, low, high):
 
 
 def threshold_multiotsu(image, classes=3, nbins=256):
-    r"""Generates multiple thresholds for an input image.
+    r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
+
+    The threshold values are chosen to maximize the total sum of pairwise
+    variances between the thresholded graylevel classes. See Notes and [1]_
+    for more details.
 
     Parameters
     ----------
@@ -1104,12 +1109,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Notes
     -----
-    The threshold values are chosen in a way that maximizes the variance
-    between the desired classes. Based on the Multi-Otsu approach by
-    Liao, Chen and Chung.
-
     This implementation relies on a Cython function whose complexity
-    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
@@ -1140,35 +1141,34 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     # histogram ignores nbins for integer arrays.
     nbins = len(bin_centers)
 
-    # defining arrays to store the zeroth (momP, cumulative probability)
-    # and first (momS, mean) moments, and the variance between classes
-    # (var_btwcls).
-    momP, momS, var_btwcls = [np.zeros((nbins, nbins)) for n in range(3)]
+    # Compute the zeroth (momP, cumulative probability) and first
+    # (momS, mean) moments
 
     # building the lookup tables.
     # step 1: calculating the diagonal.
-    for u in range(1, nbins):
-        momP[u, u] = prob[u]
-        momS[u, u] = u * prob[u]
+    prob[0] = 0
+    momP = np.diagflat(prob)
+    momS = np.diagflat(np.arange(nbins) * prob)
 
     # step 2: calculating the first row.
-    for u in range(1, nbins-1):
-        momP[1, u+1] = momP[1, u] + prob[u+1]
-        momS[1, u+1] = momS[1, u] + (u+1)*prob[u+1]
+    momP[1, 2:] = prob[1] + np.cumsum(prob[2:])
+    momS[1, 2:] = prob[1] + np.cumsum(np.arange(2, nbins) * prob[2:])
 
-    # step 3: calculating the other rows recursively.
-    for u in range(2, nbins):
-        for v in range(u+1, nbins):
-            momP[u, v] = momP[1, v] - momP[1, u-1]
-            momS[u, v] = momS[1, v] - momS[1, u-1]
+    # step 3: the other rows are recursively computed as:
+    # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
+    upper_tri = np.triu_indices_from(momP[2:, 2:], 1)
+
+    momP[2:, 2:][upper_tri] = (momP[1, 2:][upper_tri[1]]
+                               - np.repeat(momP[1, 1:-2],
+                                           np.arange(nbins - 3, 0, -1)))
+    momS[2:, 2:][upper_tri] = (momS[1, 2:][upper_tri[1]]
+                               - np.repeat(momS[1, 1:-2],
+                                           np.arange(nbins - 3, 0, -1)))
 
     # step 4: calculating the between class variance.
-    for u in range(1, nbins):
-        for v in range(u+1, nbins):
-            if (momP[u, v] != 0):
-                var_btwcls[u, v] = momS[u, v]**2 / momP[u, v]
-            else:
-                var_btwcls[u, v] = 0
+    var_btwcls = np.zeros_like(momP)
+    idx = momP > 0
+    var_btwcls[idx] = momS[idx] ** 2 / momP[idx]
 
     # finding max threshold candidates, depending on classes.
     # number of thresholds is equal to number of classes - 1.

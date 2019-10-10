@@ -2,9 +2,6 @@
 Script to show the results of the two marching cubes algorithms on different
 data.
 """
-
-from __future__ import print_function
-
 import time
 from contextlib import contextmanager
 

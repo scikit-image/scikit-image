@@ -163,6 +163,11 @@ def test_rotate_resize_center():
     assert_equal(x45, ref_x45)
 
 
+def test_rotate_resize_90():
+    x90 = rotate(np.zeros((470, 230), dtype=np.double), 90, resize=True)
+    assert x90.shape == (230, 470)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
@@ -329,6 +334,22 @@ def test_resize3d_bilinear():
     ref[2:4, 1:5, :] = 0.09375
     ref[2:4, 2:4, :] = 0.28125
     assert_almost_equal(resized, ref)
+
+
+def test_resize_dtype():
+    x = np.zeros((5, 5))
+    x_f32 = x.astype(np.float32)
+    x_u8 = x.astype(np.uint8)
+    x_b = x.astype(bool)
+
+    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
+    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
+    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 
 
 def test_swirl():

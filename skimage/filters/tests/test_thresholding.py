@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
+from skimage import color
 from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
@@ -316,6 +317,19 @@ def test_li_negative_inital_guess():
         result = threshold_li(coins, initial_guess=-5)
 
 
+def test_li_pathological_arrays():
+    # See https://github.com/scikit-image/scikit-image/issues/4140
+    a = np.array([0, 0, 1, 0, 0, 1, 0, 1])
+    b = np.array([0, 0, 0.1, 0, 0, 0.1, 0, 0.1])
+    c = np.array([0, 0, 0.1, 0, 0, 0.1, 0.01, 0.1])
+    d = np.array([0, 0, 1, 0, 0, 1, 0.5, 1])
+    e = np.array([1, 1])
+    f = np.array([1, 2])
+    arrays = [a, b, c, d, e, f]
+    thresholds = [threshold_li(arr) for arr in arrays]
+    assert np.all(np.isfinite(thresholds))
+
+
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
     assert 197 < threshold_yen(camera) < 199
@@ -549,6 +563,9 @@ def test_multiotsu_output():
         image[rr, cc] = val
     thresholds = [64, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image))
+
+    image = color.rgb2gray(data.astronaut())
+    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [
