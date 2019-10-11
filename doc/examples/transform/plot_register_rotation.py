@@ -113,8 +113,8 @@ from skimage.color import rgb2gray
 from skimage import draw, filters
 from scipy.fftpack import fft2, fftshift
 
-angle = 12
-scale = 1.2
+angle = 36
+scale = 1.4
 shiftr = 30
 shiftc = 15
 
@@ -148,7 +148,8 @@ ax[3].set_title("Log-Polar-Transformed Modified")
 ax[3].imshow(warped_rts)
 plt.show()
 
-# Use a difference of gaussians approach to enhance image features
+
+# Use difference of gaussians to enhance image features
 def dog(image, sigma1, sigma2):
     image = filters.gaussian(image, sigma1) - filters.gaussian(image, sigma2)
     return image
@@ -156,6 +157,7 @@ def dog(image, sigma1, sigma2):
 
 image = dog(image, 5, 20)
 rts_image = dog(rts_image, 5, 20)
+
 
 # Window the images and take the magnitude of the FFT
 def window_image(image, window_diameter=0.8, window_decay=10):
@@ -175,6 +177,8 @@ rts_image = window_image(rts_image)
 image_fs = np.abs(fftshift(fft2(image)))
 rts_fs = np.abs(fftshift(fft2(rts_image)))
 
+
+# Create log-polar transformed images to register
 shape = image_fs.shape
 radius = shape[0] / 8
 warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
@@ -187,6 +191,7 @@ warped_rts_fs = warped_rts_fs[:int(shape[0]/2), :]
 tparams = register_translation(warped_image_fs, warped_rts_fs,
                                upsample_factor=10)
 
+# Use translation parameters to calculate rotation and scaling parameters
 shifts, error, phasediff = tparams
 shiftr, shiftc = shifts[:2]
 recovered_angle = (360 / shape[0]) * shiftr
@@ -195,3 +200,8 @@ klog = shape[1] / np.log(radius)
 shift_scale = np.exp(shiftc / klog)
 
 print(recovered_angle, shift_scale)
+print(f"Expected value for cc rotation in degrees: {angle}")
+print(f"Recovered value for cc rotation: {recovered_angle}")
+print()
+print(f"Expected value for scaling difference: {scale}")
+print(f"Recovered value for scaling difference: {shift_scale}")
