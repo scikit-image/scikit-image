@@ -99,6 +99,9 @@ matrix:
     #   env: TRAVIS_PYTHON_VERSION=3.8
 
 before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
+      fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
       else
