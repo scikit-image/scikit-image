@@ -21,13 +21,15 @@ including `Anaconda <https://www.anaconda.com/download/>`_,
 `Python(x,y) <https://python-xy.github.io/>`_ and
 `WinPython <https://winpython.github.io/>`_.
 
-On all other systems, install it via shell/command prompt::
+On all major operating systems, install it via shell/command prompt::
 
   pip install scikit-image
 
 If you are running Anaconda or miniconda, use::
 
   conda install -c conda-forge scikit-image
+
+The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
 
 2. Development Installation:
 ----------------------------
@@ -75,7 +77,6 @@ our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _python.org: http://python.org/
-.. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
