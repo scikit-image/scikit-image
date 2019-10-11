@@ -34,7 +34,7 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     elif len(shift_steps) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
-    if np.any(np.asarray(shift_steps) < 1):
+    if any(s < 1 for s in shift_steps):
         raise ValueError("shift_steps must all be >= 1")
 
     if multichannel and max_shifts[-1] != 0:
@@ -42,34 +42,8 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
             "Multichannel cycle spinning should not have shifts along the "
             "last axis.")
 
-    return product(*[range(0, s+1, t) for
+    return product(*[range(0, s + 1, t) for
                      s, t in zip(max_shifts, shift_steps)])
-
-
-def _roll_axes(x, rolls, axes=None):
-    """Apply np.roll along a set of axes.
-
-    Parameters
-    ----------
-    x : array-like
-        Array to roll.
-    rolls : int or sequence
-        The amount to roll along each axis in ``axes``.
-    axes : int or sequence, optional
-        The axes to roll. Default is the first ``len(rolls)`` axes of ``x``.
-
-    Returns
-    -------
-    x : array
-        Data with axes rolled.
-    """
-    if axes is None:
-        axes = np.arange(len(rolls))
-    # Replace this loop with x = np.roll(x, rolls, axes) when NumPy>=1.12
-    # becomes a requirement.
-    for r, a in zip(rolls, axes):
-        x = np.roll(x, r, a)
-    return x
 
 
 def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
@@ -141,12 +115,13 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts,
                                   shift_steps)
     all_shifts = list(all_shifts)
+    roll_axes = tuple(range(x.ndim))
 
     def _run_one_shift(shift):
         # shift, apply function, inverse shift
-        xs = _roll_axes(x, shift)
+        xs = np.roll(x, shift, axis=roll_axes)
         tmp = func(xs, **func_kw)
-        return _roll_axes(tmp, -np.asarray(shift))
+        return np.roll(tmp, tuple(-s for s in shift), axis=roll_axes)
 
     if not dask_available and (num_workers is None or num_workers > 1):
         num_workers = 1
