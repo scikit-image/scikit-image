@@ -34,7 +34,7 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     elif len(shift_steps) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
-    if np.any(np.asarray(shift_steps) < 1):
+    if any(s < 1 for s in shift_steps):
         raise ValueError("shift_steps must all be >= 1")
 
     if multichannel and max_shifts[-1] != 0:
@@ -42,7 +42,7 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
             "Multichannel cycle spinning should not have shifts along the "
             "last axis.")
 
-    return product(*[range(0, s+1, t) for
+    return product(*[range(0, s + 1, t) for
                      s, t in zip(max_shifts, shift_steps)])
 
 
@@ -121,7 +121,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
         # shift, apply function, inverse shift
         xs = np.roll(x, shift, axis=roll_axes)
         tmp = func(xs, **func_kw)
-        return np.roll(tmp, -np.asarray(shift), axis=roll_axes)
+        return np.roll(tmp, tuple(-s for s in shift), axis=roll_axes)
 
     if not dask_available and (num_workers is None or num_workers > 1):
         num_workers = 1
