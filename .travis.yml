@@ -100,7 +100,7 @@ matrix:
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
+        apt-key adv --list-public-keys --with-colons | grep '^pub' | cut -d':' -f 5 | egrep -o '.{8}$' | grep -wo 762E3157 > /dev/null 2>&1 || sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
       fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
