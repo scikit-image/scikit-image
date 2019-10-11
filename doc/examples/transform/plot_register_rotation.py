@@ -88,7 +88,7 @@ shifts, error, phasediff = tparams
 shiftr, shiftc = shifts[:2]
 
 # Calculate scale factor from translation
-klog = radius / np.log(radius)
+klog = image_polar.shape[1] / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
 
 print(f"Expected value for cc rotation in degrees: {angle}")
@@ -184,6 +184,14 @@ warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
 
 warped_image_fs = warped_image_fs[:int(shape[0]/2), :]
 warped_rts_fs = warped_rts_fs[:int(shape[0]/2), :]
-output = register_translation(warped_image_fs, warped_rts_fs,
-                              upsample_factor=10)
-print(output)
+tparams = register_translation(warped_image_fs, warped_rts_fs,
+                               upsample_factor=10)
+
+shifts, error, phasediff = tparams
+shiftr, shiftc = shifts[:2]
+recovered_angle = (360 / shape[0]) * shiftr
+
+klog = shape[1] / np.log(radius)
+shift_scale = np.exp(shiftc / klog)
+
+print(recovered_angle, shift_scale)
