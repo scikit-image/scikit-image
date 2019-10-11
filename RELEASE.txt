@@ -56,50 +56,68 @@ the corresponding release branch.
   ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
   ``0`` immediately after ``dev``. 
 
-- Back on the release branch, update the version number to stable in
-  ``skimage/__init__.py``, commit, and push.
+- Make sure you have all the required write permissions (if not, you will
+  need to ask Stéfan or Juan to grant you the access), specifically, to:
 
-- Add the version number as a tag in git::
+    - https://github.com/scikit-image/scikit-image-wheels
+    - https://pypi.org/project/scikit-image/
+    - https://github.com/scikit-image/scikit-image-web
 
-   git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-  (If you do not have a GPG key, follow the tutorial to set it up:
-   https://help.github.com/articles/signing-commits-with-gpg/)
+- Perform the following step first on a release candidate to check the wheels
+  are building fine. Then proceed with the release.
 
-- Push the new tag to GitHub::
+    1. Back on the release branch, update the version number to stable in
+       ``skimage/__init__.py``, commit, and push.
 
-   git push upstream v<major>.<minor>.0
+    2. Add the version number as a tag in git::
 
-  (where ``upstream`` is the name of the
-   ``github.com:scikit-image/scikit-image`` repository.)
+        git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-- Make sure you have all the required write permissions (if not, you will need
-  to ask Stéfan or Juan to grant you the access), specifically, to:
+	(If you do not have a GPG key, follow the tutorial to set it up:
+	https://help.github.com/articles/signing-commits-with-gpg/)
 
-  - https://github.com/scikit-image/scikit-image-wheels
-  - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/scikit-image-web
+    3. Push the new tag to GitHub::
 
-- Build the package wheels (pre-compiled binaries) for various platforms:
+	git push upstream v<major>.<minor>.0<rcversion>
 
-  - Clone https://github.com/scikit-image/scikit-image-wheels.
-  - If making a patch release, switch to the appropriate v<major>.<minor>.x
-    branch. Otherwise, create that branch.
-  - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
-    release tag (e.g. ``v0.14.0``).
-  - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
-    this release tag.
-  - Commit and push.
-  - Monitor the builds at
-    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
-    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
-  - When all is green, spot-check a couple of builds to make sure that the
-    wheels have correctly uploaded. You should see a message like:
-    ``python -m wheelhouse_uploader upload --local-folder``, with output:
-    ``Wheelhouse successfully published at:
+        (where ``upstream`` is the name of the
+	``github.com:scikit-image/scikit-image`` repository.)
+
+
+    4. Build the package wheels (pre-compiled binaries) for various platforms:
+
+        - Clone https://github.com/scikit-image/scikit-image-wheels.
+	- If making a patch release, switch to the appropriate v<major>.<minor>.x
+	  branch. Otherwise, create that branch.
+	- Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
+	  release tag (e.g. ``v0.14.0``).
+	- Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
+	  this release tag.
+	- Commit and push.
+	- Monitor the builds at
+	    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
+	    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
+	- If they fail, fix them through self-merging pull requests.
+	    - Remove any build with none-supported Python versions if necessary.
+	    - Add builds for new python version if necessary.
+	- When all is green, spot-check a couple of builds to make sure that the
+	  wheels have correctly uploaded. You should see a message like:
+	  ``python -m wheelhouse_uploader upload --local-folder``, with output:
+	  ``Wheelhouse successfully published at:
+	    http://[crazyrandomstring].rackcdn.com``
+	- Open that URL and check for the wheels as
+	  ``scikit_image-<versiontag>-<platforminfo>.whl``
+
+- If you have performed a release candidate, redo the previous steps with the
+  final release.
+- Spot-check a couple of builds to make sure that the
+  wheels have correctly uploaded. You should see a message like:
+  ``python -m wheelhouse_uploader upload --local-folder``, with output:
+  ``Wheelhouse successfully published at:
     http://[crazyrandomstring].rackcdn.com``
-  - Open that URL and check for the wheels as
-    ``scikit_image-<versiontag>-<platforminfo>.whl``
+- Open that URL and check for the wheels as
+  ``scikit_image-<versiontag>-<platforminfo>.whl``
 
 - Update the docs:
 
