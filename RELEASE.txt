@@ -32,12 +32,15 @@ the corresponding release branch.
      the affected functions, elaborating on the changes and their
      consequences. If possible, organize semantically close PRs in groups.
 
-  5. Rename the file to ``doc/release/release_<major>.<minor>.txt``
+  5. Check for duplicate names in the automatically generated list of
+     contributors and reviewers
 
-  6. Copy ``doc/release/release_template.txt`` to
+  6. Rename the file to ``doc/release/release_<major>.<minor>.txt``
+
+  7. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
-  7. Copy relevant deprecations from ``release_<major>_<minor>.txt``
+  8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
      to ``release_dev.txt``.
 
 - Submit the release notes for review by other project maintainers:
