@@ -10,7 +10,7 @@ from copy import copy
 import numpy as np
 from PIL import Image
 
-from ..external.tifffile import TiffFile
+from tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',

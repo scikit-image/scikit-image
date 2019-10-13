@@ -5,3 +5,4 @@ networkx>=2.0
 pillow>=4.3.0
 imageio>=2.3.0
 PyWavelets>=0.4.0
+tifffile>=2019.7.26
