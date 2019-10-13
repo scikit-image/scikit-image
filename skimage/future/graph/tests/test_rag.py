@@ -44,7 +44,7 @@ def test_rag_merge():
     g.merge_nodes(1, 4)
     g.merge_nodes(2, 3)
     n = g.merge_nodes(3, 4, in_place=False)
-    assert sorted(g.node[n]['labels']) == list(range(5))
+    assert sorted(g.nodes[n]['labels']) == list(range(5))
     assert list(g.edges()) == []
 
 
@@ -115,16 +115,16 @@ def test_rag_error():
 
 
 def _weight_mean_color(graph, src, dst, n):
-    diff = graph.node[dst]['mean color'] - graph.node[n]['mean color']
+    diff = graph.nodes[dst]['mean color'] - graph.nodes[n]['mean color']
     diff = np.linalg.norm(diff)
     return {'weight': diff}
 
 
 def _pre_merge_mean_color(graph, src, dst):
-    graph.node[dst]['total color'] += graph.node[src]['total color']
-    graph.node[dst]['pixel count'] += graph.node[src]['pixel count']
-    graph.node[dst]['mean color'] = (graph.node[dst]['total color'] /
-                                     graph.node[dst]['pixel count'])
+    graph.nodes[dst]['total color'] += graph.nodes[src]['total color']
+    graph.nodes[dst]['pixel count'] += graph.nodes[src]['pixel count']
+    graph.nodes[dst]['mean color'] = (graph.nodes[dst]['total color'] /
+                                      graph.nodes[dst]['pixel count'])
 
 
 def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
