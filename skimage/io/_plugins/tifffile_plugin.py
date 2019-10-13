@@ -1,9 +1,6 @@
 from warnings import warn
 
-try:
-    from tifffile import TiffFile, imsave, parse_kwargs
-except ImportError:
-    from ...external.tifffile import TiffFile, imsave, parse_kwargs
+from tifffile import TiffFile, imsave, parse_kwargs
 
 
 def imread(fname, dtype=None, **kwargs):
