@@ -74,14 +74,7 @@ class TestSave:
         self.roundtrip(dtype, x)
 
 
-@parametrize("compress", (0, 9, "lzma"))
-def test_compression_roundtrip(compress):
-    x = np.ones((2, 3, 4), dtype=np.uint16)
-
-    f = NamedTemporaryFile(suffix='.tif')
-    fname = f.name
-    f.close()
-    imsave(fname, x, compress=compress, check_contrast=False)
-    y = imread(fname)
-    assert_array_equal(x, y)
-
+def test_lzw_compressed_read():
+    fullpath = os.path.join(data_dir, "onepixel_lzw.tif")
+    x = imread(fullpath)
+    assert x.shape == (1, 1, 3)
