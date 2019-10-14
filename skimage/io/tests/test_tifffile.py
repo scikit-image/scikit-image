@@ -72,9 +72,3 @@ class TestSave:
         else:
             x = x.astype(dtype)
         self.roundtrip(dtype, x)
-
-
-def test_lzw_compressed_read():
-    fullpath = os.path.join(data_dir, "onepixel_lzw.tif")
-    x = imread(fullpath)
-    assert x.shape == (1, 1, 3)
