@@ -125,14 +125,18 @@ the corresponding release branch.
   - Build a clean version of the docs. In the root directory, run
     ``python setup.py install``, then ``make cleandoc; make html``.
   - In the ``doc/`` directory, build using ``make gh-pages``.
-  - Update the symlink to ``stable``.
+  - Update the symlink to ``stable`` in ``gh-pages``.
   - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Upload the wheels to PyPI:
 
   - Make sure ``twine`` is available. You can install it with
     ``pip install twine``.
-  - Download ``wheel-uploader`` [1]_ and place it on your PATH.
+  - Downlad ``wheel-uploader`` [1]_ and place it on your PATH.
+  - Make sure authentification with twine is working.
+    - See https://pypi.org/project/twine/
+    - Set your PyPI username in the environment variable TWINE_USERNAME
+    - Set your PyPI password in the environment variable TWINE_PASSWORD
   - Run ``tools/upload_wheels.sh``.
   - If everything worked, delete the wheels from your local directory with
     ``rm -rf *.whl``
