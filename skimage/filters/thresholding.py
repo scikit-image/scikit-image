@@ -1105,13 +1105,13 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Returns
     -------
-    thresh_vals : array
+    thresh : array
         Array containing the threshold values for the desired classes.
 
     Raises
     ------
     ValueError
-         If ``image`` contains less grayscale value then requested
+         If ``image`` contains less grayscale value then the desired
          number of classes.
 
     Notes
@@ -1129,6 +1129,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:
            <http://imagej.net/plugins/download/Multi_OtsuThreshold.java>
@@ -1173,6 +1174,6 @@ def threshold_multiotsu(image, classes=3, nbins=256):
             # allocated memory is too large.
             thresh_idx = _get_multiotsu_thresh_indices(prob, classes - 1)
 
-    thresh_vals = bin_centers[thresh_idx]
+    thresh = bin_centers[thresh_idx]
 
-    return thresh_vals
+    return thresh

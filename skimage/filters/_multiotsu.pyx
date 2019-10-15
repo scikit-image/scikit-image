@@ -18,14 +18,15 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
 
     Parameters
     ----------
-    prob: 1D array
+    prob : array
         Value occurence probabilities.
-    thresh_count: int
-        The desired number of threshold.
+    thresh_count : int
+        The desired number of thresholds (classes-1).
+
 
     Returns
     -------
-    py_thresh_indices: ndarray of size thresh_count
+    py_thresh_indices : ndarray
         The indices of the desired thresholds.
 
     References
@@ -34,7 +35,7 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-
+           :DOI:`10.6688/JISE.2001.17.5.1`
     """
 
     cdef Py_ssize_t nbins = prob.shape[0]
@@ -63,33 +64,37 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
                               float [::1] var_btwcls,
                               float [::1] zeroth_moment,
                               float [::1] first_moment) nogil:
-    """Builds the between classes variance lookup table.
+    """Builds the lookup table containing the variance between classes.
 
-    The between classes variance are stored in
+    The variance between classes are stored in
     ``var_btwcls``. ``zeroth_moment`` and ``first_moment`` are buffers
     for storing the first row of respectively the zeroth and first
     order moments lookup table (respectively H, P and S in [1]_).
 
     Parameters
     ----------
-    prob: 1D array
+    prob : array
         Value occurence probabilities.
-    nbins: int
+    nbins : int
         The number of intensity values.
-    var_btwcls: (nbins*(nbins + 1) /2) 1D array
-        The Upper triangular part of the between classes variance
-        lookup table.
-    zeroth_moment: (nbins, ) 1D array
-        First row of the zeroth order moments LUT (see [1]_).
-    first_moment: (nbins, ) 1D array
-        First row of the first order moments LUT (see [1]_).
+    var_btwcls : array
+        The upper triangular part of the lookup table containing the
+        variance between classes (referred to as H in [1]_). Its size
+        is equal to nbins*(nbins + 1) / 2.
+    zeroth_moment : array
+        First row of the zeroth order moments LUT (referred to as P in
+        [1]_).
+    first_moment : array
+        First row of the first order moments LUT (referred to as S in
+        [1]_).
 
     Notes
     -----
     Only the first rows of the moments lookup tables are necessary to
-    build the between classes variance lookup table. ``var_btwcls`` is
-    stored in the compressed upper triangular matrix form (i.e. the
-    seros of the lower triangular part are not stored).
+    build the lookup table containing the variance between
+    classes. ``var_btwcls`` is stored in the compressed upper
+    triangular matrix form (i.e. the seros of the lower triangular
+    part are not stored).
 
     References
     ----------
@@ -97,7 +102,7 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-
+           :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t i, j, idx
     cdef float zeroth_moment_ij, first_moment_ij
@@ -123,24 +128,23 @@ cdef void _set_var_btwcls_lut(float [::1] prob,
 
 cdef float _get_var_btwclas_lut(float [::1] var_btwcls, Py_ssize_t i,
                                 Py_ssize_t j, Py_ssize_t nbins) nogil:
-    """Returns the between classes variance stored in compressed upper
+    """Returns the variance between classes stored in compressed upper
     triangular matrix form at the desired 2D indices.
 
     Parameters
     ----------
-    var_btwcls: 1D array
-        The between classes variance lookup table in compressed upper
-        triangular matrix form.
-    i, j: int
+    var_btwcls : array
+        The lookup table containing the variance between classes in
+        compressed upper triangular matrix form.
+    i, j : int
         2D indices in the uncompressed lookup table.
-    nbins: int
+    nbins : int
         The number of columns in the lookup table.
 
     Returns
     -------
-    value: float
+    value : float
         The value of the lookup table corresponding to index (i, j).
-
     """
     cdef cnp.intp_t idx = (i * (2 * nbins - i + 1)) / 2 + j - i
     return var_btwcls[idx]
@@ -154,17 +158,18 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
-    This implementation use a lookup table of between classes variance
+    This implementation use a lookup table of variance between classes
     to perform a brute force evaluation of sigma over all the
     combinations of threshold to find the indices maximizing sigma
     (see [1]_).
 
     Parameters
     ----------
-    var_btwcls: (nbins*(nbins + 1) /2) 1D array
-        The Upper triangular part of the between classes variance
-        lookup table.
-    hist_idx : int
+    var_btwcls : array
+        The upper triangular part of the lookup table containing the
+        variance between classes (referred to as H in [1]_). Its size
+        is equal to nbins*(nbins + 1) / 2.
+    hist_idx  : int
         Current index in the histogram.
     thresh_idx : int
         Current index in thresh_indices.
@@ -174,7 +179,7 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
         Number of divisions required to generate the desired classes.
     sigma_max : float
         Current maximum variance between classes.
-    current_indices: (thresh_count, ) 1D array
+    current_indices : array
         Current evalueted threshold indices.
     thresh_indices : array
         The indices of thresholds maximizing the variance between
@@ -188,8 +193,8 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
     Notes
     -----
     For any candidate current_indices {t_0, ..., t_n}, sigma equals
-    var_btwcls[0, t_0] + var_btwcls[t_0+1, t_1] +
-    ... + var_btwcls[t_(i-1) + 1, t_i] + ... var_btwcls[t_n, nbins-1]
+    var_btwcls[0, t_0] + var_btwcls[t_0+1, t_1] + ...
+    + var_btwcls[t_(i-1) + 1, t_i] + ... + var_btwcls[t_n, nbins-1]
 
     References
     ----------
@@ -198,7 +203,6 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
-
     """
     cdef cnp.intp_t idx
     cdef float sigma
@@ -238,14 +242,14 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
 
     Parameters
     ----------
-    prob: 1D array
+    prob : array
         Value occurence probabilities.
-    thresh_count: int
+    thresh_count : int
         The desired number of threshold.
 
     Returns
     -------
-    py_thresh_indices: (thresh_count, ) array
+    py_thresh_indices : array
         The indices of the desired thresholds.
 
     References
@@ -254,7 +258,7 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-
+           :DOI:`10.6688/JISE.2001.17.5.1`
     """
 
     cdef Py_ssize_t nbins = prob.shape[0]
@@ -281,18 +285,20 @@ cdef void _set_moments_lut_first_row(float [::1] prob,
                                      float [::1] zeroth_moment,
                                      float [::1] first_moment) nogil:
     """Builds the first rows of the zeroth and first moments lookup table
-    necessary to the computation of the between class variance.
+    necessary to the computation of the variance between class.
 
     Parameters
     ----------
-    prob: 1D array
+    prob : array
         Value occurence probabilities.
-    nbins: int
+    nbins : int
         The number of intensity values.
-    zeroth_moment: (nbins, ) 1D array
-        First row of the zeroth order moments LUT (see [1]_).
-    first_moment: (nbins, ) 1D array
-        First row of the first order moments LUT (see [1]_).
+    zeroth_moment : array
+        First row of the zeroth order moments LUT (referred to as P in
+        [1]_).
+    first_moment : array
+        First row of the first order moments LUT (referred to as S in
+        [1]_).
 
     References
     ----------
@@ -300,7 +306,7 @@ cdef void _set_moments_lut_first_row(float [::1] prob,
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-
+           :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t i
 
@@ -318,18 +324,19 @@ cdef float _get_var_btwclas(float [::1] zeroth_moment,
 
     Parameters
     ----------
-    zeroth_moment: (nbins, ) 1D array
-        First row of the zeroth order moments LUT (see [1]_).
-    first_moment: (nbins, ) 1D array
-        First row of the first order moments LUT (see [1]_).
-    i, j: int
+    zeroth_moment : array
+        First row of the zeroth order moments LUT (referred to as P in
+        [1]_).
+    first_moment : array
+        First row of the first order moments LUT (referred to as S in
+        [1]_).
+    i, j : int
         The indices of the two considred classes.
 
     Returns
     -------
-    value: float
+    value : float
         The variance between the classes i and j.
-
     """
 
     cdef float zeroth_moment_ij, first_moment_ij
@@ -356,17 +363,19 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
     maximizing the  variance between classes sigma.
 
     This implementation uses the first rows of the zeroth and first
-    moments lookup table to compute the between class variance and
+    moments lookup table to compute the variance between class and
     performs a brute force evaluation of sigma over all the
     combinations of threshold to find the indices maximizing sigma
     (see [1]_)..
 
     Parameters
     ----------
-    zeroth_moment: (nbins, ) 1D array
-        First row of the zeroth order moments LUT (see [1]_).
-    first_moment: (nbins, ) 1D array
-        First row of the first order moments LUT (see [1]_).
+    zeroth_moment : array
+        First row of the zeroth order moments LUT (referred to as P in
+        [1]_).
+    first_moment : array
+        First row of the first order moments LUT (referred to as S in
+        [1]_).
     hist_idx : int
         Current index in the histogram.
     thresh_idx : int
@@ -377,7 +386,7 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
         Number of divisions required to generate the desired classes.
     sigma_max : float
         Current maximum variance between classes.
-    current_indices: (thresh_count, ) 1D array
+    current_indices : array
         Current evalueted threshold indices.
     thresh_indices : array
         The indices of thresholds maximizing the variance between
@@ -394,7 +403,7 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-
+           :DOI:`10.6688/JISE.2001.17.5.1`
     """
     cdef cnp.intp_t idx
     cdef float sigma
