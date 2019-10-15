@@ -67,7 +67,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     map_array = np.arange(labels.max() + 1, dtype=labels.dtype)
     for i, nodes in enumerate(comps):
         for node in nodes:
-            for label in rag.node[node]['labels']:
+            for label in rag.nodes[node]['labels']:
                 map_array[label] = i
 
     return map_array[labels]
@@ -95,7 +95,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The number or N-cuts to perform before determining the optimal one.
     in_place : bool
         If set, modifies `rag` in place. For each node `n` the function will
-        set a new attribute ``rag.node[n]['ncut label']``.
+        set a new attribute ``rag.nodes[n]['ncut label']``.
     max_edge : float, optional
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
@@ -230,7 +230,7 @@ def _label_all(rag, attr_name):
         The attribute to which a unique integer is assigned.
     """
     node = min(rag.nodes())
-    new_label = rag.node[node]['labels'][0]
+    new_label = rag.nodes[node]['labels'][0]
     for n, d in rag.nodes(data=True):
         d[attr_name] = new_label
 
