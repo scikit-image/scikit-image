@@ -176,7 +176,7 @@ cdef float _set_thresh_indices_lut(float[::1] var_btwcls, Py_ssize_t hist_idx,
     nbins : int
         number of bins used in the histogram
     thresh_count : int
-        Number of divisions required to generate the desired classes.
+        The desired number of thresholds (classes-1).
     sigma_max : float
         Current maximum variance between classes.
     current_indices : array
@@ -383,7 +383,7 @@ cdef float _set_thresh_indices(float[::1] zeroth_moment,
     nbins : int
         number of bins used in the histogram
     thresh_count : int
-        Number of divisions required to generate the desired classes.
+        The desired number of thresholds (classes-1).
     sigma_max : float
         Current maximum variance between classes.
     current_indices : array
