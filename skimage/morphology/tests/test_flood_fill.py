@@ -54,7 +54,7 @@ def test_inplace_int():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]])
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    flood_fill(image, (0, 0), 5, in_place=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
                          [5, 1, 1, 5, 2, 2, 5],
@@ -72,7 +72,7 @@ def test_inplace_float():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    flood_fill(image, (0, 0), 5, in_place=True)
 
     expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
                          [5., 1., 1., 5., 2., 2., 5.],
@@ -93,7 +93,7 @@ def test_inplace_noncontiguous():
     # Transpose is noncontiguous
     image2 = image[::2, ::2]
 
-    flood_fill(image2, (0, 0), 5, inplace=True)
+    flood_fill(image2, (0, 0), 5, in_place=True)
 
     # The inplace modified result
     expected2 = np.array([[5, 5, 5, 5],

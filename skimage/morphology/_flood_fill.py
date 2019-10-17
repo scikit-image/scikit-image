@@ -5,7 +5,7 @@ connected to a given seed point with a different value.
 """
 
 import numpy as np
-import warnings
+from warnings import warn
 
 from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
                       _fast_pad)
@@ -14,7 +14,7 @@ from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 
 def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
-               tolerance=None, inplace=False):
+               tolerance=None, inplace=None, in_place=False):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -46,6 +46,11 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         If a tolerance is provided, adjacent points with values within plus or
         minus tolerance from the seed point are filled (inclusive).
     inplace : bool, optional
+        This parameter is deprecated and will be removed in version 0.19.0
+        in favor of in_place. If True, flood filling is applied to `image`
+        inplace. If False, the flood filled result is returned without
+        modifying the input `image` (default). 
+    in_place : bool, optional
         If True, flood filling is applied to `image` inplace.  If False, the
         flood filled result is returned without modifying the input `image`
         (default).
@@ -100,10 +105,15 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
+    if inplace is not None:
+        warn('The inplace parameter will change'
+             'to in_place in version 0.19.0.', stacklevel=2)
+        in_place = inplace
+
     mask = flood(image, seed_point, selem=selem, connectivity=connectivity,
                  tolerance=tolerance)
 
-    if not inplace:
+    if not in_place:
         image = image.copy()
 
     image[mask] = new_value

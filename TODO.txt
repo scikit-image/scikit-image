@@ -39,6 +39,12 @@ Version 0.18
 * In ``skimage.features.corner_peaks``, remove the warning.
 * In ``skimage/transform`` remove histogram_matching.py.
 
+Version 0.19
+------------
+
+* In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
+  in flood_fill() ``inplace`` with ``in_place`` and update the tests.
+
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
