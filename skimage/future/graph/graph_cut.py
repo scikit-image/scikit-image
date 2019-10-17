@@ -268,7 +268,9 @@ def _ncut_relabel(rag, thresh, num_cuts):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2001, Equation 7, Page 891
-        vals, vectors = linalg.eigsh(d2 * (d - w) * d2, which='SM',
+        A = d2 * (d - w) * d2
+        v0 = np.random.rand(min(A.shape))
+        vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
                                      k=min(100, m - 2))
 
         # Pick second smallest eigenvector.
