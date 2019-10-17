@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.restoration import denoise_nl_means, estimate_sigma
-from skimage.measure import compare_psnr
+from skimage.metrics import peak_signal_noise_ratio
 from skimage.util import random_noise
 
 
@@ -47,7 +47,7 @@ noisy = random_noise(astro, var=sigma**2)
 
 # estimate the noise standard deviation from the noisy image
 sigma_est = np.mean(estimate_sigma(noisy, multichannel=True))
-print("estimated noise standard deviation = {}".format(sigma_est))
+print(f"estimated noise standard deviation = {sigma_est}")
 
 patch_kw = dict(patch_size=5,      # 5x5 patches
                 patch_distance=6,  # 13x13 search area
@@ -94,16 +94,16 @@ ax[1, 2].set_title('non-local means\n(fast, using $\sigma_{est}$)')
 fig.tight_layout()
 
 # print PSNR metric for each case
-psnr_noisy = compare_psnr(astro, noisy)
-psnr = compare_psnr(astro, denoise)
-psnr2 = compare_psnr(astro, denoise2)
-psnr_fast = compare_psnr(astro, denoise_fast)
-psnr2_fast = compare_psnr(astro, denoise2_fast)
+psnr_noisy = peak_signal_noise_ratio(astro, noisy)
+psnr = peak_signal_noise_ratio(astro, denoise)
+psnr2 = peak_signal_noise_ratio(astro, denoise2)
+psnr_fast = peak_signal_noise_ratio(astro, denoise_fast)
+psnr2_fast = peak_signal_noise_ratio(astro, denoise2_fast)
 
-print("PSNR (noisy) = {:0.2f}".format(psnr_noisy))
-print("PSNR (slow) = {:0.2f}".format(psnr))
-print("PSNR (slow, using sigma) = {:0.2f}".format(psnr2))
-print("PSNR (fast) = {:0.2f}".format(psnr_fast))
-print("PSNR (fast, using sigma) = {:0.2f}".format(psnr2_fast))
+print(f"PSNR (noisy) = {psnr_noisy:0.2f}")
+print(f"PSNR (slow) = {psnr:0.2f}")
+print(f"PSNR (slow, using sigma) = {psnr2:0.2f}")
+print(f"PSNR (fast) = {psnr_fast:0.2f}")
+print(f"PSNR (fast, using sigma) = {psnr2_fast:0.2f}")
 
 plt.show()

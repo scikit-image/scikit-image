@@ -5,7 +5,7 @@ from skimage._shared.testing import (assert_equal, assert_array_equal,
 from skimage._shared import testing
 
 import skimage
-from skimage import img_as_ubyte, img_as_float
+from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
@@ -56,7 +56,7 @@ class TestRank():
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
-        @test_parallel()
+        @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
             result = getattr(rank, filter)(self.image, self.selem)
@@ -83,8 +83,7 @@ class TestRank():
             else:
                 assert_array_equal(expected, result)
 
-        with expected_warnings(['precision loss']):
-            check()
+        check()
 
 
     def test_random_sizes(self):
@@ -290,7 +289,7 @@ class TestRank():
         for method in methods:
             func = getattr(rank, method)
             out_u = func(image_uint, disk(3))
-            with expected_warnings(['precision loss']):
+            with expected_warnings(["Possible precision loss"]):
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
@@ -303,9 +302,8 @@ class TestRank():
         image = img_as_ubyte(data.camera())[::2, ::2]
         image[image > 127] = 0
         image_s = image.astype(np.int8)
-        with expected_warnings(['sign loss', 'precision loss']):
-            image_u = img_as_ubyte(image_s)
-            assert_equal(image_u, img_as_ubyte(image_s))
+        image_u = img_as_ubyte(image_s)
+        assert_equal(image_u, img_as_ubyte(image_s))
 
         methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
@@ -313,9 +311,8 @@ class TestRank():
 
         for method in methods:
             func = getattr(rank, method)
-
-            with expected_warnings(['sign loss', 'precision loss']):
-                out_u = func(image_u, disk(3))
+            out_u = func(image_u, disk(3))
+            with expected_warnings(["Possible precision loss"]):
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 

@@ -1,34 +1,48 @@
 Remember to list any API changes below in `doc/source/api_changes.txt`.
 
-Version 0.16
+Version 0.17
 ------------
 
 * Update RELEASE.txt regarding Azure Pipelines after making changes to
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* Remove `flatten` for `imread` in ``skimage.io._io.py``.
-* In ``skimage.measure._regionprops``, remove all references to
-  ``coordinates=``, ``_xycoordinates``, and ``_use_xy_warning``.
-* In ``skimage.measure.moments_central``, remove ``cc`` and ``**kwargs``
-  arguments.
-* In ``skimage.filters.median``, change default from ``behavior='rank'`` to
-  ``behavior='ndimage'``.
-
-Version 0.17
-------------
-
 * In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
   and ``shift_y``.
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
 * Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
+* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
+* Remove ``rough_wall`` from ``skimage.data.__init__``.
+* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
+
+Version 0.18
+------------
+
+* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
+  deprecation warning.
+* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
+* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
+* The following functions are deprecated and should be removed in 0.18:
+  `skimage.measure.compare_mse`,
+  `skimage.measure.compare_nrmse`,
+  `skimage.measure.compare_pnsr`
+  `skimage.measure.compare_ssim`
+* `skimage/measure/tests/test_simple_metrics.py` should also be removed
+* make coordinates='rc' the default in ``segmentation.active_contour``
+* remove deprecated ``bc`` argument in ``segmentation.active_contour``
+* In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
+  ``neighbors`` and update the tests. Set the default value of ``connectivity``
+  to 2.
+* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
+  ``neighbors`` and update the tests. Set the default value of ``connectivity``
+  to 2.
+* In ``skimage.features.corner_peaks``, remove the warning.
+* In ``skimage/transform`` remove histogram_matching.py.
 
 Other
 -----
 * Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
   once minimal required ``numpy`` is set to >= 1.14.0.
-* Remove deprecated ``Hxx, Hxy, Hyy`` API of ``hessian_matrix_eigvals`` in
-  ``skimage.feature.corner``.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
@@ -38,14 +52,20 @@ Other
   moves away from using ``np.matrix`` in a future version too.
 * Remove the conditional import and function call when ``numpy`` is set
   to > 1.15.x in ``skimage/util/arraycrop.py``.
-* When minimum supported version of ``scipy`` reaches 0.18, use 
-  ``scipy.fftpack.next_fast_len`` directly in 
-  ``skimage.feature.masked_register_translation``.
-* Monitor SciPy for a new release that passes PYTHONOPTIMIZE builds
-  `https://github.com/scipy/scipy/pull/9373`. This was identified as an issue
-  in SciPy 1.1.0. When SciPy becomes compatible with PYTHONOPTIMIZE, add an
-  environment variable ``PYTHONOPTIMIZE=2`` to one of the builds.
+* When minimum supported version of ``scipy`` reaches 0.18, use
+  ``scipy.fftpack.next_fast_len`` directly in
+  ``skimage._shared.fft``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
+* When ``numpy`` is set to > 1.16, one may simplify the implementation of
+  of `feature.blob_log` using the vectorized version of ``np.logspace``.
+* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
+  the minimum supported version of ``scipy`` reaches 1.4.
+* When Python 3.8 is released, increment the version number on the last OSX
+  build to use Python 3.8 instead of 3.7.
+* When Python 3.8 is released, add entries to the build matrix in appveyor.
+* When Python 3.8 is released, add entries to the build matrix in azure.
+* When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
+  vectorized version of ``np.linspace``.

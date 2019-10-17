@@ -84,15 +84,15 @@ skeleton_lee = skeletonize(data, method='lee')
 fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(data, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(skeleton, cmap=plt.cm.gray)
 ax[1].set_title('skeletonize')
 ax[1].axis('off')
 
-ax[2].imshow(skeleton_lee, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(skeleton_lee, cmap=plt.cm.gray)
 ax[2].set_title('skeletonize (Lee 94)')
 ax[2].axis('off')
 
@@ -134,20 +134,20 @@ dist_on_skel = distance * skel
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(data, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(dist_on_skel, cmap='magma', interpolation='nearest')
+ax[1].imshow(dist_on_skel, cmap='magma')
 ax[1].contour(data, [0.5], colors='w')
 ax[1].set_title('medial_axis')
 ax[1].axis('off')
 
-ax[2].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(skeleton, cmap=plt.cm.gray)
 ax[2].set_title('skeletonize')
 ax[2].axis('off')
 
-ax[3].imshow(skeleton_lee, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(skeleton_lee, cmap=plt.cm.gray)
 ax[3].set_title("skeletonize (Lee 94)")
 ax[3].axis('off')
 
@@ -177,19 +177,19 @@ thinned_partial = thin(image, max_iter=25)
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
-ax[1].imshow(skeleton, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(skeleton, cmap=plt.cm.gray)
 ax[1].set_title('skeleton')
 ax[1].axis('off')
 
-ax[2].imshow(thinned, cmap=plt.cm.gray, interpolation='nearest')
+ax[2].imshow(thinned, cmap=plt.cm.gray)
 ax[2].set_title('thinned')
 ax[2].axis('off')
 
-ax[3].imshow(thinned_partial, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(thinned_partial, cmap=plt.cm.gray)
 ax[3].set_title('partially thinned')
 ax[3].axis('off')
 

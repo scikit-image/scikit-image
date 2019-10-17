@@ -39,8 +39,7 @@ def test_range(dtype, f_and_dt):
 
     f, dt = f_and_dt
 
-    with expected_warnings([r'precision loss|sign loss|\A\Z']):
-        y = f(x)
+    y = f(x)
 
     omin, omax = dtype_range[dt]
 
@@ -72,8 +71,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    with expected_warnings([r'precision loss|sign loss|\A\Z']):
-        y = convert(x, dt)
+    y = convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
     _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
@@ -132,21 +130,48 @@ def test_clobber():
         for func_output_type in img_funcs:
             img = np.random.rand(5, 5)
 
-            # UserWarning for possible precision loss, expected
-            with expected_warnings([r'Possible precision loss|\A\Z',
-                                    r'Possible sign loss|\A\Z']):
-                img_in = func_input_type(img)
-                img_in_before = img_in.copy()
-                img_out = func_output_type(img_in)
+            img_in = func_input_type(img)
+            img_in_before = img_in.copy()
+            func_output_type(img_in)
 
             assert_equal(img_in, img_in_before)
+
 
 def test_signed_scaling_float32():
     x = np.array([-128,  127], dtype=np.int8)
     y = img_as_float32(x)
     assert_equal(y.max(), 1)
 
+
 def test_float32_passthrough():
     x = np.array([-1, 1], dtype=np.float32)
     y = img_as_float(x)
     assert_equal(y.dtype, x.dtype)
+
+
+float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+                    np.float64, 'float32', 'float64']
+
+
+def test_float_conversion_dtype():
+    """Test any convertion from a float dtype to an other."""
+    x = np.array([-1, 1])
+
+    # Test all combinations of dtypes convertions
+    dtype_combin = np.array(np.meshgrid(float_dtype_list,
+                                        float_dtype_list)).T.reshape(-1, 2)
+
+    for dtype_in, dtype_out in dtype_combin:
+        x = x.astype(dtype_in)
+        y = convert(x, dtype_out)
+        assert y.dtype == np.dtype(dtype_out)
+
+
+def test_subclass_conversion():
+    """Check subclass conversion behavior"""
+    x = np.array([-1, 1])
+
+    for dtype in float_dtype_list:
+        x = x.astype(dtype)
+        y = convert(x, np.floating)
+        assert y.dtype == x.dtype

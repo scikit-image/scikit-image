@@ -37,7 +37,7 @@ from ``skimage.data`` for all comparisons.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import img_as_ubyte
+from skimage.util import img_as_ubyte
 from skimage import data
 from skimage.exposure import histogram
 
@@ -46,7 +46,7 @@ hist, hist_centers = histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
-ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
 ax[0].axis('off')
 
 ax[1].plot(hist_centers, hist, lw=2)
@@ -193,19 +193,19 @@ loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12, 12))
 ax = axes.ravel()
 
-ax[0].imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
+ax[0].imshow(noisy_image, cmap=plt.cm.gray)
 ax[0].axis('off')
 
 ax[1].plot(hist[1][:-1], hist[0], lw=2)
 ax[1].set_title('Histogram of gray values')
 
-ax[2].imshow(glob, interpolation='nearest', cmap=plt.cm.gray)
+ax[2].imshow(glob, cmap=plt.cm.gray)
 ax[2].axis('off')
 
 ax[3].plot(glob_hist[1][:-1], glob_hist[0], lw=2)
 ax[3].set_title('Histogram of gray values')
 
-ax[4].imshow(loc, interpolation='nearest', cmap=plt.cm.gray)
+ax[4].imshow(loc, cmap=plt.cm.gray)
 ax[4].axis('off')
 
 ax[5].plot(loc_hist[1][:-1], loc_hist[0], lw=2)
@@ -419,7 +419,7 @@ fig, ax = plt.subplots(ncols=2, figsize=(10, 5),
 ax[0].imshow(m, cmap=plt.cm.gray)
 ax[0].set_title('Original')
 
-ax[1].imshow(m >= t, interpolation='nearest', cmap=plt.cm.gray)
+ax[1].imshow(m >= t, cmap=plt.cm.gray)
 ax[1].set_title('Local Otsu ($r=%d$)' % radius)
 
 for a in ax:

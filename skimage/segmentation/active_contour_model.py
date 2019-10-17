@@ -1,3 +1,4 @@
+from warnings import warn
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 from ..util import img_as_float
@@ -6,8 +7,11 @@ from ..filters import sobel
 
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
-                   bc='periodic', max_px_move=1.0,
-                   max_iterations=2500, convergence=0.1):
+                   bc=None, max_px_move=1.0,
+                   max_iterations=2500, convergence=0.1,
+                   *,
+                   boundary_condition='periodic',
+                   coordinates=None):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -37,18 +41,25 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         edges.
     gamma : float, optional
         Explicit time stepping parameter.
-    bc : {'periodic', 'free', 'fixed'}, optional
-        Boundary conditions for worm. 'periodic' attaches the two ends of the
-        snake, 'fixed' holds the end-points in place, and 'free' allows free
-        movement of the ends. 'fixed' and 'free' can be combined by parsing
-        'fixed-free', 'free-fixed'. Parsing 'fixed-fixed' or 'free-free'
-        yields same behaviour as 'fixed' and 'free', respectively.
+    bc : deprecated; use ``boundary_condition``
+        DEPRECATED. See ``boundary_condition`` below.
     max_px_move : float, optional
         Maximum pixel distance to move per iteration.
     max_iterations : int, optional
         Maximum iterations to optimize snake shape.
     convergence: float, optional
         Convergence criteria.
+    boundary_condition : string, optional
+        Boundary conditions for the contour. Can be one of 'periodic',
+        'free', 'fixed', 'free-fixed', or 'fixed-free'. 'periodic' attaches
+        the two ends of the snake, 'fixed' holds the end-points in place,
+        and 'free' allows free movement of the ends. 'fixed' and 'free' can
+        be combined by parsing 'fixed-free', 'free-fixed'. Parsing
+        'fixed-fixed' or 'free-free' yields same behaviour as 'fixed' and
+        'free', respectively.
+    coordinates : {'rc' or 'xy'}, optional
+        Whether to use rc or xy coordinates. The 'xy' option (current default)
+        will be removed in version 0.18.
 
     Returns
     -------
@@ -59,7 +70,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     ----------
     .. [1]  Kass, M.; Witkin, A.; Terzopoulos, D. "Snakes: Active contour
             models". International Journal of Computer Vision 1 (4): 321
-            (1988). DOI:`10.1007/BF00133570`
+            (1988). :DOI:`10.1007/BF00133570`
 
     Examples
     --------
@@ -76,23 +87,41 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     Initialize spline:
 
     >>> s = np.linspace(0, 2*np.pi, 100)
-    >>> init = 50 * np.array([np.cos(s), np.sin(s)]).T + 50
+    >>> init = 50 * np.array([np.sin(s), np.cos(s)]).T + 50
 
     Fit spline to image:
 
-    >>> snake = active_contour(img, init, w_edge=0, w_line=1) #doctest: +SKIP
-    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2) #doctest: +SKIP
-    >>> int(np.mean(dist)) #doctest: +SKIP
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1, coordinates='rc')  # doctest: +SKIP
+    >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)  # doctest: +SKIP
+    >>> int(np.mean(dist))  # doctest: +SKIP
     25
 
     """
+    if bc is not None:
+        message = ('The keyword argument `bc` to `active_contour` has been '
+                   'renamed. Use `boundary_condition=` instead. `bc` will be '
+                   'removed in scikit-image v0.18.')
+        warn(message, stacklevel=2)
+        boundary_condition = bc
+    if coordinates is None:
+        message = ('The coordinates used by `active_contour` will change '
+                   'from xy coordinates (transposed from image dimensions) to '
+                   'rc coordinates in scikit-image 0.18. Set '
+                   "`coordinates='rc'` to silence this warning. "
+                   "`coordinates='xy'` will restore the old behavior until "
+                   '0.18, but will stop working thereafter.')
+        warn(message, category=FutureWarning, stacklevel=2)
+        coordinates = 'xy'
+        snake_xy = snake
+    if coordinates == 'rc':
+        snake_xy = snake[:, ::-1]
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
     convergence_order = 10
     valid_bcs = ['periodic', 'free', 'fixed', 'free-fixed',
                  'fixed-free', 'fixed-fixed', 'free-free']
-    if bc not in valid_bcs:
+    if boundary_condition not in valid_bcs:
         raise ValueError("Invalid boundary condition.\n" +
                          "Should be one of: "+", ".join(valid_bcs)+'.')
     img = img_as_float(image)
@@ -125,7 +154,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                                np.arange(img.shape[0]),
                                img.T, kx=2, ky=2, s=0)
 
-    x, y = snake[:, 0].astype(np.float), snake[:, 1].astype(np.float)
+    x, y = snake_xy[:, 0].astype(np.float), snake_xy[:, 1].astype(np.float)
     n = len(x)
     xsave = np.empty((convergence_order, n))
     ysave = np.empty((convergence_order, n))
@@ -143,26 +172,26 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
 
     # Impose boundary conditions different from periodic:
     sfixed = False
-    if bc.startswith('fixed'):
+    if boundary_condition.startswith('fixed'):
         A[0, :] = 0
         A[1, :] = 0
         A[1, :3] = [1, -2, 1]
         sfixed = True
     efixed = False
-    if bc.endswith('fixed'):
+    if boundary_condition.endswith('fixed'):
         A[-1, :] = 0
         A[-2, :] = 0
         A[-2, -3:] = [1, -2, 1]
         efixed = True
     sfree = False
-    if bc.startswith('free'):
+    if boundary_condition.startswith('free'):
         A[0, :] = 0
         A[0, :3] = [1, -2, 1]
         A[1, :] = 0
         A[1, :4] = [-1, 3, -3, 1]
         sfree = True
     efree = False
-    if bc.endswith('free'):
+    if boundary_condition.endswith('free'):
         A[-1, :] = 0
         A[-1, -3:] = [1, -2, 1]
         A[-2, :] = 0
@@ -215,4 +244,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
             if dist < convergence:
                 break
 
-    return np.array([x, y]).T
+    if coordinates == 'xy':
+        return np.stack([x, y], axis=1)
+    else:
+        return np.stack([y, x], axis=1)

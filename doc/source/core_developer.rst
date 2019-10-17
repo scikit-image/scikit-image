@@ -1,3 +1,5 @@
+.. _core_dev:
+
 Core Developer Guide
 ====================
 

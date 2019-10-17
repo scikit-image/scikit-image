@@ -99,3 +99,9 @@ def test_binary_blobs():
 def test_lfw_subset():
     """ Test that "lfw_subset" can be loaded."""
     data.lfw_subset()
+
+
+def test_cell():
+    """ Test that "cell" image can be loaded. """
+    data.cell()
+

@@ -9,7 +9,6 @@ from .. import imread, imsave, use_plugin, reset_plugins
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
 
 from skimage._shared import testing
@@ -19,6 +18,8 @@ from skimage._shared.testing import (mono_check, color_check,
                                      assert_allclose)
 from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
+
+from skimage.metrics import structural_similarity
 
 
 def setup():
@@ -45,27 +46,18 @@ def test_png_round_trip():
     fname = f.name
     f.close()
     I = np.eye(3)
-    with expected_warnings(['Possible precision loss']):
-        imsave(fname, I)
+    imsave(fname, I)
     Ip = img_as_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
-def test_img_as_gray_flatten():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
-    with expected_warnings(['deprecated']):
-        img_flat = imread(os.path.join(data_dir, 'color.png'), flatten=True)
-    assert_array_equal(img, img_flat)
-
-
-def test_imread_flatten():
-    # a color image is flattened
+def test_imread_as_gray():
     img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
     img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
-    # check that flattening does not occur for an image that is grey already.
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
@@ -148,8 +140,9 @@ def test_jpg_quality_arg():
     with temporary_file(suffix='.jpg') as jpg:
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
-        sim = ssim(chessboard, im,
-                   data_range=chessboard.max() - chessboard.min())
+        sim = structural_similarity(
+            chessboard, im,
+            data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -215,8 +208,7 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss',
-                            'is a low contrast image']):
+    with expected_warnings(['is a low contrast image']):
         imsave(s, image)
 
     # read from file-like object
@@ -246,8 +238,7 @@ def test_imsave_boolean_input():
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    with expected_warnings(['precision loss']):
-        pil_image = ndarray_to_pil(image)
+    pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
     assert_equal(out.shape, shape)
 
@@ -296,7 +287,8 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
+        sim = structural_similarity(refi, newi,
+                                    data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 
