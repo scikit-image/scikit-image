@@ -201,6 +201,9 @@ def test_inplace():
 
 
 def test_random_seed():
+    """ensure cut_normalized returns the same output for the same input,
+    when setting numpy random seed
+    """
     img = data.coffee()
     labels1 = segmentation.slic(img, compactness=30, n_segments=400)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
