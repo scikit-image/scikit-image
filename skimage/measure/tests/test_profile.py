@@ -105,3 +105,48 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
                         linewidth=3, order=0)
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_mean():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.mean)
+    expected_prof = np.array([0, 0.8, 1, 0.2])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_max():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.max)
+    expected_prof = np.array([0, 1.8, 1.8, 0.6])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sum():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.sum)
+    expected_prof = np.array([0, 2.4, 3, 0.6])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_mean_linewidth_1():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=1, order=0,
+                        reduce_func=np.mean)
+    expected_prof = np.array([0, 1.8, 0.6, 0.])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_None_linewidth_1():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=1, order=0, reduce_func=None)
+    expected_prof = np.array([[0.6], [1.8], [0.6], [0.]])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_None_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=3, order=0, reduce_func=None)
+    expected_prof = np.array([[1.8, 0.6, 0.6],
+                              [0.6, 1.8, 1.8],
+                              [0., 0.6, 1.8],
+                              [0., 0., 0.6]])
+    assert_almost_equal(prof, expected_prof)
