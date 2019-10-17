@@ -210,7 +210,8 @@ def test_random_seed():
     results = [None] * 10
     for i in range(len(results)):
         np.random.seed(1234)
-        results[i] = graph.cut_normalized(labels1, g, in_place=False, thresh=1e-3)
+        results[i] = graph.cut_normalized(
+            labels1, g, in_place=False, thresh=1e-3)
 
     for i in range(len(results) - 1):
         assert_array_equal(results[i], results[i + 1])
