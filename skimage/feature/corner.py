@@ -83,11 +83,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> Axx
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -273,11 +273,11 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -790,7 +790,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     >>> coords = corner_peaks(corner_harris(img), min_distance=2)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
-    array([[ 4.5,  4.5]])
+    array([[4.5, 4.5]])
 
     """
 
@@ -943,11 +943,11 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
     array([[3, 3],
            [3, 2],

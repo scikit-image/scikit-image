@@ -827,10 +827,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
     >>> props[0].centroid
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
     >>> # centroid of first labeled object
     >>> props[0]['centroid']
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
 
     """
 
