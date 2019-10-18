@@ -54,8 +54,7 @@ def get_window2(window, size):
     """
     w = get_window(window, size, fftbins=False)
     w = w[safe_as_int(np.floor(w.shape[0]/2)):]
-    # make the 1D array an 'image' to use `warp`
-    win_im = np.column_stack((w, np.zeros_like(w)))
-    window2d = warp(win_im, _rotational_mapping,
+    w = w[:,np.newaxis]
+    window2d = warp(w, _rotational_mapping,
                     map_args={'window_size': size}, output_shape=(size, size))
     return window2d
