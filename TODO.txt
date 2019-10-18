@@ -41,8 +41,6 @@ Version 0.18
 
 Other
 -----
-* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
-  once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
