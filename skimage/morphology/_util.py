@@ -85,6 +85,9 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     --------
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
+    >>> _offsets_to_raveled_neighbors((2, 3, 2), np.ones((3, 3, 3)), (1, 1, 1))
+    array([ 2, -6,  1, -1,  6, -2,  3,  8, -3, -4,  7, -5, -7, -8,  5,  4, -9,
+            9])
     """
     if not selem.ndim == len(image_shape) == len(center):
         raise ValueError(
@@ -133,12 +136,17 @@ def _resolve_neighborhood(selem, connectivity, ndim):
 
     Parameters
     ----------
-    selem : array-like or None
-        The structuring element to validate. See same argument in
-        `local_maxima`.
-    connectivity : int or None
+    selem : ndarray, optional
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
+        considered as part of the neighborhood.
+    connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Defaults to `ndim` if `None` is given.
+        Adjacent pixels whose squared distance from the center is less than or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
     ndim : int
         Number of dimensions `selem` ought to have.
 
@@ -146,6 +154,15 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     -------
     selem : ndarray
         Validated or new structuring element specifying the neighborhood.
+
+    Examples
+    --------
+    >>> _resolve_neighborhood(None, 1, 2)
+    array([[False,  True, False],
+           [ True,  True,  True],
+           [False,  True, False]])
+    >>> _resolve_neighborhood(None, None, 3).shape
+    (3, 3, 3)
     """
     if selem is None:
         if connectivity is None:
@@ -214,9 +231,10 @@ def _fast_pad(image, value):
 
         np.pad(image, 1, mode="constant", constant_values=value)
 
-    Up to version 1.17 `numpy.pad` uses concatenation to create padded arrays
-    while this method needs to only allocate and copy once. This can result
-    in significant speed gains if `image` has a large number of dimensions.
+    Up to versions < 1.17 `numpy.pad` uses concatenation to create padded
+    arrays while this method needs to only allocate and copy once.
+    This can result in significant speed gains if `image` has a large number of
+    dimensions.
     Thus this function may be safely removed once that version is the minimum
     required by scikit-image.
 
