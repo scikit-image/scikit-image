@@ -54,7 +54,7 @@ def invert(image, signed_float=False):
            [-128,   -1,   -6]], dtype=int8)
     >>> img3 = np.array([[ 0., 1., 0.5, 0.75]])
     >>> invert(img3)
-    array([[ 1.  ,  0.  ,  0.5 ,  0.25]])
+    array([[1.  , 0.  , 0.5 , 0.25]])
     >>> img4 = np.array([[ 0., 1., -1., -0.25]])
     >>> invert(img4, signed_float=True)
     array([[-0.  , -1.  ,  1.  ,  0.25]])
