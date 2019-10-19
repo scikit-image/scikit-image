@@ -113,7 +113,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     distances = np.abs(offsets).sum(axis=1)
     raveled_offsets = raveled_offsets[np.argsort(distances)]
 
-    # In case any dimension in image_shape is smaller than selem.shape
+    # If any dimension in image_shape is smaller than selem.shape
     # duplicates might occur, remove them
     if any(x < y for x, y in zip(image_shape, selem.shape)):
         # np.unique reorders, which we don't want
