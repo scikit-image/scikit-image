@@ -304,7 +304,7 @@ class TestRemoveCloseObjects:
         desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
         assert_array_equal(result, desired)
 
-    def test_inplace(self):
+    def test_in_place(self):
         image = np.array([True, False, True])
         image_copy = image.copy()
         desired = np.array([False, False, True], dtype=bool)
@@ -313,7 +313,7 @@ class TestRemoveCloseObjects:
         remove_near_objects(image, 2)
         assert_array_equal(image, image_copy)
 
-        remove_near_objects(image, 2, inplace=True)
+        remove_near_objects(image, 2, in_place=True)
         assert_array_equal(image, desired)
 
     @pytest.mark.parametrize("minimal_distance", [-10, -0.1])

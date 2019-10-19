@@ -243,7 +243,7 @@ def remove_near_objects(
     p_norm=2,
     selem=None,
     connectivity=None,
-    inplace=False,
+    in_place=False,
 ):
     """Remove objects until a minimal distance is ensured.
 
@@ -277,8 +277,8 @@ def remove_near_objects(
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `selem` is not None.
-    inplace : bool, optional
-        Whether to modify `image` inplace or return a new array.
+    in_place : bool, optional
+        Whether to modify `image` in place or return a new array.
 
     Returns
     -------
@@ -334,7 +334,7 @@ def remove_near_objects(
         raise ValueError(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
-    if not inplace:
+    if not in_place:
         image = np.array(image, order="C", copy=True)
     if image.size == 0:
         # _offsets_to_raveled_neighbors doesn't support emtpy images
