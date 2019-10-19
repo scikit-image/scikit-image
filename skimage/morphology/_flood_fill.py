@@ -49,7 +49,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         This parameter is deprecated and will be removed in version 0.19.0
         in favor of in_place. If True, flood filling is applied to `image`
         inplace. If False, the flood filled result is returned without
-        modifying the input `image` (default). 
+        modifying the input `image` (default).
     in_place : bool, optional
         If True, flood filling is applied to `image` inplace.  If False, the
         flood filled result is returned without modifying the input `image`
