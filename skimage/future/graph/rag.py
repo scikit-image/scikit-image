@@ -168,7 +168,6 @@ class RAG(nx.Graph):
                 else:
                     equal = (this_val == other_val)
                 if not equal:
-                    print(f"Unequal! {node}/'{key}':{this_val} != {other_val}")
                     return False
         return True
 
