@@ -976,8 +976,8 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         coords = np.transpose(peaks.nonzero())
         for r, c in coords:
             if peaks[r, c]:
-                peaks[r - min_distance:r + min_distance + 1,
-                      c - min_distance:c + min_distance + 1] = False
+                peaks[max((r - min_distance), 0):r + min_distance + 1,
+                      max((c - min_distance), 0):c + min_distance + 1] = False
                 peaks[r, c] = True
 
     if indices is True:
