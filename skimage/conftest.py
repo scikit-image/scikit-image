@@ -1,3 +1,4 @@
+# List of files that pytest should ignore
 collect_ignore = ["io/_plugins",]
 try:
     import visvis
