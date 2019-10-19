@@ -245,8 +245,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
 
     Parameters
     ----------
-    labels : ndarray
-        The array of labels.
     rag : RAG
         The region adjacency graph.
     thresh : float
@@ -254,9 +252,6 @@ def _ncut_relabel(rag, thresh, num_cuts):
         value of the N-cut exceeds `thresh`.
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
-    map_array : array
-        The array which maps old labels to new ones. This is modified inside
-        the function.
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
