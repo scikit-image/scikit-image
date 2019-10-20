@@ -145,9 +145,9 @@ install:
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
-        pip install --no-build-isolation -e .;
+        pip install -vv --no-build-isolation -e .;
       fi
-    # ^^^^ installing in editable mdoe avoids redownloading the test datasets
+    # ^^^^ installing in editable mode avoids redownloading the test datasets
     # using pooch as our code automatically checks for the data being
     # stored in directories adjacent to the source.
     #
