@@ -66,7 +66,7 @@ except ImportError:
     import hashlib
 
     def file_hash(fname):
-        # Versioned from pooch.utils
+        # Versioned (i.e. copied from) from pooch.utils
         # Calculate the hash in chunks to avoid overloading the memory
         chunksize = 65536
         hasher = hashlib.sha256()
