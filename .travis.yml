@@ -145,8 +145,12 @@ install:
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
-        # installing in editable mdoe avoids many downloads from pooch
-        # installing from SDIST will help test the other cases
+        # installing in editable mdoe avoids redownloading the test datasets
+        # using pooch as our code automatically checks for the data being
+        # stored in directories adjacent to the source.
+        #
+        # installing from SDIST will force the use of pooch as a downloading
+        # backend to test the pooch functionality
         pip install --no-build-isolation -e .;
       fi
     # Install testing requirements
