@@ -6,6 +6,8 @@ from skimage import io
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import fetch
+from skimage.data import data_dir
 
 
 one_by_one_jpeg = (
@@ -89,6 +91,7 @@ def _named_tempfile_func(error_class):
     ]
 )
 def test_failed_temporary_file(monkeypatch, error_class):
+    fetch('data/camera.png')
     # tweak data path so that file URI works on both unix and windows.
     data_path = data_dir.lstrip(os.path.sep)
     data_path = data_path.replace(os.path.sep, '/')
