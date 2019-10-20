@@ -111,7 +111,7 @@ def _fetch(data_filename):
         # ``skimage.data.load`` with a filename that isn't part of the
         # skimage distribution
         raise ValueError(
-            "The resquested file {data_filename} is not part of the "
+            "The requested file {data_filename} is not part of the "
             "scikit-image distribution."
             "".format(data_filename=data_filename))
     return resolved_path
