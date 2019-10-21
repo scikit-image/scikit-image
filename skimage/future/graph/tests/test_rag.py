@@ -200,18 +200,17 @@ def test_inplace():
     assert backup_g == g
 
 
-def test_random_seed():
+def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
-    when setting numpy random seed
+    when specifying random_state
     """
     img = data.coffee()
     labels1 = segmentation.slic(img, compactness=30, n_segments=400)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
     results = [None] * 10
     for i in range(len(results)):
-        np.random.seed(1234)
         results[i] = graph.cut_normalized(
-            labels1, g, in_place=False, thresh=1e-3)
+            labels1, g, in_place=False, thresh=1e-3, random_state=1234)
 
     for i in range(len(results) - 1):
         assert_array_equal(results[i], results[i + 1])
