@@ -9,7 +9,7 @@ def _round_safe(coords):
     However, NumPy rounds values to the nearest *even* integer, so:
 
     >>> np.round([0.5, 1.5, 2.5, 3.5, 4.5])
-    array([ 0.,  2.,  2.,  4.,  4.])
+    array([0., 2., 2., 4., 4.])
 
     So, for our application, we detect whether the above case occurs, and use
     ``np.floor`` if so. It is sufficient to detect that the first coordinate
@@ -38,7 +38,7 @@ def _round_safe(coords):
     array([0, 1, 2, 3, 4])
     >>> coords1 = np.arange(0.5, 8, 1)
     >>> coords1
-    array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5])
+    array([0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5])
     >>> _round_safe(coords1)
     array([0, 1, 2, 3, 4, 5, 6, 7])
     """
