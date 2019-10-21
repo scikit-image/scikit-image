@@ -234,8 +234,7 @@ class TestPeakLocalMax():
                                      footprint=np.ones((3, 3), bool),
                                      min_distance=1, threshold_rel=0,
                                      indices=True, exclude_border=False)
-        assert result.shape[0] == 0
-        assert result.shape[1] == image.ndim
+        assert result.shape == (0, image.ndim)
 
     def test_one_point(self):
         image = np.zeros((10, 20))
