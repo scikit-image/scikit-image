@@ -372,21 +372,21 @@ def test_corner_peaks():
 
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, metric='chebyshev')
-    assert len(corners) == 1
+    assert len(corners) == 2
 
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, metric='chebyshev',
                            indices=False)
-    assert np.sum(corners) == 1
+    assert np.sum(corners) == 2
 
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, metric='euclidean')
-    assert len(corners) == 2
+    assert len(corners) == 3
 
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, metric='euclidean',
                            indices=False)
-    assert np.sum(corners) == 2
+    assert np.sum(corners) == 3
 
 
 def test_blank_image_nans():
