@@ -206,8 +206,8 @@ def greycoprops(P, prop='contrast'):
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
     check_nD(P, 4, 'P')
