@@ -26,6 +26,14 @@ addons:
     # https://github.com/matplotlib/matplotlib/pull/13412
     - qtbase5-dev
 
+stage: Comprehensive tests
+
+stages:
+    # Do the style check and a single test job, don't proceed if it fails
+    - name: Initial tests
+    # Do the rest of the tests
+    - name: Comprehensive tests
+
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
@@ -61,6 +69,7 @@ matrix:
         - xvfb
     - os: linux
       python: 3.7
+      stage: Initial tests
       dist: xenial # Required for Python 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:

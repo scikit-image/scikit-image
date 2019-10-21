@@ -41,8 +41,6 @@ Version 0.18
 
 Other
 -----
-* Remove legacy pretty printing workaround for ``pytest`` in ``conftest.py``
-  once minimal required ``numpy`` is set to >= 1.14.0.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
@@ -52,9 +50,6 @@ Other
   moves away from using ``np.matrix`` in a future version too.
 * Remove the conditional import and function call when ``numpy`` is set
   to > 1.15.x in ``skimage/util/arraycrop.py``.
-* When minimum supported version of ``scipy`` reaches 0.18, use
-  ``scipy.fftpack.next_fast_len`` directly in
-  ``skimage._shared.fft``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
