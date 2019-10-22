@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Generate the release notes automatically from Github pull requests.
 
 Start with:
@@ -48,6 +49,13 @@ except ImportError:
         return i
 
 
+parser = argparse.ArgumentParser(usage=__doc__)
+parser.add_argument('from_commit', help='The starting tag.')
+parser.add_argument('to_commit', help='The head branch.')
+parser.add_argument('--version', help="Version you're about to release.",
+                    default='0.15.0')
+args = parser.parse_args()
+
 GH_USER = 'scikit-image'
 GH_REPO = 'scikit-image'
 GH_TOKEN = os.environ.get('GH_TOKEN')
@@ -61,15 +69,6 @@ if GH_TOKEN is None:
 
 g = Github(GH_TOKEN)
 repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
-
-
-parser = argparse.ArgumentParser(usage=__doc__)
-parser.add_argument('from_commit', help='The starting tag.')
-parser.add_argument('to_commit', help='The head branch.')
-parser.add_argument('--version', help="Version you're about to release.",
-                    default='0.15.0')
-
-args = parser.parse_args()
 
 for tag in repository.get_tags():
     if tag.name == args.from_commit:
