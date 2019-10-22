@@ -20,7 +20,7 @@ class skimage_deprecation(Warning):
     pass
 
 
-class deprecate_arg:
+class deprecate_kwarg:
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
 
@@ -33,8 +33,8 @@ class deprecate_arg:
 
     """
 
-    def __init__(self, arg_mapping, removed_version=None):
-        self.arg_mapping = arg_mapping
+    def __init__(self, kwarg_mapping, removed_version=None):
+        self.kwarg_mapping = kwarg_mapping
         self.warning_msg = ("'{old_arg}' is a deprecated argument name "
                             "for `{func_name}`. ")
         if removed_version is not None:
@@ -45,7 +45,7 @@ class deprecate_arg:
     def __call__(self, func):
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
-            for old_arg, new_arg in self.arg_mapping.items():
+            for old_arg, new_arg in self.kwarg_mapping.items():
                 if old_arg in kwargs:
                     #  warn that the function interface has changed:
                     warnings.warn(self.warning_msg.format(
