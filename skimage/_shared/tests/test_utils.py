@@ -1,14 +1,15 @@
-from skimage._shared.utils import copy_func, check_nD, deprecate_arg
+from skimage._shared.utils import copy_func, check_nD, deprecate_kwarg
 import numpy.testing as npt
 import numpy as np
 from skimage._shared import testing
 import pytest
 
 
-def test_deprecated_arg():
+def test_deprecated_kwarg():
 
-    @deprecate_arg({'old_arg1': 'new_arg1'})
+    @deprecate_kwarg({'old_arg1': 'new_arg1'})
     def foo(arg0, new_arg1=1, arg2=None):
+        """Expected docstring"""
         return arg0, new_arg1, arg2
 
     # Assert that the DeprecationWarning is raised when the deprecated
@@ -28,6 +29,9 @@ def test_deprecated_arg():
         assert foo(0, new_arg1=2) == (0, 2, None)
         assert foo(0, arg2=2) == (0, 1, 2)
         assert foo(0, 1, arg2=2) == (0, 1, 2)
+        # Function name and doc is preserved
+        assert foo.__name__ == 'foo'
+        assert foo.__doc__ == 'Expected docstring'
 
     # Assert no warning was raised
     assert not record.list
