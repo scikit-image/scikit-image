@@ -1,3 +1,4 @@
+import sys
 from skimage._shared.utils import copy_func, check_nD, deprecate_kwarg
 import numpy.testing as npt
 import numpy as np
@@ -31,7 +32,9 @@ def test_deprecated_kwarg():
         assert foo(0, 1, arg2=2) == (0, 1, 2)
         # Function name and doc is preserved
         assert foo.__name__ == 'foo'
-        assert foo.__doc__ == 'Expected docstring'
+        if sys.flags.optimize < 2:
+            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
+            assert foo.__doc__ == 'Expected docstring'
 
     # Assert no warning was raised
     assert not record.list
