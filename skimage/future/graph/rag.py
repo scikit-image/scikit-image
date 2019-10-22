@@ -157,20 +157,6 @@ class RAG(nx.Graph):
                                   strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
 
-    def __eq__(self, other):
-        if set(self.nodes) != set(other.nodes):
-            return False
-        for node in self.nodes:
-            for key, this_val in self.nodes[node].items():
-                other_val = other.nodes[node][key]
-                if isinstance(this_val, np.ndarray):
-                    equal = (this_val == other_val).all()
-                else:
-                    equal = (this_val == other_val)
-                if not equal:
-                    return False
-        return True
-
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
         """Merge node `src` and `dst`.

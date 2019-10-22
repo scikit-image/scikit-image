@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from numpy.testing import assert_array_equal
 import numpy as np
 from skimage.future import graph
@@ -185,19 +183,6 @@ def test_ncut_stable_subgraph():
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 
     assert new_labels.max() == 0
-
-
-def test_inplace():
-    """Make sure normalized cuts does not modify arguments
-    when in_place=False"""
-    img = data.coffee()
-    labels1 = segmentation.slic(img, compactness=30, n_segments=400)
-    g = graph.rag_mean_color(img, labels1, mode='similarity')
-    backup_labels = deepcopy(labels1)
-    backup_g = deepcopy(g)
-    _ = graph.cut_normalized(labels1, g, in_place=False, thresh=1e-8)
-    assert_array_equal(backup_labels, labels1)
-    assert backup_g == g
 
 
 def test_reproducibility():
