@@ -27,7 +27,7 @@ class deprecate_arg:
     Parameters
     ----------
     arg_mapping: dict
-        mapping between the function's old argument names and the new ones.
+        Mapping between the function's old argument names and the new ones.
     removed_version : str
         The package version in which the deprecated argument will be removed.
 
