@@ -76,6 +76,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
 
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
                    max_edge=1.0,
+                   *,
                    random_state=None,
                    ):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
