@@ -109,7 +109,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`. The random state is used for the starting point
-        of `scipy.sparse.linalg.eighsh`
+        of `scipy.sparse.linalg.eigsh`.
 
     Returns
     -------
