@@ -264,7 +264,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_state):
     num_cuts : int
         The number or N-cuts to perform before determining the optimal one.
     random_state: RandomState instance
-        Provides initial values for eigenvalue solver
+        Provides initial values for eigenvalue solver.
     """
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
