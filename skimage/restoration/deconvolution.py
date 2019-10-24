@@ -325,8 +325,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
-
-def richardson_lucy(image, psf, iterations=50, clip=True):
+def richardson_lucy(image, psf, iterations=10, clip=True):
     """Richardson-Lucy deconvolution.
 
     Parameters
@@ -360,6 +359,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+    .. [2] D.S.C.Biggs and M. Andrews, "Acceleration of iterative image 
+       restoration algorithms," Appl. Opt. 36(8), 1766–1775 (1997).    
     """
     # compute the times for direct convolution and the fft method. The fft is of
     # complexity O(N log(N)) for each dimension and the direct method does
@@ -375,16 +376,31 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
         convolve_method = fftconvolve
     else:
         convolve_method = convolve
-
     image = image.astype(np.float)
-    psf = psf.astype(np.float)
-    im_deconv = np.full(image.shape, 0.5)
+    psf = psf.astype(np.float)    
     psf_mirror = psf[::-1, ::-1]
-
+    im_deconv = image
+    #initial iteration
+    relative_blur = image / convolve_method(im_deconv, psf, 'same')
+    im_deconv_mid = im_deconv * convolve_method(relative_blur, psf_mirror,
+                                                    'same')
+    v = im_deconv_mid - im_deconv
+    np.clip(v, 0, v)           
+    im_deconv = im_deconv_mid
+    np.clip(im_deconv, 0, out = im_deconv)
+    
     for _ in range(iterations):
+        im_deconv_mid_prev = im_deconv_mid
         relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
-
+        im_deconv_mid = im_deconv * convolve_method(relative_blur, psf_mirror,
+                                                    'same')
+        v_prev = v
+        v = im_deconv_mid - im_deconv
+        np.clip(v, 0, out = v) 
+        alpha = (v_prev * v).sum() / ((v_prev * v_prev).sum() + 2e-15)
+        alpha = np.clip(alpha, 0, 1)
+        im_deconv = im_deconv_mid + alpha * (im_deconv_mid - im_deconv_mid_prev)
+        np.clip(im_deconv, 0, out = im_deconv)
     if clip:
         im_deconv[im_deconv > 1] = 1
         im_deconv[im_deconv < -1] = -1
