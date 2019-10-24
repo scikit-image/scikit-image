@@ -8,6 +8,7 @@ import skimage
 from skimage.data import camera
 from skimage import restoration
 from skimage.restoration import uft
+from skimage.filters import gaussian
 
 test_img = skimage.img_as_float(camera())
 
@@ -82,10 +83,36 @@ def test_richardson_lucy():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolved = restoration.richardson_lucy(data, psf, 5)
+    deconvolved, _ = restoration.richardson_lucy(data, psf, 5)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+
+
+def test_blind_richardson_lucy():
+    im = np.zeros((100, 100), dtype=np.float32)
+    im[40:60, 45:55] = 1
+    im[45:55, 40:60] = 1
+
+    # Add some poisson photon shot noise
+    np.random.seed(0)
+    im += np.random.poisson(2.0, im.shape) / 255
+
+    psf_gaussian = np.zeros_like(im)
+    w, h = im.shape
+    psf_gaussian[w // 2, h // 2] = 1
+    psf_gaussian = gaussian(psf_gaussian, 2)
+
+    im_conv = convolve2d(im, psf_gaussian, 'same')
+    iterations = 50
+
+    im_deconv, psf = restoration.richardson_lucy(im_conv,
+                                                 iterations=iterations)
+
+    path = pjoin(dirname(abspath(__file__)), 'reconstruction_blind_RL.npy')
+    im_deconv_test, psf_test = np.load(path)
+    np.testing.assert_allclose(im_deconv, im_deconv_test, rtol=1e-3)
+    np.testing.assert_allclose(psf, psf_test, rtol=1e-3)
 
 
 if __name__ == '__main__':
