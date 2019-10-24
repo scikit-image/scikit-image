@@ -7,7 +7,7 @@ from GHMHelperFuncs import *
 
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
     """
-    A and B are the matrices of PDFs/histograms.
+    A and B are the matrices of histograms.
     """
     C = np.zeros((m, n))
     T = np.zeros((m, n), dtype=np.int64)
@@ -18,25 +18,29 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
 
     # initialize C
     for j in range(n):
-        C[0, j] = row_cost(A, B, 0, 0, j, dist)
+        C[0,j] = row_cost(A, B, 0, 0, j, dist)
     # T is already initialized to zeros.
     print("Finished initializing C and T.")
     
     # fill out rest of C and T
-    for i in range(1, m):
-        for j in range(n):
-    if cdf:          
-        index_min_cost_of_prev_row = np.argmin(C[i-1, :j + 1])
-        min_cost_of_prev_row = C[i-1, index_min_cost_of_prev_row]
-        cost_of_setting_indicator_in_col_j = row_cost(A, B, i, j, j, dist)
-        C[i,j] = cost_of_setting_indicator_in_col_j + min_cost_of_prev_row
-        T[i, j] = index_min_cost_of_prev_row 
+    if cdf:
+        for i in range(1, m):
+            for j in range(n):
+                index_min_cost_of_prev_row = np.argmin(C[i-1, :j + 1])
+                min_cost_of_prev_row = C[i-1, index_min_cost_of_prev_row]
+                cost_of_setting_indicator_in_col_j = row_cost(A, B, i, j, j, dist)
+                C[i,j] = cost_of_setting_indicator_in_col_j + min_cost_of_prev_row
+                T[i,j] = index_min_cost_of_prev_row
     else:
-        prev_row_costs = [row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
-        costs = [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)]
-        costs = [row_cost(A, B, i , 0, j, dist)] + costs
-        C[i, j] = min(costs)
-        T[i, j] = np.argmin(costs)
+        for i in range(1, m):
+            for j in range(n):
+                # TODO merge the two lines below
+                prev_row_costs = [row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
+                costs = [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)] # j = n-1;   -1, 0 ... n-2, n-1 = length n+1. but it's 0, 1, ..., n
+                costs = [row_cost(A, B, i , 0, j, dist)] + costs
+                # TODO merge the two lines below (simultaneously do both)
+                C[i,j] = min(costs)
+                T[i,j] = np.argmin(costs) - 1
     print("Finished finding C and T.")
     return C, T
             
@@ -64,11 +68,14 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
     
     # find path in M from T
     j = n-1
+    jj = n-1
     for i in range(m-1, 0, -1): # starting from bottom row, going to all but top and looking at each row in T and the row above it
+        print(i)
+        print(j)
         jj = T[i,j]
         M[i, jj+1:j+1] = 1
         j = jj
-    M[0,0:jj+1] = 1 # row 0
+    M[0, 0:jj+1] = 1 # row 0
     
     mapping = {}
     for j in range(n):
@@ -84,11 +91,12 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
     return mapping, C, T, M
 
 
+# TODO decide what file formats we accept. Currently we do jpg. See https://matplotlib.org/3.1.0/api/_as_gen/matplotlib.pyplot.imread.html See "Notes".
 
 #GHM and cdfGHM
-def GHM(imgA, imgB, dist='L1'):
-    A = create_matrix(imgA)
-    B = create_matrix(imgB)
+def GHM(imgA, imgB, num_histograms_per_dim=1, dist='L1'):
+    A, pix_to_index_A, index_to_pix_A = create_matrix(imgA, num_histograms_per_dim)
+    B, pix_to_index_B, index_to_pix_B = create_matrix(imgB, num_histograms_per_dim)
     mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=False)
 
     matched_imgA = convert(imgA, mapping)

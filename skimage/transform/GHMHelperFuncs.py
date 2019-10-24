@@ -17,9 +17,9 @@ def plot_hist(img):
     plt.hist(img.ravel(), range=(0,256), bins=256)
     plt.show()
 
-def show_img(img):
-    plt.imshow(img, cmap="gray", vmin=0, vmax=255)
-    plt.show()
+# def show_img(img):
+#     plt.imshow(img, cmap="gray", vmin=0, vmax=255)
+#     plt.show()
 
 def is_from_0_to_255(img):
     (h, w) = img.shape
@@ -91,7 +91,10 @@ def calc_histogram(img, pix_to_index):
     The histogram is normalized so that the sum of all entries equals 1.
     """
     histogram = [0]*len(pix_to_index)
-    add_to_histogram = np.vectorize(lambda pix : histogram[pix_to_index[pix]] += 1)
+    def add_pix_to_histogram(pix):
+    	histogram[pix_to_index[pix]] += 1
+    # add_to_histogram = np.vectorize(lambda pix : histogram[pix_to_index[pix]] += 1)
+    add_to_histogram = np.vectorize(add_pix_to_histogram)
     add_to_histogram(img)
     histogram = np.array([histogram])
     histogram = histogram / img.size
@@ -120,7 +123,7 @@ def create_matrix(img, num_histograms_per_dim=1):
             left = j*box_width
             right = (j+1)*box_width
             sub_img = img[top:bottom, left:right] # TODO: here and other places in this function - maybe don't create whole sub-image, this pass in indices to calc_histogram?
-            show_img(sub_img)
+            # show_img(sub_img)
             column = calc_histogram(sub_img, pix_to_index)
             if matrix is None:
                 matrix = column
@@ -134,7 +137,7 @@ def create_matrix(img, num_histograms_per_dim=1):
         left = j*box_width
         right = (j+1)*box_width
         sub_img = img[top:, left:right]
-        show_img(sub_img)
+        # show_img(sub_img)
         column = calc_histogram(sub_img, pix_to_index)
         if matrix is None:
             matrix = column
@@ -147,7 +150,7 @@ def create_matrix(img, num_histograms_per_dim=1):
         top = i*box_height
         bottom = (i+1)*box_height
         sub_img = img[top:bottom, left:]
-        show_img(sub_img)
+        # show_img(sub_img)
         column = calc_histogram(sub_img, pix_to_index)
         if matrix is None:
             matrix = column
@@ -159,7 +162,7 @@ def create_matrix(img, num_histograms_per_dim=1):
     top = i*box_height
     left = j*box_width
     sub_img = img[top:, left:]
-    show_img(sub_img)
+    # show_img(sub_img)
     column = calc_histogram(sub_img, pix_to_index)
     if matrix is None:
         matrix = column
