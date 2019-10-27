@@ -2,6 +2,7 @@ import numpy as np
 from pytest import raises
 
 from skimage.morphology import flood, flood_fill
+from skimage._shared.testing import expected_warnings
 
 eps = 1e-12
 
@@ -122,7 +123,7 @@ def test_inplace_int_deprecated():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]])
 
-    with expected_warnings(['The inplace']):
+    with expected_warnings(['The `inplace`']):
         flood_fill(image, (0, 0), 5, inplace=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
@@ -144,7 +145,7 @@ def test_inplace_float_deprecated():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
 
-    with expected_warnings(['The inplace']):
+    with expected_warnings(['The `inplace`']):
         flood_fill(image, (0, 0), 5, inplace=True)
 
     expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
