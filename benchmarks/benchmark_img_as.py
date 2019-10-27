@@ -1,6 +1,7 @@
 import numpy as np
 from skimage.util.dtype import convert
 
+
 class ImgAsSuite:
     param_names = ["dtype_in", "dtype_out", "shape", "mode"]
     params = [
@@ -39,8 +40,8 @@ class ImgAsSuite:
         if dtype_in == dtype_out:
             return np.asarray(self.image)
 
-        elif (np.issubdtype(dtype_in, np.integer) and
-                np.issubdtype(dtype_out, np.integer)):
+        elif (np.issubdtype(dtype_in, np.integer)
+                and np.issubdtype(dtype_out, np.integer)):
 
             max_in = np.iinfo(dtype_in).max
             max_out = np.iinfo(dtype_out).max
@@ -48,16 +49,16 @@ class ImgAsSuite:
             result_float = np.multiply(self.image, max_out / max_in)
             return result_float.astype(dtype_out)
 
-        elif (np.issubdtype(dtype_in, np.integer) and
-                np.issubdtype(dtype_out, np.floating)):
+        elif (np.issubdtype(dtype_in, np.integer)
+                and np.issubdtype(dtype_out, np.floating)):
             imax = np.iinfo(dtype_in).max
             return np.multiply(self.image, 1 / imax, dtype=dtype_out)
 
-        elif (np.issubdtype(dtype_in, np.floating) and
-                np.issubdtype(dtype_out, np.floating)):
+        elif (np.issubdtype(dtype_in, np.floating)
+                and np.issubdtype(dtype_out, np.floating)):
             return self.image.astype(dtype_out)
-        elif (np.issubdtype(dtype_in, np.floating) and
-                np.issubdtype(dtype_out, np.integer)):
+        elif (np.issubdtype(dtype_in, np.floating)
+                and np.issubdtype(dtype_out, np.integer)):
             imax = np.iinfo(dtype_out).max
             return np.multiply(self.image, imax).astype(dtype_out)
 
