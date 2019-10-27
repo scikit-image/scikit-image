@@ -14,7 +14,7 @@ from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
 
 def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
-               tolerance=None, inplace=None, in_place=False):
+               tolerance=None, in_place=False, inplace=None):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
