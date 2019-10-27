@@ -60,6 +60,8 @@ class ImgAsSuite:
         elif (np.issubdtype(dtype_in, np.floating)
                 and np.issubdtype(dtype_out, np.integer)):
             imax = np.iinfo(dtype_out).max
-            return np.multiply(self.image, imax).astype(dtype_out)
+            # Add 1/(imax * 2) to implement the correct rounding
+            return np.multiply(
+                self.image  + (1 / (imax * 2)), imax).astype(dtype_out)
 
         raise NotImplementedError()
