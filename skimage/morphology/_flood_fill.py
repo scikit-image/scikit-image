@@ -106,7 +106,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
            [5, 5, 5, 5, 5, 5, 3]])
     """
     if inplace is not None:
-        warn('The inplace parameter will change'
+        warn('The inplace parameter will change '
              'to in_place in version 0.19.0.', stacklevel=2)
         in_place = inplace
 
