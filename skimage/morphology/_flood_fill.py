@@ -45,15 +45,15 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         value of `image` at `seed_point` to be filled.  This is fastest.
         If a tolerance is provided, adjacent points with values within plus or
         minus tolerance from the seed point are filled (inclusive).
+    in_place : bool, optional
+        If True, flood filling is applied to `image` inplace.  If False, the
+        flood filled result is returned without modifying the input `image`
+        (default).
     inplace : bool, optional
         This parameter is deprecated and will be removed in version 0.19.0
         in favor of in_place. If True, flood filling is applied to `image`
         inplace. If False, the flood filled result is returned without
         modifying the input `image` (default).
-    in_place : bool, optional
-        If True, flood filling is applied to `image` inplace.  If False, the
-        flood filled result is returned without modifying the input `image`
-        (default).
 
     Returns
     -------
