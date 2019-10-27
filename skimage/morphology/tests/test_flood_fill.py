@@ -122,7 +122,8 @@ def test_inplace_int_deprecated():
                       [1, 0, 0, 0, 0, 0, 3],
                       [0, 1, 1, 1, 3, 3, 4]])
 
-    flood_fill(image, (0, 0), 5, inplace=True)
+    with expected_warnings(['The inplace']):
+        flood_fill(image, (0, 0), 5, inplace=True)
 
     expected = np.array([[5, 5, 5, 5, 5, 5, 5],
                          [5, 1, 1, 5, 2, 2, 5],
