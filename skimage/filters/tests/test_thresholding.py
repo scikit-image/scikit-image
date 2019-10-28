@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 
 from skimage import util
 from skimage import data
+from skimage import color
 from skimage.draw import circle
 from skimage._shared._warnings import expected_warnings
 from skimage.filters.thresholding import (threshold_local,
@@ -560,8 +561,18 @@ def test_multiotsu_output():
     for coor, val in zip(coords, values):
         rr, cc = circle(coor[1], coor[0], 20)
         image[rr, cc] = val
-    thresholds = [64, 128]
-    assert np.array_equal(thresholds, threshold_multiotsu(image))
+    t1, t2 = threshold_multiotsu(image)
+    # since the image only contains values 64, 128, 192, and the image is
+    # compared to the threshold with a strictly greater than check, thresholds
+    # 64, 65, ..., 127 are all equivalent, and thresholds 128, 129, ..., 191
+    # are all equivalent. The overly stringent check of t1 == 64 was causing
+    # some 32-bit builds to fail. See e.g.
+    # https://travis-ci.org/scikit-image/scikit-image-wheels/jobs/595911861#L3896-L3911
+    assert t1 in range(64, 128)
+    assert t2 in range(128, 192)
+
+    image = color.rgb2gray(data.astronaut())
+    assert_almost_equal(threshold_multiotsu(image, 2), 0.43945312)
 
 
 @pytest.mark.parametrize("thresholding, lower, upper", [

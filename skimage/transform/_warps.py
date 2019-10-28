@@ -427,8 +427,8 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
     >>> downscale_local_mean(a, (2, 3))
-    array([[ 3.5,  4. ],
-           [ 5.5,  4.5]])
+    array([[3.5, 4. ],
+           [5.5, 4.5]])
 
     """
     return block_reduce(image, factors, np.mean, cval)
@@ -848,17 +848,19 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
             matrix = np.linalg.inv(inverse_map.__self__.params)
 
         if matrix is not None:
-            matrix = matrix.astype(np.double)
+            matrix = matrix.astype(image.dtype)
+            ctype = 'float32_t' if image.dtype == np.float32 else 'float64_t'
             if image.ndim == 2:
-                warped = _warp_fast(image, matrix,
-                                    output_shape=output_shape,
-                                    order=order, mode=mode, cval=cval)
+                warped = _warp_fast[ctype](image, matrix,
+                                           output_shape=output_shape,
+                                           order=order, mode=mode, cval=cval)
             elif image.ndim == 3:
                 dims = []
                 for dim in range(image.shape[2]):
-                    dims.append(_warp_fast(image[..., dim], matrix,
-                                           output_shape=output_shape,
-                                           order=order, mode=mode, cval=cval))
+                    dims.append(_warp_fast[ctype](image[..., dim], matrix,
+                                                  output_shape=output_shape,
+                                                  order=order, mode=mode,
+                                                  cval=cval))
                 warped = np.dstack(dims)
 
     if warped is None:

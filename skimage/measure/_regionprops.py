@@ -525,9 +525,14 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     return out
 
 
-def regionprops_table(label_image, intensity_image=None, cache=True,
-                      properties=('label', 'bbox'), separator='-'):
-    """Find image properties and convert them into a dictionary
+def regionprops_table(label_image, intensity_image=None,
+                      properties=('label', 'bbox'),
+                      *,
+                      cache=True, separator='-'):
+    """Compute image properties and return them as a pandas-compatible table.
+
+    The table is a dictionary mapping column names to value arrays. See Notes
+    section below for details.
 
     Parameters
     ----------
@@ -536,15 +541,15 @@ def regionprops_table(label_image, intensity_image=None, cache=True,
     intensity_image : (N, M) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
-    cache : bool, optional
-        Determine whether to cache calculated properties. The computation is
-        much faster for cached properties, whereas the memory consumption
-        increases.
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
         For a list of available properties, please see :func:`regionprops`.
         Users should remember to add "label" to keep track of region
         identities.
+    cache : bool, optional
+        Determine whether to cache calculated properties. The computation is
+        much faster for cached properties, whereas the memory consumption
+        increases.
     separator : str, optional
         For non-scalar properties not listed in OBJECT_COLUMNS, each element
         will appear in its own column, with the index of that element separated
@@ -822,10 +827,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
     >>> props[0].centroid
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
     >>> # centroid of first labeled object
     >>> props[0]['centroid']
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
 
     """
 

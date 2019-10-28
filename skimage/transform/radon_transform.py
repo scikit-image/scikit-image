@@ -74,7 +74,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
              'you want to preserve the range of your image '
              '(preserve_range=True). In scikit-image 0.18 this behavior will '
              'change to preserve_range=False. To avoid this warning, '
-             'explictiely specify the preserve_range parameter.',
+             'explicitly specify the preserve_range parameter.',
              stacklevel=2)
         preserve_range = True
 

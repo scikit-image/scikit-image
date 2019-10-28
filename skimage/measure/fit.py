@@ -50,15 +50,15 @@ class LineModelND(BaseModel):
     >>> lm.estimate(np.array([x, y]).T)
     True
     >>> tuple(np.round(lm.params, 5))
-    (array([ 1.5 ,  5.25]), array([ 0.5547 ,  0.83205]))
+    (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
     >>> res = lm.residuals(np.array([x, y]).T)
     >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     >>> np.round(lm.predict_y(x[:5]), 3)
-    array([ 4.5  ,  4.562,  4.625,  4.688,  4.75 ])
+    array([4.5  , 4.562, 4.625, 4.688, 4.75 ])
     >>> np.round(lm.predict_x(y[:5]), 3)
-    array([ 1.   ,  1.042,  1.083,  1.125,  1.167])
+    array([1.   , 1.042, 1.083, 1.125, 1.167])
 
     """
 
@@ -248,9 +248,8 @@ class CircleModel(BaseModel):
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
-
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     """
 
     def estimate(self, data):
@@ -382,10 +381,10 @@ class EllipseModel(BaseModel):
     >>> ellipse.estimate(xy)
     True
     >>> np.round(ellipse.params, 2)
-    array([ 10.  ,  15.  ,   4.  ,   8.  ,   0.52])
+    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
-    array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-            0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+    array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+           0., 0., 0., 0., 0., 0., 0., 0.])
     """
 
     def estimate(self, data):
@@ -747,7 +746,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
     >>> abs(np.round(ransac_model.params))
-    array([ 20.,  30.,   5.,  10.,   0.])
+    array([20., 30.,  5., 10.,  0.])
     >>> inliers # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -779,7 +778,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
-            True,  True,  True,  True,  True], dtype=bool)
+            True,  True,  True,  True,  True])
 
     """
 

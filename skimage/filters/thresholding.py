@@ -1085,7 +1085,11 @@ def apply_hysteresis_threshold(image, low, high):
 
 
 def threshold_multiotsu(image, classes=3, nbins=256):
-    r"""Generates multiple thresholds for an input image.
+    r"""Generate `classes`-1 threshold values to divide gray levels in `image`.
+
+    The threshold values are chosen to maximize the total sum of pairwise
+    variances between the thresholded graylevel classes. See Notes and [1]_
+    for more details.
 
     Parameters
     ----------
@@ -1105,12 +1109,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
     Notes
     -----
-    The threshold values are chosen in a way that maximizes the variance
-    between the desired classes. Based on the Multi-Otsu approach by
-    Liao, Chen and Chung.
-
     This implementation relies on a Cython function whose complexity
-    if :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
+    is :math:`O\left(\frac{Ch^{C-1}}{(C-1)!}\right)`, where :math:`h`
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
@@ -1151,8 +1151,8 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     momS = np.diagflat(np.arange(nbins) * prob)
 
     # step 2: calculating the first row.
-    momP[1, 2:] = np.cumsum(prob[2:])
-    momS[1, 2:] = np.cumsum(np.arange(2, nbins) * prob[2:])
+    momP[1, 2:] = prob[1] + np.cumsum(prob[2:])
+    momS[1, 2:] = prob[1] + np.cumsum(np.arange(2, nbins) * prob[2:])
 
     # step 3: the other rows are recursively computed as:
     # A[i, j] = A[1, j] - A[1, i-1] for A in {momP, momS};  i > 1 and j > i.
