@@ -99,6 +99,8 @@ matrix:
     #   env: TRAVIS_PYTHON_VERSION=3.8
 
 before_install:
+    # Remove this line when the Ubuntu image is updated to Xenial
+    # https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728/15
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
         apt-key adv --list-public-keys --with-colons | grep '^pub' | cut -d':' -f 5 | egrep -o '.{8}$' | grep -wo 762E3157 > /dev/null 2>&1 || sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
       fi
