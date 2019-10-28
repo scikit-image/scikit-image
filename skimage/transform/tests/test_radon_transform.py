@@ -62,7 +62,7 @@ def test_iradon_bias_circular_phantom():
 
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
-    assert( roi_err < tol )
+    assert roi_err < tol
 
 
 def check_radon_center(shape, circle, dtype, preserve_range):
@@ -149,7 +149,7 @@ def test_iradon_center(size, theta, circle):
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
-    reconstructed = iradon(radon(image, circle=False), filter=filter_type,
+    reconstructed = iradon(radon(image, circle=False), filter_name=filter_type,
                            interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
