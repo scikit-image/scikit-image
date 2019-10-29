@@ -261,7 +261,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
                           "In future version it will start from 1. " +
                           "To disable this warning, explicitely " +
                           "specify the start_label parameter.",
-                          stacklevel=2)
+                          FutureWarning, stacklevel=2)
             start_label = 0
 
     if start_label not in [0, 1]:
