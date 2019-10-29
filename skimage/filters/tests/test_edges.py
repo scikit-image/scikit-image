@@ -362,14 +362,15 @@ def test_laplace_mask():
 
 def test_farid_zeros():
     """Farid on an array of all zeros."""
-    result = filters.farid(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid(np.zeros((10, 10)),
+                           mask=np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_mask():
     """Farid on a masked array should be zero."""
     result = filters.farid(np.random.uniform(size=(10, 10)),
-                           np.zeros((10, 10), dtype=bool))
+                           mask=np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -396,14 +397,15 @@ def test_farid_vertical():
 
 def test_farid_h_zeros():
     """Horizontal Farid on an array of all zeros."""
-    result = filters.farid_h(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid_h(np.zeros((10, 10)),
+                             mask=np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_h_mask():
     """Horizontal Farid on a masked array should be zero."""
     result = filters.farid_h(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), dtype=bool))
+                             mask=np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -428,14 +430,15 @@ def test_farid_h_vertical():
 
 def test_farid_v_zeros():
     """Vertical Farid on an array of all zeros."""
-    result = filters.farid_v(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid_v(np.zeros((10, 10)),
+                             mask=np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0, atol=1e-10)
 
 
 def test_farid_v_mask():
     """Vertical Farid on a masked array should be zero."""
     result = filters.farid_v(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), dtype=bool))
+                             mask=np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 

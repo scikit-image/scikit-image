@@ -394,3 +394,17 @@ dl.citation {
 .citation > dt:first-child:before {
     display: inline;
 }
+
+/* Improved header fields formatting for SKIPs */
+h1 ~ dl dt {
+    float: left;
+    width: 3em;
+    padding-right: 2em;
+}
+
+/* Remove shadow rendering around reference numbers */
+.footnote dt {
+    background: none;
+    float: left;
+    text-shadow: none;
+}
