@@ -1,6 +1,5 @@
 from itertools import product
 
-import pytest
 import numpy as np
 from skimage.segmentation import slic
 
@@ -9,7 +8,6 @@ from skimage._shared.testing import test_parallel, assert_equal
 
 
 @test_parallel()
-@pytest.mark.filterwarnings("ignore:labels")
 def test_color_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 3))
@@ -19,7 +17,8 @@ def test_color_2d():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False)
+    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
+               start_label=0)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -30,7 +29,6 @@ def test_color_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_multichannel_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 20, 8))
@@ -40,7 +38,7 @@ def test_multichannel_2d():
     img[10:, 10:, 6:8] = 1
     img += 0.01 * rnd.normal(size=img.shape)
     img = np.clip(img, 0, 1, out=img)
-    seg = slic(img, n_segments=4, enforce_connectivity=False)
+    seg = slic(img, n_segments=4, enforce_connectivity=False, start_label=0)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -51,7 +49,6 @@ def test_multichannel_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_gray_2d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))
@@ -62,7 +59,7 @@ def test_gray_2d():
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=4, compactness=1,
-               multichannel=False, convert2lab=False)
+               multichannel=False, convert2lab=False, start_label=0)
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
@@ -72,7 +69,6 @@ def test_gray_2d():
     assert_equal(seg[10:, 10:], 3)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_color_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22, 3))
@@ -87,14 +83,13 @@ def test_color_3d():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=8)
+    seg = slic(img, sigma=0, n_segments=8, start_label=0)
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
         assert_equal(seg[s], c)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_gray_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22))
@@ -110,14 +105,13 @@ def test_gray_3d():
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=8, compactness=1,
-               multichannel=False, convert2lab=False)
+               multichannel=False, convert2lab=False, start_label=0)
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
         assert_equal(seg[s], c)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_list_sigma():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0, 0],
@@ -125,11 +119,11 @@ def test_list_sigma():
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1],
                              [0, 0, 0, 1, 1, 1]], np.int)
-    seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1], multichannel=False)
+    seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
+                     multichannel=False, start_label=0)
     assert_equal(seg_sigma, result_sigma)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_spacing():
     rnd = np.random.RandomState(0)
     img = np.array([[1, 1, 1, 0, 0],
@@ -140,22 +134,20 @@ def test_spacing():
                               [1, 1, 1, 1, 1]], np.int)
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
-                          compactness=1.0)
+                          compactness=1.0, start_label=0)
     seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[1, 500, 1],
-                      compactness=1.0, multichannel=False)
+                      compactness=1.0, multichannel=False, start_label=0)
     assert_equal(seg_non_spaced, result_non_spaced)
     assert_equal(seg_spaced, result_spaced)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float) + 1
     with testing.raises(ValueError):
-        slic(img, multichannel=True, convert2lab=True)
+        slic(img, multichannel=True, convert2lab=True, start_label=0)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_enforce_connectivity():
     img = np.array([[0, 0, 0, 1, 1, 1],
                     [1, 0, 0, 1, 1, 0],
@@ -163,16 +155,18 @@ def test_enforce_connectivity():
 
     segments_connected = slic(img, 2, compactness=0.0001,
                               enforce_connectivity=True,
-                              convert2lab=False)
+                              convert2lab=False, start_label=0)
     segments_disconnected = slic(img, 2, compactness=0.0001,
                                  enforce_connectivity=False,
-                                 convert2lab=False)
+                                 convert2lab=False, start_label=0)
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
     segments_connected_low_max = slic(img, 2, compactness=0.0001,
                                       enforce_connectivity=True,
-                                      convert2lab=False, max_size_factor=0.8)
+                                      convert2lab=False,
+                                      max_size_factor=0.8,
+                                      start_label=0)
 
     result_connected = np.array([[0, 0, 0, 1, 1, 1],
                                  [0, 0, 0, 1, 1, 1],
@@ -187,7 +181,6 @@ def test_enforce_connectivity():
     assert_equal(segments_connected_low_max, result_connected)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_slic_zero():
     # Same as test_color_2d but with slic_zero=True
     rnd = np.random.RandomState(0)
@@ -198,7 +191,7 @@ def test_slic_zero():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, n_segments=4, sigma=0, slic_zero=True)
+    seg = slic(img, n_segments=4, sigma=0, slic_zero=True, start_label=0)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -209,7 +202,6 @@ def test_slic_zero():
     assert_equal(seg[10:, 10:], 3)
 
 
-@pytest.mark.filterwarnings("ignore:labels")
 def test_more_segments_than_pixels():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))
@@ -220,7 +212,7 @@ def test_more_segments_than_pixels():
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
-               multichannel=False, convert2lab=False)
+               multichannel=False, convert2lab=False, start_label=0)
     assert np.all(seg.ravel() == np.arange(seg.size))
 
 
