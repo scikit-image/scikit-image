@@ -14,7 +14,8 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
     occurence probabilities.
 
     This implementation uses a LUT to reduce the number of floating
-    point operations (see [1]_).
+    point operations (see [1]_). The use of the LUT reduces the
+    computation time at the price of more memory consumption.
 
     Parameters
     ----------
@@ -36,6 +37,7 @@ def _get_multiotsu_thresh_indices_lut(float [::1] prob,
            Engineering 17 (5): 713-727, 2001. Available at:
            <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
+
     """
 
     cdef Py_ssize_t nbins = prob.shape[0]
@@ -240,6 +242,9 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
     """Finds the indices of Otsu thresholds according to the values
     occurence probabilities.
 
+    This implementation, as opposed to `_get_multiotsu_thresh_indices_lut`,
+    does not use LUT. It is therefore slower.
+
     Parameters
     ----------
     prob : array
@@ -252,22 +257,14 @@ def _get_multiotsu_thresh_indices(float [::1] prob, Py_ssize_t thresh_count):
     py_thresh_indices : array
         The indices of the desired thresholds.
 
-    References
-    ----------
-    .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
-           multilevel thresholding", Journal of Information Science and
-           Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
-           :DOI:`10.6688/JISE.2001.17.5.1`
     """
 
     cdef Py_ssize_t nbins = prob.shape[0]
     py_thresh_indices = np.empty(thresh_count, dtype=np.intp)
     cdef Py_ssize_t[::1] thresh_indices = py_thresh_indices
     cdef Py_ssize_t[::1] current_indices = np.empty(thresh_count, dtype=np.intp)
-    cdef float [:, ::1] var_btwcls = np.zeros((nbins, nbins))
-    cdef float [::1] zeroth_moment = np.empty(nbins)
-    cdef float [::1] first_moment = np.empty(nbins)
+    cdef float [::1] zeroth_moment = np.empty(nbins, dtype=np.float32)
+    cdef float [::1] first_moment = np.empty(nbins, dtype=np.float32)
 
     with nogil:
         _set_moments_lut_first_row(prob, nbins, zeroth_moment, first_moment)
