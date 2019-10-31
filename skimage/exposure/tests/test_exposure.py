@@ -281,6 +281,22 @@ def test_rescale_same_values():
     assert_array_almost_equal(out, image)
 
 
+@pytest.mark.parametrize("in_range,out_range", [
+    ("image", "dtype"),
+    ("dtype", "image")
+])
+def test_rescale_nan_warning(in_range, out_range):
+    image = np.arange(12, dtype=float).reshape(3, 4)
+    image[1, 1] = np.nan
+
+    msg = (
+        r"One or more intensity levels are NaN\."
+        r" Rescaling will broadcast NaN to the full image\."
+    )
+    with pytest.warns(UserWarning, match=msg):
+        exposure.rescale_intensity(image, in_range, out_range)
+
+
 # Test adaptive histogram equalization
 # ====================================
 
