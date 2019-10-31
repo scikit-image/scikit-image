@@ -1,4 +1,5 @@
 import warnings
+from distutils.version import LooseVersion
 
 import numpy as np
 import pytest
@@ -282,8 +283,16 @@ def test_rescale_same_values():
 
 
 @pytest.mark.parametrize("in_range,out_range", [
-    ("image", "dtype"),
-    ("dtype", "image")
+    pytest.param(
+        "image", "dtype",
+        # Remove mark once NumPy removes this DeprecationWarning
+        marks=pytest.mark.xfail(
+            condition=LooseVersion(np.__version__) >= LooseVersion("1.17.0"),
+            reason="Passing NaN to np.clip raises a DeprecationWarning",
+            raises=ValueError
+        )
+    ),
+    ("dtype", "image"),
 ])
 def test_rescale_nan_warning(in_range, out_range):
     image = np.arange(12, dtype=float).reshape(3, 4)
@@ -293,7 +302,7 @@ def test_rescale_nan_warning(in_range, out_range):
         r"One or more intensity levels are NaN\."
         r" Rescaling will broadcast NaN to the full image\."
     )
-    with pytest.warns(UserWarning, match=msg):
+    with expected_warnings([msg]):
         exposure.rescale_intensity(image, in_range, out_range)
 
 
