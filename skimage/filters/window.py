@@ -29,25 +29,21 @@ def _rotational_mapping(output_coords, window_size):
     return coords
 
 
-def _ndrotational_mapping(output_coords, window_size):
+def _ndrotational_mapping(output_coords):
     """Mapping function for creating hyperspherically symmetric image.
 
     Parameters
     ----------
     output_coords : ndarray
-        `(M, N)` array of coordinates for which to find corresponding input
-        coordinates. The length of N is equal to the number of dimensions
-        of the output image.
 
     Returns
     -------
     coords : ndarray
-        `(M, N)` array of input coordinates corresponding to `output_coords`
     """
-    window_size = safe_as_int(window_size)
+    window_size = output_coords.shape[1]
     center = (window_size / 2) - 0.5
     coords = np.zeros_like(output_coords)
-    coords[:, 0] = np.sqrt(((output_coords - center) ** 2).sum(axis=1))
+    coords[0, ...] = np.sqrt(((output_coords - center) ** 2).sum(axis=0))
     return coords
 
 
@@ -108,17 +104,13 @@ def get_windownd(window, size, ndim):
     """
     w = get_window(window, size, fftbins=False)
     w = w[safe_as_int(np.floor(w.shape[0]/2)):]
-    # output_shape = [size for i in range(ndim)]
-
-    # generate a list of all coordinates
 
     L = [np.arange(size) for i in range(ndim)]
-    outcoords = np.hstack((np.meshgrid(*L))).swapaxes(0, 1).reshape(ndim, -1).T
+    outcoords = np.stack((np.meshgrid(*L)))
     outcoords = outcoords.astype(np.double)
 
-    coords = _ndrotational_mapping(outcoords, size)
-    all_coords = np.dstack((coords, outcoords))
+    coords = _ndrotational_mapping(outcoords)
     for i in range(ndim-1):
         w = np.expand_dims(w, axis=1)
-    return all_coords
-    # return windownd
+    windownd = warp(w, coords)
+    return windownd
