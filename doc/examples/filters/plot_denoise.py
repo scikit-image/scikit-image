@@ -72,7 +72,7 @@ ax[0, 2].imshow(denoise_bilateral(noisy, sigma_color=0.05, sigma_spatial=15,
                 multichannel=True))
 ax[0, 2].axis('off')
 ax[0, 2].set_title('Bilateral')
-ax[0, 3].imshow(denoise_wavelet(noisy, multichannel=True))
+ax[0, 3].imshow(denoise_wavelet(noisy, multichannel=True, rescale_sigma=True))
 ax[0, 3].axis('off')
 ax[0, 3].set_title('Wavelet denoising')
 
@@ -83,7 +83,8 @@ ax[1, 2].imshow(denoise_bilateral(noisy, sigma_color=0.1, sigma_spatial=15,
                 multichannel=True))
 ax[1, 2].axis('off')
 ax[1, 2].set_title('(more) Bilateral')
-ax[1, 3].imshow(denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True))
+ax[1, 3].imshow(denoise_wavelet(noisy, multichannel=True, convert2ycbcr=True,
+                                rescale_sigma=True))
 ax[1, 3].axis('off')
 ax[1, 3].set_title('Wavelet denoising\nin YCbCr colorspace')
 ax[1, 0].imshow(original)
