@@ -4,7 +4,7 @@ from scipy import ndimage as ndi
 
 def profile_line(image, src, dst, linewidth=1,
                  order=1, mode='constant', cval=0.0,
-                 reduce_func=np.mean):
+                 *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -63,6 +63,7 @@ def profile_line(image, src, dst, linewidth=1,
     array([1., 1., 1., 2., 2., 2.])
 
     For different reduce_func inputs:
+
     >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.mean)
     array([0.66666667, 0.66666667, 0.66666667, 1.33333333])
     >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.max)
@@ -71,6 +72,7 @@ def profile_line(image, src, dst, linewidth=1,
     array([2, 2, 2, 4])
 
     The full array will be returned when reduce_func=None.
+
     >>> profile_line(img, (1, 2), (4, 2), linewidth=3, order=0,
     ...     reduce_func=None)
     array([[1, 1, 2],
@@ -87,9 +89,11 @@ def profile_line(image, src, dst, linewidth=1,
     else:
         pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
-    pixels = np.flip(pixels, axis=1)
 
     if reduce_func is None:
+        # The outputted array with reduce_func=None gives an array where the
+        # row values (axis=1) are flipped. Here, we make this consistent.
+        pixels = np.flip(pixels, axis=1)
         intensities = pixels
     else:
         try:
