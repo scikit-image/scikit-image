@@ -71,7 +71,8 @@ def profile_line(image, src, dst, linewidth=1,
     >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sum)
     array([2, 2, 2, 4])
 
-    The full array will be returned when reduce_func=None.
+    The full array will be returned when reduce_func=None and when reduce_func
+    acts on each pixel value individually.
 
     >>> profile_line(img, (1, 2), (4, 2), linewidth=3, order=0,
     ...     reduce_func=None)
@@ -79,6 +80,11 @@ def profile_line(image, src, dst, linewidth=1,
            [1, 1, 2],
            [1, 1, 2],
            [0, 0, 0]])
+    >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sqrt)
+    array([[1.        , 1.        , 0.        ],
+           [1.        , 1.        , 0.        ],
+           [1.        , 1.        , 0.        ],
+           [1.41421356, 1.41421356, 0.        ]])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
@@ -89,11 +95,11 @@ def profile_line(image, src, dst, linewidth=1,
     else:
         pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
+    # The outputted array with reduce_func=None gives an array where the
+    # row values (axis=1) are flipped. Here, we make this consistent.
+    pixels = np.flip(pixels, axis=1)
 
     if reduce_func is None:
-        # The outputted array with reduce_func=None gives an array where the
-        # row values (axis=1) are flipped. Here, we make this consistent.
-        pixels = np.flip(pixels, axis=1)
         intensities = pixels
     else:
         try:

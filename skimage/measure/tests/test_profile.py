@@ -150,3 +150,31 @@ def test_reduce_func_None_linewidth_3():
                               [0., 0.6, 1.8],
                               [0., 0., 0.6]])
     assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_lambda_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
+                        reduce_func=lambda x: x + x**2)
+    expected_prof = np.array([[5.04, 0.96, 0.96],
+                              [0.96, 5.04, 5.04],
+                              [0., 0.96, 5.04],
+                              [0., 0., 0.96]])
+    # The lambda function acts on each pixel value individually.
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sqrt_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=3, order=0, reduce_func=lambda x: x**0.5)
+    expected_prof = np.array([[1.34164079, 0.77459667, 0.77459667],
+                              [0.77459667, 1.34164079, 1.34164079],
+                              [0., 0.77459667, 1.34164079],
+                              [0., 0., 0.77459667]])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sumofsqrt_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
+                        reduce_func=lambda x: np.sum(x**0.5))
+    expected_prof = np.array([2.89083412, 3.45787824, 2.11623746, 0.77459667])
+    assert_almost_equal(prof, expected_prof)
