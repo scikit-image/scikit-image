@@ -106,3 +106,92 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
             dimcoords = _round_safe(dimcoords).astype(int)
         coords.append(dimcoords)
     return tuple(coords)
+
+def my_line_nd(start, stop, *, endpoint=False, integer=True):
+    """Draw a single-pixel thick line in n dimensions.
+
+    The line produced will be ndim-connected. That is, two subsequent
+    pixels in the line will be either direct or diagonal neighbours in
+    n dimensions.
+
+    Parameters
+    ----------
+    start : array-like, shape (N,)
+        The start coordinates of the line.
+    stop : array-like, shape (N,)
+        The end coordinates of the line.
+    endpoint : bool, optional
+        Whether to include the endpoint in the returned line. Defaults
+        to False, which allows for easy drawing of multi-point paths.
+    integer : bool, optional
+        Whether to round the coordinates to integer. If True (default),
+        the returned coordinates can be used to directly index into an
+        array. `False` could be used for e.g. vector drawing.
+
+    Returns
+-------
+    coords : tuple of arrays
+        The coordinates of points on the line.
+
+    Examples
+    --------
+    >>> lin = line_nd((1, 1), (5, 2.5), endpoint=False)
+    >>> lin
+    (array([1, 2, 3, 4]), array([1, 1, 2, 2]))
+    >>> im = np.zeros((6, 5), dtype=int)
+    >>> im[lin] = 1
+    >>> im
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0],
+           [0, 1, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]])
+    >>> line_nd([2, 1, 1], [5, 5, 2.5], endpoint=True)
+    (array([2, 3, 4, 4, 5]), array([1, 2, 3, 4, 5]), array([1, 1, 2, 2, 2]))
+    """
+    # TODO currently ignoring the decimal part of the number
+    start = np.asarray(start, dtype=int)
+    stop = np.asarray(stop, dtype=int)
+    n_points = int(np.ceil(np.max(np.abs(stop - start))))
+    if endpoint:
+        n_points += 1
+
+    delta = stop - start
+    steps = np.ones_like(start, dtype=int)
+    delta_neg_mask = delta < 0
+    steps[delta_neg_mask] = -1
+    delta[delta_neg_mask] = -delta[delta_neg_mask]
+    x_dim = np.argmax(delta)
+    mask_not_x = np.ones_like(start, dtype=bool)
+    mask_not_x[x_dim] = 0
+
+    cum_error = 2 * delta - delta[x_dim]
+    cur = start
+    coords = np.zeros([len(start), n_points], dtype=int)
+    for i in range(n_points):
+        coords[:,i] = cur
+        mask = (cum_error > 0) & mask_not_x
+        cur[mask] += steps[mask]
+        cum_error[mask] -= 2 * delta[x_dim]
+        cum_error += 2 * delta
+        cur[x_dim] += 1
+
+    return tuple(coords)
+
+if __name__ == '__main__':
+    line_nd = my_line_nd
+    lin = line_nd((1, 1), (5, 2.5), endpoint=False)
+    print(lin)
+    print((np.array([1, 2, 3, 4]), np.array([1, 1, 2, 2])))
+    im = np.zeros((6, 5), dtype=int)
+    im[lin] = 1
+    print(im)
+    print(np.array([[0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0],
+           [0, 1, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]]))
+    print(line_nd([2, 1, 1], [5, 5, 2.5], endpoint=True))
+    print((np.array([2, 3, 4, 4, 5]), np.array([1, 2, 3, 4, 5]), np.array([1, 1, 2, 2, 2])))
