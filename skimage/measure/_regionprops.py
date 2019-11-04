@@ -529,7 +529,10 @@ def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
                       cache=True, separator='-'):
-    """Find image properties and convert them into a dictionary
+    """Compute image properties and return them as a pandas-compatible table.
+
+    The table is a dictionary mapping column names to value arrays. See Notes
+    section below for details.
 
     Parameters
     ----------
@@ -824,10 +827,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
     >>> props[0].centroid
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
     >>> # centroid of first labeled object
     >>> props[0]['centroid']
-    (22.729879860483141, 81.912285234465827)
+    (22.72987986048314, 81.91228523446583)
 
     """
 

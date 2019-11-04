@@ -134,13 +134,13 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     >>> img1[3, 4] = 1
     >>> img1[3, 2] = 1.5
     >>> img1
-    array([[ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
-           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
-           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
-           [ 0. ,  0. ,  1.5,  0. ,  1. ,  0. ,  0. ],
-           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
-           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
-           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
+    array([[0. , 0. , 0. , 0. , 0. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
+           [0. , 0. , 1.5, 0. , 1. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
+           [0. , 0. , 0. , 0. , 0. , 0. , 0. ]])
 
     >>> peak_local_max(img1, min_distance=1)
     array([[3, 4],
@@ -165,7 +165,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     # no peak for a trivial image
     if np.all(image == image.flat[0]):
         if indices is True:
-            return np.empty((0, 2), np.int)
+            return np.empty((0, image.ndim), np.int)
         else:
             return out
 
