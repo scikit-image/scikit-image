@@ -3,21 +3,21 @@ import numpy as np
 from nibabel.testing import data_path
 import nibabel as nib
 import matplotlib.pyplot as plt
-import GHMHelperFuncs
+import GHMHelperFuncs as helper
 
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
     if cdf:
         C = np.zeros((m, n))
         T = np.zeros((m, n), dtype=np.int64)
         
-        A_cdf = calc_cdf(A)
-        B_cdf = calc_cdf(B)
+        A_cdf = helper.calc_cdf(A)
+        B_cdf = helper.calc_cdf(B)
 
         # T is already initialized to zeros.
 
         # initialize C
         for j in range(n):
-            C[0, j] = row_cost(A_cdf, B_cdf, 0, 0, j, dist)
+            C[0, j] = helper.row_cost(A_cdf, B_cdf, 0, 0, j, dist)
         print("Finished initializing C and T. in CDF")
 
 
@@ -28,7 +28,7 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
     #             print("j:", j)
                 index_min_cost_of_prev_row = np.argmin(C[i-1, :j + 1])
                 min_cost_of_prev_row = C[i-1, index_min_cost_of_prev_row]
-                cost_of_setting_indicator_in_col_j = row_cost(A_cdf, B_cdf, i, j, j, dist)
+                cost_of_setting_indicator_in_col_j = helper.row_cost(A_cdf, B_cdf, i, j, j, dist)
                 C[i,j] = cost_of_setting_indicator_in_col_j + min_cost_of_prev_row
                 T[i, j] = index_min_cost_of_prev_row
                 
@@ -40,7 +40,7 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
 
         # initialize C
         for j in range(n):
-            C[0, j] = row_cost(A, B, 0, 0, j, dist)
+            C[0, j] = helper.row_cost(A, B, 0, 0, j, dist)
         print("Finished initializing C and T.")
 
         # fill out rest of C and T
@@ -48,9 +48,9 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
     #         print("i:", i)
             for j in range(n):
     #             print("j:", j)
-                prev_row_costs = [row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
+                prev_row_costs = [helper.row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
                 costs = [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)]
-                costs = [row_cost(A, B, i , 0, j, dist)] + costs
+                costs = [helper.row_cost(A, B, i , 0, j, dist)] + costs
                 C[i, j] = min(costs)
                 T[i, j] = np.argmin(costs)
         
@@ -101,16 +101,16 @@ def find_mapping(A, B, dist='L1', cdf=False):
 
 #GHM and cdfGHM
 def GHM(imgA, imgB, dist='L1'):
-    A = create_matrix(imgA)
-    B = create_matrix(imgB)
+    A = helper.create_matrix(imgA)
+    B = helper.create_matrix(imgB)
     mapping, C, T, M = find_mapping(A, B, dist, cdf=False)
-    matched_imgA = convert(imgA, mapping)
+    matched_imgA = helper.convert(imgA, mapping)
     return matched_imgA
 
 
 def cdfGHM(imgA, imgB, dist ='L1'):
-    A = create_matrix(imgA)
-    B = create_matrix(imgB)
+    A = helper.create_matrix(imgA)
+    B = helper.create_matrix(imgB)
     mapping, C, T, M = find_mapping(A, B, dist, cdf=True)
-    matched_imgA = convert(imgA, mapping)
+    matched_imgA = helper.convert(imgA, mapping)
     return matched_imgA
