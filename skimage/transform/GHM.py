@@ -3,8 +3,10 @@ import numpy as np
 from nibabel.testing import data_path
 import nibabel as nib
 import matplotlib.pyplot as plt
-from GHMHelperFuncs import *
+import GHMHelperFuncs as helper
 
+
+<<<<<<< HEAD
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
     """
     A and B are the matrices of histograms.
@@ -28,16 +30,16 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
             for j in range(n):
                 index_min_cost_of_prev_row = np.argmin(C[i-1, :j + 1])
                 min_cost_of_prev_row = C[i-1, index_min_cost_of_prev_row]
-                cost_of_setting_indicator_in_col_j = row_cost(A, B, i, j, j, dist)
+                cost_of_setting_indicator_in_col_j = helper.row_cost(A, B, i, j, j, dist)
                 C[i,j] = cost_of_setting_indicator_in_col_j + min_cost_of_prev_row
                 T[i,j] = index_min_cost_of_prev_row
     else:
         for i in range(1, m):
             for j in range(n):
                 # TODO merge the two lines below
-                prev_row_costs = [row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
+                prev_row_costs = [helper.row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
                 costs = [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)] # j = n-1;   -1, 0 ... n-2, n-1 = length n+1. but it's 0, 1, ..., n
-                costs = [row_cost(A, B, i , 0, j, dist)] + costs
+                costs = [helper.row_cost(A, B, i , 0, j, dist)] + costs
                 # TODO merge the two lines below (simultaneously do both)
                 C[i,j] = min(costs)
                 T[i,j] = np.argmin(costs) - 1
@@ -95,18 +97,17 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
 
 #GHM and cdfGHM
 def GHM(imgA, imgB, num_histograms_per_dim=1, dist='L1'):
-    A, pix_to_index_A, index_to_pix_A = create_matrix(imgA, num_histograms_per_dim)
-    B, pix_to_index_B, index_to_pix_B = create_matrix(imgB, num_histograms_per_dim)
+    A, pix_to_index_A, index_to_pix_A = helper.create_matrix(imgA, num_histograms_per_dim)
+    B, pix_to_index_B, index_to_pix_B = helper.create_matrix(imgB, num_histograms_per_dim)
     mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=False)
-
-    matched_imgA = convert(imgA, mapping)
+    matched_imgA = helper.convert(imgA, mapping)
     return matched_imgA
 
 
 def cdfGHM(imgA, imgB, num_histograms_per_dim=1, dist ='L1'):
-    A, pix_to_index_A, index_to_pix_A = create_matrix(imgA, num_histograms_per_dim)
-    B, pix_to_index_B, index_to_pix_B = create_matrix(imgB, num_histograms_per_dim)
+    A, pix_to_index_A, index_to_pix_A = helper.create_matrix(imgA, num_histograms_per_dim)
+    B, pix_to_index_B, index_to_pix_B = helper.create_matrix(imgB, num_histograms_per_dim)
     mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=True)
-    matched_imgA = convert(imgA, mapping)
+    matched_imgA = helper.convert(imgA, mapping)
     return matched_imgA
 
