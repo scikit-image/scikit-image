@@ -71,7 +71,7 @@ def profile_line(image, src, dst, linewidth=1,
     >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sum)
     array([2, 2, 2, 4])
 
-    The unreduced array will be returned when `reduce_func` is None and when
+    The unreduced array will be returned when `reduce_func` is None or when
     `reduce_func` acts on each pixel value individually.
 
     >>> profile_line(img, (1, 2), (4, 2), linewidth=3, order=0,
