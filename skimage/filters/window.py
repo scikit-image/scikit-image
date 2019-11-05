@@ -42,7 +42,7 @@ def _ndrotational_mapping(output_coords):
     """
     window_size = output_coords.shape[1]
     center = (window_size / 2) - 0.5
-    coords = np.zeros_like(output_coords)
+    coords = np.zeros_like(output_coords, dtype=np.double)
     coords[0, ...] = np.sqrt(((output_coords - center) ** 2).sum(axis=0))
     return coords
 
@@ -104,11 +104,8 @@ def get_windownd(window, size, ndim):
     """
     w = get_window(window, size, fftbins=False)
     w = w[safe_as_int(np.floor(w.shape[0]/2)):]
-
     L = [np.arange(size) for i in range(ndim)]
     outcoords = np.stack((np.meshgrid(*L)))
-    outcoords = outcoords.astype(np.double)
-
     coords = _ndrotational_mapping(outcoords)
     for i in range(ndim-1):
         w = np.expand_dims(w, axis=1)
