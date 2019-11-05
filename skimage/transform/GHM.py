@@ -18,7 +18,7 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
 
     # initialize C
     for j in range(n):
-        C[0,j] = row_cost(A, B, 0, 0, j, dist)
+        C[0,j] = helper.row_cost(A, B, 0, 0, j, dist)
     # T is already initialized to zeros.
     print("Finished initializing C and T.")
     
