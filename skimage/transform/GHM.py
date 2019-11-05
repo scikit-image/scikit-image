@@ -5,6 +5,11 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import GHMHelperFuncs as helper
 
+# ROCKYFIX make sure white and black are actually all white and black
+# ROCKYFIX why is white.jpg looking black? Is it the file or just the viewer?
+# ROCKYFIX: look for ROCKYFIX, TODO, FIXME, XXX, FIX
+
+
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
     """
     A and B are the matrices of histograms.
@@ -34,13 +39,12 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
     else:
         for i in range(1, m):
             for j in range(n):
-                # TODO merge the two lines below
+                # TODO merge the two lines below?
                 prev_row_costs = [helper.row_cost(A, B, i, jj+1, j, dist) for jj in range(0, j+1)]
-                costs = [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)] # j = n-1;   -1, 0 ... n-2, n-1 = length n+1. but it's 0, 1, ..., n
-                costs = [helper.row_cost(A, B, i , 0, j, dist)] + costs
-                # TODO merge the two lines below (simultaneously do both)
-                C[i,j] = min(costs)
-                T[i,j] = np.argmin(costs) - 1
+                costs = [helper.row_cost(A, B, i , 0, j, dist)] + [C[i-1, jj] + prev_row_costs[jj] for jj in range(0,j+1)]
+                argmin = np.argmin(costs)
+                C[i,j] = costs[argmin]
+                T[i,j] = argmin - 1 # j = -1, 0 ... n-2, n-1 = length n+1. but it's 0, 1, ..., n
     print("Finished finding C and T.")
     return C, T
             
