@@ -29,8 +29,8 @@ def profile_line(image, src, dst, linewidth=1,
         If `mode` is 'constant', what constant value to use outside the image.
     reduce_func : callable, optional
         Function used to calculate the aggregation of pixel values
-        perpendicular to the profile_line direction when linewidth > 1.
-        If set to None the entire array will be returned.
+        perpendicular to the profile_line direction when `linewidth` > 1.
+        If set to None the unreduced array will be returned.
 
     Returns
     -------
@@ -71,8 +71,8 @@ def profile_line(image, src, dst, linewidth=1,
     >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sum)
     array([2, 2, 2, 4])
 
-    The full array will be returned when reduce_func=None and when reduce_func
-    acts on each pixel value individually.
+    The unreduced array will be returned when `reduce_func` is None and when
+    `reduce_func` acts on each pixel value individually.
 
     >>> profile_line(img, (1, 2), (4, 2), linewidth=3, order=0,
     ...     reduce_func=None)
