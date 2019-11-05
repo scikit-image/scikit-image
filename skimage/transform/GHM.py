@@ -5,8 +5,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import GHMHelperFuncs as helper
 
-
-<<<<<<< HEAD
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
     """
     A and B are the matrices of histograms.
