@@ -3,7 +3,7 @@ from ..transform import warp
 from scipy.signal import get_window as get_window1d
 
 
-def get_window(window, size, ndim=2):
+def get_window(window, size, ndim=2, **kwargs):
     """Return an n-dimensional window of a given size and dimensionality.
 
     Parameters
@@ -15,6 +15,9 @@ def get_window(window, size, ndim=2):
         The size of the window along each axis (all axes will be equal length).
     ndim : int, optional (default: 2)
         The number of dimensions of the window.
+    **kwargs : keyword arguments
+        Passed to `transform.warp` (e.g., `order=3` to change interpolation
+        method).
 
     Returns
     -------
@@ -29,14 +32,22 @@ def get_window(window, size, ndim=2):
     (e.g., `"hann"`, `"boxcar"`). Note that certain window types require
     parameters that have to supplied with the window name as a tuple
     (e.g., `("tukey", 0.8)`). If only a float is supplied, it is interpreted
-    as the beta parameter of the kaiser window.
+    as the beta parameter of the Kaiser window.
 
     See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.windows.get_window.html
     for more details.
 
     Note that this function can generate very large arrays that can consume
     a large amount of available memory. For example, if `size=512` and
-    `ndim=4`, the function will attempt to return an > 8.5GB array.
+    `ndim=4` are given as parameters to `filters.get_window`, it will attempt
+    to return an > 8.5GB array.
+
+    The approach taken here to create nD windows is first calculate the
+    Euclidean distance from the center of the intended nD window to each
+    position in the array. Then it uses that distance to sample, with
+    interpolation, from a 1D window returned from `scipy.signal.get_window`.
+    The method of interpolation can be changed with the `order` keyword
+    argument passed to `transform.warp`.
 
     Examples
     --------
@@ -64,4 +75,4 @@ def get_window(window, size, ndim=2):
     center = (size / 2) - 0.5
     coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0))
     coords[1:, ...] = 0
-    return warp(w, coords)
+    return warp(w, coords, **kwargs)
