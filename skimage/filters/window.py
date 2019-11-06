@@ -23,7 +23,7 @@ def get_window(window, size, ndim=2, **kwargs):
     -------
     nd_window : ndarray
         A window of of `ndim` dimensions with a length of `size`
-        along each axis.
+        along each axis. `dtype` is `np.double`.
 
     Notes
     -----
@@ -63,6 +63,11 @@ def get_window(window, size, ndim=2, **kwargs):
     Return a Tukey window with an alpha parameter of 0.8 and shape (100, 100):
 
     >>> w = get_window(('tukey', 0.8), 100)
+
+    References
+    ----------
+    .. [1] Two-dimensional window design, Wikipedia,
+           https://en.wikipedia.org/wiki/Two_dimensional_window_design
     """
     # Only looking at center of window to right edge
     w = get_window1d(window, size, fftbins=False)
