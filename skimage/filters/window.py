@@ -3,37 +3,6 @@ from ..transform import warp
 from scipy.signal import get_window as get_window1d
 
 
-def _ndrotational_mapping(output_coords):
-    """Mapping function for creating a hyperspherically symmetric image.
-
-    This function generates the mapping coordinates that can be used to
-    warp a 1D array into n-dimensional space with hyperspherical symmetry,
-    assuming the starting array is itself symmetric. To do this, it calculates
-    the Euclidean distance from center for each position in the output array.
-
-    Parameters
-    ----------
-    output_coords : ndarray
-        Coordinate array that follows the `ndimage.map_coordinates` convention.
-        The length of the first axis is equal to the number of dimensions of
-        the image to be warped, and the remaining axes have the same shape as
-        the image.
-
-    Returns
-    -------
-    coords : ndarray
-        Array of the same shape as `output_coords`, containing the Euclidean
-        distance from center for a given point. For example, to warp an array
-        of length 13 into 2-dimensions, `coords.shape` will be `(2, 13, 13)`
-        and `coords[:, 9, 10]` will return `array([5., 0.])`.
-    """
-    window_size = output_coords.shape[1]
-    center = (window_size / 2) - 0.5
-    coords = np.zeros_like(output_coords, dtype=np.double)
-    coords[0, ...] = np.sqrt(((output_coords - center) ** 2).sum(axis=0))
-    return coords
-
-
 def get_window(window, size, ndim=2):
     """Return an n-dimensional window of a given size and dimensionality.
 
@@ -84,10 +53,15 @@ def get_window(window, size, ndim=2):
 
     >>> w = get_window(('tukey', 0.8), 100)
     """
+    # Only looking at center of window to right edge
     w = get_window1d(window, size, fftbins=False)
     w = w[int(np.floor(w.shape[0]/2)):]
-    L = [np.arange(size) for i in range(ndim)]
-    outcoords = np.stack((np.meshgrid(*L)))
-    coords = _ndrotational_mapping(outcoords)
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
+
+    # Create coords for warping following `ndimage.map_coordinates` convention.
+    L = [np.arange(size) for i in range(ndim)]
+    coords = np.stack((np.meshgrid(*L)))
+    center = (size / 2) - 0.5
+    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0))
+    coords[1:, ...] = 0
     return warp(w, coords)
