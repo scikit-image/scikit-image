@@ -18,7 +18,7 @@ from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from ._median import median
 from ._unsharp_mask import unsharp_mask
-from .window import get_windownd
+from .window import get_window
 
 
 __all__ = ['inverse',
@@ -61,4 +61,4 @@ __all__ = ['inverse',
            'apply_hysteresis_threshold',
            'rank',
            'unsharp_mask',
-           'get_windownd']
+           'get_window']
