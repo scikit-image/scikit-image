@@ -79,5 +79,7 @@ def get_window(window, size, ndim=2, **kwargs):
     coords = np.stack((np.meshgrid(*L)))
     center = (size / 2) - 0.5
     coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0))
+    if size % 2 == 0:
+        coords[0, ...] = coords[0, ...] - 0.5
     coords[1:, ...] = 0
     return warp(w, coords, **kwargs)
