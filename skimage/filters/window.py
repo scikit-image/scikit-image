@@ -1,5 +1,6 @@
 import numpy as np
 from ..transform import warp
+from .._shared.utils import safe_as_int
 from scipy.signal import get_window as get_window1d
 
 
@@ -69,6 +70,13 @@ def get_window(window, size, ndim=2, **kwargs):
     .. [1] Two-dimensional window design, Wikipedia,
            https://en.wikipedia.org/wiki/Two_dimensional_window_design
     """
+
+    ndim = safe_as_int(ndim)
+    size = safe_as_int(size)
+
+    if ndim <= 0:
+        raise ValueError("Number of dimensions must be greater than zero")
+
     # Only looking at center of window to right edge
     w = get_window1d(window, size, fftbins=False)
     w = w[int(np.floor(w.shape[0]/2)):]
