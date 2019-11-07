@@ -110,7 +110,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
 
-    # Deprecate the function in favor of marching_cubes_lewiner
+    # Deprecate the function in favor of marching_cubes
     warnings.warn("marching_cubes_classic is deprecated in favor of "
                   + "marching_cubes with `use_classic=True` "
                   + "to apply Lorensen et al. algorithm. "
