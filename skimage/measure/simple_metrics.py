@@ -55,6 +55,7 @@ if normalized_root_mse.__doc__ is not None:
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``normalized_root_mse`` from the
         ``metrics`` module instead.
+    
     See also
     --------
     skimage.metrics.normalized_root_mse
@@ -77,6 +78,7 @@ if peak_signal_noise_ratio.__doc__ is not None:
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``peak_signal_noise_ratio`` from the
         ``metrics`` module instead.
+    
     See also
     --------
     skimage.metrics.peak_signal_noise_ratio
