@@ -14,7 +14,7 @@ from warnings import warn
 import numpy as np
 
 from ..util import img_as_float, invert
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -164,6 +164,12 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     out : (N, M[, ..., P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
+    See also
+    --------
+    sato
+    frangi
+    hessian
+
     References
     ----------
     .. [1] Meijering, E., Jacob, M., Sarria, J. C., Steiner, P., Hirling, H.,
@@ -185,8 +191,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     if alpha is None:
         alpha = 1.0 / ndim
 
-    # Invert image to detect bright ridges on dark background
-    if not black_ridges:
+    # Invert image to detect dark ridges on bright background
+    if black_ridges:
         image = invert(image)
 
     # Generate empty (n+1)D arrays for storing auxiliary images filtered at
@@ -197,7 +203,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='val')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
 
         if ndim > 1:
 
@@ -205,18 +211,18 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
             coefficients = [alpha] * ndim
             coefficients[0] = 1
 
-            # Compute auxiliary variables l_i = e_i + sum_{j!=i} alpha * e_j
+            # Compute normalized eigenvalues l_i = e_i + sum_{j!=i} alpha * e_j
             auxiliary = [np.sum([eigenvalues[i] * np.roll(coefficients, j)[i]
                          for j in range(ndim)], axis=0) for i in range(ndim)]
 
-            # Compute maximum over auxiliary variables
-            auxiliary = np.max(auxiliary, axis=0)
+            # Get maximum eigenvalues by magnitude
+            auxiliary = auxiliary[-1]
 
-            # Rescale image intensity
-            filtered = np.abs(auxiliary) / np.abs(np.max(auxiliary))
+            # Rescale image intensity and avoid ZeroDivisionError
+            filtered = _divide_nonzero(auxiliary, np.min(auxiliary))
 
             # Remove background
-            filtered = np.where(filtered > 0, filtered, 0)
+            filtered = np.where(auxiliary < 0, filtered, 0)
 
             # Store results in (n+1)D matrices
             filtered_array[i] = filtered
@@ -252,6 +258,12 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     out : (N, M[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
+    See also
+    --------
+    meijering
+    frangi
+    hessian
+
     References
     ----------
     .. [1] Sato, Y., Nakajima, S., Shiraga, N., Atsumi, H., Yoshida, S.,
@@ -262,7 +274,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     """
 
     # Check image dimensions
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.asarray(sigmas)
@@ -344,6 +356,12 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     Re-Written by D. J. Kroon, University of Twente, May 2009, [2]_
     Adoption of 3D version from D. G. Ellis, Januar 20017, [3]_
 
+    See also
+    --------
+    meijering
+    sato
+    hessian
+
     References
     ----------
     .. [1] Frangi, A. F., Niessen, W. J., Vincken, K. L., & Viergever, M. A.
@@ -358,21 +376,22 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     # Check deprecated keyword parameters
     if beta1:
         warn('Use keyword parameter `beta` instead of `beta1` which '
-             'will be removed in version 0.17.')
+             'will be removed in version 0.17.', stacklevel=2)
         beta = beta1
 
     if beta2:
         warn('Use keyword parameter `gamma` instead of `beta2` which '
-             'will be removed in version 0.17.')
+             'will be removed in version 0.17.', stacklevel=2)
         gamma = beta2
 
     if scale_range and scale_step:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
-             '`scale_range` which will be removed in version 0.17.')
+             '`scale_range` which will be removed in version 0.17.',
+             stacklevel=2)
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
     # Check image dimensions
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     # Check (sigma) scales
     sigmas = np.asarray(sigmas)
@@ -474,6 +493,12 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     -----
     Written by Marc Schrijver (November 2001)
     Re-Written by D. J. Kroon University of Twente (May 2009) [2]_
+
+    See also
+    --------
+    meijering
+    sato
+    frangi
 
     References
     ----------

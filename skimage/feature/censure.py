@@ -7,7 +7,7 @@ from ..morphology import octagon, star
 from ..feature.censure_cy import _censure_dob_loop
 from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
                             _mask_border_keypoints)
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
 # kernel for the first seven scales only. The sizes of the later scales
@@ -190,7 +190,8 @@ class CENSURE(FeatureDetector):
            [155, 151],
            [184,  63]])
     >>> censure.scales
-    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2,
+           2])
 
     """
 
@@ -238,7 +239,7 @@ class CENSURE(FeatureDetector):
         # (4) Finally, we remove the border keypoints and return the keypoints
         # along with its corresponding scale.
 
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         num_scales = self.max_scale - self.min_scale
 

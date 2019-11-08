@@ -15,7 +15,7 @@ from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import TestCase
 
-from skimage import img_as_float, img_as_ubyte
+from skimage.util import img_as_float, img_as_ubyte
 from skimage.io import imread
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
@@ -35,27 +35,11 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgb2ydbdr, ydbdr2rgb,
-                           rgba2rgb,
-                           guess_spatial_dimensions)
+                           rgba2rgb)
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
-from skimage._shared import testing
 import colorsys
-
-
-def test_guess_spatial_dimensions():
-    im1 = np.zeros((5, 5))
-    im2 = np.zeros((5, 5, 5))
-    im3 = np.zeros((5, 5, 3))
-    im4 = np.zeros((5, 5, 5, 3))
-    im5 = np.zeros((5,))
-    assert_equal(guess_spatial_dimensions(im1), 2)
-    assert_equal(guess_spatial_dimensions(im2), 3)
-    assert_equal(guess_spatial_dimensions(im3), None)
-    assert_equal(guess_spatial_dimensions(im4), 3)
-    with testing.raises(ValueError):
-        guess_spatial_dimensions(im5)
 
 
 class TestColorconv(TestCase):
@@ -174,8 +158,7 @@ class TestColorconv(TestCase):
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_rgb = img_as_ubyte(self.img_rgb)
-        with expected_warnings(['precision loss']):
-            new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
+        new = img_as_ubyte(hed2rgb(rgb2hed(img_rgb)))
         assert_equal(new, img_rgb)
 
     # RGB<->HED roundtrip with float image
@@ -189,8 +172,7 @@ class TestColorconv(TestCase):
         img_rgb = self.img_rgb
         conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
                               rgb_from_hdx)
-        with expected_warnings(['precision loss']):
-            assert_equal(img_as_ubyte(conv), img_rgb)
+        assert_equal(img_as_ubyte(conv), img_rgb)
 
     # RGB<->HDX roundtrip with float image
     def test_hdx_rgb_roundtrip_float(self):

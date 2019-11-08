@@ -62,8 +62,8 @@ def _bincount_histogram(image, source_range):
     if source_range not in ['image', 'dtype']:
         raise ValueError('Incorrect value for `source_range` argument: {}'.format(source_range))
     if source_range == 'image':
-        image_min = int(np.min(image).astype(np.int64))
-        image_max = int(np.max(image).astype(np.int64))
+        image_min = int(image.min().astype(np.int64))
+        image_max = int(image.max().astype(np.int64))
     elif source_range == 'dtype':
         image_min, image_max = dtype_limits(image, clip_negative=False)
     image, offset = _offset_array(image, image_min, image_max)
@@ -116,9 +116,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
+    (array([107432, 154712]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([107432, 154712]), array([ 0.25,  0.75]))
+    (array([107432, 154712]), array([0.25, 0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
@@ -315,24 +315,24 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     It's easy to accidentally convert an image dtype from uint8 to float:
 
     >>> 1.0 * image
-    array([  51.,  102.,  153.])
+    array([ 51., 102., 153.])
 
     Use `rescale_intensity` to rescale to the proper range for float dtypes:
 
     >>> image_float = 1.0 * image
     >>> rescale_intensity(image_float)
-    array([ 0. ,  0.5,  1. ])
+    array([0. , 0.5, 1. ])
 
     To maintain the low contrast of the original, use the `in_range` parameter:
 
     >>> rescale_intensity(image_float, in_range=(0, 255))
-    array([ 0.2,  0.4,  0.6])
+    array([0.2, 0.4, 0.6])
 
     If the min/max value of `in_range` is more/less than the min/max image
     intensity, then the intensity levels are clipped:
 
     >>> rescale_intensity(image_float, in_range=(0, 102))
-    array([ 0.5,  1. ,  1. ])
+    array([0.5, 1. , 1. ])
 
     If you have an image with signed integers but want to rescale the image to
     just the positive range, use the `out_range` parameter:
@@ -349,8 +349,9 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     image = np.clip(image, imin, imax)
 
-    image = (image - imin) / float(imax - imin)
-    return np.array(image * (omax - omin) + omin, dtype=dtype)
+    if imin != imax:
+        image = (image - imin) / float(imax - imin)
+    return np.asarray(image * (omax - omin) + omin, dtype=dtype)
 
 
 def _assert_non_negative(image):
@@ -416,7 +417,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     out = ((image / scale) ** gamma) * scale * gain
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def adjust_log(image, gain=1, inv=False):
@@ -459,7 +460,7 @@ def adjust_log(image, gain=1, inv=False):
         return dtype(out)
 
     out = np.log2(1 + image / scale) * scale * gain
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
@@ -508,7 +509,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
         return dtype(out)
 
     out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
-    return dtype(out)
+    return out.astype(dtype)
 
 
 def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,

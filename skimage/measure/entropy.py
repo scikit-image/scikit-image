@@ -26,14 +26,14 @@ def shannon_entropy(image, base=2):
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] `https://en.wikipedia.org/wiki/Entropy_(information_theory) <https://en.wikipedia.org/wiki/Entropy_(information_theory)>`_
     .. [2] https://en.wiktionary.org/wiki/Shannon_entropy
 
     Examples
     --------
     >>> from skimage import data
     >>> shannon_entropy(data.camera())
-    7.0479552324230861
+    7.047955232423086
     """
 
     _, counts = unique(image, return_counts=True)

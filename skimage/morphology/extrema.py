@@ -74,7 +74,7 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The maxima of height >= h. The result image is a binary image, where
+       The maxima of height >= h. The resulting image is a binary image, where
        pixels belonging to the selected maxima take value 1, the others
        take value 0.
 
@@ -155,7 +155,7 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The minima of depth >= h. The result image is a binary image, where
+       The minima of depth >= h. The resulting image is a binary image, where
        pixels belonging to the selected minima take value 1, the other pixels
        take value 0.
 
@@ -260,7 +260,7 @@ def _fast_pad(image, value):
 
         np.pad(image, mode="constant", constant_values=value)
 
-    However this method needs to only allocate and copy once which can result
+    However, this method needs to only allocate and copy once which can result
     in significant speed gains if `image` is large.
 
     Examples
@@ -415,7 +415,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_maxima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -425,7 +425,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude maxima that border the image edge:
 
@@ -433,7 +433,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     image = np.asarray(image, order="C")
     if image.size == 0:
@@ -572,7 +572,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_minima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -582,7 +582,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude minima that border the image edge:
 
@@ -590,7 +590,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     return local_maxima(
         image=invert(image),

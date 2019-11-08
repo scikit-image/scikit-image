@@ -6,6 +6,7 @@ from .noise import random_noise
 from .apply_parallel import apply_parallel
 
 from .arraycrop import crop
+from .compare import compare_images
 from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
@@ -29,6 +30,7 @@ __all__ = ['img_as_float32',
            'view_as_windows',
            'pad',
            'crop',
+           'compare_images',
            'montage',
            'random_noise',
            'regular_grid',

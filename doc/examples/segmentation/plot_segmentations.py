@@ -101,9 +101,9 @@ segments_quick = quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)
 gradient = sobel(rgb2gray(img))
 segments_watershed = watershed(gradient, markers=250, compactness=0.001)
 
-print("Felzenszwalb number of segments: {}".format(len(np.unique(segments_fz))))
-print('SLIC number of segments: {}'.format(len(np.unique(segments_slic))))
-print('Quickshift number of segments: {}'.format(len(np.unique(segments_quick))))
+print(f"Felzenszwalb number of segments: {len(np.unique(segments_fz))}")
+print(f"SLIC number of segments: {len(np.unique(segments_slic))}")
+print(f"Quickshift number of segments: {len(np.unique(segments_quick))}")
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
 
