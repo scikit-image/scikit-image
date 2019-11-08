@@ -48,10 +48,10 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     use_classic : int
         0, 1 or 2. If given and greater then 0, the classic marching
         cubes by Lorensen (1987) is used. This option is included for
-        reference purposes. If 1, the`marching_cubes_lewiner` with
-        `use_classic` set to True is used, if 2, the deprecated
-        `marching_cubes_classic` implementation is used. This second
-        option will be removed in version 0.19.
+        reference purposes. If set to 1, the`marching_cubes_lewiner`
+        with `use_classic` set to True is used, else if set to 2, the
+        deprecated `marching_cubes_classic` implementation is
+        used. This second option will be removed in version 0.19.
 
     Returns
     -------
@@ -119,6 +119,8 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
 
     """
 
+    use_classic = int(use_classic)
+
     if use_classic == 0:
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
@@ -136,7 +138,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=None):
+                           allow_degenerate=True, use_classic=False):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -250,10 +252,10 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                                    step_size, allow_degenerate, use_classic)
 
 
-def _marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
-                            gradient_direction='descent', step_size=1,
-                            allow_degenerate=True, use_classic=False):
-    """Lewiner et al. algorithm for marching cubes.
+def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
+                            step_size, allow_degenerate, use_classic):
+    """Lewiner et al. algorithm for marching cubes. See
+    marching_cubes_lewiner for documentation.
 
     """
 
