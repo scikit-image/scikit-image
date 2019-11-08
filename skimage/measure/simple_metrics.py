@@ -25,20 +25,21 @@ def compare_mse(im1, im2):
 
 
 if mean_squared_error.__doc__ is not None:
-    compare_mse.__doc__ = mean_squared_error.__doc__ + """
+    compare_mse.__doc__ = mean_squared_error.__doc__ + \
+        """
 
-        Warns
-        -----
-        Deprecated:
-            .. versionadded:: 0.16
-            This function is deprecated and will be removed
-            in scikit-image 0.18.
-            Please use the function named ``mean_squared_error`` from the
-            ``metrics`` module instead.
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.16
+        This function is deprecated and will be removed
+        in scikit-image 0.18.
+        Please use the function named ``mean_squared_error`` from the
+        ``metrics`` module instead.
 
-        See also
-        --------
-        skimage.metrics.mean_squared_error
+    See also
+    --------
+    skimage.metrics.mean_squared_error
     """
 
 
@@ -50,19 +51,21 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
 
 
 if normalized_root_mse.__doc__ is not None:
-    compare_nrmse.__doc__ = normalized_root_mse.__doc__ + """ 
-        Warns
-        -----
-        Deprecated:
-            .. versionadded:: 0.16
-            This function is deprecated and will be removed
-            in scikit-image 0.18.
-            Please use the function named ``normalized_root_mse`` from the
-            ``metrics`` module instead.
+    compare_nrmse.__doc__ = normalized_root_mse.__doc__ + \
+        """
 
-        See also
-        --------
-        skimage.metrics.normalized_root_mse
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.16
+        This function is deprecated and will be removed
+        in scikit-image 0.18.
+        Please use the function named ``normalized_root_mse`` from the
+        ``metrics`` module instead.
+
+    See also
+    --------
+    skimage.metrics.normalized_root_mse
     """
 
 
@@ -74,20 +77,21 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 
 if peak_signal_noise_ratio.__doc__ is not None:
-    compare_psnr.__doc__ = peak_signal_noise_ratio.__doc__ + """
+    compare_psnr.__doc__ = peak_signal_noise_ratio.__doc__ + \
+        """
 
-        Warns
-        -----
-        Deprecated:
-            .. versionadded:: 0.16
-            This function is deprecated and will be removed
-            in scikit-image 0.18.
-            Please use the function named ``peak_signal_noise_ratio`` from the
-            ``metrics`` module instead.
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.16
+        This function is deprecated and will be removed
+        in scikit-image 0.18.
+        Please use the function named ``peak_signal_noise_ratio`` from the
+        ``metrics`` module instead.
 
-        See also
-        --------
-        skimage.metrics.peak_signal_noise_ratio
+    See also
+    --------
+    skimage.metrics.peak_signal_noise_ratio
     """
 
 
@@ -95,44 +99,44 @@ def enhancement_measure(image: np.ndarray,
                         size: int = 3,
                         eps: float = 1e-6) -> float:
     """ The image enhancement measure called EME based on [1]_.
-        It is a way of quantifying improvement of the image after enhancement.
+    It is a way of quantifying improvement of the image after enhancement.
 
-        The function uses a sliding window of user-provided size to measure
-        the mean of log of maximal and minimal intensity ratio
-        within the window.
+    The function uses a sliding window of user-provided size to measure
+    the mean of log of maximal and minimal intensity ratio
+    within the window.
 
-        Parameters
-        ----------
-        image : array
-            Input image of which the quality should be assessed.
-            Can be either 3-channel RGB or 1-channel grayscale.
-        size : int, optional
-            Size of the window.
-        eps : float, optional
-            Parameter to avoid division by zero.
+    Parameters
+    ----------
+    image : array
+        Input image of which the quality should be assessed.
+        Can be either 3-channel RGB or 1-channel grayscale.
+    size : int, optional
+        Size of the window.
+    eps : float, optional
+        Parameter to avoid division by zero.
 
-        Returns
-        -------
-        eme : float
-            The number describing image quality.
+    Returns
+    -------
+    eme : float
+        The number describing image quality.
 
-        References
-        ----------
-        .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan.
-               "A new measure of image enhancement.",
-               IASTED International Conference on Signal Processing
-               & Communication, Citeseer, 2000,
-               :DOI:10.1.1.35.4021
+    References
+    ----------
+    .. [1] Sos S. Agaian,  Karen Panetta, and Artyom M. Grigoryan.
+            "A new measure of image enhancement.",
+            IASTED International Conference on Signal Processing
+            & Communication, Citeseer, 2000,
+            :DOI:10.1.1.35.4021
 
-        Examples
-        --------
-        >>> from skimage.data import camera
-        >>> from skimage.exposure import equalize_hist
-        >>> img = camera()
-        >>> before = enhancement_measure(img)
-        >>> after = enhancement_measure(equalize_hist(img))
-        >>> before < after
-        True
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> from skimage.exposure import equalize_hist
+    >>> img = camera()
+    >>> before = enhancement_measure(img)
+    >>> after = enhancement_measure(equalize_hist(img))
+    >>> before < after
+    True
     """
     image = img_as_float(image)
     image = rescale_intensity(image, out_range=(0., 1.))
