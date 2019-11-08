@@ -10,7 +10,7 @@ from ._marching_cubes_classic import _marching_cubes_classic
 
 def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
                    gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, use_classic=False):
+                   allow_degenerate=True, use_classic=0):
     """Lewiner et al.  marching cubes algorithm [1] to find surfaces in 3d
     volumetric data.
 
@@ -45,9 +45,13 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    use_classic : bool
-        If given and True, the classic marching cubes by Lorensen (1987)
-        is used. This option is included for reference purposes.
+    use_classic : int
+        0, 1 or 2. If given and greater then 0, the classic marching
+        cubes by Lorensen (1987) is used. This option is included for
+        reference purposes. If 1, the`marching_cubes_lewiner` with
+        `use_classic` set to True is used, if 2, the deprecated
+        `marching_cubes_classic` implementation is used. This second
+        option will be removed in version 0.19.
 
     Returns
     -------
@@ -115,13 +119,19 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
 
     """
 
-    if use_classic:
+    if use_classic == 0:
+        return _marching_cubes_lewiner(volume, level, spacing,
+                                       gradient_direction, step_size,
+                                       allow_degenerate, use_classic=False)
+    elif use_classic == 1:
+        return _marching_cubes_lewiner(volume, level, spacing,
+                                       gradient_direction, step_size,
+                                       allow_degenerate, use_classic=True)
+    elif use_classic == 2:
         return _marching_cubes_classic(volume, level, spacing,
                                        gradient_direction)
-
-    return marching_cubes_lewiner(volume, level, spacing,
-                                  gradient_direction, step_size,
-                                  allow_degenerate, use_classic=False)
+    else:
+        raise ValueError("use_classic should be 0, 1 or 2.")
 
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
@@ -230,12 +240,22 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
 
     """
 
-    if use_classic is None:
-        # Deprecate the function in favor of marching_cubes
-        warnings.warn("marching_cubes_lewiner is deprecated in favor of "
-                      + "marching_cubes. marching_cubes_lewiner will "
-                      + "be removed in version 0.19",
-                      FutureWarning)
+    # Deprecate the function in favor of marching_cubes
+    warnings.warn("marching_cubes_lewiner is deprecated in favor of "
+                  + "marching_cubes. marching_cubes_lewiner will "
+                  + "be removed in version 0.19",
+                  FutureWarning)
+
+    return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
+                                   step_size, allow_degenerate, use_classic)
+
+
+def _marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
+                            gradient_direction='descent', step_size=1,
+                            allow_degenerate=True, use_classic=False):
+    """Lewiner et al. algorithm for marching cubes.
+
+    """
 
     # Check volume and ensure its in the format that the alg needs
     if not isinstance(volume, np.ndarray) or (volume.ndim != 3):
