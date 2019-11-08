@@ -88,9 +88,9 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     >> from mayavi import mlab
     >> verts, faces, _, _ = marching_cubes(myvolume, 0.0)
     >> mlab.triangular_mesh([vert[0] for vert in verts],
-    ..                      [vert[1] for vert in verts],
-    ..                      [vert[2] for vert in verts],
-    ..                      faces)
+                            [vert[1] for vert in verts],
+                            [vert[2] for vert in verts],
+                            faces)
     >> mlab.show()
 
     Similarly using the ``visvis`` package::

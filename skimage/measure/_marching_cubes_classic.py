@@ -101,8 +101,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
 
     # Deprecate the function in favor of marching_cubes
     warnings.warn("marching_cubes_classic is deprecated in favor of "
-                  + "marching_cubes with `use_classic=2` "
-                  + "to apply Lorensen et al. algorithm. "
+                  + "marching_cubes with use_classic=2. "
                   + "marching_cubes_classic will be removed in version 0.19",
                   FutureWarning)
 
