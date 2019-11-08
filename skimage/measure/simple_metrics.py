@@ -26,6 +26,7 @@ def compare_mse(im1, im2):
 
 if mean_squared_error.__doc__ is not None:
     compare_mse.__doc__ = mean_squared_error.__doc__ + """
+
     Warns
     -----
     Deprecated:
@@ -33,6 +34,7 @@ if mean_squared_error.__doc__ is not None:
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``mean_squared_error`` from the
         ``metrics`` module instead.
+
     See also
     --------
     skimage.metrics.mean_squared_error
@@ -48,6 +50,7 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
 
 if normalized_root_mse.__doc__ is not None:
     compare_nrmse.__doc__ = normalized_root_mse.__doc__ + """
+
     Warns
     -----
     Deprecated:
@@ -55,7 +58,7 @@ if normalized_root_mse.__doc__ is not None:
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``normalized_root_mse`` from the
         ``metrics`` module instead.
-    
+
     See also
     --------
     skimage.metrics.normalized_root_mse
@@ -71,6 +74,7 @@ def compare_psnr(im_true, im_test, data_range=None):
 
 if peak_signal_noise_ratio.__doc__ is not None:
     compare_psnr.__doc__ = peak_signal_noise_ratio.__doc__ + """
+
     Warns
     -----
     Deprecated:
@@ -78,7 +82,7 @@ if peak_signal_noise_ratio.__doc__ is not None:
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``peak_signal_noise_ratio`` from the
         ``metrics`` module instead.
-    
+
     See also
     --------
     skimage.metrics.peak_signal_noise_ratio
