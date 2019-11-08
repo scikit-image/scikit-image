@@ -61,9 +61,12 @@ def test_NRMSE():
     assert_equal(compare_nrmse(y, x, 'mean'), 1 / np.mean(y))
     assert_equal(compare_nrmse(y, x, 'Euclidean'), 1 / np.sqrt(3))
     assert_equal(compare_nrmse(y, x, 'min-max'), 1 / (y.max() - y.min()))
-    assert_equal(normalized_root_mse(y, x, 'mean'), 1 / np.mean(y))
-    assert_equal(normalized_root_mse(y, x, 'Euclidean'), 1 / np.sqrt(3))
-    assert_equal(normalized_root_mse(y, x, 'min-max'), 1 / (y.max() - y.min()))
+    assert_equal(normalized_root_mse(
+        y, x, normalization='mean'), 1 / np.mean(y))
+    assert_equal(normalized_root_mse(
+        y, x, normalization='Euclidean'), 1 / np.sqrt(3))
+    assert_equal(normalized_root_mse(
+        y, x, normalization='min-max'), 1 / (y.max() - y.min()))
 
     # mixed precision inputs are allowed
     assert_almost_equal(normalized_root_mse(y, np.float32(x), 'min-max'),
@@ -107,4 +110,4 @@ def test_EME_color():
                 enhancement_measure(enhanced, size=3, eps=1))
     assert_less(enhancement_measure(orig, size=7),
                 enhancement_measure(enhanced, size=7))
-    normalized_root_mse(x, x, 'foo')
+    # normalized_root_mse(x, x, 'foo')
