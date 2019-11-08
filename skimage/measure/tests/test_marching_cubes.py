@@ -1,24 +1,21 @@
 import numpy as np
 from skimage.draw import ellipsoid, ellipsoid_stats
-from skimage.measure import (marching_cubes_classic, marching_cubes_lewiner,
-                             mesh_surface_area)
+from skimage.measure import marching_cubes, mesh_surface_area
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal
-from skimage._shared._warnings import expected_warnings
 
 
 def test_marching_cubes_isotropic():
     ellipsoid_isotropic = ellipsoid(6, 10, 16, levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)
-    
+
     # Classic
-    verts, faces = marching_cubes_classic(ellipsoid_isotropic, 0.)
+    verts, faces = marching_cubes(ellipsoid_isotropic, 0., use_classic=2)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
-    
+
     # Lewiner
-    verts, faces = marching_cubes_lewiner(ellipsoid_isotropic, 0.)[:2]
+    verts, faces = marching_cubes(ellipsoid_isotropic, 0.)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1% tolerance for isotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.99
@@ -30,61 +27,62 @@ def test_marching_cubes_anisotropic():
     ellipsoid_anisotropic = ellipsoid(6, 10, 16, spacing=spacing,
                                       levelset=True)
     _, surf = ellipsoid_stats(6, 10, 16)
-    
+
     # Classic
-    verts, faces = marching_cubes_classic(ellipsoid_anisotropic, 0.,
-                                          spacing=spacing)
+    verts, faces = marching_cubes(ellipsoid_anisotropic, 0.,
+                                  spacing=spacing, use_classic=2)
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
-    
+
     # Lewiner
-    verts, faces = marching_cubes_lewiner(
-        ellipsoid_anisotropic, 0., spacing=spacing)[:2]
+    verts, faces = marching_cubes(ellipsoid_anisotropic, 0.,
+                                  spacing=spacing)[:2]
     surf_calc = mesh_surface_area(verts, faces)
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
     assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test spacing together with allow_degenerate=False
-    marching_cubes_lewiner(ellipsoid_anisotropic, 0, spacing=spacing,
-                           allow_degenerate=False)
+    marching_cubes(ellipsoid_anisotropic, 0, spacing=spacing,
+                   allow_degenerate=False)
 
 
 def test_invalid_input():
     # Classic
     with testing.raises(ValueError):
-        marching_cubes_classic(np.zeros((2, 2, 1)), 0)
+        marching_cubes(np.zeros((2, 2, 1)), 0, use_classic=2)
     with testing.raises(ValueError):
-        marching_cubes_classic(np.zeros((2, 2, 1)), 1)
+        marching_cubes(np.zeros((2, 2, 1)), 1, use_classic=2)
     with testing.raises(ValueError):
-        marching_cubes_classic(np.ones((3, 3, 3)), 1, spacing=(1, 2))
+        marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2), use_classic=2)
     with testing.raises(ValueError):
-        marching_cubes_classic(np.zeros((20, 20)), 0)
-    
+        marching_cubes(np.zeros((20, 20)), 0, use_classic=2)
+
     # Lewiner
     with testing.raises(ValueError):
-        marching_cubes_lewiner(np.zeros((2, 2, 1)), 0)
+        marching_cubes(np.zeros((2, 2, 1)), 0)
     with testing.raises(ValueError):
-        marching_cubes_lewiner(np.zeros((2, 2, 1)), 1)
+        marching_cubes(np.zeros((2, 2, 1)), 1)
     with testing.raises(ValueError):
-        marching_cubes_lewiner(np.ones((3, 3, 3)), 1,
-                               spacing=(1, 2))
+        marching_cubes(np.ones((3, 3, 3)), 1, spacing=(1, 2))
     with testing.raises(ValueError):
-        marching_cubes_lewiner(np.zeros((20, 20)), 0)
+        marching_cubes(np.zeros((20, 20)), 0)
 
 
 def test_both_algs_same_result_ellipse():
     # Performing this test on data that does not have ambiguities
-    
+
     sphere_small = ellipsoid(1, 1, 1, levelset=True)
-    
-    vertices1, faces1 = marching_cubes_classic(sphere_small, 0)[:2]
-    vertices2, faces2 = marching_cubes_lewiner(
-        sphere_small, 0, allow_degenerate=False)[:2]
-    vertices3, faces3 = marching_cubes_lewiner(
-        sphere_small, 0, allow_degenerate=False, use_classic=True)[:2]
-    
-    # Order is different, best we can do is test equal shape and same vertices present
+
+    vertices1, faces1 = marching_cubes(sphere_small, 0, use_classic=2)[:2]
+    vertices2, faces2 = marching_cubes(sphere_small, 0,
+                                       allow_degenerate=False)[:2]
+    vertices3, faces3 = marching_cubes(sphere_small, 0,
+                                       allow_degenerate=False,
+                                       use_classic=True)[:2]
+
+    # Order is different, best we can do is test equal shape and same
+    # vertices present
     assert _same_mesh(vertices1, faces1, vertices2, faces2)
     assert _same_mesh(vertices1, faces1, vertices3, faces3)
 
@@ -119,18 +117,18 @@ def test_both_algs_same_result_donut():
             for ix in range(vol.shape[2]):
                 # Double-torii formula by Thomas Lewiner
                 z, y, x = float(iz)*a+b, float(iy)*a+b, float(ix)*a+b
-                vol[iz,iy,ix] = ( ( 
+                vol[iz,iy,ix] = ( (
                     (8*x)**2 + (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) * ( (8*x)**2 +
                     (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) - 64 * ( (8*x)**2 + (8*y-2)**2 )
                     ) * ( ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 )
                     * ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 ) -
-                    64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 
+                    64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2
                     ) ) + 1025
-    
-    vertices1, faces1 = marching_cubes_classic(vol, 0)[:2]
-    vertices2, faces2 = marching_cubes_lewiner(vol, 0)[:2]
-    vertices3, faces3 = marching_cubes_lewiner(vol, 0, use_classic=True)[:2]
-    
+
+    vertices1, faces1 = marching_cubes(vol, 0, use_classic=2)[:2]
+    vertices2, faces2 = marching_cubes(vol, 0)[:2]
+    vertices3, faces3 = marching_cubes(vol, 0, use_classic=True)[:2]
+
     # Old and new alg are different
     assert not _same_mesh(vertices1, faces1, vertices2, faces2)
     # New classic and new Lewiner are different
