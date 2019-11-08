@@ -47,11 +47,7 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
         removed, at the cost of making the algorithm slower.
     use_classic : bool
         If given and True, the classic marching cubes by Lorensen (1987)
-        is used. This option is included for reference purposes. Note
-        that this algorithm has ambiguities and is not guaranteed to
-        produce a topologically correct result. The results with using
-        this option are *not* generally the same as the
-        ``marching_cubes_classic()`` function.
+        is used. This option is included for reference purposes.
 
     Returns
     -------
@@ -85,7 +81,8 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     named `myvolume` about the level 0.0, using the ``mayavi`` package::
 
       >>> from mayavi import mlab # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes(myvolume,
+                                                         0.0) # doctest: +SKIP
       >>> mlab.triangular_mesh([vert[0] for vert in verts],
       ...                      [vert[1] for vert in verts],
       ...                      [vert[2] for vert in verts],
@@ -95,7 +92,8 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
     Similarly using the ``visvis`` package::
 
       >>> import visvis as vv # doctest: +SKIP
-      >>> verts, faces, normals, values = marching_cubes(myvolume, 0.0) # doctest: +SKIP
+      >>> verts, faces, normals, values = marching_cubes(myvolume,
+                                                         0.0) # doctest: +SKIP
       >>> vv.mesh(np.fliplr(verts), faces, normals, values) # doctest: +SKIP
       >>> vv.use().Run() # doctest: +SKIP
 
@@ -235,7 +233,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     if use_classic is None:
         # Deprecate the function in favor of marching_cubes
         warnings.warn("marching_cubes_lewiner is deprecated in favor of "
-                      + "marching_cubes with. marching_cubes_lewiner will "
+                      + "marching_cubes. marching_cubes_lewiner will "
                       + "be removed in version 0.19",
                       FutureWarning)
 
