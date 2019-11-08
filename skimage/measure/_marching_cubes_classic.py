@@ -98,6 +98,22 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
     """
+
+    # Deprecate the function in favor of marching_cubes
+    warnings.warn("marching_cubes_classic is deprecated in favor of "
+                  + "marching_cubes with `use_classic=True` "
+                  + "to apply Lorensen et al. algorithm. "
+                  + "marching_cubes_classic will be removed in version 0.19",
+                  FutureWarning)
+
+    return _marching_cubes_classic(volume, level, spacing, gradient_direction)
+
+
+def _marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
+                            gradient_direction='descent'):
+    """Lorensen et al. algorithm for marching cubes.
+
+    """
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
     if volume.ndim != 3:
         raise ValueError("Input volume must have 3 dimensions.")
@@ -109,13 +125,6 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
             raise ValueError("Surface level must be within volume data range.")
     if len(spacing) != 3:
         raise ValueError("`spacing` must consist of three floats.")
-
-    # Deprecate the function in favor of marching_cubes
-    warnings.warn("marching_cubes_classic is deprecated in favor of "
-                  + "marching_cubes with `use_classic=True` "
-                  + "to apply Lorensen et al. algorithm. "
-                  + "marching_cubes_classic will be removed in version 0.19",
-                  FutureWarning)
 
     volume = np.array(volume, dtype=np.float64, order="C")
 
