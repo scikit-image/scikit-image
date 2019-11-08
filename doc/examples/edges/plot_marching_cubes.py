@@ -34,7 +34,7 @@ ellip_double = np.concatenate((ellip_base[:-1, ...],
                                ellip_base[2:, ...]), axis=0)
 
 # Use marching cubes to obtain the surface mesh of these ellipsoids
-verts, faces, normals, values = measure.marching_cubes_lewiner(ellip_double, 0)
+verts, faces, normals, values = measure.marching_cubes(ellip_double, 0)
 
 # Display resulting triangular mesh using Matplotlib. This can also be done
 # with mayavi (see skimage.measure.marching_cubes_lewiner docstring).
