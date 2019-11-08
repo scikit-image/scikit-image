@@ -9,7 +9,6 @@ from .simple_metrics import (compare_mse,
                              compare_psnr,
                              enhancement_measure)
 from ._regionprops import regionprops, perimeter, regionprops_table
-from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
 from .pnpoly import points_in_poly, grid_points_in_poly

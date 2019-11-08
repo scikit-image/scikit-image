@@ -30,11 +30,9 @@ if mean_squared_error.__doc__ is not None:
     -----
     Deprecated:
         .. versionadded:: 0.16
-
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``mean_squared_error`` from the
         ``metrics`` module instead.
-
     See also
     --------
     skimage.metrics.mean_squared_error
@@ -54,28 +52,13 @@ if normalized_root_mse.__doc__ is not None:
     -----
     Deprecated:
         .. versionadded:: 0.16
-
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``normalized_root_mse`` from the
         ``metrics`` module instead.
-
     See also
     --------
     skimage.metrics.normalized_root_mse
     """
-    _assert_compatible(im_true, im_test)
-    im_true, im_test = _as_floats(im_true, im_test)
-
-    norm_type = norm_type.lower()
-    if norm_type == 'euclidean':
-        denom = np.sqrt(np.mean((im_true * im_true), dtype=np.float64))
-    elif norm_type == 'min-max':
-        denom = im_true.max() - im_true.min()
-    elif norm_type == 'mean':
-        denom = im_true.mean()
-    else:
-        raise ValueError("Unsupported norm_type")
-    return np.sqrt(compare_mse(im_true, im_test)) / denom
 
 
 def compare_psnr(im_true, im_test, data_range=None):
@@ -91,37 +74,13 @@ if peak_signal_noise_ratio.__doc__ is not None:
     -----
     Deprecated:
         .. versionadded:: 0.16
-
         This function is deprecated and will be removed in scikit-image 0.18.
         Please use the function named ``peak_signal_noise_ratio`` from the
         ``metrics`` module instead.
-
     See also
     --------
     skimage.metrics.peak_signal_noise_ratio
     """
-    _assert_compatible(im_true, im_test)
-
-    if data_range is None:
-        if im_true.dtype != im_test.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im_true.")
-        dmin, dmax = dtype_range[im_true.dtype.type]
-        true_min, true_max = np.min(im_true), np.max(im_true)
-        if true_max > dmax or true_min < dmin:
-            raise ValueError(
-                "im_true has intensity values outside the range expected for "
-                "its data type.  Please manually specify the data_range")
-        if true_min >= 0:
-            # most common case (255 for uint8, 1 for float)
-            data_range = dmax
-        else:
-            data_range = dmax - dmin
-
-    im_true, im_test = _as_floats(im_true, im_test)
-
-    err = compare_mse(im_true, im_test)
-    return 10 * np.log10((data_range ** 2) / err)
 
 
 def enhancement_measure(image: np.ndarray,
