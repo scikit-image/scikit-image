@@ -69,7 +69,7 @@ def test_NRMSE():
         y, x, normalization='min-max'), 1 / (y.max() - y.min()))
 
     # mixed precision inputs are allowed
-    assert_almost_equal(normalized_root_mse(y, np.float32(x), 'min-max'),
+    assert_almost_equal(normalized_root_mse(y, np.float32(x), normalization='min-max'),
                         1 / (y.max() - y.min()))
 
 
