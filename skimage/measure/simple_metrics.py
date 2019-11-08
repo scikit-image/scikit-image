@@ -45,7 +45,7 @@ def compare_nrmse(im_true, im_test, norm_type='euclidean'):
     warn('DEPRECATED: skimage.measure.compare_nrmse has been moved to '
          'skimage.metrics.normalized_root_mse. It will be removed from '
          'skimage.measure in version 0.18.', stacklevel=2)
-    return normalized_root_mse(im_true, im_test, norm_type=norm_type)
+    return normalized_root_mse(im_true, im_test, normalization=norm_type)
 
 
 if normalized_root_mse.__doc__ is not None:

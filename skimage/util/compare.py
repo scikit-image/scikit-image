@@ -28,9 +28,9 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
 
     Notes
     -----
-    `diff` computes the absolute difference between the two images.
-    `blend` computes the mean value.
-    `checkerboard` makes tiles of dimension `n_tiles` that display
+    ``'diff'`` computes the absolute difference between the two images.
+    ``'blend'`` computes the mean value.
+    ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
     if image1.shape != image2.shape:
