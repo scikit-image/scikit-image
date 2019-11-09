@@ -5,11 +5,13 @@ import numpy as np
 # import traceback
 import matplotlib.pyplot as plt
 
+# TODO test that image matched to itself does not change
+# TODO test that image matched to a template that is all one value X changes to be completely X (black and white are example templates for this, we should probably also test a uniform gray image)
 
 def create_black(dimensions=(100,100)):
 	return np.zeros(dimensions)
 
-def create_white_img(dimensions=(100,100)):
+def create_white(dimensions=(100,100)):
 	return np.ones(dimensions)*255
 
 def save_img(img, filename, folder="."):
