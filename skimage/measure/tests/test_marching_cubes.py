@@ -110,6 +110,7 @@ def test_both_algs_same_result_donut():
     # Performing this test on data that does not have ambiguities
     n = 48
     a, b = 2.5/n, -1.25
+    c = 1.85 * 1.85
 
     vol = np.empty((n, n, n), 'float32')
 
@@ -117,13 +118,13 @@ def test_both_algs_same_result_donut():
         iz, iy, ix = np.unravel_index(idx, vol.shape)
         z, y, x = float(iz) * a + b, float(iy) * a + b, float(ix) * a + b
         vol[iz, iy, ix] = (
-            (((8 * x) ** 2 + (8 * y - 2) ** 2 + (8 * z) ** 2 + 16 - 1.85 * 1.85)
+            (((8 * x) ** 2 + (8 * y - 2) ** 2 + (8 * z) ** 2 + 16 - c)
              * ((8 * x) ** 2 + (8 * y - 2) ** 2 + (8 * z) ** 2
-                + 16 - 1.85 * 1.85) - 64 * ((8 * x) ** 2 + (8 * y - 2) ** 2))
+                + 16 - c) - 64 * ((8 * x) ** 2 + (8 * y - 2) ** 2))
             * (((8 * x) ** 2 + ((8 * y - 2) + 4) * ((8 * y - 2) + 4)
-                + (8 * z) ** 2 + 16 - 1.85 * 1.85)
+                + (8 * z) ** 2 + 16 - c)
                * ((8 * x) ** 2 + ((8 * y - 2) + 4) * ((8 * y - 2) + 4)
-                  + (8 * z) ** 2 + 16 - 1.85 * 1.85)
+                  + (8 * z) ** 2 + 16 - c)
                - 64 * (((8 * y - 2) + 4) * ((8 * y - 2) + 4) + (8 * z) ** 2))
         ) + 1025
 
