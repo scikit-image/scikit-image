@@ -115,7 +115,7 @@ def test_both_algs_same_result_donut():
 
     for idx in range(np.prod(vol.shape)):
         iz, iy, ix = np.unravel_index(idx, vol.shape)
-        z, y, x = float(iz)*a+b, float(iy)*a+b, float(ix)*a+b
+        z, y, x = float(iz) * a + b, float(iy) * a + b, float(ix) * a + b
         vol[iz, iy, ix] = (
             (((8 * x) ** 2 + (8 * y - 2) ** 2 + (8 * z) ** 2 + 16 - 1.85 * 1.85)
              * ((8 * x) ** 2 + (8 * y - 2) ** 2 + (8 * z) ** 2
