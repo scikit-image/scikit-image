@@ -83,11 +83,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> Axx
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -273,11 +273,11 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -422,6 +422,11 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     response : ndarray
         Kitchen and Rosenfeld response image.
 
+    References
+    ----------
+    .. [1] Kitchen, L., & Rosenfeld, A. (1982). Gray-level corner detection.
+           Pattern recognition letters, 1(2), 95-102.
+           :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
@@ -612,7 +617,11 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
@@ -668,13 +677,13 @@ def corner_fast(image, n=12, threshold=0.15):
     ----------
     image : 2D ndarray
         Input image.
-    n : int
+    n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
         that should all be either brighter or darker w.r.t testpixel.
         A point c on the circle is darker w.r.t test pixel p if
         `Ic < Ip - threshold` and brighter if `Ic > Ip + threshold`. Also
         stands for the n in `FAST-n` corner detector.
-    threshold : float
+    threshold : float, optional
         Threshold used in deciding whether the pixels on the circle are
         brighter, darker or similar w.r.t. the test pixel. Decrease the
         threshold when more corners are desired and vice-versa.
@@ -686,8 +695,10 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Edward Rosten and Tom Drummond
-           "Machine Learning for high-speed corner detection",
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
+           corner detection. In European conference on computer vision (pp. 430-443).
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
            https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
@@ -752,8 +763,11 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-           foerstner87.fast.pdf
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
     .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
@@ -776,7 +790,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     >>> coords = corner_peaks(corner_harris(img), min_distance=2)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
-    array([[ 4.5,  4.5]])
+    array([[4.5, 4.5]])
 
     """
 
@@ -899,9 +913,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
+def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None):
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -912,17 +926,28 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
 
+    See also
+    --------
+    skimage.feature.peak_local_max
+
+    Notes
+    -----
+    The `num_peaks` limit is applied before suppression of
+    connected peaks. If you want to limit the number of peaks
+    after suppression, you should set `num_peaks=np.inf` and
+    post-process the output of this function.
+
     Examples
     --------
     >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
     array([[3, 3],
            [3, 2],
@@ -932,19 +957,27 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     array([[2, 2]])
 
     """
+    if threshold_rel is None:
+        threshold_rel = 0.1
+        warn("Until the version 0.16, threshold_rel was set to 0.1 by default."
+             "Starting from version 0.16, the default value is set to None."
+             "Until version 0.18, a None value corresponds to a threshold value of 0.1."
+             "The default behavior will match skimage.feature.peak_local_max.",
+             category=FutureWarning, stacklevel=2)
 
     peaks = peak_local_max(image, min_distance=min_distance,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
                            indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels)
+                           footprint=footprint, labels=labels,
+                           num_peaks_per_label=num_peaks_per_label)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())
         for r, c in coords:
             if peaks[r, c]:
-                peaks[r - min_distance:r + min_distance + 1,
-                      c - min_distance:c + min_distance + 1] = False
+                peaks[max((r - min_distance), 0):r + min_distance + 1,
+                      max((c - min_distance), 0):c + min_distance + 1] = False
                 peaks[r, c] = True
 
     if indices is True:

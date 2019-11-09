@@ -7,7 +7,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor,
 from ..feature import (corner_fast, corner_orientations, corner_peaks,
                        corner_harris)
 from ..transform import pyramid_gaussian
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 from .orb_cy import _orb_loop
 
@@ -100,17 +100,17 @@ class ORB(FeatureDetector, DescriptorExtractor):
            [3, 3],
            [4, 4]])
     >>> detector_extractor1.keypoints[matches[:, 0]]
-    array([[ 42.,  40.],
-           [ 47.,  58.],
-           [ 44.,  40.],
-           [ 59.,  42.],
-           [ 45.,  44.]])
+    array([[42., 40.],
+           [47., 58.],
+           [44., 40.],
+           [59., 42.],
+           [45., 44.]])
     >>> detector_extractor2.keypoints[matches[:, 1]]
-    array([[ 55.,  53.],
-           [ 60.,  71.],
-           [ 57.,  53.],
-           [ 72.,  55.],
-           [ 58.,  57.]])
+    array([[55., 53.],
+           [60., 71.],
+           [57., 53.],
+           [72., 55.],
+           [58., 57.]])
 
     """
 
@@ -168,7 +168,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -240,7 +240,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Corresponding orientations in radians.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 
@@ -286,7 +286,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         pyramid = self._build_pyramid(image)
 

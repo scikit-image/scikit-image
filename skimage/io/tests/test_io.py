@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import numpy as np
 from skimage import io, data_dir
@@ -52,3 +53,49 @@ def test_imread_http_url(httpserver):
     # by extension
     image = io.imread(httpserver.url + '/test.jpg' + '?' + 's' * 266)
     assert image.shape == (1, 1)
+
+
+def _named_tempfile_func(error_class):
+    """Create a mock function for NamedTemporaryFile that always raises.
+
+    Parameters
+    ----------
+    error_class : exception class
+        The error that should be raised when asking for a NamedTemporaryFile.
+
+    Returns
+    -------
+    named_temp_file : callable
+        A function that always raises the desired error.
+
+    Notes
+    -----
+    Although this function has general utility for raising errors, it is
+    expected to be used to raise errors that ``tempfile.NamedTemporaryFile``
+    from the Python standard library could raise. As of this writing, these
+    are ``FileNotFoundError``, ``FileExistsError``, ``PermissionError``, and
+    ``BaseException``. See
+    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__
+    for more information.
+    """
+    def named_temp_file(*args, **kwargs):
+        raise error_class()
+    return named_temp_file
+
+
+@testing.parametrize(
+    'error_class', [
+        FileNotFoundError, FileExistsError, PermissionError, BaseException
+    ]
+)
+def test_failed_temporary_file(monkeypatch, error_class):
+    # tweak data path so that file URI works on both unix and windows.
+    data_path = data_dir.lstrip(os.path.sep)
+    data_path = data_path.replace(os.path.sep, '/')
+    image_url = 'file:///{0}/camera.png'.format(data_path)
+    with monkeypatch.context():
+        monkeypatch.setattr(
+            tempfile, 'NamedTemporaryFile', _named_tempfile_func(error_class)
+        )
+        with testing.raises(error_class):
+            image = io.imread(image_url)

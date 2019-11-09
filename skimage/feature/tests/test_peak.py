@@ -228,6 +228,14 @@ class TestPeakLocalMax():
                                      indices=False, exclude_border=False)
         assert np.all(~ result)
 
+    def test_empty_non2d_indices(self):
+        image = np.zeros((10, 10, 10))
+        result = peak.peak_local_max(image,
+                                     footprint=np.ones((3, 3), bool),
+                                     min_distance=1, threshold_rel=0,
+                                     indices=True, exclude_border=False)
+        assert result.shape == (0, image.ndim)
+
     def test_one_point(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -445,3 +453,15 @@ class TestProminentPeaks(unittest.TestCase):
                                      min_distance=1, threshold_rel=0,
                                      indices=False, exclude_border=False)
         assert np.all(labels == labelsin)
+
+    def test_many_objects(self):
+        mask = np.zeros([500, 500], dtype=bool)
+        x, y = np.indices((500, 500))
+        x_c = x // 20 * 20 + 10
+        y_c = y // 20 * 20 + 10
+        mask[(x - x_c) ** 2 + (y - y_c) ** 2 < 8 ** 2] = True
+        labels, num_objs = ndi.label(mask)
+        dist = ndi.distance_transform_edt(mask)
+        local_max = peak.peak_local_max(dist, min_distance=20, indices=True,
+                                        exclude_border=False, labels=labels)
+        assert len(local_max) == 625

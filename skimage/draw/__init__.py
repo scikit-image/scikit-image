@@ -7,9 +7,11 @@ from ._draw import _bezier_segment
 from ._random_shapes import random_shapes
 from ._polygon2mask import polygon2mask
 
+from .draw_nd import line_nd
 
 __all__ = ['line',
            'line_aa',
+           'line_nd',
            'bezier_curve',
            'polygon',
            'polygon_perimeter',

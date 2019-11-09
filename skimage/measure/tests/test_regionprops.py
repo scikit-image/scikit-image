@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 from numpy import array
+
+from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (regionprops, PROPS, perimeter,
                                           _parse_docs, _props_to_dict,
                                           regionprops_table, OBJECT_COLUMNS,
@@ -451,7 +453,8 @@ def test_iterate_all_props():
 
 
 def test_cache():
-    region = regionprops(SAMPLE)[0]
+    SAMPLE_mod = SAMPLE.copy()
+    region = regionprops(SAMPLE_mod)[0]
     f0 = region.filled_image
     region._label_image[:10] = 1
     f1 = region.filled_image
@@ -498,7 +501,7 @@ def test_props_to_dict():
     regions = regionprops(SAMPLE)
     out = _props_to_dict(regions, properties=('label', 'area', 'bbox'),
                          separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -511,7 +514,7 @@ def test_regionprops_table():
 
     out = regionprops_table(SAMPLE, properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert out == {'label': array([1]), 'area': array([180]),
+    assert out == {'label': array([1]), 'area': array([72]),
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
@@ -524,3 +527,10 @@ def test_props_dict_complete():
 
 def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+
+
+def test_deprecated_coords_argument():
+    with expected_warnings(['coordinates keyword argument']):
+        region = regionprops(SAMPLE, coordinates='rc')
+    with testing.raises(ValueError):
+        region = regionprops(SAMPLE, coordinates='xy')

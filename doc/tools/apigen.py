@@ -268,6 +268,9 @@ class ApiDocWriter(object):
         if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
             print('WARNING: Empty -', uri)
             return ''
+        functions = sorted(functions)
+        classes = sorted(classes)
+        submodules = sorted(submodules)
 
         # Make a shorter version of the uri that omits the package name for
         # titles

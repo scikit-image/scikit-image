@@ -3,7 +3,7 @@
 
 import numpy as np
 import numpy.random as npr
-from scipy.signal import fftconvolve, convolve
+from scipy.signal import convolve
 
 from . import uft
 
@@ -361,29 +361,14 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    # compute the times for direct convolution and the fft method. The fft is of
-    # complexity O(N log(N)) for each dimension and the direct method does
-    # straight arithmetic (and is O(n*k) to add n elements k times)
-    direct_time = np.prod(image.shape + psf.shape)
-    fft_time =  np.sum([n*np.log(n) for n in image.shape + psf.shape])
-
-    # see whether the fourier transform convolution method or the direct
-    # convolution method is faster (discussed in scikit-image PR #1792)
-    time_ratio = 40.032 * fft_time / direct_time
-
-    if time_ratio <= 1 or len(image.shape) > 2:
-        convolve_method = fftconvolve
-    else:
-        convolve_method = convolve
-
     image = image.astype(np.float)
     psf = psf.astype(np.float)
     im_deconv = np.full(image.shape, 0.5)
     psf_mirror = psf[::-1, ::-1]
 
     for _ in range(iterations):
-        relative_blur = image / convolve_method(im_deconv, psf, 'same')
-        im_deconv *= convolve_method(relative_blur, psf_mirror, 'same')
+        relative_blur = image / convolve(im_deconv, psf, mode='same')
+        im_deconv *= convolve(relative_blur, psf_mirror, mode='same')
 
     if clip:
         im_deconv[im_deconv > 1] = 1

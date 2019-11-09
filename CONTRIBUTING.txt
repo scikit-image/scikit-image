@@ -219,7 +219,7 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
+  `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery.
 * No changes are ever committed without review and approval by two core
   team members.  Ask on the
@@ -318,7 +318,7 @@ i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
 `pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
-(using ``easy_install pytest-cov``) and then run::
+(using ``pip install pytest-cov``) and then run::
 
   $ make coverage
 
@@ -478,7 +478,8 @@ that has to be changed to
 
     def a_function(image, rescale=None):
         if rescale is None:
-            warn('The default value of rescale will change to `False` in version N+3')
+            warn('The default value of rescale will change '
+                 'to `False` in version N+3.', stacklevel=2)
             rescale = True
         out = do_something(image, rescale=rescale)
         return out
@@ -506,6 +507,22 @@ Note that the 2-release deprecation cycle is not a strict rule and in some
 cases, the developers can agree on a different procedure upon justification
 (like when we can't detect the change, or it involves moving or deleting an
 entire function for example).
+
+Scikit-image uses warnings to highlight changes in its API so that users may
+update their code accordingly. The ``stacklevel`` argument sets the location in
+the callstack where the warnings will point. In most cases, it is appropriate
+to set the ``stacklevel`` to ``2``.  When warnings originate from helper
+routines internal to the scikit-image library, it is may be more appropriate to
+set the ``stacklevel`` to ``3``. For more information, see the documentation of
+the `warn <https://docs.python.org/3/library/warnings.html#warnings.warn>`__
+function in the Python standard library.
+
+To test if your warning is being emitted correctly, try calling the function
+from an IPython console. It should point you to the console input itself
+instead of being emitted by the files in the scikit-image library.
+
+* **Good**: ``ipython:1: UserWarning: ...``
+* **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
 Bugs
 ----

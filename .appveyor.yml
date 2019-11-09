@@ -1,9 +1,7 @@
 # AppVeyor.com is a Continuous Integration service to build and run tests under
 # Windows
-
 environment:
   matrix:
-    - PYTHON: C:\Python35-x64
     - PYTHON: C:\Python36
     - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37

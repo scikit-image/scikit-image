@@ -25,7 +25,7 @@ References
 
 import numpy as np
 
-from ..._shared.utils import assert_nD
+from ..._shared.utils import check_nD
 from . import bilateral_cy
 from .generic import _handle_input
 
@@ -36,7 +36,7 @@ __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
 
-    assert_nD(image, 2)
+    check_nD(image, 2)
     image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
                                                     out_dtype)
 
