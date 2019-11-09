@@ -2,6 +2,7 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
+cimport numpy as np
 from numpy cimport ndarray
 from numpy.math cimport INFINITY
 
@@ -11,6 +12,63 @@ Implementation choices
 - Merging euc and man into one 'fast' generalised function is not worth it (40s->60s time)
 - refer to 345267b43be9f81abe84dce49259c2827d02ec28 for the merge
 """
+
+# joined types
+ctypedef fused scalar_int:
+    char
+    short
+    int
+    long
+    long long
+
+ctypedef fused scalar_float:
+    np.half
+    float
+    double
+    long double
+
+
+cdef inline scalar_float f_small(scalar_float p, scalar_float infinity) nogil:
+    cdef double out = infinity
+    if p == 0:
+        out = 0
+    return out
+
+cdef inline double euclidean_dist_small(Py_ssize_t a, Py_ssize_t b, double c, type return_type) nogil:
+    cdef double out = <double>(a-b)**2+c
+    return out
+
+cdef inline double euclidean_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f, type return_type) nogil:
+    cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
+    if out != out:
+        if a==INFINITY and b!=INFINITY:
+            out = -INFINITY
+        else:
+            out = INFINITY
+    return out
+
+cdef inline double manhattan_dist_small(Py_ssize_t a, double b, double c, type return_type) nogil:
+    cdef double out
+    if a>=b:
+        out = a-b+c
+    else:
+        out = b-a+c
+    return out
+
+cdef inline double manhattan_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f, type return_type) nogil:
+    cdef double s
+    cdef double fa = f[a]
+    cdef double fb = f[b]
+    s = (a + fa + b - fb) / 2
+    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
+        return s
+    s = (a - fa + b + fb) / 2
+    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
+        return s
+    if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
+        return INFINITY
+    return -1
+
 
 cdef inline double f(double p) nogil:
     cdef double out = INFINITY
