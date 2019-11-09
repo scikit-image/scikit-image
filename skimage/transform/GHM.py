@@ -5,7 +5,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import GHMHelperFuncs as helper
 
-# ROCKYFIX make sure white and black are actually all white and black
 # ROCKYFIX why is white.jpg looking black? Is it the file or just the viewer?
 # ROCKYFIX: look for ROCKYFIX, TODO, FIXME, XXX, FIX
 
@@ -62,9 +61,9 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
     assert k_1 == k_2, "The number of columns (histograms) in A and B must match."
     k = k_1
     
-    print(m)
-    print(n)
-    print(k)
+    # print(m)
+    # print(n)
+    # print(k)
     
     C, T = calc_C_T_mtx(m, n, A, B, dist, cdf)
 
@@ -74,8 +73,8 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
     j = n-1
     jj = n-1
     for i in range(m-1, 0, -1): # starting from bottom row, going to all but top and looking at each row in T and the row above it
-        print(i)
-        print(j)
+        # print(i)
+        # print(j)
         jj = T[i,j]
         M[i, jj+1:j+1] = 1
         j = jj
