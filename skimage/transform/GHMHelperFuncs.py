@@ -39,6 +39,45 @@ def read_and_check_img(filepath):
     # plot_hist(img)
     return img
 
+# TODO check M cdf (def function and use it)
+# TODO check C cdf (def function and use it)
+# TODO check T cdf (def function and use it)
+
+# VERIFICATION FUNCTIOSN
+def check_M_matrix_pdf(M):
+	# all elements should be either 0 or 1
+	if not np.logical_or(M==0, M==1):
+		return False
+	# every column should have exactly one 1
+	if not np.all(np.sum(M, axis=0) == 1):
+		return False
+	# get indices for all nonzero (1) elements in M
+	row_indices, col_indices = np.nonzero(M)
+	m, n = M.shape
+	for i in range(n):
+		r = row_indices[i]
+		c = col_indices[i]
+		# check the top-left to bottom-right structure
+		if (c != i):
+			return False
+	return True
+
+def check_C_matrix_pdf(C):
+	# left to right: cost increases
+	if C != np.sort(C, axis=1):
+		return False
+	# top to bottom: cost decreases
+	if C != -np.sort(-C, axis=0):
+		return False
+	return True
+
+def check_T_matrix_pdf(T):
+	m, n = T.shape
+	for i in range(m):
+		for j in range(n):
+			if (not np.issubdtype(T[i,u], np.intenger)) or T[i,j] < -1 or T[i,j] > j:
+				return False
+
 #GHM HELPER FUNCTIONS
 def distance(value1, value2, metric='L1'):
     """ Any distance must be 'additive' (see paper).

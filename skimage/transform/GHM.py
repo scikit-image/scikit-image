@@ -42,10 +42,12 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
                 argmin = np.argmin(costs)
                 C[i,j] = costs[argmin]
                 T[i,j] = argmin - 1 # j = -1, 0 ... n-2, n-1 = length n+1. but it's 0, 1, ..., n
+        assert helper.check_M_pdf(M), "Invalid M matrix"
+        assert helper.check_C_pdf(C), "Invalid C matrix"
+        assert helper.check_T_pdf(T), "Invalid T matrix"
     print("Finished finding C and T.")
     return C, T
             
-# TODO add assertion that the M, C, and T matrices follow rules listed in paper
 def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
     """ Find function that maps values (bins) in A's range to values (bins) in B's range.
         See paper for some details.
