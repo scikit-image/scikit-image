@@ -17,17 +17,13 @@ def plot_hist(img):
     plt.hist(img.ravel(), range=(0,256), bins=256)
     plt.show()
 
-# def show_img(img):
-#     plt.imshow(img, cmap="gray", vmin=0, vmax=255)
-#     plt.show()
+def show_img(img, vmin=0, vmax=255):
+    plt.imshow(img, cmap="gray", vmin=vmin, vmax=vmax)
+    # plt.imshow(img, cmap="gray", vmin=np.min(img), vmax=np.max(img)+1)
+    plt.show()
 
 def is_from_0_to_255(img):
-    (h, w) = img.shape
-    for row in range(h):
-        for col in range(w):
-            if (img[row, col] > 255 or img[row, col] < 0):
-                return False
-    return True
+	return np.all(img <= 255) and np.all(img >= 0)
 
 def read_and_check_img(filepath):
     if filepath[-4:] != ".jpg":
@@ -39,14 +35,13 @@ def read_and_check_img(filepath):
         img = img[:,:,0]
     print("Done reading "+ filepath)
     # print(img)
-    # show_img(img)
+    show_img(img)
     # plot_hist(img)
     return img
 
 #GHM HELPER FUNCTIONS
 def distance(value1, value2, metric='L1'):
-    """
-    Any distance must be 'additive' (see paper).
+    """ Any distance must be 'additive' (see paper).
     """
     if metric == 'L1':
         return abs(value2-value1)
@@ -67,13 +62,12 @@ def row_cost(A, B, i, jj, j, dist='L1'):
     return dist_sum
 
 def pix_index_mapping(img):
-    """
-    Returns both pix_to_index and index_to_pix.
-    pix_to_index is a dictionary that maps each pixel value in the image to its index in the to-be-created histograms.
-    index_to_pix is an array that maps indices in a histogram to pixel values.
+    """ Returns both pix_to_index and index_to_pix.
+	    pix_to_index is a dictionary that maps each pixel value in the image to its index in the to-be-created histograms.
+	    index_to_pix is an array that maps indices in a histogram to pixel values.
 
-    Note that pix_to_index and index_to_pix are strictly monotonically increasing
-    (i.e. higher pix implies higher index and higher index implies higher pix).
+	    Note that pix_to_index and index_to_pix are strictly monotonically increasing
+	    (i.e. higher pix implies higher index and higher index implies higher pix).
     """
     pix_to_index = {}
     index_to_pix = []
@@ -85,10 +79,9 @@ def pix_index_mapping(img):
     return pix_to_index, index_to_pix
 
 def calc_histogram(img, pix_to_index):
-    """
-    Calculate the normalized histogram.
-    The histogram is a numpy array, where each index corresponds to a pixel value.
-    The histogram is normalized so that the sum of all entries equals 1.
+    """ Calculate the normalized histogram.
+	    The histogram is a numpy array, where each index corresponds to a pixel value.
+	    The histogram is normalized so that the sum of all entries equals 1.
     """
     histogram = [0]*len(pix_to_index)
     def add_pix_to_histogram(pix):
@@ -171,9 +164,8 @@ def create_matrix(img, num_histograms_per_dim=1):
     return matrix, pix_to_index, index_to_pix
 
 def convert(imgA, mapping):
-    """
-    This function takes imgA, and a mapping from pixel values in imgA to another set of pixel values.
-    This function returns a modified version of imgA according to the mapping.
+    """ This function takes imgA, and a mapping from pixel values in imgA to another set of pixel values.
+	    This function returns a modified version of imgA according to the mapping.
     """
     converter = np.vectorize(lambda pix : mapping[pix])
     return converter(imgA)

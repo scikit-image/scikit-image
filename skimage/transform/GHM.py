@@ -5,20 +5,18 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import GHMHelperFuncs as helper
 
-# ROCKYFIX why is white.jpg looking black? Is it the file or just the viewer?
 # ROCKYFIX: look for ROCKYFIX, TODO, FIXME, XXX, FIX
 
 
 def calc_C_T_mtx(m, n, A, B, dist, cdf):
-    """
-    A and B are the matrices of histograms.
+    """ A and B are the matrices of histograms.
     """
     C = np.zeros((m, n))
     T = np.zeros((m, n), dtype=np.int64)
 
     if cdf:
-        A = calc_cdf(A)
-        B = calc_cdf(B)
+        A = helper.calc_cdf(A)
+        B = helper.calc_cdf(B)
 
     # initialize C
     for j in range(n):
@@ -49,9 +47,8 @@ def calc_C_T_mtx(m, n, A, B, dist, cdf):
             
 # TODO add assertion that the M, C, and T matrices follow rules listed in paper
 def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
-    """
-    Find function that maps values (bins) in A's range to values (bins) in B's range.
-    See paper for some details.
+    """ Find function that maps values (bins) in A's range to values (bins) in B's range.
+        See paper for some details.
     """
     print("*********")
     print("Starting find_mapping")
@@ -97,18 +94,15 @@ def find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist='L1', cdf=False):
 # TODO decide what file formats we accept. Currently we do jpg. See https://matplotlib.org/3.1.0/api/_as_gen/matplotlib.pyplot.imread.html See "Notes".
 
 #GHM and cdfGHM
-def GHM(imgA, imgB, num_histograms_per_dim=1, dist='L1'):
+def GHM(imgA, imgB, cdf=True, num_histograms_per_dim=1, dist='L1'):
+    """ imgA:                   image being processed
+        imgB:                   template image
+        cdf:                    if True, use cdf GHM; otherwise, use pdf GHM
+        num_histograms_per_dim: how many separate subsections the image should be split into per dimension (i.e. num_histograms_per_dim squared is the number of histograms generated for a 2D image)
+        dist:                   distance type (default is L1 squared); distance must be an additive distance
+    """
     A, pix_to_index_A, index_to_pix_A = helper.create_matrix(imgA, num_histograms_per_dim)
     B, pix_to_index_B, index_to_pix_B = helper.create_matrix(imgB, num_histograms_per_dim)
-    mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=False)
+    mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=cdf)
     matched_imgA = helper.convert(imgA, mapping)
     return matched_imgA
-
-
-def cdfGHM(imgA, imgB, num_histograms_per_dim=1, dist ='L1'):
-    A, pix_to_index_A, index_to_pix_A = helper.create_matrix(imgA, num_histograms_per_dim)
-    B, pix_to_index_B, index_to_pix_B = helper.create_matrix(imgB, num_histograms_per_dim)
-    mapping, C, T, M = find_mapping(A, B, index_to_pix_A, index_to_pix_B, dist, cdf=True)
-    matched_imgA = helper.convert(imgA, mapping)
-    return matched_imgA
-
