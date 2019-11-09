@@ -4,6 +4,7 @@
 #cython: wraparound=False
 cimport numpy as np
 from numpy cimport ndarray
+from numpy import iinfo
 from numpy.math cimport INFINITY
 
 """
@@ -17,29 +18,28 @@ Implementation choices
 ctypedef fused scalar_int:
     char
     short
+    Py_ssize_t
     int
     long
     long long
 
 ctypedef fused scalar_float:
-    np.half
     float
     double
     long double
 
-
-cdef inline scalar_float f_small(scalar_float p, scalar_float infinity) nogil:
-    cdef double out = infinity
+cdef inline scalar_float f(scalar_float p) nogil:
+    cdef scalar_float out = INFINITY
     if p == 0:
         out = 0
     return out
 
-cdef inline double euclidean_dist_small(Py_ssize_t a, Py_ssize_t b, double c, type return_type) nogil:
-    cdef double out = <double>(a-b)**2+c
+cdef inline scalar_float euclidean_dist(scalar_int a, scalar_int b, scalar_float c) nogil:
+    cdef scalar_float out = <scalar_float>(a-b)**2+c
     return out
 
-cdef inline double euclidean_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f, type return_type) nogil:
-    cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
+cdef inline scalar_float euclidean_meet(scalar_int a, scalar_int b, scalar_float[:] f) nogil:
+    cdef scalar_float out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
         if a==INFINITY and b!=INFINITY:
             out = -INFINITY
@@ -47,18 +47,18 @@ cdef inline double euclidean_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f,
             out = INFINITY
     return out
 
-cdef inline double manhattan_dist_small(Py_ssize_t a, double b, double c, type return_type) nogil:
-    cdef double out
+cdef inline scalar_float manhattan_dist(scalar_int a, scalar_float b, scalar_float c) nogil:
+    cdef scalar_float out
     if a>=b:
         out = a-b+c
     else:
         out = b-a+c
     return out
 
-cdef inline double manhattan_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f, type return_type) nogil:
-    cdef double s
-    cdef double fa = f[a]
-    cdef double fb = f[b]
+cdef inline scalar_float manhattan_meet(scalar_int a, scalar_int b, scalar_float[:] f) nogil:
+    cdef scalar_float s
+    cdef scalar_float fa = f[a]
+    cdef scalar_float fb = f[b]
     s = (a + fa + b - fb) / 2
     if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
         return s
@@ -69,54 +69,12 @@ cdef inline double manhattan_meet_small(Py_ssize_t a, Py_ssize_t b, double[:] f,
         return INFINITY
     return -1
 
-
-cdef inline double f(double p) nogil:
-    cdef double out = INFINITY
-    if p == 0:
-        out = 0
-    return out
-
-cdef inline double euclidean_dist(Py_ssize_t a, Py_ssize_t b, double c) nogil:
-    cdef double out = <double>(a-b)**2+c
-    return out
-
-cdef inline double euclidean_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
-    cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
-    if out != out:
-        if a==INFINITY and b!=INFINITY:
-            out = -INFINITY
-        else:
-            out = INFINITY
-    return out
-
-cdef inline double manhattan_dist(Py_ssize_t a, double b, double c) nogil:
-    cdef double out
-    if a>=b:
-        out = a-b+c
-    else:
-        out = b-a+c
-    return out
-
-cdef inline double manhattan_meet(Py_ssize_t a, Py_ssize_t b, double[:] f) nogil:
-    cdef double s
-    cdef double fa = f[a]
-    cdef double fb = f[b]
-    s = (a + fa + b - fb) / 2
-    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
-        return s
-    s = (a - fa + b + fb) / 2
-    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
-        return s
-    if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return INFINITY
-    return -1
-
-def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_arr,
-                                       bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
-    cdef Py_ssize_t length = len(arr)
-    cdef Py_ssize_t i, rightmost, current_domain,start
-    cdef double intersection
+def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_float[:] cost_arr,
+                                       bint isfirst, scalar_float[::1] domains,
+                                       scalar_int[::1] centers, scalar_float[::1] out):
+    cdef scalar_int length = len(arr)
+    cdef scalar_int i, rightmost, current_domain,start
+    cdef scalar_float intersection
     with nogil:
         if isfirst:
             for i in range(length):
@@ -150,15 +108,15 @@ def _generalized_distance_transform_1d_euclidean(double[:] arr, double[:] cost_a
         for i in range(length):
             while domains[current_domain+1]<i:
                 current_domain += 1
-            out[i] = euclidean_dist(i,centers[current_domain],cost_arr[<Py_ssize_t>centers[current_domain]])
+            out[i] = euclidean_dist(i,centers[current_domain],cost_arr[<scalar_int>centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_arr,
-                                       bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
-    cdef Py_ssize_t length = len(arr)
-    cdef Py_ssize_t i, rightmost, current_domain, start
-    cdef double intersection
+def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_float[:] cost_arr,
+                                       bint isfirst, scalar_float[::1] domains,
+                                       scalar_int[::1] centers, scalar_float[::1] out):
+    cdef scalar_int length = len(arr)
+    cdef scalar_int i, rightmost, current_domain, start
+    cdef scalar_float intersection
     with nogil:
         if isfirst:
             for i in range(length):
@@ -177,10 +135,10 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
         centers[0] = start
 
         for i in range(start+1,length):
-            intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
+            intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr)
             while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
                 rightmost-=1
-                intersection = manhattan_meet(i,<Py_ssize_t>centers[rightmost],cost_arr)
+                intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr)
 
             rightmost+=1
             centers[rightmost]=i
@@ -195,13 +153,13 @@ def _generalized_distance_transform_1d_manhattan(double[:] arr, double[:] cost_a
             out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
+def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
-                                       bint isfirst, double[::1] domains,
-                                       Py_ssize_t[::1] centers, double[::1] out):
-    cdef Py_ssize_t length = len(arr)
-    cdef Py_ssize_t i, rightmost, current_domain, start
-    cdef double intersection
+                                       bint isfirst, scalar_float[::1] domains,
+                                       scalar_int[::1] centers, scalar_float[::1] out):
+    cdef scalar_int length = len(arr)
+    cdef scalar_int i, rightmost, current_domain, start
+    cdef scalar_float intersection
 
     if isfirst:
         for i in range(length):
