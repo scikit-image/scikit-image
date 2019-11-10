@@ -1,4 +1,4 @@
-"""
+r"""
 
 General Description
 -------------------
@@ -99,14 +99,14 @@ def _handle_input(image, selem=None, out=None, mask=None, out_dtype=None,
     """
     check_nD(image, 2)
     input_dtype = image.dtype
-    if (image_dtype in (bool, np.bool, np.bool_)
+    if (input_dtype in (bool, np.bool, np.bool_)
             or out_dtype in (bool, np.bool, np.bool_)):
         raise ValueError('dtype cannot be bool.')
-    if image_dtype not in (np.uint8, np.uint16):
+    if input_dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
                    'uint8 as required by rank filters. Convert manually using '
                    'skimage.util.img_as_ubyte to silence this warning.'
-                   .format(image.dtype))
+                   .format(input_dtype))
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
