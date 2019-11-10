@@ -4,7 +4,7 @@
 #cython: wraparound=False
 cimport numpy as np
 from numpy cimport ndarray
-#from numpy.math cimport INFINITY
+from numpy.math cimport INFINITY
 """
 Implementation choices
 - Inline had no noticeable effect on the performance. saw now reason to remove it though
@@ -154,7 +154,7 @@ def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_flo
 def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
                                        bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
+                                       scalar_int[::1] centers, scalar_float[::1] out):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
     cdef scalar_float intersection
@@ -165,26 +165,26 @@ def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] 
 
     start = 0
     while start<length:
-        if cost_arr[start] != posINF:
+        if cost_arr[start] != INFINITY:
             break
         start+=1
     start = min(length-1,start)
 
     rightmost = 0
-    domains[0] = negINF
-    domains[1] = posINF
+    domains[0] = -INFINITY
+    domains[1] = INFINITY
     centers[0] = start
 
     for i in range(start+1,length):
-        intersection = dist_meet(i,centers[rightmost],cost_arr, posINF, negINF)
-        while intersection <= domains[rightmost] or domains[rightmost]==posINF and rightmost>start:
+        intersection = dist_meet(i,centers[rightmost],cost_arr, INFINITY, -INFINITY)
+        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
             rightmost-=1
-            intersection = dist_meet(i,centers[rightmost],cost_arr, posINF, negINF)
+            intersection = dist_meet(i,centers[rightmost],cost_arr, INFINITY, -INFINITY)
 
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-    domains[rightmost+1] = posINF
+    domains[rightmost+1] = INFINITY
 
     current_domain = 0
 
