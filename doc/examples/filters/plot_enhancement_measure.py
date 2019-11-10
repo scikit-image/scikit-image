@@ -58,4 +58,4 @@ compare_side_by_side(before=img_rgb, after=equalize_adapthist(image=img_rgb,
 #        "A new measure of image enhancement.",
 #        IASTED International Conference on Signal Processing
 #        & Communication, Citeseer, 2000,
-#        :DOI:10.1.1.35.4021
+#        :DOI:`10.1.1.35.4021`

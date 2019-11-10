@@ -120,7 +120,7 @@ def enhancement_measure(image: np.ndarray,
             "A new measure of image enhancement.",
             IASTED International Conference on Signal Processing
             & Communication, Citeseer, 2000,
-            :DOI:10.1.1.35.4021
+            :DOI:`10.1.1.35.4021`
 
     Examples
     --------
