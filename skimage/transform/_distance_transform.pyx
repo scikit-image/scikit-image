@@ -4,9 +4,7 @@
 #cython: wraparound=False
 cimport numpy as np
 from numpy cimport ndarray
-from numpy import iinfo
-from numpy.math cimport INFINITY
-
+#from numpy.math cimport INFINITY
 """
 Implementation choices
 - Inline had no noticeable effect on the performance. saw now reason to remove it though
@@ -28,8 +26,8 @@ ctypedef fused scalar_float:
     double
     long double
 
-cdef inline scalar_float f(scalar_float p) nogil:
-    cdef scalar_float out = INFINITY
+cdef inline scalar_float f(scalar_float p, scalar_float posINF) nogil:
+    cdef scalar_float out = posINF
     if p == 0:
         out = 0
     return out
@@ -38,13 +36,13 @@ cdef inline scalar_float euclidean_dist(scalar_int a, scalar_int b, scalar_float
     cdef scalar_float out = <scalar_float>(a-b)**2+c
     return out
 
-cdef inline scalar_float euclidean_meet(scalar_int a, scalar_int b, scalar_float[:] f) nogil:
+cdef inline scalar_float euclidean_meet(scalar_int a, scalar_int b, scalar_float[:] f, scalar_float posINF, scalar_float negINF) nogil:
     cdef scalar_float out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
-        if a==INFINITY and b!=INFINITY:
-            out = -INFINITY
+        if a==posINF and b!=posINF:
+            out = negINF
         else:
-            out = INFINITY
+            out = posINF
     return out
 
 cdef inline scalar_float manhattan_dist(scalar_int a, scalar_float b, scalar_float c) nogil:
@@ -55,7 +53,7 @@ cdef inline scalar_float manhattan_dist(scalar_int a, scalar_float b, scalar_flo
         out = b-a+c
     return out
 
-cdef inline scalar_float manhattan_meet(scalar_int a, scalar_int b, scalar_float[:] f) nogil:
+cdef inline scalar_float manhattan_meet(scalar_int a, scalar_int b, scalar_float[:] f, scalar_float posINF, scalar_float negINF) nogil:
     cdef scalar_float s
     cdef scalar_float fa = f[a]
     cdef scalar_float fb = f[b]
@@ -66,42 +64,42 @@ cdef inline scalar_float manhattan_meet(scalar_int a, scalar_int b, scalar_float
     if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return INFINITY
+        return posINF
     return -1
 
 def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_float[:] cost_arr,
                                        bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out):
+                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain,start
     cdef scalar_float intersection
     with nogil:
         if isfirst:
             for i in range(length):
-                cost_arr[i] = f(arr[i])
+                cost_arr[i] = f(arr[i], posINF)
 
         start = 0
         while start<length:
-            if cost_arr[start] != INFINITY:
+            if cost_arr[start] != posINF:
                 break
             start+=1
         start = min(length-1,start)
 
         rightmost = 0
-        domains[0] = -INFINITY
-        domains[1] = INFINITY
+        domains[0] = negINF
+        domains[1] = posINF
         centers[0] = start
     
         for i in range(start+1,length):
-            intersection = euclidean_meet(i,centers[rightmost],cost_arr)
-            while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
+            intersection = euclidean_meet(i,centers[rightmost],cost_arr, posINF, negINF)
+            while intersection <= domains[rightmost] or domains[rightmost]==posINF and rightmost>start:
                 rightmost-=1
-                intersection = euclidean_meet(i,centers[rightmost],cost_arr)
+                intersection = euclidean_meet(i,centers[rightmost],cost_arr, posINF, negINF)
 
             rightmost+=1
             centers[rightmost]=i
             domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
+        domains[rightmost+1] = posINF
 
         current_domain = 0
 
@@ -113,37 +111,37 @@ def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_flo
 
 def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_float[:] cost_arr,
                                        bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out):
+                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
     cdef scalar_float intersection
     with nogil:
         if isfirst:
             for i in range(length):
-                cost_arr[i] = f(arr[i])
+                cost_arr[i] = f(arr[i], posINF)
 
         start = 0
         while start<length:
-            if cost_arr[start] != INFINITY:
+            if cost_arr[start] != posINF:
                 break
             start+=1
         start = min(length-1,start)
 
         rightmost = 0
-        domains[0] = -INFINITY
-        domains[1] = INFINITY
+        domains[0] = negINF
+        domains[1] = posINF
         centers[0] = start
 
         for i in range(start+1,length):
-            intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr)
-            while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
+            intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr, posINF, negINF)
+            while intersection <= domains[rightmost] or domains[rightmost]==posINF and rightmost>start:
                 rightmost-=1
-                intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr)
+                intersection = manhattan_meet(i,<scalar_int>centers[rightmost],cost_arr, posINF, negINF)
 
             rightmost+=1
             centers[rightmost]=i
             domains[rightmost]=intersection
-        domains[rightmost+1] = INFINITY
+        domains[rightmost+1] = posINF
 
         current_domain = 0
 
@@ -156,7 +154,7 @@ def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_flo
 def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] cost_arr,
                                        cost_func, dist_func, dist_meet,
                                        bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out):
+                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
     cdef scalar_float intersection
@@ -167,26 +165,26 @@ def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] 
 
     start = 0
     while start<length:
-        if cost_arr[start] != INFINITY:
+        if cost_arr[start] != posINF:
             break
         start+=1
     start = min(length-1,start)
 
     rightmost = 0
-    domains[0] = -INFINITY
-    domains[1] = INFINITY
+    domains[0] = negINF
+    domains[1] = posINF
     centers[0] = start
 
     for i in range(start+1,length):
-        intersection = dist_meet(i,centers[rightmost],cost_arr)
-        while intersection <= domains[rightmost] or domains[rightmost]==INFINITY and rightmost>start:
+        intersection = dist_meet(i,centers[rightmost],cost_arr, posINF, negINF)
+        while intersection <= domains[rightmost] or domains[rightmost]==posINF and rightmost>start:
             rightmost-=1
-            intersection = dist_meet(i,centers[rightmost],cost_arr)
+            intersection = dist_meet(i,centers[rightmost],cost_arr, posINF, negINF)
 
         rightmost+=1
         centers[rightmost]=i
         domains[rightmost]=intersection
-    domains[rightmost+1] = INFINITY
+    domains[rightmost+1] = posINF
 
     current_domain = 0
 

@@ -9,6 +9,7 @@ it is at the bottom.
 
 import warnings
 import numpy as np
+from numpy import iinfo
 from ..util.along_axis import apply_along_axis
 from ..util import img_as_float64
 from functools import partial 
@@ -64,9 +65,9 @@ def generalized_distance_transform(ndarr_in, func='euclidean', cost_func=f, dist
         out_buffer = np.empty(length, dtype=np.double)
         
         if dimension == 0:
-            output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer)
+            output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer, typeINF=float, negINF = iinfo(float).min, posINF=iinfo(float).max)
         else:
-            output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=False, domains = domains_buffer, centers = centers_buffer, out = out_buffer)
+            output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=False, domains = domains_buffer, centers = centers_buffer, out = out_buffer, typeINF=float, negINF = iinfo(float).min, posINF=iinfo(float).max)
     
     return output
 
