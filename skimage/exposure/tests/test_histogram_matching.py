@@ -27,7 +27,6 @@ class TestMatchHistogram:
     image_rgb = data.chelsea()
     template_rgb = data.astronaut()
 
-    @pytest.mark.me
     @pytest.mark.parametrize('image, reference, multichannel', [
         (image_rgb, template_rgb, True),
         (image_rgb[:, :, 0], template_rgb[:, :, 0], False)
