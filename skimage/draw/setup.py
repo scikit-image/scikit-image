@@ -12,7 +12,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('draw', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_draw.pyx'], working_path=base_path)
+    cython(['_draw.pyx', '_draw_nd.pyx'], working_path=base_path)
 
     config.add_extension('_draw', sources=['_draw.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])

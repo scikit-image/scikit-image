@@ -180,18 +180,23 @@ def my_line_nd(start, stop, *, endpoint=False, integer=True):
     return tuple(coords)
 
 if __name__ == '__main__':
-    line_nd = my_line_nd
-    lin = line_nd((1, 1), (5, 2.5), endpoint=False)
-    print(lin)
-    print((np.array([1, 2, 3, 4]), np.array([1, 1, 2, 2])))
-    im = np.zeros((6, 5), dtype=int)
-    im[lin] = 1
-    print(im)
-    print(np.array([[0, 0, 0, 0, 0],
-           [0, 1, 0, 0, 0],
-           [0, 1, 0, 0, 0],
-           [0, 0, 1, 0, 0],
-           [0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0]]))
-    print(line_nd([2, 1, 1], [5, 5, 2.5], endpoint=True))
-    print((np.array([2, 3, 4, 4, 5]), np.array([1, 2, 3, 4, 5]), np.array([1, 1, 2, 2, 2])))
+    def test(draw_nd_fn):
+        lin = draw_nd_fn((1, 1), (5, 2.5), endpoint=False)
+        print(lin)
+        print((np.array([1, 2, 3, 4]), np.array([1, 1, 2, 2])))
+        im = np.zeros((6, 5), dtype=int)
+        im[lin] = 1
+        print(im)
+        print(np.array([[0, 0, 0, 0, 0],
+               [0, 1, 0, 0, 0],
+               [0, 1, 0, 0, 0],
+               [0, 0, 1, 0, 0],
+               [0, 0, 1, 0, 0],
+               [0, 0, 0, 0, 0]]))
+        print(draw_nd_fn([2, 1, 1], [5, 5, 2.5], endpoint=True))
+        print((np.array([2, 3, 4, 4, 5]), np.array([1, 2, 3, 4, 5]), np.array([1, 1, 2, 2, 2])))
+
+    from _draw_nd import my_line_nd_cython
+    test(line_nd)
+    test(my_line_nd)
+    test(my_line_nd_cython)
