@@ -10,7 +10,7 @@ analysis, filtering, morphology, feature detection, and more.
 This is a bug fix release that addresses several critical issues from 0.16.1.
 
 Bug fixes
-*********
+---------
 - Migrate to networkx 2.x (#4236, #4237)
 - Sync required numpy and dask to runtime versions (#4233, #4239)
 - Fix wrong argument parsing in structural_similarity (#4246, #4247)
