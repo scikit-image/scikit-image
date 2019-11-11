@@ -17,12 +17,12 @@ def imshow_side_by_side(original,
     ax[0, 0].imshow(original)
     ax[0, 0].axis('off')
     ax[0, 0].set_title("Original Image and Its Histogram")
-    ax[1, 0].hist(original.ravel(), nbins=256)
+    ax[1, 0].hist(original.ravel(), bins=256)
 
     ax[0, 1].imshow(filtered)
     ax[0, 1].axis('off')
     ax[0, 1].set_title("Alpha Root Filtered Image and Its Histogram,")
-    ax[1, 1].hist(filtered.ravel(), nbins=256)
+    ax[1, 1].hist(filtered.ravel(), bins=256)
 
     plt.show()
 
