@@ -43,12 +43,12 @@ def manhattan_meet(a,b,f, posINF=np.inf, negINF=-np.inf):
         return posINF
     return -1
 
-def generalized_distance_transform(ndarr_in, func='euclidean', cost_func=f, dist_func=euclidean_dist, dist_meet=euclidean_meet):
+def generalized_distance_transform(ndarr_in, func='euclidean', cost_func=f, dist_func=euclidean_dist, dist_meet=euclidean_meet, arr_type=float):
     ndarr = ndarr_in.astype(np.double)
     if func == "euclidean":
-        gdt1d = partial(_generalized_distance_transform_1d_euclidean, typeINF=float, negINF = finfo(float).min, posINF=finfo(float).max)
+        gdt1d = partial(_generalized_distance_transform_1d_euclidean, typeINF=arr_type, negINF = finfo(arr_type).min, posINF=finfo(arr_type).max)
     elif func == "manhattan":
-        gdt1d = partial(_generalized_distance_transform_1d_manhattan, typeINF=float, negINF = finfo(float).min, posINF=finfo(float).max)
+        gdt1d = partial(_generalized_distance_transform_1d_manhattan, typeINF=arr_type, negINF = finfo(arr_type).min, posINF=finfo(arr_type).max)
     else:
         gdt1d = partial(_generalized_distance_transform_1d_slow, cost_func=cost_func, dist_func=dist_func, dist_meet=dist_meet)
         warnings.warn("slow")

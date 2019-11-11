@@ -3,11 +3,12 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 cimport numpy as np
+from libc.stdint cimport uint16_t
 from numpy cimport ndarray
 from numpy.math cimport INFINITY
 """
 Implementation choices
-- Inline had no noticeable effect on the performance. saw now reason to remove it though
+- Inline had no noticeable effect on the performance. saw no reason to remove it though
 - Merging euc and man into one 'fast' generalised function is not worth it (40s->60s time)
 - refer to 345267b43be9f81abe84dce49259c2827d02ec28 for the merge
 """
@@ -26,53 +27,61 @@ ctypedef fused scalar_float:
     double
     long double
 
-cdef inline scalar_float f(scalar_float p, scalar_float posINF) nogil:
-    cdef scalar_float out = posINF
+cdef inline scalar_int f(scalar_int p, scalar_int posINF) nogil:
+    cdef scalar_int out = posINF
     if p == 0:
         out = 0
     return out
 
-cdef inline scalar_float euclidean_dist(scalar_int a, scalar_int b, scalar_float c) nogil:
-    cdef scalar_float out = <scalar_float>(a-b)**2+c
+cdef inline scalar_int euclidean_dist(scalar_int a, scalar_int b, scalar_int c) nogil:
+    cdef scalar_int out = (a-b)**2+c
     return out
 
-cdef inline scalar_float euclidean_meet(scalar_int a, scalar_int b, scalar_float[:] f, scalar_float posINF, scalar_float negINF) nogil:
-    cdef scalar_float out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
+cdef inline double euclidean_meet(scalar_int a, scalar_int b, scalar_int[:] f, scalar_int posINF, scalar_int negINF) nogil:
+    cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
     if out != out:
         if a==posINF and b!=posINF:
-            out = negINF
+            out = -INFINITY
         else:
-            out = posINF
+            out = INFINITY
     return out
 
-cdef inline scalar_float manhattan_dist(scalar_int a, scalar_float b, scalar_float c) nogil:
-    cdef scalar_float out
+cdef inline scalar_int manhattan_dist(scalar_int a, scalar_int b, scalar_int c) nogil:
+    cdef scalar_int out
     if a>=b:
         out = a-b+c
     else:
         out = b-a+c
     return out
 
-cdef inline scalar_float manhattan_meet(scalar_int a, scalar_int b, scalar_float[:] f, scalar_float posINF, scalar_float negINF) nogil:
-    cdef scalar_float s
-    cdef scalar_float fa = f[a]
-    cdef scalar_float fb = f[b]
+cdef inline double manhattan_dist_double(scalar_int a, double b, scalar_int c) nogil:
+    cdef double out
+    if a>=b:
+        out = <double>a-<double>b+<double>c
+    else:
+        out = <double>b-<double>a+<double>c
+    return out
+
+cdef inline double manhattan_meet(scalar_int a, scalar_int b, scalar_int[:] f, scalar_int posINF, scalar_int negINF) nogil:
+    cdef double s
+    cdef scalar_int fa = f[a]
+    cdef scalar_int fb = f[b]
     s = (a + fa + b - fb) / 2
-    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
+    if manhattan_dist_double(a,s,fa) == manhattan_dist_double(b,s,fb):
         return s
     s = (a - fa + b + fb) / 2
-    if manhattan_dist(a,s,fa) == manhattan_dist(b,s,fb):
+    if manhattan_dist_double(a,s,fa) == manhattan_dist_double(b,s,fb):
         return s
     if manhattan_dist(a,a,fa) > manhattan_dist(b,a,fb):
-        return posINF
+        return INFINITY
     return -1
 
-def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_float[:] cost_arr,
-                                       bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
+def _generalized_distance_transform_1d_euclidean(scalar_int[:] arr, scalar_int[:] cost_arr,
+                                       bint isfirst, double[::1] domains,
+                                       scalar_int[::1] centers, scalar_int[::1] out, type typeINF, scalar_int negINF, scalar_int posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain,start
-    cdef scalar_float intersection
+    cdef double intersection
     with nogil:
         if isfirst:
             for i in range(length):
@@ -86,8 +95,8 @@ def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_flo
         start = min(length-1,start)
 
         rightmost = 0
-        domains[0] = negINF
-        domains[1] = posINF
+        domains[0] = <double>negINF
+        domains[1] = <double>posINF
         centers[0] = start
     
         for i in range(start+1,length):
@@ -109,12 +118,12 @@ def _generalized_distance_transform_1d_euclidean(scalar_float[:] arr, scalar_flo
             out[i] = euclidean_dist(i,centers[current_domain],cost_arr[<scalar_int>centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_float[:] cost_arr,
-                                       bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out, type typeINF, scalar_float negINF, scalar_float posINF):
+def _generalized_distance_transform_1d_manhattan(scalar_int[:] arr, scalar_int[:] cost_arr,
+                                       bint isfirst, double[::1] domains,
+                                       scalar_int[::1] centers, scalar_int[::1] out, type typeINF, scalar_int negINF, scalar_int posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
-    cdef scalar_float intersection
+    cdef double intersection
     with nogil:
         if isfirst:
             for i in range(length):
@@ -151,13 +160,13 @@ def _generalized_distance_transform_1d_manhattan(scalar_float[:] arr, scalar_flo
             out[i] = manhattan_dist(i,centers[current_domain],cost_arr[centers[current_domain]])
     return out
 
-def _generalized_distance_transform_1d_slow(scalar_float[:] arr,scalar_float[:] cost_arr,
-                                       cost_func, dist_func, dist_meet,
-                                       bint isfirst, scalar_float[::1] domains,
-                                       scalar_int[::1] centers, scalar_float[::1] out):
+def _generalized_distance_transform_1d_slow(double[:] arr,double[:] cost_arr,
+                                           cost_func, dist_func, dist_meet,
+                                       bint isfirst, double[::1] domains,
+                                       scalar_int[::1] centers, double[::1] out):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
-    cdef scalar_float intersection
+    cdef double intersection
 
     if isfirst:
         for i in range(length):
