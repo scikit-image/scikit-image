@@ -4,7 +4,6 @@ Root Filtering (Alpha Rooting)
 ==============================
 
 """
-
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -26,6 +25,8 @@ def imshow_side_by_side(original,
     ax[1, 1].hist(filtered.ravel(), nbins=256)
 
     plt.show()
+
+
 ###########################################################################
 # Contrast enhancement and sharpening properties of alpha-root filtering
 # are presented below.
@@ -42,8 +43,11 @@ imshow_side_by_side(original, alpha=0.7)
 original = data.coffee()
 imshow_side_by_side(original, alpha=0.9)
 imshow_side_by_side(original, alpha=0.7)
+
+
 ###########################################################################
 # For values of alpha that exceed 1.0, we observe blurring.
+
 
 original = data.astronaut()
 imshow_side_by_side(original, alpha=1.5)
@@ -57,10 +61,12 @@ original = data.coffee()
 imshow_side_by_side(original, alpha=1.5)
 imshow_side_by_side(original, alpha=1.7)
 
-###########################################################################
 
+###########################################################################
+#
 # References
 # ----------
 #
-# .. [1] A. K. Jain, Fundamentals of Digital Image Processing.
+# .. [1] A. K. Jain (1989),
+#        "Fundamentals of Digital Image Processing", pp. 256-260,
 #        Upper SaddleRiver, NJ: Prentice-Hall, 1989.
