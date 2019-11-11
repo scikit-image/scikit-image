@@ -19,6 +19,7 @@ from skimage.filters.thresholding import (threshold_local,
                                           threshold_triangle,
                                           threshold_minimum,
                                           threshold_multiotsu,
+                                          threshold_tpoint,
                                           try_all_threshold,
                                           _mean_std,
                                           _cross_entropy)
@@ -129,7 +130,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_local(self.image, 3, method='gaussian')
         assert_equal(ref, self.image > out)
@@ -144,7 +145,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_local(self.image, 3, method='mean')
         assert_equal(ref, self.image > out)
@@ -164,10 +165,10 @@ class TestSimpleImage():
         out = threshold_local(self.image, 3, method='median',
                               mode='constant', cval=20)
         expected = np.array([[20.,  1.,  3.,  4., 20.],
-                            [ 1.,  1.,  3.,  4.,  4.],
-                            [ 2.,  2.,  4.,  4.,  4.],
-                            [ 4.,  4.,  4.,  1.,  2.],
-                            [20.,  5.,  5.,  2., 20.]])
+                             [1.,  1.,  3.,  4.,  4.],
+                             [2.,  2.,  4.,  4.,  4.],
+                             [4.,  4.,  4.,  1.,  2.],
+                             [20.,  5.,  5.,  2., 20.]])
         assert_equal(expected, out)
 
     def test_threshold_niblack(self):
@@ -618,3 +619,11 @@ def test_multiotsu_lut():
             result = _get_multiotsu_thresh_indices(prob, classes - 1)
 
             assert np.array_equal(result_lut, result)
+
+def test_tpoint_tail():
+    img = rgb2gray(data.retina())[210:-210, 210:-210]
+    assert 0.56 < threshold_tpoint(img, tail=True) < 0.58
+
+def test_tpoint_foot():
+    img = rgb2gray(data.retina())[210:-210, 210:-210]
+    assert 0.33 < threshold_tpoint(img, tail=False) < 0.45
