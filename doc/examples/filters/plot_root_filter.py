@@ -29,7 +29,7 @@ def imshow_side_by_side(original,
 
 ###########################################################################
 # Contrast enhancement and sharpening properties of alpha-root filtering
-# [1] are presented below.
+# [1]_ are presented below.
 
 
 original = data.astronaut()
