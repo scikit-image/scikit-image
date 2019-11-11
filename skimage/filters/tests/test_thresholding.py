@@ -620,9 +620,11 @@ def test_multiotsu_lut():
 
             assert np.array_equal(result_lut, result)
 
+
 def test_tpoint_tail():
     img = rgb2gray(data.retina())[210:-210, 210:-210]
     assert 0.56 < threshold_tpoint(img, tail=True) < 0.58
+
 
 def test_tpoint_foot():
     img = rgb2gray(data.retina())[210:-210, 210:-210]
