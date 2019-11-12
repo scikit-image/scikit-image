@@ -329,16 +329,9 @@ def _to_array(args):
 #   0
 # 3   1   ->  0x
 #   2         xx
-EDGETORELATIVEPOSX = np.array([[0, 1], [1, 1], [1, 0], [0, 0],
-                               [0, 1], [1, 1], [1, 0], [0, 0],
-                               [0, 0], [1, 1], [1, 1], [0, 0]], 'int8')
-EDGETORELATIVEPOSY = np.array([[0, 0], [0, 1], [1, 1], [1, 0],
-                               [0, 0], [0, 1], [1, 1], [1, 0],
-                               [0, 0], [0, 0], [1, 1], [1, 1]], 'int8')
-EDGETORELATIVEPOSZ = np.array([[0, 0], [0, 0], [0, 0], [0, 0],
-                               [1, 1], [1, 1], [1, 1], [1, 1],
-                               [0, 1], [0, 1], [0, 1], [0, 1]], 'int8')
-
+EDGETORELATIVEPOSX = np.array([ [0,1],[1,1],[1,0],[0,0], [0,1],[1,1],[1,0],[0,0], [0,0],[1,1],[1,1],[0,0] ], 'int8')
+EDGETORELATIVEPOSY = np.array([ [0,0],[0,1],[1,1],[1,0], [0,0],[0,1],[1,1],[1,0], [0,0],[0,0],[1,1],[1,1] ], 'int8')
+EDGETORELATIVEPOSZ = np.array([ [0,0],[0,0],[0,0],[0,0], [1,1],[1,1],[1,1],[1,1], [0,1],[0,1],[0,1],[0,1] ], 'int8')
 
 def _get_mc_luts():
     """ Kind of lazy obtaining of the luts.
@@ -346,56 +339,26 @@ def _get_mc_luts():
     if not hasattr(mcluts, 'THE_LUTS'):
 
         mcluts.THE_LUTS = _marching_cubes_lewiner_cy.LutProvider(
-            EDGETORELATIVEPOSX,
-            EDGETORELATIVEPOSY,
-            EDGETORELATIVEPOSZ,
-            _to_array(mcluts.CASESCLASSIC),
-            _to_array(mcluts.CASES),
-            _to_array(mcluts.TILING1),
-            _to_array(mcluts.TILING2),
-            _to_array(mcluts.TILING3_1),
-            _to_array(mcluts.TILING3_2),
-            _to_array(mcluts.TILING4_1),
-            _to_array(mcluts.TILING4_2),
-            _to_array(mcluts.TILING5),
-            _to_array(mcluts.TILING6_1_1),
-            _to_array(mcluts.TILING6_1_2),
-            _to_array(mcluts.TILING6_2),
-            _to_array(mcluts.TILING7_1),
-            _to_array(mcluts.TILING7_2),
-            _to_array(mcluts.TILING7_3),
-            _to_array(mcluts.TILING7_4_1),
-            _to_array(mcluts.TILING7_4_2),
-            _to_array(mcluts.TILING8),
-            _to_array(mcluts.TILING9),
-            _to_array(mcluts.TILING10_1_1),
-            _to_array(mcluts.TILING10_1_1_),
-            _to_array(mcluts.TILING10_1_2),
-            _to_array(mcluts.TILING10_2),
-            _to_array(mcluts.TILING10_2_),
-            _to_array(mcluts.TILING11),
-            _to_array(mcluts.TILING12_1_1),
-            _to_array(mcluts.TILING12_1_1_),
-            _to_array(mcluts.TILING12_1_2),
-            _to_array(mcluts.TILING12_2),
-            _to_array(mcluts.TILING12_2_),
-            _to_array(mcluts.TILING13_1),
-            _to_array(mcluts.TILING13_1_),
-            _to_array(mcluts.TILING13_2),
-            _to_array(mcluts.TILING13_2_),
-            _to_array(mcluts.TILING13_3),
-            _to_array(mcluts.TILING13_3_),
-            _to_array(mcluts.TILING13_4),
-            _to_array(mcluts.TILING13_5_1),
-            _to_array(mcluts.TILING13_5_2),
-            _to_array(mcluts.TILING14),
-            _to_array(mcluts.TEST3),
-            _to_array(mcluts.TEST4),
-            _to_array(mcluts.TEST6),
-            _to_array(mcluts.TEST7),
-            _to_array(mcluts.TEST10),
-            _to_array(mcluts.TEST12),
-            _to_array(mcluts.TEST13),
-            _to_array(mcluts.SUBCONFIG13), )
+                EDGETORELATIVEPOSX, EDGETORELATIVEPOSY, EDGETORELATIVEPOSZ,
+
+                _to_array(mcluts.CASESCLASSIC), _to_array(mcluts.CASES),
+
+                _to_array(mcluts.TILING1), _to_array(mcluts.TILING2), _to_array(mcluts.TILING3_1), _to_array(mcluts.TILING3_2),
+                _to_array(mcluts.TILING4_1), _to_array(mcluts.TILING4_2), _to_array(mcluts.TILING5), _to_array(mcluts.TILING6_1_1),
+                _to_array(mcluts.TILING6_1_2), _to_array(mcluts.TILING6_2), _to_array(mcluts.TILING7_1),
+                _to_array(mcluts.TILING7_2), _to_array(mcluts.TILING7_3), _to_array(mcluts.TILING7_4_1),
+                _to_array(mcluts.TILING7_4_2), _to_array(mcluts.TILING8), _to_array(mcluts.TILING9),
+                _to_array(mcluts.TILING10_1_1), _to_array(mcluts.TILING10_1_1_), _to_array(mcluts.TILING10_1_2),
+                _to_array(mcluts.TILING10_2), _to_array(mcluts.TILING10_2_), _to_array(mcluts.TILING11),
+                _to_array(mcluts.TILING12_1_1), _to_array(mcluts.TILING12_1_1_), _to_array(mcluts.TILING12_1_2),
+                _to_array(mcluts.TILING12_2), _to_array(mcluts.TILING12_2_), _to_array(mcluts.TILING13_1),
+                _to_array(mcluts.TILING13_1_), _to_array(mcluts.TILING13_2), _to_array(mcluts.TILING13_2_),
+                _to_array(mcluts.TILING13_3), _to_array(mcluts.TILING13_3_), _to_array(mcluts.TILING13_4),
+                _to_array(mcluts.TILING13_5_1), _to_array(mcluts.TILING13_5_2), _to_array(mcluts.TILING14),
+
+                _to_array(mcluts.TEST3), _to_array(mcluts.TEST4), _to_array(mcluts.TEST6),
+                _to_array(mcluts.TEST7), _to_array(mcluts.TEST10), _to_array(mcluts.TEST12),
+                _to_array(mcluts.TEST13), _to_array(mcluts.SUBCONFIG13),
+                )
 
     return mcluts.THE_LUTS
