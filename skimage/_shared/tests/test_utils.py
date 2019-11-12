@@ -13,10 +13,22 @@ def test_deprecated_kwarg():
         """Expected docstring"""
         return arg0, new_arg1, arg2
 
+    @deprecate_kwarg({'old_arg1': 'new_arg1'},
+                     warning_msg="Custom warning message")
+    def bar(arg0, new_arg1=1, arg2=None):
+        """Expected docstring"""
+        return arg0, new_arg1, arg2
+
     # Assert that the DeprecationWarning is raised when the deprecated
     # argument name is used and that the reasult is valid
-    with pytest.warns(FutureWarning):
+    with pytest.warns(FutureWarning) as record:
         assert foo(0, old_arg1=1) == (0, 1, None)
+        assert bar(0, old_arg1=1) == (0, 1, None)
+
+    msg = ("'old_arg1' is a deprecated argument name "
+           "for `foo`. Use 'new_arg1' instead.")
+    assert str(record[0].message) == msg
+    assert str(record[1].message) == "Custom warning message"
 
     # Assert that nothing happens when the function is called with the
     # new API

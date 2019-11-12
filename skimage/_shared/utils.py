@@ -27,20 +27,28 @@ class deprecate_kwarg:
     Parameters
     ----------
     arg_mapping: dict
-        Mapping between the function's old argument names and the new ones.
+        Mapping between the function's old argument names and the new
+        ones.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
     removed_version : str
-        The package version in which the deprecated argument will be removed.
+        The package version in which the deprecated argument will be
+        removed.
 
     """
 
-    def __init__(self, kwarg_mapping, removed_version=None):
+    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
         self.kwarg_mapping = kwarg_mapping
-        self.warning_msg = ("'{old_arg}' is a deprecated argument name "
-                            "for `{func_name}`. ")
-        if removed_version is not None:
-            self.warning_msg += (f"It will be removed in version "
-                                 "{removed_version}. ")
-        self.warning_msg += "Use '{new_arg}' instead."
+        if warning_msg is None:
+            self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+                                "for `{func_name}`. ")
+            if removed_version is not None:
+                self.warning_msg += (f"It will be removed in version "
+                                     "{removed_version}. ")
+            self.warning_msg += "Use '{new_arg}' instead."
+        else:
+            self.warning_msg = warning_msg
 
     def __call__(self, func):
         @functools.wraps(func)
