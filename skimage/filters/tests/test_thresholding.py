@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from scipy import ndimage as ndi
+from scipy import ndimage as ndi, integrate, interpolate
 
 from skimage import util
 from skimage import data
@@ -622,10 +622,65 @@ def test_multiotsu_lut():
 
 
 def test_tpoint_tail():
-    img = rgb2gray(data.retina())[210:-210, 210:-210]
-    assert 0.56 < threshold_tpoint(img, tail=True) < 0.58
+    # simulate piecewise histogram
+    x = np.linspace(0, 1, 256)
+
+    piece_points = (0.2, 0.35)
+    gradients = (5, -5, -0.25)
+
+    def recursive(x, n):
+        if not n:
+            return gradients[n]*x
+        else:
+            return gradients[n]*x + recursive(piece_points[n-1], n-1) - gradients[n]*piece_points[n-1]
+
+    y = np.piecewise(x,
+                     (x <= piece_points[0], (x > piece_points[0])
+                      * (x <= piece_points[1]), x > piece_points[1]),
+                     [lambda x, n=n: recursive(x, n)
+                      for n in range(len(gradients))]
+                     )
+
+    cdf = integrate.cumtrapz(y, x, initial=0)
+    # normalise cdf to range [0..1]
+    cdf /= cdf.max()
+
+    # simulate image according to histogram
+    fn = interpolate.interp1d(cdf, x)
+    im = fn(np.random.rand(1024, 1024))
+
+    err = 0.01
+    assert piece_points[1]-err <= threshold_tpoint(im) <= piece_points[1]+err
 
 
 def test_tpoint_foot():
-    img = rgb2gray(data.retina())[210:-210, 210:-210]
-    assert 0.33 < threshold_tpoint(img, tail=False) < 0.45
+    # simulate piecewise histogram
+    x = np.linspace(0, 1, 256)
+
+    piece_points = (0.6, 0.8)
+    gradients = (0.1, 3, -3)
+
+    def recursive(x, n):
+        if not n:
+            return gradients[n]*x
+        else:
+            return gradients[n]*x + recursive(piece_points[n-1], n-1) - gradients[n]*piece_points[n-1]
+
+    y = np.piecewise(x,
+                     (x <= piece_points[0], (x > piece_points[0])
+                      * (x <= piece_points[1]), x > piece_points[1]),
+                     [lambda x, n=n: recursive(x, n)
+                      for n in range(len(gradients))]
+                     )
+
+    cdf = integrate.cumtrapz(y, x, initial=0)
+    # normalise cdf to range [0..1]
+    cdf /= cdf.max()
+
+    # simulate image according to histogram
+    fn = interpolate.interp1d(cdf, x)
+    im = fn(np.random.rand(1024, 1024))
+
+    err = 0.01
+    assert piece_points[0] - \
+        err <= threshold_tpoint(im, tail=False) <= piece_points[0]+err
