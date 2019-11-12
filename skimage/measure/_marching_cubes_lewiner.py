@@ -8,16 +8,15 @@ from . import _marching_cubes_lewiner_cy
 from ._marching_cubes_classic import _marching_cubes_classic
 
 
-def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
+def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                    gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, use_classic=0):
-    """Lewiner et al.  marching cubes algorithm [1] to find surfaces in 3d
-    volumetric data.
+                   allow_degenerate=True, method='lewiner'):
+    """Marching cubes algorithm to find surfaces in 3d volumetric data.
 
-    In contrast to Lorensen et al. approach [2], this algorithm is
-    faster, resolves ambiguities, and guarantees topologically correct
-    results. Therefore, this algorithm generally a better choice,
-    unless there is a specific need for the classic algorithm.
+    In contrast with Lorensen et al. approach [2], Lewiner et
+    al. algorithm is faster, resolves ambiguities, and guarantees
+    topologically correct results. Therefore, this algorithm generally
+    a better choice.
 
     Parameters
     ----------
@@ -45,13 +44,11 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    use_classic : int
-        0, 1 or 2. If given and greater then 0, the classic marching
-        cubes by Lorensen (1987) is used. This option is included for
-        reference purposes. If set to 1, the`marching_cubes_lewiner`
-        with `use_classic` set to True is used, else if set to 2, the
-        deprecated `marching_cubes_classic` implementation is
-        used. This second option will be removed in version 0.19.
+    method: str
+        One of 'lewiner', 'lorensen' or '_lorensen'. Specify witch of
+        Lewiner et al. or Lorensen et al. method will be used. The
+        '_lorensen' flag correspond to an old implementation that will
+        be deprecated in version 0.19.
 
     Returns
     -------
@@ -119,21 +116,20 @@ def marching_cubes(volume, level=None, spacing=(1., 1., 1.),
 
     """
 
-    use_classic = int(use_classic)
-
-    if use_classic == 0:
+    if method == 'lewiner':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
                                        allow_degenerate, use_classic=False)
-    elif use_classic == 1:
+    elif method == 'lorensen':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
                                        allow_degenerate, use_classic=True)
-    elif use_classic == 2:
+    elif method == '_lorensen':
         return _marching_cubes_classic(volume, level, spacing,
                                        gradient_direction)
     else:
-        raise ValueError("use_classic should be 0, 1 or 2.")
+        raise ValueError("method should be one of 'lewiner', 'lorensen' or "
+                         "'_lorensen'.")
 
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
@@ -244,8 +240,8 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
 
     # Deprecate the function in favor of marching_cubes
     warnings.warn("marching_cubes_lewiner is deprecated in favor of "
-                  + "marching_cubes. marching_cubes_lewiner will "
-                  + "be removed in version 0.19",
+                  "marching_cubes. marching_cubes_lewiner will "
+                  "be removed in version 0.19",
                   FutureWarning)
 
     return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
