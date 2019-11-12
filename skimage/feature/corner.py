@@ -979,31 +979,34 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                            indices=False, num_peaks=num_peaks,
                            footprint=footprint, labels=labels,
                            num_peaks_per_label=num_peaks_per_label)
-    if min_distance > 0:
-        coords = np.transpose(peaks.nonzero())
-        num_peaks = coords.shape[0]
-        # Compute the distance between each detected distance
-        dist = pdist(coords, metric)
-        rejected_peaks = set()
-        start = end = 0
-        step = num_peaks - 1
-        for i in range(num_peaks - 1):
-            end += step
-            if i in rejected_peaks:
-                start = end
-                step -= 1
-                continue
+
+    # Get the coordinates of the detected peaks
+    coords = np.transpose(peaks.nonzero())
+    num_peaks = coords.shape[0]
+    # Compute the distance between each detected distance
+    dist = pdist(coords, metric)  # dist is a condensed distance matrix
+    rejected_peaks = set()
+
+    # To save memory, dist is not converted to a square distance
+    # matrix. Instead, the indices `start` and `end` are updated such
+    # that each row of the distance matrix is dist[start:end]:
+    start = end = 0
+    step = num_peaks - 1
+    for i in range(num_peaks - 1):
+        end += step
+        # If i is already in rejected_peaks, nothing more to do.
+        if i not in rejected_peaks:
             candidates = i + 1 + np.nonzero(dist[start:end] <= min_distance)[0]
             rejected_peaks.update(candidates)
-            start = end
-            step -= 1
+        start = end
+        step -= 1
 
-        # Remove the peaks that are too close to each others
-        rejected_peaks = tuple(rejected_peaks)
-        if indices is True:
-            return np.delete(coords, rejected_peaks, axis=0)
+    # Remove the peaks that are too close to each others
+    rejected_peaks = tuple(rejected_peaks)
+    if indices is True:
+        return np.delete(coords, rejected_peaks, axis=0)
 
-        peaks[tuple(coords[rejected_peaks, :].T)] = False
+    peaks[tuple(coords[rejected_peaks, :].T)] = False
 
     if indices is True:
         return np.transpose(peaks.nonzero())
