@@ -583,7 +583,7 @@ def _convert(matrix, arr):
 
     Returns
     -------
-    out : ndarray, dtype=float
+    out : ndarray
         The converted array.
     """
     arr = _prepare_colorarray(arr)
