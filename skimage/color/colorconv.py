@@ -456,11 +456,13 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
+    dtype: dtype
+        Output data type.
 
     Returns
     -------
-    (x, y, z) : tuple
-        A tuple with 3 elements containing the XYZ coordinates of the given
+    out : array
+        Array with 3 elements containing the XYZ coordinates of the given
         illuminant.
 
     Raises
