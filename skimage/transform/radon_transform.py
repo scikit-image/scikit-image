@@ -188,8 +188,8 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
-def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=True):
+def iradon(radon_image, theta=None, output_size=None, filter="ramp",
+           interpolation="linear", circle=True, preserve_range=False):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -197,13 +197,13 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Parameters
     ----------
-    radon_image : array_like, dtype=float
+    radon_image : array
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different
         angle. The tomography rotation axis should lie at the pixel
         index ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : array_like, dtype=float, optional
+    theta : array_like, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int, optional
@@ -219,6 +219,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -261,6 +265,8 @@ def iradon(radon_image, theta=None, output_size=None,
     if filter not in filter_types:
         raise ValueError("Unknown filter: %s" % filter)
 
+    radon_image = convert_to_float(radon_image, preserve_range)
+
     img_shape = radon_image.shape[0]
     if output_size is None:
         # If output size not specified, estimate from input radon image
@@ -285,7 +291,8 @@ def iradon(radon_image, theta=None, output_size=None,
     radon_filtered = np.real(ifft(projection, axis=0)[:img_shape, :])
 
     # Reconstruct image by interpolation
-    reconstructed = np.zeros((output_size, output_size))
+    reconstructed = np.zeros((output_size, output_size),
+                             dtype=radon_image.dtype)
     radius = output_size // 2
     xpr, ypr = np.mgrid[:output_size, :output_size] - radius
     x = np.arange(img_shape) - img_shape // 2
