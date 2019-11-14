@@ -435,3 +435,14 @@ def test_iradon_sart():
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.022 * error_factor
+
+
+def test_iradon_dtype():
+    sinogram = np.zeros((16, 1), dtype=int)
+    sinogram[8, 0] = 1.
+    sinogram64 = sinogram.astype('float64')
+    sinogram32 = sinogram.astype('float32')
+
+    assert iradon(sinogram, theta=[0]).dtype == 'float64'
+    assert iradon(sinogram64, theta=[0]).dtype == sinogram64.dtype
+    assert iradon(sinogram32, theta=[0]).dtype == sinogram32.dtype
