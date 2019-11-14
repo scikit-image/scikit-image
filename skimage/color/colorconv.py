@@ -456,7 +456,7 @@ def get_xyz_coords(illuminant, observer, dtype=float):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
-    dtype: dtype
+    dtype: dtype, optional
         Output data type.
 
     Returns
