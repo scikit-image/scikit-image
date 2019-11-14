@@ -12,6 +12,11 @@ from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
 
+from .._shared.utils import copy_func
+
+from numpy import pad as numpy_pad
+pad = copy_func(numpy_pad, name='pad')
+
 
 __all__ = ['img_as_float32',
            'img_as_float64',
@@ -23,6 +28,7 @@ __all__ = ['img_as_float32',
            'dtype_limits',
            'view_as_blocks',
            'view_as_windows',
+           'pad',
            'crop',
            'compare_images',
            'montage',
