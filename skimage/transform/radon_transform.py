@@ -383,11 +383,11 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     theta : 1D array, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    image : 2D array, dtype=float, optional
+    image : 2D array, optional
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
-    projection_shifts : 1D array, dtype=float, optional
+    projection_shifts : 1D array, optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
@@ -398,6 +398,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         Relaxation parameter for the update step. A higher value can
         improve the convergence rate, but one runs the risk of instabilities.
         Values close to or higher than 1 are not recommended.
+    dtype : dtype, optional
+        Output data type, must be floating point. By default, if input
+        data type is not float, input is cast to double, otherwise
+        dtype is set to input data type.
 
     Returns
     -------
