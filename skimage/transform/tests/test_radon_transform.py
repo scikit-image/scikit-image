@@ -443,6 +443,15 @@ def test_iradon_dtype():
     sinogram64 = sinogram.astype('float64')
     sinogram32 = sinogram.astype('float32')
 
-    assert iradon(sinogram, theta=[0]).dtype == 'float64'
+    with expected_warnings(['Input data is cast to float']):
+        assert iradon(sinogram, theta=[0]).dtype == 'float64'
+
     assert iradon(sinogram64, theta=[0]).dtype == sinogram64.dtype
     assert iradon(sinogram32, theta=[0]).dtype == sinogram32.dtype
+
+
+def test_iradon_wrong_dtype():
+    sinogram = np.zeros((16, 1))
+
+    with testing.raises(ValueError):
+        iradon(sinogram, dtype=int)
