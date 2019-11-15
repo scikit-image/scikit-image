@@ -189,7 +189,7 @@ def _get_fourier_filter(size, filter_name):
 
 
 def iradon(radon_image, theta=None, output_size=None, filter="ramp",
-           interpolation="linear", circle=True, preserve_range=False):
+           interpolation="linear", circle=True, dtype=None):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -219,10 +219,10 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp",
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+    dtype : dtype, optional
+        Output data type, must be floating point. By default, if input
+        data type is not float, input is cast to double, otherwise
+        dtype is set to input data type.
 
     Returns
     -------
@@ -265,7 +265,19 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp",
     if filter not in filter_types:
         raise ValueError("Unknown filter: %s" % filter)
 
-    radon_image = convert_to_float(radon_image, preserve_range)
+    if dtype is None:
+        if radon_image.dtype.char in 'efdg':
+            dtype = radon_image.dtype
+        else:
+            warn("Only floating point data type are valid for inverse radon "
+                 "transform. Input data is cast to float. To disable this "
+                 "warning, please cast image_radon to float.")
+            dtype = float
+    elif np.dtype(dtype).char not in 'efdg':
+        raise ValueError("Only floating point data type are valid for inverse "
+                         "radon transform.")
+
+    radon_image = radon_image.astype(dtype, copy=False)
 
     img_shape = radon_image.shape[0]
     if output_size is None:
@@ -292,7 +304,7 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp",
 
     # Reconstruct image by interpolation
     reconstructed = np.zeros((output_size, output_size),
-                             dtype=radon_image.dtype)
+                             dtype=dtype)
     radius = output_size // 2
     xpr, ypr = np.mgrid[:output_size, :output_size] - radius
     x = np.arange(img_shape) - img_shape // 2
