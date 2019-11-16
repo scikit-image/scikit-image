@@ -6,6 +6,7 @@ from skimage import data_dir
 from skimage.io import imread
 from skimage.transform import radon, iradon, iradon_sart, rescale
 
+from skimage._shared.utils import convert_to_float
 from skimage._shared import testing
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
@@ -455,3 +456,11 @@ def test_iradon_wrong_dtype():
 
     with testing.raises(ValueError):
         iradon(sinogram, dtype=int)
+
+
+def test_radon_dtype():
+    img = convert_to_float(PHANTOM, False)
+    img32 = img.astype(np.float32)
+
+    assert radon(img).dtype == img.dtype
+    assert radon(img32).dtype == img32.dtype

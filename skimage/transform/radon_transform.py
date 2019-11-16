@@ -110,7 +110,8 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
     if padded_image.shape[0] != padded_image.shape[1]:
         raise ValueError('padded_image must be a square')
     center = padded_image.shape[0] // 2
-    radon_image = np.zeros((padded_image.shape[0], len(theta)))
+    radon_image = np.zeros((padded_image.shape[0], len(theta)),
+                           dtype=image.dtype)
 
     for i, angle in enumerate(np.deg2rad(theta)):
         cos_a, sin_a = np.cos(angle), np.sin(angle)
