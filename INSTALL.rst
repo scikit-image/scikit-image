@@ -1,24 +1,18 @@
 Installing scikit-image
 =======================
 
-We are assuming that you have default Python environment already configured on
-your computer and you intend to install ``scikit-image`` inside of it. If you
-want to create and work with Python virtual environments, please follow the
-instructions on `venv`_ and `virtual environments`_.
+We highlight four different ways to install and use ``scikit-image`` for
+Python3:
 
-There are two ways you can install ``scikit-image`` on your preferred Python
-environment.
-
-
-1. Pre-installed scientific python distributions
-2. Virtual environment based installation
-3. Development Installation
-
+1. Pre-installed scientific python distributions (recommended)
+2. Isolated environment based installation (recommended)
+3. Source based installation for development purposes
+4. Using the operating system's package manager (not recommended)
 
 1. Pre-installed scientific python distributions
 ------------------------------------------------
 
-The fastest way to get going with scikit-image is to use one of several
+The easiest way to get going with scikit-image is to use one of several
 scientific python distributions that come with scikit-image (and many other
 useful packages) pre-installed.
 
@@ -27,17 +21,18 @@ useful packages) pre-installed.
   - `Python(x,y) <https://python-xy.github.io/>`_
   - `WinPython <https://winpython.github.io/>`_
 
-2. Standard Installation:
--------------------------
+2. Isolated environment based installation
+------------------------------------------
 
 While the pre-installed versions above give you an easy way to start, if you
 wish to have more control over the installation procedure, you may want to use
 a virtual environment based approach. Two common approaches use technologies
-such as ``venv`` (``pip`` based) and ``conda`` (through Anaconda or Miniconda).
+such as ``venv`` (also known as virtual environments or ``pip`` based) and
+``conda`` (installed through Anaconda or Miniconda).
 
 venv
 ====
-When using ``venv``, you may find the following bash commands useful::
+When using ``venv``, you can get started with the following commands::
 
   # Take note of your current directory
   pwd
@@ -51,7 +46,7 @@ When using ``venv``, you may find the following bash commands useful::
   # Install all other packages you need
   pip install ...
 
-Now, whenver you want to use this specific version of scikit-image, make sure
+Now, whenever you want to use this specific version of scikit-image, make sure
 you activate it by::
 
   # Change to the directory where you created the virtual environment
@@ -61,7 +56,8 @@ you activate it by::
   # Use python as you wish
 
 
-The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
+Should you need to have access to the wheels offline, they can be downloaded
+manually from `PyPi <https://pypi.org/project/scikit-image/>`__.
 
 conda
 =====
@@ -82,94 +78,27 @@ you activate your conda environment by typing::
   # Use python as you wish
 
 While the default Anaconda installation provides scikit-image, you may wish to
-explore `conda-forge <https://conda-forge.org/>`_ for a more updated version.
+explore `conda-forge <https://conda-forge.org/>`__ for a more updated version.
+If you are new to conda, you may also find the following
+`introduction to conda <https://kaust-vislab.github.io/introduction-to-conda-for-data-scientists/>`__
+useful.
 
-2. Development Installation:
-----------------------------
+3. Source based installation for development purposes
+-----------------------------------------------------
 
-You can install the ``scikit-image`` development version if either your
-distribution ships an outdated version or you want to develop and work on new
-features before the package is released officially.
+Development installation instructions can be found in the Contribution guide.
+TODO: provide a cross link to this????
 
-First, uninstall any existing installations::
+4. Using the operating system's package manager
+-----------------------------------------------
 
-  pip uninstall scikit-image
-
-or, on conda-based systems::
-
-  conda uninstall scikit-image
-
-Now, clone scikit-image on your local computer, and install::
-
-  git clone https://github.com/scikit-image/scikit-image.git
-  cd scikit-image
-  pip install -e .
-
-To update the installation::
-
-  git pull  # Grab latest source
-  pip install -e .  # Reinstall
-
-Platform-specific notes follow below.
-
-a. Windows
-``````````
-If you experience the error ``Error:unable to find vcvarsall.bat`` it means
-that your computer does not have recommended compilers for Python. You can
-either download and install Windows compilers from `here`_  or use
-`MinGW compilers`_ . If using `MinGW`, make sure to correctly configure
-``distutils`` by modifying (or create, if not existing) the configuration file
-``distutils.cfg`` (located for example at
-``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
-
-  [build]
-   compiler=mingw32
-
-A run-through of the compilation process for Windows is included in
-our `setup of Azure Pipelines`_ (a continuous integration service).
-
-.. _miniconda: http://conda.pydata.org/miniconda.html
-.. _python.org: http://python.org/
-.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
-.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
-.. _venv: https://docs.python.org/3/library/venv.html
-.. _virtual environments: https://docs.python-guide.org/en/latest/dev/virtualenvs/
-.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
-
-b. Debian and Ubuntu
-````````````````````
-Install all the required dependencies::
-
-  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy python3-tk
-
-Install suitable compilers::
-
-  sudo apt-get install build-essential cython3
-
-Complete the general development installation instructions above.
-
-Build Requirements
-------------------
-.. include:: ../../requirements/build.txt
-   :literal:
-
-Documentation Requirements
---------------------------
-
-.. include:: ../../requirements/docs.txt
-   :literal:
-
-Runtime Requirements
---------------------
-
-.. include:: ../../requirements/default.txt
-   :literal:
+TODO: https://github.com/scikit-image/scikit-image/pull/4305
 
 Optional Requirements
 ---------------------
 
-You can use ``scikit-image`` with the basic requirements listed above, but some
-functionality is only available with the following installed:
+Some functionality of ``scikit-image`` is only available with the following
+additional python package installed:
 
 * `PyQt5 <http://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
     A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
@@ -187,23 +116,3 @@ functionality is only available with the following installed:
 
 * `imread <http://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
-
-Testing Requirements
---------------------
-
-.. include:: ../../requirements/test.txt
-   :literal:
-
-Warnings during testing phase
------------------------------
-
-Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed.  This might cause
-certain tests to fail if you are building scikit-image with versions of
-dependencies that were not tested at the time of the release. To disable
-failures on warnings, export the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests::
-
-   export SKIMAGE_TEST_STRICT_WARNINGS=False
-   pytest --pyargs skimage

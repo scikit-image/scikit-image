@@ -214,6 +214,68 @@ When using conda, you may find the following bash commands useful::
   # Test your installation
   pytest skimage
 
+Python requirements
+===================
+
+The commands above will install the necessary development requirements. All
+development requirements can be found in ``.txt`` files in the directory
+``requirements``.
+
+Build Requirements
+``````````````````
+.. include:: ../../requirements/build.txt
+   :literal:
+
+Runtime Requirements
+````````````````````
+
+.. include:: ../../requirements/default.txt
+   :literal:
+
+Documentation Requirements
+``````````````````````````
+
+.. include:: ../../requirements/docs.txt
+   :literal:
+
+Testing Requirements
+````````````````````
+
+.. include:: ../../requirements/test.txt
+   :literal:
+
+
+Operating specific details
+--------------------------
+
+Installing the necessary compilers for development is an operating specific
+task. Here we summarize common pitfalls in installing the necessary compilers.
+
+Windows
+=======
+
+If you experience the error ``Error:unable to find vcvarsall.bat`` it means
+that your computer does not have recommended compilers for Python. You can
+either download and install Windows compilers from `here`_  or use
+`MinGW compilers`_ . If using `MinGW`, make sure to correctly configure
+``distutils`` by modifying (or create, if not existing) the configuration file
+``distutils.cfg`` (located for example at
+``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
+
+  [build]
+   compiler=mingw32
+
+A run-through of the compilation process for Windows is included in
+our `setup of Azure Pipelines`_ (a continuous integration service).
+
+.. _miniconda: http://conda.pydata.org/miniconda.html
+.. _python.org: http://python.org/
+.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
+.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
+.. _venv: https://docs.python.org/3/library/venv.html
+.. _virtual environments: https://docs.python-guide.org/en/latest/dev/virtualenvs/
+.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
+
 Guidelines
 ----------
 
@@ -309,6 +371,20 @@ Use ``--doctest-modules`` to run doctests.
 For example, run all tests and all doctests using::
 
     $ PYTHONPATH=. pytest --doctest-modules skimage
+
+Warnings during testing phase
+=============================
+
+Scikit-image tries to catch all warnings in its development builds to ensure
+that crucial warnings from dependencies are not missed.  This might cause
+certain tests to fail if you are building scikit-image with versions of
+dependencies that were not tested at the time of the release. To disable
+failures on warnings, export the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
+tests::
+
+   export SKIMAGE_TEST_STRICT_WARNINGS=False
+   pytest --pyargs skimage
 
 Test coverage
 -------------
@@ -534,7 +610,7 @@ Benchmarks
 
 While not mandatory for most pull requests, we ask that performance related
 PRs include a benchmark in order to clearly depict the use-case that is being
-optimized for. A historical view of our snapshots can be found on 
+optimized for. A historical view of our snapshots can be found on
 at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
 
 In this section we will review how to setup the benchmarks,
@@ -565,7 +641,7 @@ Writing a benchmark
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
 a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
-The ``time_`` method should only contain code you wish to benchmark. 
+The ``time_`` method should only contain code you wish to benchmark.
 Therefore it is useful to move everything that prepares the benchmark scenario
 into the ``setup`` method. This function is called before calling a ``time_``
 method and its execution time is not factored into the benchmarks.
