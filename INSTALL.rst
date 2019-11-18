@@ -16,7 +16,7 @@ environment.
 Warning
 -------
 
-No matter what anybody tells you, do not type::
+We strongly recommend you do not type::
 
   sudo pip [anything else]
 
@@ -43,7 +43,7 @@ On all major operating systems, install it via shell/command prompt::
 
   pip install --user scikit-image
 
-Again, do **not** type ``sudo pip ...``.
+Again, we strongly recommend not typing ``sudo pip ...``.
 
 If you are running Anaconda or miniconda, use::
 
@@ -185,7 +185,7 @@ reasons:
      system.
   2. It is hard to control exactly what version of packages you may have
      installed.
-  3. Not all packages are available from the system's package manager. 
+  3. Not all packages are available from the system's package manager.
 
 That said, if you must use the system environment, use the **system's** package
 manger (e.g. ``apt``, ``dnf``, ``yum``), and **not** ``pip`` to perform the
@@ -195,9 +195,15 @@ For example, on Ubuntu, typing::
 
   sudo apt install python3-skimage
 
-Will perform a valid install of scikit-image on Ubuntu 19.10, but will install
-version ``0.14.2`` (even for Python 3!!) while the latest version of
-scikit-image at the time of writing is ``0.16.2``. Again, **never** type::
+Will perform a valid install of scikit-image on Ubuntu, but may be a few
+versions older than the one avaiable from PyPi. In contrast, using ``sudo pip
+[...]`` will ask ``pip`` to install whatever versions it finds on PyPi and may
+update **other** libraries to incompatible versions, which may break the python
+installation that your operating system uses. This is the main reason we
+**strongly** discourage typing::
 
   sudo pip [...]
 
+or::
+
+  sudo python -m pip [...]
