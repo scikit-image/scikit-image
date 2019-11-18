@@ -2,6 +2,7 @@ import os
 import itertools
 
 import numpy as np
+import pytest
 from skimage import data_dir
 from skimage.io import imread
 from skimage.transform import radon, iradon, iradon_sart, rescale
@@ -438,15 +439,19 @@ def test_iradon_sart():
         assert delta < 0.022 * error_factor
 
 
-def test_iradon_dtype():
+@pytest.mark.parametrize("preserve_range", [True, False])
+def test_iradon_dtype(preserve_range):
     sinogram = np.zeros((16, 1), dtype=int)
     sinogram[8, 0] = 1.
     sinogram64 = sinogram.astype('float64')
     sinogram32 = sinogram.astype('float32')
 
-    assert iradon(sinogram, theta=[0]).dtype == 'float64'
-    assert iradon(sinogram64, theta=[0]).dtype == sinogram64.dtype
-    assert iradon(sinogram32, theta=[0]).dtype == sinogram32.dtype
+    assert iradon(sinogram, theta=[0],
+                  preserve_range=preserve_range).dtype == 'float64'
+    assert iradon(sinogram64, theta=[0],
+                  preserve_range=preserve_range).dtype == sinogram64.dtype
+    assert iradon(sinogram32, theta=[0],
+                  preserve_range=preserve_range).dtype == sinogram32.dtype
 
 
 def test_radon_dtype():
