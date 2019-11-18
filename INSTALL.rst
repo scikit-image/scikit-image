@@ -9,27 +9,80 @@ instructions on `venv`_ and `virtual environments`_.
 There are two ways you can install ``scikit-image`` on your preferred Python
 environment.
 
-1. Standard Installation
-2. Development Installation
 
-1. Standard Installation:
+1. Pre-installed scientific python distributions
+2. Virtual environment based installation
+3. Development Installation
+
+
+1. Pre-installed scientific python distributions
+------------------------------------------------
+
+The fastest way to get going with scikit-image is to use one of several
+scientific python distributions that come with scikit-image (and many other
+useful packages) pre-installed.
+
+  - `Anaconda <https://www.anaconda.com/download/>`_
+  - `Enthought Canopy <https://www.enthought.com/product/canopy/>`_
+  - `Python(x,y) <https://python-xy.github.io/>`_
+  - `WinPython <https://winpython.github.io/>`_
+
+2. Standard Installation:
 -------------------------
 
-``scikit-image`` comes pre-installed with several Python distributions,
-including `Anaconda <https://www.anaconda.com/download/>`_,
-`Enthought Canopy <https://www.enthought.com/product/canopy/>`_,
-`Python(x,y) <https://python-xy.github.io/>`_ and
-`WinPython <https://winpython.github.io/>`_.
+While the pre-installed versions above give you an easy way to start, if you
+wish to have more control over the installation procedure, you may want to use
+a virtual environment based approach. Two common approaches use technologies
+such as ``venv`` (``pip`` based) and ``conda`` (through Anaconda or Miniconda).
 
-On all major operating systems, install it via shell/command prompt::
+venv
+====
+When using ``venv``, you may find the following bash commands useful::
 
+  # Take note of your current directory
+  pwd
+  # Create a virtualenv named ``skimage`` that lives in the directory of
+  # the same name
+  python -m venv skimage
+  # Activate it
+  source skimage/bin/activate
+  # Install a precompiled scikit-image wheel from PyPi
   pip install scikit-image
+  # Install all other packages you need
+  pip install ...
 
-If you are running Anaconda or miniconda, use::
+Now, whenver you want to use this specific version of scikit-image, make sure
+you activate it by::
 
-  conda install -c conda-forge scikit-image
+  # Change to the directory where you created the virtual environment
+  cd YOUR_DIRECTORY
+  # Activate it
+  source skimage/bin/activate
+  # Use python as you wish
+
 
 The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
+
+conda
+=====
+
+When using conda, you may find the following bash commands useful::
+
+  # Create a conda environment named ``skimage``
+  conda create --name skimage
+  # Activate it
+  conda activate skimage
+  conda install scikit-image
+
+Now, whenver you want to use this specific version of scikit-image, make sure
+you activate your conda environment by typing::
+
+  # Activate the specific conda environment
+  conda activate skimage
+  # Use python as you wish
+
+While the default Anaconda installation provides scikit-image, you may wish to
+explore `conda-forge <https://conda-forge.org/>`_ for a more updated version.
 
 2. Development Installation:
 ----------------------------
@@ -97,9 +150,8 @@ Complete the general development installation instructions above.
 
 Build Requirements
 ------------------
-* `Python >= 3.5 <http://python.org>`__
-* `Numpy >= 1.11 <http://numpy.scipy.org/>`__
-* `Cython >= 0.23.4 <http://www.cython.org/>`__
+.. include:: ../../requirements/build.txt
+   :literal:
 
 Documentation Requirements
 --------------------------
