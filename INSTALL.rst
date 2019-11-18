@@ -11,6 +11,24 @@ environment.
 
 1. Standard Installation
 2. Development Installation
+3. Linux operating system installation (not recommended)
+
+Warning
+-------
+
+No matter what anybody tells you, do not type::
+
+  sudo pip [anything else]
+
+This is almost guaranteed to not only destroy your installation of python, but
+also your whole operating system since the operating system expects very
+specific versions of libraries to be installed. In the best case, you are left
+with a broken install. In the worst case, your operating system will refuse
+to boot, and the easiest solution might be to perform a clean install.
+
+If you must use the system environment, which we do not recommend, read on
+below.
+
 
 1. Standard Installation:
 -------------------------
@@ -23,7 +41,9 @@ including `Anaconda <https://www.anaconda.com/download/>`_,
 
 On all major operating systems, install it via shell/command prompt::
 
-  pip install scikit-image
+  pip install --user scikit-image
+
+Again, do **not** type ``sudo pip ...``.
 
 If you are running Anaconda or miniconda, use::
 
@@ -155,3 +175,29 @@ tests::
 
    export SKIMAGE_TEST_STRICT_WARNINGS=False
    pytest --pyargs skimage
+
+3. Linux operating system installation
+--------------------------------------
+We do not recommend using the opearting system's version of python for a few
+reasons:
+
+  1. It is easy to type ``sudo pip`` and cause major problems in the operating
+     system.
+  2. It is hard to control exactly what version of packages you may have
+     installed.
+  3. Not all packages are available from the system's package manager. 
+
+That said, if you must use the system environment, use the **system's** package
+manger (e.g. ``apt``, ``dnf``, ``yum``), and **not** ``pip`` to perform the
+installation.
+
+For example, on Ubuntu, typing::
+
+  sudo apt install python3-skimage
+
+Will perform a valid install of scikit-image on Ubuntu 19.10, but will install
+version ``0.14.2`` (even for Python 3!!) while the latest version of
+scikit-image at the time of writing is ``0.16.2``. Again, **never** type::
+
+  sudo pip [...]
+
