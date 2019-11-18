@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 from skimage import draw
+import pytest
 from skimage.measure import (moments, moments_central, moments_coords,
                              moments_coords_central, moments_normalized,
                              moments_hu, centroid, inertia_tensor,
@@ -131,6 +132,19 @@ def test_moments_hu():
     hu2 = moments_hu(nu2)
     # central moments must be translation and scale invariant
     assert_almost_equal(hu, hu2, decimal=1)
+
+
+@pytest.mark.parametrize("preserve_range", [True, False])
+def test_moments_hu_dtype(preserve_range):
+    img = np.zeros((20, 20), dtype=int)
+    img_f32 = img.astype('float32')
+    img_f64 = img.astype('float64')
+
+    assert moments_hu(img, preserve_range=preserve_range).dtype == 'float64'
+    assert moments_hu(img_f32,
+                      preserve_range=preserve_range).dtype == img_f32.dtype
+    assert moments_hu(img_f64,
+                      preserve_range=preserve_range).dtype == img_f64.dtype
 
 
 def test_centroid():
