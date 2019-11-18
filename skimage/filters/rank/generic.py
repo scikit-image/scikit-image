@@ -112,6 +112,54 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     return image, selem, out, mask, n_bins
 
 
+def _handle_input_3D(image, selem, out, mask, out_dtype=None, pixel_size=1):
+
+    check_nD(image, [2,3])
+    if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
+        image = img_as_ubyte(image)
+
+    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    image = np.ascontiguousarray(image)
+
+    if mask is None:
+        mask = np.ones(image.shape, dtype=np.uint8)
+    else:
+        mask = img_as_ubyte(mask)
+        mask = np.ascontiguousarray(mask)
+
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
+    if out is None:
+        if out_dtype is None:
+            out_dtype = image.dtype
+        out = np.empty(image.shape+(pixel_size,), dtype=out_dtype)
+    else:
+        out = out.reshape(out.shape+(pixel_size,))
+
+    is_8bit = image.dtype in (np.uint8, np.int8)
+
+    if is_8bit:
+        n_bins = 256
+    else:
+        # Convert to a Python int to avoid the potential overflow when we add
+        # 1 to the maximum of the image.
+        n_bins = int(max(3, image.max())) + 1
+
+    if n_bins > 2**10:
+        warn("Bad rank filter performance is expected due to a "
+             "large number of bins ({}), equivalent to an approximate "
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
+
+    return image, selem, out, mask, n_bins
+
+
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
 
@@ -124,8 +172,21 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
     return out.reshape(out.shape[:2])
 
 
+def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
+                            shift_z, out_dtype=None):
+
+    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
+                                                    out_dtype)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z, mask=mask,
+         out=out, n_bins=n_bins)
+
+    return out.reshape(out.shape[:2])
+
+
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None, pixel_size=1):
+
 
     image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
                                                     out_dtype,
@@ -245,7 +306,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
 
     Parameters
@@ -279,9 +340,15 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if image.ndims == 2:
+        return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+                                    out=out, mask=mask,
+                                    shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image, selem,
+                                    out=out, mask=mask,
+                                    shift_x=shift_x, shift_y=shift_y, shift_z=shift_z)
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):

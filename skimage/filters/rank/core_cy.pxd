@@ -26,3 +26,15 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 double p0, double p1,
                 Py_ssize_t s0, Py_ssize_t s1,
                 Py_ssize_t n_bins) except *
+
+cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
+                            dtype_t, Py_ssize_t, Py_ssize_t, double,
+                            double, Py_ssize_t, Py_ssize_t) nogil,
+                dtype_t[:, :, ::1] image,
+                char[:, :, ::1] selem,
+                char[:, :, ::1] mask,
+                dtype_t_out[:, :, :, ::1] out,
+                signed char shift_x, signed char shift_y, signed char shift_z,
+                double p0, double p1,
+                Py_ssize_t s0, Py_ssize_t s1,
+                Py_ssize_t n_bins) except *:

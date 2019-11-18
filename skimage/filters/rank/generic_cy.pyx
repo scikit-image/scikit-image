@@ -486,6 +486,17 @@ def _equalize(dtype_t[:, ::1] image,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
 
+def _equalize_3D(dtype_t[:, :, ::1] image,
+                char[:, :, ::1] selem,
+                char[:, :, ::1] mask,
+                dtype_t_out[:, :, :, ::1] out,
+                signed char shift_x, signed char shift_y, signed char shift_z,
+                Py_ssize_t n_bins):
+
+    _core_3D(_kernel_equalize[dtype_t_out, dtype_t], image, selem, mask, out,
+             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+
+
 def _gradient(dtype_t[:, ::1] image,
               char[:, ::1] selem,
               char[:, ::1] mask,
