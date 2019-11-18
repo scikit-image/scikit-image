@@ -367,7 +367,7 @@ def order_angles_golden_ratio(theta):
 
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
-                clip=None, relaxation=0.15):
+                clip=None, relaxation=0.15, dtype=None):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using a single iteration of
@@ -375,20 +375,20 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
 
     Parameters
     ----------
-    radon_image : 2D array, dtype=float
+    radon_image : 2D array
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different angle. The
         tomography rotation axis should lie at the pixel index
         ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : 1D array, dtype=float, optional
+    theta : 1D array, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    image : 2D array, dtype=float, optional
+    image : 2D array, optional
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
-    projection_shifts : 1D array, dtype=float, optional
+    projection_shifts : 1D array, optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
@@ -399,6 +399,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         Relaxation parameter for the update step. A higher value can
         improve the convergence rate, but one runs the risk of instabilities.
         Values close to or higher than 1 are not recommended.
+    dtype : dtype, optional
+        Output data type, must be floating point. By default, if input
+        data type is not float, input is cast to double, otherwise
+        dtype is set to input data type.
 
     Returns
     -------
@@ -441,30 +445,58 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')
+
+    if dtype is None:
+        if radon_image.dtype.char in 'fd':
+            dtype = radon_image.dtype
+        else:
+            warn("Only floating point data type are valid for SART inverse "
+                 "radon transform. Input data is cast to float. To disable "
+                 "this warning, please cast image_radon to float.")
+            dtype = np.dtype(float)
+    elif np.dtype(dtype).char not in 'fd':
+        raise ValueError("Only floating point data type are valid for inverse "
+                         "radon transform.")
+
+    dtype = np.dtype(dtype)
+    radon_image = radon_image.astype(dtype, copy=False)
+
     reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
+
     if theta is None:
-        theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
-    elif theta.shape != (radon_image.shape[1],):
+        theta = np.linspace(0, 180, radon_image.shape[1],
+                            endpoint=False, dtype=dtype)
+    elif len(theta) != radon_image.shape[1]:
         raise ValueError('Shape of theta (%s) does not match the '
                          'number of projections (%d)'
-                         % (projection_shifts.shape, radon_image.shape[1]))
+                         % (len(theta), radon_image.shape[1]))
+    else:
+        theta = np.asarray(theta, dtype=dtype)
+
     if image is None:
-        image = np.zeros(reconstructed_shape, dtype=np.float)
+        image = np.zeros(reconstructed_shape, dtype=dtype)
     elif image.shape != reconstructed_shape:
         raise ValueError('Shape of image (%s) does not match first dimension '
                          'of radon_image (%s)'
                          % (image.shape, reconstructed_shape))
+    elif image.dtype != dtype:
+        warn("image dtype does not match output dtype: "
+             "image is cast to {}".format(dtype))
+
+    image = np.asarray(image, dtype=dtype)
+
     if projection_shifts is None:
-        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
-    elif projection_shifts.shape != (radon_image.shape[1],):
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=dtype)
+    elif len(projection_shifts) != radon_image.shape[1]:
         raise ValueError('Shape of projection_shifts (%s) does not match the '
                          'number of projections (%d)'
-                         % (projection_shifts.shape, radon_image.shape[1]))
+                         % (len(projection_shifts), radon_image.shape[1]))
+    else:
+        projection_shifts = np.asarray(projection_shifts, dtype=dtype)
     if clip is not None:
         if len(clip) != 2:
             raise ValueError('clip must be a length-2 sequence')
-        clip = (float(clip[0]), float(clip[1]))
-    relaxation = float(relaxation)
+        clip = np.asarray(clip, dtype=dtype)
 
     for angle_index in order_angles_golden_ratio(theta):
         image_update = sart_projection_update(image, theta[angle_index],
