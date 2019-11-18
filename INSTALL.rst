@@ -41,7 +41,7 @@ including `Anaconda <https://www.anaconda.com/download/>`_,
 
 On all major operating systems, install it via shell/command prompt::
 
-  pip install --user scikit-image
+  pip install scikit-image
 
 Again, we strongly recommend not typing ``sudo pip ...``.
 
