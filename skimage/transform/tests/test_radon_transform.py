@@ -462,7 +462,8 @@ def test_radon_dtype():
     assert radon(img32).dtype == img32.dtype
 
 
-def test_iradon_sart_dtype():
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_iradon_sart_dtype(dtype):
     sinogram = np.zeros((16, 1), dtype=int)
     sinogram[8, 0] = 1.
     sinogram64 = sinogram.astype('float64')
@@ -473,6 +474,10 @@ def test_iradon_sart_dtype():
 
     assert iradon_sart(sinogram64, theta=[0]).dtype == sinogram64.dtype
     assert iradon_sart(sinogram32, theta=[0]).dtype == sinogram32.dtype
+
+    assert iradon_sart(sinogram, theta=[0], dtype=dtype).dtype == dtype
+    assert iradon_sart(sinogram32, theta=[0], dtype=dtype).dtype == dtype
+    assert iradon_sart(sinogram64, theta=[0], dtype=dtype).dtype == dtype
 
 
 def test_iradon_sart_wrong_dtype():
