@@ -57,7 +57,7 @@ from ..._shared.utils import check_nD, warn
 from . import generic_cy
 
 
-__all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
+__all__ = ['autolevel', 'bottomhat', 'equalize', 'equalize_3D', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
            'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
            'entropy', 'otsu']
@@ -305,8 +305,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
 
-
-def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False):
+def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Equalize image using local histogram.
 
     Parameters
@@ -340,13 +339,45 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, sh
 
     """
 
-    np_image = np.asanyarray(image)
-    if image.ndims == 2:
-        return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
-                                    out=out, mask=mask,
-                                    shift_x=shift_x, shift_y=shift_y)
-    else:
-        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image, selem,
+    return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
+
+def equalize_3D(image, selem, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False):
+    """Equalize image using local histogram.
+
+    Parameters
+    ----------
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filters.rank import equalize
+    >>> img = data.camera()
+    >>> equ = equalize(img, disk(5))
+
+    """
+
+    return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image, selem,
                                     out=out, mask=mask,
                                     shift_x=shift_x, shift_y=shift_y, shift_z=shift_z)
 
