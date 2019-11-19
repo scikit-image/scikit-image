@@ -267,7 +267,13 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp",
     if filter not in filter_types:
         raise ValueError("Unknown filter: %s" % filter)
 
-    if preserve_range is None:
+    if preserve_range is None and np.issubdtype(radon_image.dtype, np.integer):
+        warn('Image dtype is not float. By default iradon will assume '
+             'you want to preserve the range of your image '
+             '(preserve_range=True). In scikit-image 0.19 this behavior will '
+             'change to preserve_range=False. To avoid this warning, '
+             'explicitly specify the preserve_range parameter.',
+             stacklevel=2)
         preserve_range = True
 
     radon_image = convert_to_float(radon_image, preserve_range)
