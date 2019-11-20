@@ -480,12 +480,16 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                         num_se_d += 1
 
         for s in range(stacks):
+            for i in range(n_bins):
+                histo[i] = 0
+            pop = 0
+
             for r in range(srows):
                 for c in range(scols):
                     for j in range(sstacks):
                         rr = r - centre_r
                         cc = c - centre_c
-                        ss = j - centre_c + s
+                        ss = j - centre_s + s
 
                         # change this to accept 3D
                         if selem[j, r, c]:
