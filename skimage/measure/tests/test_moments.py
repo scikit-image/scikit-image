@@ -10,7 +10,6 @@ from skimage.measure import (moments, moments_central, moments_coords,
 from skimage._shared import testing
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_allclose)
-from skimage._shared._warnings import expected_warnings
 
 
 def test_moments():
@@ -134,17 +133,13 @@ def test_moments_hu():
     assert_almost_equal(hu, hu2, decimal=1)
 
 
-@pytest.mark.parametrize("preserve_range", [True, False])
-def test_moments_hu_dtype(preserve_range):
-    img = np.zeros((20, 20), dtype=int)
-    img_f32 = img.astype('float32')
-    img_f64 = img.astype('float64')
+@pytest.mark.parametrize("dtype", [np.int8, np.int16, np.int32, np.int64,
+                                   np.uint8, np.uint16, np.uint32, np.uint64,
+                                   np.float32, np.float64])
+def test_moments_hu_dtype(dtype):
+    img = np.zeros((20, 20), dtype=dtype)
 
-    assert moments_hu(img, preserve_range=preserve_range).dtype == 'float64'
-    assert moments_hu(img_f32,
-                      preserve_range=preserve_range).dtype == img_f32.dtype
-    assert moments_hu(img_f64,
-                      preserve_range=preserve_range).dtype == img_f64.dtype
+    assert moments_hu(img).dtype == img.dtype
 
 
 def test_centroid():
