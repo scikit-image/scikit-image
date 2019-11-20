@@ -6,7 +6,7 @@
 cimport numpy as cnp
 from libc.math cimport log, exp
 
-from .core_cy cimport dtype_t, dtype_t_out, _core
+from .core_cy cimport dtype_t, dtype_t_out, _core, _core_3D
 
 from ..._shared.interpolation cimport round
 
