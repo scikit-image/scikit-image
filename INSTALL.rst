@@ -41,7 +41,7 @@ including `Anaconda <https://www.anaconda.com/download/>`_,
 
 On all major operating systems, install it via shell/command prompt::
 
-  pip install scikit-image
+  python3 -m pip install scikit-image
 
 Again, we strongly recommend not typing ``sudo pip ...``.
 
@@ -206,4 +206,4 @@ installation that your operating system uses. This is the main reason we
 
 or::
 
-  sudo python -m pip [...]
+  sudo python3 -m pip [...]
