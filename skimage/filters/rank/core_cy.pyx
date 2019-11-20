@@ -91,7 +91,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef char* mask_data = &mask[0, 0]
 
     # define local variable types
-    cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
+    cdef Py_ssize_t r, c, rr, cc, s, j, value, local_max, i, even_row
 
     # number of pixels actually inside the neighborhood (double)
     cdef double pop = 0
