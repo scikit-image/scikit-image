@@ -1,5 +1,5 @@
 import numpy as np
-from .._shared.utils import check_nD, convert_to_float
+from .._shared.utils import check_nD
 from . import _moments_cy
 import itertools
 
