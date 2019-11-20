@@ -26,8 +26,10 @@ specific versions of libraries to be installed. In the best case, you are left
 with a broken install. In the worst case, your operating system will refuse
 to boot, and the easiest solution might be to perform a clean install.
 
-If you must use the system environment, which we do not recommend, read on
-below.
+.. warning::
+
+   If you must use the system environment, which we do not recommend, read on
+   below.
 
 
 1. Standard Installation:
