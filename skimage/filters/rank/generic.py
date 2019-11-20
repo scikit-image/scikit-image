@@ -181,7 +181,7 @@ def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
     func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.reshape(out.shape[:2])
+    return out.reshape(out.shape[:3])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -341,7 +341,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, sh
     """
 
     np_image = np.asanyarray(image)
-    if image.ndims == 2:
+    if image.ndim == 2:
         return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
                                     out=out, mask=mask,
                                     shift_x=shift_x, shift_y=shift_y)
