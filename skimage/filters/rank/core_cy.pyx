@@ -323,7 +323,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef char* mask_data = &mask[0, 0, 0]
 
     # define local variable types
-    cdef Py_ssize_t r, c, s, rr, cc, ss, value, local_max, i, even_row
+    cdef Py_ssize_t r, c, s, j, rr, cc, ss, value, local_max, i, even_row
 
     # number of pixels actually inside the neighborhood (double)
     cdef double pop = 0
@@ -385,39 +385,206 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
     with nogil:
 
-    se_e_r = <Py_ssize_t*>malloc(se_size)
-    se_e_c = <Py_ssize_t*>malloc(se_size)
-    se_e_s = <Py_ssize_t*>malloc(se_size)
+        se_e_r = <Py_ssize_t*>malloc(se_size)
+        se_e_c = <Py_ssize_t*>malloc(se_size)
+        se_e_s = <Py_ssize_t*>malloc(se_size)
 
-    se_w_r = <Py_ssize_t*>malloc(se_size)
-    se_w_c = <Py_ssize_t*>malloc(se_size)
-    se_w_s = <Py_ssize_t*>malloc(se_size)
+        se_w_r = <Py_ssize_t*>malloc(se_size)
+        se_w_c = <Py_ssize_t*>malloc(se_size)
+        se_w_s = <Py_ssize_t*>malloc(se_size)
 
-    se_n_r = <Py_ssize_t*>malloc(se_size)
-    se_n_c = <Py_ssize_t*>malloc(se_size)
-    se_n_s = <Py_ssize_t*>malloc(se_size)
+        se_n_r = <Py_ssize_t*>malloc(se_size)
+        se_n_c = <Py_ssize_t*>malloc(se_size)
+        se_n_s = <Py_ssize_t*>malloc(se_size)
 
-    se_s_r = <Py_ssize_t*>malloc(se_size)
-    se_s_c = <Py_ssize_t*>malloc(se_size)
-    se_s_s = <Py_ssize_t*>malloc(se_size)
+        se_s_r = <Py_ssize_t*>malloc(se_size)
+        se_s_c = <Py_ssize_t*>malloc(se_size)
+        se_s_s = <Py_ssize_t*>malloc(se_size)
 
-    se_u_r = <Py_ssize_t*>malloc(se_size)
-    se_u_c = <Py_ssize_t*>malloc(se_size)
-    se_u_s = <Py_ssize_t*>malloc(se_size)
+        se_u_r = <Py_ssize_t*>malloc(se_size)
+        se_u_c = <Py_ssize_t*>malloc(se_size)
+        se_u_s = <Py_ssize_t*>malloc(se_size)
 
-    se_d_r = <Py_ssize_t*>malloc(se_size)
-    se_d_c = <Py_ssize_t*>malloc(se_size)
-    se_d_s = <Py_ssize_t*>malloc(se_size)
+        se_d_r = <Py_ssize_t*>malloc(se_size)
+        se_d_c = <Py_ssize_t*>malloc(se_size)
+        se_d_s = <Py_ssize_t*>malloc(se_size)
 
-    histo = <Py_ssize_t*>malloc(n_bins * sizeof(Py_ssize_t))
+        histo = <Py_ssize_t*>malloc(n_bins * sizeof(Py_ssize_t))
 
-    if (se_e_r is NULL or se_e_c is NULL or se_e_s is NULL or
-        se_w_r is NULL or se_w_c is NULL or se_w_s is NULL or
-        se_n_r is NULL or se_n_c is NULL or se_n_s is NULL or
-        se_s_r is NULL or se_s_c is NULL or se_s_s is NULL or
-        se_u_r is NULL or se_u_c is NULL or se_u_s is NULL or
-        se_d_r is NULL or se_d_c is NULl or se_d_s is NULL or
-        histo is NULL):
+        if (se_e_r is NULL or se_e_c is NULL or se_e_s is NULL or
+            se_w_r is NULL or se_w_c is NULL or se_w_s is NULL or
+            se_n_r is NULL or se_n_c is NULL or se_n_s is NULL or
+            se_s_r is NULL or se_s_c is NULL or se_s_s is NULL or
+            se_u_r is NULL or se_u_c is NULL or se_u_s is NULL or
+            se_d_r is NULL or se_d_c is NULL or se_d_s is NULL or
+            histo is NULL):
+            free(se_e_r)
+            free(se_e_c)
+            free(se_e_s)
+            free(se_w_r)
+            free(se_w_c)
+            free(se_w_s)
+            free(se_n_r)
+            free(se_n_c)
+            free(se_n_s)
+            free(se_s_r)
+            free(se_s_c)
+            free(se_s_s)
+            free(se_u_r)
+            free(se_u_c)
+            free(se_u_s)
+            free(se_d_r)
+            free(se_d_c)
+            free(se_d_s)
+            free(histo)
+            with gil:
+                raise MemoryError()
+
+        for i in range(n_bins):
+            histo[i] = 0
+
+        num_se_n = num_se_s = num_se_e = num_se_w = num_se_u = num_se_d = 0
+
+        for r in range(srows):
+            for c in range(scols):
+                for s in range(sstacks):
+                    if t_e[s, r, c]:
+                        se_e_r[num_se_e] = r - centre_r
+                        se_e_c[num_se_e] = c - centre_c
+                        se_e_s[num_se_e] = s - centre_s
+                        num_se_e += 1
+                    if t_w[s, r, c]:
+                        se_w_r[num_se_w] = r - centre_r
+                        se_w_c[num_se_w] = c - centre_c
+                        se_w_s[num_se_w] = s - centre_s
+                        num_se_w += 1
+                    if t_n[s, r, c]:
+                        se_n_r[num_se_n] = r - centre_r
+                        se_n_c[num_se_n] = c - centre_c
+                        se_n_s[num_se_n] = s - centre_s
+                        num_se_n += 1
+                    if t_s[s, r, c]:
+                        se_s_r[num_se_s] = r - centre_r
+                        se_s_c[num_se_s] = c - centre_c
+                        se_s_s[num_se_n] = s - centre_s
+                        num_se_s += 1
+                    if t_u[s, r, c]:
+                        se_u_r[num_se_u] = r - centre_r
+                        se_u_c[num_se_u] = c - centre_c
+                        se_u_s[num_se_u] = s - centre_s
+                        num_se_u += 1
+                    if t_d[s, r, c]:
+                        se_d_r[num_se_d] = r - centre_r
+                        se_d_c[num_se_d] = c - centre_c
+                        se_d_s[num_se_d] = s - centre_s
+                        num_se_d += 1
+
+        for s in range(stacks):
+            for r in range(srows):
+                for c in range(scols):
+                    for j in range(sstacks):
+                        rr = r - centre_r
+                        cc = c - centre_c
+                        ss = j - centre_c + s
+
+                        # change this to accept 3D
+                        if selem[j, r, c]:
+                            if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                                histogram_increment(histo, &pop, image[ss, rr, cc])
+
+            r = 0
+            c = 0
+            kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins, mid_bin,
+                   p0, p1, s0, s1)
+
+        # main loop
+
+            r = 0
+            for even_row in range(0, rows, 2):
+
+                # ---> west to east
+                for c in range(1, cols):
+                    for j in range(num_se_e):
+                        rr = r + se_e_r[j]
+                        cc = c + se_e_c[j]
+                        ss = s + se_e_s[j]
+                        if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                            histogram_increment(histo, &pop, image[ss, rr, cc])
+
+                    for j in range(num_se_w):
+                        rr = r + se_w_r[j]
+                        cc = c + se_w_c[j] - 1
+                        ss = s + se_w_s[j]
+                        if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                            histogram_decrement(histo, &pop, image[ss, rr, cc])
+
+                    kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
+                           mid_bin, p0, p1, s0, s1)
+
+                r += 1  # pass to the next row
+                if r >= rows:
+                    break
+
+                # ---> north to south
+                for j in range(num_se_s):
+                    rr = r + se_s_r[j]
+                    cc = c + se_s_c[j]
+                    ss = s + se_s_s[j]
+                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                        histogram_increment(histo, &pop, image[rr, cc, ss])
+
+                for j in range(num_se_n):
+                    rr = r + se_n_r[j] - 1
+                    cc = c + se_n_c[j]
+                    ss = s + se_n_s[j]
+                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                        histogram_decrement(histo, &pop, image[ss, rr, cc])
+
+                kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
+                       mid_bin, p0, p1, s0, s1)
+
+                # ---> east to west
+                for c in range(cols - 2, -1, -1):
+                    for j in range(num_se_w):
+                        rr = r + se_w_r[j]
+                        cc = c + se_w_c[j]
+                        ss = s + se_w_s[j]
+                        if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                            histogram_increment(histo, &pop, image[ss, rr, cc])
+
+                    for j in range(num_se_e):
+                        rr = r + se_e_r[j]
+                        cc = c + se_e_c[j] + 1
+                        ss = s + se_e_s[j]
+                        if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                            histogram_decrement(histo, &pop, image[ss, rr, cc])
+
+                    kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
+                           mid_bin, p0, p1, s0, s1)
+
+                r += 1  # pass to the next row
+                if r >= rows:
+                    break
+
+                # ---> north to south
+                for j in range(num_se_s):
+                    rr = r + se_s_r[j]
+                    cc = c + se_s_c[j]
+                    ss = s + se_s_s[j]
+                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                        histogram_increment(histo, &pop, image[ss, rr, cc])
+
+                for j in range(num_se_n):
+                    rr = r + se_n_r[j] - 1
+                    cc = c + se_n_c[j]
+                    ss = s + se_n_s[j]
+                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
+                        histogram_decrement(histo, &pop, image[ss, rr, cc])
+
+                kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c],
+                       n_bins, mid_bin, p0, p1, s0, s1)
+
+        # release memory allocated by malloc
         free(se_e_r)
         free(se_e_c)
         free(se_e_s)
@@ -430,179 +597,12 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
         free(se_s_r)
         free(se_s_c)
         free(se_s_s)
+
         free(se_u_r)
         free(se_u_c)
         free(se_u_s)
+
         free(se_d_r)
         free(se_d_c)
         free(se_d_s)
         free(histo)
-        with gil:
-            raise MemoryError()
-
-    for i in range(n_bins):
-        histo[i] = 0
-
-    num_se_n = num_se_s = num_se_e = num_se_w = num_se_u = num_se_d = 0
-
-    for r in range(srows):
-        for c in range(scols):
-            for s in range(sstacks):
-                if t_e[s, r, c]:
-                    se_e_r[num_se_e] = r - centre_r
-                    se_e_c[num_se_e] = c - centre_c
-                    se_e_s[num_se_e] = s - centre_s
-                    num_se_e += 1
-                if t_w[s, r, c]:
-                    se_w_r[num_se_w] = r - centre_r
-                    se_w_c[num_se_w] = c - centre_c
-                    se_w_s[num_se_w] = s - centre_s
-                    num_se_w += 1
-                if t_n[s, r, c]:
-                    se_n_r[num_se_n] = r - centre_r
-                    se_n_c[num_se_n] = c - centre_c
-                    se_n_s[num_se_n] = s - centre_s
-                    num_se_n += 1
-                if t_s[s, r, c]:
-                    se_s_r[num_se_s] = r - centre_r
-                    se_s_c[num_se_s] = c - centre_c
-                    se_s_s[num_se_n] = s - centre_s
-                    num_se_s += 1
-                if t_u[s, r, c]:
-                    se_u_r[num_se_u] = r - centre_r
-                    se_u_c[num_se_u] = c - centre_c
-                    se_u_s[num_se_u] = s - centre_s
-                    num_se_u += 1
-                if t_d[s, r c]:
-                    se_d_r[num_se_d] = r - centre_r
-                    se_d_c[num_se_d] = c - centre_c
-                    se_d_s[num_se_d] = s - centre_s
-                    num_se_d += 1
-
-    for s in range(stacks)
-        for r in range(srows):
-            for c in range(scols):
-                for j in range(sstacks):
-                    rr = r - centre_r
-                    cc = c - centre_c
-                    ss = j - centre_c + s
-
-                    # change this to accept 3D
-                    if selem[j, r, c]:
-                        if is_in_mask(rows, cols, stacks, rr, cc, ss, mask_data):
-                            histogram_increment(histo, &pop, image[ss, rr, cc])
-
-        r = 0
-        c = 0
-        kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins, mid_bin,
-               p0, p1, s0, s1)
-
-    # main loop
-
-        r = 0
-        for even_row in range(0, rows, 2):
-
-            # ---> west to east
-            for c in range(1, cols):
-                for j in range(num_se_e):
-                    rr = r + se_e_r[j]
-                    cc = c + se_e_c[j]
-                    ss = s + se_e_s[j]
-                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                        histogram_increment(histo, &pop, image[ss, rr, cc])
-
-                for j in range(num_se_w):
-                    rr = r + se_w_r[j]
-                    cc = c + se_w_c[j] - 1
-                    ss = s + se_w_s[j]
-                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                        histogram_decrement(histo, &pop, image[ss, rr, cc])
-
-                kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
-                       mid_bin, p0, p1, s0, s1)
-
-            r += 1  # pass to the next row
-            if r >= rows:
-                break
-
-            # ---> north to south
-            for j in range(num_se_s):
-                rr = r + se_s_r[j]
-                cc = c + se_s_c[j]
-                ss = s + se_s_s[j]
-                if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                    histogram_increment(histo, &pop, image[rr, cc, ss])
-
-            for j in range(num_se_n):
-                rr = r + se_n_r[j] - 1
-                cc = c + se_n_c[j]
-                ss = s + se_n_s[j]
-                if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                    histogram_decrement(histo, &pop, image[ss, rr, cc])
-
-            kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
-                   mid_bin, p0, p1, s0, s1)
-
-            # ---> east to west
-            for c in range(cols - 2, -1, -1):
-                for j in range(num_se_w):
-                    rr = r + se_w_r[j]
-                    cc = c + se_w_c[j]
-                    ss = s + se_w_s[j]
-                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                        histogram_increment(histo, &pop, image[ss, rr, cc])
-
-                for j in range(num_se_e):
-                    rr = r + se_e_r[j]
-                    cc = c + se_e_c[j] + 1
-                    ss = s + se_e_s[j]
-                    if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                        histogram_decrement(histo, &pop, image[ss, rr, cc])
-
-                kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c], n_bins,
-                       mid_bin, p0, p1, s0, s1)
-
-            r += 1  # pass to the next row
-            if r >= rows:
-                break
-
-            # ---> north to south
-            for j in range(num_se_s):
-                rr = r + se_s_r[j]
-                cc = c + se_s_c[j]
-                ss = s + se_s_s[j]
-                if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                    histogram_increment(histo, &pop, image[ss, rr, cc])
-
-            for j in range(num_se_n):
-                rr = r + se_n_r[j] - 1
-                cc = c + se_n_c[j]
-                ss = s + se_n_s[j]
-                if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                    histogram_decrement(histo, &pop, image[ss, rr, cc])
-
-            kernel(&out[s, r, c, 0], odepth, histo, pop, image[s, r, c],
-                   n_bins, mid_bin, p0, p1, s0, s1)
-
-    # release memory allocated by malloc
-    free(se_e_r)
-    free(se_e_c)
-    free(se_e_s)
-    free(se_w_r)
-    free(se_w_c)
-    free(se_w_s)
-    free(se_n_r)
-    free(se_n_c)
-    free(se_n_s)
-    free(se_s_r)
-    free(se_s_c)
-    free(se_s_s)
-
-    free(se_u_r)
-    free(se_u_c)
-    free(se_u_s)
-
-    free(se_d_r)
-    free(se_d_c)
-    free(se_d_u)
-    free(histo)

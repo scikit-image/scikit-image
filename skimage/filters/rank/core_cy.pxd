@@ -38,4 +38,4 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                             signed char shift_x, signed char shift_y, signed char shift_z,
                             double p0, double p1,
                             Py_ssize_t s0, Py_ssize_t s1,
-                            Py_ssize_t n_bins) except *:
+                            Py_ssize_t n_bins) except *
