@@ -3,24 +3,19 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from .._shared.fused_numerics cimport np_floats
+from .._shared.fused_numerics cimport np_real_numeric
 
 
-def moments_hu(np_floats[:, :] nu):
+def moments_hu(cnp.ndarray[dtype=np_real_numeric, ndim=2] nu):
 
-    if np_floats is cnp.float32_t:
-        dtype = np.float32
-    else:
-        dtype = np.float64
-
-    cdef np_floats[::1] hu = np.zeros((7, ), dtype=dtype)
-    cdef np_floats t0 = nu[3, 0] + nu[1, 2]
-    cdef np_floats t1 = nu[2, 1] + nu[0, 3]
-    cdef np_floats q0 = t0 * t0
-    cdef np_floats q1 = t1 * t1
-    cdef np_floats n4 = 4 * nu[1, 1]
-    cdef np_floats s = nu[2, 0] + nu[0, 2]
-    cdef np_floats d = nu[2, 0] - nu[0, 2]
+    cdef np_real_numeric[::1] hu = np.zeros((7, ), dtype=nu.dtype)
+    cdef np_real_numeric t0 = nu[3, 0] + nu[1, 2]
+    cdef np_real_numeric t1 = nu[2, 1] + nu[0, 3]
+    cdef np_real_numeric q0 = t0 * t0
+    cdef np_real_numeric q1 = t1 * t1
+    cdef np_real_numeric n4 = 4 * nu[1, 1]
+    cdef np_real_numeric s = nu[2, 0] + nu[0, 2]
+    cdef np_real_numeric d = nu[2, 0] - nu[0, 2]
     hu[0] = s
     hu[1] = d * d + n4 * nu[1, 1]
     hu[3] = q0 + q1

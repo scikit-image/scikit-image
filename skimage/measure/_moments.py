@@ -306,7 +306,7 @@ def moments_normalized(mu, order=3):
     return nu
 
 
-def moments_hu(nu, *, preserve_range=None):
+def moments_hu(nu):
     """Calculate Hu's set of image moments (2D-only).
 
     Note that this set of moments is proofed to be translation, scale and
@@ -316,11 +316,6 @@ def moments_hu(nu, *, preserve_range=None):
     ----------
     nu : (M, M) array
         Normalized central image moments, where M must be > 4.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
-        By default, data range is preserved (ie ``preserve_range=True``).
 
     Returns
     -------
@@ -342,9 +337,6 @@ def moments_hu(nu, *, preserve_range=None):
 
 
     """
-    if preserve_range is None:
-        preserve_range = True
-    nu = convert_to_float(nu, preserve_range)
     return _moments_cy.moments_hu(nu)
 
 
