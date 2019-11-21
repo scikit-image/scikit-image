@@ -529,6 +529,31 @@ def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
 
 
+def test_column_dtypes_correct():
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    for col in COL_DTYPES:
+        r = region[col]
+
+        if col in OBJECT_COLUMNS:
+            assert COL_DTYPES[col]== object
+            continue
+
+        if np.isscalar(r):
+            t = type(r)
+        else:
+            if np.isscalar(r[0]):
+                t = type(r[0])
+            else:
+                t = type(r[0][0])
+            
+        if t == np.float64 or t == float:
+            assert COL_DTYPES[col] == float, col
+        elif t == np.int32 or t == int:
+            assert COL_DTYPES[col] == int, col
+        else:
+            assert False, col
+        
+
 def test_deprecated_coords_argument():
     with expected_warnings(['coordinates keyword argument']):
         region = regionprops(SAMPLE, coordinates='rc')
