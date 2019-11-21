@@ -545,7 +545,6 @@ def test_column_dtypes_correct():
                 t = type(r[0])
             else:
                 t = type(r[0][0])
-        print(f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}')
 
         if np.issubdtype(t, np.floating):
             assert COL_DTYPES[col] == float, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
