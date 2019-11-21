@@ -538,13 +538,7 @@ def test_column_dtypes_correct():
             assert COL_DTYPES[col] == object
             continue
 
-        if np.isscalar(r):
-            t = type(r)
-        else:
-            if np.isscalar(r[0]):
-                t = type(r[0])
-            else:
-                t = type(r[0][0])
+        t = type(np.ravel(r)[0])
 
         if np.issubdtype(t, np.floating):
             assert COL_DTYPES[col] == float, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
