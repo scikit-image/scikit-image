@@ -114,7 +114,7 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
 def _handle_input_3D(image, selem, out, mask, out_dtype=None, pixel_size=1):
 
-    check_nD(image, [2,3])
+    check_nD(image, [2, 3])
     if image.dtype not in (np.uint8, np.uint16):
         message = ('Possible precision loss converting image of type {} to '
                    'uint8 as required by rank filters. Convert manually using '
@@ -173,20 +173,19 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
 
 def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
-                            shift_z, out_dtype=None):
+                               shift_z, out_dtype=None):
 
     image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
-                                                    out_dtype)
+                                                       out_dtype)
 
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z, mask=mask,
-         out=out, n_bins=n_bins)
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
+         mask=mask, out=out, n_bins=n_bins)
 
     return out.reshape(out.shape[:3])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None, pixel_size=1):
-
 
     image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
                                                     out_dtype,
@@ -306,7 +305,8 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False):
+def equalize(image, selem, out=None, mask=None,
+             shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
 
     Parameters
@@ -341,14 +341,15 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False, sh
     """
 
     np_image = np.asanyarray(image)
-    if image.ndim == 2:
+    if np_image.ndim == 2:
         return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
-                                    out=out, mask=mask,
-                                    shift_x=shift_x, shift_y=shift_y)
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
     else:
-        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image, selem,
-                                    out=out, mask=mask,
-                                    shift_x=shift_x, shift_y=shift_y, shift_z=shift_z)
+        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
