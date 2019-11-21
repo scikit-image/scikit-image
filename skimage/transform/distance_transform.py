@@ -57,7 +57,7 @@ def generalized_distance_transform(ndarr_in, func='euclidean', cost_func=f, dist
     for dimension in range(ndarr.ndim):
         length = ndarr.shape[dimension]
         domains_buffer =np.empty(length+1, dtype=np.double)
-        centers_buffer = np.empty(length,dtype=np.intp)
+        centers_buffer = np.empty(length,dtype=int)
         out_buffer = np.empty(length, dtype=arr_type)
         
         if dimension == 0:

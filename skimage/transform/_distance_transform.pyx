@@ -78,7 +78,11 @@ cdef inline double manhattan_meet(scalar_int a, scalar_int b, scalar_int[:] f, s
 
 def _generalized_distance_transform_1d_euclidean(scalar_int[:] arr, scalar_int[:] cost_arr,
                                        bint isfirst, double[::1] domains,
-                                       scalar_int[::1] centers, scalar_int[::1] out, type typeINF, scalar_int negINF, scalar_int posINF):
+                                       scalar_int[::1] centers,
+                                       scalar_int[::1] out,
+                                       type typeINF,
+                                       scalar_int negINF,
+                                       scalar_int posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain,start
     cdef double intersection
@@ -120,7 +124,11 @@ def _generalized_distance_transform_1d_euclidean(scalar_int[:] arr, scalar_int[:
 
 def _generalized_distance_transform_1d_manhattan(scalar_int[:] arr, scalar_int[:] cost_arr,
                                        bint isfirst, double[::1] domains,
-                                       scalar_int[::1] centers, scalar_int[::1] out, type typeINF, scalar_int negINF, scalar_int posINF):
+                                       scalar_int[::1] centers,
+                                       scalar_int[::1] out,
+                                       type typeINF,
+                                       scalar_int negINF,
+                                       scalar_int posINF):
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain, start
     cdef double intersection
