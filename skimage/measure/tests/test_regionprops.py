@@ -530,6 +530,7 @@ def test_column_dtypes_complete():
 
 
 def test_column_dtypes_correct():
+    msg = 'mismatch with expected type,'
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
     for col in COL_DTYPES:
         r = region[col]
@@ -542,15 +543,15 @@ def test_column_dtypes_correct():
 
         if np.issubdtype(t, np.floating):
             assert COL_DTYPES[col] == float, (
-              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
             )
         elif np.issubdtype(t, np.integer):
             assert COL_DTYPES[col] == int, (
-              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
             )
         else:
             assert False, (
-              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
             )
 
 
