@@ -545,13 +545,14 @@ def test_column_dtypes_correct():
                 t = type(r[0])
             else:
                 t = type(r[0][0])
+        print(f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}')
 
-        if t == np.float64 or t == float:
-            assert COL_DTYPES[col] == float, col
-        elif t == np.int32 or t == int:
-            assert COL_DTYPES[col] == int, col
+        if np.issubdtype(t, np.floating):
+            assert COL_DTYPES[col] == float, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+        elif np.issubdtype(t, np.integer):
+            assert COL_DTYPES[col] == int, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
         else:
-            assert False, col
+            assert False, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
 
 
 def test_deprecated_coords_argument():
