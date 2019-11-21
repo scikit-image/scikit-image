@@ -75,6 +75,10 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
+
     image = np.ascontiguousarray(image)
 
     if mask is None:
@@ -124,6 +128,9 @@ def _handle_input_3D(image, selem, out, mask, out_dtype=None, pixel_size=1):
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
     image = np.ascontiguousarray(image)
 
     if mask is None:
@@ -333,10 +340,13 @@ def equalize(image, selem, out=None, mask=None,
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import equalize
+    >>> import numpy as np
     >>> img = data.camera()
     >>> equ = equalize(img, disk(5))
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> equ_vol = equalize(volume, ball(5))
 
     """
 
