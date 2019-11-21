@@ -11,7 +11,7 @@ def _smooth(image, sigma, mode, cval, multichannel=None):
 
     # apply Gaussian filter to all channels independently
     if multichannel:
-        sigma = (sigma, )*(image.ndim - 1) + (0, )
+        sigma = (sigma, ) * (image.ndim - 1) + (0, )
     ndi.gaussian_filter(image, sigma, output=smoothed,
                         mode=mode, cval=cval)
     return smoothed
@@ -110,7 +110,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
-    
+
     Returns
     -------
     out : array
@@ -180,7 +180,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
-    
+
     Returns
     -------
     pyramid : generator
