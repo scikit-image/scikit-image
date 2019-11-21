@@ -27,7 +27,7 @@ class _Lddmm:
     """
 
     def __init__(self, template, target, template_resolution=1, target_resolution=1, check_artifacts=False, num_iterations=200, num_affine_only_iterations=50, 
-    num_timesteps=5, initial_affine=np.eye(4), initial_velocity_fields = None, contrast_order=1, sigmaM=None, sigmaA=None, smooth_length=None, sigmaR=None, 
+    num_timesteps=5, initial_affine=None, initial_velocity_fields = None, contrast_order=1, sigmaM=None, sigmaA=None, smooth_length=None, sigmaR=None, 
     translational_stepsize=None, linear_stepsize=None, deformative_stepsize=None, contrast_stepsize=1):
     
         # Inputs.
@@ -75,6 +75,8 @@ class _Lddmm:
         self.delta_t = 1 / self.num_timesteps
 
         # Dynamics.
+        if initial_affine is None:
+            initial_affine = np.eye(4)
         self.affine = _validate_ndarray(initial_affine, required_ndim=2, reshape_to_shape=(4, 4))
         self.velocity_fields = initial_velocity_fields or np.zeros((*self.template.shape, self.num_timesteps, self.template.ndim))
         self.phi = np.copy(self.template_coords)
