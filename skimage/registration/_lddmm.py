@@ -512,7 +512,7 @@ def lddmm_register(template, target, template_resolution=1, target_resolution=1,
     sigmaR=0, 
     num_iterations=200, 
     num_affine_only_iterations=50, 
-    initial_affine=np.eye(4), initial_velocity_fields=None, 
+    initial_affine=None, initial_velocity_fields=None, 
     num_timesteps=5, contrast_order=3, sigmaM=None, smooth_length=None):
     """
     Compute a registration between template and target, to be applied with apply_lddmm.
