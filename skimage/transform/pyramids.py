@@ -23,7 +23,8 @@ def _check_factor(factor):
 
 
 def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False, preserve_range=False):
+                   mode='reflect', cval=0, multichannel=False,
+                   preserve_range=False):
     """Smooth and then downsample image.
 
     Parameters
@@ -82,7 +83,8 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
 
 def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0, multichannel=False, preserve_range=False):
+                   mode='reflect', cval=0, multichannel=False,
+                   preserve_range=False):
     """Upsample and then smooth image.
 
     Parameters
@@ -141,7 +143,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0, multichannel=False, preserve_range=False):
+                     mode='reflect', cval=0, multichannel=False,
+                     preserve_range=False):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -222,7 +225,8 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
 
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0, multichannel=False, preserve_range=False):
+                      mode='reflect', cval=0, multichannel=False,
+                      preserve_range=False):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
