@@ -27,17 +27,17 @@ class TestMatchHistogram:
     image_rgb = data.chelsea()
     template_rgb = data.astronaut()
 
-    # To handle with mutlichannel ==False
-    #(image_rgb[:, :, 0], template_rgb[:, :, 0]),
-    @pytest.mark.parametrize('image, reference', [
-        (image_rgb, template_rgb)
+    @pytest.mark.parametrize('image, reference, multichannel', [
+        (image_rgb, template_rgb, True),
+        (image_rgb[:, :, 0], template_rgb[:, :, 0], False)
     ])
-    def test_match_histograms(self, image, reference):
+    def test_match_histograms(self, image, reference, multichannel):
         """Assert that pdf of matched image is close to the reference's pdf for
         all channels and all values of matched"""
 
         # when
-        matched = exposure.match_histograms(image, reference, multichannel=True)
+        matched = exposure.match_histograms(image, reference,
+                                            multichannel=multichannel)
 
         matched_pdf = self._calculate_image_empirical_pdf(matched)
         reference_pdf = self._calculate_image_empirical_pdf(reference)
@@ -48,9 +48,12 @@ class TestMatchHistogram:
             matched_values, matched_quantiles = matched_pdf[channel]
 
             for i, matched_value in enumerate(matched_values):
-                closest_id = (np.abs(reference_values - matched_value)).argmin()
+                closest_id = (
+                    np.abs(reference_values - matched_value)
+                ).argmin()
                 assert_almost_equal(matched_quantiles[i],
-                                    reference_quantiles[closest_id], decimal=1)
+                                    reference_quantiles[closest_id],
+                                    decimal=1)
 
     @pytest.mark.parametrize('image, reference', [
         (image_rgb, template_rgb[:, :, 0]),
