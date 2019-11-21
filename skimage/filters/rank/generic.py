@@ -311,23 +311,23 @@ def equalize(image, selem, out=None, mask=None,
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : (N, M[,P]) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : (N, M[,P]) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : (N, M[,P]) ndarray (same dtype as input image)
         Output image.
 
     Examples
