@@ -49,7 +49,7 @@ cdef inline char is_in_mask_3D(Py_ssize_t rows, Py_ssize_t cols, Py_ssize_t stac
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1 or s < 0 or s > stacks - 1:
         return 0
     else:
-        if mask[s*rows * cols + r * cols + c]:
+        if mask[s * rows * cols + r * cols + c]:
             return 1
         else:
             return 0
@@ -305,9 +305,9 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t scols = selem.shape[2]
     cdef Py_ssize_t odepth = out.shape[3]
 
-    cdef Py_ssize_t centre_s = <Py_ssize_t>(selem.shape[0] / 2) + shift_y
+    cdef Py_ssize_t centre_s = <Py_ssize_t>(selem.shape[0] / 2) + shift_z
     cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
-    cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[2] / 2) + shift_z
+    cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[2] / 2) + shift_y
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0
@@ -466,7 +466,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     if t_s[s, r, c]:
                         se_s_r[num_se_s] = r - centre_r
                         se_s_c[num_se_s] = c - centre_c
-                        se_s_s[num_se_n] = s - centre_s
+                        se_s_s[num_se_s] = s - centre_s
                         num_se_s += 1
                     if t_u[s, r, c]:
                         se_u_r[num_se_u] = r - centre_r
@@ -535,7 +535,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     cc = c + se_s_c[j]
                     ss = s + se_s_s[j]
                     if is_in_mask_3D(rows, cols, stacks, rr, cc, ss, mask_data):
-                        histogram_increment(histo, &pop, image[rr, cc, ss])
+                        histogram_increment(histo, &pop, image[ss, rr, cc])
 
                 for j in range(num_se_n):
                     rr = r + se_n_r[j] - 1
