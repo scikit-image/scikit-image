@@ -48,6 +48,9 @@ For Python 2.7, please install the 0.14.x Long Term Support using:
     sys.stderr.write(error + "\n")
     sys.exit(1)
 
+# Add the current directory to the path to allow import of skimage
+sys.path.append(os.path.abspath("."))
+
 import builtins
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
@@ -163,39 +166,16 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
-    try:
-        from numpy.distutils.core import setup
-        extra = {'configuration': configuration}
-        # Do not try and upgrade larger dependencies
-        for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
-            try:
-                __import__(lib)
-                INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
-                                    if lib not in i]
-            except ImportError:
-                pass
-    except ImportError:
-        if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
-                                   sys.argv[1] in ('--help-commands',
-                                                   '--version',
-                                                   'clean',
-                                                   'egg_info',
-                                                   'install_egg_info',
-                                                   'rotate')):
-            # For these actions, NumPy is not required.
-            #
-            # They are required to succeed without Numpy for example when
-            # pip is used to install scikit-image when Numpy is not yet
-            # present in the system.
-            from setuptools import setup
-            extra = {}
-        else:
-            print('To install scikit-image from source, you will need numpy.\n' +
-                  'Install numpy with pip:\n' +
-                  'pip install numpy\n'
-                  'Or use your operating system package manager. For more\n' +
-                  'details, see https://scikit-image.org/docs/stable/install.html')
-            sys.exit(1)
+    from numpy.distutils.core import setup
+    extra = {'configuration': configuration}
+    # Do not try and upgrade larger dependencies
+    for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
+        try:
+            __import__(lib)
+            INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
+                                if lib not in i]
+        except ImportError:
+            pass
 
     setup(
         name=DISTNAME,
