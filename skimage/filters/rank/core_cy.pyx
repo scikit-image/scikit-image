@@ -341,12 +341,6 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     t = np.hstack((np.zeros((selem.shape[0], 1, selem.shape[2])), selem))
     cdef unsigned char[:, :, :] t_n = (np.diff(t, axis=1) > 0).view(np.uint8)
 
-    t = np.vstack((selem, np.zeros((1, selem.shape[1], selem.shape[2]))))
-    cdef unsigned char [:, :, :] t_d = (np.diff(t, axis=0) > 0).view(np.uint8)
-
-    t = np.vstack((np.zeros((1, selem.shape[1], selem.shape[2])), selem))
-    cdef unsigned char [:, :, :] t_u = (np.diff(t, axis=0) > 0).view(np.uint8)
-
     # the current local histogram distribution
     cdef Py_ssize_t* histo
 
@@ -370,15 +364,6 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t* se_s_c
     cdef Py_ssize_t* se_s_s
 
-    cdef Py_ssize_t* se_u_r
-    cdef Py_ssize_t* se_u_c
-    cdef Py_ssize_t* se_u_s
-
-    cdef Py_ssize_t* se_d_r
-    cdef Py_ssize_t* se_d_c
-    cdef Py_ssize_t* se_d_s
-
-
 
     # number of element in each attack border
     cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w, num_se_u, num_se_d
@@ -401,13 +386,6 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
         se_s_c = <Py_ssize_t*>malloc(se_size)
         se_s_s = <Py_ssize_t*>malloc(se_size)
 
-        se_u_r = <Py_ssize_t*>malloc(se_size)
-        se_u_c = <Py_ssize_t*>malloc(se_size)
-        se_u_s = <Py_ssize_t*>malloc(se_size)
-
-        se_d_r = <Py_ssize_t*>malloc(se_size)
-        se_d_c = <Py_ssize_t*>malloc(se_size)
-        se_d_s = <Py_ssize_t*>malloc(se_size)
 
         histo = <Py_ssize_t*>malloc(n_bins * sizeof(Py_ssize_t))
 
@@ -415,8 +393,6 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
             se_w_r is NULL or se_w_c is NULL or se_w_s is NULL or
             se_n_r is NULL or se_n_c is NULL or se_n_s is NULL or
             se_s_r is NULL or se_s_c is NULL or se_s_s is NULL or
-            se_u_r is NULL or se_u_c is NULL or se_u_s is NULL or
-            se_d_r is NULL or se_d_c is NULL or se_d_s is NULL or
             histo is NULL):
             free(se_e_r)
             free(se_e_c)
@@ -430,12 +406,6 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
             free(se_s_r)
             free(se_s_c)
             free(se_s_s)
-            free(se_u_r)
-            free(se_u_c)
-            free(se_u_s)
-            free(se_d_r)
-            free(se_d_c)
-            free(se_d_s)
             free(histo)
             with gil:
                 raise MemoryError()
@@ -443,7 +413,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
         for i in range(n_bins):
             histo[i] = 0
 
-        num_se_n = num_se_s = num_se_e = num_se_w = num_se_u = num_se_d = 0
+        num_se_n = num_se_s = num_se_e = num_se_w = 0
 
         for r in range(srows):
             for c in range(scols):
@@ -468,16 +438,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                         se_s_c[num_se_s] = c - centre_c
                         se_s_s[num_se_s] = s - centre_s
                         num_se_s += 1
-                    if t_u[s, r, c]:
-                        se_u_r[num_se_u] = r - centre_r
-                        se_u_c[num_se_u] = c - centre_c
-                        se_u_s[num_se_u] = s - centre_s
-                        num_se_u += 1
-                    if t_d[s, r, c]:
-                        se_d_r[num_se_d] = r - centre_r
-                        se_d_c[num_se_d] = c - centre_c
-                        se_d_s[num_se_d] = s - centre_s
-                        num_se_d += 1
+
 
         for s in range(stacks):
             for i in range(n_bins):
@@ -601,12 +562,4 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
         free(se_s_r)
         free(se_s_c)
         free(se_s_s)
-
-        free(se_u_r)
-        free(se_u_c)
-        free(se_u_s)
-
-        free(se_d_r)
-        free(se_d_c)
-        free(se_d_s)
         free(histo)
