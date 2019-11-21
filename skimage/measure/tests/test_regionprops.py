@@ -535,7 +535,7 @@ def test_column_dtypes_correct():
         r = region[col]
 
         if col in OBJECT_COLUMNS:
-            assert COL_DTYPES[col]== object
+            assert COL_DTYPES[col] == object
             continue
 
         if np.isscalar(r):
@@ -545,14 +545,14 @@ def test_column_dtypes_correct():
                 t = type(r[0])
             else:
                 t = type(r[0][0])
-            
+
         if t == np.float64 or t == float:
             assert COL_DTYPES[col] == float, col
         elif t == np.int32 or t == int:
             assert COL_DTYPES[col] == int, col
         else:
             assert False, col
-        
+
 
 def test_deprecated_coords_argument():
     with expected_warnings(['coordinates keyword argument']):
