@@ -27,7 +27,7 @@ def test_pyramid_reduce_gray():
     assert_almost_equal(out1.ptp(), 1.0, decimal=2)
     out2 = pyramids.pyramid_reduce(image_gray, downscale=2,
                                    multichannel=False, preserve_range=True)
-    assert_almost_equal(out2.ptp()/image_gray.ptp(), 1.0, decimal=2)
+    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_nd():
