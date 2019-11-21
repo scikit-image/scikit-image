@@ -541,11 +541,17 @@ def test_column_dtypes_correct():
         t = type(np.ravel(r)[0])
 
         if np.issubdtype(t, np.floating):
-            assert COL_DTYPES[col] == float, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            assert COL_DTYPES[col] == float, (
+              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            )
         elif np.issubdtype(t, np.integer):
-            assert COL_DTYPES[col] == int, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            assert COL_DTYPES[col] == int, (
+              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            )
         else:
-            assert False, f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            assert False, (
+              f'{col} dtype {t} mismatch with expected type, {COL_DTYPES[col]}'
+            )
 
 
 def test_deprecated_coords_argument():
