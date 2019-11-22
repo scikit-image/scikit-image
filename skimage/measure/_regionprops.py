@@ -568,7 +568,10 @@ def regionprops_table(label_image, intensity_image=None,
         Dictionary mapping property names to an array of values of that
         property, one value per region. This dictionary can be used as input to
         pandas ``DataFrame`` to map property names to columns in the frame and
-        regions to rows.
+        regions to rows. If the image has 0 regions, the output will be for a
+        an ndimensional cube of size 4 with a hypercube in the middle of it.
+        All arrays will have no elements and parameters which are treated as
+        arrays will have not elements.
 
     Notes
     -----
