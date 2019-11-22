@@ -949,8 +949,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
     cdef int case, config, subconfig
-    if mask is None:
-        mask = np.ones((Nx, Ny, Nz), dtype='int32')
+
     # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
     # we have:  max_x = Nx_bound + st + st - 1

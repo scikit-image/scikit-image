@@ -149,7 +149,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     # Check if a mask array is passed
     if mask is not None:
         if not mask.shape == volume.shape:
-            raise AttributeError('volume and mask must have the same shape.')
+            raise ValueError('volume and mask must have the same shape.')
         mask = mask.astype('int32')
 
     # Apply algorithm
