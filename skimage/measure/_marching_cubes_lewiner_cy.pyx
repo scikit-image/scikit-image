@@ -974,29 +974,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
             while x < Nx_bound:
                 x += st
                 x_st = x + st
-                if mask is None:
-                    # Initialize cell
-                    cell.set_cube(isovalue, x, y, z, st,
-                        im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
-                        im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
-
-                    # Do classic!
-                    if classic:
-                        # Determine number of vertices
-                        nt = 0
-                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                            nt += 1
-                        # Add triangles
-                        if nt > 0:
-                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                    else:
-                        # Get case, if non-nul, enter the big switch
-                        case = luts.CASES.get2(cell.index, 0)
-                        if case > 0:
-                            config = luts.CASES.get2(cell.index, 1)
-                            the_big_switch(luts, cell, case, config)
-
-                elif mask[z_st, y_st, x_st]:
+                if mask is None or mask[z_st, y_st, x_st]:
                     # Initialize cell
                     cell.set_cube(isovalue, x, y, z, st,
                         im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
