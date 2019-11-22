@@ -77,17 +77,14 @@ def get_window(window, size, ndim=2, **kwargs):
     if ndim <= 0:
         raise ValueError("Number of dimensions must be greater than zero")
 
-    # Only looking at center of window to right edge
     w = get_window1d(window, size, fftbins=False)
-    w = w[int(np.floor(w.shape[0]/2)):]
+    wcenter = (size / 2) - 0.5
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
 
     # Create coords for warping following `ndimage.map_coordinates` convention.
     L = [np.arange(size, dtype=np.double) for i in range(ndim)]
     coords = np.stack((np.meshgrid(*L)))
     center = (size / 2) - 0.5
-    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0))
-    if size % 2 == 0:
-        coords[0, ...] = coords[0, ...] - 0.5
+    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0)) + wcenter
     coords[1:, ...] = 0
     return warp(w, coords, **kwargs)
