@@ -625,6 +625,21 @@ def regionprops_table(label_image, intensity_image=None,
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
                           cache=cache)
+
+    if len(regions) == 0:
+        label_image = np.zeros(tuple([3] * len(label_image.shape)))
+        label_image[tuple([1] * len(label_image.shape))] = 1
+        if intensity_image != None:
+            intensity_image = label_image.copy()
+        regions = regionprops(label_image, intensity_image=intensity_image,
+                              cache=cache)
+
+        out = {}
+        for prop in properties:
+            if np.isscalar(regions[0][prop]) or prop in OBJECT_COLUMNS:
+                out = np.empty(shape=(0,), dtype=COL_DTYPES[prop])
+        return out
+    
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
