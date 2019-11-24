@@ -294,7 +294,7 @@ def _load(plugin):
     else:
         modname = plugin_module_name[plugin]
         plugin_module = __import__('skimage.io._plugins.' + modname,
-            fromlist=[modname])
+                                   fromlist=[modname])
 
     provides = plugin_provides[plugin]
     for p in provides:
