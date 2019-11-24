@@ -46,6 +46,19 @@ def test_real_input():
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
+def test_real_input_single_axis():
+    reference_image = camera()
+    subpixel_shift = (3, 4)
+    shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
+    shifted_image = fft.ifftn(shifted_image)
+
+    # subpixel precision
+    result, error, diffphase = register_translation(reference_image,
+                                                    shifted_image,
+                                                    axis=1)
+    assert_allclose(result[:2], [0, -6.25], atol=0.05)
+
+
 def test_size_one_dimension_input():
     # take a strip of the input image
     reference_image = fft.fftn(camera()[:, 15]).reshape((-1, 1))

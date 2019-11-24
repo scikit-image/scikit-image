@@ -106,7 +106,7 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
 
 
 def register_translation(src_image, target_image, upsample_factor=1,
-                         space="real", return_error=True):
+                         space="real", return_error=True, axis=None):
     """
     Efficient subpixel image translation registration by cross-correlation.
 
@@ -134,6 +134,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
     return_error : bool, optional
         Returns error and phase difference if on,
         otherwise only shifts are returned
+    axis : int, optional
+        The `axis` to which the translation shift is limited. Useful if the
+        user knows the translation shift should only be along one axis.
 
     Returns
     -------
@@ -228,6 +231,19 @@ def register_translation(src_image, target_image, upsample_factor=1,
     for dim in range(src_freq.ndim):
         if shape[dim] == 1:
             shifts[dim] = 0
+
+    if axis is not None:
+        if 0 in (shifts):
+            print('One of the shifts is already 0, '
+                  'returning the shifts array as is.')
+        else:
+            x_shift, y_shift = float(shifts[1]), float(shifts[0])
+            if axis == 0:  # y
+                shifts = np.array([y_shift + (x_shift**2 / y_shift), 0],
+                                  dtype=np.float64)
+            elif axis == 1:  # x
+                shifts = np.array([0, x_shift + (y_shift**2 / x_shift)],
+                                  dtype=np.float64)
 
     if return_error:
         return shifts, _compute_error(CCmax, src_amp, target_amp),\
