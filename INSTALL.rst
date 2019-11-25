@@ -21,15 +21,16 @@ We strongly recommend you do not type::
   sudo pip [anything else]
 
 This is almost guaranteed to not only destroy your installation of python, but
-also your whole operating system since the operating system expects very
-specific versions of libraries to be installed. In the best case, you are left
-with a broken install. In the worst case, your operating system will refuse
-to boot, and the easiest solution might be to perform a clean install.
+also your whole operating system. This is beacuse the operating system expects 
+very specific versions of libraries to be installed and pip may attempt to update
+many of them. In the best case, you are left with a broken install of scikit-image. 
+In the worst case, your operating system will refuse to boot, and the easiest 
+solution might be to perform a clean install.
 
 .. warning::
 
-   If you must use the system environment, which we do not recommend, read on
-   below.
+   If you must use the operating system's environment, which we do not recommend, 
+   read on below.
 
 
 1. Standard Installation:
@@ -180,11 +181,11 @@ tests::
 
 3. Linux operating system installation
 --------------------------------------
-We do not recommend using the opearting system's version of python for a few
+We do not recommend using the opearting system's environment of python for a few
 reasons:
 
-  1. It is easy to type ``sudo pip`` and cause major problems in the operating
-     system.
+  1. It is easy to type ``sudo pip [...]`` and cause major problems in the 
+     operating system.
   2. It is hard to control exactly what version of packages you may have
      installed.
   3. Not all packages are available from the system's package manager.
