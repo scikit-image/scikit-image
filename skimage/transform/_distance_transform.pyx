@@ -37,13 +37,9 @@ cdef inline scalar_int euclidean_dist(scalar_int a, scalar_int b, scalar_int c) 
     cdef scalar_int out = (a-b)**2+c
     return out
 
-cdef inline double euclidean_meet(scalar_int a, scalar_int b, scalar_int[:] f, scalar_int posINF, scalar_int negINF) nogil:
+cdef inline double euclidean_meet(scalar_int a, scalar_int b, scalar_int[:] f, scalar_int posINF, scalar_int negINF): #nogil:
     cdef double out = (f[a]+a**2-f[b]-b**2)/(2*a-2*b)
-    if out != out:
-        if a==posINF and b!=posINF:
-            out = -INFINITY
-        else:
-            out = INFINITY
+    print(f[a], a, f[b], b, out)
     return out
 
 cdef inline scalar_int manhattan_dist(scalar_int a, scalar_int b, scalar_int c) nogil:
@@ -86,18 +82,12 @@ def _generalized_distance_transform_1d_euclidean(scalar_int[:] arr, scalar_int[:
     cdef scalar_int length = len(arr)
     cdef scalar_int i, rightmost, current_domain,start
     cdef double intersection
-    with nogil:
+    for w in range(1): #with nogil:
         if isfirst:
             for i in range(length):
                 cost_arr[i] = f(arr[i], posINF)
 
         start = 0
-        while start<length:
-            if cost_arr[start] != posINF:
-                break
-            start+=1
-        start = min(length-1,start)
-
         rightmost = 0
         domains[0] = <double>negINF
         domains[1] = <double>posINF

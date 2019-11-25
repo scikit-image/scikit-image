@@ -87,3 +87,18 @@ def test_manhattan_equivalent_to_ndimage():
     skimage_out_man = generalized_distance_transform(case, func='manhattan')
 
     np.testing.assert_allclose(skimage_out_man,out_man)
+
+def test_new_temp():
+    case = np.array([[1, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0],
+            [1, 1, 1, 0, 0],
+            [1, 0, 1, 0, 1],
+            [0, 0, 1, 1, 1]])
+
+    out_euc = np.array([[5.0, 2.0, 1.0, 1.0, 1.0],
+               [4.0, 1.0, 0.0, 0.0, 0.0],
+               [2.0, 1.0, 1.0, 0.0, 0.0],
+               [1.0, 0.0, 1.0, 0.0, 1.0],
+               [0.0, 0.0, 1.0, 1.0, 2.0]])
+    skimage_out_euc = generalized_distance_transform(case, func='euclidean')**0.5
+    np.testing.assert_allclose(skimage_out_euc,out_euc)

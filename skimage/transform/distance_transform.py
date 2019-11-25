@@ -64,6 +64,7 @@ def generalized_distance_transform(ndarr_in, func='euclidean', cost_func=f, dist
             output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=True, domains=domains_buffer, centers=centers_buffer, out=out_buffer)
         else:
             output = apply_along_axis(gdt1d, dimension, (ndarr, output), isfirst=False, domains = domains_buffer, centers = centers_buffer, out = out_buffer)
+        print(output)
     
     return output
 
