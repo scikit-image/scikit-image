@@ -46,7 +46,7 @@ def test_marching_cubes_anisotropic():
     assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test marching cube with mask
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         verts, faces = marching_cubes_lewiner(
             ellipsoid_anisotropic, 0., spacing=spacing,
             mask=np.array([]))[:2]
