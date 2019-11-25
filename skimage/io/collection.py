@@ -14,7 +14,7 @@ from ..external.tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
-           'imread_collection_wrapper']
+           'imread_collection_wrapper', 'alphanumeric_key']
 
 
 def concatenate_images(ic):
