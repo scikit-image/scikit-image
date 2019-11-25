@@ -521,9 +521,13 @@ def test_regionprops_table():
     out = regionprops_table(np.zeros((2, 2), dtype=int),
                             properties=('label', 'area', 'bbox'),
                             separator='+')
-    assert len(out) == 2
+    assert len(out) == 6
     assert len(out['label']) == 0
     assert len(out['area']) == 0
+    assert len(out['bbox+0']) == 0
+    assert len(out['bbox+1']) == 0
+    assert len(out['bbox+2']) == 0
+    assert len(out['bbox+3']) == 0
 
 
 def test_props_dict_complete():

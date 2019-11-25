@@ -634,11 +634,8 @@ def regionprops_table(label_image, intensity_image=None,
         regions = regionprops(label_image, intensity_image=intensity_image,
                               cache=cache)
 
-        out = {}
-        for prop in properties:
-            if np.isscalar(regions[0][prop]) or prop in OBJECT_COLUMNS:
-                out[prop] = np.empty(shape=(0,), dtype=COL_DTYPES[prop])
-        return out
+        out_d = _props_to_dict(regions, properties=properties, separator=separator)
+        return {k: v[:0] for k, v in out_d.items()}
 
     return _props_to_dict(regions, properties=properties, separator=separator)
 
