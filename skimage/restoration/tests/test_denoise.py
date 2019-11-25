@@ -384,6 +384,40 @@ def test_no_denoising_for_small_h():
     assert_(np.allclose(denoised, img))
 
 
+@pytest.mark.parametrize('fast_mode', [False, True])
+def test_denoise_nl_means_2d_dtype(fast_mode):
+    img = np.zeros((40, 40), dtype=int)
+    img_f32 = img.astype('float32')
+    img_f64 = img.astype('float64')
+
+    with expected_warnings(['Image dtype is not float']):
+        assert restoration.denoise_nl_means(
+            img, fast_mode=fast_mode).dtype == 'float64'
+
+    assert restoration.denoise_nl_means(
+        img_f32, fast_mode=fast_mode).dtype == img_f32.dtype
+
+    assert restoration.denoise_nl_means(
+        img_f64, fast_mode=fast_mode).dtype == img_f64.dtype
+
+
+@pytest.mark.parametrize('fast_mode', [False, True])
+def test_denoise_nl_means_3d_dtype(fast_mode):
+    img = np.zeros((12, 12, 8), dtype=int)
+    img_f32 = img.astype('float32')
+    img_f64 = img.astype('float64')
+
+    with expected_warnings(['Image dtype is not float']):
+        assert restoration.denoise_nl_means(
+            img, fast_mode=fast_mode).dtype == 'float64'
+
+    assert restoration.denoise_nl_means(
+        img_f32, fast_mode=fast_mode).dtype == img_f32.dtype
+
+    assert restoration.denoise_nl_means(
+        img_f64, fast_mode=fast_mode).dtype == img_f64.dtype
+
+
 @pytest.mark.parametrize(
     'img, multichannel, convert2ycbcr',
     [(astro_gray, False, False),
