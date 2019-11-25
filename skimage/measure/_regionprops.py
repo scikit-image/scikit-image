@@ -627,7 +627,7 @@ def regionprops_table(label_image, intensity_image=None,
                           cache=cache)
 
     if len(regions) == 0:
-        label_image = np.zeros(tuple([3] * len(label_image.shape)), dtype=int)
+        label_image = np.zeros((3,) * label_image.ndim, dtype=int)
         label_image[tuple([1] * len(label_image.shape))] = 1
         if intensity_image is not None:
             intensity_image = label_image.copy()
