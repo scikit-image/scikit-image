@@ -15,10 +15,9 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
-import sys
-
-from configparser import ConfigParser
 import os.path
+import warnings
+from configparser import ConfigParser
 from glob import glob
 
 from .collection import imread_collection_wrapper
@@ -112,7 +111,8 @@ def _scan_plugins():
 
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
-        if 'providers' not in meta_data:
+        if 'provides' not in meta_data:
+            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
             continue
         plugin_meta_data[name] = meta_data
         provides = [s.strip() for s in meta_data['provides'].split(',')]
