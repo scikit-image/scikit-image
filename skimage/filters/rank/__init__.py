@@ -44,3 +44,5 @@ __all__ = ['autolevel',
            'percentile',
            'windowed_histogram',
            'majority']
+
+__3Dfilters__ = ['equalize']

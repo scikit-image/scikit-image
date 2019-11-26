@@ -13,6 +13,8 @@ for each pixel neighborhood.
 The local version [2]_ of the histogram equalization emphasized every local
 graylevel variations.
 
+These algorithms can both be used on 2-D and 3-D images.
+
 References
 ----------
 .. [1] https://en.wikipedia.org/wiki/Histogram_equalization

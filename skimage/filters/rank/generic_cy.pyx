@@ -389,7 +389,6 @@ cdef inline void _kernel_otsu(dtype_t_out* out, Py_ssize_t odepth,
         out[0] = <dtype_t_out>0
         return
 
-
     # maximizing the between class variance
     max_i = 0
     q1 = histo[0]
@@ -487,11 +486,11 @@ def _equalize(dtype_t[:, ::1] image,
 
 
 def _equalize_3D(dtype_t[:, :, ::1] image,
-                char[:, :, ::1] selem,
-                char[:, :, ::1] mask,
-                dtype_t_out[:, :, :, ::1] out,
-                signed char shift_x, signed char shift_y, signed char shift_z,
-                Py_ssize_t n_bins):
+                 char[:, :, ::1] selem,
+                 char[:, :, ::1] mask,
+                 dtype_t_out[:, :, :, ::1] out,
+                 signed char shift_x, signed char shift_y, signed char shift_z,
+                 Py_ssize_t n_bins):
 
     _core_3D(_kernel_equalize[dtype_t_out, dtype_t], image, selem, mask, out,
              shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
