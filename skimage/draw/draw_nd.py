@@ -1,6 +1,19 @@
 import numpy as np
 from ._draw_nd import _line_nd_cy
 
+def _line_nd_py(cur, stop, step, *, delta, x_dim, endpoint, error, coords):
+
+    ndim = error.shape[0]
+    n_points = coords.shape[1]
+
+    for i_pt in range(n_points):
+        for i_dim in range(ndim):
+            coords[i_dim, i_pt] = cur[i_dim]
+            if error[i_dim] > 0:
+                coords[i_dim, i_pt] += step[i_dim]
+                error[i_dim] -= 2 * delta[x_dim]
+            error[i_dim] += 2 * delta[i_dim]
+            cur[i_dim] = coords[i_dim, i_pt]
 
 def line_nd(start, stop, *, endpoint=False, integer=True):
     """Draw a single-pixel thick line in n dimensions.
@@ -50,17 +63,21 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
     delta = stop - start
     delta_abs = np.abs(delta)
     x_dim = np.argmax(delta_abs)
+
+    q = (stop[x_dim] * start - start[x_dim] * stop) / delta[x_dim]
+
+    start_int = np.round(start).astype(int)
+    stop_int = np.round(stop).astype(int)
     
-    n_points = np.ceil(np.abs(delta[x_dim])).astype(int)
+    n_points = abs(stop_int[x_dim] - start_int[x_dim])
     if endpoint:
         n_points += 1
 
     step = np.sign(delta).astype(int)
-    mask_not_x = np.ones_like(start, dtype=bool)
-    mask_not_x[x_dim] = 0
 
-    error = 2 * delta_abs - delta_abs[x_dim]
-    cur = np.round(start).astype(int)
+    error = 2 * delta_abs - delta_abs[x_dim] + q * 2 * delta_abs[x_dim]
+    error[x_dim] = 0
+    cur = start_int
     coords = np.zeros([len(start), n_points], dtype=np.intp)
 
     _line_nd_cy(cur, np.round(stop).astype(int), step, endpoint=endpoint,
