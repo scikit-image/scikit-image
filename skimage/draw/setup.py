@@ -16,6 +16,8 @@ def configuration(parent_package='', top_path=None):
 
     config.add_extension('_draw', sources=['_draw.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
+    config.add_extension('_draw_nd', sources=['_draw_nd.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 
