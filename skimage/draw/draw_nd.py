@@ -215,12 +215,21 @@ def _line_nd(cur, step, delta, x_dim, error, coords):
 
 
 tests = [
-    ((0, 0), (2, 2)),
-    ((1, 1), (3, 3)),
-    ((0, 0), (4, 2)),
-    ((1, 1), (5, 3)),
-    ((1, 1), (5, 2.5)),
-    ((2, 1, 1), (5, 5, 2.5)),
+    ((0, 0), (2, 2)), # m=1 (x0 is even)
+    ((1, 1), (3, 3)), # m=1 (x0 is odd)
+    ((0, 0), (4, 2)), # m=2 (x0 is even)
+    ((1, 1), (5, 3)), # m=2 (x0 is odd)
+    ((1, 1), (3, 5)), # x is the second coordinate
+    ((1, 1), (5, 2.5)), # y1 is decimal
+    ((1.1, 1.4), (5.3, 2.2)), # all decimals (this produces a bug - a repeated point in the original implementation, due to the call to np.ceil (maybe a -0.5 is due in there))
+    ((0, 0), (5, -3)), # m<0
+    ((0, 0), (3, -5)), # m<0, x is the second coordinate
+    ((2, 1, 1), (5, 5, 2.5)), # 3 dimensions
+    ((2, 1, 1), (5, 5, -2.5)), # 3 dimensions, m>0 and m<0
+    ((2, 1, 0), (5, 5, -1.5)), # 3 dimensions, m>0 and m<0, shifting causes different shape in the old implementation (compared to previous test)
+    ((2, 1, 1), (5, 5, -2.4)), # just need to tease out why the results are what they are in this and the next example
+    ((2, 1, 1), (5, 5, -2.6))
+
 ]
 
 for start, stop in tests:
