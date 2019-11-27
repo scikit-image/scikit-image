@@ -8,10 +8,8 @@ cimport numpy as cnp
 
 from .._shared.fused_numerics cimport np_floats
 
-
-cdef extern from "fast_exp.h":
-    double fast_exp(double y) nogil
-    float fast_exp(float y) nogil
+cdef extern from "fast_exp.hpp":
+    T fast_exp[T](T y) nogil
 
 
 cdef inline np_floats patch_distance_2d(np_floats [:, :] p1,
@@ -45,6 +43,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :] p1,
 
     .. math::  \exp( -w ((p1 - p2)^2 - 2*var))
     """
+
     cdef int i, j
     cdef int center = s / 2
     cdef np_floats DISTANCE_CUTOFF = 5.0
@@ -100,6 +99,7 @@ cdef inline np_floats patch_distance_2dmultichannel(np_floats [:, :, :] p1,
 
     .. math::  \exp( -w ((p1 - p2)^2 - 2*var))
     """
+
     cdef int i, j, channel
     cdef np_floats DISTANCE_CUTOFF = 5.0
     cdef np_floats tmp_diff = 0
@@ -148,6 +148,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
 
     .. math::  \exp( -w ((p1 - p2)^2 - 2*var))
     """
+
     cdef int i, j, k
     cdef np_floats DISTANCE_CUTOFF = 5.0
     cdef np_floats distance = 0
@@ -165,8 +166,8 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
     return distance
 
 
-def _nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
-                           np_floats var=0.):
+def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, int s=7, int
+                           d=13, np_floats h=0.1, np_floats var=0.):
     """
     Perform non-local means denoising on 2-D RGB image
 
@@ -205,7 +206,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
     cdef int n_row, n_col, n_channels
-    n_row, n_col, n_channels = image.shape
+    n_row, n_col, n_channels = image.shape[0], image.shape[1], image.shape[2]
     cdef int offset = s / 2
     cdef int row, col, i, j, channel
     cdef int row_start, row_end, col_start, col_end
@@ -284,8 +285,8 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
     return result[offset:-offset, offset:-offset]
 
 
-def _nl_means_denoising_3d(image, int s=7, int d=13, np_floats h=0.1,
-                           np_floats var=0.0):
+def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image, int s=7, int
+                           d=13, np_floats h=0.1, np_floats var=0.0):
     """
     Perform non-local means denoising on 3-D array
 
@@ -317,7 +318,7 @@ def _nl_means_denoising_3d(image, int s=7, int d=13, np_floats h=0.1,
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
     cdef int n_pln, n_row, n_col
-    n_pln, n_row, n_col = image.shape
+    n_pln, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
     cdef int offset = s / 2
     # padd the image so that boundaries are denoised as well
     cdef np_floats [:, :, ::1] padded = np.ascontiguousarray(
@@ -541,6 +542,7 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
     """
     cdef int pln, row, col
     cdef np_floats distance
+    integral[:, :] = 0
     var *= 2.0
     for pln in range(max(1, -t_pln), min(n_pln, n_pln - t_pln)):
         for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
@@ -560,7 +562,8 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
                      integral[pln - 1, row, col - 1])
 
 
-def _fast_nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
+def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
+                                int s=7, int d=13, np_floats h=0.1,
                                 np_floats var=0.):
     """
     Perform fast non-local means denoising on 2-D array, with the outer
@@ -596,6 +599,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
     """
+
     cdef np_floats DISTANCE_CUTOFF = 5.0
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -614,7 +618,7 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
     cdef np_floats alpha
     cdef np_floats h2 = h * h
     cdef np_floats s2 = s * s
-    n_row, n_col, n_channels = image.shape
+    n_row, n_col, n_channels = image.shape[0], image.shape[1], image.shape[2]
     cdef np_floats h2s2 = n_channels * h2 * s2
     n_row += 2 * pad_size
     n_col += 2 * pad_size
@@ -634,7 +638,6 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
                     alpha = 1.
                 # Compute integral image of the squared difference between
                 # padded and the same image shifted by (t_row, t_col)
-                integral[: ,:] = 0
                 _integral_image_2d[np_floats](padded, integral, t_row, t_col,
                                               n_row, n_col, n_channels, var)
 
@@ -675,7 +678,8 @@ def _fast_nl_means_denoising_2d(image, int s=7, int d=13, np_floats h=0.1,
     return result[pad_size:-pad_size, pad_size:-pad_size]
 
 
-def _fast_nl_means_denoising_3d(image, int s=5, int d=7, np_floats h=0.1,
+def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
+                                int s=5, int d=7, np_floats h=0.1,
                                 np_floats var=0.):
     """
     Perform fast non-local means denoising on 3-D array, with the outer
@@ -711,6 +715,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, np_floats h=0.1,
     Jacques Froment. Parameter-Free Fast Pixelwise Non-Local Means
     Denoising. Image Processing On Line, 2014, vol. 4, p. 300-326.
     """
+
     cdef np_floats DISTANCE_CUTOFF = 5.0
     if s % 2 == 0:
         s += 1  # odd value for symmetric patch
@@ -732,7 +737,7 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, np_floats h=0.1,
     cdef np_floats h_square = h * h
     cdef np_floats s_cube = s * s * s
     cdef np_floats s_cube_h_square = h_square * s_cube
-    n_pln, n_row, n_col = image.shape
+    n_pln, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
     n_pln += 2 * pad_size
     n_row += 2 * pad_size
     n_col += 2 * pad_size
@@ -761,7 +766,6 @@ def _fast_nl_means_denoising_3d(image, int s=5, int d=7, np_floats h=0.1,
 
                     # Compute integral image of the squared difference between
                     # padded and the same image shifted by (t_pln, t_row, t_col)
-                    integral[:, :] = 0
                     _integral_image_3d[np_floats](
                         padded, integral, t_pln, t_row, t_col,
                         n_pln, n_row, n_col, var)
