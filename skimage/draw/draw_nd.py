@@ -176,8 +176,8 @@ def my_line_nd(start, stop, *, endpoint=False, integer=True):
     m = (stop - start) / (stop[x_dim] - start[x_dim])
     q = (stop[x_dim] * start - start[x_dim] * stop) / delta[x_dim]
 
-    start_int = np.round(start).astype(int)
-    stop_int = np.round(stop).astype(int)
+    start_int = np.floor(start + 0.5).astype(int)
+    stop_int = np.floor(stop + 0.5).astype(int)
     delta_int = stop_int - start_int
     delta_abs_int = np.abs(delta_int)
     
