@@ -1,4 +1,6 @@
+import itertools
 import numpy as np
+import pytest
 import unittest
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import assert_equal
@@ -379,7 +381,6 @@ class TestPeakLocalMax():
                                           threshold_rel=0).tolist()) == \
             [[5, 5, 5, 5], [15, 15, 15, 15]]
 
-
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
 
@@ -391,6 +392,19 @@ class TestPeakLocalMax():
 
         image[2, 2] = 0
         assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+
+
+@pytest.mark.parametrize(
+    ["indices"],
+    [[indices] for indices in itertools.product(range(3), range(3))],
+)
+def test_footprint_1px(indices):
+    image = np.zeros((3, 3))
+    image[indices] = 1
+    footprint = np.ones((1, 1), dtype=np.bool)
+    assert len(peak.peak_local_max(
+        image, footprint=footprint, exclude_border=True)) == 1
+
 
 class TestProminentPeaks(unittest.TestCase):
     def test_isolated_peaks(self):

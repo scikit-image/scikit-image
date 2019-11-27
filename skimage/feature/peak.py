@@ -48,10 +48,14 @@ def _exclude_border(mask, footprint, exclude_border):
     """
     # zero out the image borders
     for i in range(mask.ndim):
-        remove = (footprint.shape[i] if footprint is not None
-                  else 2 * exclude_border)
-        mask[(slice(None),) * i + (slice(None, remove // 2),)] = False
-        mask[(slice(None),) * i + (slice(-remove // 2, None),)] = False
+        remove = (footprint.shape[i] // 2 if footprint is not None
+                  else exclude_border)
+        # if we want to remove 0 pixels, we need to bail.  otherwise
+        # slice(-0, None) will nuke the entire image.
+        if remove == 0:
+            continue
+        mask[(slice(None),) * i + (slice(None, remove),)] = False
+        mask[(slice(None),) * i + (slice(-remove, None),)] = False
     return mask
 
 
