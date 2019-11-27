@@ -173,6 +173,7 @@ def my_line_nd(start, stop, *, endpoint=False, integer=True):
     delta_abs = np.abs(delta)
     x_dim = np.argmax(delta_abs)
 
+    m = (stop - start) / (stop[x_dim] - start[x_dim])
     q = (stop[x_dim] * start - start[x_dim] * stop) / delta[x_dim]
 
     start_int = np.round(start).astype(int)
@@ -186,13 +187,13 @@ def my_line_nd(start, stop, *, endpoint=False, integer=True):
 
     step = np.sign(delta).astype(int)
 
-    error = (q - 1) * delta_abs_int[x_dim]
+    error = (2 * (m * start_int[x_dim] + q - start_int) - 1) * delta_abs_int[x_dim]
     error[x_dim] = 0
     error_int = error.astype(int)
     coords = np.zeros([len(start), n_points], dtype=np.intp)
 
-    _line_nd(start_int, step,
-                delta=delta_int, x_dim=x_dim,
+    _line_nd_cy(start_int, step,
+                delta=delta_abs_int, x_dim=x_dim,
                 error=error_int, coords=coords)
 
     return tuple(coords)
