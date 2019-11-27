@@ -13,7 +13,7 @@ cdef extern from "fast_exp.h":
     float fast_expf(float y) nogil
 
 
-cdef np_floats exp_func(np_floats x):
+cdef inline np_floats exp_func(np_floats x) nogil:
     if np_floats is cnp.float32_t:
         return fast_expf(x)
     else:
@@ -69,7 +69,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :] p1,
             tmp_diff = p1[i, j] - p2[i, j]
             distance += w[i, j] * (tmp_diff * tmp_diff - 2 * var)
     distance = max(distance, 0)
-    distance = fast_exp(-distance)
+    distance = exp_func(-distance)
     return distance
 
 
@@ -121,7 +121,7 @@ cdef inline np_floats patch_distance_2dmultichannel(np_floats [:, :, :] p1,
                 tmp_diff = p1[i, j, channel] - p2[i, j, channel]
                 distance += w[i, j] * (tmp_diff * tmp_diff - 2 * var)
     distance = max(distance, 0)
-    distance = fast_exp(-distance)
+    distance = exp_func(-distance)
     return distance
 
 
@@ -170,7 +170,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
                 distance += w[i, j, k] * (tmp_diff * tmp_diff - 2 * var)
     distance = max(distance, 0.0)
-    distance = fast_exp(-distance)
+    distance = exp_func(-distance)
     return distance
 
 
@@ -494,6 +494,7 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
     cdef int row, col, channel
     cdef np_floats distance, t
     var *= 2.0
+    integral[:, :] = 0
 
     for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
         for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
@@ -663,7 +664,7 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                         # exp of large negative numbers is close to zero
                         if distance > DISTANCE_CUTOFF:
                             continue
-                        weight = alpha * fast_exp(-distance)
+                        weight = alpha * exp_func(-distance)
                         # Accumulate weights corresponding to different shifts
                         weights[row, col] += weight
                         weights[row + t_row, col + t_col] += weight
@@ -795,7 +796,7 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                                 if distance > DISTANCE_CUTOFF:
                                     continue
 
-                                weight = alpha * fast_exp(-distance)
+                                weight = alpha * exp_func(-distance)
                                 # Accumulate weights for the different shifts
                                 weights[pln, row, col] += weight
                                 weights[pln + t_pln, row + t_row,

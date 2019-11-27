@@ -42,6 +42,34 @@ __inline double fast_exp (double y)
     return _eco.d;
 }
 
+/* Simple cast to float */
+__inline float _fast_expf(float y)
+{
+    union
+    {
+        double d;
+        struct { int i, j; } n;
+        char t[8];
+    } _eco;
+
+    _eco.n.i = 1;
+
+    switch(_eco.t[0]) {
+        case 1:
+            /* Little endian */
+            _eco.n.j = (int)(EXP_A*(y)) + EXP_BC;
+            _eco.n.i = 0;
+            break;
+        case 0:
+            /* Big endian */
+            _eco.n.i = (int)(EXP_A*(y)) + EXP_BC;
+            _eco.n.j = 0;
+            break;
+    }
+
+    return (float)_eco.d;
+}
+
 
 #define EXPF_A (184.6649652337873)  /* 2^7÷ln2 */
 /* For min. RMS error */
@@ -52,7 +80,7 @@ __inline float fast_expf (float y)
 {
     union
     {
-        double d;
+        float d;
         struct { int16_t i, j; } n;
         char t[8];
     } _eco;
@@ -62,12 +90,12 @@ __inline float fast_expf (float y)
     switch(_eco.t[0]) {
         case 1:
             /* Little endian */
-            _eco.n.j = (int)(EXPF_A*(y)) + EXPF_BC;
+            _eco.n.j = (int16_t)(EXPF_A*(y)) + EXPF_BC;
             _eco.n.i = 0;
             break;
         case 0:
             /* Big endian */
-            _eco.n.i = (int)(EXPF_A*(y)) + EXPF_BC;
+            _eco.n.i = (int16_t)(EXPF_A*(y)) + EXPF_BC;
             _eco.n.j = 0;
             break;
     }
