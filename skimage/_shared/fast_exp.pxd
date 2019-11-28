@@ -10,7 +10,7 @@ cdef extern from "fast_exp.h":
     float fast_expf(float y) nogil
 
 
-cdef inline np_floats exp_func(np_floats x) nogil:
+cdef inline np_floats _fast_exp(np_floats x) nogil:
     if np_floats is cnp.float32_t:
         return fast_expf(x)
     else:

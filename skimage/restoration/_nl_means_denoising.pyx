@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 from .._shared.fused_numerics cimport np_floats
-from .._shared.fast_exp cimport exp_func
+from .._shared.fast_exp cimport _fast_exp
 
 
 cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
@@ -57,7 +57,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
             for channel in range(n_channels):
                 tmp_diff = p1[i, j, channel] - p2[i, j, channel]
                 distance += w[i, j] * (tmp_diff * tmp_diff - 2 * var)
-    return exp_func(-max(0.0, distance))
+    return _fast_exp(-max(0.0, distance))
 
 
 cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
@@ -104,7 +104,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
             for k in range(s):
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
                 distance += w[i, j, k] * (tmp_diff * tmp_diff - 2 * var)
-    return exp_func(-max(0.0, distance))
+    return _fast_exp(-max(0.0, distance))
 
 
 def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
@@ -139,82 +139,74 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
         Denoised image, of same shape as input image.
     """
 
+    if s % 2 == 0:
+        s += 1  # odd value for symmetric patch
+
     if np_floats is cnp.float32_t:
         dtype = np.float32
     else:
         dtype = np.float64
 
-    if s % 2 == 0:
-        s += 1  # odd value for symmetric patch
     cdef Py_ssize_t n_row, n_col, n_channels
     n_row, n_col, n_channels = image.shape[0], image.shape[1], image.shape[2]
     cdef Py_ssize_t offset = s / 2
-    cdef Py_ssize_t row, col, i, j, channel
-    cdef Py_ssize_t row_start, row_end, col_start, col_end
-    cdef Py_ssize_t row_start_i, row_end_i, col_start_j, col_end_j
+    cdef Py_ssize_t row, col, i, j, channel, i_start, i_end, j_start, j_end
     cdef np_floats[::1] new_values = np.zeros(n_channels, dtype=dtype)
     cdef np_floats[:, :, ::1] padded = np.ascontiguousarray(
         np.pad(image, ((offset, offset), (offset, offset), (0, 0)),
                mode='reflect'))
-    cdef np_floats [:, :, ::1] result = padded.copy()
+    cdef np_floats [:, :, ::1] result = np.empty_like(image)
     cdef np_floats A = ((s - 1.) / 4.)
     cdef np_floats new_value
     cdef np_floats weight_sum, weight
-    cdef np_floats [::] range_vals = np.arange(-offset, offset + 1,
-                                               dtype=dtype)
+    cdef np_floats [::1] range_vals = np.arange(-offset, offset + 1,
+                                                dtype=dtype)
     xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
     cdef np_floats [:, ::1] w = np.ascontiguousarray(
         np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
     w *= 1. / (n_channels * np.sum(w) * h * h)
 
+    cdef np_floats [:, :, :] central_patch
+
     # Coordinates of central pixel
     # Iterate over rows, taking padding into account
     with nogil:
-        for row in range(offset, n_row + offset):
-            row_start = row - offset
-            row_end = row + offset + 1
+        for row in range(n_row):
             # Iterate over columns, taking padding into account
-            for col in range(offset, n_col + offset):
+            i_start = row - min(d, row)
+            i_end = row + min(d + 1, n_row - row)
+
+            for col in range(n_col):
                 # Initialize per-channel bins
-                for channel in range(n_channels):
-                    new_values[channel] = 0
+                new_values[:] = 0
                 # Reset weights for each local region
                 weight_sum = 0
-                col_start = col - offset
-                col_end = col + offset + 1
+
+                central_patch = padded[row:row+s, col:col+s, :]
+                j_start = col - min(d, col)
+                j_end = col + min(d + 1, n_col - col)
 
                 # Iterate over local 2d patch for each pixel
-                # First rows
-                for i in range(max(-d, offset - row),
-                               min(d + 1, n_row + offset - row)):
-                    row_start_i = row_start + i
-                    row_end_i = row_end + i
-                    # Local patch columns
-                    for j in range(max(-d, offset - col),
-                                   min(d + 1, n_col + offset - col)):
-                        col_start_j = col_start + j
-                        col_end_j = col_end + j
+                for i in range(i_start, i_end):
+                    for j in range(j_start, j_end):
                         weight = patch_distance_2d[np_floats](
-                            padded[row_start:row_end,
-                                   col_start:col_end, :],
-                            padded[row_start_i:row_end_i,
-                                   col_start_j:col_end_j, :],
+                            central_patch,
+                            padded[i:i+s, j:j+s, :],
                             w, s, var, n_channels)
 
                         # Collect results in weight sum
                         weight_sum += weight
                         # Apply to each channel multiplicatively
                         for channel in range(n_channels):
-                            new_values[channel] += weight * padded[row + i,
-                                                                   col + j,
+                            new_values[channel] += weight * padded[i+offset,
+                                                                   j+offset,
                                                                    channel]
 
                 # Normalize the result
                 for channel in range(n_channels):
                     result[row, col, channel] = new_values[channel] / weight_sum
 
-    # Return cropped result, undoing padding
-    return result[offset:-offset, offset:-offset]
+    return result
 
 
 def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
@@ -387,10 +379,9 @@ cdef inline np_floats _integral_to_distance_3d(np_floats [:, :, ::]
 
 cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
                                     np_floats [:, ::] integral,
-                                    Py_ssize_t t_row, Py_ssize_t
-                                    t_col, Py_ssize_t n_row,
-                                    Py_ssize_t n_col, Py_ssize_t n_channels,
-                                    np_floats var) nogil:
+                                    Py_ssize_t t_row, Py_ssize_t t_col,
+                                    Py_ssize_t n_row, Py_ssize_t n_col,
+                                    Py_ssize_t n_channels, np_floats var) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_row, t_col)``.
@@ -421,11 +412,15 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
     by avoiding copies of ``padded``.
     """
     cdef Py_ssize_t row, col, channel
-    cdef np_floats distance, t
+    cdef Py_ssize_t row_start = max(1, -t_row)
+    cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
+    cdef Py_ssize_t col_start = max(1, -t_col)
+    cdef Py_ssize_t col_end = min(n_col, n_col - t_col)
+    cdef np_floats t, distance
     var *= 2.0
 
-    for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
-        for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
+    for row in range(row_start, row_end):
+        for col in range(col_start, col_end):
             distance = 0
             for channel in range(n_channels):
                 t = (padded[row, col, channel] -
@@ -440,11 +435,10 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
 
 cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
                                     np_floats [:, :, ::] integral,
-                                    Py_ssize_t t_pln, Py_ssize_t
-                                    t_row, Py_ssize_t t_col,
-                                    Py_ssize_t n_pln, Py_ssize_t n_row,
-                                    Py_ssize_t n_col, np_floats
-                                    var) nogil:
+                                    Py_ssize_t t_pln, Py_ssize_t t_row,
+                                    Py_ssize_t t_col, Py_ssize_t n_pln,
+                                    Py_ssize_t n_row, Py_ssize_t n_col,
+                                    np_floats var) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
@@ -477,11 +471,18 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
     by avoiding copies of ``padded``.
     """
     cdef Py_ssize_t pln, row, col
+    cdef Py_ssize_t pln_start = max(1, -t_pln)
+    cdef Py_ssize_t pln_end = min(n_pln, n_pln - t_pln)
+    cdef Py_ssize_t row_start = max(1, -t_row)
+    cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
+    cdef Py_ssize_t col_start = max(1, -t_col)
+    cdef Py_ssize_t col_end = min(n_col, n_col - t_col)
     cdef np_floats distance
     var *= 2.0
-    for pln in range(max(1, -t_pln), min(n_pln, n_pln - t_pln)):
-        for row in range(max(1, -t_row), min(n_row, n_row - t_row)):
-            for col in range(max(1, -t_col), min(n_col, n_col - t_col)):
+
+    for pln in range(pln_start, pln_end):
+        for row in range(row_start, row_end):
+            for col in range(col_start, col_end):
                 distance = (padded[pln, row, col] -
                             padded[pln + t_pln, row + t_row, col + t_col])
                 distance *= distance
@@ -588,7 +589,7 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                         # exp of large negative numbers is close to zero
                         if distance > DISTANCE_CUTOFF:
                             continue
-                        weight = alpha * exp_func(-distance)
+                        weight = alpha * _fast_exp(-distance)
                         # Accumulate weights corresponding to different shifts
                         weights[row, col] += weight
                         weights[row + t_row, col + t_col] += weight
@@ -723,7 +724,7 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                                 if distance > DISTANCE_CUTOFF:
                                     continue
 
-                                weight = alpha * exp_func(-distance)
+                                weight = alpha * _fast_exp(-distance)
                                 # Accumulate weights for the different shifts
                                 weights[pln, row, col] += weight
                                 weights[pln + t_pln, row + t_row,
