@@ -56,7 +56,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
         for j in range(s):
             for channel in range(n_channels):
                 tmp_diff = p1[i, j, channel] - p2[i, j, channel]
-                distance += w[i, j] * (tmp_diff * tmp_diff - 2 * var)
+                distance += w[i, j] * (tmp_diff * tmp_diff - var)
     return _fast_exp(-max(0.0, distance))
 
 
@@ -104,7 +104,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
         for j in range(s):
             for k in range(s):
                 tmp_diff = p1[i, j, k] - p2[i, j, k]
-                distance += w[i, j, k] * (tmp_diff * tmp_diff - 2 * var)
+                distance += w[i, j, k] * (tmp_diff * tmp_diff - var)
     return _fast_exp(-max(0.0, distance))
 
 
@@ -169,8 +169,8 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
     w *= 1. / (n_channels * np.sum(w) * h * h)
 
     cdef np_floats [:, :, :] central_patch
+    var *= 2
 
-    # Coordinates of central pixel
     # Iterate over rows, taking padding into account
     with nogil:
         for row in range(n_row):
@@ -248,6 +248,7 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
     cdef Py_ssize_t n_pln, n_row, n_col
     n_pln, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
     cdef Py_ssize_t i_start, i_end, j_start, j_end, k_start, k_end
+    cdef Py_ssize_t pln, row, col, i, j, k
     cdef Py_ssize_t offset = s / 2
     # padd the image so that boundaries are denoised as well
     cdef np_floats [:, :, ::1] padded = np.ascontiguousarray(
@@ -264,12 +265,11 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
     cdef np_floats [:, :, ::1] w = np.ascontiguousarray(
         np.exp(-(xg_pln * xg_pln + xg_row * xg_row + xg_col * xg_col) /
                (2 * A * A)))
-    cdef Py_ssize_t pln, row, col, i, j, k
     w *= 1. / (np.sum(w) * h * h)
 
     cdef np_floats [:, :, :] central_patch
+    var *= 2
 
-    # Coordinates of central pixel
     # Iterate over planes, taking padding into account
     with nogil:
         for pln in range(n_pln):
@@ -290,16 +290,13 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                     weight_sum = 0
 
                     # Iterate over local 3d patch for each pixel
-                    # First planes
                     for i in range(i_start, i_end):
-                        # Rows
                         for j in range(j_start, j_end):
-                            # Columns
                             for k in range(k_start, k_end):
                                 weight = patch_distance_3d[np_floats](
-                                        central_patch,
-                                        padded[i:i+s, j:j+s, k:k+s],
-                                        w, s, var)
+                                    central_patch,
+                                    padded[i:i+s, j:j+s, k:k+s],
+                                    w, s, var)
                                 # Collect results in weight sum
                                 weight_sum += weight
                                 new_value += weight * padded[i+offset,
@@ -332,13 +329,11 @@ cdef inline np_floats _integral_to_distance_2d(np_floats [:, ::] integral,
 
     Used in _fast_nl_means_denoising_2d
     """
-    cdef np_floats distance
-    distance =  integral[row + offset, col + offset] + \
-                integral[row - offset, col - offset] - \
-                integral[row - offset, col + offset] - \
-                integral[row + offset, col - offset]
-    distance = max(distance, 0.0) / h2s2
-    return distance
+    cdef np_floats distance = (integral[row + offset, col + offset] +
+                               integral[row - offset, col - offset] -
+                               integral[row - offset, col + offset] -
+                               integral[row + offset, col - offset])
+    return max(distance, 0.0) / h2s2
 
 
 cdef inline np_floats _integral_to_distance_3d(np_floats [:, :, ::]
@@ -359,17 +354,16 @@ cdef inline np_floats _integral_to_distance_3d(np_floats [:, :, ::]
 
     Used in _fast_nl_means_denoising_3d
     """
-    cdef np_floats distance
-    distance = (integral[pln + offset, row + offset, col + offset] -
-                integral[pln - offset, row - offset, col - offset] +
-                integral[pln - offset, row - offset, col + offset] +
-                integral[pln - offset, row + offset, col - offset] +
-                integral[pln + offset, row - offset, col - offset] -
-                integral[pln - offset, row + offset, col + offset] -
-                integral[pln + offset, row - offset, col + offset] -
-                integral[pln + offset, row + offset, col - offset])
-    distance = max(distance, 0.0) / (s_cube_h_square)
-    return distance
+    cdef np_floats distance= (
+        integral[pln + offset, row + offset, col + offset] -
+        integral[pln - offset, row - offset, col - offset] +
+        integral[pln - offset, row - offset, col + offset] +
+        integral[pln - offset, row + offset, col - offset] +
+        integral[pln + offset, row - offset, col - offset] -
+        integral[pln - offset, row + offset, col + offset] -
+        integral[pln + offset, row - offset, col + offset] -
+        integral[pln + offset, row + offset, col - offset])
+    return max(distance, 0.0) / (s_cube_h_square)
 
 
 cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
@@ -575,9 +569,7 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
                 for row in range(max(offset, offset - t_row),
                                  min(n_row - offset, n_row - offset - t_row)):
                     # Iterate over columns, taking offset and shift into account
-                    for col in range(
-                            max(offset, offset - t_col),
-                            min(n_col - offset, n_col - offset - t_col)):
+                    for col in range(offset, n_col - offset - t_col):
                         # Compute squared distance between shifted patches
                         distance = _integral_to_distance_2d[np_floats](
                             integral, row, col, offset, h2s2)
@@ -693,8 +685,8 @@ def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
                     alpha = 0.5
                 # Iterate over shifts along the column axis
                 for t_col in range(0, d + 1):
-                    col_dist_min = max(offset, offset - t_col)
-                    col_dist_max = min(n_col - offset, n_col - offset - t_col)
+                    col_dist_min = offset
+                    col_dist_max = n_col - offset - t_col
 
                     # Compute integral image of the squared difference between
                     # padded and the same image shifted by (t_pln, t_row, t_col)
