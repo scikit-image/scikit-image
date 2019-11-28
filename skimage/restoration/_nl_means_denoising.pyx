@@ -96,6 +96,7 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
     cdef np_floats DISTANCE_CUTOFF = 5.0
     cdef np_floats distance = 0
     cdef np_floats tmp_diff
+
     for i in range(s):
         # exp of large negative numbers will be 0, so we'd better stop
         if distance > DISTANCE_CUTOFF:
@@ -156,9 +157,10 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
         np.pad(image, ((offset, offset), (offset, offset), (0, 0)),
                mode='reflect'))
     cdef np_floats [:, :, ::1] result = np.empty_like(image)
-    cdef np_floats A = ((s - 1.) / 4.)
     cdef np_floats new_value
     cdef np_floats weight_sum, weight
+
+    cdef np_floats A = ((s - 1.) / 4.)
     cdef np_floats [::1] range_vals = np.arange(-offset, offset + 1,
                                                 dtype=dtype)
     xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
@@ -235,23 +237,26 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
         Denoised image, of same shape as input image.
     """
 
+    if s % 2 == 0:
+        s += 1  # odd value for symmetric patch
+
     if np_floats is cnp.float32_t:
         dtype = np.float32
     else:
         dtype = np.float64
 
-    if s % 2 == 0:
-        s += 1  # odd value for symmetric patch
     cdef Py_ssize_t n_pln, n_row, n_col
     n_pln, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
+    cdef Py_ssize_t i_start, i_end, j_start, j_end, k_start, k_end
     cdef Py_ssize_t offset = s / 2
     # padd the image so that boundaries are denoised as well
     cdef np_floats [:, :, ::1] padded = np.ascontiguousarray(
         np.pad(image, offset, mode='reflect'))
-    cdef np_floats [:, :, ::1] result = padded.copy()
-    cdef np_floats A = ((s - 1.) / 4.)
+    cdef np_floats [:, :, ::1] result = np.empty_like(image)
     cdef np_floats new_value
     cdef np_floats weight_sum, weight
+
+    cdef np_floats A = ((s - 1.) / 4.)
     cdef np_floats [::] range_vals = np.arange(-offset, offset + 1,
                                                dtype=dtype)
     xg_pln, xg_row, xg_col = np.meshgrid(range_vals, range_vals, range_vals,
@@ -260,62 +265,52 @@ def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
         np.exp(-(xg_pln * xg_pln + xg_row * xg_row + xg_col * xg_col) /
                (2 * A * A)))
     cdef Py_ssize_t pln, row, col, i, j, k
-    cdef Py_ssize_t pln_start, pln_end, row_start, row_end, col_start, col_end
-    cdef Py_ssize_t pln_start_i, pln_end_i, row_start_j, row_end_j, \
-             col_start_k, col_end_k
     w *= 1. / (np.sum(w) * h * h)
+
+    cdef np_floats [:, :, :] central_patch
 
     # Coordinates of central pixel
     # Iterate over planes, taking padding into account
     with nogil:
-        for pln in range(offset, n_pln + offset):
-            pln_start = pln - offset
-            pln_end = pln + offset + 1
+        for pln in range(n_pln):
+            i_start = pln - min(d, pln)
+            i_end = pln + min(d + 1, n_pln - pln)
             # Iterate over rows, taking padding into account
-            for row in range(offset, n_row + offset):
-                row_start = row - offset
-                row_end = row + offset + 1
+            for row in range(n_row):
+                j_start = row - min(d, row)
+                j_end = row + min(d + 1, n_row - row)
                 # Iterate over columns, taking padding into account
-                for col in range(offset, n_col + offset):
-                    col_start = col - offset
-                    col_end = col + offset + 1
+                for col in range(n_col):
+                    k_start = col - min(d, col)
+                    k_end = col + min(d + 1, n_col - col)
+
+                    central_patch = padded[pln:pln+s, row:row+s, col:col+s]
+
                     new_value = 0
                     weight_sum = 0
 
                     # Iterate over local 3d patch for each pixel
                     # First planes
-                    for i in range(max(-d, offset - pln),
-                                   min(d + 1, n_pln + offset - pln)):
-                        pln_start_i = pln_start + i
-                        pln_end_i = pln_end + i
+                    for i in range(i_start, i_end):
                         # Rows
-                        for j in range(max(-d, offset - row),
-                                       min(d + 1, n_row + offset - row)):
-                            row_start_j = row_start + j
-                            row_end_j = row_end + j
+                        for j in range(j_start, j_end):
                             # Columns
-                            for k in range(max(-d, offset - col),
-                                           min(d + 1, n_col + offset - col)):
-                                col_start_k = col_start + k
-                                col_end_k = col_end + k
+                            for k in range(k_start, k_end):
                                 weight = patch_distance_3d[np_floats](
-                                        padded[pln_start:pln_end,
-                                               row_start:row_end,
-                                               col_start:col_end],
-                                        padded[pln_start_i:pln_end_i,
-                                               row_start_j:row_end_j,
-                                               col_start_k:col_end_k],
+                                        central_patch,
+                                        padded[i:i+s, j:j+s, k:k+s],
                                         w, s, var)
                                 # Collect results in weight sum
                                 weight_sum += weight
-                                new_value += weight * padded[pln + i,
-                                                             row + j, col + k]
+                                new_value += weight * padded[i+offset,
+                                                             j+offset,
+                                                             k+offset]
 
                     # Normalize the result
                     result[pln, row, col] = new_value / weight_sum
 
     # Return cropped result, undoing padding
-    return result[offset:-offset, offset:-offset, offset:-offset]
+    return result
 
 #-------------- Accelerated algorithm of Froment 2015 ------------------
 
