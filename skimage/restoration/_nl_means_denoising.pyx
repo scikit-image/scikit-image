@@ -7,17 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 from .._shared.fused_numerics cimport np_floats
-
-cdef extern from "fast_exp.h":
-    double fast_exp(double y) nogil
-    float fast_expf(float y) nogil
-
-
-cdef inline np_floats exp_func(np_floats x) nogil:
-    if np_floats is cnp.float32_t:
-        return fast_expf(x)
-    else:
-        return fast_exp(x)
+from .._shared.fast_exp cimport exp_func
 
 
 cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
