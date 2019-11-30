@@ -191,14 +191,14 @@ reasons:
   3. Not all packages are available from the system's package manager.
 
 That said, if you must use the system environment, use the **system's** package
-manger (e.g. ``apt``, ``dnf``, ``yum``), and **not** ``pip`` to perform the
+manger (e.g. ``apt``, ``dnf``, or ``yum``), and **not** ``pip`` to perform the
 installation.
 
 For example, on Ubuntu, typing::
 
   sudo apt install python3-skimage
 
-Will perform a valid install of scikit-image on Ubuntu, but may be a few
+will perform a valid install of scikit-image on Ubuntu, but may be a few
 versions older than the one avaiable from PyPi. In contrast, using ``sudo pip
 [...]`` will ask ``pip`` to install whatever versions it finds on PyPi and may
 update **other** libraries to incompatible versions, which may break the python
