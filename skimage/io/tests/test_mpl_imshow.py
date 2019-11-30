@@ -19,6 +19,7 @@ im_hi = imf + 10
 
 imshow_expected_warnings = [
     r"tight_layout : falling back to Agg|\A\Z",
+    r"tight_layout: falling back to Agg|\A\Z",  # formatting change in mpl
     # Maptlotlib 2.2.3 seems to use np.asscalar which issues a warning
     # with numpy 1.16
     # Matplotlib 2.2.3 is the last supported version for python 2.7
