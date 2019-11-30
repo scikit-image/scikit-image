@@ -1,3 +1,6 @@
+import functools
+import warnings
+import numpy as np
 from .dtype import (img_as_float32, img_as_float64, img_as_float,
                     img_as_int, img_as_uint, img_as_ubyte,
                     img_as_bool, dtype_limits)
@@ -12,10 +15,13 @@ from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
 
-from .._shared.utils import copy_func
 
-from numpy import pad as numpy_pad
-pad = copy_func(numpy_pad, name='pad')
+@functools.wraps(np.pad)
+def pad(*args, **kwargs):
+    warnings.warn("skimage.util.pad is deprecated and will be removed in "
+                  "version 0.19. Please use numpy.pad instead.",
+                  FutureWarning, stacklevel=2)
+    return np.pad(*args, **kwargs)
 
 
 __all__ = ['img_as_float32',
