@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
 set -ev
-export PY=${TRAVIS_PYTHON_VERSION}
 
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
