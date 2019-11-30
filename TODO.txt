@@ -66,3 +66,5 @@ Other
   the minimum supported version of ``scipy`` reaches 1.4.
 * When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
   vectorized version of ``np.linspace``.
+* Monitor when multibuild devel gets merged into master for python 3.8 compatibility
+  https://github.com/matthew-brett/multibuild/issues/284
