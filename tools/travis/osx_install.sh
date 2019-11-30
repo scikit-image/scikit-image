@@ -11,7 +11,7 @@ sudo tlmgr update --self
 sudo tlmgr install ucs dvipng anyfontsize
 
 # Set up virtualenv on OSX
-git clone https://github.com/matthew-brett/multibuild ~/multibuild
+git clone --single-branch devel --depth 1 https://github.com/matthew-brett/multibuild ~/multibuild
 source ~/multibuild/osx_utils.sh
 get_macpython_environment $TRAVIS_PYTHON_VERSION ~/venv
 
