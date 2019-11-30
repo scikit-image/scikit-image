@@ -29,9 +29,9 @@ def test_fixed_reference():
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    snake = active_contour(gaussian(img, 1), init, boundary_condition='fixed',
-                           alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1,
-                           coordinates='rc')
+    snake = active_contour(gaussian(img, sigma=1, output=float), init,
+                           boundary_condition='fixed', alpha=0.1, beta=1.0,
+                           w_line=-5, w_edge=0, gamma=0.1, coordinates='rc')
     refr = [136, 135, 134, 133, 132, 131, 129, 128, 127, 125]
     refc = [5, 9, 13, 17, 21, 25, 30, 34, 38, 42]
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
@@ -43,9 +43,9 @@ def test_free_reference():
     r = np.linspace(70, 40, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    snake = active_contour(gaussian(img, 3), init, boundary_condition='free',
-                           alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1,
-                           coordinates='rc')
+    snake = active_contour(gaussian(img, sigma=3, output=float), init,
+                           boundary_condition='free', alpha=0.1, beta=1.0,
+                           w_line=-5, w_edge=0, gamma=0.1, coordinates='rc')
     refr = [76, 76, 75, 74, 73, 72, 71, 70, 69, 69]
     refc = [10, 13, 16, 19, 23, 26, 29, 32, 36, 39]
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
@@ -53,7 +53,7 @@ def test_free_reference():
 
 
 def test_RGB():
-    img = gaussian(data.text(), 1)
+    img = gaussian(data.text(), sigma=1, output=float)
     imgR = np.zeros((img.shape[0], img.shape[1], 3))
     imgG = np.zeros((img.shape[0], img.shape[1], 3))
     imgRGB = np.zeros((img.shape[0], img.shape[1], 3))
