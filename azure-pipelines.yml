@@ -26,6 +26,15 @@ jobs:
         ARCH: 'x64'
         PIP_FLAGS: ''
         TEST_EXAMPLES: 'true'
+      Python38:
+        PYTHON_VERSION: '3.8'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python38-x64:
+        PYTHON_VERSION: '3.8'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
       Python37-x64-pre:
         PYTHON_VERSION: '3.7'
         ARCH: 'x64'
