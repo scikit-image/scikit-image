@@ -55,7 +55,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     -----
     This function is a wrapper around :func:`scipy.ndi.gaussian_filter`.
 
-    Integer arrays are converted to float.
+    Integer arrays are converted to float, if output specified as float.
 
     The multi-dimensional filter is implemented as a sequence of
     one-dimensional convolution filters. The intermediate arrays are
@@ -112,9 +112,17 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
-    image = convert_to_float(image, preserve_range)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
-                               truncate=truncate)
+    if output is not None:
+        if isinstance(output, np.ndarray):
+            # convert image to float if output is float numpy ndarray
+            if issubclass(output.dtype.type, np.floating):
+                image = convert_to_float(image, preserve_range)
+        elif issubclass(type(output), type):
+            # convert image to float if output is float dtype
+            if issubclass(output, (np.floating, float)):
+                image = convert_to_float(image, preserve_range)
+    return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
+                               cval=cval, truncate=truncate)
 
 
 def _guess_spatial_dimensions(image):

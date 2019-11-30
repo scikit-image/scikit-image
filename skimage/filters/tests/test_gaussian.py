@@ -1,7 +1,14 @@
+import pytest
+
 import numpy as np
 from skimage.filters._gaussian import gaussian, _guess_spatial_dimensions
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+
+
+@pytest.fixture
+def image():
+    return np.random.randint(0, 10, size=(3, 3), dtype=np.uint8)
 
 
 def test_negative_sigma():
@@ -82,3 +89,20 @@ def test_guess_spatial_dimensions():
     testing.assert_equal(_guess_spatial_dimensions(im4), 3)
     with testing.raises(ValueError):
         _guess_spatial_dimensions(im5)
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.uint8, np.uint16, np.uint32, np.int32, np.float32, np.float64]
+)
+def test_gaussian_preserve_dtype(image, dtype):
+    gaussian_image = gaussian(image, sigma=1, output=dtype, preserve_range=True)
+    assert gaussian_image.dtype == dtype
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.uint8, np.uint16, np.uint32, np.int32, np.float32, np.float64]
+)
+def test_preserve_output(image, dtype):
+    output = np.zeros_like(image, dtype=dtype)
+    gaussian_image = gaussian(image, sigma=1, output=output, preserve_range=True)
+    assert id(gaussian_image) == id(output)
