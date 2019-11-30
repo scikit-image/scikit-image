@@ -28,7 +28,7 @@ section_end "Flake8.test"
 section "Tests.examples"
 # Run example applications
 echo Build or run examples
-pip install --retries 3 -q -r ./requirements/docs.txt
+pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
 pip list
 tools/build_versions.py
 echo 'backend : Template' > $MPL_DIR/matplotlibrc
