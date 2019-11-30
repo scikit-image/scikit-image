@@ -68,3 +68,4 @@ Other
   vectorized version of ``np.linspace``.
 * Monitor when multibuild devel gets merged into master for python 3.8 compatibility
   https://github.com/matthew-brett/multibuild/issues/284
+  and update osx_install to point to the correct branch
