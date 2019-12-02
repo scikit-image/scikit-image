@@ -1,5 +1,5 @@
 from ._find_contours import find_contours
-from ._marching_cubes_lewiner import marching_cubes_lewiner
+from ._marching_cubes_lewiner import marching_cubes_lewiner, marching_cubes
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
 from ._regionprops import regionprops, perimeter, regionprops_table
@@ -36,6 +36,7 @@ __all__ = ['find_contours',
            'moments_hu',
            'inertia_tensor',
            'inertia_tensor_eigvals',
+           'marching_cubes',
            'marching_cubes_lewiner',
            'marching_cubes_classic',
            'mesh_surface_area',
