@@ -1,4 +1,6 @@
+import itertools
 import numpy as np
+import pytest
 import unittest
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import assert_equal
@@ -379,7 +381,6 @@ class TestPeakLocalMax():
                                           threshold_rel=0).tolist()) == \
             [[5, 5, 5, 5], [15, 15, 15, 15]]
 
-
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
 
@@ -391,6 +392,75 @@ class TestPeakLocalMax():
 
         image[2, 2] = 0
         assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+
+
+@pytest.mark.parametrize(
+    ["indices"],
+    [[indices] for indices in itertools.product(range(5), range(5))],
+)
+def test_exclude_border(indices):
+    image = np.zeros((5, 5))
+    image[indices] = 1
+
+    # exclude_border = False, means it will always be found.
+    assert len(peak.peak_local_max(image, exclude_border=False)) == 1
+
+    # exclude_border = 0, means it will always be found.
+    assert len(peak.peak_local_max(image, exclude_border=0)) == 1
+
+    # exclude_border = True, min_distance=1 means it will be found unless it's
+    # on the edge.
+    if indices[0] in (0, 4) or indices[1] in (0, 4):
+        expected_peaks = 0
+    else:
+        expected_peaks = 1
+    assert len(peak.peak_local_max(
+        image, min_distance=1, exclude_border=True)) == expected_peaks
+
+    # exclude_border = (1, 0) means it will be found unless it's on the edge of
+    # the first dimension.
+    if indices[0] in (0, 4):
+        expected_peaks = 0
+    else:
+        expected_peaks = 1
+    assert len(peak.peak_local_max(
+        image, exclude_border=(1, 0))) == expected_peaks
+
+    # exclude_border = (0, 1) means it will be found unless it's on the edge of
+    # the second dimension.
+    if indices[1] in (0, 4):
+        expected_peaks = 0
+    else:
+        expected_peaks = 1
+    assert len(peak.peak_local_max(
+        image, exclude_border=(0, 1))) == expected_peaks
+
+
+def test_exclude_border_errors():
+    image = np.zeros((5, 5))
+
+    # exclude_border doesn't have the right cardinality.
+    with pytest.raises(ValueError):
+        assert peak.peak_local_max(image, exclude_border=(1,))
+
+    # exclude_border doesn't have the right type
+    with pytest.raises(TypeError):
+        assert peak.peak_local_max(image, exclude_border=1.0)
+
+    # exclude_border is a tuple of the right cardinality but contains
+    # non-integer values.
+    with pytest.raises(ValueError):
+        assert peak.peak_local_max(image, exclude_border=(1, 'a'))
+
+    # exclude_border is a tuple of the right cardinality but contains a
+    # negative value.
+    with pytest.raises(ValueError):
+        assert peak.peak_local_max(image, exclude_border=(1, -1))
+
+    # exclude_border is a negative value.
+    with pytest.raises(ValueError):
+        assert peak.peak_local_max(image, exclude_border=-1)
+
 
 class TestProminentPeaks(unittest.TestCase):
     def test_isolated_peaks(self):
