@@ -78,4 +78,5 @@ def block_reduce(image, block_size, func=np.sum, cval=0, dtype=None):
 
     blocked = view_as_blocks(image, block_size)
 
-    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)), dtype=dtype)
+    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)),
+                dtype=dtype)
