@@ -185,6 +185,29 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
     return np.array([b for b in blobs_array if b[-1] > 0])
 
 
+def _format_exclude_border(img_ndim, exclude_border):
+    """Format an ``exclude_border`` argument as a tuple of ints for calling
+    ``peak_local_max``.
+    """
+    if isinstance(exclude_border, tuple):
+        if len(exclude_border) != img_ndim:
+            raise ValueError(
+                "`exclude_border` should have the same length as the "
+                "dimensionality of the image.")
+        for exclude in exclude_border:
+            if not isinstance(exclude, int):
+                raise ValueError(
+                    "exclude border, when expressed as a tuple, must only "
+                    "contain ints.")
+        return exclude_border
+    elif isinstance(exclude_border, int):
+        return (exclude_border,) * img_ndim + (0,)
+    elif exclude_border is True:
+        raise ValueError("exclude_border cannot be True")
+    elif exclude_border is False:
+        return (0,) * (img_ndim + 1)
+
+
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5, *, exclude_border=False):
     r"""Finds blobs in the given grayscale image.
@@ -218,9 +241,15 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
-    exclude_border : int or bool, optional
-        If nonzero int, `exclude_border` excludes blobs from
-        within `exclude_border`-pixels of the border of the image.
+    exclude_border : tuple of ints, int, or False, optional
+        If tuple of ints, the length of the tuple must match the input array's
+        dimensionality.  Each element of the tuple will exclude peaks from
+        within `exclude_border`-pixels of the border of the image along that
+        dimension.
+        If nonzero int, `exclude_border` excludes peaks from within
+        `exclude_border`-pixels of the border of the image.
+        If zero or False, peaks are identified regardless of their
+        distance from the border.
 
     Returns
     -------
@@ -304,11 +333,15 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     image_cube = np.stack(dog_images, axis=-1)
 
-    # local_maxima = get_local_maxima(image_cube, threshold)
-    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3,) * (image.ndim + 1)),
-                                  threshold_rel=0.0,
-                                  exclude_border=exclude_border)
+    exclude_border = _format_exclude_border(image.ndim, exclude_border)
+    local_maxima = peak_local_max(
+        image_cube,
+        threshold_abs=threshold,
+        footprint=np.ones((3,) * (image.ndim + 1)),
+        threshold_rel=0.0,
+        exclude_border=exclude_border,
+    )
+
     # Catch no peaks
     if local_maxima.size == 0:
         return np.empty((0, 3))
@@ -369,9 +402,15 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    exclude_border : int or bool, optional
-        If nonzero int, `exclude_border` excludes blobs from
-        within `exclude_border`-pixels of the border of the image.
+    exclude_border : tuple of ints, int, or False, optional
+        If tuple of ints, the length of the tuple must match the input array's
+        dimensionality.  Each element of the tuple will exclude peaks from
+        within `exclude_border`-pixels of the border of the image along that
+        dimension.
+        If nonzero int, `exclude_border` excludes peaks from within
+        `exclude_border`-pixels of the border of the image.
+        If zero or False, peaks are identified regardless of their
+        distance from the border.
 
     Returns
     -------
@@ -454,10 +493,14 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     image_cube = np.stack(gl_images, axis=-1)
 
-    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
-                                  footprint=np.ones((3,) * (image.ndim + 1)),
-                                  threshold_rel=0.0,
-                                  exclude_border=exclude_border)
+    exclude_border = _format_exclude_border(image.ndim, exclude_border)
+    local_maxima = peak_local_max(
+        image_cube,
+        threshold_abs=threshold,
+        footprint=np.ones((3,) * (image.ndim + 1)),
+        threshold_rel=0.0,
+        exclude_border=exclude_border,
+    )
 
     # Catch no peaks
     if local_maxima.size == 0:
