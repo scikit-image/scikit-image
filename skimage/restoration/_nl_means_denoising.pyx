@@ -28,8 +28,8 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
         Array of weights for the different pixels of the patches.
     s : Py_ssize_t
         Linear size of the patches.
-    var : np_floats
-        Expected noise variance.
+    var_diff : np_floats
+        The double of the expected noise variance.
     n_channels : Py_ssize_t
         The number of channels.
 
@@ -77,8 +77,8 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
         Array of weights for the different pixels of the patches.
     s : Py_ssize_t
         Linear size of the patches.
-    var : np_floats
-        Expected noise variance.
+    var_diff : np_floats
+        The double of the expected noise variance.
 
     Returns
     -------
@@ -370,7 +370,8 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
                                     np_floats [:, ::] integral,
                                     Py_ssize_t t_row, Py_ssize_t t_col,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
-                                    Py_ssize_t n_channels, np_floats var) nogil:
+                                    Py_ssize_t n_channels,
+                                    np_floats var_diff) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_row, t_col)``.
@@ -385,13 +386,14 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
     t_row : Py_ssize_t
         Shift along the row axis.
     t_col : Py_ssize_t
-        Shift along the column axis.
+        Shift along the column axis (positive).
     n_row : Py_ssize_t
     n_col : Py_ssize_t
     n_channels : Py_ssize_t
-    var : np_floats
-        Expected noise variance.  If non-zero, this is used to reduce the
-        apparent patch distances by the expected distance due to the noise.
+    var_diff : np_floats
+        The double of the expected noise variance.  If non-zero, this
+        is used to reduce the apparent patch distances by the expected
+        distance due to the noise.
 
     Notes
     -----
@@ -403,17 +405,16 @@ cdef inline void _integral_image_2d(np_floats [:, :, ::] padded,
     cdef Py_ssize_t row, col, channel
     cdef Py_ssize_t row_start = max(1, -t_row)
     cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
-    cdef Py_ssize_t col_end = min(n_col, n_col - t_col)
     cdef np_floats t, distance
 
     for row in range(row_start, row_end):
-        for col in range(1, col_end):
+        for col in range(1, n_col - t_col):
             distance = 0
             for channel in range(n_channels):
                 t = (padded[row, col, channel] -
                      padded[row + t_row, col + t_col, channel])
                 distance += t * t
-            distance -= n_channels * var
+            distance -= n_channels * var_diff
             integral[row, col] = (distance +
                                   integral[row - 1, col] +
                                   integral[row, col - 1] -
@@ -425,7 +426,7 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
                                     Py_ssize_t t_pln, Py_ssize_t t_row,
                                     Py_ssize_t t_col, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
-                                    np_floats var) nogil:
+                                    np_floats var_diff) nogil:
     """
     Computes the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
@@ -442,13 +443,14 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
     t_row : Py_ssize_t
         Shift along the row axis.
     t_col : Py_ssize_t
-        Shift along the column axis.
+        Shift along the column axis (positive).
     n_pln : Py_ssize_t
     n_row : Py_ssize_t
     n_col : Py_ssize_t
-    var : np_floats
-        Expected noise variance.  If non-zero, this is used to reduce the
-        apparent patch distances by the expected distance due to the noise.
+    var_diff : np_floats
+        The double of the expected noise variance.  If non-zero, this
+        is used to reduce the apparent patch distances by the expected
+        distance due to the noise.
 
     Notes
     -----
@@ -462,16 +464,15 @@ cdef inline void _integral_image_3d(np_floats [:, :, ::] padded,
     cdef Py_ssize_t pln_end = min(n_pln, n_pln - t_pln)
     cdef Py_ssize_t row_start = max(1, -t_row)
     cdef Py_ssize_t row_end = min(n_row, n_row - t_row)
-    cdef Py_ssize_t col_end = min(n_col, n_col - t_col)
     cdef np_floats distance
 
     for pln in range(pln_start, pln_end):
         for row in range(row_start, row_end):
-            for col in range(1, col_end):
+            for col in range(1, n_col - t_col):
                 distance = (padded[pln, row, col] -
                             padded[pln + t_pln, row + t_row, col + t_col])
                 distance *= distance
-                distance -= var
+                distance -= var_diff
                 integral[pln, row, col] = (
                      distance +
                      integral[pln - 1, row, col] +
