@@ -3,9 +3,9 @@ from ..util import view_as_blocks
 
 
 def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
-    """
-    Down-sample image by applying function to local blocks. Able to do
-    max and mean pooling.
+    """Downsample image by applying function `func` to local blocks.
+
+    This function is useful for max and mean pooling, for example.
 
     Parameters
     ----------
