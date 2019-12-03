@@ -2,7 +2,7 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0, dtype=None):
+def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
     """
     Down-sample image by applying function to local blocks. Able to do
     max and mean pooling.
@@ -15,14 +15,15 @@ def block_reduce(image, block_size, func=np.sum, cval=0, dtype=None):
         Array containing down-sampling integer factor along each axis.
     func : callable
         Function object which is used to calculate the return value for each
-        local block. This function must implement an ``axis`` parameter such
-        as ``numpy.sum``, ``numpy.min``, or ``numpy.mean``.
+        local block. This function must implement an ``axis`` parameter.
+        Primary functions are ``numpy.sum``, ``numpy.min``, ``numpy.max``,
+        ``numpy.mean`` and ``numpy.median``.
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
-    dtype : string
-        Dtype argument passed to passed numpy function. Defaults to default
-        for function. Especially useful when using ``np.mean``.
+    **func_kwargs :
+        Flag arguments passed to func. Noteably useful for passing dtype
+        argument to ``np.mean``.
 
     Returns
     -------
@@ -78,4 +79,5 @@ def block_reduce(image, block_size, func=np.sum, cval=0, dtype=None):
 
     blocked = view_as_blocks(image, block_size)
 
-    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)), dtype=dtype)
+    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)),
+                **func_kwargs)
