@@ -151,7 +151,7 @@ merging, because:
 
 among others.
 
-All these are valid reasons for closing, but we must be wary not to alienate
+All these may be valid reasons for closing, but we must be wary not to alienate
 contributors by closing an issue or pull request without an explanation. When
 closing, your message should:
 
