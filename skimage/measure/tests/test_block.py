@@ -95,10 +95,10 @@ def test_func_kwargs_same_dtype():
                      [214, 205, 101,  57]], dtype=np.uint8)
 
     out = block_reduce(image, (2, 2), func=np.mean, dtype=np.uint8)
-    excepted = np.array([[41, 16], [32, 31]], dtype=np.uint8)
+    expected = np.array([[41, 16], [32, 31]], dtype=np.uint8)
 
-    assert_equal(out, excepted)
-    assert out.dtype == excepted.dtype
+    assert_equal(out, expected)
+    assert out.dtype == expected.dtype
 
 
 def test_func_kwargs_different_dtype():
@@ -109,7 +109,7 @@ def test_func_kwargs_different_dtype():
                      dtype=np.float64)
 
     out = block_reduce(image, (2, 2), func=np.mean, dtype=np.float16)
-    excepted = np.array([[0.6855, 0.3164], [0.4922, 0.521]], dtype=np.float16)
+    expected = np.array([[0.6855, 0.3164], [0.4922, 0.521]], dtype=np.float16)
 
-    assert_equal(out, excepted)
-    assert out.dtype == excepted.dtype
+    assert_equal(out, expected)
+    assert out.dtype == expected.dtype
