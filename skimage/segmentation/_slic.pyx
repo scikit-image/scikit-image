@@ -11,7 +11,7 @@ from ..util import regular_grid
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 cnp.ndarray[cnp.uint8_t, ndim=3, cast=True] mask,
+                 cnp.ndarray[cnp.npy_bool, ndim=3, cast=True] mask,
                  double[:, ::1] segments,
                  float step,
                  Py_ssize_t max_iter,
@@ -90,17 +90,17 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                               for s in slices]
 
     # Add mask support
-    cdef bint use_mask = <bint> (mask.size > 0)
+    cdef bint use_mask = mask is not None
     cdef Py_ssize_t mask_label = start_label - 1
 
     cdef Py_ssize_t[:, :, ::1] nearest_segments \
         = np.full((depth, height, width), mask_label, dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
-    cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
+    cdef Py_ssize_t[::1] n_segment_elems = np.empty(n_segments, dtype=np.intp)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
-    cdef char change
+    cdef bint change
     cdef double dist_center, cx, cy, cz, dx, dy, dz, t
 
     cdef double sz, sy, sx
@@ -114,11 +114,11 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double dist_color
 
     # The reference implementation (Achanta et al.) calls this invxywt
-    cdef double spatial_weight = float(1) / (step * step)
+    cdef double spatial_weight = 1.0 / (step * step)
 
     with nogil:
         for i in range(max_iter):
-            change = 0
+            change = False
             distance[:, :, :] = DBL_MAX
 
             # assign pixels to segments
@@ -145,7 +145,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dy *= dy
                         for x in range(x_min, x_max):
 
-                            if use_mask and (mask[z, y, x] == 0):
+                            if use_mask and not mask[z, y, x]:
                                 continue
 
                             dx = sx * (cx - x)
@@ -165,10 +165,10 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             if distance[z, y, x] > dist_center:
                                 nearest_segments[z, y, x] = k+start_label
                                 distance[z, y, x] = dist_center
-                                change = 1
+                                change = True
 
             # stop if no pixel changed its segment
-            if change == 0:
+            if not change:
                 break
 
             # recompute segment centers
@@ -181,7 +181,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                     for x in range(width):
 
                         if use_mask:
-                            if mask[z, y, x] == 0:
+                            if not mask[z, y, x]:
                                 continue
 
                             if nearest_segments[z, y, x] == mask_label:
@@ -207,7 +207,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         for x in range(width):
 
                             if use_mask:
-                                if mask[z, y, x] == 0:
+                                if not mask[z, y, x]:
                                     continue
 
                                 if nearest_segments[z, y, x] == mask_label:
@@ -278,7 +278,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     cdef Py_ssize_t zz, yy, xx
 
-    cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size, 3), dtype=np.intp)
+    cdef Py_ssize_t[:, ::1] coord_list = np.empty((max_size, 3), dtype=np.intp)
 
     with nogil:
         for z in range(depth):
@@ -309,8 +309,8 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                             yy = coord_list[bfs_visited, 1] + ddy[i]
                             xx = coord_list[bfs_visited, 2] + ddx[i]
                             if (0 <= xx < width and
-                                    0 <= yy < height and
-                                    0 <= zz < depth):
+                                0 <= yy < height and
+                                0 <= zz < depth):
                                 if (segments[zz, yy, xx] == label and
                                     connected_segments[zz, yy, xx] == mask_label):
                                     connected_segments[zz, yy, xx] = \

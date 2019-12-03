@@ -280,7 +280,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
-        mask = np.ones((0, 1, 1), dtype=np.bool)
 
     if spacing is None:
         spacing = np.ones(3)
