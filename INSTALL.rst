@@ -181,7 +181,7 @@ tests::
 
 3. Linux operating system installation
 --------------------------------------
-We do not recommend using the opearting system's environment of python for a few
+We do not recommend using the operating system's environment of python for a few
 reasons:
 
   1. It is easy to type ``sudo pip [...]`` and cause major problems in the 
