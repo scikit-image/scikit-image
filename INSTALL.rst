@@ -116,3 +116,13 @@ additional python package installed:
 
 * `imread <http://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+
+* `dask <https://dask.org/>`__
+   Dask provides advanced parallelism for analytics, enabling performance at scale for the tools you love
+
+
+Using ``venv``, you can install ``PyAMG``, ``SimpleITK``, ``astropy`` and
+``dask`` by activating your virtual environment and typing::
+
+   pip install scikit-image[optional]
+
