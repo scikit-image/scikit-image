@@ -77,8 +77,7 @@ matrix:
     - os: linux
       python: 3.8
       stage: Initial tests
-      # Require pre for scikit-learn 0.22 that has builds for 3.8
-      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 PIP_FLAGS="--pre"
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 PIP_FLAGS=""
       dist: xenial # Required for Python 3.7+
       services:
         - xvfb
@@ -105,7 +104,7 @@ matrix:
       language: objective-c
       stage: Initial tests
       # Require pre for scikit-learn 0.22 that has builds for 3.8
-      env: MB_PYTHON_VERSION=3.8 PIP_FLAGS="--pre"
+      env: MB_PYTHON_VERSION=3.8 PIP_FLAGS=""
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
