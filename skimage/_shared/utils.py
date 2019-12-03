@@ -2,7 +2,6 @@ import warnings
 import functools
 import sys
 import numpy as np
-import types
 import numbers
 
 from ..util import img_as_float
@@ -228,21 +227,6 @@ def check_nD(array, ndim, arg_name='image'):
         raise ValueError(msg_empty_array % (arg_name))
     if not array.ndim in ndim:
         raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
-
-
-def copy_func(f, name=None):
-    """Create a copy of a function.
-
-    Parameters
-    ----------
-    f : function
-        Function to copy.
-    name : str, optional
-        Name of new function.
-
-    """
-    return types.FunctionType(f.__code__, f.__globals__, name or f.__name__,
-                              f.__defaults__, f.__closure__)
 
 
 def check_random_state(seed):

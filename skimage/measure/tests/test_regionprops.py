@@ -518,6 +518,17 @@ def test_regionprops_table():
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
+    out = regionprops_table(np.zeros((2, 2), dtype=int),
+                            properties=('label', 'area', 'bbox'),
+                            separator='+')
+    assert len(out) == 6
+    assert len(out['label']) == 0
+    assert len(out['area']) == 0
+    assert len(out['bbox+0']) == 0
+    assert len(out['bbox+1']) == 0
+    assert len(out['bbox+2']) == 0
+    assert len(out['bbox+3']) == 0
+
 
 def test_props_dict_complete():
     region = regionprops(SAMPLE)[0]

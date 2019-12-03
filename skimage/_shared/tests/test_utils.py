@@ -1,5 +1,5 @@
 import sys
-from skimage._shared.utils import copy_func, check_nD, deprecate_kwarg
+from skimage._shared.utils import check_nD, deprecate_kwarg
 import numpy.testing as npt
 import numpy as np
 from skimage._shared import testing
@@ -57,21 +57,6 @@ def test_check_nD():
     x = z[10:30, 30:10]
     with testing.raises(ValueError):
         check_nD(x, 2)
-
-
-def test_copyfunc():
-    def foo(a):
-        return a
-
-    bar = copy_func(foo, name='bar')
-    other = copy_func(foo)
-
-    npt.assert_equal(bar.__name__, 'bar')
-    npt.assert_equal(other.__name__, 'foo')
-
-    other.__name__ = 'other'
-
-    npt.assert_equal(foo.__name__, 'foo')
 
 
 if __name__ == "__main__":
