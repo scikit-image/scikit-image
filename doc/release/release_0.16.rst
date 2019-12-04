@@ -1,3 +1,38 @@
+Announcement: scikit-image 0.16.2
+=================================
+
+We're happy to announce the release of scikit-image v0.16.2!
+
+scikit-image is an image processing toolbox for SciPy that includes algorithms
+for segmentation, geometric transformations, color space manipulation,
+analysis, filtering, morphology, feature detection, and more.
+
+This is a bug fix release that addresses several critical issues from 0.16.1.
+
+Bug fixes
+---------
+- Migrate to networkx 2.x (#4236, #4237)
+- Sync required numpy and dask to runtime versions (#4233, #4239)
+- Fix wrong argument parsing in structural_similarity (#4246, #4247)
+- Fix active contour gallery example after change to rc coordinates (#4257, #4262)
+
+4 authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- François Boulogne
+- Jarrod Millman
+- Mark Harfouche
+- Ondrej Pesek
+
+6 reviewers added to this release [alphabetical by first name or login]
+-----------------------------------------------------------------------
+- Alexandre de Siqueira
+- Egor Panfilov
+- François Boulogne
+- Juan Nunez-Iglesias
+- Mark Harfouche
+- Nelle Varoquaux
+
+
 Announcement: scikit-image 0.16.1
 =================================
 

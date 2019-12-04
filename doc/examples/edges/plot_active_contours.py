@@ -47,8 +47,8 @@ snake = active_contour(gaussian(img, 3),
 
 fig, ax = plt.subplots(figsize=(7, 7))
 ax.imshow(img, cmap=plt.cm.gray)
-ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
-ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
+ax.plot(init[:, 1], init[:, 0], '--r', lw=3)
+ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
 ax.set_xticks([]), ax.set_yticks([])
 ax.axis([0, img.shape[1], img.shape[0], 0])
 
@@ -72,8 +72,8 @@ snake = active_contour(gaussian(img, 1), init, boundary_condition='fixed',
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.imshow(img, cmap=plt.cm.gray)
-ax.plot(init[:, 0], init[:, 1], '--r', lw=3)
-ax.plot(snake[:, 0], snake[:, 1], '-b', lw=3)
+ax.plot(init[:, 1], init[:, 0], '--r', lw=3)
+ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
 ax.set_xticks([]), ax.set_yticks([])
 ax.axis([0, img.shape[1], img.shape[0], 0])
 

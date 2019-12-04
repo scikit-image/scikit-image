@@ -1,7 +1,8 @@
+from numpy.testing import assert_array_equal
 import numpy as np
 from skimage.future import graph
 from skimage._shared.version_requirements import is_installed
-from skimage import segmentation
+from skimage import segmentation, data
 from skimage._shared import testing
 
 
@@ -182,6 +183,22 @@ def test_ncut_stable_subgraph():
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 
     assert new_labels.max() == 0
+
+
+def test_reproducibility():
+    """ensure cut_normalized returns the same output for the same input,
+    when specifying random_state
+    """
+    img = data.coffee()
+    labels1 = segmentation.slic(img, compactness=30, n_segments=400)
+    g = graph.rag_mean_color(img, labels1, mode='similarity')
+    results = [None] * 10
+    for i in range(len(results)):
+        results[i] = graph.cut_normalized(
+            labels1, g, in_place=False, thresh=1e-3, random_state=1234)
+
+    for i in range(len(results) - 1):
+        assert_array_equal(results[i], results[i + 1])
 
 
 def test_generic_rag_2d():

@@ -83,10 +83,10 @@ def moments_coords_central(coords, center=None, order=3):
     ...                    for row in range(13, 17)
     ...                    for col in range(14, 18)])
     >>> moments_coords_central(coords)
-    array([[ 16.,   0.,  20.,   0.],
-           [  0.,   0.,   0.,   0.],
-           [ 20.,   0.,  25.,   0.],
-           [  0.,   0.,   0.,   0.]])
+    array([[16.,  0., 20.,  0.],
+           [ 0.,  0.,  0.,  0.],
+           [20.,  0., 25.,  0.],
+           [ 0.,  0.,  0.,  0.]])
 
     As seen above, for symmetric objects, odd-order moments (columns 1 and 3,
     rows 1 and 3) are zero when centered on the centroid, or center of mass,
@@ -96,10 +96,10 @@ def moments_coords_central(coords, center=None, order=3):
     >>> coords2 = np.concatenate((coords, [[17, 17]]), axis=0)
     >>> np.round(moments_coords_central(coords2),
     ...          decimals=2)  # doctest: +NORMALIZE_WHITESPACE
-    array([[ 17.  ,   0.  ,  22.12,  -2.49],
-           [  0.  ,   3.53,   1.73,   7.4 ],
-           [ 25.88,   6.02,  36.63,   8.83],
-           [  4.15,  19.17,  14.8 ,  39.6 ]])
+    array([[17.  ,  0.  , 22.12, -2.49],
+           [ 0.  ,  3.53,  1.73,  7.4 ],
+           [25.88,  6.02, 36.63,  8.83],
+           [ 4.15, 19.17, 14.8 , 39.6 ]])
 
     Image moments and central image moments are equivalent (by definition)
     when the center is (0, 0):
@@ -233,10 +233,10 @@ def moments_central(image, center=None, order=3, **kwargs):
     >>> M = moments(image)
     >>> centroid = (M[1, 0] / M[0, 0], M[0, 1] / M[0, 0])
     >>> moments_central(image, centroid)
-    array([[ 16.,   0.,  20.,   0.],
-           [  0.,   0.,   0.,   0.],
-           [ 20.,   0.,  25.,   0.],
-           [  0.,   0.,   0.,   0.]])
+    array([[16.,  0., 20.,  0.],
+           [ 0.,  0.,  0.,  0.],
+           [20.,  0., 25.,  0.],
+           [ 0.,  0.,  0.,  0.]])
     """
     if center is None:
         center = centroid(image)
@@ -288,10 +288,10 @@ def moments_normalized(mu, order=3):
     >>> centroid = (m[0, 1] / m[0, 0], m[1, 0] / m[0, 0])
     >>> mu = moments_central(image, centroid)
     >>> moments_normalized(mu)
-    array([[        nan,         nan,  0.078125  ,  0.        ],
-           [        nan,  0.        ,  0.        ,  0.        ],
-           [ 0.078125  ,  0.        ,  0.00610352,  0.        ],
-           [ 0.        ,  0.        ,  0.        ,  0.        ]])
+    array([[       nan,        nan, 0.078125  , 0.        ],
+           [       nan, 0.        , 0.        , 0.        ],
+           [0.078125  , 0.        , 0.00610352, 0.        ],
+           [0.        , 0.        , 0.        , 0.        ]])
 
     """
     if np.any(np.array(mu.shape) <= order):
