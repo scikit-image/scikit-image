@@ -57,7 +57,7 @@ from ..._shared.utils import check_nD, warn
 from . import generic_cy
 
 
-__all__ = ['autolevel', 'bottomhat', 'equalize', 'equalize_3D', 'gradient', 'maximum', 'mean',
+__all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
            'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
            'entropy', 'otsu']

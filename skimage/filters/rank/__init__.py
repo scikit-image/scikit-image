@@ -1,4 +1,4 @@
-from .generic import (autolevel, bottomhat, equalize, equalize_3D, gradient,
+from .generic import (autolevel, bottomhat, equalize, gradient,
                       maximum, mean, geometric_mean, subtract_mean,
                       median, minimum, modal, enhance_contrast, pop,
                       threshold, tophat, noise_filter, entropy, otsu,
@@ -14,7 +14,6 @@ __all__ = ['autolevel',
            'autolevel_percentile',
            'bottomhat',
            'equalize',
-           'equalize_3D',
            'gradient',
            'gradient_percentile',
            'maximum',
@@ -45,4 +44,5 @@ __all__ = ['autolevel',
            'windowed_histogram',
            'majority']
 
-__3Dfilters__ = ['equalize']
+__3Dfilters__ = ['equalize',
+                 'otsu']
