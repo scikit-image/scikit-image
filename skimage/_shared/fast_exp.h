@@ -6,14 +6,13 @@
 #include <stdint.h>
 
 /* use just EXP_A = 1512775 for integer version, to avoid FP calculations */
-#define EXP_A (1512775.3951951856938)  /* 2^20÷ln2 */
+#define EXP_A (1512775.3951951856938)  /* 2^20*ln2 */
 /* For min. RMS error */
 #define EXP_BC 1072632447              /* 1023*2^20 - 60801 */
 /* For min. max. relative error */
 /* #define EXP_BC 1072647449 */        /* 1023*2^20 - 45799 */
 /* For min. mean relative error */
 /* #define EXP_BC 1072625005 */        /* 1023*2^20 - 68243 */
-
 
 __inline double fast_exp (double y)
 {
@@ -70,11 +69,9 @@ __inline float _fast_expf(float y)
     return (float)_eco.d;
 }
 
-
-#define EXPF_A (184.6649652337873)  /* 2^7÷ln2 */
+#define EXPF_A (184.6649652337873)  /* 2^7/ln2 */
 /* For min. RMS error */
 #define EXPF_BC 16249              /* 127*2^7 - 7 */
-
 
 __inline float fast_expf (float y)
 {
