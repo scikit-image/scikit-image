@@ -4,7 +4,7 @@
  * Additional improvements by Leonid Bloch. */
 
 /* use just EXP_A = 1512775 for integer version, to avoid FP calculations */
-#define EXP_A (1512775.3951951856938)  /* 2^20*ln2 */
+#define EXP_A (1512775.3951951856938)  /* 2^20/ln2 */
 /* For min. RMS error */
 #define EXP_BC 1072632447              /* 1023*2^20 - 60801 */
 /* For min. max. relative error */
