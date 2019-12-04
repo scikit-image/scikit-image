@@ -44,5 +44,4 @@ __all__ = ['autolevel',
            'windowed_histogram',
            'majority']
 
-__3Dfilters__ = ['equalize',
-                 'otsu']
+__3Dfilters__ = ['equalize']
