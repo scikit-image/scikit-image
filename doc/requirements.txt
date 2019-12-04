@@ -1,0 +1,3 @@
+# For binder
+scikit-image
+scikit-learn

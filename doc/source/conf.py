@@ -68,6 +68,17 @@ sphinx_gallery_conf = {
         '../examples/applications',
         '../examples/developers',
     ]),
+    'binder': {
+     # Required keys
+     'org': 'scikit-image',
+     'repo': 'docs',
+     'branch': 'gh-pages',  # Can be any branch, tag, or commit hash. Use a branch that hosts your docs.
+     'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub deployment. Must be full URL (e.g. https://mybinder.org).
+     'dependencies': '../requirements.txt',
+     # Optional keys
+     'filepath_prefix': 'dev/', # A prefix to prepend to any filepaths in Binder links.
+     'use_jupyter_lab': False  # Whether Binder links should start Jupyter Lab instead of the Jupyter Notebook interface.
+     }
 }
 
 # Determine if the matplotlib has a recent enough version of the
