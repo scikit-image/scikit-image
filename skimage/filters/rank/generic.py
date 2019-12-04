@@ -334,7 +334,7 @@ def equalize(image, selem, out=None, mask=None,
 
     Returns
     -------
-    out : (N, M[,P])   ndarray (same dtype as input image)
+    out : (N, M[,P]) ndarray (same dtype as input image)
         Output image.
 
     Examples
