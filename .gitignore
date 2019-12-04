@@ -13,6 +13,7 @@ __pycache__
 *.new
 *.md5
 *.old
+.DS_Store
 .pytest_cache
 temp.tif
 .ropeproject
