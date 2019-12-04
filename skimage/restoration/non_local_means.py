@@ -11,8 +11,7 @@ from ._nl_means_denoising import (
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
                      multichannel=False, fast_mode=True, sigma=0., *,
                      preserve_range=None):
-    """
-    Perform non-local means denoising on 2-D or 3-D grayscale images, and
+    """Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
 
     Parameters
@@ -106,6 +105,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     ``h = 0.8 * sigma`` when `fast_mode` is `True`, or ``h = 0.6 * sigma`` when
     `fast_mode` is `False`.
 
+    Artifacts may appear in fast mode when large single precision
+    (float32) volumetric data is processed. These artifacts are caused
+    by round-off errors accumulation.
+
     References
     ----------
     .. [1] A. Buades, B. Coll, & J-M. Morel. A non-local algorithm for image
@@ -132,6 +135,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     >>> a[10:-10, 10:-10] = 1.
     >>> a += 0.3 * np.random.randn(*a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
+
     """
     if image.ndim == 2:
         image = image[..., np.newaxis]
