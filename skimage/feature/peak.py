@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.ndimage as ndi
-from ..segmentation import relabel_sequential
 from .. import measure
 from ..filters import rank_order
 
@@ -42,16 +41,16 @@ def _get_peak_mask(image, min_distance, footprint, threshold_abs,
     return mask
 
 
-def _exclude_border(mask, footprint, exclude_border):
+def _exclude_border(mask, exclude_border):
     """
     Remove peaks near the borders
     """
     # zero out the image borders
-    for i in range(mask.ndim):
-        remove = (footprint.shape[i] if footprint is not None
-                  else 2 * exclude_border)
-        mask[(slice(None),) * i + (slice(None, remove // 2),)] = False
-        mask[(slice(None),) * i + (slice(-remove // 2, None),)] = False
+    for i, excluded in enumerate(exclude_border):
+        if excluded == 0:
+            continue
+        mask[(slice(None),) * i + (slice(None, excluded),)] = False
+        mask[(slice(None),) * i + (slice(-excluded, None),)] = False
     return mask
 
 
@@ -85,12 +84,16 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         the minimum intensity of the image.
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as `max(image) * threshold_rel`.
-    exclude_border : int or bool, optional
-        If nonzero int, `exclude_border` excludes peaks from
-        within `exclude_border`-pixels of the border of the image.
+    exclude_border : int, tuple of ints, or bool, optional
+        If positive integer, `exclude_border` excludes peaks from within
+        `exclude_border`-pixels of the border of the image.
+        If tuple of non-negative ints, the length of the tuple must match the
+        input array's dimensionality.  Each element of the tuple will exclude
+        peaks from within `exclude_border`-pixels of the border of the image
+        along that dimension.
         If True, takes the `min_distance` parameter as value.
-        If zero or False, peaks are identified regardless of their
-        distance from the border.
+        If zero or False, peaks are identified regardless of their distance
+        from the border.
     indices : bool, optional
         If True, the output will be an array representing peak
         coordinates.  If False, the output will be a boolean array shaped as
@@ -101,7 +104,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     footprint : ndarray of bools, optional
         If provided, `footprint == 1` represents the local region within which
         to search for peaks at every point in `image`.  Overrides
-        `min_distance` (also for `exclude_border`).
+        `min_distance`.
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
@@ -159,8 +162,30 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     threshold_abs = threshold_abs if threshold_abs is not None else image.min()
 
-    if type(exclude_border) == bool:
-        exclude_border = min_distance if exclude_border else 0
+    if isinstance(exclude_border, bool):
+        exclude_border = (min_distance if exclude_border else 0,) * image.ndim
+    elif isinstance(exclude_border, int):
+        if exclude_border < 0:
+            raise ValueError("`exclude_border` cannot be a negative value")
+        exclude_border = (exclude_border,) * image.ndim
+    elif isinstance(exclude_border, tuple):
+        if len(exclude_border) != image.ndim:
+            raise ValueError(
+                "`exclude_border` should have the same length as the "
+                "dimensionality of the image.")
+        for exclude in exclude_border:
+            if not isinstance(exclude, int):
+                raise ValueError(
+                    "`exclude_border`, when expressed as a tuple, must only "
+                    "contain ints."
+                )
+            if exclude < 0:
+                raise ValueError(
+                    "`exclude_border` cannot contain a negative value")
+    else:
+        raise TypeError(
+            "`exclude_border` must be bool, int, or tuple with the same "
+            "length as the dimensionality of the image.")
 
     # no peak for a trivial image
     if np.all(image == image.flat[0]):
@@ -178,10 +203,9 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
             labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
         labels = labels.astype(np.int32)
 
-        if exclude_border:
-            # create a mask for the non-exclude region
-            inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
-                                         footprint, exclude_border)
+        # create a mask for the non-exclude region
+        inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
+                                     exclude_border)
 
         # For each label, extract a smaller image enclosing the object of
         # interest, identify num_peaks_per_label peaks and mark them in
@@ -216,8 +240,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     mask = _get_peak_mask(image, min_distance, footprint, threshold_abs,
                           threshold_rel)
 
-    if exclude_border:
-        mask = _exclude_border(mask, footprint, exclude_border)
+    mask = _exclude_border(mask, exclude_border)
 
     # Select highest intensities (num_peaks)
     coordinates = _get_high_intensity_peaks(image, mask, num_peaks)
