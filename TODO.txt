@@ -39,6 +39,12 @@ Version 0.18
 * In ``skimage.features.corner_peaks``, remove the warning.
 * In ``skimage/transform`` remove histogram_matching.py.
 
+Version 0.19
+------------
+
+* Remove the definition of `skimage.util.pad` and
+  skimage/util/tests/test_arraypad.py.
+
 Other
 -----
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0

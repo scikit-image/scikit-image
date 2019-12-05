@@ -439,6 +439,7 @@ def test_blob_log_overlap_3d_anisotropic():
     assert_almost_equal(overlap,
                         1./math.pi * (2 * math.acos(1./2) - math.sqrt(3)/2.))
 
+
 def test_no_blob():
     im = np.zeros((10, 10))
     blobs = blob_log(im,  min_sigma=2, max_sigma=5, num_sigma=4)
