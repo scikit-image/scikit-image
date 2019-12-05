@@ -111,6 +111,8 @@ long-term, continued commitment to the project and its :ref:`values`. A
 nomination will result in discussion that cannot take more than a month and
 then admission to the SC by consensus.
 
+The scikit-image steering council may be contacted at
+`skimage-steering@groups.io <mailto:skimage-steering@groups.io>`__.
 
 Decision Making Process
 =======================
