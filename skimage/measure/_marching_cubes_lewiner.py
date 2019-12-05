@@ -10,7 +10,7 @@ from ._marching_cubes_classic import _marching_cubes_classic
 
 def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                    gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, method='lewiner'):
+                   allow_degenerate=True, method='lewiner', mask=None):
     """Marching cubes algorithm to find surfaces in 3d volumetric data.
 
     In contrast with Lorensen et al. approach [2], Lewiner et
@@ -49,6 +49,13 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         Lewiner et al. or Lorensen et al. method will be used. The
         '_lorensen' flag correspond to an old implementation that will
         be deprecated in version 0.19.
+    mask : (M, N, P) array
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
+
 
     Returns
     -------
@@ -119,11 +126,11 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     if method == 'lewiner':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=False)
+                                       allow_degenerate, use_classic=False, mask=mask)
     elif method == 'lorensen':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=True)
+                                       allow_degenerate, use_classic=True, mask=mask)
     elif method == '_lorensen':
         return _marching_cubes_classic(volume, level, spacing,
                                        gradient_direction)
