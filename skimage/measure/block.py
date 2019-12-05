@@ -2,7 +2,7 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0):
+def block_reduce(image, block_size, func=np.sum, cval=0, axis=None):
     """Down-sample image by applying function to local blocks.
 
     Parameters
@@ -18,6 +18,9 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
+    axis : array_like
+        Specify the list of axes to reduce over, on which func will be
+        called. If None, it reduces over all axes.
 
     Returns
     -------
@@ -56,6 +59,10 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
         raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
 
+    if axis is not None and len(axis) > len(block_size):
+        raise ValueError("`axis` can not have more indexes than the ones in "
+                         "the number of dims in `block_size`.")
+
     pad_width = []
     for i in range(len(block_size)):
         if block_size[i] < 1:
@@ -72,5 +79,17 @@ def block_reduce(image, block_size, func=np.sum, cval=0):
                    constant_values=cval)
 
     blocked = view_as_blocks(image, block_size)
+    
+    if axis is None:
+        for i in range(len(out.shape) // 2):
+            out = func(out, axis=-1)
 
-    return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)))
+    else:
+        np_axis = np.array(axis)
+        np_axis -= len(out.shape) // 2
+        np_axis = np.sort(np_axis)
+        for ax in np_axis:
+            out = func(out, axis=ax)
+
+    return out
+
