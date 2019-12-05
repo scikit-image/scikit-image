@@ -19,7 +19,9 @@ then
 
     git rm -r dev
     cp -r ../doc/build/html dev
+    mv dev/binder .
     git add dev
+    git add binder
 
     git commit -m "Deployed to GitHub Pages"
     git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" gh-pages > /dev/null 2>&1
