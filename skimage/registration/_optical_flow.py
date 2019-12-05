@@ -218,7 +218,7 @@ def optical_flow_tvl1(reference_image, moving_image,
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
-def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
+def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
          prefilter):
     """Iterative Lucas-Kanade (iLK) solver for optical flow estimation.
 
@@ -232,7 +232,7 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
         Initialization for the vector field.
     radius : int
         Radius of the window considered around each pixel.
-    nwarp : int
+    num_warp : int
         Number of times moving_image is warped.
     gaussian : bool
         if True, a gaussian kernel is used for the local
@@ -249,16 +249,11 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
     """
     dtype = reference_image.dtype
     ndim = reference_image.ndim
-
-    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
-                         for n in reference_image.shape], indexing='ij')
-
     size = 2 * radius + 1
 
     if gaussian:
-        s = size / 4
-        filter_func = partial(ndi.gaussian_filter, sigma=(0, ) + ndim * (s, ),
-                              mode='mirror')
+        sigma = (0, ) + ndim * (size / 4, )
+        filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
     else:
         filter_func = partial(ndi.uniform_filter, size=(1, ) + ndim * (size, ),
                               mode='mirror')
@@ -266,10 +261,16 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
     flow = flow0
     coef = np.zeros((int((ndim * (ndim + 1)) / 2 + ndim), )
                     + reference_image.shape, dtype=dtype)
+    # For each pixel location (i, j), the optical flow X = flow[:, i, j]
+    # is the solution of the ndim x ndim linear system
+    # A[i, j] * X = b[i, j]
     A = np.zeros(reference_image.shape + (ndim, ndim), dtype=dtype)
     b = np.zeros(reference_image.shape + (ndim, ), dtype=dtype)
 
-    for _ in range(nwarp):
+    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
+                         for n in reference_image.shape], indexing='ij')
+
+    for _ in range(num_warp):
         if prefilter:
             flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
 
@@ -277,6 +278,7 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
         grad = np.array(np.gradient(moving_image_warp))
         It = (grad * flow).sum(0) + reference_image - moving_image_warp
 
+        # Local linear systems creation
         k = 0
         for i in range(ndim):
             for j in range(i, ndim):
@@ -295,10 +297,12 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
                 A[..., i, j] = A[..., j, i] = coef[k]
                 k += 1
 
+        # Don't consider badly conditioned linear systems
         idx = abs(np.linalg.det(A)) < 1e-14
         A[idx] = np.eye(ndim, dtype=dtype)
         b[idx] = 0
 
+        # Solve the local linear systems
         flow = np.transpose(np.linalg.solve(A, b),
                             (ndim, ) + tuple(range(ndim)))
 
@@ -306,7 +310,7 @@ def _ilk(reference_image, moving_image, flow0, radius, nwarp, gaussian,
 
 
 def optical_flow_ilk(reference_image, moving_image, *,
-                     radius=7, nwarp=10, gaussian=False,
+                     radius=7, num_warp=10, gaussian=False,
                      prefilter=False, dtype=np.float32):
     """Coarse to fine optical flow estimator.
 
@@ -323,7 +327,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
         The second gray scale image of the sequence.
     radius : int, optional
         Radius of the window considered around each pixel.
-    nwarp : int, optional
+    num_warp : int, optional
         Number of times moving_image is warped.
     gaussian : bool, optional
         if True, a gaussian kernel is used for the local
@@ -340,6 +344,10 @@ def optical_flow_ilk(reference_image, moving_image, *,
     -------
     flow : ndarray, shape ((reference_image.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
+
+    Notes
+    -----
+    Color images are not supported.
 
     References
     ----------
@@ -365,7 +373,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     """
 
-    solver = partial(_ilk, radius=radius, nwarp=nwarp, gaussian=gaussian,
+    solver = partial(_ilk, radius=radius, num_warp=num_warp, gaussian=gaussian,
                      prefilter=prefilter)
 
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
