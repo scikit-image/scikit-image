@@ -15,11 +15,6 @@ from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
 
-from .._shared.utils import copy_func
-
-from numpy import pad as numpy_pad
-pad = copy_func(numpy_pad, name='pad')
-
 
 @functools.wraps(np.pad)
 def pad(*args, **kwargs):
