@@ -132,6 +132,8 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                                        gradient_direction, step_size,
                                        allow_degenerate, use_classic=True, mask=mask)
     elif method == '_lorensen':
+        if mask is not None:
+            warnings.warn('Attribute mask is not implemented for _lorensen method.')
         return _marching_cubes_classic(volume, level, spacing,
                                        gradient_direction)
     else:
