@@ -3,7 +3,8 @@ from scipy import ndimage as ndi
 
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=1, mode='constant', cval=0.0):
+                 order=1, mode='constant', cval=0.0,
+                 *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -26,6 +27,10 @@ def profile_line(image, src, dst, linewidth=1,
         How to compute any values falling outside of the image.
     cval : float, optional
         If `mode` is 'constant', what constant value to use outside the image.
+    reduce_func : callable, optional
+        Function used to calculate the aggregation of pixel values
+        perpendicular to the profile_line direction when `linewidth` > 1.
+        If set to None the unreduced array will be returned.
 
     Returns
     -------
@@ -56,6 +61,30 @@ def profile_line(image, src, dst, linewidth=1,
     array([1., 1., 1., 2., 2., 2., 0.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
     array([1., 1., 1., 2., 2., 2.])
+
+    For different reduce_func inputs:
+
+    >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.mean)
+    array([0.66666667, 0.66666667, 0.66666667, 1.33333333])
+    >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.max)
+    array([1, 1, 1, 2])
+    >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sum)
+    array([2, 2, 2, 4])
+
+    The unreduced array will be returned when `reduce_func` is None or when
+    `reduce_func` acts on each pixel value individually.
+
+    >>> profile_line(img, (1, 2), (4, 2), linewidth=3, order=0,
+    ...     reduce_func=None)
+    array([[1, 1, 2],
+           [1, 1, 2],
+           [1, 1, 2],
+           [0, 0, 0]])
+    >>> profile_line(img, (1, 0), (1, 3), linewidth=3, reduce_func=np.sqrt)
+    array([[1.        , 1.        , 0.        ],
+           [1.        , 1.        , 0.        ],
+           [1.        , 1.        , 0.        ],
+           [1.41421356, 1.41421356, 0.        ]])
     """
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
@@ -66,7 +95,17 @@ def profile_line(image, src, dst, linewidth=1,
     else:
         pixels = ndi.map_coordinates(image, perp_lines,
                                      order=order, mode=mode, cval=cval)
-    intensities = pixels.mean(axis=1)
+    # The outputted array with reduce_func=None gives an array where the
+    # row values (axis=1) are flipped. Here, we make this consistent.
+    pixels = np.flip(pixels, axis=1)
+
+    if reduce_func is None:
+        intensities = pixels
+    else:
+        try:
+            intensities = reduce_func(pixels, axis=1)
+        except TypeError:  # function doesn't allow axis kwarg
+            intensities = np.apply_along_axis(reduce_func, arr=pixels, axis=1)
 
     return intensities
 

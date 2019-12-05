@@ -6,6 +6,7 @@ from skimage import data_dir
 from skimage.io import imread
 from skimage.transform import radon, iradon, iradon_sart, rescale
 
+from skimage._shared.utils import convert_to_float
 from skimage._shared import testing
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
@@ -435,3 +436,32 @@ def test_iradon_sart():
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.022 * error_factor
+
+
+def test_radon_dtype():
+    img = convert_to_float(PHANTOM, False)
+    img32 = img.astype(np.float32)
+
+    assert radon(img).dtype == img.dtype
+    assert radon(img32).dtype == img32.dtype
+
+
+def test_iradon_sart_dtype():
+    sinogram = np.zeros((16, 1), dtype=int)
+    sinogram[8, 0] = 1.
+    sinogram64 = sinogram.astype('float64')
+    sinogram32 = sinogram.astype('float32')
+
+    with expected_warnings(['Input data is cast to float']):
+        assert iradon_sart(sinogram, theta=[0]).dtype == 'float64'
+
+    assert iradon_sart(sinogram64, theta=[0]).dtype == sinogram64.dtype
+    assert iradon_sart(sinogram32, theta=[0]).dtype == sinogram32.dtype
+
+
+def test_iradon_wrong_dtype():
+    sinogram = np.zeros((16, 1))
+
+    with testing.raises(ValueError):
+        iradon_sart(sinogram, dtype=int)
+
