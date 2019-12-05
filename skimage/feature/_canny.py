@@ -13,6 +13,7 @@ Original author: Lee Kamentsky
 """
 
 import warnings
+import functools
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -51,6 +52,52 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
+def _smooth_with_mask(image, function, mask):
+    """Smooth an image with a linear function, ignoring masked pixels.
+
+    Parameters
+    ----------
+    image : array
+        Image you want to smooth.
+    function : callable
+        A function that does image smoothing.
+    mask : array
+        Mask with 1's for significant pixels, 0's for masked pixels.
+
+    Notes
+    ------
+    This function calculates the fractional contribution of masked pixels
+    by applying the function to the mask (which gets you the fraction of
+    the pixel data that's due to significant points). We then mask the image
+    and apply the function. The resulting values will be lower by the
+    bleed-over fraction, so you can recalibrate by dividing by the function
+    on the mask to recover the effect of smoothing from just the significant
+    pixels.
+    """
+    bleed_over = function(mask.astype(float))
+    masked_image = np.zeros_like(image)
+    masked_image[mask] = image[mask]
+    smoothed_image = function(masked_image)
+    output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
+    return output_image
+
+
+def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
+                      col_slices, out):
+    r_0, r_1, r_2, r_3 = row_slices
+    c_0, c_1, c_2, c_3 = col_slices
+    c1 = magnitude[r_0, c_0][pts[r_1, c_1]]
+    c2 = magnitude[r_2, c_2][pts[r_3, c_3]]
+    m = magnitude[pts]
+    w = w_num[pts] / w_denum[pts]
+    c_plus = c2 * w + c1 * (1 - w) <= m
+    c1 = magnitude[r_1, c_1][pts[r_0, c_0]]
+    c2 = magnitude[r_3, c_3][pts[r_2, c_2]]
+    c_minus = c2 * w + c1 * (1 - w) <= m
+    out[pts] = c_plus & c_minus
+    return out
+
+
 def _get_local_maxima(isobel, jsobel, magnitude, mask):
 
     abs_isobel = np.abs(isobel)
@@ -85,56 +132,40 @@ def _get_local_maxima(isobel, jsobel, magnitude, mask):
     # Get the magnitudes shifted left to make a matrix of the points to the
     # right of pts. Similarly, shift left and down to get the points to the
     # top right of pts.
-    c1 = magnitude[1:, :][pts[:-1, :]]
-    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
-    m = magnitude[pts]
-    w = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:-1, :][pts[1:, :]]
-    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_jsobel, abs_isobel,
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        local_maxima)
     # ----- 45 to 90 degrees ------
     # Mix diagonal and vertical
     #
     pts = ((pts_plus | pts_minus) & is_vertical)
-    c1 = magnitude[:, 1:][pts[:, :-1]]
-    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
-    m = magnitude[pts]
-    w = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:, :-1][pts[:, 1:]]
-    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_isobel, abs_jsobel,
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        local_maxima)
     # ----- 90 to 135 degrees ------
     # Mix anti-diagonal and vertical
     #
     pts_plus = is_down & is_right
     pts_minus = is_up & is_left
     pts = ((pts_plus | pts_minus) & is_vertical)
-    c1 = magnitude[:, 1:][pts[:, :-1]]
-    c2 = magnitude[:-1, 1:][pts[1:, :-1]]
-    m = magnitude[pts]
-    w = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus = c2 * w + c1 * (1.0 - w) <= m
-    c1 = magnitude[:, :-1][pts[:, 1:]]
-    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
-    c_minus = c2 * w + c1 * (1.0 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_isobel, abs_jsobel,
+        [slice(None), slice(None), slice(-1), slice(1, None)],
+        [slice(1, None), slice(-1), slice(1, None), slice(-1)],
+        local_maxima)
     # ----- 135 to 180 degrees ------
     # Mix anti-diagonal and anti-horizontal
     #
     pts = ((pts_plus | pts_minus) & is_horizontal)
-    c1 = magnitude[:-1, :][pts[1:, :]]
-    c2 = magnitude[:-1, 1:][pts[1:, :-1]]
-    m = magnitude[pts]
-    w = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[1:, :][pts[:-1, :]]
-    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
-    c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = c_plus & c_minus
+    local_maxima = _set_local_maxima(
+        magnitude, pts, abs_jsobel, abs_isobel,
+        [slice(-1), slice(1, None), slice(-1), slice(1, None)],
+        [slice(None), slice(None), slice(1, None), slice(-1)],
+        local_maxima)
 
     return local_maxima
 
@@ -268,11 +299,11 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
         if high_threshold < 0.0 or low_threshold < 0.0:
             raise ValueError("Quantile thresholds must not be < 0.0")
 
-    def fsmooth(x):
-        return gaussian(x, sigma, mode='constant')
-
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
+
+    fsmooth = functools.partial(gaussian, sigma=sigma, mode='constant',
+                                preserve_range=preserve_range)
 
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
 
