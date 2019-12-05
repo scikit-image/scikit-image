@@ -22,7 +22,7 @@ def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
         Constant padding value if image is not perfectly divisible by the
         block size.
     **func_kwargs :
-        Flag arguments passed to func. Noteably useful for passing dtype
+        Keyword arguments passed to `func`. Notably useful for passing dtype
         argument to ``np.mean``.
 
     Returns
