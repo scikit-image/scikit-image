@@ -15,6 +15,7 @@ import numpy as np
 
 from ..util import img_as_float, invert
 from .._shared.utils import check_nD
+from ..feature import hessian_matrix, hessian_matrix_eigvals
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -80,7 +81,8 @@ def _sortbyabs(array, axis=0):
     return array[tuple(index)]
 
 
-def compute_hessian_eigenvalues(image, sigma, sorting='none'):
+def compute_hessian_eigenvalues(image, sigma, sorting='none',
+                                mode='constant', cval=0):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -97,6 +99,11 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     sorting : {'val', 'abs', 'none'}, optional
         Sorting of eigenvalues by values ('val') or absolute values ('abs'),
         or without sorting ('none'). Default is 'none'.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -105,20 +112,18 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         of the input image.
     """
 
-    # Import has to be here due to circular import error
-    from ..feature import hessian_matrix, hessian_matrix_eigvals
-
     # Convert image to float
     image = img_as_float(image)
 
     # Make nD hessian
-    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc')
+    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
+                                      mode=mode)
 
     # Correct for scale
     hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     # Compute Hessian eigenvalues
-    hessian_eigenvalues = np.array(hessian_matrix_eigvals(hessian_elements))
+    hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
 
     if sorting == 'abs':
 
@@ -374,17 +379,17 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     """
 
     # Check deprecated keyword parameters
-    if beta1:
+    if beta1 is not None:
         warn('Use keyword parameter `beta` instead of `beta1` which '
              'will be removed in version 0.17.', stacklevel=2)
         beta = beta1
 
-    if beta2:
+    if beta2 is not None:
         warn('Use keyword parameter `gamma` instead of `beta2` which '
              'will be removed in version 0.17.', stacklevel=2)
         gamma = beta2
 
-    if scale_range and scale_step:
+    if scale_range is not None and scale_step is not None:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
              '`scale_range` which will be removed in version 0.17.',
              stacklevel=2)
@@ -394,7 +399,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     check_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
+    sigmas = np.asarray(sigmas).ravel()
     if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
 
@@ -413,18 +418,15 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
     filtered_array = np.zeros(sigmas.shape + image.shape)
-    lambdas_array = np.zeros(sigmas.shape + image.shape)
+    lambdas_array = np.zeros_like(filtered_array)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
 
         # Calculate (abs sorted) eigenvalues
         lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                        sorting='abs')
-
-        # Compute sensitivity to deviation from a plate-like structure
-        # see equations (11) and (15) in reference [1]_
-        r_a = np.inf if ndim == 2 else _divide_nonzero(*lambdas) ** 2
+                                                        sorting='abs',
+                                                        mode='reflect')
 
         # Compute sensitivity to deviation from a blob-like structure,
         # see equations (10) and (15) in reference [1]_,
@@ -438,9 +440,14 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
         # Compute output image for given (sigma) scale and store results in
         # (n+1)D matrices, see equations (13) and (15) in reference [1]_
-        filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
-                             * np.exp(-r_b / beta_sq)
+        filtered_array[i] = (np.exp(-r_b / beta_sq)
                              * (1 - np.exp(-r_g / gamma_sq)))
+        if ndim == 3:
+            # Compute sensitivity to deviation from a plate-like
+            # structure see equations (11) and (15) in reference [1]_
+            r_a = _divide_nonzero(*lambdas) ** 2
+            filtered_array[i] *= (1 - np.exp(-r_a / alpha_sq))
+
         lambdas_array[i] = np.max(lambdas, axis=0)
 
     # Remove background
