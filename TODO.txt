@@ -42,8 +42,11 @@ Version 0.18
 Version 0.19
 ------------
 
+* In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
+  in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * Remove the definition of `skimage.util.pad` and
   skimage/util/tests/test_arraypad.py.
+
 
 Other
 -----
@@ -64,9 +67,8 @@ Other
   of `feature.blob_log` using the vectorized version of ``np.logspace``.
 * Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` once
   the minimum supported version of ``scipy`` reaches 1.4.
-* When Python 3.8 is released, increment the version number on the last OSX
-  build to use Python 3.8 instead of 3.7.
-* When Python 3.8 is released, add entries to the build matrix in appveyor.
-* When Python 3.8 is released, add entries to the build matrix in azure.
 * When ``numpy`` is set to >= 1.16, simplify ``draw.line_nd`` by using the
   vectorized version of ``np.linspace``.
+* Monitor when multibuild devel gets merged into master for python 3.8 compatibility
+  https://github.com/matthew-brett/multibuild/issues/284
+  and update osx_install to point to the correct branch
