@@ -124,6 +124,9 @@ def _preprocess(image, mask, sigma, mode, preserve_range):
 
 def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
                       col_slices, out):
+    # Get the magnitudes shifted left to make a matrix of the points to the
+    # right of pts. Similarly, shift left and down to get the points to the
+    # top right of pts.
     r_0, r_1, r_2, r_3 = row_slices
     c_0, c_1, c_2, c_3 = col_slices
     c1 = magnitude[r_0, c_0][pts[r_1, c_1]]
@@ -140,16 +143,16 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
 
 def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
     #
-    # * Find the normal to the edge at each point using the arctangent of the
-    #   ratio of the Y sobel over the X sobel - pragmatically, we can
-    #   look at the signs of X and Y and the relative magnitude of X vs Y
-    #   to sort the points into 4 categories: horizontal, vertical,
-    #   diagonal and antidiagonal.
+    # Find the normal to the edge at each point using the arctangent of the
+    # ratio of the Y sobel over the X sobel - pragmatically, we can
+    # look at the signs of X and Y and the relative magnitude of X vs Y
+    # to sort the points into 4 categories: horizontal, vertical,
+    # diagonal and antidiagonal.
     #
-    # * Look in the normal and reverse directions to see if the values
-    #   in either of those directions are greater than the point in question.
-    #   Use interpolation to get a mix of points instead of picking the one
-    #   that's the closest to the normal.
+    # Look in the normal and reverse directions to see if the values
+    # in either of those directions are greater than the point in question.
+    # Use interpolation to get a mix of points instead of picking the one
+    # that's the closest to the normal.
 
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
@@ -171,6 +174,7 @@ def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
     #
     local_maxima = np.zeros(magnitude.shape, bool)
     # ----- 0 to 45 degrees ------
+    # Mix diagonal and horizontal
     pts_plus = is_up & is_right
     pts_minus = is_down & is_left
     pts = ((pts_plus | pts_minus) & is_horizontal)
@@ -326,7 +330,6 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     # because who knows what lies beyond the edge of the image?
     #
     check_nD(image, 2)
-    dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
         warnings.warn("Setting low_threshold to None is deprecated. "
@@ -344,6 +347,7 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
 
     if use_quantiles:
         if preserve_range:
+            dtype_max = dtype_limits(image, clip_negative=False)[1]
             low_threshold = low_threshold / dtype_max
             high_threshold = high_threshold / dtype_max
         if high_threshold < low_threshold:
