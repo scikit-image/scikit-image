@@ -74,6 +74,8 @@ Deprecations
 ------------
 - Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
   deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+- Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
+  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
 - Parameter ``filter`` in ``skimage.transform.iradon`` has been
   deprecated in favor of ``filter_name``.
 

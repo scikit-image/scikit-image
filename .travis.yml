@@ -74,14 +74,12 @@ matrix:
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:
         - xvfb
-    # When 3.8 gets released, and dependencies have built wheels, enable
-    # this build
-    # - os: linux
-    #   python: 3.8
-    #   env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
-    #   dist: xenial # Required for Python 3.7
-    #   services:
-    #     - xvfb
+    - os: linux
+      python: 3.8
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
+      dist: xenial # Required for Python 3.7+
+      services:
+        - xvfb
     - os: linux
       python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
@@ -95,17 +93,16 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.6
+      env: MB_PYTHON_VERSION=3.6
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
-    # When 3.8 gets released, and dependencies have built wheels, enable
-    # this build
-    # - os: osx
-    #   osx_image: xcode9.4
-    #   language: objective-c
-    #   env: TRAVIS_PYTHON_VERSION=3.8
+      env: MB_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+    - os: osx
+      osx_image: xcode9.4
+      language: objective-c
+      # Require pre for scikit-learn 0.22 that has builds for 3.8
+      env: MB_PYTHON_VERSION=3.8
 
 before_install:
     # Remove this line when the Ubuntu image is updated to Xenial
