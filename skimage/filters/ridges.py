@@ -15,7 +15,7 @@ import numpy as np
 
 from ..util import img_as_float, invert
 from .._shared.utils import check_nD
-from ..feature import hessian_matrix, hessian_matrix_eigvals
+from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
