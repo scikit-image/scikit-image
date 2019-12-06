@@ -127,4 +127,5 @@ class TestCanny(unittest.TestCase):
         high = 0.2
 
         assert_equal(F.canny(img, 1.0, low, high, preserve_range=False),
-                     F.canny(img, 1.0, 255*low, 255*high, preserve_range=True))
+                     F.canny(img, 1.0, 255 * low, 255 * high,
+                             preserve_range=True))
