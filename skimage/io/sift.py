@@ -1,4 +1,3 @@
-from six import string_types
 import numpy as np
 
 __all__ = ['load_sift', 'load_surf']
@@ -39,7 +38,7 @@ def _sift_read(filelike, mode='SIFT'):
           feature values
 
     """
-    if isinstance(filelike, string_types):
+    if isinstance(filelike, str):
         f = open(filelike, 'r')
         filelike_is_str = True
     else:

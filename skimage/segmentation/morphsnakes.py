@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from itertools import cycle
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 __all__ = ['morphological_chan_vese',
            'morphological_geodesic_active_contour',
@@ -86,7 +84,7 @@ _curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
 
 def _check_input(image, init_level_set):
     """Check that shapes of `image` and `init_level_set` match."""
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     if len(image.shape) != len(init_level_set.shape):
         raise ValueError("The dimensions of the initial level set do not "
@@ -280,7 +278,7 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
            Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
            Transactions on Pattern Analysis and Machine Intelligence (PAMI),
-           2014, DOI 10.1109/TPAMI.2013.106
+           2014, :DOI:`10.1109/TPAMI.2013.106`
     """
 
     init_level_set = _init_level_set(init_level_set, image.shape)
@@ -394,7 +392,7 @@ def morphological_geodesic_active_contour(gimage, iterations,
     .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
            Surfaces, Pablo Márquez-Neila, Luis Baumela, Luis Álvarez. In IEEE
            Transactions on Pattern Analysis and Machine Intelligence (PAMI),
-           2014, DOI 10.1109/TPAMI.2013.106
+           2014, :DOI:`10.1109/TPAMI.2013.106`
     """
 
     image = gimage

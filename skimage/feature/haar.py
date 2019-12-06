@@ -1,9 +1,7 @@
-from __future__ import division
 
 from itertools import chain
 from operator import add
 
-import six
 import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
@@ -23,7 +21,7 @@ def _validate_feature_type(feature_type):
     if feature_type is None:
         feature_type_ = FEATURE_TYPE
     else:
-        if isinstance(feature_type, six.string_types):
+        if isinstance(feature_type, str):
             feature_type_ = [feature_type]
         else:
             feature_type_ = feature_type
@@ -136,6 +134,17 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         is `uint` or `int` and `float` when the data type of `int_image` is
         `float`.
 
+    Notes
+    -----
+    When extracting those features in parallel, be aware that the choice of the
+    backend (i.e. multiprocessing vs threading) will have an impact on the
+    performance. The rule of thumb is as follows: use multiprocessing when
+    extracting features for all possible ROI in an image; use threading when
+    extracting the feature at specific location for a limited number of ROIs.
+    Refer to the example
+    :ref:`sphx_glr_auto_examples_applications_plot_haar_extraction_selection_classification.py`
+    for more insights.
+
     Examples
     --------
     >>> import numpy as np
@@ -175,12 +184,12 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
            In Computer Vision and Pattern Recognition, 1997. Proceedings.,
            1997 IEEE Computer Society Conference on (pp. 193-199). IEEE.
            http://tinyurl.com/y6ulxfta
-           DOI: 10.1109/CVPR.1997.609319
+           :DOI:`10.1109/CVPR.1997.609319`
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
            http://www.merl.com/publications/docs/TR2004-043.pdf
-           DOI: 10.1109/CVPR.2001.990517
+           :DOI:`10.1109/CVPR.2001.990517`
 
     """
     if feature_coord is None:
@@ -271,11 +280,11 @@ def draw_haar_like_feature(image, r, c, width, height,
     ...                                feature_coord,
     ...                                max_n_features=1)
     >>> image
-    array([[[ 0. ,  0.5,  0. ],
-            [ 0.5,  0. ,  0. ]],
+    array([[[0. , 0.5, 0. ],
+            [0.5, 0. , 0. ]],
     <BLANKLINE>
-           [[ 0.5,  0. ,  0. ],
-            [ 0. ,  0.5,  0. ]]])
+           [[0.5, 0. , 0. ],
+            [0. , 0.5, 0. ]]])
 
     """
     random_state = check_random_state(random_state)

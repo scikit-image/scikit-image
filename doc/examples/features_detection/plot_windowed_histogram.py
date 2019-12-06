@@ -35,7 +35,6 @@ References
        Trans. Image Processing, 16(9):2389-2394, 2007.
 """
 
-from __future__ import division
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

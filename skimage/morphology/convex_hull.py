@@ -6,6 +6,7 @@ from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
+from .._shared.utils import warn
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
@@ -43,16 +44,19 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     References
     ----------
-    .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+    .. [1] https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
     ndim = image.ndim
-
+    if np.count_nonzero(image) == 0:
+        warn("Input image is entirely zero, no valid convex hull. "
+             "Returning empty image", UserWarning)
+        return np.zeros(image.shape, dtype=np.bool_)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual hull.
     if ndim == 2:
-        coords = possible_hull(image.astype(np.uint8))
+        coords = possible_hull(np.ascontiguousarray(image, dtype=np.uint8))
     else:
         coords = np.transpose(np.nonzero(image))
         if offset_coordinates:
@@ -89,40 +93,67 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
     return mask
 
 
-def convex_hull_object(image, neighbors=8):
-    """Compute the convex hull image of individual objects in a binary image.
+def convex_hull_object(image, neighbors=None, *, connectivity=None):
+    r"""Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
 
     Parameters
     ----------
-    image : (M, N) array
+    image : (M, N) ndarray
         Binary input image.
-    neighbors : {4, 8}, int
-        Whether to use 4- or 8-connectivity.
+    neighbors : {4, 8}, int, optional
+        Whether to use 4 or 8 adjacent pixels as neighbors.
+        If ``None``, set to 8. **Deprecated, use** ``connectivity`` **instead.**
+    connectivity : {1, 2}, int, optional
+        Determines the neighbors of each pixel. Adjacent elements
+        within a squared distance of ``connectivity`` from pixel center
+        are considered neighbors. If ``None``, set to 2::
+
+            1-connectivity      2-connectivity
+                  [ ]           [ ]  [ ]  [ ]
+                   |               \  |  /
+             [ ]--[x]--[ ]      [ ]--[x]--[ ]
+                   |               /  |  \
+                  [ ]           [ ]  [ ]  [ ]
 
     Returns
     -------
     hull : ndarray of bool
-        Binary image with pixels in convex hull set to True.
+        Binary image with pixels inside convex hull set to ``True``.
 
     Notes
     -----
-    This function uses skimage.morphology.label to define unique objects,
-    finds the convex hull of each using convex_hull_image, and combines
+    This function uses ``skimage.morphology.label`` to define unique objects,
+    finds the convex hull of each using ``convex_hull_image``, and combines
     these regions with logical OR. Be aware the convex hulls of unconnected
     objects may overlap in the result. If this is suspected, consider using
-    convex_hull_image separately on each object.
-
+    convex_hull_image separately on each object or adjust ``connectivity``.
     """
     if image.ndim > 2:
         raise ValueError("Input must be a 2D image")
 
-    if neighbors != 4 and neighbors != 8:
-        raise ValueError('Neighbors must be either 4 or 8.')
+    if neighbors is None and connectivity is None:
+        connectivity = 2
+    elif neighbors is not None:
+        # Backward-compatibility
+        if neighbors == 4:
+            connectivity = 1
+        elif neighbors == 8:
+            connectivity = 2
+        else:
+            raise ValueError('`neighbors` must be either 4 or 8.')
+        warn("The argument `neighbors` is deprecated and will be removed in "
+             "scikit-image 0.18, use `connectivity` instead. "
+             "For neighbors={neighbors}, use connectivity={connectivity}"
+             "".format(neighbors=neighbors, connectivity=connectivity),
+             stacklevel=2)
+    else:
+        if connectivity not in (1, 2):
+            raise ValueError('`connectivity` must be either 1 or 2.')
 
-    labeled_im = label(image, neighbors, background=0)
+    labeled_im = label(image, connectivity=connectivity, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
 

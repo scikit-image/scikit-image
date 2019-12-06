@@ -15,6 +15,16 @@ def test_shape_mismatch():
         label2rgb(image, label)
 
 
+def test_wrong_kind():
+    image = np.ones((3, 3))
+    label = image
+    # Must not raise an error.
+    label2rgb(image, label)
+    # kind='foo' is wrong.
+    with testing.raises(ValueError):
+        label2rgb(image, label, kind='foo')
+
+
 def test_rgb():
     image = np.ones((1, 3))
     label = np.arange(3).reshape(1, -1)
@@ -113,7 +123,7 @@ def test_avg():
     # label image
     label_field = np.array([[1, 1, 1, 2],
                             [1, 2, 2, 2],
-                            [3, 3, 3, 3]], dtype=np.uint8)
+                            [3, 3, 4, 4]], dtype=np.uint8)
 
     # color image
     r = np.array([[1., 1., 0., 0.],
@@ -136,7 +146,7 @@ def test_avg():
                      [0.  , 0.  , 0.  , 0.  ]])
     bout = np.array([[0. , 0. , 0. , 1. ],
                      [0. , 1. , 1. , 1. ],
-                     [0.5, 0.5, 0.5, 0.5]])
+                     [0.0, 0.0, 1.0, 1.0]])
     expected_out = np.dstack((rout, gout, bout))
 
     # test standard averaging
@@ -157,5 +167,5 @@ def test_avg():
 
 def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
-    image = -1 * np.ones((10, 10))
+    image = np.full((10, 10), -1, dtype='float64')
     assert_warns(UserWarning, label2rgb, labels, image)

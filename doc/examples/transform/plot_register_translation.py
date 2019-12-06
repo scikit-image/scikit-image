@@ -12,7 +12,7 @@ arbitrary subpixel precision [1]_.
 
 .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
        "Efficient subpixel image registration algorithms," Optics Letters 33,
-       156-158 (2008). DOI:10.1364/OL.33.000156
+       156-158 (2008). :DOI:`10.1364/OL.33.000156`
 
 """
 import numpy as np
@@ -28,14 +28,14 @@ shift = (-22.4, 13.32)
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = fourier_shift(np.fft.fftn(image), shift)
 offset_image = np.fft.ifftn(offset_image)
-print("Known offset (y, x): {}".format(shift))
+print(f"Known offset (y, x): {shift}")
 
 # pixel precision first
 shift, error, diffphase = register_translation(image, offset_image)
 
 fig = plt.figure(figsize=(8, 3))
-ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
-ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1, adjustable='box-forced')
+ax1 = plt.subplot(1, 3, 1)
+ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1)
 ax3 = plt.subplot(1, 3, 3)
 
 ax1.imshow(image, cmap='gray')
@@ -56,14 +56,14 @@ ax3.set_title("Cross-correlation")
 
 plt.show()
 
-print("Detected pixel offset (y, x): {}".format(shift))
+print(f"Detected pixel offset (y, x): {shift}")
 
 # subpixel precision
 shift, error, diffphase = register_translation(image, offset_image, 100)
 
 fig = plt.figure(figsize=(8, 3))
-ax1 = plt.subplot(1, 3, 1, adjustable='box-forced')
-ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1, adjustable='box-forced')
+ax1 = plt.subplot(1, 3, 1)
+ax2 = plt.subplot(1, 3, 2, sharex=ax1, sharey=ax1)
 ax3 = plt.subplot(1, 3, 3)
 
 ax1.imshow(image, cmap='gray')
@@ -85,4 +85,4 @@ ax3.set_title("Supersampled XC sub-area")
 
 plt.show()
 
-print("Detected subpixel offset (y, x): {}".format(shift))
+print(f"Detected subpixel offset (y, x): {shift}")

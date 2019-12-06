@@ -268,6 +268,9 @@ class ApiDocWriter(object):
         if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
             print('WARNING: Empty -', uri)
             return ''
+        functions = sorted(functions)
+        classes = sorted(classes)
+        submodules = sorted(submodules)
 
         # Make a shorter version of the uri that omits the package name for
         # titles
@@ -302,6 +305,7 @@ class ApiDocWriter(object):
             ad += f + '\n'
             ad += self.rst_section_levels[2] * len(f) + '\n'
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
+            ad += '\n.. include:: ' + full_f + '.examples\n\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[2] * \
@@ -496,7 +500,8 @@ class ApiDocWriter(object):
         w(subtitle + "\n")
         w("-" * len(subtitle) + "\n\n")
 
-        w('.. toctree::\n\n')
+        w('.. toctree::\n')
+        w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
         idx.close()

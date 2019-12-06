@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 ====================
 Morphological Snakes
@@ -40,12 +38,12 @@ References
 .. [1] A Morphological Approach to Curvature-based Evolution of Curves and
        Surfaces, Pablo Márquez-Neila, Luis Baumela and Luis Álvarez. In IEEE
        Transactions on Pattern Analysis and Machine Intelligence (PAMI),
-       2014, DOI 10.1109/TPAMI.2013.106
+       2014, :DOI:`10.1109/TPAMI.2013.106`
 .. [2] Geodesic Active Contours, Vicent Caselles, Ron Kimmel and Guillermo
        Sapiro. In International Journal of Computer Vision (IJCV), 1997,
-       DOI:10.1023/A:1007979827043
+       :DOI:`10.1023/A:1007979827043`
 .. [3] Active Contours without Edges, Tony Chan and Luminita Vese. In IEEE
-       Transactions on Image Processing, 2001, DOI:10.1109/83.902291
+       Transactions on Image Processing, 2001, :DOI:`10.1109/83.902291`
 
 """
 

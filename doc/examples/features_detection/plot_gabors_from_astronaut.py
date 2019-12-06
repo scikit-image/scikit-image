@@ -25,16 +25,16 @@ approximation.
 Enjoy ;-) And keep in mind that getting Gabors on natural image patches
 is not rocket science.
 
-.. [1] http://en.wikipedia.org/wiki/Gabor_filter
-.. [2] http://en.wikipedia.org/wiki/Simple_cell
-.. [3] http://en.wikipedia.org/wiki/Receptive_field
+.. [1] https://en.wikipedia.org/wiki/Gabor_filter
+.. [2] https://en.wikipedia.org/wiki/Simple_cell
+.. [3] https://en.wikipedia.org/wiki/Receptive_field
 .. [4] D. H. Hubel and T. N., Wiesel Receptive Fields of Single Neurones
        in the Cat's Striate Cortex, J. Physiol. pp. 574-591 (148) 1959
 .. [5] D. H. Hubel and T. N., Wiesel Receptive Fields, Binocular
        Interaction, and Functional Architecture in the Cat's Visual Cortex,
        J. Physiol. 160 pp.  106-154 1962
-.. [6] http://en.wikipedia.org/wiki/K-means_clustering
-.. [7] http://en.wikipedia.org/wiki/Lateral_geniculate_nucleus
+.. [6] https://en.wikipedia.org/wiki/K-means_clustering
+.. [7] https://en.wikipedia.org/wiki/Lateral_geniculate_nucleus
 """
 import numpy as np
 from scipy.cluster.vq import kmeans2
@@ -75,13 +75,13 @@ ax = axes.ravel()
 ax[0].imshow(astro, cmap=plt.cm.gray)
 ax[0].set_title("Image (original)")
 
-ax[1].imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[1].imshow(fb1_montage, cmap=plt.cm.gray)
 ax[1].set_title("K-means filterbank (codebook)\non original image")
 
 ax[2].imshow(astro_dog, cmap=plt.cm.gray)
 ax[2].set_title("Image (LGN-like DoG)")
 
-ax[3].imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
+ax[3].imshow(fb2_montage, cmap=plt.cm.gray)
 ax[3].set_title("K-means filterbank (codebook)\non LGN-like DoG image")
 
 for a in ax.ravel():

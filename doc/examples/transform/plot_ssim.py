@@ -25,7 +25,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
-from skimage.measure import compare_ssim as ssim
+from skimage.metrics import structural_similarity as ssim
 
 
 img = img_as_float(data.camera())
@@ -41,8 +41,7 @@ img_noise = img + noise
 img_const = img + abs(noise)
 
 fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4),
-                         sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+                         sharex=True, sharey=True)
 ax = axes.ravel()
 
 mse_none = mse(img, img)

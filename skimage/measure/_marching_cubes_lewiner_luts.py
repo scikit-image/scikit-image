@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
-# This file was auto-generated from LookUpTable.h by createluts.py.
-# The luts are Copyright (C) 2002 by Thomas Lewiner
+# This file was auto-generated from `mc_meta/LookUpTable.h` by
+# `mc_meta/createluts.py`.
 
 #static const char casesClassic[256][16]
 CASESCLASSIC = (256, 16), """

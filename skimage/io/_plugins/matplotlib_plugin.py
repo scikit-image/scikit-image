@@ -1,17 +1,15 @@
-from __future__ import division
 from collections import namedtuple
 import numpy as np
-import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ...util.colormap import viridis
 from ..._shared.utils import warn
 from math import floor, ceil
 
 
 _default_colormap = 'gray'
-_nonstandard_colormap = viridis
+_nonstandard_colormap = 'viridis'
 _diverging_colormap = 'RdBu'
 
 
@@ -51,7 +49,7 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.float) and
+    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
                           (immin < lo or immax > hi))
     low_data_range = (immin != immax and
                       is_low_contrast(image))
@@ -72,13 +70,13 @@ def _raise_warnings(image_properties):
     ip = image_properties
     if ip.unsupported_dtype:
         warn("Non-standard image type; displaying image with "
-             "stretched contrast.")
+             "stretched contrast.", stacklevel=3)
     if ip.low_data_range:
         warn("Low image data range; displaying image with "
-             "stretched contrast.")
+             "stretched contrast.", stacklevel=3)
     if ip.out_of_range_float:
         warn("Float image out of standard range; displaying "
-             "image with stretched contrast.")
+             "image with stretched contrast.", stacklevel=3)
 
 
 def _get_display_range(image):
@@ -147,8 +145,8 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
     ax_im : `matplotlib.pyplot.AxesImage`
         The `AxesImage` object returned by `plt.imshow`.
     """
-    if kwargs.get('cmap', None) == 'viridis':
-        kwargs['cmap'] = viridis
+    import matplotlib.pyplot as plt
+
     lo, hi, cmap = _get_display_range(image)
 
     kwargs.setdefault('interpolation', 'nearest')
@@ -162,7 +160,6 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(ax_im, cax=cax)
-    ax.set_adjustable('box-forced')
     ax.get_figure().tight_layout()
 
     return ax_im
@@ -176,6 +173,8 @@ def imshow_collection(ic, *args, **kwargs):
     fig : `matplotlib.figure.Figure`
         The `Figure` object returned by `plt.subplots`.
     """
+    import matplotlib.pyplot as plt
+
     if len(ic) < 1:
         raise ValueError('Number of images to plot must be greater than 0')
 
@@ -201,9 +200,9 @@ def imshow_collection(ic, *args, **kwargs):
     return fig
 
 
-imread = plt.imread
-show = plt.show
+imread = matplotlib.image.imread
 
 
 def _app_show():
+    from matplotlib.pyplot import show
     show()

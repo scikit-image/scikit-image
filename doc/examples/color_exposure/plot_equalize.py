@@ -13,7 +13,7 @@ it sometimes yields unnatural looking images.  An alternative method is
 *contrast stretching*, where the image is rescaled to include all intensities
 that fall within the 2nd and 98th percentiles [2]_.
 
-.. [1] http://en.wikipedia.org/wiki/Histogram_equalization
+.. [1] https://en.wikipedia.org/wiki/Histogram_equalization
 .. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
 
 """
@@ -40,7 +40,6 @@ def plot_img_and_hist(image, axes, bins=256):
     # Display image
     ax_img.imshow(image, cmap=plt.cm.gray)
     ax_img.set_axis_off()
-    ax_img.set_adjustable('box-forced')
 
     # Display histogram
     ax_hist.hist(image.ravel(), bins=bins, histtype='step', color='black')

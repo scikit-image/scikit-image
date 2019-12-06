@@ -1,31 +1,32 @@
-from __future__ import print_function, division
 
 import numpy as np
 from skimage.restoration import unwrap_phase
+import sys
 
 import warnings
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal_nulp,
                                      assert_almost_equal, assert_array_equal,
-                                     assert_)
+                                     assert_, skipif)
 from skimage._shared._warnings import expected_warnings
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
     """An assert_almost_equal insensitive to phase shifts of n*2*pi."""
     shift = 2 * np.pi * np.round((b.mean() - a.mean()) / (2 * np.pi))
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+    with expected_warnings([r'invalid value encountered|\A\Z',
+                            r'divide by zero encountered|\A\Z']):
         print('assert_phase_allclose, abs', np.max(np.abs(a - (b - shift))))
         print('assert_phase_allclose, rel',
               np.max(np.abs((a - (b - shift)) / a)))
     if np.ma.isMaskedArray(a):
         assert_(np.ma.isMaskedArray(b))
         assert_array_equal(a.mask, b.mask)
+        assert_(a.fill_value == b.fill_value)
         au = np.asarray(a)
         bu = np.asarray(b)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with expected_warnings([r'invalid value encountered|\A\Z',
+                                r'divide by zero encountered|\A\Z']):
             print('assert_phase_allclose, no mask, abs',
                   np.max(np.abs(au - (bu - shift))))
             print('assert_phase_allclose, no mask, rel',
@@ -37,8 +38,8 @@ def check_unwrap(image, mask=None):
     image_wrapped = np.angle(np.exp(1j * image))
     if mask is not None:
         print('Testing a masked image')
-        image = np.ma.array(image, mask=mask)
-        image_wrapped = np.ma.array(image_wrapped, mask=mask)
+        image = np.ma.array(image, mask=mask, fill_value=0.5)
+        image_wrapped = np.ma.array(image_wrapped, mask=mask, fill_value=0.5)
     image_unwrapped = unwrap_phase(image_wrapped, seed=0)
     assert_phase_almost_equal(image_unwrapped, image)
 
@@ -88,9 +89,8 @@ def check_wrap_around(ndim, axis):
     index_first = tuple([0] * ndim)
     index_last = tuple([-1 if n == axis else 0 for n in range(ndim)])
     # unwrap the image without wrap around
-    with warnings.catch_warnings():
-        # We do not want warnings about length 1 dimensions
-        warnings.simplefilter("ignore")
+    # We do not want warnings about length 1 dimensions
+    with expected_warnings([r'Image has a length 1 dimension|\A\Z']):
         image_unwrap_no_wrap_around = unwrap_phase(image_wrapped, seed=0)
     print('endpoints without wrap_around:',
           image_unwrap_no_wrap_around[index_first],
@@ -100,9 +100,8 @@ def check_wrap_around(ndim, axis):
                 image_unwrap_no_wrap_around[index_last]) > np.pi)
     # unwrap the image with wrap around
     wrap_around = [n == axis for n in range(ndim)]
-    with warnings.catch_warnings():
-        # We do not want warnings about length 1 dimensions
-        warnings.simplefilter("ignore")
+    # We do not want warnings about length 1 dimensions
+    with expected_warnings([r'Image has a length 1 dimension.|\A\Z']):
         image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around,
                                                 seed=0)
     print('endpoints with wrap_around:',
@@ -116,6 +115,8 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
+@skipif(sys.version_info[:2] == (3, 4),
+        reason="Doesn't work with python 3.4. See issue #3079")
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
@@ -174,7 +175,7 @@ def test_unwrap_3d_middle_wrap_around():
 
 def test_unwrap_2d_compressed_mask():
     # ValueError when image is masked array with a compressed mask (no masked
-    # elments).  GitHub issue #1346
+    # elements).  GitHub issue #1346
     image = np.ma.zeros((10, 10))
     unwrap = unwrap_phase(image)
     assert_(np.all(unwrap == 0))

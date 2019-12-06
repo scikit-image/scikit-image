@@ -3,7 +3,7 @@ It contains the definitions of the mcp class, such that
 other cython modules can "cimport mcp" and subclass it.
 """
 
-cimport heap
+from . cimport heap
 cimport numpy as cnp
 
 ctypedef heap.BOOL_T BOOL_T
@@ -25,7 +25,7 @@ cdef class MCP:
     cdef BOOL_T use_start_cost
     # if use_start_cost is true, the cost of the starting element is added to
     # the cost of the path. Set to true by default in the base class...
-    
+
     # Arrays used during front propagation
     cdef FLOAT_T [:] flat_costs
     cdef FLOAT_T [:] flat_cumulative_costs
@@ -35,10 +35,10 @@ cdef class MCP:
     cdef OFFSET_T [:,:] offsets
     cdef INDEX_T [:] flat_offsets
     cdef FLOAT_T [:] offset_lengths
-    
+
     # Methods
     cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost)
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, FLOAT_T offset_length)
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
     cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
-    
+

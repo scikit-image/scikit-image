@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from six import BytesIO
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 
 from ... import data_dir, img_as_float
@@ -9,7 +9,6 @@ from .. import imread, imsave, use_plugin, reset_plugins
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
 
 from skimage._shared import testing
@@ -19,6 +18,8 @@ from skimage._shared.testing import (mono_check, color_check,
                                      assert_allclose)
 from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
+
+from skimage.metrics import structural_similarity
 
 
 def setup():
@@ -51,13 +52,12 @@ def test_png_round_trip():
     assert np.sum(np.abs(Ip-I)) < 1e-3
 
 
-def test_imread_flatten():
-    # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+def test_imread_as_gray():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
-    # check that flattening does not occur for an image that is grey already.
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
@@ -140,8 +140,9 @@ def test_jpg_quality_arg():
     with temporary_file(suffix='.jpg') as jpg:
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
-        sim = ssim(chessboard, im,
-                   data_range=chessboard.max() - chessboard.min())
+        sim = structural_similarity(
+            chessboard, im,
+            data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -172,7 +173,7 @@ class TestSave:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-                if np.issubdtype(dtype, float):
+                if np.issubdtype(dtype, np.floating):
                     yield (self.verify_roundtrip, dtype, x,
                            roundtrip_function(x), 255)
                 else:
@@ -190,9 +191,15 @@ class TestSave:
 def test_imsave_incorrect_dimension():
     with temporary_file(suffix='.png') as fname:
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 3, 1)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 3, 1)))
         with testing.raises(ValueError):
-            imsave(fname, np.zeros((2, 3, 2)))
+            with expected_warnings([fname + ' is a low contrast image']):
+                imsave(fname, np.zeros((2, 3, 2)))
+        # test that low contrast check is ignored
+        with testing.raises(ValueError):
+            with expected_warnings([]):
+                imsave(fname, np.zeros((2, 3, 2)), check_contrast=False)
 
 
 def test_imsave_filelike():
@@ -201,33 +208,51 @@ def test_imsave_filelike():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(['precision loss',
-                            'is a low contrast image']):
+    with expected_warnings(['is a low contrast image']):
         imsave(s, image)
 
     # read from file-like object
     s.seek(0)
     out = imread(s)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
+    assert_allclose(out, image)
+
+
+def test_imsave_boolean_input():
+    shape = (2, 2)
+    image = np.eye(*shape, dtype=np.bool)
+    s = BytesIO()
+
+    # save to file-like object
+    with expected_warnings(
+            ['is a boolean image: setting True to 1 and False to 0']):
+        imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert_equal(out.shape, shape)
     assert_allclose(out, image)
 
 
 def test_imexport_imimport():
     shape = (2, 2)
     image = np.zeros(shape)
-    with expected_warnings(['precision loss']):
-        pil_image = ndarray_to_pil(image)
+    pil_image = ndarray_to_pil(image)
     out = pil_to_ndarray(pil_image)
-    assert out.shape == shape
+    assert_equal(out.shape, shape)
 
 
 def test_all_color():
-    color_check('pil')
-    color_check('pil', 'bmp')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    mono_check('pil')
+    with expected_warnings(['.* is a boolean image']):
+        mono_check('pil')
 
 
 def test_multi_page_gif():
@@ -262,7 +287,8 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
+        sim = structural_similarity(refi, newi,
+                                    data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 

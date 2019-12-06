@@ -14,7 +14,7 @@ def test_hog_output_size():
     img = img_as_float(data.astronaut()[:256, :].mean(axis=2))
 
     fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
-                     cells_per_block=(1, 1))
+                     cells_per_block=(1, 1), block_norm='L1')
 
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
@@ -46,7 +46,7 @@ def test_hog_output_correctness_l2hys_norm():
 def test_hog_image_size_cell_size_mismatch():
     image = data.camera()[:150, :200]
     fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
-                     cells_per_block=(1, 1))
+                     cells_per_block=(1, 1), block_norm='L1')
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
 
 
@@ -76,16 +76,20 @@ def test_hog_basic_orientations_and_data_types():
 
         (hog_float, hog_img_float) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False,
+            block_norm='L1')
         (hog_uint8, hog_img_uint8) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualize=True, transform_sqrt=False)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=False,
+            block_norm='L1')
         (hog_float_norm, hog_img_float_norm) = feature.hog(
             image_float, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True,
+            block_norm='L1')
         (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(
             image_uint8, orientations=4, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualize=True, transform_sqrt=True)
+            cells_per_block=(1, 1), visualize=True, transform_sqrt=True,
+            block_norm='L1')
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -164,7 +168,8 @@ def test_hog_orientations_circle():
         (hog, hog_img) = feature.hog(image, orientations=orientations,
                                      pixels_per_cell=(8, 8),
                                      cells_per_block=(1, 1), visualize=True,
-                                     transform_sqrt=False)
+                                     transform_sqrt=False,
+                                     block_norm='L1')
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -214,7 +219,8 @@ def test_hog_visualization_orientation():
         orientations=3,
         pixels_per_cell=(width, height),
         cells_per_block=(1, 1),
-        visualize=True
+        visualize=True,
+        block_norm='L1'
     )
 
     middle_index = height // 2
@@ -238,14 +244,15 @@ def test_hog_block_normalization_incorrect_error():
 def test_hog_incorrect_dimensions(shape, multichannel):
     img = np.zeros(shape)
     with testing.raises(ValueError):
-        feature.hog(img, multichannel=multichannel)
+        feature.hog(img, multichannel=multichannel, block_norm='L1')
 
 
 def test_hog_output_equivariance_multichannel():
     img = data.astronaut()
     img[:, :, (1, 2)] = 0
-    hog_ref = feature.hog(img, multichannel=True)
+    hog_ref = feature.hog(img, multichannel=True, block_norm='L1')
 
     for n in (1, 2):
-        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True)
+        hog_fact = feature.hog(np.roll(img, n, axis=2), multichannel=True,
+                               block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)

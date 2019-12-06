@@ -56,7 +56,7 @@ fig = plt.figure(figsize=(8, 8))
 
 # display original image with locations of patches
 ax = fig.add_subplot(3, 2, 1)
-ax.imshow(image, cmap=plt.cm.gray, interpolation='nearest',
+ax.imshow(image, cmap=plt.cm.gray,
           vmin=0, vmax=255)
 for (y, x) in grass_locations:
     ax.plot(x + PATCH_SIZE / 2, y + PATCH_SIZE / 2, 'gs')
@@ -80,17 +80,18 @@ ax.legend()
 # display the image patches
 for i, patch in enumerate(grass_patches):
     ax = fig.add_subplot(3, len(grass_patches), len(grass_patches)*1 + i + 1)
-    ax.imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
+    ax.imshow(patch, cmap=plt.cm.gray,
               vmin=0, vmax=255)
     ax.set_xlabel('Grass %d' % (i + 1))
 
 for i, patch in enumerate(sky_patches):
     ax = fig.add_subplot(3, len(sky_patches), len(sky_patches)*2 + i + 1)
-    ax.imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
+    ax.imshow(patch, cmap=plt.cm.gray,
               vmin=0, vmax=255)
     ax.set_xlabel('Sky %d' % (i + 1))
 
 
 # display the patches and plot
-fig.suptitle('Grey level co-occurrence matrix features', fontsize=14)
+fig.suptitle('Grey level co-occurrence matrix features', fontsize=14, y=1.05)
+plt.tight_layout()
 plt.show()

@@ -9,58 +9,73 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
+Starting from this release, scikit-image will follow the spirit of the recently
+introduced numpy deprecation policy -- NEP 29
+(https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
+Accordingly, scikit-image 0.16 drops the support for Python 3.5.
+This release of scikit-image officially supports Python 3.6 and 3.7.
 
 New Features
 ------------
-- manual segmentation with matplotlib (#2584)
-- hysteresis thresholding in filters (#2665)
-- lookfor function (#2713)
-- montage function (#2626)
-- 2D and 3D segmentation with morphological snakes (#2791)
-- nD support for image moments (#2603)
-- inertia tensor and its eigenvalues can now be computed outside of
-  regionprops; available in ``skimage.measure.inertia_tensor`` (#2603)
-- cycle-spinning function for approximating shift-invariance by averaging
-  results from a series of spatial shifts (#2647)
-- Haar-like feature (#2848)
+- Added majority rank filter - ``filters.rank.majority``.
 
 
 Improvements
 ------------
-- VisuShrink method for wavelet denoising (#2470)
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
-  ``anti_aliasing`` option to avoid aliasing artifacts when down-sampling
-  images (#2802)
-- Support for multichannel images for ``skimage.feature.hog`` (#2870)
-- Non-local means denoising (``denoise_nl_means``) has a new optional
-  parameter, `sigma`, that can be used to specify the noise standard deviation.
-  This enables noise-robust patch distance estimation. (#2890)
 
 
 API Changes
 -----------
-- ``skimage.util.montage.montage2d`` is now available as
-  ``skimage.util.montage2d``.
+- Deprecated subpackage ``skimage.novice`` has been removed.
+- Default value of ``multichannel`` parameters has been set to False in
+  ``skimage.transform.rescale``, ``skimage.transform.pyramid_reduce``,
+  ``skimage.transform.pyramid_laplacian``,
+  ``skimage.transform.pyramid_gaussian``, and
+  ``skimage.transform.pyramid_expand``. No guessing is performed for 3D arrays
+  anymore, so, please, make sure that the parameter is fixed to a proper value.
+- Deprecated argument ``visualise`` has been removed from
+  ``skimage.feature.hog``. Use ``visualize`` instead.¨
+- ``skimage.transform.seam_carve`` has been completely removed from the
+  library due to licensing restrictions.
+- Parameter ``as_grey`` has been removed from ``skimage.data.load`` and
+  ``skimage.io.imread``. Use ``as_gray`` instead.
+- Parameter ``min_size`` has been removed from
+  ``skimage.morphology.remove_small_holes``. Use ``area_threshold`` instead.
+- Deprecated ``correct_mesh_orientation`` in ``skimage.measure`` has been
+  removed.
+- ``skimage.measure._regionprops`` has been completely switched to using
+  row-column coordinates. Old x-y interface is not longer available.
+- Default value of ``behavior`` parameter has been set to ``ndimage`` in
+  ``skimage.filters.median``.
+- Parameter ``flatten`` in `skimage.io.imread` has been removed in
+  favor of ``as_gray``.
+- Parameters ``Hxx, Hxy, Hyy`` have been removed from
+  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
+- Default value of ``order`` parameter has been set to ``rc`` in
+  ``skimage.feature.hessian_matrix``.
+- ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
+- When used with floating point inputs, ``denoise_wavelet`` no longer rescales
+  the range of the data or clips the output to the range [0, 1] or [-1, 1].
+  For non-float inputs, rescaling and clipping still occurs as in prior
+  releases (although with a bugfix related to the scaling of ``sigma``).
+
+
+Bugfixes
+--------
+- ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
+  rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
+  preserve the relative scale of the noise estimate. To restore the old,
+  behaviour, the user can manually specify ``rescale_sigma=False``.
 
 
 Deprecations
 ------------
-- ``skimage.util.montage2d`` is deprecated and will be removed in 0.15.
-  Use ``skimage.util.montage`` instead.
-- ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` have a new
-  ``anti_aliasing`` option that avoids aliasing artifacts when down-sampling
-  images. This option will be enabled by default in 0.15.
-- ``regionprops`` will use row-column coordinates in 0.16. You can start
-  using them now with ``regionprops(..., coordinates='rc')``. You can silence
-  warning messages, and retain the old behavior, with
-  ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error. This change has a number of consequences.
-  Specifically, the "orientation" region property will measure the
-  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
-  row-column coordinates.
+- Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
+  deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+- Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
+  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
 
 
 Contributors to this release

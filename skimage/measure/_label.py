@@ -10,12 +10,12 @@ def label(input, neighbors=None, background=None, return_num=False,
     The value refers to the maximum number of orthogonal hops to consider a
     pixel/voxel a neighbor::
 
-      1-connectivity      2-connectivity     diagonal connection close-up
+      1-connectivity     2-connectivity     diagonal connection close-up
 
-           [ ]           [ ]  [ ]  [ ]         [ ]
-            |               \  |  /             |  <- hop 2
-      [ ]--[x]--[ ]      [ ]--[x]--[ ]    [x]--[ ]
-            |               /  |  \         hop 1
+           [ ]           [ ]  [ ]  [ ]             [ ]
+            |               \  |  /                 |  <- hop 2
+      [ ]--[x]--[ ]      [ ]--[x]--[ ]        [x]--[ ]
+            |               /  |  \             hop 1
            [ ]           [ ]  [ ]  [ ]
 
     Parameters
@@ -26,7 +26,7 @@ def label(input, neighbors=None, background=None, return_num=False,
         Whether to use 4- or 8-"connectivity".
         In 3D, 4-"connectivity" means connected pixels have to share face,
         whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use ``connectivity`` instead.**
+        **Deprecated, use** ``connectivity`` **instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as 0. By default, 0-valued pixels are considered as background

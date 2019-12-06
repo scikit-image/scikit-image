@@ -1,14 +1,4 @@
-from math import ceil
-from multiprocessing import cpu_count
-
 __all__ = ['apply_parallel']
-
-
-try:
-    import dask.array as da
-    dask_available = True
-except ImportError:
-    dask_available = False
 
 
 def _get_chunks(shape, ncpu):
@@ -28,6 +18,10 @@ def _get_chunks(shape, ncpu):
     >>> _get_chunks((2, 4), 2)
     ((1, 1), (4,))
     """
+    # since apply_parallel is in the critical import path, we lazy import
+    # math just when we need it.
+    from math import ceil
+
     chunks = []
     nchunks_per_dim = int(ceil(ncpu ** (1./len(shape))))
 
@@ -50,8 +44,16 @@ def _get_chunks(shape, ncpu):
     return tuple(chunks)
 
 
+def _ensure_dask_array(array, chunks=None):
+    import dask.array as da
+    if isinstance(array, da.Array):
+        return array
+
+    return da.from_array(array, chunks=chunks)
+
+
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                 extra_arguments=(), extra_keywords={}):
+                   extra_arguments=(), extra_keywords={}, *, compute=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -62,7 +64,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     ----------
     function : function
         Function to be mapped which takes an array as an argument.
-    array : numpy array
+    array : numpy array or dask array
         Array which the function will be applied to.
     chunks : int, tuple, or tuple of tuples, optional
         A single integer is interpreted as the length of one side of a square
@@ -82,20 +84,45 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
+    compute : bool, optional
+        If ``True``, compute eagerly returning a NumPy Array.
+        If ``False``, compute lazily returning a Dask Array.
+        If ``None`` (default), compute based on array type provided
+        (eagerly for NumPy Arrays and lazily for Dask Arrays).
+
+    Returns
+    -------
+    out : ndarray or dask Array
+        Returns the result of the applying the operation.
+        Type is dependent on the ``compute`` argument.
 
     Notes
     -----
     Numpy edge modes 'symmetric', 'wrap', and 'edge' are converted to the
-    equivalent `dask` boundary modes 'reflect', 'periodic' and 'nearest',
+    equivalent ``dask`` boundary modes 'reflect', 'periodic' and 'nearest',
     respectively.
+    Setting ``compute=False`` can be useful for chaining later operations.
+    For example region selection to preview a result or storing large data
+    to disk instead of loading in memory.
+
     """
-    if not dask_available:
+    try:
+        # Importing dask takes time. since apply_parallel is on the
+        # minimum import path of skimage, we lazy attempt to import dask
+        import dask.array as da
+    except ImportError:
         raise RuntimeError("Could not import 'dask'.  Please install "
                            "using 'pip install dask'")
+
+    if compute is None:
+        compute = not isinstance(array, da.Array)
 
     if chunks is None:
         shape = array.shape
         try:
+            # since apply_parallel is in the critical import path, we lazy
+            # import multiprocessing just when we need it.
+            from multiprocessing import cpu_count
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4
@@ -111,5 +138,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
 
-    darr = da.from_array(array, chunks=chunks)
-    return darr.map_overlap(wrapped_func, depth, boundary=mode).compute()
+    darr = _ensure_dask_array(array, chunks=chunks)
+
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    if compute:
+        res = res.compute()
+
+    return res
