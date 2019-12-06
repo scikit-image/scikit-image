@@ -1,3 +1,4 @@
+import functools
 import numpy as np
 
 import skimage
@@ -12,7 +13,8 @@ class CannyPlugin(OverlayPlugin):
     name = 'Canny Filter'
 
     def __init__(self, *args, **kwargs):
-        super(CannyPlugin, self).__init__(image_filter=canny, **kwargs)
+        filter_func = functools.partial(canny, preserve_range=True)
+        super(CannyPlugin, self).__init__(image_filter=filter_func, **kwargs)
 
     def attach(self, image_viewer):
         image = image_viewer.image
