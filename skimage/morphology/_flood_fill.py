@@ -1,4 +1,4 @@
-"""flood_fill.py - inplace flood fill algorithm
+"""flood_fill.py - in place flood fill algorithm
 
 This module provides a function to fill all equal (or within tolerance) values
 connected to a given seed point with a different value.
@@ -46,7 +46,7 @@ def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,
         If a tolerance is provided, adjacent points with values within plus or
         minus tolerance from the seed point are filled (inclusive).
     in_place : bool, optional
-        If True, flood filling is applied to `image` inplace.  If False, the
+        If True, flood filling is applied to `image` in place.  If False, the
         flood filled result is returned without modifying the input `image`
         (default).
     inplace : bool, optional
