@@ -13,7 +13,6 @@ Original author: Lee Kamentsky
 """
 
 import warnings
-import functools
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -44,42 +43,83 @@ def smooth_with_function_and_mask(image, function, mask):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
+    warnings.warn("smooth_with_function_and_mask is deprecated and will be "
+                  "removed in version 0.19", FutureWarning)
+
     bleed_over = function(mask.astype(float))
     masked_image = np.zeros_like(image)
     masked_image[mask] = image[mask]
     smoothed_image = function(masked_image)
     output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
+
     return output_image
 
 
-def _smooth_with_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels.
+def _preprocess(image, mask, sigma, mode, preserve_range):
+    """Preprocess the image and mask before applying canny edge detection.
+
+    The image is smoothed using a gaussian filter ignoring masked
+    pixels and the mask is eroded.
 
     Parameters
     ----------
     image : array
-        Image you want to smooth.
-    function : callable
-        A function that does image smoothing.
+        Image to be smoothed.
     mask : array
         Mask with 1's for significant pixels, 0's for masked pixels.
+    sigma : scalar or sequence of scalars, optional
+        Standard deviation for Gaussian kernel. The standard
+        deviations of the Gaussian filter are given for each axis as a
+        sequence, or as a single number, in which case it is equal for
+        all axes.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        The ``mode`` parameter determines how the array borders are
+        handled, where ``cval`` is the value when mode is equal to
+        'constant'. Default is 'nearest'.
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
-    Notes
-    ------
-    This function calculates the fractional contribution of masked pixels
-    by applying the function to the mask (which gets you the fraction of
-    the pixel data that's due to significant points). We then mask the image
-    and apply the function. The resulting values will be lower by the
-    bleed-over fraction, so you can recalibrate by dividing by the function
-    on the mask to recover the effect of smoothing from just the significant
-    pixels.
+    Returns
+    -------
+    smoothed_image : ndarray
+        The smoothed array
+    eroded_mask : ndarray
+        The eroded mask.
+
     """
-    bleed_over = function(mask.astype(float))
+
+    if mask is None:
+        mask = np.ones(image.shape, dtype=bool)
+
+    # Compute the fractional contribution of masked pixels by applying
+    # the function to the mask (which gets you the fraction of the
+    # pixel data that's due to significant points)
+
+    bleed_over = gaussian(mask.astype(float), sigma=sigma, mode=mode,
+                          preserve_range=preserve_range)
+
+    # Smooth the masked image
+
     masked_image = np.zeros_like(image)
     masked_image[mask] = image[mask]
-    smoothed_image = function(masked_image)
-    output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
-    return output_image
+    smoothed_image = gaussian(masked_image, sigma=sigma, mode=mode,
+                              preserve_range=preserve_range)
+
+    # Lower the result by the bleed-over fraction, so you can
+    # recalibrate by dividing by the function on the mask to recover
+    # the effect of smoothing from just the significant pixels.
+
+    smoothed_image /= (bleed_over + np.finfo(float).eps)
+
+    # Make the eroded mask. Setting the border value to zero will wipe
+    # out the image edges for us.
+
+    s = ndi.generate_binary_structure(2, 2)
+    eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
+
+    return smoothed_image, eroded_mask
 
 
 def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
@@ -98,17 +138,22 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
     return out
 
 
-def _get_local_maxima(isobel, jsobel, magnitude, mask):
+def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
+    #
+    # * Find the normal to the edge at each point using the arctangent of the
+    #   ratio of the Y sobel over the X sobel - pragmatically, we can
+    #   look at the signs of X and Y and the relative magnitude of X vs Y
+    #   to sort the points into 4 categories: horizontal, vertical,
+    #   diagonal and antidiagonal.
+    #
+    # * Look in the normal and reverse directions to see if the values
+    #   in either of those directions are greater than the point in question.
+    #   Use interpolation to get a mix of points instead of picking the one
+    #   that's the closest to the normal.
 
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
 
-    #
-    # Make the eroded mask. Setting the border value to zero will wipe
-    # out the image edges for us.
-    #
-    s = ndi.generate_binary_structure(2, 2)
-    eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
     eroded_mask = eroded_mask & (magnitude > 0)
 
     # Normals' orientations
@@ -124,7 +169,7 @@ def _get_local_maxima(isobel, jsobel, magnitude, mask):
     # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
     # 90-135 degrees and 135-180 degrees.
     #
-    local_maxima = np.zeros(mask.shape, bool)
+    local_maxima = np.zeros(magnitude.shape, bool)
     # ----- 0 to 45 degrees ------
     pts_plus = is_up & is_right
     pts_minus = is_down & is_left
@@ -189,9 +234,14 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
     use_quantiles : bool, optional
-        If True then treat low_threshold and high_threshold as quantiles of the
-        edge magnitude image, rather than absolute edge magnitude values. If True
-        then the thresholds must be in the range [0, 1].
+        If True then treat low_threshold and high_threshold as
+        quantiles of the edge magnitude image, rather than absolute
+        edge magnitude values. If True then the thresholds must be in
+        the range [0, 1].
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -243,6 +293,7 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     >>> edges1 = feature.canny(im)
     >>> # Increase the smoothing for better results
     >>> edges2 = feature.canny(im, sigma=3)
+
     """
 
     #
@@ -278,13 +329,17 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        warnings.warn("Setting low_threshold to None is no more supported, "
-                      "please explicitely set its value.")
+        warnings.warn("Setting low_threshold to None is deprecated. "
+                      "It will raise an error starting from version 0.19. "
+                      "To remove this warning, use the default value or "
+                      "explicitely set its value.", FutureWarning)
         low_threshold = 0.1
 
     if high_threshold is None:
-        warnings.warn("Setting low_threshold to None is no more supported, "
-                      "please explicitely set its value.")
+        warnings.warn("Setting high_threshold to None is deprecated. "
+                      "It will raise an error starting from version 0.19. "
+                      "To remove this warning, use the default value or "
+                      "explicitely set its value.", FutureWarning)
         high_threshold = 0.2
 
     if use_quantiles:
@@ -299,19 +354,12 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
         if high_threshold < 0.0 or low_threshold < 0.0:
             raise ValueError("Quantile thresholds must not be < 0.0")
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=bool)
-
-    fsmooth = functools.partial(gaussian, sigma=sigma, mode='constant',
-                                preserve_range=preserve_range)
-
-    smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
+    smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant',
+                                        preserve_range)
 
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
     magnitude = np.hypot(isobel, jsobel)
-
-    local_maxima = _get_local_maxima(isobel, jsobel, magnitude, mask)
 
     #
     # ---- If use_quantiles is set then calculate the thresholds to use
@@ -323,6 +371,7 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     #
     # ---- Create two masks at the two thresholds.
     #
+    local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
     high_mask = local_maxima & (magnitude >= high_threshold)
     low_mask = local_maxima & (magnitude >= low_threshold)
 
@@ -335,9 +384,9 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     if count == 0:
         return low_mask
 
-    sums = (np.array(ndi.sum(high_mask, labels,
-                             np.arange(count, dtype=np.int32) + 1),
-                     copy=False, ndmin=1))
+    sums = np.array(ndi.sum(high_mask, labels,
+                            np.arange(1, count + 1, dtype=np.int32)),
+                    copy=False, ndmin=1)
     good_label = np.zeros((count + 1,), bool)
     good_label[1:] = sums > 0
     output_mask = good_label[labels]
