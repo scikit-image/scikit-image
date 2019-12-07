@@ -80,7 +80,8 @@ ax[0, 1].axis('off')
 ax[0, 1].set_title('non-local means\n(slow)')
 ax[0, 2].imshow(denoise2)
 ax[0, 2].axis('off')
-ax[0, 2].set_title('non-local means\n(slow, using $\sigma_{est}$)')
+ax[0, 2].set_title('non-local means\n'
+                   r'(slow, using $\sigma_{est}$)')
 ax[1, 0].imshow(astro)
 ax[1, 0].axis('off')
 ax[1, 0].set_title('original\n(noise free)')
@@ -89,7 +90,8 @@ ax[1, 1].axis('off')
 ax[1, 1].set_title('non-local means\n(fast)')
 ax[1, 2].imshow(denoise2_fast)
 ax[1, 2].axis('off')
-ax[1, 2].set_title('non-local means\n(fast, using $\sigma_{est}$)')
+ax[1, 2].set_title('non-local means\n'
+                   r'(fast, using $\sigma_{est}$)')
 
 fig.tight_layout()
 

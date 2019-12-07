@@ -180,15 +180,15 @@ class SkiviImageWindow(QMainWindow):
         self.update_histograms()
 
     def scale_mouse_pos(self, x, y):
-                width = self.label.pm.width()
-                height = self.label.pm.height()
-                x_frac = 1. * x / width
-                y_frac = 1. * y / height
-                width = self.arr.shape[1]
-                height = self.arr.shape[0]
-                new_x = int(width * x_frac)
-                new_y = int(height * y_frac)
-                return(new_x, new_y)
+        width = self.label.pm.width()
+        height = self.label.pm.height()
+        x_frac = 1. * x / width
+        y_frac = 1. * y / height
+        width = self.arr.shape[1]
+        height = self.arr.shape[0]
+        new_x = int(width * x_frac)
+        new_y = int(height * y_frac)
+        return(new_x, new_y)
 
     def label_mouseMoveEvent(self, evt):
         x = evt.x()
