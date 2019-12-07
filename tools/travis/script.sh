@@ -9,14 +9,6 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 
-section "Flake8"
-pip install flake8
-# If any core dev wants to disable flake8 from causing failures,
-# they should feel free to let the add the --exit-zero flag
-# flake8 --exit-zero
-flake8
-section_end "Flake8"
-
 section "List.installed.dependencies"
 pip list
 tools/build_versions.py
@@ -47,5 +39,15 @@ elif [[ "${TEST_EXAMPLES}" != "0" ]]; then
   done
 fi
 section_end "Tests.examples"
+
+if [[ "${DO_FLAKE8}" == "1" ]]; then
+        section "Flake8"
+        pip install flake8
+    # If any core dev wants to disable flake8 from causing failures,
+    # they should feel free to let the add the --exit-zero flag
+    # flake8 --exit-zero
+    flake8
+    section_end "Flake8"
+fi
 
 set +ev
