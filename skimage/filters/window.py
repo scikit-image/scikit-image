@@ -1,10 +1,10 @@
 import numpy as np
 from ..transform import warp
 from .._shared.utils import safe_as_int
-from scipy.signal import get_window as get_window1d
+from scipy.signal import get_window
 
 
-def get_window(window, size, ndim=2, **kwargs):
+def window(window, size, ndim=2, **kwargs):
     """Return an n-dimensional window of a given size and dimensionality.
 
     Parameters
@@ -31,7 +31,7 @@ def get_window(window, size, ndim=2, **kwargs):
     This function is based on `scipy.signal.get_window` and thus can access
     all of the window types available to that function
     (e.g., `"hann"`, `"boxcar"`). Note that certain window types require
-    parameters that have to supplied with the window name as a tuple
+    parameters that have to be supplied with the window name as a tuple
     (e.g., `("tukey", 0.8)`). If only a float is supplied, it is interpreted
     as the beta parameter of the Kaiser window.
 
@@ -49,6 +49,28 @@ def get_window(window, size, ndim=2, **kwargs):
     interpolation, from a 1D window returned from `scipy.signal.get_window`.
     The method of interpolation can be changed with the `order` keyword
     argument passed to `transform.warp`.
+
+    Window types:
+    - boxcar
+    - triang
+    - blackman
+    - hamming
+    - hann
+    - bartlett
+    - flattop
+    - parzen
+    - bohman
+    - blackmanharris
+    - nuttall
+    - barthann
+    - kaiser (needs beta)
+    - gaussian (needs standard deviation)
+    - general_gaussian (needs power, width)
+    - slepian (needs width)
+    - dpss (needs normalized half-bandwidth)
+    - chebwin (needs attenuation)
+    - exponential (needs decay scale)
+    - tukey (needs taper fraction)
 
     Examples
     --------
@@ -77,7 +99,7 @@ def get_window(window, size, ndim=2, **kwargs):
     if ndim <= 0:
         raise ValueError("Number of dimensions must be greater than zero")
 
-    w = get_window1d(window, size, fftbins=False)
+    w = get_window(window, size, fftbins=False)
     wcenter = (size / 2) - 0.5
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
 

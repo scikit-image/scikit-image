@@ -16,9 +16,10 @@ reaches the edges, removing the effect of the artificial discontinuity that
 results from the FFT.
 
 In this example, we see that the FFT of a typical image can show strong
-spectral leakage along the x and y axes. The application of a two-dimensional
-"Hann" window greatly reduces the spectral leakage, making the "real" frequency
-information more visible in the plot of the frequency component of the FFT.
+spectral leakage along the x and y axes (see the vertical and horizontal lines
+in the figure). The application of a two-dimensional Hann window greatly
+reduces the spectral leakage, making the "real" frequency information more
+visible in the plot of the frequency component of the FFT.
 """
 
 import matplotlib.pyplot as plt
@@ -27,12 +28,12 @@ from scipy.fftpack import fft2, fftshift
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.data import astronaut
-from skimage.filters import get_window
+from skimage.filters import window
 
 image = img_as_float(rgb2gray(astronaut()))
 size = image.shape[0]  # note image needs to be square
 
-wimage = image * get_window('hann', size)
+wimage = image * window('hann', size)
 
 image_f = np.abs(fftshift(fft2(image)))
 wimage_f = np.abs(fftshift(fft2(wimage)))
