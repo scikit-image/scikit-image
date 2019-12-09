@@ -343,9 +343,25 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     else:
         s = np.argsort(accum)
 
+    # For circles with centers too close, only keep the one with
+    # the highest peak
+    accum_sorted, cx_sorted, cy_sorted, r_sorted = \
+        accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1]
+    accum = []
+    cx = []
+    cy = []
+    r = []
+    for ac, x, y, ra in zip(accum_sorted, cx_sorted, cy_sorted, r_sorted):
+        close_in_x = [abs(i - x) <= min_xdistance for i in cx]
+        close_in_y = [abs(j - y) <= min_ydistance for j in cy]
+        if (True not in close_in_x) and (True not in close_in_y):
+            accum.append(ac)
+            cx.append(x)
+            cy.append(y)
+            r.append(ra)
+
     if total_num_peaks != np.inf:
         tnp = total_num_peaks
-        return (accum[s][::-1][:tnp], cx[s][::-1][:tnp], cy[s][::-1][:tnp],
-                r[s][::-1][:tnp])
+        return (accum[:tnp], cx[:tnp], cy[:tnp], r[:tnp])
 
-    return (accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1])
+    return (accum, cx, cy, r)
