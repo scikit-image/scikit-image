@@ -35,7 +35,7 @@ fig, ax = plt.subplots()
 ax.imshow(image, cmap=plt.cm.gray)
 
 for r in range(len(table['centroid'])):
-    y0, x0 = table['centroid'][r]
+    y0, x0 = table['centroid_0'][r], table['centroid_1'][r]
     orientation = table['orientation'][r]
     x1 = x0 + math.cos(orientation) / 2 * table['major_axis_length'][r]
     y1 = y0 - math.sin(orientation) / 2 * table['major_axis_length'][r]
