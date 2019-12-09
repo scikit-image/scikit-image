@@ -23,18 +23,18 @@ image[rr, cc] = 1
 image = rotate(image, angle=15, order=0)
 
 label_img = label(image)
-regions = regionprops(label_img)
 props = (
     'centroid', 'orientation',
     'major_axis_length', 'minor_axis_length',
     'bbox'
 )
-table = regionprops_table(regions, properties=props)
+
+table = regionprops_table(label_img, image, properties=props)
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap=plt.cm.gray)
 
-for r in range(len(regions)):
+for r in range(len(table['centroid'])):
     y0, x0 = table['centroid'][r]
     orientation = table['orientation'][r]
     x1 = x0 + math.cos(orientation) / 2 * table['major_axis_length'][r]
