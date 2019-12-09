@@ -271,10 +271,11 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
                        total_num_peaks=np.inf, normalize=False):
     """Return peaks in a circle Hough transform.
 
-    Identifies most prominent circles separated by certain distances in a
-    Hough space. Non-maximum suppression with different sizes is applied
+    Identifies most prominent circles separated by certain distances in given
+    Hough spaces. Non-maximum suppression with different sizes is applied
     separately in the first and second dimension of the Hough space to
-    identify peaks.
+    identify peaks. For circles with different radius but close in distance,
+    only the one with highest peak is kept.
 
     Parameters
     ----------
