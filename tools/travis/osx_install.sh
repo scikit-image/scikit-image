@@ -11,9 +11,9 @@ sudo tlmgr update --self
 sudo tlmgr install ucs dvipng anyfontsize
 
 # Set up virtualenv on OSX
-git clone https://github.com/matthew-brett/multibuild ~/multibuild
+git clone --depth 1 --branch devel https://github.com/matthew-brett/multibuild ~/multibuild
 source ~/multibuild/osx_utils.sh
-get_macpython_environment $TRAVIS_PYTHON_VERSION ~/venv
+get_macpython_environment $MB_PYTHON_VERSION ~/venv
 
 # libpng 1.6.32 has a bug in reading PNG
 # that seems to be the default library that is installed
