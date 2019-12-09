@@ -353,9 +353,11 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     cy = []
     r = []
     for ac, x, y, ra in zip(accum_sorted, cx_sorted, cy_sorted, r_sorted):
-        close_in_x = [abs(i - x) <= min_xdistance for i in cx]
-        close_in_y = [abs(j - y) <= min_ydistance for j in cy]
-        if (True not in close_in_x) and (True not in close_in_y):
+        far_from_kept_circle = [
+            abs(i - x) > min_xdistance or abs(j - y) > min_ydistance
+            for i, j in zip(cx, cy)
+        ]
+        if all(far_from_kept_circle):
             accum.append(ac)
             cx.append(x)
             cy.append(y)
