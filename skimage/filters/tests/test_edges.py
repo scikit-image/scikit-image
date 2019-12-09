@@ -1,4 +1,5 @@
 import numpy as np
+from skimage import data
 from skimage import filters
 from skimage.filters.edges import _mask_filter_result
 
@@ -495,6 +496,42 @@ def test_vertical_mask_line(grad_func):
 
     result = grad_func(hgrad, mask)
     assert_allclose(result, expected)
+
+
+MAX_EDGE_0 = np.array([
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]],
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]],
+    [[1, 1, 1],
+     [1, 1, 1],
+     [1, 1, 1]],
+])
+
+MAX_EDGE_ND = np.array([
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]],
+    [[0, 0, 0],
+     [0, 1, 1],
+     [1, 1, 1]],
+    [[1, 1, 1],
+     [1, 1, 1],
+     [1, 1, 1]]
+]).astype(float)
+
+
+@testing.parametrize(
+    'func', (filters.sobel, filters.scharr, filters.prewitt)
+)
+def test_3d_edge_filters(func):
+    blobs = data.binary_blobs(length=128, n_dim=3)
+    edges = func(blobs)
+    edges0 = func(blobs, axis=0)
+    testing.assert_allclose(np.max(edges), func(MAX_EDGE_ND)[1, 1, 1])
+    testing.assert_allclose(np.max(edges0), 1.0)
 
 
 def test_range():
