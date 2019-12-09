@@ -3,15 +3,23 @@
 Measure region properties
 =========================
 
-This example shows how to measure properties of labelled image regions.
+This example shows how to measure properties of labelled image regions. It is
+a toy example, where the image regions are two ellipses. The outputs are the
+following:
+
+1. Drawing of certain properties for each region, computed via
+   :py:func:`regionprops`
+2. Table of certain properties for each region (one region per row), computed
+   via :py:func:`regionprops_table`
 
 """
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from skimage.draw import ellipse
-from skimage.measure import label, regionprops
+from skimage.measure import label, regionprops, regionprops_table
 from skimage.transform import rotate
 
 
@@ -50,3 +58,12 @@ for props in regions:
 
 ax.axis((0, 600, 600, 0))
 plt.show()
+
+props = regionprops_table(label_img, properties=('centroid',
+                                                 'orientation',
+                                                 'major_axis_length',
+                                                 'minor_axis_length'))
+
+props  # is a pandas-compatible dict
+
+pd.DataFrame(props)
