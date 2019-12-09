@@ -143,12 +143,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         if image.shape[-1] != 3 and convert2lab:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
         elif image.shape[-1] == 3:
-            image = rgb2lab(image).astype(dtype)
+            image = rgb2lab(image)
 
     depth, height, width = image.shape[:3]
 
     # initialize cluster centroids for desired number of segments
-    # grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     grid_z, grid_y, grid_x = np.meshgrid(np.arange(depth, dtype=dtype),
                                          np.arange(height, dtype=dtype),
                                          np.arange(width, dtype=dtype),
