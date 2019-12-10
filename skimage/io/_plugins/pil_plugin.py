@@ -3,7 +3,7 @@ __all__ = ['imread', 'imsave']
 from distutils.version import LooseVersion
 import warnings
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
 
@@ -38,8 +38,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
         im = Image.open(fname)
-        pil_version = LooseVersion(Image.__version__)
-        if im.format == 'MPO' and pil_version < '6.0.0':
+        if im.format == 'MPO' and LooseVersion(pil_version) < '6.0.0':
             warnings.warn("You are trying to read a MPO image. "
                           "To ensure a good support of this format, "
                           "please upgrade pillow to 6.0.0 version or later.",
