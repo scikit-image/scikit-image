@@ -40,7 +40,8 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
         if im.format == 'MPO' and Image.__version__ < '6.0.0':
             warnings.warn("You are trying to read a MPO image. "
                           "To ensure a good support of this format, "
-                          "please upgrade pillow to 6.0.0 version or later.")
+                          "please upgrade pillow to 6.0.0 version or later.",
+                          stacklevel=2)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
