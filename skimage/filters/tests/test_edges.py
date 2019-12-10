@@ -19,7 +19,7 @@ def test_roberts_diagonal1():
     image = np.tri(10, 10, 0)
     expected = ~(np.tri(10, 10, -1).astype(bool) |
                  np.tri(10, 10, -2).astype(bool).transpose())
-    expected = _mask_filter_result(expected, None)
+    expected[-1, -1] = 0  # due to 'reflect' & image shape, last pixel not edge
     result = filters.roberts(image).astype(bool)
     assert_array_almost_equal(result, expected)
 
@@ -53,7 +53,6 @@ def test_sobel_horizontal():
     image = (i >= 0).astype(float)
     result = filters.sobel(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -63,7 +62,6 @@ def test_sobel_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.sobel(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -87,7 +85,6 @@ def test_sobel_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.sobel_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -119,7 +116,6 @@ def test_sobel_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.sobel_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -151,7 +147,6 @@ def test_scharr_horizontal():
     image = (i >= 0).astype(float)
     result = filters.scharr(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -161,7 +156,6 @@ def test_scharr_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.scharr(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert_allclose(result[j == 0], 1)
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -186,7 +180,6 @@ def test_scharr_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.scharr_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -219,7 +212,6 @@ def test_scharr_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.scharr_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -252,7 +244,6 @@ def test_prewitt_horizontal():
     image = (i >= 0).astype(float)
     result = filters.prewitt(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
 
@@ -262,7 +253,6 @@ def test_prewitt_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.prewitt(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert_allclose(result[j == 0], 1)
     assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
 
@@ -287,7 +277,6 @@ def test_prewitt_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.prewitt_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
 
@@ -320,7 +309,6 @@ def test_prewitt_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.prewitt_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
 
@@ -381,7 +369,6 @@ def test_farid_horizontal():
     image = (i >= 0).astype(float)
     result = filters.farid(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == result[i == 0][0]))
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
@@ -391,7 +378,6 @@ def test_farid_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.farid(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
     assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
@@ -416,7 +402,6 @@ def test_farid_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.farid_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert np.all(result[i == 0] == result[i == 0][0])
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
@@ -449,7 +434,6 @@ def test_farid_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.farid_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
     assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
