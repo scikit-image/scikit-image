@@ -30,7 +30,7 @@ try:
             pass
     umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
-except:
+except Exception:
     UmfpackContext = None
 
 try:
@@ -77,8 +77,8 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
         Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
-    edges_deep = np.vstack((vertices[:, :, :-1].ravel(),
-                            vertices[:, :, 1:].ravel()))
+    edges_deep = np.vstack((vertices[..., :-1].ravel(),
+                            vertices[..., 1:].ravel()))
     edges_right = np.vstack((vertices[:, :-1].ravel(),
                              vertices[:, 1:].ravel()))
     edges_down = np.vstack((vertices[:-1].ravel(), vertices[1:].ravel()))
@@ -91,26 +91,21 @@ def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
     gradients = 0
-    for channel in range(0, data.shape[-1]):
-        gradients += _compute_gradients_3d(data[..., channel],
-                                           spacing) ** 2
+    for channel in range(data.shape[-1]):
+        gradients += np.concatenate(
+            [np.abs(np.diff(data[..., channel], axis=ax)).ravel() / spacing[ax]
+             for ax in [2, 1, 0]], axis=0) ** 2
     # All channels considered together in this standard deviation
-    beta /= 10 * data.std()
+    scale_factor = 10 * data.std()
     if multichannel:
         # New final term in beta to give == results in trivial case where
         # multiple identical spectra are passed.
-        beta /= np.sqrt(data.shape[-1])
+        scale_factor *= np.sqrt(data.shape[-1])
+    beta /= scale_factor
     gradients *= beta
     weights = np.exp(- gradients)
     weights += eps
     return weights
-
-
-def _compute_gradients_3d(data, spacing):
-    gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel() / spacing[2]
-    gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel() / spacing[1]
-    gr_down = np.abs(data[:-1] - data[1:]).ravel() / spacing[0]
-    return np.r_[gr_deep, gr_right, gr_down]
 
 
 def _make_laplacian_sparse(edges, weights):
