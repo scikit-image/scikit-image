@@ -178,8 +178,8 @@ def test_hough_line_peaks_zero_input():
     hspace, angles, dists = transform.hough_line(img, theta)
     h, a, d = transform.hough_line_peaks(hspace, angles, dists)
     assert_equal(a, np.array([]))
-    
-    
+
+
 @test_parallel()
 def test_hough_circle():
     # Prepare picture

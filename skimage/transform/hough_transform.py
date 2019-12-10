@@ -362,6 +362,10 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
             cx.append(x)
             cy.append(y)
             r.append(ra)
+    accum = np.array(accum)
+    cx = np.array(cx)
+    cy = np.array(cy)
+    r = np.array(r)
 
     if total_num_peaks != np.inf:
         tnp = total_num_peaks
