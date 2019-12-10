@@ -4,21 +4,23 @@ from .._shared.utils import safe_as_int
 from scipy.signal import get_window
 
 
-def window(window, size, ndim=2, **kwargs):
+def window(window_type, size, ndim=2, warp_kwargs=None):
     """Return an n-dimensional window of a given size and dimensionality.
 
     Parameters
     ----------
-    window : string, float, or tuple
-        The type of window to be created. Windows are based on
-        `scipy.signal.get_window`.
+    window_type : string, float, or tuple
+        The type of window to be created. Any window type supported by
+        `scipy.signal.get_window` is allowed here. See notes below for a
+        current list, or the SciPy documentation for the version of SciPy
+        on your machine.
     size : int
         The size of the window along each axis (all axes will be equal length).
     ndim : int, optional (default: 2)
         The number of dimensions of the window.
-    **kwargs : keyword arguments
-        Passed to `transform.warp` (e.g., `order=3` to change interpolation
-        method).
+    warp_kwargs : dict
+        Keyword arguments passed to `transform.warp` (e.g.,
+        `warp_kwargs={'order':3}` to change interpolation method).
 
     Returns
     -------
@@ -50,6 +52,11 @@ def window(window, size, ndim=2, **kwargs):
     The method of interpolation can be changed with the `order` keyword
     argument passed to `transform.warp`.
 
+    Some coordinates in the output window will be outside of the original
+    signal. These will be filled in according to the default behavior of
+    `transform.warp` (i.e. zeros). This can be changed with the `mode`
+    keyword argument passed to `transform.warp`.
+
     Window types:
     - boxcar
     - triang
@@ -76,16 +83,16 @@ def window(window, size, ndim=2, **kwargs):
     --------
     Return a Hann window with shape (512, 512):
 
-    >>> from skimage.filters import get_window
-    >>> w = get_window('hann', 512)
+    >>> from skimage.filters import window
+    >>> w = window('hann', 512)
 
     Return a Kaiser window with beta parameter of 16 and shape (256, 256, 256):
 
-    >>> w = get_window(16, 256, ndim=3)
+    >>> w = window(16, 256, ndim=3)
 
     Return a Tukey window with an alpha parameter of 0.8 and shape (100, 100):
 
-    >>> w = get_window(('tukey', 0.8), 100)
+    >>> w = window(('tukey', 0.8), 100)
 
     References
     ----------
@@ -99,14 +106,17 @@ def window(window, size, ndim=2, **kwargs):
     if ndim <= 0:
         raise ValueError("Number of dimensions must be greater than zero")
 
-    w = get_window(window, size, fftbins=False)
-    wcenter = (size / 2) - 0.5
+    w = get_window(window_type, size, fftbins=False)
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
 
     # Create coords for warping following `ndimage.map_coordinates` convention.
     L = [np.arange(size, dtype=np.double) for i in range(ndim)]
     coords = np.stack((np.meshgrid(*L)))
     center = (size / 2) - 0.5
-    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0)) + wcenter
+    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0)) + center
     coords[1:, ...] = 0
-    return warp(w, coords, **kwargs)
+
+    if warp_kwargs is None:
+        warp_kwargs = {}
+
+    return warp(w, coords, **warp_kwargs)

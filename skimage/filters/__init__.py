@@ -18,7 +18,7 @@ from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from ._median import median
 from ._unsharp_mask import unsharp_mask
-from .window import window
+from ._window import window
 
 
 __all__ = ['inverse',

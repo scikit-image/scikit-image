@@ -35,3 +35,5 @@ def test_window_1d(size):
 def test_window_invalid_ndim():
     with raises(ValueError):
         window(10, 10, ndim=2.3)
+    with raises(ValueError):
+        window(10, 10, ndim=0)
