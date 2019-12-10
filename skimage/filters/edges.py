@@ -57,14 +57,7 @@ def _mask_filter_result(result, mask):
     Input masks are eroded so that mask areas in the original image don't
     affect values in the result.
     """
-    if mask is None and result.ndim > 2:
-        pass
-    elif mask is None:
-        result[0, :] = 0
-        result[-1, :] = 0
-        result[:, 0] = 0
-        result[:, -1] = 0
-    else:
+    if mask is not None:
         erosion_selem = ndi.generate_binary_structure(mask.ndim, mask.ndim)
         mask = binary_erosion(mask, erosion_selem, border_value=0)
         result *= mask

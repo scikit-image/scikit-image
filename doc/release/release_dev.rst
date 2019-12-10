@@ -31,6 +31,11 @@ API Changes
   the range of the data or clips the output to the range [0, 1] or [-1, 1].
   For non-float inputs, rescaling and clipping still occurs as in prior
   releases (although with a bugfix related to the scaling of ``sigma``).
+- For 2D input, edge filters (Sobel, Scharr, Prewitt, Roberts, and Farid)
+  no longer set the boundary pixels to 0 when a mask is not supplied. This was
+  changed because the boundary mode for `scipy.ndimage.convolve` is now
+  ``'reflect'``, which allows meaningful values at the borders for these
+  filters. (#4347)
 
 
 Bugfixes
