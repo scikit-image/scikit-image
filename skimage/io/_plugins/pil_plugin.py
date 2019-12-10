@@ -39,7 +39,7 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     else:
         im = Image.open(fname)
         pil_version = LooseVersion(Image.__version__)
-        if im.format == 'MPO' and pil_version < LooseVersion('6.0.0'):
+        if im.format == 'MPO' and pil_version < '6.0.0':
             warnings.warn("You are trying to read a MPO image. "
                           "To ensure a good support of this format, "
                           "please upgrade pillow to 6.0.0 version or later.",
