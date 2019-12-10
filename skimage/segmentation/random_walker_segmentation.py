@@ -96,14 +96,12 @@ def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
             [np.abs(np.diff(data[..., channel], axis=ax)).ravel() / spacing[ax]
              for ax in [2, 1, 0]], axis=0) ** 2
     # All channels considered together in this standard deviation
-    scale_factor = 10 * data.std()
+    scale_factor = -1 / (10 * data.std())
     if multichannel:
         # New final term in beta to give == results in trivial case where
         # multiple identical spectra are passed.
-        scale_factor *= np.sqrt(data.shape[-1])
-    beta /= scale_factor
-    gradients *= beta
-    weights = np.exp(- gradients)
+        scale_factor /= np.sqrt(data.shape[-1])
+    weights = np.exp(scale_factor * beta * gradients)
     weights += eps
     return weights
 
@@ -112,27 +110,21 @@ def _make_laplacian_sparse(edges, weights):
     """
     Sparse implementation
     """
-    pixel_nb = edges.max() + 1
-    diag = np.arange(pixel_nb)
-    i_indices = np.hstack((edges[0], edges[1]))
-    j_indices = np.hstack((edges[1], edges[0]))
-    data = np.hstack((-weights, -weights))
+    pixel_nb = edges.shape[1]
+    i_indices = edges.ravel()
+    j_indices = edges[::-1].ravel()
+    data = - np.hstack((weights, weights))
     lap = sparse.coo_matrix((data, (i_indices, j_indices)),
                             shape=(pixel_nb, pixel_nb))
-    connect = - np.ravel(lap.sum(axis=1))
-    lap = sparse.coo_matrix(
-        (np.hstack((data, connect)), (np.hstack((i_indices, diag)),
-                                      np.hstack((j_indices, diag)))),
-        shape=(pixel_nb, pixel_nb))
+    lap.setdiag(-np.ravel(lap.sum(axis=1)))
     return lap.tocsr()
 
 
 def _clean_labels_ar(X, labels, copy=False):
-    X = X.astype(labels.dtype)
     if copy:
         labels = np.copy(labels)
     labels = np.ravel(labels)
-    labels[labels == 0] = X
+    labels[labels == 0] = X.astype(labels.dtype)
     return labels
 
 
@@ -146,14 +138,14 @@ def _buildAB(lap_sparse, labels):
     unlabeled_indices = indices[labels == 0]
     seeds_indices = indices[labels > 0]
     # The following two lines take most of the time in this function
-    B = lap_sparse[unlabeled_indices][:, seeds_indices]
-    lap_sparse = lap_sparse[unlabeled_indices][:, unlabeled_indices]
+    rows = lap_sparse[unlabeled_indices, :]
+    B = rows[:, seeds_indices]
+    lap_sparse = rows[:, unlabeled_indices]
     nlabels = labels.max()
     rhs = []
     for lab in range(1, nlabels + 1):
         mask = (labels[seeds_indices] == lab)
-        fs = sparse.csr_matrix(mask)
-        fs = fs.transpose()
+        fs = sparse.csr_matrix(mask).transpose()
         rhs.append(B * fs)
     return lap_sparse, rhs
 
@@ -163,9 +155,9 @@ def _mask_edges_weights(edges, weights, mask):
     Remove edges of the graph connected to masked nodes, as well as
     corresponding weights of the edges.
     """
-    mask0 = np.hstack((mask[:, :, :-1].ravel(), mask[:, :-1].ravel(),
+    mask0 = np.hstack((mask[..., :-1].ravel(), mask[:, :-1].ravel(),
                        mask[:-1].ravel()))
-    mask1 = np.hstack((mask[:, :, 1:].ravel(), mask[:, 1:].ravel(),
+    mask1 = np.hstack((mask[..., 1:].ravel(), mask[:, 1:].ravel(),
                        mask[1:].ravel()))
     ind_mask = np.logical_and(mask0, mask1)
     edges, weights = edges[:, ind_mask], weights[ind_mask]
