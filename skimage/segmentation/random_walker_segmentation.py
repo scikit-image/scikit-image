@@ -135,18 +135,19 @@ def _buildAB(lap_sparse, labels):
     """
     labels = labels[labels >= 0]
     indices = np.arange(labels.size)
-    unlabeled_indices = indices[labels == 0]
-    seeds_indices = indices[labels > 0]
+    cond = labels > 0
+    unlabeled_indices = indices[~cond]
+    seeds_indices = indices[cond]
     # The following two lines take most of the time in this function
     rows = lap_sparse[unlabeled_indices, :]
     B = rows[:, seeds_indices]
     lap_sparse = rows[:, unlabeled_indices]
     nlabels = labels.max()
-    rhs = []
-    for lab in range(1, nlabels + 1):
-        mask = (labels[seeds_indices] == lab)
-        fs = sparse.csr_matrix(mask).transpose()
-        rhs.append(B * fs)
+    seeds = labels[seeds_indices]
+
+    mask = np.vstack([seeds == lab for lab in range(1, nlabels+1)])
+    rhs = B * sparse.csc_matrix(mask).transpose()
+
     return lap_sparse, rhs
 
 
@@ -517,8 +518,7 @@ def _solve_bf(lap_sparse, B, return_full_prob=False):
     """
     lap_sparse = lap_sparse.tocsc()
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-    X = np.array([solver(np.array((-B[i]).toarray()).ravel())
-                  for i in range(len(B))])
+    X = solver(-B.toarray()).T
     if not return_full_prob:
         X = np.argmax(X, axis=0)
     return X
@@ -531,10 +531,8 @@ def _solve_cg(lap_sparse, B, tol, return_full_prob=False):
     maximal X_i is returned.
     """
     lap_sparse = lap_sparse.tocsc()
-    X = []
-    for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].toarray(), tol=tol)[0]
-        X.append(x0)
+    X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol)[0]
+         for i in range(B.shape[1])]
     if not return_full_prob:
         X = np.array(X)
         X = np.argmax(X, axis=0)
@@ -548,12 +546,10 @@ def _solve_cg_mg(lap_sparse, B, tol, return_full_prob=False):
     pyamg). For each pixel, the label i corresponding to the maximal
     X_i is returned.
     """
-    X = []
     ml = ruge_stuben_solver(lap_sparse)
     M = ml.aspreconditioner(cycle='V')
-    for i in range(len(B)):
-        x0 = cg(lap_sparse, -B[i].toarray(), tol=tol, M=M, maxiter=30)[0]
-        X.append(x0)
+    X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol, M=M, maxiter=30)[0]
+         for i in range(B.shape[1])]
     if not return_full_prob:
         X = np.array(X)
         X = np.argmax(X, axis=0)
