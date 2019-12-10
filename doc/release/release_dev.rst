@@ -35,7 +35,8 @@ API Changes
   no longer set the boundary pixels to 0 when a mask is not supplied. This was
   changed because the boundary mode for `scipy.ndimage.convolve` is now
   ``'reflect'``, which allows meaningful values at the borders for these
-  filters. (#4347)
+  filters. To retain the old behavior, pass
+  ``mask=np.ones(image.shape, dtype=bool)`` (#4347)
 
 
 Bugfixes
