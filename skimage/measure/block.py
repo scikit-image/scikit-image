@@ -23,7 +23,8 @@ def block_reduce(image, block_size, func=np.sum, cval=0, func_kwargs=None):
         block size.
     func_kwargs : dict
         Keyword arguments passed to `func`. Notably useful for passing dtype
-        argument to ``np.mean``.
+        argument to ``np.mean``. Takes dictionary of inputs, i.e.:
+        ``func_kwargs={'dtype': np.float16})``.
 
     Returns
     -------
