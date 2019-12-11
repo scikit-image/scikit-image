@@ -2,7 +2,7 @@ import numpy as np
 from ..util import view_as_blocks
 
 
-def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
+def block_reduce(image, block_size, func=np.sum, cval=0, func_kwargs=None):
     """Downsample image by applying function `func` to local blocks.
 
     This function is useful for max and mean pooling, for example.
@@ -17,11 +17,11 @@ def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
         Function object which is used to calculate the return value for each
         local block. This function must implement an ``axis`` parameter.
         Primary functions are ``numpy.sum``, ``numpy.min``, ``numpy.max``,
-        ``numpy.mean`` and ``numpy.median``.
+        ``numpy.mean`` and ``numpy.median``.  See also `func_kwargs`.
     cval : float
         Constant padding value if image is not perfectly divisible by the
         block size.
-    **func_kwargs :
+    func_kwargs : dict
         Keyword arguments passed to `func`. Notably useful for passing dtype
         argument to ``np.mean``.
 
@@ -61,6 +61,9 @@ def block_reduce(image, block_size, func=np.sum, cval=0, **func_kwargs):
     if len(block_size) != image.ndim:
         raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
+
+    if func_kwargs is None:
+        func_kwargs = {}
 
     pad_width = []
     for i in range(len(block_size)):
