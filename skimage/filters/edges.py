@@ -547,7 +547,7 @@ def laplace(image, ksize=3, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def farid(image, mask=None):
+def farid(image, *, mask=None):
     """Find the edge magnitude using the Farid transform.
 
     Parameters
@@ -591,12 +591,13 @@ def farid(image, mask=None):
     >>> edges = filters.farid(camera)
     """
     check_nD(image, 2)
-    out = np.sqrt(farid_h(image, mask) ** 2 + farid_v(image, mask) ** 2)
+    out = np.sqrt(farid_h(image, mask=mask) ** 2
+                  + farid_v(image, mask=mask) ** 2)
     out /= np.sqrt(2)
     return out
 
 
-def farid_h(image, mask=None):
+def farid_h(image, *, mask=None):
     """Find the horizontal edges of an image using the Farid transform.
 
     Parameters
@@ -632,7 +633,7 @@ def farid_h(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def farid_v(image, mask=None):
+def farid_v(image, *, mask=None):
     """Find the vertical edges of an image using the Farid transform.
 
     Parameters

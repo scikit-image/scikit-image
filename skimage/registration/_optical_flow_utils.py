@@ -76,7 +76,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
 
 
 def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
-                   dtype='float32'):
+                   dtype=np.float32):
     """Generic coarse to fine solver.
 
     Parameters

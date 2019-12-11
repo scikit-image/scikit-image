@@ -219,7 +219,7 @@ Guidelines
 
 * All code should have tests (see `test coverage`_ below for more details).
 * All code should be documented, to the same
-  `standard <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#docstring-standard>`_ as NumPy and SciPy.
+  `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery.
 * No changes are ever committed without review and approval by two core
   team members.  Ask on the
@@ -318,7 +318,7 @@ i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
 `pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
-(using ``easy_install pytest-cov``) and then run::
+(using ``pip install pytest-cov``) and then run::
 
   $ make coverage
 

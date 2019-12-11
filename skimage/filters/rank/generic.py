@@ -1062,7 +1062,9 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    pixel_size=n_bins)
 
 
-def majority(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def majority(image, selem,
+             *,
+             out=None, mask=None, shift_x=False, shift_y=False):
     """Majority filter assign to each pixel the most occuring value within
     its neighborhood.
 

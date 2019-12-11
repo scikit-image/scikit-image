@@ -56,16 +56,26 @@ API Changes
 - Default value of ``order`` parameter has been set to ``rc`` in
   ``skimage.feature.hessian_matrix``.
 - ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
+- When used with floating point inputs, ``denoise_wavelet`` no longer rescales
+  the range of the data or clips the output to the range [0, 1] or [-1, 1].
+  For non-float inputs, rescaling and clipping still occurs as in prior
+  releases (although with a bugfix related to the scaling of ``sigma``).
 
 
 Bugfixes
 --------
+- ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
+  rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
+  preserve the relative scale of the noise estimate. To restore the old,
+  behaviour, the user can manually specify ``rescale_sigma=False``.
 
 
 Deprecations
 ------------
 - Parameter ``neighbors`` in ``skimage.measure.convex_hull_object`` has been
   deprecated in favor of ``connectivity`` and will be removed in version 0.18.0.
+- Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
+  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
 
 
 Contributors to this release

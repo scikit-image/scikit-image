@@ -215,7 +215,7 @@ for section, pull_request_dicts in highlights.items():
 contributors = OrderedDict()
 
 contributors['authors'] = authors
-#contributors['committers'] = committers
+# contributors['committers'] = committers
 contributors['reviewers'] = reviewers
 
 for section_name, contributor_set in contributors.items():
@@ -224,6 +224,11 @@ for section_name, contributor_set in contributors.items():
                      'release [alphabetical by first name or login]')
     print(committer_str)
     print('-' * len(committer_str))
+
+    # Remove None from contributor set if it's in there.
+    if None in contributor_set:
+        contributor_set.remove(None)
+
     for c in sorted(contributor_set, key=str.lower):
         print(f'- {c}')
     print()
