@@ -11,7 +11,7 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     ----------
     window_type : string, float, or tuple
         The type of window to be created. Any window type supported by
-        `scipy.signal.get_window` is allowed here. See notes below for a
+        ``scipy.signal.get_window`` is allowed here. See notes below for a
         current list, or the SciPy documentation for the version of SciPy
         on your machine.
     size : int
@@ -19,43 +19,41 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     ndim : int, optional (default: 2)
         The number of dimensions of the window.
     warp_kwargs : dict
-        Keyword arguments passed to `transform.warp` (e.g.,
-        `warp_kwargs={'order':3}` to change interpolation method).
+        Keyword arguments passed to `skimage.transform.warp` (e.g.,
+        ``warp_kwargs={'order':3}`` to change interpolation method).
 
     Returns
     -------
     nd_window : ndarray
-        A window of of `ndim` dimensions with a length of `size`
-        along each axis. `dtype` is `np.double`.
+        A window of ``ndim`` dimensions with a length of ``size``
+        along each axis. ``dtype`` is ``np.double``.
 
     Notes
     -----
-    This function is based on `scipy.signal.get_window` and thus can access
+    This function is based on ``scipy.signal.get_window`` and thus can access
     all of the window types available to that function
-    (e.g., `"hann"`, `"boxcar"`). Note that certain window types require
+    (e.g., ``"hann"``, ``"boxcar"``). Note that certain window types require
     parameters that have to be supplied with the window name as a tuple
-    (e.g., `("tukey", 0.8)`). If only a float is supplied, it is interpreted
+    (e.g., ``("tukey", 0.8)``). If only a float is supplied, it is interpreted
     as the beta parameter of the Kaiser window.
 
     See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.windows.get_window.html
     for more details.
 
-    Note that this function can generate very large arrays that can consume
-    a large amount of available memory. For example, if `size=512` and
-    `ndim=4` are given as parameters to `filters.get_window`, it will attempt
-    to return an > 8.5GB array.
+    Note that this function can generate very large arrays that consume
+    a large amount of available memory. For example, if ``size=512`` and
+    ``ndim=4`` are given as parameters to `skimage.filters.window`, it will
+    attempt to return an > 8.5GB array.
 
-    The approach taken here to create nD windows is first calculate the
+    The approach taken here to create nD windows is to first calculate the
     Euclidean distance from the center of the intended nD window to each
-    position in the array. Then it uses that distance to sample, with
-    interpolation, from a 1D window returned from `scipy.signal.get_window`.
-    The method of interpolation can be changed with the `order` keyword
-    argument passed to `transform.warp`.
+    position in the array. That distance is used to sample, with
+    interpolation, from a 1D window returned from ``scipy.signal.get_window``.
+    The method of interpolation can be changed with the ``order`` keyword
+    argument passed to `skimage.transform.warp`.
 
     Some coordinates in the output window will be outside of the original
-    signal. These will be filled in according to the default behavior of
-    `transform.warp` (i.e. zeros). This can be changed with the `mode`
-    keyword argument passed to `transform.warp`.
+    signal; these will be filled in with zeros.
 
     Window types:
     - boxcar
@@ -119,4 +117,4 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     if warp_kwargs is None:
         warp_kwargs = {}
 
-    return warp(w, coords, **warp_kwargs)
+    return warp(w, coords, mode='constant', cval=0., **warp_kwargs)
