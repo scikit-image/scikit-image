@@ -121,9 +121,9 @@ def _make_laplacian_sparse(edges, weights):
 
 
 def _clean_labels_ar(X, labels, copy=False):
-    # if copy:
-    #     labels = np.copy(labels)
-    labels = np.ravel(labels).copy()
+    if copy:
+        labels = np.copy(labels)
+    labels = np.ravel(labels)
     labels[labels == 0] = X.astype(labels.dtype)
     return labels
 
@@ -482,7 +482,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
-    if np.any(label_values < 0) or np.any(isolated):
+    if label_values[0] < 0 or np.any(isolated):
         isolated = np.logical_and(
             np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)),
             null_mask)
