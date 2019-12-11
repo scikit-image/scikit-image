@@ -121,19 +121,27 @@ def _make_laplacian_sparse(edges, weights):
 
 
 def _clean_labels_ar(X, labels, copy=False):
-    if copy:
-        labels = np.copy(labels)
-    labels = np.ravel(labels)
+    # if copy:
+    #     labels = np.copy(labels)
+    labels = np.ravel(labels).copy()
     labels[labels == 0] = X.astype(labels.dtype)
     return labels
 
 
-def _buildAB(lap_sparse, labels):
+def _build_linear_system(data, spacing, labels, mask,
+                         beta, multichannel):
     """
     Build the matrix A and rhs B of the linear system to solve.
     A and B are two block of the laplacian of the image graph.
     """
-    labels = labels[labels >= 0]
+    lap_sparse = _build_laplacian(data, spacing, mask=mask,
+                                  beta=beta, multichannel=multichannel)
+
+    if mask is None:
+        labels = labels.ravel().astype('int32')
+    else:
+        labels = labels[mask].astype('int32')
+
     indices = np.arange(labels.size)
     cond = labels > 0
     unlabeled_indices = indices[~cond]
@@ -149,6 +157,33 @@ def _buildAB(lap_sparse, labels):
     rhs = B * sparse.csc_matrix(mask).transpose()
 
     return lap_sparse, rhs
+
+
+def _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode):
+    if mode == 'cg_mg' and not amg_loaded:
+        warn("pyamg (http://pyamg.github.io/)) is needed to use "
+             "this mode, but is not installed. The 'cg' mode will be "
+             "used instead.")
+        mode = 'cg'
+
+    if mode == 'cg':
+        lap_sparse = lap_sparse.tocsc()
+        X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol)[0]
+             for i in range(B.shape[1])]
+    elif mode == 'cg_mg':
+        ml = ruge_stuben_solver(lap_sparse)
+        M = ml.aspreconditioner(cycle='V')
+        X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol, M=M, maxiter=30)[0]
+             for i in range(B.shape[1])]
+    elif mode == 'bf':
+        lap_sparse = lap_sparse.tocsc()
+        solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
+        X = solver(-B.toarray()).T
+
+    if not return_full_prob:
+        X = np.array(X)
+        X = X.argmax(axis=0)
+    return X
 
 
 def _mask_edges_weights(edges, weights, mask):
@@ -172,7 +207,7 @@ def _mask_edges_weights(edges, weights, mask):
 
 def _build_laplacian(data, spacing, mask=None, beta=50,
                      multichannel=False):
-    l_x, l_y, l_z = tuple(data.shape[i] for i in range(3))
+    l_x, l_y, l_z = data.shape[:3]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
     weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
                                   multichannel=multichannel)
@@ -204,18 +239,10 @@ def _unchanged_labels(labels, return_full_prob=False):
     last dimension corresponding to unique labels.
     """
     if return_full_prob:
-        # Find and iterate over valid labels
-        unique_labels = np.unique(labels)
-        unique_labels = unique_labels[unique_labels > 0]
-
-        out_labels = np.empty(labels.shape + (len(unique_labels),),
-                              dtype=np.bool)
-        for n, i in enumerate(unique_labels):
-            out_labels[..., n] = (labels == i)
-
-    else:
-        out_labels = labels
-    return out_labels
+        return np.concatenate([np.atleast_3d(labels == lab)
+                               for lab in np.unique(labels) if lab > 0],
+                              axis=-1)
+    return labels
 
 
 # ----------- Random walker algorithm --------------------------------
@@ -391,7 +418,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
              'You may also install pyamg and run the random_walker '
              'function in "cg_mg" mode (see docstring).')
 
-    if (labels != 0).all():
+    label_values, renum = np.unique(labels, return_inverse=True)
+
+    if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '
              'labels == 0. No zero valued areas in labels were '
              'found. Returning provided labels.')
@@ -421,7 +450,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     # Spacing kwarg checks
     if spacing is None:
-        spacing = np.asarray((1.,) * 3)
+        spacing = np.ones(3)
     elif len(spacing) == len(dims):
         if len(spacing) == 2:  # Need a dummy spacing for singleton 3rd dim
             spacing = np.r_[spacing, 1.]
@@ -433,63 +462,54 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     if copy:
         labels = np.copy(labels)
-    label_values = np.unique(labels)
 
     # If some labeled pixels are isolated inside pruned zones, prune them
     # as well and keep the labels for the final output
-    inds_isolated_seeds, isolated_values = _check_isolated_seeds(labels)
+    # inds_isolated_seeds, isolated_values = _check_isolated_seeds(labels)
 
-    # Reorder label values to have consecutive integers (no gaps)
-    if np.any(np.diff(label_values) != 1):
-        mask = labels >= 0
-        labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
-    labels = labels.astype(np.int32)
+    null_mask = labels == 0
+    pos_mask = labels > 0
+    mask = labels >= 0
+
+    fill = ndi.binary_propagation(null_mask, mask=mask)
+    isolated = np.logical_and(pos_mask, np.logical_not(fill))
+
+    inds_isolated_seeds = np.nonzero(isolated)
+    isolated_values = labels[inds_isolated_seeds]
+
+    labels[inds_isolated_seeds] = isolated_values
+    pos_mask[inds_isolated_seeds] = False
 
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
-    if np.any(labels < 0):
-        filled = ndi.binary_propagation(labels > 0, mask=labels >= 0)
-        labels[np.logical_and(np.logical_not(filled), labels == 0)] = -1
-        del filled
-    labels = np.atleast_3d(labels)
+    if np.any(label_values < 0) or np.any(isolated):
+        isolated = np.logical_and(
+            np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)),
+            null_mask)
 
-    # No unlabeled pixel, so nothing to do
-    if (labels == 0).sum() == 0:
-        labels = np.squeeze(labels)
-        labels[inds_isolated_seeds] = isolated_values
-        warn('Random walker only segments unlabeled areas, where '
-             'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.')
-        return _unchanged_labels(labels, return_full_prob)
+        labels[isolated] = -1
+        if np.all(isolated[null_mask]):
+            warn('Random walker only segments unlabeled areas, where '
+                 'labels == 0. No zero valued areas in labels were '
+                 'found. Returning provided labels.')
+            return _unchanged_labels(labels, return_full_prob)
 
-    if np.any(labels < 0):
-        lap_sparse = _build_laplacian(data, spacing, mask=labels >= 0,
-                                      beta=beta, multichannel=multichannel)
+        mask[isolated] = False
+        mask = np.atleast_3d(mask)
     else:
-        lap_sparse = _build_laplacian(data, spacing, beta=beta,
-                                      multichannel=multichannel)
-    lap_sparse, B = _buildAB(lap_sparse, labels)
+        mask = None
+
+    # Reorder label values to have consecutive integers (no gaps)
+    labels = np.atleast_3d(renum.reshape(dims) + label_values[0])
+
+    lap_sparse, B = _build_linear_system(data, spacing, labels, mask,
+                                         beta, multichannel)
 
     # We solve the linear system
     # lap_sparse X = B
     # where X[i, j] is the probability that a marker of label i arrives
     # first at pixel j by anisotropic diffusion.
-    if mode == 'cg':
-        X = _solve_cg(lap_sparse, B, tol=tol,
-                      return_full_prob=return_full_prob)
-    if mode == 'cg_mg':
-        if not amg_loaded:
-            warn("""pyamg (http://pyamg.github.io/)) is needed to use
-                this mode, but is not installed. The 'cg' mode will be used
-                instead.""")
-            X = _solve_cg(lap_sparse, B, tol=tol,
-                          return_full_prob=return_full_prob)
-        else:
-            X = _solve_cg_mg(lap_sparse, B, tol=tol,
-                             return_full_prob=return_full_prob)
-    if mode == 'bf':
-        X = _solve_bf(lap_sparse, B,
-                      return_full_prob=return_full_prob)
+    X = _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode)
 
     # Clean up results
     if return_full_prob:
@@ -499,7 +519,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             labels[inds_isolated_seeds] = isolated_values
         X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
                       for Xline in X])
-        for i in range(1, int(labels.max()) + 1):
+        for i in range(1, int(label_values[-1]) + 1):
             mask_i = np.squeeze(labels == i)
             X[:, mask_i] = 0
             X[i - 1, mask_i] = 1
@@ -507,50 +527,4 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         X = _clean_labels_ar(X + 1, labels).reshape(dims)
         # Put back labels of isolated seeds
         X[inds_isolated_seeds] = isolated_values
-    return X
-
-
-def _solve_bf(lap_sparse, B, return_full_prob=False):
-    """
-    solves lap_sparse X_i = B_i for each phase i. An LU decomposition
-    of lap_sparse is computed first. For each pixel, the label i
-    corresponding to the maximal X_i is returned.
-    """
-    lap_sparse = lap_sparse.tocsc()
-    solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-    X = solver(-B.toarray()).T
-    if not return_full_prob:
-        X = np.argmax(X, axis=0)
-    return X
-
-
-def _solve_cg(lap_sparse, B, tol, return_full_prob=False):
-    """
-    solves lap_sparse X_i = B_i for each phase i, using the conjugate
-    gradient method. For each pixel, the label i corresponding to the
-    maximal X_i is returned.
-    """
-    lap_sparse = lap_sparse.tocsc()
-    X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol)[0]
-         for i in range(B.shape[1])]
-    if not return_full_prob:
-        X = np.array(X)
-        X = np.argmax(X, axis=0)
-    return X
-
-
-def _solve_cg_mg(lap_sparse, B, tol, return_full_prob=False):
-    """
-    solves lap_sparse X_i = B_i for each phase i, using the conjugate
-    gradient method with a multigrid preconditioner (ruge-stuben from
-    pyamg). For each pixel, the label i corresponding to the maximal
-    X_i is returned.
-    """
-    ml = ruge_stuben_solver(lap_sparse)
-    M = ml.aspreconditioner(cycle='V')
-    X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol, M=M, maxiter=30)[0]
-         for i in range(B.shape[1])]
-    if not return_full_prob:
-        X = np.array(X)
-        X = np.argmax(X, axis=0)
     return X
