@@ -20,6 +20,7 @@ then
     git rm -r dev
     cp -r ../doc/build/html dev
     mv dev/binder .
+    cp ../binder/postBuild binder/
     git add dev
     git add binder
 

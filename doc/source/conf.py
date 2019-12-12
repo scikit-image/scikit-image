@@ -74,7 +74,7 @@ sphinx_gallery_conf = {
         'repo': 'docs',
         'branch': 'gh-pages',  # Can be any branch, tag, or commit hash
         'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
-        'dependencies': '../requirements.txt',
+        'dependencies': '../binder/requirements.txt',
         # Optional keys
         'filepath_prefix': 'dev/', # A prefix to prepend to filepaths in links.
         'use_jupyter_lab': False
