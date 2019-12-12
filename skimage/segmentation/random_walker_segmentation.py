@@ -90,18 +90,20 @@ def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
                         multichannel=False):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
-    gradients = 0
-    for channel in range(data.shape[-1]):
+    gradients = np.concatenate(
+        [np.abs(np.diff(data[..., 0], axis=ax)).ravel() / spacing[ax]
+         for ax in [2, 1, 0]], axis=0) ** 2
+    for channel in range(1, data.shape[-1]):
         gradients += np.concatenate(
             [np.abs(np.diff(data[..., channel], axis=ax)).ravel() / spacing[ax]
              for ax in [2, 1, 0]], axis=0) ** 2
     # All channels considered together in this standard deviation
-    scale_factor = -1 / (10 * data.std())
+    scale_factor = -beta / (10 * data.std())
     if multichannel:
         # New final term in beta to give == results in trivial case where
         # multiple identical spectra are passed.
         scale_factor /= np.sqrt(data.shape[-1])
-    weights = np.exp(scale_factor * beta * gradients)
+    weights = np.exp(scale_factor * gradients)
     weights += eps
     return weights
 
@@ -119,16 +121,7 @@ def _make_laplacian_sparse(edges, weights):
     lap.setdiag(-np.ravel(lap.sum(axis=1)))
     return lap.tocsr()
 
-
-def _clean_labels_ar(X, labels, copy=False):
-    if copy:
-        labels = np.copy(labels)
-    labels = np.ravel(labels)
-    labels[labels == 0] = X.astype(labels.dtype)
-    return labels
-
-
-def _build_linear_system(data, spacing, labels, mask,
+def _build_linear_system(data, spacing, labels, nlabels, mask,
                          beta, multichannel):
     """
     Build the matrix A and rhs B of the linear system to solve.
@@ -150,7 +143,6 @@ def _build_linear_system(data, spacing, labels, mask,
     rows = lap_sparse[unlabeled_indices, :]
     B = -rows[:, seeds_indices]
     lap_sparse = rows[:, unlabeled_indices]
-    nlabels = labels.max()
     seeds = labels[seeds_indices]
 
     mask = np.vstack([seeds == lab for lab in range(1, nlabels+1)])
@@ -233,8 +225,7 @@ def _mask_edges_weights(edges, weights, mask):
     return edges, weights
 
 
-def _build_laplacian(data, spacing, mask=None, beta=50,
-                     multichannel=False):
+def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
     l_x, l_y, l_z = data.shape[:3]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
     weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
@@ -248,7 +239,7 @@ def _build_laplacian(data, spacing, mask=None, beta=50,
 
 def _preprocess(labels):
 
-    label_values, renum = np.unique(labels, return_inverse=True)
+    label_values, inv_idx = np.unique(labels, return_inverse=True)
 
     if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '
@@ -270,7 +261,6 @@ def _preprocess(labels):
     inds_isolated_seeds = np.nonzero(isolated)
     isolated_values = labels[inds_isolated_seeds]
 
-    labels[inds_isolated_seeds] = isolated_values
     pos_mask[inds_isolated_seeds] = False
 
     # If the array has pruned zones, be sure that no isolated pixels
@@ -294,7 +284,7 @@ def _preprocess(labels):
 
     # Reorder label values to have consecutive integers (no gaps)
     zero_idx = np.searchsorted(label_values, 0)
-    labels = np.atleast_3d(renum.reshape(labels.shape) - zero_idx)
+    labels = np.atleast_3d(inv_idx.reshape(labels.shape) - zero_idx)
 
     nlabels = label_values[zero_idx + 1:].shape[0]
 
@@ -458,7 +448,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', None):
         raise ValueError(
             "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', , 'bicgstab', 'bf' and None".format(mode=mode))
+            " 'cg', 'bicgstab', 'bf' and None".format(mode=mode))
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
@@ -500,6 +490,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
      inds_isolated_seeds, isolated_values) = _preprocess(labels)
 
     if isolated_values is None:
+        # No non isolated zero valued areas in labels were
+        # found. Returning provided labels.
         if return_full_prob:
             # Return the concatenation of the masks of each unique label
             return np.concatenate([np.atleast_3d(labels == lab)
@@ -507,7 +499,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                                   axis=-1)
         return labels
 
-    lap_sparse, B = _build_linear_system(data, spacing, labels, mask,
+    lap_sparse, B = _build_linear_system(data, spacing, labels, nlabels, mask,
                                          beta, multichannel)
 
     # We solve the linear system
@@ -517,19 +509,20 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     X = _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode)
 
     # Clean up results
+    if len(isolated_values) > 0:
+        # Put back labels of isolated seeds
+        labels[inds_isolated_seeds] = isolated_values
     if return_full_prob:
-        labels = labels.astype(np.float)
-        # Put back labels of isolated seeds
-        if len(isolated_values) > 0:
-            labels[inds_isolated_seeds] = isolated_values
-        X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
-                      for Xline in X])
-        for i in range(nlabels):
-            mask_i = np.squeeze(labels == (i+1))
-            X[:, mask_i] = 0
-            X[i, mask_i] = 1
+        labels = np.squeeze(labels.astype(float))
+        mask = labels == 0
+
+        out = np.zeros((nlabels,) + dims)
+        for i, (label_prob, prob) in enumerate(zip(out, X)):
+            label_prob[mask] = prob
+            label_prob[labels == i+1] = 1
+
+        X = out
     else:
-        X = _clean_labels_ar(X + 1, labels).reshape(dims)
-        # Put back labels of isolated seeds
-        X[inds_isolated_seeds] = isolated_values
+        labels[labels == 0] = np.round(X + 1).astype(labels.dtype)
+        X = labels.reshape(dims)
     return X
