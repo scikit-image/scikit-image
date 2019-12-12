@@ -58,8 +58,6 @@ Other
   for sparse matricies (``np.matrix``) used by scipy.sparse in
   ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
   moves away from using ``np.matrix`` in a future version too.
-* Remove the conditional import and function call when ``numpy`` is set
-  to > 1.15.x in ``skimage/util/arraycrop.py``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
