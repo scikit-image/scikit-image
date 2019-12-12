@@ -31,9 +31,8 @@ from skimage.data import astronaut
 from skimage.filters import window
 
 image = img_as_float(rgb2gray(astronaut()))
-size = image.shape[0]  # note image needs to be square
 
-wimage = image * window('hann', size)
+wimage = image * window('hann', image.shape)
 
 image_f = np.abs(fftshift(fft2(image)))
 wimage_f = np.abs(fftshift(fft2(wimage)))
