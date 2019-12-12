@@ -160,6 +160,15 @@ def _build_linear_system(data, spacing, labels, mask,
 
 
 def _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode):
+
+    if mode is None:
+        if amg_loaded:
+            mode = 'cg_mg'
+        elif UmfpackContext is not None:
+            mode = 'cg'
+        else:
+            mode = 'bf'
+
     if mode == 'cg_mg' and not amg_loaded:
         warn("pyamg (http://pyamg.github.io/)) is needed to use "
              "this mode, but is not installed. The 'cg' mode will be "
@@ -167,6 +176,13 @@ def _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode):
         mode = 'cg'
 
     if mode == 'cg':
+        if UmfpackContext is None:
+            warn('"cg" mode will be used, but it may be slower than '
+                 '"bf" because SciPy was built without UMFPACK. Consider'
+                 ' rebuilding SciPy with UMFPACK; this will greatly '
+                 'accelerate the conjugate gradient ("cg") solver. '
+                 'You may also install pyamg and run the random_walker '
+                 'function in "cg_mg" mode (see docstring).')
         lap_sparse = lap_sparse.tocsc()
         X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol)[0]
              for i in range(B.shape[1])]
@@ -243,6 +259,62 @@ def _unchanged_labels(labels, return_full_prob=False):
                                for lab in np.unique(labels) if lab > 0],
                               axis=-1)
     return labels
+
+
+def _preprocess(labels):
+
+    label_values, renum = np.unique(labels, return_inverse=True)
+
+    if not (label_values == 0).any():
+        warn('Random walker only segments unlabeled areas, where '
+             'labels == 0. No zero valued areas in labels were '
+             'found. Returning provided labels.')
+
+        return labels, None, None, None, None
+
+    # If some labeled pixels are isolated inside pruned zones, prune them
+    # as well and keep the labels for the final output
+    # inds_isolated_seeds, isolated_values = _check_isolated_seeds(labels)
+
+    null_mask = labels == 0
+    pos_mask = labels > 0
+    mask = labels >= 0
+
+    fill = ndi.binary_propagation(null_mask, mask=mask)
+    isolated = np.logical_and(pos_mask, np.logical_not(fill))
+
+    inds_isolated_seeds = np.nonzero(isolated)
+    isolated_values = labels[inds_isolated_seeds]
+
+    labels[inds_isolated_seeds] = isolated_values
+    pos_mask[inds_isolated_seeds] = False
+
+    # If the array has pruned zones, be sure that no isolated pixels
+    # exist between pruned zones (they could not be determined)
+    if label_values[0] < 0 or np.any(isolated):
+        isolated = np.logical_and(
+            np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)),
+            null_mask)
+
+        labels[isolated] = -1
+        if np.all(isolated[null_mask]):
+            warn('Random walker only segments unlabeled areas, where '
+                 'labels == 0. No zero valued areas in labels were '
+                 'found. Returning provided labels.')
+            return labels, None, None, None, None
+
+        mask[isolated] = False
+        mask = np.atleast_3d(mask)
+    else:
+        mask = None
+
+    # Reorder label values to have consecutive integers (no gaps)
+    zero_idx = np.searchsorted(label_values, 0)
+    labels = np.atleast_3d(renum.reshape(labels.shape) - zero_idx)
+
+    nlabels = len(label_values[zero_idx:])
+
+    return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
 
 # ----------- Random walker algorithm --------------------------------
@@ -399,33 +471,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode is None:
-        if amg_loaded:
-            mode = 'cg_mg'
-        elif UmfpackContext is not None:
-            mode = 'cg'
-        else:
-            mode = 'bf'
-    elif mode not in ('cg_mg', 'cg', 'bf'):
+    if mode not in ('cg_mg', 'cg', 'bf', None):
         raise ValueError("{mode} is not a valid mode. Valid modes are 'cg_mg',"
-                         " 'cg' and 'bf'".format(mode=mode))
-
-    if UmfpackContext is None and mode == 'cg':
-        warn('"cg" mode will be used, but it may be slower than '
-             '"bf" because SciPy was built without UMFPACK. Consider'
-             ' rebuilding SciPy with UMFPACK; this will greatly '
-             'accelerate the conjugate gradient ("cg") solver. '
-             'You may also install pyamg and run the random_walker '
-             'function in "cg_mg" mode (see docstring).')
-
-    label_values, renum = np.unique(labels, return_inverse=True)
-
-    if not (label_values == 0).any():
-        warn('Random walker only segments unlabeled areas, where '
-             'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.')
-
-        return _unchanged_labels(labels, return_full_prob)
+                         " 'cg', 'bf' and None".format(mode=mode))
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
@@ -463,44 +511,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if copy:
         labels = np.copy(labels)
 
-    # If some labeled pixels are isolated inside pruned zones, prune them
-    # as well and keep the labels for the final output
-    # inds_isolated_seeds, isolated_values = _check_isolated_seeds(labels)
+    (labels, nlabels, mask,
+     inds_isolated_seeds, isolated_values) = _preprocess(labels)
 
-    null_mask = labels == 0
-    pos_mask = labels > 0
-    mask = labels >= 0
-
-    fill = ndi.binary_propagation(null_mask, mask=mask)
-    isolated = np.logical_and(pos_mask, np.logical_not(fill))
-
-    inds_isolated_seeds = np.nonzero(isolated)
-    isolated_values = labels[inds_isolated_seeds]
-
-    labels[inds_isolated_seeds] = isolated_values
-    pos_mask[inds_isolated_seeds] = False
-
-    # If the array has pruned zones, be sure that no isolated pixels
-    # exist between pruned zones (they could not be determined)
-    if label_values[0] < 0 or np.any(isolated):
-        isolated = np.logical_and(
-            np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)),
-            null_mask)
-
-        labels[isolated] = -1
-        if np.all(isolated[null_mask]):
-            warn('Random walker only segments unlabeled areas, where '
-                 'labels == 0. No zero valued areas in labels were '
-                 'found. Returning provided labels.')
-            return _unchanged_labels(labels, return_full_prob)
-
-        mask[isolated] = False
-        mask = np.atleast_3d(mask)
-    else:
-        mask = None
-
-    # Reorder label values to have consecutive integers (no gaps)
-    labels = np.atleast_3d(renum.reshape(dims) + label_values[0])
+    if isolated_values is None:
+        return _unchanged_labels(labels, return_full_prob)
 
     lap_sparse, B = _build_linear_system(data, spacing, labels, mask,
                                          beta, multichannel)
@@ -519,7 +534,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             labels[inds_isolated_seeds] = isolated_values
         X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
                       for Xline in X])
-        for i in range(1, int(label_values[-1]) + 1):
+        for i in range(1, nlabels):
             mask_i = np.squeeze(labels == i)
             X[:, mask_i] = 0
             X[i - 1, mask_i] = 1
