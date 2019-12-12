@@ -7,7 +7,7 @@ from skimage.registration._lddmm_utilities import _validate_ndarray
 from skimage.registration._lddmm_utilities import _validate_xyz_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
-from skimage.registration._lddmm_utilities import _multiply_by_affine # TODO: write test for this function.
+from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
 
 """
 Test _validate_scalar_to_multi.
@@ -268,13 +268,68 @@ def test__compute_coords():
     assert np.array_equal(_compute_coords(**kwargs), correct_output)
 
 """
-Test _multiply_by_affine.
+Test _multiply_coords_by_affine.
 """
 
-@pytest.mark.skip
-def test__multiply_by_affine():
-    assert False
+def test__multiply_coords_by_affine():
 
+    # Test proper use.
+
+    # Test 3D case.
+
+    array = _compute_coords((3,4,5), 1)
+    affine = np.eye(4) + np.append(np.arange(3*4).reshape(3,4), np.zeros((1,4)), 0)**2
+    result = _multiply_coords_by_affine(affine, array)
+    arrays = []
+    for dim in range(3):
+        arrays.append(np.sum(affine[dim, :-1] * array, axis=-1) + affine[dim, -1])
+    expected = np.stack(arrays=arrays, axis=-1)
+
+    assert np.array_equal(result, expected)
+
+    # Test improper use.
+
+    # Verify affine is 2-dimensional.
+    affine = np.eye(4)[None]
+    array = np.arange(4*5*6*3).reshape(4,5,6,3)
+    expected_exception = ValueError
+    match = "affine must be a 2-dimensional matrix."
+    with pytest.raises(expected_exception, match=match):
+        _multiply_coords_by_affine(affine, array)
+
+    # Verify affine is square.
+    affine = np.eye(4)[:3]
+    array = np.arange(4*5*6*3).reshape(4,5,6,3)
+    expected_exception = ValueError
+    match = "affine must be a square matrix."
+    with pytest.raises(expected_exception, match=match):
+        _multiply_coords_by_affine(affine, array)
+
+    # Verify compatibility between affine and array.
+    affine = np.eye(4)
+    array = np.arange(4*5*6*2).reshape(4,5,6,2)
+    expected_exception = ValueError
+    match = "array is incompatible with affine. The length of the last dimension of array should be 1 less than the length of affine."
+    with pytest.raises(expected_exception, match=match):
+        _multiply_coords_by_affine(affine, array)
+
+    # Verify warning on violation of homogenous coordinates in affine.
+    
+    affine = np.ones((4,4))
+    array = np.arange(4*5*6*3).reshape(4,5,6,3)
+    expected_warning = RuntimeWarning
+    match = "affine is not in homogenous coordinates.\naffine\[-1] should be zeros with a 1 on the right."
+    print(len(match), 'match')
+    with pytest.warns(expected_warning, match=match):
+        _multiply_coords_by_affine(affine, array)
+    
+    affine = np.zeros((4,4))
+    array = np.arange(4*5*6*3).reshape(4,5,6,3)
+    expected_warning = RuntimeWarning
+    match = "affine is not in homogenous coordinates.\naffine\[-1] should be zeros with a 1 on the right."
+    with pytest.warns(expected_warning, match=match):
+        _multiply_coords_by_affine(affine, array)
+    
 """
 Perform tests.
 """
@@ -285,4 +340,4 @@ if __name__ == "__main__":
     test__validate_xyz_resolution()
     test__compute_axes()
     test__compute_coords()
-    test__multiply_by_affine()
+    test__multiply_coords_by_affine()

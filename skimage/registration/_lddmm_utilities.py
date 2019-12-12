@@ -7,10 +7,11 @@ Defines:
         _validate_xyz_resolution(ndim, xyz_resolution)
         _compute_axes(shape, xyz_resolution=1, origin='center')
         _compute_coords(shape, xyz_resolution=1, origin='center')
-        _multiply_by_affine(array, affine)
+        _multiply_coords_by_affine(array, affine)
 """
 
 import numpy as np
+import warnings
 
 def _validate_scalar_to_multi(value, size=3, dtype=float):
     """
@@ -209,20 +210,33 @@ def _compute_coords(shape, xyz_resolution=1, origin='center'):
     return np.stack(meshes, axis=-1)
 
 
-def _multiply_by_affine(array, affine, spatial_dimensions=3):
+def _multiply_coords_by_affine(affine, array):
+    
+    # Validate inputs.
 
-    arrays = []
-    for dim in range(spatial_dimensions):
-        arrays.append(np.sum(affine[dim, :-1] * array + affine[dim, -1], axis=-1))
+    # Verify that affine is square.
+    if affine.ndim != 2:
+        raise ValueError(f"affine must be a 2-dimensional matrix.\n"
+            f"affine.ndim: {affine.ndim}.")
+    # affine is 2-dimensional.
+    if affine.shape[0] != affine.shape[1]:
+        raise ValueError(f"affine must be a square matrix.\n"
+            f"affine.shape: {affine.shape}.")
+    # affine is square.
 
-    return np.stack(arrays=arrays, axis=-1)
+    # Verify compatibility between affine and array.
+    if array.shape[-1] != len(affine) - 1:
+        raise ValueError(f"array is incompatible with affine. The length of the last dimension of array should be 1 less than the length of affine.\n"
+            f"array.shape: {array.shape}, affine.shape: {affine.shape}.")
+    
+    # Raise warning if affine is not in homogenous coordinates.
+    if not np.array_equal(affine[-1], np.array([0] * (len(affine) - 1) + [1])):
+        warnings.warn(message=f"affine is not in homogenous coordinates.\n"
+            f"affine[-1] should be zeros with a 1 on the right.\n"
+            f"affine[-1]: {affine[-1]}.", category=RuntimeWarning)
 
-    # Expanded for 3D:
-    # return np.stack(
-    #     arrays=[
-    #         np.sum(affine[0, :3] * array + affine[0, -1], axis=-1), 
-    #         np.sum(affine[1, :3] * array + affine[1, -1], axis=-1), 
-    #         np.sum(affine[2, :3] * array + affine[2, -1], axis=-1), 
-    #     ],
-    #     axis=-1,
-    # )
+    # Perform affine matrix multiplication.
+
+    ndims = len(affine) - 1
+    return np.squeeze(np.matmul(affine[:ndims, :ndims], array[...,None]), -1) + affine[:ndims, ndims]
+    

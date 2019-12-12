@@ -2,15 +2,16 @@ import numpy as np
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det
 from skimage.transform import resize
+from matplotlib import pyplot as plt
 
 from skimage.registration._lddmm_utilities import _validate_ndarray
 from skimage.registration._lddmm_utilities import _validate_scalar_to_multi
 from skimage.registration._lddmm_utilities import _validate_xyz_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
-from skimage.registration._lddmm_utilities import _multiply_by_affine
+from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
 
-'''
+r'''
   _            _       _                         
  | |          | |     | |                        
  | |        __| |   __| |  _ __ ___    _ __ ___  
@@ -28,7 +29,7 @@ class _Lddmm:
 
     def __init__(self, template, target, template_resolution=1, target_resolution=1, check_artifacts=False, num_iterations=200, num_affine_only_iterations=50, 
     num_timesteps=5, initial_affine=None, initial_velocity_fields = None, contrast_order=1, sigmaM=None, sigmaA=None, smooth_length=None, sigmaR=None, 
-    translational_stepsize=None, linear_stepsize=None, deformative_stepsize=None, contrast_stepsize=1):
+    translational_stepsize=None, linear_stepsize=None, deformative_stepsize=None, contrast_stepsize=1, calibrate=False):
     
         # Inputs.
 
@@ -55,6 +56,7 @@ class _Lddmm:
         self.sigmaM = sigmaM or np.std(self.target)
         self.sigmaA = sigmaA or 5 * self.sigmaM
         self.smooth_length = smooth_length or 2 * np.max(self.template_resolution)
+        self.calibrate = calibrate
 
         # Flags.
         self.check_artifacts = check_artifacts
@@ -112,6 +114,10 @@ class _Lddmm:
         self.matching_energies = []
         self.regularization_energies = []
         self.total_energies = []
+        # For optional calibration plots.
+        if self.calibrate:
+            self.affines = []
+            self.maximum_velocities = [0] * self.num_affine_only_iterations
 
 
     def register(self):
@@ -153,12 +159,16 @@ class _Lddmm:
             self._update_affine(affine_inv_gradient)
             # Update velocity_fields.
             if iteration >= self.num_affine_only_iterations: self._update_velocity_fields(velocity_fields_gradients)
-            # Do other things.
-            pass
         
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
 
+        # Optionally display useful plots for calibrating the registration parameters.
+        if self.calibrate:
+            self._generate_calibration_plots()
+        
+        # Note: the user-level apply_lddmm function relies on many of these specific outputs with these specific keys to function. 
+        # ----> Check the apply_lddmm function signature before adjusting these outputs.
         return dict(
             # Core.
             affine=self.affine,
@@ -219,7 +229,7 @@ class _Lddmm:
             # End time loop.
 
         # Apply affine_inv to target_coords by multiplication.
-        affine_inv_target_coords = _multiply_by_affine(self.target_coords, inv(self.affine))
+        affine_inv_target_coords = _multiply_coords_by_affine(inv(self.affine), self.target_coords)
 
         # Apply phi_inv to affine_inv_target_coords.
         self.phi_inv_affine_inv = interpn(
@@ -340,7 +350,7 @@ class _Lddmm:
         non_affine_deformed_template_gradient = np.stack(np.gradient(non_affine_deformed_template, *self.template_resolution), -1)
 
         # Apply the affine to each component of non_affine_deformed_template_gradient.
-        sample_coords = _multiply_by_affine(self.target_coords, inv(self.affine))
+        sample_coords = _multiply_coords_by_affine(inv(self.affine), self.target_coords)
         deformed_template_gradient = interpn(
             points=self.template_axes,
             values=non_affine_deformed_template_gradient,
@@ -392,6 +402,10 @@ class _Lddmm:
 
         self.affine = inv(affine_inv)
 
+        # Save affine for calibration plotting.
+        if self.calibrate:
+            self.affines.append(self.affine)
+
 
     def _compute_velocity_fields_gradients(self):
 
@@ -421,7 +435,7 @@ class _Lddmm:
 
             # Apply affine by multiplication.
             # This transforms error in the target space back to time t.
-            self.affine_phi = _multiply_by_affine(self.phi, self.affine)
+            self.affine_phi = _multiply_coords_by_affine(self.affine, self.phi)
 
             # Compute the determinant of the gradient of self.phi.
             grad_phi = np.stack(np.gradient(self.phi, *self.template_resolution, axis=[0,1,2]), -1)
@@ -468,6 +482,11 @@ class _Lddmm:
             for timestep in range(self.num_timesteps):
                 self.velocity_fields[...,timestep,:] -= velocity_fields_gradients[timestep] * self.deformative_stepsize
 
+            # Save maximum velocity for calibration plotting.
+            if self.calibrate:
+                maximum_velocity = np.sqrt(np.sum(self.velocity_fields**2, axis=-1)).max()
+                self.maximum_velocities.append(maximum_velocity)
+
     
     def _compute_affine_phi(self):
 
@@ -490,12 +509,38 @@ class _Lddmm:
 
             # Apply affine by multiplication.
             # This transforms error in the target space back to time t.
-            self.affine_phi = _multiply_by_affine(self.phi, self.affine)
-        
+            self.affine_phi = _multiply_coords_by_affine(self.affine, self.phi)
+    
+
+    def _generate_calibration_plots(self):
+
+        fig, axes = plt.subplots(2, 2, figsize=(6, 6))
+
+        # Plot matching, regularization, and total energies.
+        ax = axes[0, 0]
+        ax.plot(list(zip(self.matching_energies, self.regularization_energies, self.total_energies)))
+        ax.set_title('Energies')
+
+        # Plot the maximum velocity.
+        ax = axes[0, 1]
+        ax.plot(self.maximum_velocities)
+        ax.set_title('Maximum\nvelocity')
+
+        # Plot affine[:, :3], the translation components.
+        translations = [affine[:-1, -1] for affine in self.affines]
+        ax = axes[1, 0]
+        ax.plot(translations)
+        ax.set_title('Translation\ncomponents')
+
+        # Plot self.affine[:3, :3], the linear transformation components.
+        linear_components = [affine[:-1, :-1].ravel() for affine in self.affines]
+        ax = axes[1, 1]
+        ax.plot(linear_components)
+        ax.set_title('Linear\ncomponents')
 
     # End _Lddmm.
 
-'''
+r'''
   _    _                          __                          _     _                       
  | |  | |                        / _|                        | |   (_)                      
  | |  | |  ___    ___   _ __    | |_   _   _   _ __     ___  | |_   _    ___    _ __    ___ 
@@ -513,7 +558,8 @@ def lddmm_register(template, target, template_resolution=1, target_resolution=1,
     num_iterations=200, 
     num_affine_only_iterations=50, 
     initial_affine=None, initial_velocity_fields=None, 
-    num_timesteps=5, contrast_order=3, sigmaM=None, smooth_length=None):
+    num_timesteps=5, contrast_order=1, sigmaM=None, smooth_length=None, 
+    calibrate=False):
     """
     Compute a registration between template and target, to be applied with apply_lddmm.
     
@@ -534,6 +580,7 @@ def lddmm_register(template, target, template_resolution=1, target_resolution=1,
         contrast_order (int, optional): The order of the polynomial fit between the contrasts of the template and target. Defaults to 3.
         sigmaM (float, optional): A measure of spread. Defaults to None.
         smooth_length (float, optional): The length scale of smoothing. Defaults to None.
+        calibrate (bool, optional): A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. Defaults to False.
     
     Example:
         >>> import numpy as np
@@ -575,6 +622,7 @@ def lddmm_register(template, target, template_resolution=1, target_resolution=1,
         translational_stepsize=translational_stepsize,
         linear_stepsize=linear_stepsize,
         deformative_stepsize=deformative_stepsize,
+        calibrate=calibrate,
     )
 
     return lddmm.register()
@@ -642,11 +690,11 @@ template_shape, template_resolution, target_shape, target_resolution, deform_to=
     # Apply the affine transform to the position field.
     if deform_to == "template":
         # Apply the affine by multiplication.
-        affine_phi = _multiply_by_affine(phi, affine)
+        affine_phi = _multiply_coords_by_affine(affine, phi)
         # affine_phi has the resolution of the template.
     elif deform_to == "target":
         # Apply the affine by interpolation.
-        sample_coords = _multiply_by_affine(target_coords, inv(affine))
+        sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)####TODO################################################# inv(affine), or just affine? TODO
         phi_inv_affine_inv = interpn(
             points=template_axes,
             values=phi_inv - template_coords,
@@ -663,7 +711,7 @@ template_shape, template_resolution, target_shape, target_resolution, deform_to=
         return phi_inv_affine_inv
 
 
-def _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution):
+def _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value=None):
 
     # Validate inputs.
 
@@ -698,14 +746,14 @@ def _apply_position_field(subject, subject_resolution, output_resolution, positi
         values=subject,
         xi=position_field,
         bounds_error=False,
-        fill_value=None,
+        fill_value=extrapolation_fill_value,
     )
 
     return deformed_subject
 
 
 def apply_lddmm(subject, subject_resolution=1, affine_phi=None, phi_inv_affine_inv=None, 
-template_resolution=1, target_resolution=1, output_resolution=None, deform_to="template", **unused_kwargs):
+template_resolution=1, target_resolution=1, output_resolution=None, deform_to="template", extrapolation_fill_value=None, **unused_kwargs):
     """
     Apply the transform, or position field affine_phi or phi_inv_affine_inv, to the subject 
     to deform it to either the template or the target.
@@ -728,6 +776,7 @@ template_resolution=1, target_resolution=1, output_resolution=None, deform_to="t
             or just one scalar to indicate isotropy, or None to indicate the resolution of template or target based on deform_to. 
             Defaults to None.
         deform_to (str, optional): Either "template" or "target", indicating which position field to apply to subject. Defaults to "template".
+        extrapolation_fill_value (float, NoneType, optional): The fill_value kwarg passed to scipy.interpolate.interpn. Defaults to None.
 
     Raises:
         TypeError: Raised if deform_to is not of type str.
@@ -773,6 +822,6 @@ template_resolution=1, target_resolution=1, output_resolution=None, deform_to="t
 
     # Call _apply_position_field.
 
-    deformed_subject = _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution)
+    deformed_subject = _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value)
 
     return deformed_subject

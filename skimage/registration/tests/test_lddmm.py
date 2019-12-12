@@ -14,7 +14,7 @@ from skimage.registration._lddmm import apply_lddmm
 @pytest.mark.parametrize('deform_to', ['template', 'target'])
 def test__generate_position_field(deform_to):
 
-    # Test identity affine and velocity_fields.
+    # Test identity affine and identity velocity_fields.
 
     num_timesteps = 10
 
@@ -77,15 +77,11 @@ def test__generate_position_field(deform_to):
     ])
 
     if deform_to == 'template':
-        expected_output = _lddmm_utilities._multiply_by_affine(
-            _lddmm_utilities._compute_coords(template_shape, template_resolution), 
-            affine, 3
-        )
+        expected_output = _lddmm_utilities._multiply_coords_by_affine(affine, 
+            _lddmm_utilities._compute_coords(template_shape, template_resolution))
     elif deform_to == 'target':
-        expected_output = _lddmm_utilities._multiply_by_affine(
-            _lddmm_utilities._compute_coords(target_shape, target_resolution), 
-            inv(affine), 3
-        )
+        expected_output = _lddmm_utilities._multiply_coords_by_affine(inv(affine), 
+            _lddmm_utilities._compute_coords(target_shape, target_resolution))
 
     position_field = _generate_position_field(affine=affine, velocity_fields=velocity_fields, velocity_field_resolution=velocity_field_resolution, 
         template_shape=template_shape, template_resolution=template_resolution, target_shape=target_shape, target_resolution=target_resolution, deform_to=deform_to)
@@ -234,10 +230,8 @@ def test__apply_position_field():
         [-1,0,0],
         [0,0,1],
     ])
-    position_field = _lddmm_utilities._multiply_by_affine(
-        _lddmm_utilities._compute_coords(subject.shape, position_field_resolution), 
-        affine, 2
-    )
+    position_field = _lddmm_utilities._multiply_coords_by_affine(affine, 
+        _lddmm_utilities._compute_coords(subject.shape, position_field_resolution))
 
     deformed_subject = _apply_position_field(
         subject=subject,

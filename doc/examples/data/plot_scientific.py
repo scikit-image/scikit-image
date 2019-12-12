@@ -20,6 +20,8 @@ images = ('hubble_deep_field',
           'retina',
           'shepp_logan_phantom',
           'cell',
+          'allen_mouse_brain_atlas',
+          'cleared_mouse_brain'
           )
 
 
