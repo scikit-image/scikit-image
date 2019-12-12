@@ -510,7 +510,7 @@ MAX_SOBEL_ND = np.array([
      [1, 1, 0]]
 ]).astype(float)
 
-# maximum Scharr 3D edge in magnitude This illustrates the better rotation
+# maximum Scharr 3D edge in magnitude. This illustrates the better rotation
 # invariance of the Scharr filter!
 MAX_SCHARR_ND = np.array([
     [[0, 0, 0],
