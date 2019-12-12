@@ -110,13 +110,16 @@ def window(window_type, shape, warp_kwargs=None):
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
 
     # Create coords for warping following `ndimage.map_coordinates` convention.
-    L = [np.arange(s, dtype=np.double) * (max_size / s) for s in shape]
+    L = [np.arange(s, dtype=np.float32) * (max_size / s) for s in shape]
 
     center = (max_size / 2) - 0.5
-
-    coords = np.stack((np.meshgrid(*L)))
-    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0)) + center
-    coords[1:, ...] = 0
+    dist = 0
+    for g in np.meshgrid(*L, sparse=True):
+        g -= center
+        dist = dist + g * g
+    dist = np.sqrt(dist)
+    coords = np.zeros((ndim,) + dist.shape, dtype=np.float32)
+    coords[0] = dist + center
 
     if warp_kwargs is None:
         warp_kwargs = {}
