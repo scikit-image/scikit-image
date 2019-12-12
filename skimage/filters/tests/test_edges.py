@@ -482,7 +482,8 @@ def test_vertical_mask_line(grad_func):
     assert_allclose(result, expected)
 
 
-MAX_EDGE_0 = np.array([
+# maximum Sobel 3D edge on axis 0
+MAX_SOBEL_0 = np.array([
     [[0, 0, 0],
      [0, 0, 0],
      [0, 0, 0]],
@@ -494,28 +495,50 @@ MAX_EDGE_0 = np.array([
      [1, 1, 1]],
 ])
 
-MAX_EDGE_ND = np.array([
+# maximum Sobel 3D edge in magnitude
+MAX_SOBEL_ND = np.array([
+    [[1, 0, 0],
+     [1, 0, 0],
+     [1, 0, 0]],
+
+    [[1, 0, 0],
+     [1, 1, 0],
+     [1, 1, 0]],
+
+    [[1, 1, 0],
+     [1, 1, 0],
+     [1, 1, 0]]
+]).astype(float)
+
+# maximum Scharr 3D edge in magnitude This illustrates the better rotation
+# invariance of the Scharr filter!
+MAX_SCHARR_ND = np.array([
     [[0, 0, 0],
-     [0, 0, 0],
-     [0, 0, 0]],
-    [[0, 0, 0],
+     [0, 0, 1],
+     [0, 1, 1]],
+    [[0, 0, 1],
      [0, 1, 1],
-     [1, 1, 1]],
-    [[1, 1, 1],
-     [1, 1, 1],
+     [0, 1, 1]],
+    [[0, 0, 1],
+     [0, 1, 1],
      [1, 1, 1]]
 ]).astype(float)
 
 
+
 @testing.parametrize(
-    'func', (filters.sobel, filters.scharr, filters.prewitt)
+    ('func', 'max_edge'),
+    [(filters.prewitt, MAX_SOBEL_ND),
+     (filters.sobel, MAX_SOBEL_ND),
+     (filters.scharr, MAX_SCHARR_ND)]
 )
-def test_3d_edge_filters(func):
+def test_3d_edge_filters(func, max_edge):
     blobs = data.binary_blobs(length=128, n_dim=3)
     edges = func(blobs)
     edges0 = func(blobs, axis=0)
-    testing.assert_allclose(np.max(edges), func(MAX_EDGE_ND)[1, 1, 1])
+    testing.assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
     testing.assert_allclose(np.max(edges0), 1.0)
+
 
 
 def test_range():
