@@ -207,8 +207,7 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=SOBEL_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
-    if image.ndim == 2 and mask is not None:
-        output = _mask_filter_result(output, mask)
+    output = _mask_filter_result(output, mask)
     return output
 
 
@@ -329,8 +328,7 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=SCHARR_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
-    if image.ndim == 2 and mask is not None:
-        output = _mask_filter_result(output, mask)
+    output = _mask_filter_result(output, mask)
     return output
 
 
@@ -457,8 +455,7 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     image = img_as_float(image)
     output = _generic_edge_filter(image, smooth_weights=PREWITT_SMOOTH,
                                   axis=axis, mode=mode, cval=cval)
-    if image.ndim == 2 or mask is not None:
-        output = _mask_filter_result(output, mask)
+    output = _mask_filter_result(output, mask)
     return output
 
 
