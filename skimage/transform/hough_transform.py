@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial import cKDTree
 from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
@@ -343,32 +344,50 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
         s = np.argsort(accum / r)
     else:
         s = np.argsort(accum)
+    accum_sorted, cx_sorted, cy_sorted, r_sorted = \
+        accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1]
+
+    tnp = len(accum_sorted) if total_num_peaks == np.inf else total_num_peaks
+
+    # Skip searching for neighboring circles
+    # if default min_xdistance and min_ydistance are used
+    if min_xdistance == 1 and min_ydistance == 1:
+        return (accum_sorted[:tnp],
+                cx_sorted[:tnp],
+                cy_sorted[:tnp],
+                r_sorted[:tnp])
 
     # For circles with centers too close, only keep the one with
     # the highest peak
-    accum_sorted, cx_sorted, cy_sorted, r_sorted = \
-        accum[s][::-1], cx[s][::-1], cy[s][::-1], r[s][::-1]
-    accum = []
-    cx = []
-    cy = []
-    r = []
-    for ac, x, y, ra in zip(accum_sorted, cx_sorted, cy_sorted, r_sorted):
-        far_from_kept_circle = [
-            abs(i - x) > min_xdistance or abs(j - y) > min_ydistance
-            for i, j in zip(cx, cy)
-        ]
-        if all(far_from_kept_circle):
-            accum.append(ac)
-            cx.append(x)
-            cy.append(y)
-            r.append(ra)
-    accum = np.array(accum)
-    cx = np.array(cx)
-    cy = np.array(cy)
-    r = np.array(r)
+    removed = np.zeros(len(accum_sorted), dtype=bool)
+    accum_kept = []
+    cx_kept = []
+    cy_kept = []
+    r_kept = []
+    i = 0
 
-    if total_num_peaks != np.inf:
-        tnp = total_num_peaks
-        return (accum[:tnp], cx[:tnp], cy[:tnp], r[:tnp])
+    # Use a KDTree to search for neighboring circles effectively
+    scaled_cx_sorted = cx_sorted / float(min_xdistance)
+    scaled_cy_sorted = cy_sorted / float(min_ydistance)
+    kd_tree = cKDTree(np.stack([scaled_cx_sorted, scaled_cy_sorted], axis=1))
+    while i < tnp:
+        if not removed[i]:
+            accum_kept.append(accum_sorted[i])
+            cx_kept.append(cx_sorted[i])
+            cy_kept.append(cy_sorted[i])
+            r_kept.append(r_sorted[i])
+            # Find a shrot list of candidates to remove
+            # by searching within a radius of sqrt(2) in scaled space
+            neighbors_i = kd_tree.query_ball_point(
+                (scaled_cx_sorted[i], scaled_cy_sorted[i]), np.sqrt(2)
+            )
+            # Check distance in both dimensions and mark as removed if close
+            for ni in neighbors_i:
+                x_close = abs(scaled_cx_sorted[ni] - scaled_cx_sorted[i]) <= 1
+                y_close = abs(scaled_cy_sorted[ni] - scaled_cy_sorted[i]) <= 1
+                if x_close or y_close:
+                    removed[ni] = True
+        i += 1
 
-    return (accum, cx, cy, r)
+    return (np.array(accum_kept), np.array(cx_kept),
+            np.array(cy_kept), np.array(r_kept))
