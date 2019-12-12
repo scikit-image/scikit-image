@@ -86,17 +86,17 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     return edges
 
 
-def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
-                        multichannel=False):
+def _compute_weights_3d(data, spacing, beta, eps, multichannel):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
     gradients = np.concatenate(
-        [np.abs(np.diff(data[..., 0], axis=ax)).ravel() / spacing[ax]
+        [np.diff(data[..., 0], axis=ax).ravel() / spacing[ax]
          for ax in [2, 1, 0]], axis=0) ** 2
     for channel in range(1, data.shape[-1]):
         gradients += np.concatenate(
-            [np.abs(np.diff(data[..., channel], axis=ax)).ravel() / spacing[ax]
+            [np.diff(data[..., channel], axis=ax).ravel() / spacing[ax]
              for ax in [2, 1, 0]], axis=0) ** 2
+
     # All channels considered together in this standard deviation
     scale_factor = -beta / (10 * data.std())
     if multichannel:
@@ -108,20 +108,6 @@ def _compute_weights_3d(data, spacing, beta=130, eps=1.e-6,
     return weights
 
 
-def _make_laplacian_sparse(edges, weights):
-    """
-    Sparse implementation
-    """
-    pixel_nb = edges.shape[1]
-    i_indices = edges.ravel()
-    j_indices = edges[::-1].ravel()
-    data = -np.hstack((weights, weights))
-    lap = sparse.coo_matrix((data, (i_indices, j_indices)),
-                            shape=(pixel_nb, pixel_nb))
-    lap.setdiag(-np.ravel(lap.sum(axis=1)))
-    return lap.tocsr()
-
-
 def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
     l_x, l_y, l_z = data.shape[:3]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
@@ -130,10 +116,10 @@ def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
     if mask is not None:
         # Remove edges of the graph connected to masked nodes, as well
         # as corresponding weights of the edges.
-        mask0 = np.hstack((mask[..., :-1].ravel(), mask[:, :-1].ravel(),
-                           mask[:-1].ravel()))
-        mask1 = np.hstack((mask[..., 1:].ravel(), mask[:, 1:].ravel(),
-                           mask[1:].ravel()))
+        mask0 = np.hstack([mask[..., :-1].ravel(), mask[:, :-1].ravel(),
+                           mask[:-1].ravel()])
+        mask1 = np.hstack([mask[..., 1:].ravel(), mask[:, 1:].ravel(),
+                           mask[1:].ravel()])
         ind_mask = np.logical_and(mask0, mask1)
         edges, weights = edges[:, ind_mask], weights[ind_mask]
 
@@ -141,9 +127,15 @@ def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
         _, inv_idx = np.unique(edges, return_inverse=True)
         edges = inv_idx.reshape(edges.shape)
 
-    lap = _make_laplacian_sparse(edges, weights)
-    del edges, weights
-    return lap
+    # Build the sparse linear system
+    pixel_nb = edges.shape[1]
+    i_indices = edges.ravel()
+    j_indices = edges[::-1].ravel()
+    data = -np.hstack((weights, weights))
+    lap = sparse.coo_matrix((data, (i_indices, j_indices)),
+                            shape=(pixel_nb, pixel_nb))
+    lap.setdiag(-np.ravel(lap.sum(axis=1)))
+    return lap.tocsr()
 
 
 def _build_linear_system(data, spacing, labels, nlabels, mask,
