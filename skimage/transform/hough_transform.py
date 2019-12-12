@@ -317,6 +317,12 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     >>> img[x, y] = 1
     >>> hspaces = transform.hough_circle(img, radius)
     >>> accum, cx, cy, rad = hough_circle_peaks(hspaces, [radius,])
+
+    Notes
+    -----
+    Circles with bigger radius have higher peaks in Hough space. If larger
+    circles are preferred over smaller ones, `normalize` should be False.
+    Otherwise, circles will be returned in the order of decreasing perfectness.
     """
     from ..feature.peak import _prominent_peaks
 
