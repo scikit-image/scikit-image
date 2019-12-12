@@ -546,18 +546,18 @@ def test_3d_edge_filters_single_axis(func):
     testing.assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
 
 
-def test_range():
+@testing.parametrize(
+    'detector',
+    [filters.sobel, filters.scharr, filters.prewitt,
+     filters.roberts, filters.farid]
+)
+def test_range(detector):
     """Output of edge detection should be in [0, 1]"""
     image = np.random.random((100, 100))
-    for detector in (filters.sobel, filters.scharr,
-                     filters.prewitt, filters.roberts,
-                     filters.farid):
-        out = detector(image)
-        assert_(out.min() >= 0,
-                "Minimum of `{0}` is smaller than zero".format(
-                    detector.__name__)
-                )
-        assert_(out.max() <= 1,
-                "Maximum of `{0}` is larger than 1".format(
-                    detector.__name__)
-                )
+    out = detector(image)
+    assert_(
+        out.min() >= 0, f'Minimum of `{detector.__name__}` is smaller than 0.'
+    )
+    assert_(
+        out.max() <= 1, f'Maximum of `{detector.__name__}` is larger than 1.'
+    )
