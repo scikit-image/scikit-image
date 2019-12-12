@@ -248,19 +248,6 @@ def _check_isolated_seeds(labels):
     return inds, values
 
 
-def _unchanged_labels(labels, return_full_prob=False):
-    """
-    Return the input array of labels, unless ``return_full_prob`` is True,
-    in which case a mask of pixels is returned for each unique label, with the
-    last dimension corresponding to unique labels.
-    """
-    if return_full_prob:
-        return np.concatenate([np.atleast_3d(labels == lab)
-                               for lab in np.unique(labels) if lab > 0],
-                              axis=-1)
-    return labels
-
-
 def _preprocess(labels):
 
     label_values, renum = np.unique(labels, return_inverse=True)
@@ -312,7 +299,7 @@ def _preprocess(labels):
     zero_idx = np.searchsorted(label_values, 0)
     labels = np.atleast_3d(renum.reshape(labels.shape) - zero_idx)
 
-    nlabels = len(label_values[zero_idx:])
+    nlabels = label_values[zero_idx + 1:].shape[0]
 
     return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
@@ -515,7 +502,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
      inds_isolated_seeds, isolated_values) = _preprocess(labels)
 
     if isolated_values is None:
-        return _unchanged_labels(labels, return_full_prob)
+        if return_full_prob:
+            # Return the concatenation of the masks of each unique label
+            return np.concatenate([np.atleast_3d(labels == lab)
+                                   for lab in np.unique(labels) if lab > 0],
+                                  axis=-1)
+        return labels
 
     lap_sparse, B = _build_linear_system(data, spacing, labels, mask,
                                          beta, multichannel)
@@ -534,10 +526,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             labels[inds_isolated_seeds] = isolated_values
         X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
                       for Xline in X])
-        for i in range(1, nlabels):
-            mask_i = np.squeeze(labels == i)
+        for i in range(nlabels):
+            mask_i = np.squeeze(labels == (i+1))
             X[:, mask_i] = 0
-            X[i - 1, mask_i] = 1
+            X[i, mask_i] = 1
     else:
         X = _clean_labels_ar(X + 1, labels).reshape(dims)
         # Put back labels of isolated seeds
