@@ -130,6 +130,22 @@ def test_2d_cg_mg():
     return data, labels_cg_mg
 
 
+def test_2d_bicgstab():
+    lx = 70
+    ly = 100
+    data, labels = make_2d_syntheticdata(lx, ly)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_cg = random_walker(data, labels, beta=90, mode='bicgstab')
+    assert (labels_cg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob = random_walker(data, labels, beta=90, mode='bicgstab',
+                                  return_full_prob=True)
+    assert (full_prob[1, 25:45, 40:60] >=
+            full_prob[0, 25:45, 40:60]).all()
+    assert data.shape == labels.shape
+
+
 def test_types():
     lx = 70
     ly = 100

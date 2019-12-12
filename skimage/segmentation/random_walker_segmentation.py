@@ -40,15 +40,15 @@ except ImportError:
     amg_loaded = False
 
 from ..util import img_as_float
-from ..filters import rank_order
 
-from scipy.sparse.linalg import cg
+from scipy.sparse.linalg import cg, bicgstab, spsolve
 import scipy
 from distutils.version import LooseVersion as Version
 import functools
 
 if Version(scipy.__version__) >= Version('1.1'):
     cg = functools.partial(cg, atol=0)
+    bicgstab = functools.partial(bicgstab, atol=0)
 
 # -----------Laplacian--------------------
 
@@ -148,7 +148,7 @@ def _build_linear_system(data, spacing, labels, mask,
     seeds_indices = indices[cond]
     # The following two lines take most of the time in this function
     rows = lap_sparse[unlabeled_indices, :]
-    B = rows[:, seeds_indices]
+    B = -rows[:, seeds_indices]
     lap_sparse = rows[:, unlabeled_indices]
     nlabels = labels.max()
     seeds = labels[seeds_indices]
@@ -184,17 +184,29 @@ def _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode):
                  'You may also install pyamg and run the random_walker '
                  'function in "cg_mg" mode (see docstring).')
         lap_sparse = lap_sparse.tocsc()
-        X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol)[0]
-             for i in range(B.shape[1])]
+        cg_out = [cg(lap_sparse, B[:, i].toarray(), tol=tol)
+                  for i in range(B.shape[1])]
+        if np.any([info > 0 for _, info in cg_out]):
+            warn("Conjugate gradient convergence to tolerance not achieved.")
+        X = [x for x, _ in cg_out]
+    elif mode == 'bicgstab':
+        lap_sparse = lap_sparse.tocsc()
+        cg_out = [bicgstab(lap_sparse, B[:, i].toarray(), tol=tol)
+                  for i in range(B.shape[1])]
+        if np.any([info > 0 for _, info in cg_out]):
+            warn(" Biconjugate gradient stabilized convergence to "
+                 "tolerance not achieved.")
+        X = [x for x, _ in cg_out]
     elif mode == 'cg_mg':
         ml = ruge_stuben_solver(lap_sparse)
         M = ml.aspreconditioner(cycle='V')
-        X = [cg(lap_sparse, -B[:, i].toarray(), tol=tol, M=M, maxiter=30)[0]
-             for i in range(B.shape[1])]
+        cg_out = [cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=30)
+                  for i in range(B.shape[1])]
+        if np.any([info > 0 for _, info in cg_out]):
+            warn("Conjugate gradient convergence to tolerance not achieved.")
+        X = [x for x, _ in cg_out]
     elif mode == 'bf':
-        lap_sparse = lap_sparse.tocsc()
-        solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-        X = solver(-B.toarray()).T
+        X = spsolve(lap_sparse, B.toarray()).T
 
     if not return_full_prob:
         X = np.array(X)
@@ -443,9 +455,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', None):
-        raise ValueError("{mode} is not a valid mode. Valid modes are 'cg_mg',"
-                         " 'cg', 'bf' and None".format(mode=mode))
+    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', None):
+        raise ValueError(
+            "{mode} is not a valid mode. Valid modes are 'cg_mg',"
+            " 'cg', , 'bicgstab', 'bf' and None".format(mode=mode))
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
