@@ -493,7 +493,7 @@ MAX_SOBEL_0 = np.array([
     [[1, 1, 1],
      [1, 1, 1],
      [1, 1, 1]],
-])
+]).astype(float)
 
 # maximum Sobel 3D edge in magnitude
 MAX_SOBEL_ND = np.array([
@@ -525,7 +525,6 @@ MAX_SCHARR_ND = np.array([
 ]).astype(float)
 
 
-
 @testing.parametrize(
     ('func', 'max_edge'),
     [(filters.prewitt, MAX_SOBEL_ND),
@@ -535,10 +534,16 @@ MAX_SCHARR_ND = np.array([
 def test_3d_edge_filters(func, max_edge):
     blobs = data.binary_blobs(length=128, n_dim=3)
     edges = func(blobs)
-    edges0 = func(blobs, axis=0)
     testing.assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
-    testing.assert_allclose(np.max(edges0), 1.0)
 
+
+@testing.parametrize(
+    'func', (filters.prewitt, filters.sobel, filters.scharr)
+)
+def test_3d_edge_filters_single_axis(func):
+    blobs = data.binary_blobs(length=128, n_dim=3)
+    edges0 = func(blobs, axis=0)
+    testing.assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
 
 
 def test_range():
