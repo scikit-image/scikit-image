@@ -115,11 +115,36 @@ def _make_laplacian_sparse(edges, weights):
     pixel_nb = edges.shape[1]
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
-    data = - np.hstack((weights, weights))
+    data = -np.hstack((weights, weights))
     lap = sparse.coo_matrix((data, (i_indices, j_indices)),
                             shape=(pixel_nb, pixel_nb))
     lap.setdiag(-np.ravel(lap.sum(axis=1)))
     return lap.tocsr()
+
+
+def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
+    l_x, l_y, l_z = data.shape[:3]
+    edges = _make_graph_edges_3d(l_x, l_y, l_z)
+    weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
+                                  multichannel=multichannel)
+    if mask is not None:
+        # Remove edges of the graph connected to masked nodes, as well
+        # as corresponding weights of the edges.
+        mask0 = np.hstack((mask[..., :-1].ravel(), mask[:, :-1].ravel(),
+                           mask[:-1].ravel()))
+        mask1 = np.hstack((mask[..., 1:].ravel(), mask[:, 1:].ravel(),
+                           mask[1:].ravel()))
+        ind_mask = np.logical_and(mask0, mask1)
+        edges, weights = edges[:, ind_mask], weights[ind_mask]
+
+        # Reassign edges labels to 0, 1, ... edges_number - 1
+        _, inv_idx = np.unique(edges, return_inverse=True)
+        edges = inv_idx.reshape(edges.shape)
+
+    lap = _make_laplacian_sparse(edges, weights)
+    del edges, weights
+    return lap
+
 
 def _build_linear_system(data, spacing, labels, nlabels, mask,
                          beta, multichannel):
@@ -204,37 +229,6 @@ def _solve_linear_system(lap_sparse, B, tol, return_full_prob, mode):
         X = np.array(X)
         X = X.argmax(axis=0)
     return X
-
-
-def _mask_edges_weights(edges, weights, mask):
-    """
-    Remove edges of the graph connected to masked nodes, as well as
-    corresponding weights of the edges.
-    """
-    mask0 = np.hstack((mask[..., :-1].ravel(), mask[:, :-1].ravel(),
-                       mask[:-1].ravel()))
-    mask1 = np.hstack((mask[..., 1:].ravel(), mask[:, 1:].ravel(),
-                       mask[1:].ravel()))
-    ind_mask = np.logical_and(mask0, mask1)
-    edges, weights = edges[:, ind_mask], weights[ind_mask]
-    max_node_index = edges.max()
-    # Reassign edges labels to 0, 1, ... edges_number - 1
-    order = np.searchsorted(np.unique(edges.ravel()),
-                            np.arange(max_node_index + 1))
-    edges = order[edges.astype(np.int64)]
-    return edges, weights
-
-
-def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
-    l_x, l_y, l_z = data.shape[:3]
-    edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
-                                  multichannel=multichannel)
-    if mask is not None:
-        edges, weights = _mask_edges_weights(edges, weights, mask)
-    lap = _make_laplacian_sparse(edges, weights)
-    del edges, weights
-    return lap
 
 
 def _preprocess(labels):
@@ -517,9 +511,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         mask = labels == 0
 
         out = np.zeros((nlabels,) + dims)
-        for i, (label_prob, prob) in enumerate(zip(out, X)):
+        for lab, (label_prob, prob) in enumerate(zip(out, X), start=1):
             label_prob[mask] = prob
-            label_prob[labels == i+1] = 1
+            label_prob[labels == lab] = 1
 
         X = out
     else:
