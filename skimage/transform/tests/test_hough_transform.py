@@ -280,7 +280,6 @@ def test_hough_circle_peaks_min_distance():
     x[::2] += 1
     img[x, y] = 1
 
-
     radii = [rad_0, rad_1, rad_2]
     hspaces = transform.hough_circle(img, radii)
     out = transform.hough_circle_peaks(hspaces, radii, min_xdistance=15,
