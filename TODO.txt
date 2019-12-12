@@ -50,10 +50,9 @@ Version 0.19
 
 Other
 -----
-* Remove the conditional warning logic when ``scipy`` is set to >= 1.1.0
-  in ``filters/tests/test_lpi_filter.py``.
-* Remove  the conditional warning logic when ``pywl`` is set to > 0.5.2
-  in ``skimage/restoration/tests/test_denoise.py``
+* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
+  for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
+  ``test_denoise.py`` regarding multidimensional indexing.
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for sparse matricies (``np.matrix``) used by scipy.sparse in
   ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
