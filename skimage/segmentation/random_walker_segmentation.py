@@ -90,11 +90,11 @@ def _compute_weights_3d(data, spacing, beta, eps, multichannel):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
     gradients = np.concatenate(
-        [np.diff(data[..., 0], axis=ax).ravel() / spacing[ax]
+        [np.gradient(data[..., 0], axis=ax).ravel() / spacing[ax]
          for ax in [2, 1, 0]], axis=0) ** 2
     for channel in range(1, data.shape[-1]):
         gradients += np.concatenate(
-            [np.diff(data[..., channel], axis=ax).ravel() / spacing[ax]
+            [np.gradient(data[..., channel], axis=ax).ravel() / spacing[ax]
              for ax in [2, 1, 0]], axis=0) ** 2
 
     # All channels considered together in this standard deviation
@@ -116,11 +116,12 @@ def _build_laplacian(data, spacing, mask=None, beta=50, multichannel=False):
     if mask is not None:
         # Remove edges of the graph connected to masked nodes, as well
         # as corresponding weights of the edges.
-        mask0 = np.hstack([mask[..., :-1].ravel(), mask[:, :-1].ravel(),
-                           mask[:-1].ravel()])
-        mask1 = np.hstack([mask[..., 1:].ravel(), mask[:, 1:].ravel(),
-                           mask[1:].ravel()])
-        ind_mask = np.logical_and(mask0, mask1)
+        # mask0 = np.hstack([mask[..., :-1].ravel(), mask[:, :-1].ravel(),
+        #                    mask[:-1].ravel()])
+        # mask1 = np.hstack([mask[..., 1:].ravel(), mask[:, 1:].ravel(),
+        #                    mask[1:].ravel()])
+        # ind_mask = np.logical_and(mask0, mask1)
+        ind_mask = np.hstack([mask.ravel() for _ in range(3)])
         edges, weights = edges[:, ind_mask], weights[ind_mask]
 
         # Reassign edges labels to 0, 1, ... edges_number - 1
@@ -153,9 +154,9 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
         labels = labels[mask].astype('int32')
 
     indices = np.arange(labels.size)
-    cond = labels > 0
-    unlabeled_indices = indices[~cond]
-    seeds_indices = indices[cond]
+    seeds_mask = labels > 0
+    unlabeled_indices = indices[~seeds_mask]
+    seeds_indices = indices[seeds_mask]
     # The following two lines take most of the time in this function
     rows = lap_sparse[unlabeled_indices, :]
     B = -rows[:, seeds_indices]
