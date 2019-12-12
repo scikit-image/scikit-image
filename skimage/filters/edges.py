@@ -135,7 +135,7 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
         axes = [axis]
     else:
         axes = axis
-    mag = (len(axes) > 1)
+    return_magnitude = (len(axes) > 1)
 
     output = np.zeros(image.shape, dtype=float)
 
@@ -146,11 +146,11 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
             kernel = kernel * np.reshape(smooth_weights,
                                          kernel_shape(ndim, smooth_dim))
         ax_output = ndi.convolve(image, kernel, mode='reflect')
-        if mag:
+        if return_magnitude:
             ax_output *= ax_output
         output += ax_output
 
-    if mag:
+    if return_magnitude:
         output = np.sqrt(output) / np.sqrt(ndim)
     return output
 
