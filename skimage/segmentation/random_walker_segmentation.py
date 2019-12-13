@@ -172,12 +172,7 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
 def _solve_linear_system(lap_sparse, B, tol, mode):
 
     if mode is None:
-        if amg_loaded:
-            mode = 'cg_mg'
-        elif UmfpackContext is not None:
-            mode = 'cg'
-        else:
-            mode = 'bf'
+        mode = 'cg_j'
 
     if mode == 'cg_mg' and not amg_loaded:
         warn("'cg_mg' can't be used, it requires pyamg to be installed. "
