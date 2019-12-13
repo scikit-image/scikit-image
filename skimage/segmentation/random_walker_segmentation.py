@@ -41,16 +41,13 @@ except ImportError:
 
 from ..util import img_as_float
 
-from scipy.sparse.linalg import cg, bicgstab, spsolve
+from scipy.sparse.linalg import cg, spsolve
 import scipy
 from distutils.version import LooseVersion as Version
 import functools
 
 if Version(scipy.__version__) >= Version('1.1'):
     cg = functools.partial(cg, atol=0)
-    bicgstab = functools.partial(bicgstab, atol=0)
-
-# -----------Laplacian--------------------
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
@@ -265,10 +262,7 @@ def _preprocess(labels):
     return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
 
-# ----------- Random walker algorithm --------------------------------
-
-
-def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
+def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, spacing=None):
     """Random walker algorithm for segmentation from markers.
 
@@ -295,10 +289,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : string, available options {'cg', 'cg_j', 'cg_mg', 'bicgstab', 'bf'}
+    mode : string, available options {'cg', 'cg_j', 'cg_mg', 'bf'}
         Mode for solving the linear system in the random walker algorithm.
-        If no preference given, automatically attempt to use the fastest
-        option available ('cg_mg' from pyamg >> 'cg' with UMFPACK > 'bf').
 
         - 'bf' (brute force): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
@@ -313,14 +305,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           convergeance of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
-          solution is computed with the Conjugate Gradient method.  This mode
-          requires that the pyamg module (http://pyamg.github.io/) is
-          installed. For images of size > 512x512, this is the recommended
-          (fastest) mode.
+          solution is computed with the Conjugate Gradient method. This mode
+          requires that the pyamg module is installed.
 
     tol : float, optional
-        tolerance to achieve when solving the linear system, in
-        cg' and 'cg_mg' modes.
+        tolerance to achieve when solving the linear system using
+        the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
     copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
