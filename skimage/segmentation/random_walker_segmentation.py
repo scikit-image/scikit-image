@@ -105,7 +105,7 @@ def _compute_weights_3d(data, spacing, beta, eps, multichannel):
         scale_factor /= np.sqrt(data.shape[-1])
     weights = np.exp(scale_factor * gradients)
     weights += eps
-    return weights
+    return -weights
 
 
 def _build_laplacian(data, spacing, mask, beta, multichannel):
@@ -131,10 +131,10 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     pixel_nb = edges.shape[1]
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
-    data = -np.hstack((weights, weights))
+    data = np.hstack((weights, weights))
     lap = sparse.coo_matrix((data, (i_indices, j_indices)),
                             shape=(pixel_nb, pixel_nb))
-    lap.setdiag(-np.ravel(lap.sum(axis=1)))
+    lap.setdiag(-np.ravel(lap.sum(axis=0)))
     return lap.tocsr()
 
 
@@ -149,24 +149,22 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
     else:
         labels = labels[mask]
 
-    lap_sparse = _build_laplacian(data, spacing, mask=mask,
-                                  beta=beta, multichannel=multichannel)
-
-    seeds_mask = labels > 0
-    seeds = labels[seeds_mask]
-
     indices = np.arange(labels.size)
+    seeds_mask = labels > 0
     unlabeled_indices = indices[~seeds_mask]
     seeds_indices = indices[seeds_mask]
 
-    # The following two lines take most of the time in this function
+    lap_sparse = _build_laplacian(data, spacing, mask=mask,
+                                  beta=beta, multichannel=multichannel)
+
     rows = lap_sparse[unlabeled_indices, :]
     lap_sparse = rows[:, unlabeled_indices]
     B = -rows[:, seeds_indices]
 
+    seeds = labels[seeds_mask]
     seeds_mask = sparse.csc_matrix(np.hstack(
         [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels+1)]))
-    rhs = B * seeds_mask
+    rhs = B.dot(seeds_mask)
 
     return lap_sparse, rhs
 
@@ -182,43 +180,37 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             mode = 'bf'
 
     if mode == 'cg_mg' and not amg_loaded:
-        warn("pyamg (http://pyamg.github.io/)) is needed to use "
-             "this mode, but is not installed. The 'cg' mode will be "
-             "used instead.")
-        mode = 'cg'
+        warn("'cg_mg' can't be used, it requires pyamg to be installed. "
+             "The 'cg_j' mode will be used instead.",
+             stacklevel=2)
+        mode = 'cg_j'
 
-    if mode == 'cg':
-        if UmfpackContext is None:
-            warn('"cg" mode will be used, but it may be slower than '
-                 '"bf" because UMFPACK is not availabe. Consider '
-                 'installing scikit-umfpack or building Scipy with UMFPACK; '
-                 'this will greatly accelerate the conjugate gradient ("cg") '
-                 'solver. You may also install pyamg and run the '
-                 'random_walker function in "cg_mg" mode (see docstring).')
-        lap_sparse = lap_sparse.tocsc()
-        cg_out = [cg(lap_sparse, B[:, i].toarray(), tol=tol)
-                  for i in range(B.shape[1])]
-        if np.any([info > 0 for _, info in cg_out]):
-            warn("Conjugate gradient convergence to tolerance not achieved.")
-        X = [x for x, _ in cg_out]
-    elif mode == 'bicgstab':
-        lap_sparse = lap_sparse.tocsc()
-        cg_out = [bicgstab(lap_sparse, B[:, i].toarray(), tol=tol)
-                  for i in range(B.shape[1])]
-        if np.any([info > 0 for _, info in cg_out]):
-            warn(" Biconjugate gradient stabilized convergence to "
-                 "tolerance not achieved.")
-        X = [x for x, _ in cg_out]
-    elif mode == 'cg_mg':
-        ml = ruge_stuben_solver(lap_sparse)
-        M = ml.aspreconditioner(cycle='V')
-        cg_out = [cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=30)
-                  for i in range(B.shape[1])]
-        if np.any([info > 0 for _, info in cg_out]):
-            warn("Conjugate gradient convergence to tolerance not achieved.")
-        X = [x for x, _ in cg_out]
-    elif mode == 'bf':
+    if mode == 'bf':
         X = spsolve(lap_sparse, B.toarray()).T
+    else:
+        maxiter = None
+        if mode == 'cg':
+            if UmfpackContext is None:
+                warn("'cg' mode may be slow because UMFPACK is not availabel. "
+                     "Consider building Scipy with UMFPACK or use a "
+                     "preconditioned version of CG ('cg_j' or 'cg_mg' modes).",
+                     stacklevel=2)
+            M = None
+        elif mode == 'cg_j':
+            M = sparse.diags(1.0 / lap_sparse.diagonal())
+        else:
+            lap_sparse = lap_sparse.tocsr()
+            ml = ruge_stuben_solver(lap_sparse)
+            M = ml.aspreconditioner(cycle='V')
+            maxiter = 30
+        cg_out = [
+            cg(lap_sparse, B[:, i].toarray(), tol=tol, M=M, maxiter=maxiter)
+            for i in range(B.shape[1])]
+        if np.any([info > 0 for _, info in cg_out]):
+            warn("Conjugate gradient convergence to tolerance not achieved. "
+                 "Consider decreasing beta to improve system conditionning.",
+                 stacklevel=2)
+        X = np.asarray([x for x, _ in cg_out])
 
     return X
 
@@ -230,7 +222,8 @@ def _preprocess(labels):
     if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '
              'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.')
+             'found. Returning provided labels.',
+             stacklevel=2)
 
         return labels, None, None, None, None
 
@@ -255,9 +248,9 @@ def _preprocess(labels):
 
         labels[isolated] = -1
         if np.all(isolated[null_mask]):
-            warn('Random walker only segments unlabeled areas, where '
-                 'labels == 0. No zero valued areas in labels were '
-                 'found. Returning provided labels.')
+            warn('All unlabeled pixels are isolated, they could not be '
+                 'determined by the random walker algorithm.',
+                 stacklevel=2)
             return labels, None, None, None, None
 
         mask[isolated] = False
@@ -307,7 +300,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : string, available options {'cg_mg', 'cg', 'bf'}
+    mode : string, available options {'cg', 'cg_j', 'cg_mg', 'bicgstab', 'bf'}
         Mode for solving the linear system in the random walker algorithm.
         If no preference given, automatically attempt to use the fastest
         option available ('cg_mg' from pyamg >> 'cg' with UMFPACK > 'bf').
@@ -319,6 +312,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
           but it is quite slow.
+        - 'cg_j' (conjugate gradient with Jacobi preconditionner): the
+          Jacobi preconditionner is applyed during the Conjugate
+          gradient method iterations. This may accelerate the
+          convergeance of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method.  This mode
@@ -337,8 +334,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         If True, input data is parsed as multichannel data (see 'data' above
         for proper input format in this case).
     return_full_prob : bool, optional
-        If True, the probability that a pixel belongs to each of the labels
-        will be returned, instead of only the most likely label.
+        If True, the probability that a pixel belongs to each of the
+        labels will be returned, instead of only the most likely
+        label. The returned probability values may be inaccurate
+        particularly if `mode` is not 'bf' and `beta` is large.
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
@@ -433,10 +432,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', None):
+    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', 'cg_j', None):
         raise ValueError(
             "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'bicgstab', 'bf' and None".format(mode=mode))
+            " 'cg', 'cg_j', 'bicgstab', 'bf' and None".format(mode=mode))
 
     # Spacing kwarg checks
     if spacing is None:
