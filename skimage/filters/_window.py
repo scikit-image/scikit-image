@@ -100,6 +100,8 @@ def window(window_type, shape, warp_kwargs=None):
         shape = safe_as_int(shape),
     else:
         shape = tuple(safe_as_int(shape))
+    if any(s < 0 for s in shape):
+        raise ValueError("invalid shape")
 
     ndim = len(shape)
     if ndim <= 0:
@@ -114,7 +116,7 @@ def window(window_type, shape, warp_kwargs=None):
 
     center = (max_size / 2) - 0.5
     dist = 0
-    for g in np.meshgrid(*L, sparse=True):
+    for g in np.meshgrid(*L, sparse=True, indexing='ij'):
         g -= center
         dist = dist + g * g
     dist = np.sqrt(dist)
