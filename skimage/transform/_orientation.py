@@ -28,13 +28,13 @@ def _normalize(x):
     return u / norm
 
 
-def _axis_0_rotation_matrix(u, indices=None):
+def _axis_0_rotation_matrix(unit_vector, indices=None):
     """Generate a matrix that rotates a vector to coincide with the 0th (y-)
        coordinate axis.
 
     Parameters
     ----------
-    u : (N, ) array
+    unit_vector : (N, ) array
         Unit vector.
     indices : sequence of int, optional
         Indices of the components of `axis` that should be transformed.
@@ -42,7 +42,7 @@ def _axis_0_rotation_matrix(u, indices=None):
 
     Returns
     -------
-    R : (N, N) array
+    rotation_matrix : (N, N) array
         Orthogonal projection matrix.
 
     References
@@ -56,50 +56,51 @@ def _axis_0_rotation_matrix(u, indices=None):
 
     Examples
     --------
-    >>> R = _axis_0_rotation_matrix([0, 1, 0])
-    >>> R @ [0, 1, 0]
+    >>> rotation_matrix = _axis_0_rotation_matrix([0, 1, 0])
+    >>> rotation_matrix @ [0, 1, 0]
     array([ 1.,  0.,  0.])
     """
-    ndim = len(u)
+    ndim = len(unit_vector)
 
     if indices is None:
         indices = range(ndim)
 
-    x = u
-    w = indices
-
-    R = np.eye(ndim)
+    rotation_matrix = np.eye(ndim)
 
     # loop to create stages of 2D rotations around fixed axes
     # that are multiplied to form our nD matrix; see: [2]_
     for step in np.round(2 ** np.arange(np.log2(ndim))).astype(int):
-        A = np.eye(ndim)
+        plane_rotation_matrix = np.eye(ndim)
 
         for n in range(0, ndim - step, step * 2):
-            if n + step >= len(w):
+            if n + step >= len(indices):
                 break
 
-            i = w[n]
-            j = w[n + step]
+            # axes that make up this plane
+            i = indices[n]
+            j = indices[n + step]
 
-            r = np.hypot(x[i], x[j])
-            if r > 0:
+            # distance from origin in this plane
+            radius = np.hypot(unit_vector[i], unit_vector[j])
+
+            if radius > 0:
                 # calculation of coefficients
-                pcos = x[i] / r
-                psin = -x[j] / r
+                pcos = unit_vector[i] / radius
+                psin = -unit_vector[j] / radius
 
-                # base 2-dimensional rotation
-                A[i, i] = pcos
-                A[i, j] = -psin
-                A[j, i] = psin
-                A[j, j] = pcos
+                # base 2-dimensional rotation for this plane
+                plane_rotation_matrix[i, i] = pcos
+                plane_rotation_matrix[i, j] = -psin
+                plane_rotation_matrix[j, i] = psin
+                plane_rotation_matrix[j, j] = pcos
 
-                x[i] = r
-                x[j] = 0
+                unit_vector[i] = radius
+                unit_vector[j] = 0
 
-        R = A @ R  # multiply R by current matrix of stage A
+        # compound current plane's rotation with previous ones'
+        rotation_matrix = plane_rotation_matrix @ rotation_matrix
 
-    return R
+    return rotation_matrix
 
 
 def convert_quasipolar_coords(r, thetas):
@@ -216,7 +217,7 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
 
     Returns
     -------
-    M : (N, N) array
+    rotation_matrix : (N, N) array
         Matrix that rotates ``src`` to coincide with ``dst``.
 
     References
@@ -229,37 +230,38 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
 
     Examples
     --------
-    >>> X = np.asarray([1, 0])
-    >>> Y = np.asarray([.5, .5])
-    >>> M = compute_rotation_matrix(X, Y)
-    >>> Z = M @ X
-    >>> uY = Y / np.linalg.norm(Y)
-    >>> np.allclose(Z, uY)
+    >>> src = np.asarray([1, 0])
+    >>> dst = np.asarray([.5, .5])
+    >>> rotation_matrix = compute_rotation_matrix(src, dst)
+    >>> src_rotated = rotation_matrix @ src
+    >>> dst_normalized = dst / np.linalg.norm(dst)
+    >>> np.allclose(src_rotated, dst_normalized)
     True
     """
     # step 1: vectors are normalized
     homogeneous_slice = -use_homogeneous_coords or None
-    X = _normalize(src[:homogeneous_slice])
-    Y = _normalize(dst[:homogeneous_slice])
+    src = _normalize(src[:homogeneous_slice])
+    dst = _normalize(dst[:homogeneous_slice])
 
     if use_homogeneous_coords:
-        X = np.append(X, 1)
-        Y = np.append(Y, 1)
+        src = np.append(src, 1)
+        dst = np.append(dst, 1)
 
     # step 2: a vector is created containing the
     #         indices of difference between input vectors
-    w = np.flatnonzero(~np.isclose(X, Y))
+    indices = np.flatnonzero(~np.isclose(src, dst))
 
     # step 3: matrices are generated for each input vector
     #         to rotate respective vector to the 0th axis
-    Mx = _axis_0_rotation_matrix(X, w)
-    My = _axis_0_rotation_matrix(Y, w)
+    src_rotation_matrix = _axis_0_rotation_matrix(src, indices)
+    dst_rotation_matrix = _axis_0_rotation_matrix(dst, indices)
 
     # step 4: by rotating both vectors to the same direction
     #         and inverting one operation, a final
     #         rotation matrix is created
-    My_inverse = My.T  # since My is orthogonal, its inverse is its transpose
+    # a rotation matrix is orthogonal, so its inverse is its transpose
+    dst_rotation_matrix_inverse = dst_rotation_matrix.T
 
-    M = My_inverse @ Mx
+    rotation_matrix = dst_rotation_matrix_inverse @ src_rotation_matrix
 
-    return M
+    return rotation_matrix
