@@ -21,8 +21,6 @@ New Features
 ------------
 - Vector-to-vector rotation matrix generation
   (``skimage.transform.compute_rotation_matrix``) (#3125)
-- Quasipolar to Cartesian coordinate conversion
-  (``skimage.transform.convert_quasipolar_coords``) (#3125)
 
 
 Improvements

@@ -14,13 +14,12 @@ from ._geometric import (estimate_transform,
                          PiecewiseAffineTransform)
 from ._warps import (swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords, warp_polar)
-from ._orientation import convert_quasipolar_coords, compute_rotation_matrix
+from ._orientation import compute_rotation_matrix
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 
 
 __all__ = ['compute_rotation_matrix',
-           'convert_quasipolar_coords',
            'match_histograms',
            'hough_circle',
            'hough_ellipse',
