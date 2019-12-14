@@ -203,11 +203,17 @@ cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) nog
         Interpolated value to be used in bicubic_interpolation.
 
     """
-    return (\
-        f[1] + 0.5 * x * \
-            (f[2] - f[0] + x * \
-                (2.0 * f[0] - 5.0 * f[1] + 4.0 * f[2] - f[3] + x * \
-                    (3.0 * (f[1] - f[2]) + f[3] - f[0]))))
+    return (
+        f[1] + <np_floats>0.5 * x * (
+            f[2] - f[0] + x * (
+                <np_floats>2.0 * f[0] -
+                <np_floats>5.0 * f[1] +
+                <np_floats>4.0 * f[2] - f[3] + x * (
+                    <np_floats>3.0 * (f[1] - f[2]) + f[3] - f[0]
+                )
+            )
+        )
+    )
 
 
 cdef inline void bicubic_interpolation(np_real_numeric* image,
