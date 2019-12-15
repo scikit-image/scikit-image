@@ -79,6 +79,34 @@ except ImportError:
 
 
 def _fetch(data_filename):
+    """Fetch a given data file from either the local cache or the repository.
+
+    This function provides the path location of the data file given
+    its name in the scikit-image repository.
+
+    Parameters
+    ----------
+    data_filename:
+        Name of the file in the scikit-image repository. e.g.
+        'restoration/tess/camera_rl.npy'.
+
+    Returns
+    -------
+    Path of the local file as a python string.
+
+    Raises
+    ------
+    RuntimeError:
+        A runtime error can be raised if the file is known to the scikit-image
+        distribution, but the user doesn't have pooch. This will only happen
+        for datasets added after scikit-image 0.17 as public facing datasets
+        added before scikit-image 0.17 are shipped with the distribution.
+
+    ValueError:
+        This Error can be raised if the filename is not known to the
+        scikit-image distribution.
+
+    """
     # potential_local_file is the location of the file that would be shipped
     # with scikit-image.
     #
