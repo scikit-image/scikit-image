@@ -78,6 +78,13 @@ except ImportError:
         return hasher.hexdigest()
 
 
+def _hash_hash(path, expected_hash):
+    """Check if the provided path has the expected hash."""
+    if not osp.exists(resolved_path):
+        return False
+    return file_hash(path) == expected_hash
+
+
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
@@ -107,41 +114,57 @@ def _fetch(data_filename):
         scikit-image distribution.
 
     """
-    # potential_local_file is the location of the file that would be shipped
-    # with scikit-image.
-    #
-    # Two things can cause the file to already be in the distribution:
-    # 1. The user is running it from the github repo, in which case
-    #    we should avoid a downloading from the internet
-    # 2. We chose to ship this file with skimage by default
-    potential_local_file = osp.join(skimage_distribution_dir, data_filename)
     resolved_path = osp.join(data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
-    if osp.exists(resolved_path) and file_hash(resolved_path) == expected_hash:
+
+    # Case 1:
+    # The file may already be in the data_dir regardless of if Pooch is
+    # installed. We may have decided to ship it in the scikit-image
+    # distribution
+    if _hash_hash(resolved_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
-        pass
-    elif (osp.exists(potential_local_file)
-            and file_hash(potential_local_file) == expected_hash):
+        return resolved_path
+
+
+    # Case 2:
+    # The user is using a cloned version of the github repo, which
+    # contains both the publically shipped data, and test data.
+    # In this case, the file would be located relative to the
+    # skimage_distribution_dir
+    gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
+    if _has_hash(gh_repository_path):
         parent = osp.dirname(resolved_path)
         os.makedirs(parent, exist_ok=True)
-        shutil.copy2(potential_local_file, resolved_path)
-    elif has_pooch:
+        shutil.copy2(gh_repository_path, resolved_path)
+        return resolved_path
+
+    # Case 3:
+    # The user has Pooch installed, let the image fetcher use it to search
+    # for our data.
+    if has_pooch:
         resolved_path = image_fetcher.fetch(data_filename)
-    elif data_filename in registry:
+        return resolved_path
+
+    # Case 4:
+    # The user installed scikit-image from a distribution, but didn't install
+    # Pooch.
+    # Case 4A: The data is in the registry. So guide the user to install pooch.
+    if data_filename in registry:
         # Legacy data might be available even without pooch
         raise RuntimeError(
-            "Loading the file {data_filename} requires the dependency "
+            f"Loading the file {data_filename} requires the dependency "
             "'pooch' to be installed. Install it with the command "
             "'pip install pooch' or 'conda install pooch' as appropriate."
-            "".format(data_filename=data_filename))
+        )
+    # Case 4b: The the data is not in the registry.
     else:
         # This is only expected to happen if the user calls
         # ``skimage.data.load`` with a filename that isn't part of the
         # skimage distribution
         raise ValueError(
             f"The requested file {data_filename} is not known to "
-            "scikit-image.")
-    return resolved_path
+            "scikit-image."
+        )
 
 
 if has_pooch:
