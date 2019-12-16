@@ -205,6 +205,9 @@ cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) nog
         Interpolated value to be used in bicubic_interpolation.
 
     """
+
+    # Explicitly cast a floating point literal to the other operand's type
+    # to prevent promoting operands unnecessarily to double precision
     return (
         f[1] + <np_floats>0.5 * x * (
             f[2] - f[0] + x * (
