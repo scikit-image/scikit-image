@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 from skimage.registration._lddmm_utilities import _validate_ndarray
 from skimage.registration._lddmm_utilities import _validate_scalar_to_multi
-from skimage.registration._lddmm_utilities import _validate_xyz_resolution
+from skimage.registration._lddmm_utilities import _validate_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
 from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
@@ -642,7 +642,7 @@ template_shape, template_resolution, target_shape, target_resolution, deform_to=
         raise ValueError(f"velocity_fields' initial dimensions must equal template_shape.\n"
             f"velocity_fields.shape: {velocity_fields.shape}, template_shape: {template_shape}.")
     # Validate velocity_field_resolution.
-    velocity_field_resolution = _validate_xyz_resolution(velocity_fields.ndim - 2, velocity_field_resolution)
+    velocity_field_resolution = _validate_resolution(velocity_fields.ndim - 2, velocity_field_resolution)
     # Validate affine.
     affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(4, 4))
     # Verify deform_to.
@@ -718,21 +718,21 @@ def _apply_position_field(subject, subject_resolution, output_resolution, positi
     # Validate position_field.
     position_field = _validate_ndarray(position_field)
     # Validate position_field_resolution.
-    position_field_resolution = _validate_xyz_resolution(position_field.ndim - 1, position_field_resolution)
+    position_field_resolution = _validate_resolution(position_field.ndim - 1, position_field_resolution)
     # Validate subject.
     subject = _validate_ndarray(subject, required_ndim=position_field.ndim - 1)
     # Validate subject_resolution.
-    subject_resolution = _validate_xyz_resolution(subject.ndim, subject_resolution)
+    subject_resolution = _validate_resolution(subject.ndim, subject_resolution)
     # Validate output_resolution.
-    output_resolution = _validate_xyz_resolution(subject.ndim, output_resolution)
+    output_resolution = _validate_resolution(subject.ndim, output_resolution)
 
     # Resample position_field.
     if not np.array_equal(position_field_resolution, output_resolution):
         new_position_field_base_shape = np.ceil(position_field.shape[:-1] * position_field_resolution / output_resolution)
         position_field = interpn(
-            points=_compute_axes(shape=position_field.shape[:-1], xyz_resolution=position_field_resolution),
+            points=_compute_axes(shape=position_field.shape[:-1], resolution=position_field_resolution),
             values=position_field,
-            xi=_compute_coords(shape=new_position_field_base_shape, xyz_resolution=output_resolution),
+            xi=_compute_coords(shape=new_position_field_base_shape, resolution=output_resolution),
             bounds_error=False,
             fill_value=None,
         )
@@ -742,7 +742,7 @@ def _apply_position_field(subject, subject_resolution, output_resolution, positi
 
     # Interpolate subject at position field.
     deformed_subject = interpn(
-        points=_compute_axes(shape=subject.shape, xyz_resolution=subject_resolution),
+        points=_compute_axes(shape=subject.shape, resolution=subject_resolution),
         values=subject,
         xi=position_field,
         bounds_error=False,
@@ -792,7 +792,7 @@ template_resolution=1, target_resolution=1, output_resolution=None, deform_to="t
     # Validate subject.
     subject = _validate_ndarray(subject)
     # Validate subject_resolution.
-    subject_resolution = _validate_xyz_resolution(subject.ndim, subject_resolution)
+    subject_resolution = _validate_resolution(subject.ndim, subject_resolution)
     # Verify deform_to.
     if not isinstance(deform_to, str):
         raise TypeError(f"deform_to must be of type str.\n"
@@ -805,7 +805,7 @@ template_resolution=1, target_resolution=1, output_resolution=None, deform_to="t
     elif output_resolution is None and deform_to == "target" or output_resolution == "target":
         output_resolution = np.copy(target_resolution)
     else:
-        output_resolution = _validate_xyz_resolution(subject.ndim, output_resolution)
+        output_resolution = _validate_resolution(subject.ndim, output_resolution)
 
     # Define position_field and position_field_resolution.
 

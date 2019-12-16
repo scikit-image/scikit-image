@@ -4,10 +4,11 @@ Defines:
         _validate_scalar_to_multi(value, size=3, dtype=float)
         _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
             forbid_object_dtype=True, broadcast_to_shape=None)
-        _validate_xyz_resolution(ndim, xyz_resolution)
-        _compute_axes(shape, xyz_resolution=1, origin='center')
-        _compute_coords(shape, xyz_resolution=1, origin='center')
+        _validate_resolution(ndim, resolution)
+        _compute_axes(shape, resolution=1, origin='center')
+        _compute_coords(shape, resolution=1, origin='center')
         _multiply_coords_by_affine(array, affine)
+
 """
 
 import numpy as np
@@ -154,19 +155,19 @@ forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None):
     return array
 
 # TODO: reverse order of arguments and propagate change throughout ardent.
-def _validate_xyz_resolution(ndim, xyz_resolution):
-    """Validate xyz_resolution to assure its length matches the dimensionality of image."""
+def _validate_resolution(ndim, resolution):
+    """Validate resolution to assure its length matches the dimensionality of image."""
 
-    xyz_resolution = _validate_scalar_to_multi(xyz_resolution, size=ndim)
+    resolution = _validate_scalar_to_multi(resolution, size=ndim)
 
-    if np.any(xyz_resolution <= 0):
-        raise ValueError(f"All elements of xyz_resolution must be positive.\n"
-            f"np.min(xyz_resolution): {np.min(xyz_resolution)}.")
+    if np.any(resolution <= 0):
+        raise ValueError(f"All elements of resolution must be positive.\n"
+            f"np.min(resolution): {np.min(resolution)}.")
 
-    return xyz_resolution
+    return resolution
 
 
-def _compute_axes(shape, xyz_resolution=1, origin='center'):
+def _compute_axes(shape, resolution=1, origin='center'):
     """Returns the real_axes defining an image with the given shape 
     at the given resolution as a list of numpy arrays.
     """
@@ -174,21 +175,21 @@ def _compute_axes(shape, xyz_resolution=1, origin='center'):
     # Validate shape.
     shape = _validate_ndarray(shape, dtype=int, required_ndim=1)
 
-    # Validate xyz_resolution.
-    xyz_resolution = _validate_xyz_resolution(len(shape), xyz_resolution)
+    # Validate resolution.
+    resolution = _validate_resolution(len(shape), resolution)
 
     # Create axes.
 
-    # axes is a list of arrays matching each shape element from shape, spaced by the corresponding xyz_resolution.
-    axes = [np.arange(dim_size) * dim_res for dim_size, dim_res in zip(shape, xyz_resolution)]
+    # axes is a list of arrays matching each shape element from shape, spaced by the corresponding resolution.
+    axes = [np.arange(dim_size) * dim_res for dim_size, dim_res in zip(shape, resolution)]
 
     # List all presently recognized origin values.
     origins = ['center', 'zero']
 
     if origin == 'center':
         # Center each axes array to its mean.
-        for xyz_index, axis in enumerate(axes):
-            axes[xyz_index] -= np.mean(axis)
+        for axis_index, axis in enumerate(axes):
+            axes[axis_index] -= np.mean(axis)
     elif origin == 'zero':
         # Allow each axis to increase from 0 along each dimension.
         pass
@@ -199,11 +200,11 @@ def _compute_axes(shape, xyz_resolution=1, origin='center'):
     return axes
 
 
-def _compute_coords(shape, xyz_resolution=1, origin='center'):
+def _compute_coords(shape, resolution=1, origin='center'):
     """Returns the real_coordinates of an image with the given shape 
     at the given resolution as a single numpy array of shape (*shape, len(shape))."""
 
-    axes = _compute_axes(shape, xyz_resolution, origin)
+    axes = _compute_axes(shape, resolution, origin)
 
     meshes = np.meshgrid(*axes, indexing='ij')
 
@@ -240,3 +241,12 @@ def _multiply_coords_by_affine(affine, array):
     ndims = len(affine) - 1
     return np.squeeze(np.matmul(affine[:ndims, :ndims], array[...,None]), -1) + affine[:ndims, ndims]
     
+
+def resample(image, new_resolution, old_resolution=1, **interpolation_kwargs):
+
+
+    # Validate inputs.
+    image = _validate_ndarray(image)
+    new_resolution = _validate_resolution(image.ndim, new_resolution)
+    old_resolution = _validate_resolution(image.ndim, old_resolution)
+

@@ -4,7 +4,7 @@ import numpy as np
 
 from skimage.registration._lddmm_utilities import _validate_scalar_to_multi
 from skimage.registration._lddmm_utilities import _validate_ndarray
-from skimage.registration._lddmm_utilities import _validate_xyz_resolution
+from skimage.registration._lddmm_utilities import _validate_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
 from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
@@ -174,42 +174,42 @@ def test__validate_ndarray():
         _validate_ndarray(**kwargs)
 
 """
-Test _validate_xyz_resolution.
+Test _validate_resolution.
 """
 
-def test__validate_xyz_resolution():
+def test__validate_resolution():
 
     # Test proper use.
     
-    kwargs = dict(ndim=1, xyz_resolution=2)
+    kwargs = dict(ndim=1, resolution=2)
     correct_output = np.full(1, 2, float)
-    assert np.array_equal(_validate_xyz_resolution(**kwargs), correct_output)
+    assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=4, xyz_resolution=1.5)
+    kwargs = dict(ndim=4, resolution=1.5)
     correct_output = np.full(4, 1.5, float)
-    assert np.array_equal(_validate_xyz_resolution(**kwargs), correct_output)
+    assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=3, xyz_resolution=np.ones(3, int))
+    kwargs = dict(ndim=3, resolution=np.ones(3, int))
     correct_output = np.ones(3, float)
-    assert np.array_equal(_validate_xyz_resolution(**kwargs), correct_output)
+    assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=2, xyz_resolution=[3, 4])
+    kwargs = dict(ndim=2, resolution=[3, 4])
     correct_output = np.array([3, 4], float)
-    assert np.array_equal(_validate_xyz_resolution(**kwargs), correct_output)
+    assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
     # Test improper use.
 
-    kwargs = dict(ndim=2, xyz_resolution=[3, -4])
+    kwargs = dict(ndim=2, resolution=[3, -4])
     expected_exception = ValueError
-    match = "All elements of xyz_resolution must be positive."
+    match = "All elements of resolution must be positive."
     with pytest.raises(expected_exception, match=match):
-        _validate_xyz_resolution(**kwargs)
+        _validate_resolution(**kwargs)
 
-    kwargs = dict(ndim=2, xyz_resolution=[3, 0])
+    kwargs = dict(ndim=2, resolution=[3, 0])
     expected_exception = ValueError
-    match = "All elements of xyz_resolution must be positive."
+    match = "All elements of resolution must be positive."
     with pytest.raises(expected_exception, match=match):
-        _validate_xyz_resolution(**kwargs)
+        _validate_resolution(**kwargs)
 
 """
 Test _compute_axes.
@@ -221,31 +221,31 @@ def test__compute_axes():
 
     # _compute_axes produces a list with a np.ndarray for each element in shape.
 
-    kwargs = dict(shape=(0, 1, 2), xyz_resolution=1, origin='center')
+    kwargs = dict(shape=(0, 1, 2), resolution=1, origin='center')
     correct_output = [np.arange(dim_size) * dim_res - np.mean(np.arange(dim_size) * dim_res) 
         for dim_size, dim_res in zip((0, 1, 2), (1, 1, 1))]
     for dim, coord in enumerate(_compute_axes(**kwargs)):
         assert np.array_equal(coord, correct_output[dim])
 
-    kwargs = dict(shape=(1, 2, 3, 4), xyz_resolution=1.5, origin='center')
+    kwargs = dict(shape=(1, 2, 3, 4), resolution=1.5, origin='center')
     correct_output = [np.arange(dim_size) * dim_res - np.mean(np.arange(dim_size) * dim_res) 
         for dim_size, dim_res in zip((1, 2, 3, 4), (1.5, 1.5, 1.5, 1.5))]
     for dim, coord in enumerate(_compute_axes(**kwargs)):
         assert np.array_equal(coord, correct_output[dim])
 
-    kwargs = dict(shape=(2, 3, 4), xyz_resolution=[1, 1.5, 2], origin='center')
+    kwargs = dict(shape=(2, 3, 4), resolution=[1, 1.5, 2], origin='center')
     correct_output = [np.arange(dim_size) * dim_res - np.mean(np.arange(dim_size) * dim_res) 
         for dim_size, dim_res in zip((2, 3, 4), (1, 1.5, 2))]
     for dim, coord in enumerate(_compute_axes(**kwargs)):
         assert np.array_equal(coord, correct_output[dim])
 
-    kwargs = dict(shape=5, xyz_resolution=1, origin='center')
+    kwargs = dict(shape=5, resolution=1, origin='center')
     correct_output = [np.arange(dim_size) * dim_res - np.mean(np.arange(dim_size) * dim_res) 
         for dim_size, dim_res in zip((5,), (1,))]
     for dim, coord in enumerate(_compute_axes(**kwargs)):
         assert np.array_equal(coord, correct_output[dim])
 
-    kwargs = dict(shape=5, xyz_resolution=1, origin='zero')
+    kwargs = dict(shape=5, resolution=1, origin='zero')
     correct_output = [np.arange(dim_size) * dim_res
         for dim_size, dim_res in zip((5,), (1,))]
     for dim, coord in enumerate(_compute_axes(**kwargs)):
@@ -259,11 +259,11 @@ def test__compute_coords():
 
     # Test proper use.
 
-    kwargs = dict(shape=5, xyz_resolution=1, origin='center')
+    kwargs = dict(shape=5, resolution=1, origin='center')
     correct_output = np.array([[-2], [-1], [0], [1], [2]])
     assert np.array_equal(_compute_coords(**kwargs), correct_output)
 
-    kwargs = dict(shape=(3,4), xyz_resolution=1, origin='zero')
+    kwargs = dict(shape=(3,4), resolution=1, origin='zero')
     correct_output = np.array([[[0,0], [0,1], [0,2], [0,3]], [[1,0], [1,1], [1,2], [1,3]], [[2,0], [2,1], [2,2], [2,3]]])
     assert np.array_equal(_compute_coords(**kwargs), correct_output)
 
@@ -337,7 +337,7 @@ Perform tests.
 if __name__ == "__main__":
     test__validate_scalar_to_multi()
     test__validate_ndarray()
-    test__validate_xyz_resolution()
+    test__validate_resolution()
     test__compute_axes()
     test__compute_coords()
     test__multiply_coords_by_affine()
