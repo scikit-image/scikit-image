@@ -1,6 +1,6 @@
 """
 Defines:
-    Functions:
+    Private functions:
         _validate_scalar_to_multi(value, size=3, dtype=float)
         _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
             forbid_object_dtype=True, broadcast_to_shape=None)
@@ -8,11 +8,17 @@ Defines:
         _compute_axes(shape, resolution=1, origin='center')
         _compute_coords(shape, resolution=1, origin='center')
         _multiply_coords_by_affine(array, affine)
-
+    User functions:
+        resample(image, new_resolution, old_resolution=1, 
+            err_to_larger=True, extrapolation_fill_value=None, 
+            origin='center', method='linear', image_is_coords=False)
 """
 
 import numpy as np
 import warnings
+
+from scipy.interpolate import interpn
+from scipy.ndimage import gaussian_filter
 
 def _validate_scalar_to_multi(value, size=3, dtype=float):
     """
@@ -242,11 +248,65 @@ def _multiply_coords_by_affine(affine, array):
     return np.squeeze(np.matmul(affine[:ndims, :ndims], array[...,None]), -1) + affine[:ndims, ndims]
     
 
-def resample(image, new_resolution, old_resolution=1, **interpolation_kwargs):
+def resample(image, new_resolution, old_resolution=1, err_to_larger=True, extrapolation_fill_value=None, origin='center', method='linear', image_is_coords=False, anti_aliasing=True):
+    """
+    Resamples image from an old resolution to a new resolution.
+    
+    Args:
+        image (np.ndarray): The image to be resampled
+        new_resolution (float, seq): The resolution of the resampled image.
+        old_resolution (float, seq, optional): The resolution of the input image. Defaults to 1.
+        err_to_larger (bool, optional): Determines whether to round the new shape up or down. Defaults to True.
+        extrapolation_fill_value (float, NoneType, optional): The fill_value kwarg passed to interpn. Defaults to None.
+        origin (str, optional): The origin to use for the image axes and coordinates used internally. Defaults to 'center'.
+        method (str, optional): The method of interpolation, passed as the method kwarg in interpn. Defaults to 'linear'.
+        image_is_coords (bool, optional): If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. Defaults to False.
+        anti_aliasing (bool, optional): If True, applies a gaussian filter across dimensions to be downsampled before interpolating. Defaults to True.
+    
+    Returns:
+        np.ndarray: The result of resampling image at new_resolution.
+    """
 
+    # Validate inputs and define ndim & old_shape based on image_is_coords.
+    image = _validate_ndarray(image) # Breaks alias.
+    if image_is_coords:
+        ndim = image.ndim - 1
+        old_shape = image.shape[:-1]
+    else:
+        ndim = image.ndim
+        old_shape = image.shape
+    new_resolution = _validate_resolution(ndim, new_resolution)
+    old_resolution = _validate_resolution(ndim, old_resolution)
 
-    # Validate inputs.
-    image = _validate_ndarray(image)
-    new_resolution = _validate_resolution(image.ndim, new_resolution)
-    old_resolution = _validate_resolution(image.ndim, old_resolution)
+    # Handle trivial case.
+    if np.array_equal(new_resolution, old_resolution):
+        return image # Note: this is a copy of the input image and is not the same object.
+    
+    # Compute new_coords and old_axes.
+    if err_to_larger:
+        new_shape = np.ceil(old_shape * old_resolution / new_resolution)
+    else:
+        new_shape = np.floor(old_shape * old_resolution / new_resolution)
+    new_coords = _compute_coords(new_shape, new_resolution, origin)
+    old_axes = _compute_axes(old_shape, old_resolution, origin)
 
+    # Apply anti-aliasing gaussian filter if downsampling.
+    if anti_aliasing:
+        if image_is_coords:
+            downsample_factors = np.insert(old_shape / new_shape, image.ndim - 1, values=0, axis=0)
+            print(f"downsample_factors: {downsample_factors}")
+        else:
+            downsample_factors = old_shape / new_shape
+        anti_aliasing_sigma = np.maximum(0, (downsample_factors - 1) / 2)
+        gaussian_filter(image, anti_aliasing_sigma, output=image, mode='nearest') # Mutates image.
+
+    # Interpolate image.
+    new_image = interpn(
+        points=old_axes, 
+        values=image, 
+        xi=new_coords, 
+        bounds_error=False, 
+        fill_value=extrapolation_fill_value, 
+    )
+
+    return new_image

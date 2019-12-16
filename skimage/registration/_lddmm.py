@@ -10,6 +10,7 @@ from skimage.registration._lddmm_utilities import _validate_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
 from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
+from skimage.registration._lddmm_utilities import resample
 
 r'''
   _            _       _                         
@@ -694,7 +695,7 @@ template_shape, template_resolution, target_shape, target_resolution, deform_to=
         # affine_phi has the resolution of the template.
     elif deform_to == "target":
         # Apply the affine by interpolation.
-        sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)####TODO################################################# inv(affine), or just affine? TODO
+        sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)
         phi_inv_affine_inv = interpn(
             points=template_axes,
             values=phi_inv - template_coords,
@@ -727,18 +728,14 @@ def _apply_position_field(subject, subject_resolution, output_resolution, positi
     output_resolution = _validate_resolution(subject.ndim, output_resolution)
 
     # Resample position_field.
-    if not np.array_equal(position_field_resolution, output_resolution):
-        new_position_field_base_shape = np.ceil(position_field.shape[:-1] * position_field_resolution / output_resolution)
-        position_field = interpn(
-            points=_compute_axes(shape=position_field.shape[:-1], resolution=position_field_resolution),
-            values=position_field,
-            xi=_compute_coords(shape=new_position_field_base_shape, resolution=output_resolution),
-            bounds_error=False,
-            fill_value=None,
-        )
-
-    # To make this fully general, accept an output_shape and adjust the position_field to match that shape by interpolating on a grid with arbitrary physical extent.
-    # TODO: ^
+    position_field = resample(
+        image=position_field, 
+        new_resolution=output_resolution, 
+        old_resolution=position_field_resolution, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        image_is_coords=True, 
+    )
 
     # Interpolate subject at position field.
     deformed_subject = interpn(

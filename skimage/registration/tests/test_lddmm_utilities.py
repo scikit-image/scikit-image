@@ -8,6 +8,7 @@ from skimage.registration._lddmm_utilities import _validate_resolution
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
 from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
+from skimage.registration._lddmm_utilities import resample
 
 """
 Test _validate_scalar_to_multi.
@@ -329,7 +330,172 @@ def test__multiply_coords_by_affine():
     match = "affine is not in homogenous coordinates.\naffine\[-1] should be zeros with a 1 on the right."
     with pytest.warns(expected_warning, match=match):
         _multiply_coords_by_affine(affine, array)
-    
+ 
+"""
+Test _multiply_coords_by_affine.
+"""
+
+def test_resample():
+
+    # Test proper use.
+
+    # Test upsample with origin='zero'.
+    kwargs = dict(
+        image=np.array([
+            [0, 1, 2], 
+            [3, 4, 5], 
+        ]), 
+        new_resolution=1/2, 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='zero', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [0.0, 0.5, 1.0, 1.5, 2.0, 2.5], 
+        [1.5, 2.0, 2.5, 3.0, 3.5, 4.0], 
+        [3.0, 3.5, 4.0, 4.5, 5.0, 5.5], 
+        [4.5, 5.0, 5.5, 6.0, 6.5, 7.0], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test upsample with origin='center'.
+    kwargs = dict(
+        image=np.array([
+            [0, 1, 2], 
+            [3, 4, 5], 
+        ]), 
+        new_resolution=1/2, 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='center', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [-1.0, -0.5,  0.0,  0.5,  1.0,  1.5], 
+        [ 0.5,  1.0,  1.5,  2.0,  2.5,  3.0], 
+        [ 2.0,  2.5,  3.0,  3.5,  4.0,  4.5], 
+        [ 3.5,  4.0,  4.5,  5.0,  5.5,  6.0], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test downsample with origin='zero' and anti_aliasing=False.
+    kwargs = dict(
+        image=np.array([
+            [ 0,  1,  2,  3,  4], 
+            [ 5,  6,  7,  8,  9], 
+            [10, 11, 12, 13, 14], 
+            [15, 16, 17, 18, 19], 
+        ]), 
+        new_resolution=2, 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='zero', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [ 0,  2,  4], 
+        [10, 12, 14], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test downsample with origin='center' and anti_aliasing=False.
+    kwargs = dict(
+        image=np.array([
+            [ 0,  1,  2,  3,  4], 
+            [ 5,  6,  7,  8,  9], 
+            [10, 11, 12, 13, 14], 
+            [15, 16, 17, 18, 19], 
+        ]), 
+        new_resolution=2, 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='center', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [ 2.5,  4.5,  6.5],
+        [12.5, 14.5, 16.5], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test joint upsample and downsample with origin='zero' and anti_aliasing=False.
+    kwargs = dict(
+        image=np.array([
+            [0, 1, 2, 3, 4], 
+            [5, 6, 7, 8, 9], 
+        ]), 
+        new_resolution=[1/2, 2], 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='zero', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [   0,    2,    4], 
+        [ 2.5,  4.5,  6.5], 
+        [ 5.0,  7.0,  9.0], 
+        [ 7.5,  9.5, 11.5], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test joint upsample and downsample with origin='center' and anti_aliasing=False.
+    kwargs = dict(
+        image=np.array([
+            [0, 1, 2, 3, 4], 
+            [5, 6, 7, 8, 9], 
+        ]), 
+        new_resolution=[1/2, 2], 
+        old_resolution=1, 
+        err_to_larger=True, 
+        extrapolation_fill_value=None, 
+        origin='center', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [-1.25,  0.75,  2.75], 
+        [ 1.25,  3.25,  5.25], 
+        [ 3.75,  5.75,  7.75], 
+        [ 6.25,  8.25, 10.25], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
+    # Test joint upsample and downsample with origin='zero', anti_aliasing=False, and err_to_larger=False.
+    kwargs = dict(
+        image=np.array([
+            [ 0,  1,  2,  3,  4], 
+            [ 5,  6,  7,  8,  9], 
+            [10, 11, 12, 13, 14], 
+        ]), 
+        new_resolution=[1/2, 2], 
+        old_resolution=1, 
+        err_to_larger=False, 
+        extrapolation_fill_value=None, 
+        origin='zero', 
+        method='linear', 
+        anti_aliasing=False, 
+    )
+    correct_output = np.array([
+        [   0,    2], 
+        [ 2.5,  4.5], 
+        [ 5.0,  7.0], 
+        [ 7.5,  9.5], 
+        [10.0, 12.0], 
+        [12.5, 14.5], 
+    ])
+    assert np.array_equal(resample(**kwargs), correct_output)
+
 """
 Perform tests.
 """
@@ -341,3 +507,4 @@ if __name__ == "__main__":
     test__compute_axes()
     test__compute_coords()
     test__multiply_coords_by_affine()
+    test_resample()
