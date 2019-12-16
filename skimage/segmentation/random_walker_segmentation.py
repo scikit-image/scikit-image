@@ -183,9 +183,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn("'cg' mode may be slow because UMFPACK is not availabel. "
-                     "Consider building Scipy with UMFPACK or use a "
-                     "preconditioned version of CG ('cg_j' or 'cg_mg' modes).",
+                warn('"cg" mode may be slow because UMFPACK is not availabel. '
+                     'Consider building Scipy with UMFPACK or use a '
+                     'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
                      stacklevel=2)
             M = None
         elif mode == 'cg_j':

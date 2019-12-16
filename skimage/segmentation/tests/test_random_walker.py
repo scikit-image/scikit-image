@@ -5,7 +5,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import xfail, arch32
 import scipy
-import numpy as np
 from distutils.version import LooseVersion as Version
 
 
@@ -364,12 +363,12 @@ def test_trivial_cases():
             markers[y][x] = 1
 
     markers[img == 0] = -1
-    with expected_warnings(["Returning provided labels"]):
+    with expected_warnings(["All unlabeled pixels are isolated"]):
             output_labels = random_walker(img, markers)
     assert np.all(output_labels[markers == 1] == 1)
     # Here 0-labeled pixels could not be determined (no connexion to seed)
     assert np.all(output_labels[markers == 0] == -1)
-    with expected_warnings(["Returning provided labels"]):
+    with expected_warnings(["All unlabeled pixels are isolated"]):
         test = random_walker(img, markers, return_full_prob=True)
 
 
