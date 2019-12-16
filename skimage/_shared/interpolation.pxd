@@ -23,7 +23,9 @@ cimport numpy as np
 from .fused_numerics cimport np_real_numeric, np_floats
 
 cdef inline Py_ssize_t round(np_floats r) nogil:
-    return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
+    return <Py_ssize_t>(
+        (r + <np_floats>0.5) if (r > <np_floats>0.0) else (r - <np_floats>0.5)
+    )
 
 cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) nogil:
     return one if one > two else two
