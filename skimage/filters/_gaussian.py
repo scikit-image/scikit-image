@@ -113,14 +113,14 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     if output is not None:
-        if isinstance(output, np.ndarray):
-            # convert image to float if output is float numpy ndarray
+        if not isinstance(output, np.ndarray):
+            raise ValueError("Output is not an numpy array")
+        else:
             if issubclass(output.dtype.type, np.floating):
-                image = convert_to_float(image, preserve_range)
-        elif issubclass(type(output), type):
-            # convert image to float if output is float dtype
-            if issubclass(output, (np.floating, float)):
-                image = convert_to_float(image, preserve_range)
+                if not issubclass(image.dtype.type, np.floating):
+                    image = convert_to_float(image, preserve_range)
+    else:
+        image = convert_to_float(image, preserve_range)
     return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
                                cval=cval, truncate=truncate)
 
