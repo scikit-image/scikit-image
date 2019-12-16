@@ -754,3 +754,19 @@ def lfw_subset():
 
     """
     return _np.load(_os.path.join(data_dir, 'lfw_subset.npy'))
+
+
+def neuron():
+    """3D volume data of a neuron in MouseLight dataset
+
+    Returns
+    -------
+    images : (200, 25, 25) uint8 ndarray
+        100 first images are faces and subsequent 100 are non-faces.
+
+    Notes
+    -----
+    This is extracted from the Mouselight dataset collected by Janelia.
+
+    """
+    return _load("neuron.tif")
