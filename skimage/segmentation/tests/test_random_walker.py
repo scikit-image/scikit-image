@@ -140,8 +140,8 @@ def test_2d_cg_j():
     with expected_warnings([NUMPY_MATRIX_WARNING]):
         full_prob = random_walker(data, labels, beta=90, mode='cg_j',
                                   return_full_prob=True)
-    assert (full_prob[1, 25:45, 40:60] >=
-            full_prob[0, 25:45, 40:60]).all()
+    assert (full_prob[1, 25:45, 40:60]
+            >= full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
 
 
@@ -370,7 +370,6 @@ def test_trivial_cases():
     assert np.all(output_labels[markers == 0] == -1)
     with expected_warnings(["All unlabeled pixels are isolated"]):
         test = random_walker(img, markers, return_full_prob=True)
-
 
 
 def test_length2_spacing():

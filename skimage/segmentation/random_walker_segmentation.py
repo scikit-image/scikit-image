@@ -160,7 +160,7 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
 
     seeds = labels[seeds_mask]
     seeds_mask = sparse.csc_matrix(np.hstack(
-        [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels+1)]))
+        [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)]))
     rhs = B.dot(seeds_mask)
 
     return lap_sparse, rhs
@@ -172,8 +172,8 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         mode = 'cg_j'
 
     if mode == 'cg_mg' and not amg_loaded:
-        warn("'cg_mg' can't be used, it requires pyamg to be installed. "
-             "The 'cg_j' mode will be used instead.",
+        warn('"cg_mg" not available, it requires pyamg to be installed. '
+             'The "cg_j" mode will be used instead.',
              stacklevel=2)
         mode = 'cg_j'
 
@@ -302,7 +302,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         - 'cg_j' (conjugate gradient with Jacobi preconditionner): the
           Jacobi preconditionner is applyed during the Conjugate
           gradient method iterations. This may accelerate the
-          convergeance of the 'cg' method.
+          convergence of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
@@ -400,7 +400,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     >>> np.random.seed(0)
     >>> a = np.zeros((10, 10)) + 0.2 * np.random.rand(10, 10)
     >>> a[5:8, 5:8] += 1
-    >>> b = np.zeros_like(a)
+    >>> b = np.zeros_like(a, dtype=np.int32)
     >>> b[3, 3] = 1  # Marker for first phase
     >>> b[6, 6] = 2  # Marker for second phase
     >>> random_walker(a, b)
