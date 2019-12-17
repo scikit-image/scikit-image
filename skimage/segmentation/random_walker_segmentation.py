@@ -302,7 +302,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         - 'cg_j' (conjugate gradient with Jacobi preconditionner): the
           Jacobi preconditionner is applyed during the Conjugate
           gradient method iterations. This may accelerate the
-          convergeance of the 'cg' method.
+          convergence of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
