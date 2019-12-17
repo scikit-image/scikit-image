@@ -160,7 +160,7 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
 
     seeds = labels[seeds_mask]
     seeds_mask = sparse.csc_matrix(np.hstack(
-        [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels+1)]))
+        [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)]))
     rhs = B.dot(seeds_mask)
 
     return lap_sparse, rhs
