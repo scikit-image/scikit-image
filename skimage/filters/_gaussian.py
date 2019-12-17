@@ -55,7 +55,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     -----
     This function is a wrapper around :func:`scipy.ndi.gaussian_filter`.
 
-    Integer arrays are converted to float, if output specified as float.
+    Integer arrays are converted to float, if output is not specified.
 
     The multi-dimensional filter is implemented as a sequence of
     one-dimensional convolution filters. The intermediate arrays are
