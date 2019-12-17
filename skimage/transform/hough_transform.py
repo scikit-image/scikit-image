@@ -375,7 +375,13 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     # Use a KDTree to search for neighboring circles effectively
     scaled_cx_sorted = cx_sorted / float(min_xdistance)
     scaled_cy_sorted = cy_sorted / float(min_ydistance)
-    kd_tree = cKDTree(np.stack([scaled_cx_sorted, scaled_cy_sorted], axis=1))
+    scaled_coordinates = np.stack([scaled_cx_sorted, scaled_cy_sorted], axis=1)
+    if scaled_coordinates.size == 0:
+        # Return empty arrays early
+        # as cKDTree throws an error given zero-sized data
+        return (np.array(accum_kept), np.array(cx_kept),
+                np.array(cy_kept), np.array(r_kept))
+    kd_tree = cKDTree(scaled_coordinates)
     while i < tnp:
         if not removed[i]:
             accum_kept.append(accum_sorted[i])
