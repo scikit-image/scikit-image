@@ -115,12 +115,12 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     if output is not None:
         if not isinstance(output, np.ndarray):
             raise ValueError("Output is not an numpy array")
-        else:
-            if issubclass(output.dtype.type, np.floating):
-                if not issubclass(image.dtype.type, np.floating):
-                    image = convert_to_float(image, preserve_range)
-    else:
-        image = convert_to_float(image, preserve_range)
+    image = convert_to_float(image, preserve_range)
+    if output:
+        if issubclass(image.dtype.type, output.dtype.type):
+            msg = ("Converted image dtype doesn't correspond output dtype, "
+                   "possible loss of data.")
+            warn(RuntimeWarning(msg))
     return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
                                cval=cval, truncate=truncate)
 
