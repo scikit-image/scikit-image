@@ -321,8 +321,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the
         labels will be returned, instead of only the most likely
-        label. The returned probability values may be inaccurate
-        particularly if `mode` is not 'bf' and `beta` is large.
+        label.
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
