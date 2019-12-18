@@ -322,7 +322,8 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
     -----
     Circles with bigger radius have higher peaks in Hough space. If larger
     circles are preferred over smaller ones, `normalize` should be False.
-    Otherwise, circles will be returned in the order of decreasing perfectness.
+    Otherwise, circles will be returned in the order of decreasing voting
+    number.
     """
     from ..feature.peak import _prominent_peaks
 
@@ -388,7 +389,7 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
             cx_kept.append(cx_sorted[i])
             cy_kept.append(cy_sorted[i])
             r_kept.append(r_sorted[i])
-            # Find a shrot list of candidates to remove
+            # Find a short list of candidates to remove
             # by searching within a radius of sqrt(2) in scaled space
             neighbors_i = kd_tree.query_ball_point(
                 (scaled_cx_sorted[i], scaled_cy_sorted[i]), np.sqrt(2)
