@@ -116,7 +116,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if not isinstance(output, np.ndarray):
             raise ValueError("Output is not an numpy array")
     image = convert_to_float(image, preserve_range)
-    if output:
+    if output is not None:
         if issubclass(image.dtype.type, output.dtype.type):
             msg = ("Converted image dtype doesn't correspond output dtype, "
                    "possible loss of data.")
