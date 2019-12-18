@@ -1,3 +1,0 @@
-#!/bin/bash
-
-pip install git+https://github.com/scikit-image/scikit-image.git#egg=scikit-image

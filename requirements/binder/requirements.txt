@@ -1,6 +1,6 @@
 # For binder
-numpy
 scikit-learn
 pandas
 seaborn
 matplotlib
+scikit-image
