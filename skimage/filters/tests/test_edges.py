@@ -482,6 +482,11 @@ def test_vertical_mask_line(grad_func):
     assert_allclose(result, expected)
 
 
+# The below three constant 3x3x3 cubes were empirically found to maximise the
+# output of each of their respective filters. We use them to test that the
+# output of the filter on the blobs image matches expectation in terms of
+# scale.
+
 # maximum Sobel 3D edge on axis 0
 MAX_SOBEL_0 = np.array([
     [[0, 0, 0],
