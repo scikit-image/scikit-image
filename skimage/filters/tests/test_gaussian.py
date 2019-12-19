@@ -92,11 +92,11 @@ def test_guess_spatial_dimensions():
 
 
 @pytest.mark.parametrize(
-    "dtype", [np.uint8, np.uint16, np.uint32, np.int32,
-              np.float32, np.float64]
+    "dtype", [np.float32, np.float64]
 )
 def test_preserve_output(image, dtype):
+    image = image.astype(dtype)
     output = np.zeros_like(image, dtype=dtype)
     gaussian_image = gaussian(image, sigma=1, output=output,
                               preserve_range=True)
-    assert id(gaussian_image) == id(output)
+    assert gaussian_image is output
