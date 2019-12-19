@@ -428,6 +428,10 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
                                                         sorting='abs',
                                                         mode='reflect')
 
+        # Compute sensitivity to deviation from a plate-like
+        # structure see equations (11) and (15) in reference [1]_
+        r_a = np.inf if ndim == 2 else _divide_nonzero(*lambdas) ** 2
+
         # Compute sensitivity to deviation from a blob-like structure,
         # see equations (10) and (15) in reference [1]_,
         # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
@@ -440,13 +444,9 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
         # Compute output image for given (sigma) scale and store results in
         # (n+1)D matrices, see equations (13) and (15) in reference [1]_
-        filtered_array[i] = (np.exp(-r_b / beta_sq)
+        filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
+                             * np.exp(-r_b / beta_sq)
                              * (1 - np.exp(-r_g / gamma_sq)))
-        if ndim == 3:
-            # Compute sensitivity to deviation from a plate-like
-            # structure see equations (11) and (15) in reference [1]_
-            r_a = _divide_nonzero(*lambdas) ** 2
-            filtered_array[i] *= (1 - np.exp(-r_a / alpha_sq))
 
         lambdas_array[i] = np.max(lambdas, axis=0)
 
