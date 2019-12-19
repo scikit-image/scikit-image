@@ -116,15 +116,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             sigma = [sigma] * (image.ndim - 1)
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
-    if output is not None:
-        if not isinstance(output, np.ndarray):
-            raise ValueError("Output is not an numpy array")
-    image = convert_to_float(image, preserve_range)
-    if output is not None:
-        if issubclass(image.dtype.type, output.dtype.type):
-            msg = ("Converted image dtype doesn't correspond output dtype, "
-                   "possible loss of data.")
-            warn(RuntimeWarning(msg))
     image = convert_to_float(image, preserve_range)
     if output is None:
         output = np.empty_like(image)
