@@ -404,9 +404,12 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
     coordinates = np.stack([xs, ys], axis=1)
     # Use a KDTree to search for neighboring points effectively
     kd_tree = cKDTree(coordinates)
-    i = 0
-    while i < max_points:
-        if not is_neighbor[i]:
+    n_pts = 0
+    for i in range(len(xs)):
+        if n_pts >= max_points:
+            # Ignore the point if points to keep reaches maximum
+            is_neighbor[i] = True
+        elif not is_neighbor[i]:
             # Find a short list of candidates to remove
             # by searching within a circle
             neighbors_i = kd_tree.query_ball_point(
@@ -419,7 +422,6 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
                 y_close = abs(ys[ni] - ys[i]) <= min_ydistance
                 if (x_close or y_close) and (ni > i):
                     is_neighbor[ni] = True
-        i += 1
+            n_pts += 1
     should_keep = ~is_neighbor
-    should_keep[max_points:] = False
     return should_keep

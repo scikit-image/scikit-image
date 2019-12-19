@@ -295,15 +295,27 @@ def test_hough_circle_peaks_min_distance():
     assert_equal(out[2], np.array([x_0, x_2]))
     assert_equal(out[3], np.array([rad_0, rad_2]))
 
+
+def test_hough_circle_peaks_total_peak_and_min_distance():
+    img = np.zeros((120, 120), dtype=int)
+    cx = cy = [40, 50, 60, 70, 80]
+    radii = range(20, 30, 2)
+    for i in range(len(cx)):
+        y, x = circle_perimeter(cy[i], cx[i], radii[i])
+        img[x, y] = 1
+
+    hspaces = transform.hough_circle(img, radii)
     out = transform.hough_circle_peaks(hspaces, radii, min_xdistance=15,
                                        min_ydistance=15, threshold=None,
                                        num_peaks=np.inf,
-                                       total_num_peaks=1,
+                                       total_num_peaks=2,
                                        normalize=True)
 
-    assert_equal(out[1], np.array([y_0]))
-    assert_equal(out[2], np.array([x_0]))
-    assert_equal(out[3], np.array([rad_0]))
+    # 2nd (4th) circle is removed as it is close to 1st (3rd) oneself.
+    # 5th is removed as total_num_peaks = 2
+    assert_equal(out[1], np.array(cy[:4:2]))
+    assert_equal(out[2], np.array(cx[:4:2]))
+    assert_equal(out[3], np.array(radii[:4:2]))
 
 
 def test_hough_circle_peaks_normalize():
