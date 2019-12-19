@@ -125,10 +125,11 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     if output is None:
         output = np.empty_like(image)
     elif not isinstance(output, np.ndarray):
-        raise ValueError("provided output argument is not a numpy array")
+        raise ValueError("Provided output argument is not a numpy array")
     elif image.dtype != output.dtype:
-        warn("Invalid output datatype. A new array is assigned.")
+        msg = ("Invalid output datatype. A new array is assigned.")
         output = np.empty_like(image)
+        warn(RuntimeWarning(msg))
     return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
                                cval=cval, truncate=truncate)
 
