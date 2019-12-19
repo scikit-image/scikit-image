@@ -64,7 +64,7 @@ def _mask_filter_result(result, mask):
     return result
 
 
-def kernel_shape(ndim, dim):
+def _kernel_shape(ndim, dim):
     """Return list of `ndim` 1s except at position `dim`, where value is -1.
 
     Parameters
@@ -81,16 +81,47 @@ def kernel_shape(ndim, dim):
 
     Examples
     --------
-    >>> kernel_shape(2, 0)
+    >>> _kernel_shape(2, 0)
     [-1, 1]
-    >>> kernel_shape(3, 1)
+    >>> _kernel_shape(3, 1)
     [1, -1, 1]
-    >>> kernel_shape(4, -1)
+    >>> _kernel_shape(4, -1)
     [1, 1, 1, -1]
     """
     shape = [1, ] * ndim
     shape[dim] = -1
     return shape
+
+
+def _reshape_nd(arr, ndim, dim):
+    """Reshape a 1D array to have n dimensions, all singletons but one.
+
+    Parameters
+    ----------
+    arr : array, shape (N,)
+        Input array
+    ndim : int
+        Number of desired dimensions of reshaped array.
+    dim : int
+        Which dimension/axis will not be singleton-sized.
+
+    Returns
+    -------
+    arr_reshaped : array, shape ([1, ...], N, [1,...])
+        View of `arr` reshaped to the desired shape.
+
+    Examples
+    --------
+    >>> arr = np.random.random(7)
+    >>> _reshape_nd(arr, 2, 0).shape
+    (7, 1)
+    >>> _reshape_nd(arr, 3, 1).shape
+    (1, 7, 1)
+    >>> _reshape_nd(arr, 4, -1).shape
+    (1, 1, 1, 7)
+    """
+    kernel_shape = _kernel_shape(ndim, dim)
+    return np.reshape(arr, kernel_shape)
 
 
 def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
@@ -140,11 +171,10 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
     output = np.zeros(image.shape, dtype=float)
 
     for edge_dim in axes:
-        kernel = np.reshape(edge_weights, kernel_shape(ndim, edge_dim))
+        kernel = _reshape_nd(edge_weights, ndim, edge_dim)
         smooth_axes = list(set(range(ndim)) - {edge_dim})
         for smooth_dim in smooth_axes:
-            kernel = kernel * np.reshape(smooth_weights,
-                                         kernel_shape(ndim, smooth_dim))
+            kernel = kernel * _reshape_nd(smooth_weights, ndim, smooth_dim)
         ax_output = ndi.convolve(image, kernel, mode='reflect')
         if return_magnitude:
             ax_output *= ax_output
