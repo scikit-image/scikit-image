@@ -295,6 +295,16 @@ def test_hough_circle_peaks_min_distance():
     assert_equal(out[2], np.array([x_0, x_2]))
     assert_equal(out[3], np.array([rad_0, rad_2]))
 
+    out = transform.hough_circle_peaks(hspaces, radii, min_xdistance=15,
+                                       min_ydistance=15, threshold=None,
+                                       num_peaks=np.inf,
+                                       total_num_peaks=1,
+                                       normalize=True)
+
+    assert_equal(out[1], np.array([y_0]))
+    assert_equal(out[2], np.array([x_0]))
+    assert_equal(out[3], np.array([rad_0]))
+
 
 def test_hough_circle_peaks_normalize():
     x_0, y_0, rad_0 = (50, 50, 20)

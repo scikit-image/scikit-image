@@ -358,7 +358,8 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
 
     # Skip searching for neighboring circles
     # if default min_xdistance and min_ydistance are used
-    if min_xdistance == 1 and min_ydistance == 1:
+    # or if no peak was detected
+    if (min_xdistance == 1 and min_ydistance == 1) or len(accum_sorted) == 0:
         return (accum_sorted[:tnp],
                 cx_sorted[:tnp],
                 cy_sorted[:tnp],
@@ -366,41 +367,56 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
 
     # For circles with centers too close, only keep the one with
     # the highest peak
-    removed = np.zeros(len(accum_sorted), dtype=bool)
-    accum_kept = []
-    cx_kept = []
-    cy_kept = []
-    r_kept = []
+    should_keep = label_distant_points(
+        cx_sorted, cy_sorted, min_xdistance, min_ydistance, tnp
+    )
+    return (accum_sorted[should_keep],
+            cx_sorted[should_keep],
+            cy_sorted[should_keep],
+            r_sorted[should_keep])
+
+
+def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
+    """Keep points that are separated by certain distance in each dimension.
+
+    Parameters
+    ----------
+    xs : array
+        X coordinates of points.
+    ys : array
+        Y coordinates of points.
+    min_xdistance : int
+        Minimum distance separating points in the x dimension.
+    min_ydistance : int
+        Minimum distance separating points in the y dimension.
+    max_points : int
+        Max number of distant points to keep.
+
+    Returns
+    -------
+    should_keep : array of bool
+        A mask array for distant points to keep.
+    """
+    is_neighbor = np.zeros(len(xs), dtype=bool)
+    coordinates = np.stack([xs, ys], axis=1)
+    # Use a KDTree to search for neighboring points effectively
+    kd_tree = cKDTree(coordinates)
     i = 0
-
-    # Use a KDTree to search for neighboring circles effectively
-    scaled_cx_sorted = cx_sorted / float(min_xdistance)
-    scaled_cy_sorted = cy_sorted / float(min_ydistance)
-    scaled_coordinates = np.stack([scaled_cx_sorted, scaled_cy_sorted], axis=1)
-    if scaled_coordinates.size == 0:
-        # Return empty arrays early
-        # as cKDTree throws an error given zero-sized data
-        return (np.array(accum_kept), np.array(cx_kept),
-                np.array(cy_kept), np.array(r_kept))
-    kd_tree = cKDTree(scaled_coordinates)
-    while i < tnp:
-        if not removed[i]:
-            accum_kept.append(accum_sorted[i])
-            cx_kept.append(cx_sorted[i])
-            cy_kept.append(cy_sorted[i])
-            r_kept.append(r_sorted[i])
+    while i < max_points:
+        if not is_neighbor[i]:
             # Find a short list of candidates to remove
-            # by searching within a radius of sqrt(2) in scaled space
+            # by searching within a circle
             neighbors_i = kd_tree.query_ball_point(
-                (scaled_cx_sorted[i], scaled_cy_sorted[i]), np.sqrt(2)
+                (xs[i], ys[i]),
+                np.hypot(min_xdistance, min_ydistance)
             )
-            # Check distance in both dimensions and mark as removed if close
+            # Check distance in both dimensions and mark if close
             for ni in neighbors_i:
-                x_close = abs(scaled_cx_sorted[ni] - scaled_cx_sorted[i]) <= 1
-                y_close = abs(scaled_cy_sorted[ni] - scaled_cy_sorted[i]) <= 1
-                if x_close or y_close:
-                    removed[ni] = True
+                x_close = abs(xs[ni] - xs[i]) <= min_xdistance
+                y_close = abs(ys[ni] - ys[i]) <= min_ydistance
+                if (x_close or y_close) and (ni > i):
+                    is_neighbor[ni] = True
         i += 1
-
-    return (np.array(accum_kept), np.array(cx_kept),
-            np.array(cy_kept), np.array(r_kept))
+    should_keep = ~is_neighbor
+    should_keep[max_points:] = False
+    return should_keep
