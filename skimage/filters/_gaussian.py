@@ -117,9 +117,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    if output is None:
-        output = np.empty_like(image)
-    elif not isinstance(output, np.ndarray):
+    if not isinstance(output, np.ndarray):
         raise ValueError("Provided output argument is not a numpy array")
     elif image.dtype != output.dtype:
         msg = ("Invalid output datatype. A new array is assigned.")
