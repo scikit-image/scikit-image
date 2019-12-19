@@ -379,6 +379,9 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
 def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
     """Keep points that are separated by certain distance in each dimension.
 
+    The first point is always accpeted and all subsequent points are selected
+    so that they are distant from all their preceding ones.
+
     Parameters
     ----------
     xs : array
