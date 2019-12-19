@@ -11,7 +11,7 @@ class FiltersSuite:
         self.image[:2000, :2000] += 1
         self.image[3000:, 3000] += 0.5
 
-        self.image3d = data.binary_blobs(length=128, n_dim=3).astype(float)
+        self.image3d = data.binary_blobs(length=256, n_dim=3).astype(float)
 
     def time_sobel(self):
         filters.sobel(self.image)
