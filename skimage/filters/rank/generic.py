@@ -75,6 +75,10 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
+
     image = np.ascontiguousarray(image)
 
     if mask is None:
@@ -112,6 +116,57 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     return image, selem, out, mask, n_bins
 
 
+def _handle_input_3D(image, selem, out, mask, out_dtype=None, pixel_size=1):
+
+    check_nD(image, [2, 3])
+    if image.dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(image.dtype))
+        warn(message, stacklevel=2)
+        image = img_as_ubyte(image)
+
+    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
+    if selem.ndim != image.ndim:
+        raise ValueError('Image dimensions and neighborhood dimensions'
+                         'do not match')
+    image = np.ascontiguousarray(image)
+
+    if mask is None:
+        mask = np.ones(image.shape, dtype=np.uint8)
+    else:
+        mask = img_as_ubyte(mask)
+        mask = np.ascontiguousarray(mask)
+
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
+    if out is None:
+        if out_dtype is None:
+            out_dtype = image.dtype
+        out = np.empty(image.shape+(pixel_size,), dtype=out_dtype)
+    else:
+        out = out.reshape(out.shape+(pixel_size,))
+
+    is_8bit = image.dtype in (np.uint8, np.int8)
+
+    if is_8bit:
+        n_bins = 256
+    else:
+        # Convert to a Python int to avoid the potential overflow when we add
+        # 1 to the maximum of the image.
+        n_bins = int(max(3, image.max())) + 1
+
+    if n_bins > 2**10:
+        warn("Bad rank filter performance is expected due to a "
+             "large number of bins ({}), equivalent to an approximate "
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
+
+    return image, selem, out, mask, n_bins
+
+
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
 
@@ -122,6 +177,18 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, n_bins=n_bins)
 
     return out.reshape(out.shape[:2])
+
+
+def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
+                               shift_z, out_dtype=None):
+
+    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
+                                                       out_dtype)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
+         mask=mask, out=out, n_bins=n_bins)
+
+    return out.reshape(out.shape[:3])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -245,43 +312,54 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def equalize(image, selem, out=None, mask=None,
+             shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : (N, M[,P]) ndarray (uint8, uint16)
         Input image.
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : (N, M[,P]) array (same dtype as input)
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : (N, M[,P]) ndarray (same dtype as input image)
         Output image.
 
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import equalize
+    >>> import numpy as np
     >>> img = data.camera()
     >>> equ = equalize(img, disk(5))
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> equ_vol = equalize(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._equalize, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):

@@ -105,3 +105,8 @@ def test_cell():
     """ Test that "cell" image can be loaded. """
     data.cell()
 
+
+def test_neuron():
+    """ Test that "neuron" image can be loaded. """
+    neuron = data.neuron()
+    assert_equal(neuron.ndim, 3)
