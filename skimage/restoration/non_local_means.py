@@ -154,23 +154,15 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         preserve_range = True
 
     image = convert_to_float(image, preserve_range)
-    h = image.dtype.type(h)
-    sigma = image.dtype.type(sigma)
 
-    ctype = 'float32_t' if image.dtype == np.float32 else 'float64_t'
-    nlm_kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
+    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if multichannel:  # 2-D images
         if fast_mode:
-            return np.squeeze(
-                np.asarray(_fast_nl_means_denoising_2d[ctype](image,
-                                                              **nlm_kwargs)))
+            return _fast_nl_means_denoising_2d(image, **kwargs)
         else:
-            return np.squeeze(
-                np.asarray(_nl_means_denoising_2d[ctype](image, **nlm_kwargs)))
+            return _nl_means_denoising_2d(image, **kwargs)
     else:  # 3-D grayscale
         if fast_mode:
-            return np.asarray(_fast_nl_means_denoising_3d[ctype](image,
-                                                                 **nlm_kwargs))
+            return _fast_nl_means_denoising_3d(image, **kwargs)
         else:
-            return np.asarray(_nl_means_denoising_3d[ctype](image,
-                                                            **nlm_kwargs))
+            return _nl_means_denoising_3d(image, **kwargs)
