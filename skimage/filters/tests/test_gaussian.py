@@ -89,7 +89,7 @@ def test_guess_spatial_dimensions():
 @pytest.mark.parametrize(
     "dtype", [np.float32, np.float64]
 )
-def test_preserve_output(image, dtype):
+def test_preserve_output(dtype):
     image = np.random.randint(0, 10, size=(3, 3), dtype=dtype)
     output = np.zeros_like(image, dtype=dtype)
     gaussian_image = gaussian(image, sigma=1, output=output,
