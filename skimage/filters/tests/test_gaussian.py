@@ -90,7 +90,7 @@ def test_guess_spatial_dimensions():
     "dtype", [np.float32, np.float64]
 )
 def test_preserve_output(dtype):
-    image = np.random.randint(0, 10, size=(3, 3), dtype=dtype)
+    image = np.arange(9, dtype=dtype).reshape((3, 3))
     output = np.zeros_like(image, dtype=dtype)
     gaussian_image = gaussian(image, sigma=1, output=output,
                               preserve_range=True)
