@@ -126,8 +126,9 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             msg = ("Invalid output datatype. A new array is assigned.")
             output = np.empty_like(image)
             warn(RuntimeWarning(msg))
-    return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
-                               cval=cval, truncate=truncate)
+    ndi.gaussian_filter(image, sigma, output=output, mode=mode, cval=cval,
+                        truncate=truncate)
+    return output
 
 
 def _guess_spatial_dimensions(image):
