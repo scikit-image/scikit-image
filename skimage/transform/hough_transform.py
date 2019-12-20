@@ -420,7 +420,7 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
             for ni in neighbors_i:
                 x_close = abs(xs[ni] - xs[i]) <= min_xdistance
                 y_close = abs(ys[ni] - ys[i]) <= min_ydistance
-                if (x_close or y_close) and (ni > i):
+                if x_close and y_close and ni > i:
                     is_neighbor[ni] = True
             n_pts += 1
     should_keep = ~is_neighbor
