@@ -6,11 +6,6 @@ from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
 
-@pytest.fixture
-def image():
-    return np.random.randint(0, 10, size=(3, 3), dtype=np.uint8)
-
-
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
@@ -95,7 +90,7 @@ def test_guess_spatial_dimensions():
     "dtype", [np.float32, np.float64]
 )
 def test_preserve_output(image, dtype):
-    image = image.astype(dtype)
+    image = np.random.randint(0, 10, size=(3, 3), dtype=dtype)
     output = np.zeros_like(image, dtype=dtype)
     gaussian_image = gaussian(image, sigma=1, output=output,
                               preserve_range=True)
