@@ -60,7 +60,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     The ``output`` should be floating point data type since gaussian converts
     to float provided ``image``. If ``output`` is not provided, another array will be allocated
     and returned as the result.
-    as ``output``.
 
     The multi-dimensional filter is implemented as a sequence of
     one-dimensional convolution filters. The intermediate arrays are
