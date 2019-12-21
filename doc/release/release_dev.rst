@@ -21,6 +21,7 @@ New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
 - Added 3D implementation of rank equalization filter - ``filters.rank.equalize``.
+- Added 3D implementation of rank otsu filter - ``filters.rank.otsu``.
 
 
 Improvements

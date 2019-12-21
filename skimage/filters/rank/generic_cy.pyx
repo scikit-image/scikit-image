@@ -655,6 +655,16 @@ def _otsu(dtype_t[:, ::1] image,
     _core(_kernel_otsu[dtype_t_out, dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, n_bins)
 
+def _otsu_3D(dtype_t[:, :, ::1] image,
+                 char[:, :, ::1] selem,
+                 char[:, :, ::1] mask,
+                 dtype_t_out[:, :, :, ::1] out,
+                 signed char shift_x, signed char shift_y, signed char shift_z,
+                 Py_ssize_t n_bins):
+
+    _core_3D(_kernel_otsu[dtype_t_out, dtype_t], image, selem, mask, out,
+             shift_x, shift_y, shift_z, 0, 0, 0, 0, n_bins)
+
 
 def _windowed_hist(dtype_t[:, ::1] image,
                    char[:, ::1] selem,

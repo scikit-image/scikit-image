@@ -311,7 +311,6 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
 
-
 def equalize(image, selem, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):
     """Equalize image using local histogram.
@@ -1043,28 +1042,29 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    out_dtype=np.double)
 
 
-def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def otsu(image, selem, out=None, mask=None,
+         shift_x=False, shift_y=False, shift_z=False):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
     ----------
     image : ndarray
         Image array (uint8 array).
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    selem : (N, M[,P]) ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : (N, M[,P]) ndarray
         If None, a new array will be allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y, shift_z : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : (N, M[,P]) ndarray (same dtype as input image)
         Output image.
 
     References
@@ -1075,16 +1075,27 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     >>> from skimage import data
     >>> from skimage.filters.rank import otsu
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
+    >>> import numpy as np
     >>> img = data.camera()
     >>> local_otsu = otsu(img, disk(5))
     >>> thresh_image = img >= local_otsu
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> local_otsu_vol = otsu(volume, ball(5))
+    >>> thresh_image_vol = volume >= local_otsu_vol
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._otsu, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x,
-                                   shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._otsu, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def windowed_histogram(image, selem, out=None, mask=None,
