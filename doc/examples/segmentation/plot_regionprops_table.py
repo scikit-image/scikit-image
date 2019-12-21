@@ -37,5 +37,16 @@ for fraction, table in zip(fractions, tables):
 
 areas = pd.concat(tables, axis=0)
 
-areas.plot(x='volume fraction', y='area', kind='scatter')
+# Divide the figure into a 2x1 grid
+fig, (im, ax) = plt.subplots(2, 1)
+# Turn off axes for top subplot
+im.axis('off')
+# Plot area vs volume fraction
+areas.plot(x='volume fraction', y='area', kind='scatter', ax=ax)
+# Show image with lowest volume fraction
+ax1 = fig.add_subplot(221)
+ax1.imshow(images[0])
+# Show image with highest volume fraction
+ax2 = fig.add_subplot(222)
+ax2.imshow(images[-1])
 plt.show()
