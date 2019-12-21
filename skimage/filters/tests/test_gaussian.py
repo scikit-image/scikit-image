@@ -95,3 +95,11 @@ def test_preserve_output(dtype):
     gaussian_image = gaussian(image, sigma=1, output=output,
                               preserve_range=True)
     assert gaussian_image is output
+
+
+def test_output_error():
+    image = np.arange(9, dtype=np.float32).reshape((3, 3))
+    output = np.zeros_like(image, dtype=np.uint8)
+    with pytest.raises(ValueError):
+        gaussian(image, sigma=1, output=output,
+                 preserve_range=True)
