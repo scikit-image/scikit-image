@@ -50,3 +50,21 @@ ax1.imshow(images[0])
 ax2 = fig.add_subplot(222)
 ax2.imshow(images[-1])
 plt.show()
+
+"""
+In the scatterplot, many points seem to be overlapping at low area values.
+To get a better sense of the distribution, we may want to add some 'jitter'
+to the visualization. To this end, we import `seaborn`, the Python library
+dedicated to statistical data visualization, and use `stripplot` with
+argument `jitter=True`.
+"""
+
+import seaborn as sns
+
+sns_fig, sns_ax = plt.subplots()
+sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True,
+              ax=sns_ax)
+x_format = sns_ax.xaxis.get_major_formatter()
+x_format.seq = ['{:0.2f}'.format(float(s)) for s in x_format.seq]
+sns_ax.xaxis.set_major_formatter(x_format)
+plt.show()
