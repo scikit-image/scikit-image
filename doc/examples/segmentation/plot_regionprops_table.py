@@ -51,10 +51,14 @@ im.axis('off')
 areas.plot(x='volume fraction', y='area', kind='scatter', ax=ax)
 # Show image with lowest volume fraction
 ax1 = fig.add_subplot(221)
-ax1.imshow(images[0])
+ax1.imshow(images[0], cmap='gray_r')
+ax1.set_axis_off()
+ax1.set_title(f'fraction {fractions[0]}')
 # Show image with highest volume fraction
 ax2 = fig.add_subplot(222)
-ax2.imshow(images[-1])
+ax2.imshow(images[-1], cmap='gray_r')
+ax2.set_axis_off()
+ax2.set_title(f'fraction {fractions[-1]}')
 plt.show()
 
 """
