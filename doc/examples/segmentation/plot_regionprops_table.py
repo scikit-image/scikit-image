@@ -24,10 +24,9 @@ from skimage import data, measure
 
 fractions = np.linspace(0.05, 0.5, 10)
 
-"""
-2D images
----------
-"""
+#####################################################################
+# 2D images
+# ========
 
 images = [data.binary_blobs(volume_fraction=f) for f in fractions]
 
@@ -74,10 +73,11 @@ x_format.seq = ['{:0.2f}'.format(float(s)) for s in x_format.seq]
 sns_ax.xaxis.set_major_formatter(x_format)
 plt.show()
 
-"""
-3D images
----------
-"""
+#####################################################################
+# 3D images
+# ========
+# Doing the same analysis in 3D, we find a much more dramatic behaviour: blobs
+# coalesce into a single, giant piece as the volume fraction crosses ~0.25.
 
 images = [data.binary_blobs(length=128, n_dim=3, volume_fraction=f)
           for f in fractions]
