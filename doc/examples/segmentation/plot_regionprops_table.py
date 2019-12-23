@@ -26,7 +26,7 @@ fractions = np.linspace(0.05, 0.5, 10)
 
 #####################################################################
 # 2D images
-# ========
+# =========
 
 images = [data.binary_blobs(volume_fraction=f) for f in fractions]
 
@@ -68,14 +68,13 @@ Python library dedicated to statistical data visualization) with argument
 sns_fig, sns_ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True,
               ax=sns_ax)
-x_format = sns_ax.xaxis.get_major_formatter()
-x_format.seq = ['{:0.2f}'.format(float(s)) for s in x_format.seq]
-sns_ax.xaxis.set_major_formatter(x_format)
+# Fix floating point rendering
+sns_ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
 plt.show()
 
 #####################################################################
 # 3D images
-# ========
+# =========
 # Doing the same analysis in 3D, we find a much more dramatic behaviour: blobs
 # coalesce into a single, giant piece as the volume fraction crosses ~0.25.
 
@@ -98,8 +97,7 @@ blob_volumes = pd.concat(tables, axis=0)
 d3_fig, d3_ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=blob_volumes, jitter=True,
               ax=d3_ax)
-x_format = d3_ax.xaxis.get_major_formatter()
-x_format.seq = ['{:0.2f}'.format(float(s)) for s in x_format.seq]
-d3_ax.xaxis.set_major_formatter(x_format)
 d3_ax.set_ylabel('blob size (3D)')
+# Fix floating point rendering
+d3_ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
 plt.show()
