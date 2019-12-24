@@ -61,13 +61,12 @@ ax2.set_axis_off()
 ax2.set_title(f'fraction {fractions[-1]}')
 plt.show()
 
-"""
-In the scatterplot, many points seem to be overlapping at low area values.
-To get a better sense of the distribution, we may want to add some 'jitter'
-to the visualization. To this end, we use `stripplot` (from `seaborn`, the
-Python library dedicated to statistical data visualization) with argument
-`jitter=True`.
-"""
+#####################################################################
+# In the scatterplot, many points seem to be overlapping at low area values.
+# To get a better sense of the distribution, we may want to add some 'jitter'
+# to the visualization. To this end, we use `stripplot` (from `seaborn`, the
+# Python library dedicated to statistical data visualization) with argument
+# `jitter=True`.
 
 sns_fig, sns_ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True,
