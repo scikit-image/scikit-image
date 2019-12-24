@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.ndimage import maximum_filter, minimum_filter, convolve
-
+from scipy.ndimage import maximum_filter, minimum_filter
+from skimage._shared.gpu.convolve import convolve
 from ..transform import integral_image
 from ..feature import structure_tensor
 from ..morphology import octagon, star

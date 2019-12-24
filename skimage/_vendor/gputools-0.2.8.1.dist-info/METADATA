@@ -1,0 +1,31 @@
+Metadata-Version: 2.1
+Name: gputools
+Version: 0.2.8.1
+Summary: OpenCL accelerated volume processing
+Home-page: https://github.com/maweigert/gputools
+Author: Martin Weigert
+Author-email: mweigert@mpi-cbg.de
+License: BSD 3-Clause License
+Keywords: science image-processing
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Software Development
+Classifier: Topic :: Scientific/Engineering
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Dist: configparser
+Requires-Dist: numpy (>=1.11.0)
+Requires-Dist: pyopencl (>=2016.1)
+Requires-Dist: reikna (>=0.6.7)
+Requires-Dist: scipy
+Requires-Dist: ConfigParser ; python_version<"3.0"
+Requires-Dist: scikit-tensor ; python_version<"3.0"
+Requires-Dist: configparser ; python_version>="3.0"
+Requires-Dist: scikit-tensor-py3 ; python_version>="3.0"
+
+UNKNOWN
+
+

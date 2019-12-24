@@ -458,7 +458,7 @@ def test_farid_v_horizontal():
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = filters.farid_v(image)
-    assert_allclose(result, 0, atol=1e-10)
+    assert_allclose(result, 0, atol=1e-10) 
 
 
 @testing.parametrize("grad_func", (filters.prewitt_h, filters.sobel_h,
