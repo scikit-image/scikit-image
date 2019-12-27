@@ -56,6 +56,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
+    'inspect_global_variables'  : False,
     'subsection_order': ExplicitOrder([
         '../examples/data',
         '../examples/numpy_operations',
