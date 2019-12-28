@@ -117,10 +117,13 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    if output is not None and not np.issubdtype(output.dtype, np.floating):
+    if output is None:
+        output = np.empty_like(image)
+    elif not np.issubdtype(output.dtype, np.floating):
         raise ValueError("Provided output data type is not float")
-    return ndi.gaussian_filter(image, sigma, output=output, mode=mode,
-                               cval=cval, truncate=truncate)
+    ndi.gaussian_filter(image, sigma, output=output, mode=mode, cval=cval,
+                        truncate=truncate)
+    return output
 
 
 def _guess_spatial_dimensions(image):
