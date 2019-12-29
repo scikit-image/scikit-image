@@ -11,7 +11,8 @@ from libc.float cimport DBL_MAX
 
 
 def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
-                       double max_dist, bint return_tree, int random_seed):
+                       double max_dist, bint return_tree, int random_seed,
+                       bint full_search):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -31,6 +32,9 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
         Whether to return the full segmentation hierarchy tree and distances.
     random_seed : int
         Random seed used for breaking ties.
+    full_search : bool
+        Wether to extend search to always find the nearest node with higher
+        density. Will return a single tree if max_dist is large enough.
 
     Returns
     -------
@@ -39,12 +43,6 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     """
 
     random_state = np.random.RandomState(random_seed)
-
-    # TODO join orphaned roots?
-    # Some nodes might not have a point of higher density within the
-    # search window. We could do a global search over these in the end.
-    # Reference implementation doesn't do that, though, and it only has
-    # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
     cdef double inv_kernel_size_sqr = -0.5 / (kernel_size * kernel_size)
@@ -58,6 +56,8 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
 
     cdef double current_density, closest, dist, t
     cdef Py_ssize_t r, c, r_, c_, channel, r_min, r_max, c_min, c_max
+    cdef Py_ssize_t c_min_old, c_max_old, r_min_old, r_max_old
+    cdef int window_size
     cdef double* current_pixel_ptr
 
     # this will break ties that otherwise would give us headache
@@ -65,7 +65,8 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
     # default parent to self
     cdef Py_ssize_t[:, ::1] parent = \
         np.arange(width * height, dtype=np.intp).reshape(height, width)
-    cdef double[:, ::1] dist_parent = np.zeros((height, width), dtype=np.double)
+    cdef double[:, ::1] dist_parent = np.zeros((height, width),
+                                               dtype=np.double)
 
     # compute densities
     with nogil:
@@ -93,31 +94,55 @@ def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
         # find nearest node with higher density
         current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
-            r_min = max(r - kernel_width, 0)
-            r_max = min(r + kernel_width + 1, height)
             for c in range(width):
                 current_density = densities[r, c]
                 closest = DBL_MAX
-                c_min = max(c - kernel_width, 0)
-                c_max = min(c + kernel_width + 1, width)
-                for r_ in range(r_min, r_max):
-                    for c_ in range(c_min, c_max):
-                        if densities[r_, c_] > current_density:
-                            dist = 0
-                            # We compute the distances twice since otherwise
-                            # we get crazy memory overhead
-                            # (width * height * windowsize**2)
-                            for channel in range(channels):
-                                t = (current_pixel_ptr[channel] -
-                                     image[r_, c_, channel])
+                window_size = kernel_width
+                c_min = max(c - window_size, 0)
+                c_max = min(c + window_size + 1, width)
+                r_min = max(r - window_size, 0)
+                r_max = min(r + window_size + 1, height)
+                c_min_old = 0
+                c_max_old = 0
+                r_min_old = 0
+                r_max_old = 0
+                # increase search window until you find a parent
+                # or until you have searched all the image
+                while closest == DBL_MAX and \
+                    not(c_min_old == 0 and c_max_old == width and
+                        r_min_old == 0 and r_max_old == height):
+                    for r_ in range(r_min, r_max):
+                        for c_ in range(c_min, c_max):
+                            # no need to check the previous search window again
+                            if not (c_min_old <= c_ < c_max_old and
+                                    r_min_old <= r_ < r_max_old) and \
+                                    densities[r_, c_] > current_density:
+                                dist = 0
+                                # We compute the distances twice since
+                                # otherwise we get crazy memory overhead
+                                # (width * height * windowsize**2)
+                                for channel in range(channels):
+                                    t = (current_pixel_ptr[channel] -
+                                         image[r_, c_, channel])
+                                    dist += t * t
+                                t = r - r_
                                 dist += t * t
-                            t = r - r_
-                            dist += t * t
-                            t = c - c_
-                            dist += t * t
-                            if dist < closest:
-                                closest = dist
-                                parent[r, c] = r_ * width + c_
+                                t = c - c_
+                                dist += t * t
+                                if dist < closest:
+                                    closest = dist
+                                    parent[r, c] = r_ * width + c_
+                    if not full_search:
+                        break
+                    c_min_old = c_min
+                    c_max_old = c_max
+                    r_min_old = r_min
+                    r_max_old = r_max
+                    window_size = window_size+kernel_width
+                    c_min = max(c - window_size, 0)
+                    c_max = min(c + window_size + 1, width)
+                    r_min = max(r - window_size, 0)
+                    r_max = min(r + window_size + 1, height)
                 dist_parent[r, c] = sqrt(closest)
                 current_pixel_ptr += channels
 

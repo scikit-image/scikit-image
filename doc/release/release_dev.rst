@@ -20,6 +20,7 @@ This release of scikit-image officially supports Python 3.6 and 3.7.
 New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
+- Added option to compute a single tree over the whole image for quickshift.
 
 
 Improvements
