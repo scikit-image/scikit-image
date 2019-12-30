@@ -1,10 +1,11 @@
+import functools
 import numpy as np
 from ..transform import warp
 from .._shared.utils import safe_as_int
 from scipy.signal import get_window
 
 
-def window(window_type, size, ndim=2, warp_kwargs=None):
+def window(window_type, shape, warp_kwargs=None):
     """Return an n-dimensional window of a given size and dimensionality.
 
     Parameters
@@ -14,10 +15,9 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
         ``scipy.signal.get_window`` is allowed here. See notes below for a
         current list, or the SciPy documentation for the version of SciPy
         on your machine.
-    size : int
-        The size of the window along each axis (all axes will be equal length).
-    ndim : int, optional (default: 2)
-        The number of dimensions of the window.
+    shape : tuple of int or int
+        The shape of the window along each axis. If an integer is provided,
+        a 1D window is generated.
     warp_kwargs : dict
         Keyword arguments passed to `skimage.transform.warp` (e.g.,
         ``warp_kwargs={'order':3}`` to change interpolation method).
@@ -25,8 +25,7 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     Returns
     -------
     nd_window : ndarray
-        A window of ``ndim`` dimensions with a length of ``size``
-        along each axis. ``dtype`` is ``np.double``.
+        A window of the specified ``shape``. ``dtype`` is ``np.double``.
 
     Notes
     -----
@@ -40,10 +39,9 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     See https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.windows.get_window.html
     for more details.
 
-    Note that this function can generate very large arrays that consume
-    a large amount of available memory. For example, if ``size=512`` and
-    ``ndim=4`` are given as parameters to `skimage.filters.window`, it will
-    attempt to return an > 8.5GB array.
+    Note that this function generates a double precision array of the specified
+    ``shape`` and can thus generate very large arrays that consume a large
+    amount of available memory.
 
     The approach taken here to create nD windows is to first calculate the
     Euclidean distance from the center of the intended nD window to each
@@ -82,15 +80,15 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
     Return a Hann window with shape (512, 512):
 
     >>> from skimage.filters import window
-    >>> w = window('hann', 512)
+    >>> w = window('hann', (512, 512))
 
     Return a Kaiser window with beta parameter of 16 and shape (256, 256, 256):
 
-    >>> w = window(16, 256, ndim=3)
+    >>> w = window(16, (256, 256, 256))
 
     Return a Tukey window with an alpha parameter of 0.8 and shape (100, 100):
 
-    >>> w = window(('tukey', 0.8), 100)
+    >>> w = window(('tukey', 0.8), (100, 100))
 
     References
     ----------
@@ -98,21 +96,32 @@ def window(window_type, size, ndim=2, warp_kwargs=None):
            https://en.wikipedia.org/wiki/Two_dimensional_window_design
     """
 
-    ndim = safe_as_int(ndim)
-    size = safe_as_int(size)
+    if np.isscalar(shape):
+        shape = safe_as_int(shape),
+    else:
+        shape = tuple(safe_as_int(shape))
+    if any(s < 0 for s in shape):
+        raise ValueError("invalid shape")
 
+    ndim = len(shape)
     if ndim <= 0:
         raise ValueError("Number of dimensions must be greater than zero")
 
-    w = get_window(window_type, size, fftbins=False)
+    max_size = functools.reduce(max, shape)
+    w = get_window(window_type, max_size, fftbins=False)
     w = np.reshape(w, (-1,) + (1,) * (ndim-1))
 
     # Create coords for warping following `ndimage.map_coordinates` convention.
-    L = [np.arange(size, dtype=np.double) for i in range(ndim)]
-    coords = np.stack((np.meshgrid(*L)))
-    center = (size / 2) - 0.5
-    coords[0, ...] = np.sqrt(((coords - center) ** 2).sum(axis=0)) + center
-    coords[1:, ...] = 0
+    L = [np.arange(s, dtype=np.float32) * (max_size / s) for s in shape]
+
+    center = (max_size / 2) - 0.5
+    dist = 0
+    for g in np.meshgrid(*L, sparse=True, indexing='ij'):
+        g -= center
+        dist = dist + g * g
+    dist = np.sqrt(dist)
+    coords = np.zeros((ndim,) + dist.shape, dtype=np.float32)
+    coords[0] = dist + center
 
     if warp_kwargs is None:
         warp_kwargs = {}
