@@ -1,85 +1,236 @@
 How to make a new release of ``skimage``
 ========================================
 
+While following this guide, note down all the times that you need to
+consult a previous release manager, or that you find an instruction
+unclear. You will, of course, make a PR to update these notes after
+you are done with the release! ;-)
+
+Some of the instructions don't apply to patch releases. As a reminder, we use a
+variant of "semantic versioning", where version numbers are classified as
+v<major>.<minor>.<patch>. If you are making a patch release, skip the first
+three steps. Instead, make a PR to update ``release_<major>.<minor>.txt`` on
+the corresponding release branch.
+
+Before you start, make sure you have all the required write
+permissions (if not, you will need to ask an owner to grant you
+access), specifically to:
+
+  - https://github.com/scikit-image/scikit-image-wheels
+  - https://pypi.org/project/scikit-image/
+  - https://github.com/scikit-image/scikit-image-web
+
+
 - Check ``TODO.txt`` for any outstanding tasks.
 
-- Update release notes.
+- Branch v<major>.<minor>.x from master. This is the "release branch", where
+  you will make your changes gearing up for release, and cherry-pick them as
+  appropriate to master.
 
-  1. Review and cleanup ``doc/release/release_dev.txt``
+- On the release branch, update the release notes:
 
-     - To show a list of merges and contributors, run
-       ``doc/release/contribs.py <tag of prev release>``.
+  1. Review and cleanup ``doc/release/release_dev.rst``.
 
-  2. Rename to ``doc/release/release_X.txt``
+  2. Make a list of merges, contributors, and reviewers by running
+     ``tools/generate_release_notes.py -h`` and following that file's usage.
 
-  3. Copy ``doc/release/release_template.txt`` to
+  3. Paste this list at the end of the ``release_dev.txt``.
+
+  4. Scan the PR titles for highlights, deprecations, API changes,
+     and bugfixes, and mention these in the relevant sections of the notes.
+     Try to present the information in an expressive way by mentioning
+     the affected functions, elaborating on the changes and their
+     consequences. If possible, organize semantically close PRs in groups.
+
+  5. Check for duplicate names in the automatically generated list of
+     contributors and reviewers
+
+  6. Rename the file to ``doc/release/release_<major>.<minor>.txt``
+
+  7. Copy ``doc/release/release_template.txt`` to
      ``doc/release/release_dev.txt`` for the next release.
 
-- Update the version number in ``skimage/__init__.py`` and ``bento.info`` and commit
+  8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
+     to ``release_dev.txt``.
 
-- Update the docs:
+- Submit the release notes for review by other project maintainers:
 
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs.  Run ``python setup.py install`` in the
-    root dir, then ``rm -rf build; make html`` in the docs.
-  - Build using ``make gh-pages``.
-  - Update the symlink to ``stable``.
-  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
+  - Create a PR from v<major>.<minor>.x branch to master (at this point,
+    the difference should show the full contents of the release notes).
+  - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
+  - Once the consensus is found, ask the project maintainers to merge
+    the PR.
+  - Cherry pick the change onto the release branch.
+
+- On the master branch, update the version number in ``skimage/__init__.py``
+  to the next ``.dev0`` version, commit, and push. This should follow PEP440
+  meaning that the appropriate version number would look something like
+  ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
+  ``0`` immediately after ``dev``.
+
+- On the master branch, edit ``doc/source/_static/docversions.js``,
+  add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
+  change back to the release branch.
+
+- Back on the release branch, update the version number to match the release
+  version in ``skimage/__init__.py``, commit, and push.
+
+- Update the release docs:
+
+  - On the release branch, build a clean version of the docs. In the
+    root directory, run ``pip install .``.
+  - In the ``doc/`` directory:
+    - Build using
+      ``make clean; make html; make gh-pages``.
+    - In the ``gh-pages/`` directory:
+      - Update the symlink to ``stable`` and commit.
+      - Upload the docs: ``git push origin gh-pages``.
+
+At this point, you are ready to tag the new version.  This "seals the
+deal", so we want to make sure everything is working.  Go to
+https://travis-ci.org/scikit-image/scikit-image/branches, click on the
+release branch, and ensure that all checks have passed for the latest
+build.  Do the same for AppVeyor at
+https://ci.appveyor.com/project/scikit-image/scikit-image/history.
+
+Now, build a trial version of the binary wheels we will be shipping:
+
+  - Clone https://github.com/scikit-image/scikit-image-wheels.
+  - Switch to the appropriate v<major>.<minor>.x branch.
+  - Update its ``.travis.yml`` file so that ``BUILD_COMMIT`` points to this
+    branch (e.g. ``v0.16.x``).
+  - Update its ``.appveyor.yml`` file so that ``BUILD_COMMIT`` also points to
+    this release tag.
+  - Commit and push.
+  - Monitor the builds at
+    https://ci.appveyor.com/project/scikit-image/scikit-image-wheels and
+    https://travis-ci.org/scikit-image/scikit-image-wheels/branches
+  - When all is green, spot-check a couple of builds to make sure that the
+    wheels have correctly uploaded. You should see a message like:
+    ``python -m wheelhouse_uploader upload --local-folder``, with output:
+    ``Wheelhouse successfully published at:
+    http://[crazyrandomstring].rackcdn.com``
+  - Open that URL and check for the wheels as
+    ``scikit_image-<versiontag>-<platforminfo>.whl``
+
+**Do not tag until the builds are all green.**
 
 - Add the version number as a tag in git::
 
-   git tag -s v0.X.0
+   git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
 
-  (If you do not have a gpg key, use -m instead; it is important for
-  Debian packaging that the tags are annotated)
+  (If you do not have a GPG key, follow the tutorial to set it up:
+   https://help.github.com/articles/signing-commits-with-gpg/)
 
-- Push the new meta-data to github::
+- Push the new tag to GitHub::
 
-   git push --tags origin master
+   git push upstream v<major>.<minor>.0
 
-- Publish on PyPi::
+  (where ``upstream`` is the name of the
+   ``github.com:scikit-image/scikit-image`` repository.)
 
-   python setup.py register
-   python setup.py sdist upload
+- Build the package wheels again, but change BUILD_COMMIT in both
+  Travis-CI and AppVeyor to the release version, e.g., ``v0.16.0``.
 
-  Go to https://travis-ci.org/scikit-image/scikit-image-wheels, select the
-  "Current" tab, and click (on the right) on the "Restart Build" icon.  After
-  the wheels become available at http://wheels.scikit-image.org/ (approx 15
-  mins), execute ``tools/osx_wheel_upload.sh``.  Note that, if you rebuild the
-  same wheels, it can take up to 15 minutes for the the files in the http
-  directory to update to the versions that Travis-CI uploaded. You may want to
-  check the timestamps in the http directory listing to check that you will get
-  the latest version.
+- Upload the wheels to PyPI:
 
-- Increase the version number
+  - Make sure ``twine`` is available. You can install it with
+    ``pip install twine``.
+  - Download ``wheel-uploader`` [1]_ and place it on your PATH.
+  - Run ``tools/upload_wheels.sh``.
+  - If everything worked, delete the wheels from your local directory with
+    ``rm -rf *.whl``
 
-  - In ``setup.py``, set to ``0.Xdev``.
-  - In ``bento.info``, set to ``0.X.dev0``.
+.. [1] https://github.com/MacPython/terryfy/blob/master/wheel-uploader
+
+- Publish the source distribution on PyPi::
+
+   python setup.py sdist
+   twine upload dist/scikit-image-<major>.<minor>.0.tar.gz
 
 - Update the web frontpage:
-  The webpage is kept in a separate repo: scikit-image-web
+  The webpage source is kept in a separate repo: scikit-image-web. The
+  live webpage lives in a second repo, scikit-image.github.com, that you only
+  interact with via the ``make`` command within scikit-image-web.
 
   - Sync your branch with the remote repo: ``git pull``.
     If you try to ``make gh-pages`` when your branch is out of sync, it
     creates headaches.
-  - Add release date to ``index.rst`` under "Announcements".
+  - Add release date to ``index.rst`` under "News".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
-  - Build using ``make gh-pages``.
-  - Push upstream: ``git push origin master`` in ``gh-pages``.
+  - Commit and push back to master. (Nothing is being served at this stage.)
+  - Build using ``make gh-pages``. (This checks out a copy of the
+    scikit-image.github.com repository in the ``gh-pages`` directory.)
+  - Push the built site: ``cd gh-pages`` and ``git push origin master``.
 
-- Update the development docs for the new version ``0.Xdev`` just like above
+- Post release notes on mailing lists, blog, Twitter, etc.
 
-- Post release notes on mailing lists, blog, G+, etc.
+  - scikit-image@python.org
+  - scipy-user@python.org
+  - scikit-learn@python.org
 
-  - scikit-image@googlegroups.com
-  - scipy-user@scipy.org
-  - scikit-learn-general@lists.sourceforge.net
-  - pythonvision@googlegroups.com
+- Update the version and the release date on Wikipedia
+  https://en.wikipedia.org/wiki/Scikit-image
 
+- Make a PR to scikit-image with any updates you might have to these notes
+
+- If making a patch release (v<major>.<minor>.<patch>), forward-port the
+  release notes to the master branch and make a PR.
+
+Conda-forge
+-----------
+
+**Note**: conda-forge now has an automated bot who makes the below PR for you.
+Now all you have to do is to look at pull requests at
+https://github.com/conda-forge/scikit-image-feedstock/pulls
+and check for a new one for this version. Wait for all the continuous
+integration checks to go green, then merge.
+
+The manual instructions remain below in case the bot fails for some reason.
+
+A scikit-image build recipe resides at
+https://github.com/conda-forge/scikit-image-feedstock. You should update it to
+point to the most recent release. You can do this by following these steps:
+
+- Fork the repository at https://github.com/conda-forge/scikit-image-feedstock,
+  and clone it to your machine.
+- Sprout a new branch, e.g. ``v<major>.<minor>``.
+- Find out the SHA256 hash of the source distribution. You can find this at
+  https://pypi.org/project/scikit-image/, or use the following commands:
+
+  - ``sha256sum path/to/scikit-image-*.tar.gz`` (Linux)
+  - ``shasum -a 256 dist/scikit-image-*.tar.gz`` (macOS)
+  - ``CertUtil -hashfile dist\scikit-image-*.tar.gz SHA256`` (Windows)
+
+- Edit the file ``recipe/meta.yaml``:
+
+  - Update the version number on the first line.
+  - Update the SHA256 value on line 9.
+  - If necessary, reset the build number to 0. (line 12)
+  - Update any requirements in the appropriate sections (build or run).
+    Note: don't remove ``numpy x.x``. This tells conda-smithy, conda-forge's
+    build system, that the library must be linked against NumPy at build time.
+  - Commit these changes.
+  - Update the infrastructure around the recipe with ``conda-smithy``:
+    * Install conda-smithy either with conda or pip
+    * Run ``conda-smithy rerender`` in the root of the repository, and commit
+      the changes.
+
+- Push to your fork, and submit a pull request to the
+  upstream repo.
 
 Debian
 ------
+
+The below instructions remain here for completeness. However, the Debian
+scientific team has kindly taken over package maintenance. Simply follow the
+procedure described at https://www.debian.org/Bugs/Reporting to report a "bug"
+that there is a new version of scikit-image out (specifying the version
+number), with severity set to "Wishlist".
+
+If you want to take matters into your own hands for some reason, follow the
+instructions detailed below to cut a Debian release yourself.
 
 - Tag the release as per instructions above.
 - git checkout debian

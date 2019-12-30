@@ -1,39 +1,23 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
-from ._gaussian import gaussian
-from .edges import (sobel, hsobel, vsobel, sobel_h, sobel_v,
-                    scharr, hscharr, vscharr, scharr_h, scharr_v,
-                    prewitt, hprewitt, vprewitt, prewitt_h, prewitt_v,
-                    roberts, roberts_positive_diagonal,
-                    roberts_negative_diagonal, roberts_pos_diag,
-                    roberts_neg_diag, laplace)
+from ._gaussian import gaussian, _guess_spatial_dimensions
+from .edges import (sobel, sobel_h, sobel_v,
+                    scharr, scharr_h, scharr_v,
+                    prewitt, prewitt_h, prewitt_v,
+                    roberts, roberts_pos_diag, roberts_neg_diag,
+                    laplace,
+                    farid, farid_h, farid_v)
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor
-from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
-                           threshold_isodata, threshold_li)
+from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
+                           threshold_isodata, threshold_li, threshold_minimum,
+                           threshold_mean, threshold_triangle,
+                           threshold_niblack, threshold_sauvola,
+                           threshold_multiotsu, try_all_threshold,
+                           apply_hysteresis_threshold)
+from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
-from .rank import median
-
-from .._shared.utils import deprecated, copy_func
-from .. import restoration
-denoise_bilateral = deprecated('skimage.restoration.denoise_bilateral')\
-    (restoration.denoise_bilateral)
-denoise_tv_bregman = deprecated('skimage.restoration.denoise_tv_bregman')\
-    (restoration.denoise_tv_bregman)
-denoise_tv_chambolle = deprecated('skimage.restoration.denoise_tv_chambolle')\
-    (restoration.denoise_tv_chambolle)
-gaussian_filter = copy_func(gaussian, name='gaussian_filter')
-gaussian_filter = deprecated('skimage.filters.gaussian')(gaussian_filter)
-gabor_filter = copy_func(gabor, name='gabor_filter')
-gabor_filter = deprecated('skimage.filters.gabor')(gabor_filter)
-
-# Backward compatibility v<0.11
-
-
-@deprecated('skimage.feature.canny')
-def canny(*args, **kwargs):
-    # Hack to avoid circular import
-    from ..feature._canny import canny as canny_
-    return canny_(*args, **kwargs)
+from ._median import median
+from ._unsharp_mask import unsharp_mask
 
 
 __all__ = ['inverse',
@@ -41,37 +25,38 @@ __all__ = ['inverse',
            'LPIFilter2D',
            'gaussian',
            'median',
-           'canny',
            'sobel',
-           'hsobel',
-           'vsobel',
            'sobel_h',
            'sobel_v',
            'scharr',
-           'hscharr',
-           'vscharr',
            'scharr_h',
            'scharr_v',
            'prewitt',
-           'hprewitt',
-           'vprewitt',
            'prewitt_h',
            'prewitt_v',
            'roberts',
-           'roberts_positive_diagonal',
-           'roberts_negative_diagonal',
            'roberts_pos_diag',
            'roberts_neg_diag',
            'laplace',
-           'denoise_tv_chambolle',
-           'denoise_bilateral',
-           'denoise_tv_bregman',
            'rank_order',
            'gabor_kernel',
            'gabor',
-           'threshold_adaptive',
+           'try_all_threshold',
+           'meijering',
+           'sato',
+           'frangi',
+           'hessian',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
            'threshold_li',
-           'rank']
+           'threshold_local',
+           'threshold_minimum',
+           'threshold_mean',
+           'threshold_niblack',
+           'threshold_sauvola',
+           'threshold_triangle',
+           'threshold_multiotsu',
+           'apply_hysteresis_threshold',
+           'rank',
+           'unsharp_mask']

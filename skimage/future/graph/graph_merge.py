@@ -42,7 +42,7 @@ def _rename_node(graph, node_id, copy_id):
     """ Rename `node_id` in `graph` to `copy_id`. """
 
     graph._add_node_silent(copy_id)
-    graph.node[copy_id] = graph.node[node_id]
+    graph.nodes[copy_id].update(graph.nodes[node_id])
 
     for nbr in graph.neighbors(node_id):
         wt = graph[node_id][nbr]['weight']
@@ -96,7 +96,7 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
         rag = rag.copy()
 
     edge_heap = []
-    for n1, n2, data in rag.edges_iter(data=True):
+    for n1, n2, data in rag.edges(data=True):
         # Push a valid edge in the heap
         wt = data['weight']
         heap_item = [wt, n1, n2, True]
@@ -130,7 +130,7 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
             _revalidate_node_edges(rag, new_id, edge_heap)
 
     label_map = np.arange(labels.max() + 1)
-    for ix, (n, d) in enumerate(rag.nodes_iter(data=True)):
+    for ix, (n, d) in enumerate(rag.nodes(data=True)):
         for label in d['labels']:
             label_map[label] = ix
 

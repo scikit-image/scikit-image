@@ -1,9 +1,8 @@
-from __future__ import division
 
 import numpy as np
 from scipy import ndimage as ndi
 from ..morphology import dilation, erosion, square
-from ..util import img_as_float, view_as_windows, pad
+from ..util import img_as_float, view_as_windows
 from ..color import gray2rgb
 
 
@@ -27,14 +26,14 @@ def _find_boundaries_subpixel(label_img):
 
     label_img_expanded = np.zeros([(2 * s - 1) for s in label_img.shape],
                                   label_img.dtype)
-    pixels = [slice(None, None, 2)] * ndim
+    pixels = (slice(None, None, 2), ) * ndim
     label_img_expanded[pixels] = label_img
 
     edges = np.ones(label_img_expanded.shape, dtype=bool)
     edges[pixels] = False
     label_img_expanded[edges] = max_label
-    windows = view_as_windows(pad(label_img_expanded, 1,
-                                  mode='constant', constant_values=0),
+    windows = view_as_windows(np.pad(label_img_expanded, 1,
+                                     mode='constant', constant_values=0),
                               (3,) * ndim)
 
     boundaries = np.zeros_like(edges)
@@ -154,7 +153,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [False, False,  True,  True,  True],
            [False,  True,  True,  True,  True],
            [False,  True,  True, False, False],
-           [False,  True,  True, False, False]], dtype=bool)
+           [False,  True,  True, False, False]])
     """
     if label_img.dtype == 'bool':
         label_img = label_img.astype(np.uint8)

@@ -22,7 +22,7 @@ def configuration(parent_package='', top_path=None):
 if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
-          maintainer_email='scikit-image@googlegroups.com',
+          maintainer_email='scikit-image@python.org',
           description='Graph-based Image-processing Algorithms',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',

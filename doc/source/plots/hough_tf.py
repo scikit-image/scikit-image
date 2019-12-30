@@ -14,18 +14,17 @@ img += np.random.random(img.shape) > 0.95
 
 out, angles, d = hough_line(img)
 
-plt.subplot(1, 2, 1)
+fix, axes = plt.subplots(1, 2, figsize=(7, 4))
 
-plt.imshow(img, cmap=plt.cm.gray)
-plt.title('Input image')
+axes[0].imshow(img, cmap=plt.cm.gray)
+axes[0].set_title('Input image')
 
-plt.subplot(1, 2, 2)
-plt.imshow(out, cmap=plt.cm.bone,
-           extent=(np.rad2deg(angles[-1]), np.rad2deg(angles[0]),
-                   d[-1], d[0]))
-plt.title('Hough transform')
-plt.xlabel('Angle (degree)')
-plt.ylabel('Distance (pixel)')
+axes[1].imshow(
+    out, cmap=plt.cm.bone,
+    extent=(np.rad2deg(angles[-1]), np.rad2deg(angles[0]), d[-1], d[0]))
+axes[1].set_title('Hough transform')
+axes[1].set_xlabel('Angle (degree)')
+axes[1].set_ylabel('Distance (pixel)')
 
-plt.subplots_adjust(wspace=0.4)
+plt.tight_layout()
 plt.show()

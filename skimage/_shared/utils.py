@@ -2,14 +2,13 @@ import warnings
 import functools
 import sys
 import numpy as np
-import types
+import numbers
 
-import six
-
-from ._warnings import all_warnings
+from ..util import img_as_float
+from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD']
+           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -32,25 +31,32 @@ class deprecated(object):
     behavior : {'warn', 'raise'}
         Behavior during call to deprecated function: 'warn' = warn user that
         function is deprecated; 'raise' = raise error.
+    removed_version : str
+        The package version in which the deprecated function will be removed.
     """
 
-    def __init__(self, alt_func=None, behavior='warn'):
+    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
         self.alt_func = alt_func
         self.behavior = behavior
+        self.removed_version = removed_version
 
     def __call__(self, func):
 
         alt_msg = ''
         if self.alt_func is not None:
             alt_msg = ' Use ``%s`` instead.' % self.alt_func
+        rmv_msg = ''
+        if self.removed_version is not None:
+            rmv_msg = (' and will be removed in version %s' %
+                       self.removed_version)
 
-        msg = 'Call to deprecated function ``%s``.' % func.__name__
-        msg += alt_msg
+        msg = ('Function ``%s`` is deprecated' % func.__name__ +
+               rmv_msg + '.' + alt_msg)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
-                func_code = six.get_function_code(func)
+                func_code = func.__code__
                 warnings.simplefilter('always', skimage_deprecation)
                 warnings.warn_explicit(msg,
                                        category=skimage_deprecation,
@@ -111,18 +117,18 @@ def safe_as_int(val, atol=1e-3):
 
     Examples
     --------
-    >>> _safe_as_int(7.0)
+    >>> safe_as_int(7.0)
     7
 
-    >>> _safe_as_int([9, 4, 2.9999999999])
-    array([9, 4, 3], dtype=int32)
+    >>> safe_as_int([9, 4, 2.9999999999])
+    array([9, 4, 3])
 
-    >>> _safe_as_int(53.01)
+    >>> safe_as_int(53.1)
     Traceback (most recent call last):
         ...
     ValueError: Integer argument required but received 53.1, check inputs.
 
-    >>> _safe_as_int(53.01, atol=0.01)
+    >>> safe_as_int(53.01, atol=0.01)
     53
 
     """
@@ -144,9 +150,16 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def assert_nD(array, ndim, arg_name='image'):
+def check_shape_equality(im1, im2):
+    """Raise an error if the shape do not match."""
+    if not im1.shape == im2.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
+
+
+def check_nD(array, ndim, arg_name='image'):
     """
-    Verify an array meets the desired ndims.
+    Verify an array meets the desired ndims and array isn't empty.
 
     Parameters
     ----------
@@ -159,35 +172,70 @@ def assert_nD(array, ndim, arg_name='image'):
 
     """
     array = np.asanyarray(array)
-    msg = "The parameter `%s` must be a %s-dimensional array"
+    msg_incorrect_dim = "The parameter `%s` must be a %s-dimensional array"
+    msg_empty_array = "The parameter `%s` cannot be an empty array"
     if isinstance(ndim, int):
         ndim = [ndim]
+    if array.size == 0:
+        raise ValueError(msg_empty_array % (arg_name))
     if not array.ndim in ndim:
-        raise ValueError(msg % (arg_name, '-or-'.join([str(n) for n in ndim])))
+        raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
-def _mode_deprecations(mode):
-    """Used to update deprecated mode names in
-    `skimage._shared.interpolation.pyx`."""
-    if mode.lower() == 'nearest':
-        warnings.warn(skimage_deprecation(
-            "Mode 'nearest' has been renamed to 'edge'. Mode 'nearest' will be "
-            "removed in a future release."))
-        mode = 'edge'
-    return mode
-
-
-def copy_func(f, name=None):
-    """Create a copy of a function.
+def check_random_state(seed):
+    """Turn seed into a `np.random.RandomState` instance.
 
     Parameters
     ----------
-    f : function
-        Function to copy.
-    name : str, optional
-        Name of new function.
+    seed : None, int or np.random.RandomState
+           If `seed` is None, return the RandomState singleton used by `np.random`.
+           If `seed` is an int, return a new RandomState instance seeded with `seed`.
+           If `seed` is already a RandomState instance, return it.
+
+    Raises
+    ------
+    ValueError
+        If `seed` is of the wrong type.
 
     """
-    return types.FunctionType(six.get_function_code(f),
-                              six.get_function_globals(f), name or f.__name__,
-                              six.get_function_defaults(f), six.get_function_closure(f))
+    # Function originally from scikit-learn's module sklearn.utils.validation
+    if seed is None or seed is np.random:
+        return np.random.mtrand._rand
+    if isinstance(seed, (numbers.Integral, np.integer)):
+        return np.random.RandomState(seed)
+    if isinstance(seed, np.random.RandomState):
+        return seed
+    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
+                     ' instance' % seed)
+
+
+def convert_to_float(image, preserve_range):
+    """Convert input image to float image with the appropriate range.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    preserve_range : bool
+        Determines if the range of the image should be kept or transformed
+        using img_as_float. Also see
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
+
+    Notes:
+    ------
+    * Input images with `float32` data type are not upcast.
+
+    Returns
+    -------
+    image : ndarray
+        Transformed version of the input.
+
+    """
+    if preserve_range:
+        # Convert image to double only if it is not single or double
+        # precision float
+        if image.dtype.char not in 'df':
+            image = image.astype(float)
+    else:
+        image = img_as_float(image)
+    return image

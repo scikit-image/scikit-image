@@ -1,0 +1,8 @@
+SimpleITK
+astropy>=1.2.0
+tifffile
+qtpy
+pyamg
+dask[array]>=0.15.0
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1

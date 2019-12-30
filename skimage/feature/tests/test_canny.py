@@ -1,10 +1,9 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_equal
+from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 import skimage.feature as F
-from skimage import filters, data
-from skimage import img_as_float
+from skimage import data, img_as_float
 
 
 class TestCanny(unittest.TestCase):
@@ -71,7 +70,7 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = img_as_float(data.camera()[::50,::50])
+        image = img_as_float(data.camera()[::50, ::50])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -92,7 +91,7 @@ class TestCanny(unittest.TestCase):
         assert_equal(result, correct_output)
 
     def test_invalid_use_quantiles(self):
-        image = img_as_float(data.camera()[::50,::50])
+        image = img_as_float(data.camera()[::50, ::50])
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=3.6)
@@ -105,3 +104,13 @@ class TestCanny(unittest.TestCase):
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=-100)
+
+    def test_dtype(self):
+        """Check that the same output is produced regardless of image dtype."""
+        image_uint8 = data.camera()
+        image_float = img_as_float(image_uint8)
+
+        result_uint8 = F.canny(image_uint8)
+        result_float = F.canny(image_float)
+
+        assert_equal(result_uint8, result_float)

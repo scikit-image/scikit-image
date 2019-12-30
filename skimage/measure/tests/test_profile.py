@@ -1,9 +1,11 @@
-from numpy.testing import assert_equal, assert_almost_equal
 import numpy as np
-
 from skimage.measure import profile_line
 
+from skimage._shared.testing import assert_equal, assert_almost_equal
+
+
 image = np.arange(100).reshape((10, 10)).astype(np.float)
+
 
 def test_horizontal_rightward():
     prof = profile_line(image, (0, 2), (0, 8), order=0)
@@ -75,6 +77,7 @@ def test_pythagorean_triangle_right_downward_interpolated():
     expected_prof = np.linspace(11, 79, 11)
     assert_almost_equal(prof, expected_prof)
 
+
 pyth_image = np.zeros((6, 7), np.float)
 line = ((1, 2, 2, 3, 3, 4), (1, 2, 3, 3, 4, 5))
 below = ((2, 2, 3, 4, 4, 5), (0, 1, 2, 3, 4, 4))
@@ -104,7 +107,74 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
     assert_almost_equal(prof, expected_prof)
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_reduce_func_mean():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.mean)
+    expected_prof = np.array([0, 0.8, 1, 0.2])
+    assert_almost_equal(prof, expected_prof)
 
+
+def test_reduce_func_max():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.max)
+    expected_prof = np.array([0, 1.8, 1.8, 0.6])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sum():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
+                        reduce_func=np.sum)
+    expected_prof = np.array([0, 2.4, 3, 0.6])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_mean_linewidth_1():
+    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=1, order=0,
+                        reduce_func=np.mean)
+    expected_prof = np.array([0, 1.8, 0.6, 0.])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_None_linewidth_1():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=1, order=0, reduce_func=None)
+    expected_prof = np.array([[0.6], [1.8], [0.6], [0.]])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_None_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=3, order=0, reduce_func=None)
+    expected_prof = np.array([[1.8, 0.6, 0.6],
+                              [0.6, 1.8, 1.8],
+                              [0., 0.6, 1.8],
+                              [0., 0., 0.6]])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_lambda_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
+                        reduce_func=lambda x: x + x**2)
+    expected_prof = np.array([[5.04, 0.96, 0.96],
+                              [0.96, 5.04, 5.04],
+                              [0., 0.96, 5.04],
+                              [0., 0., 0.96]])
+    # The lambda function acts on each pixel value individually.
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sqrt_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2),
+                        linewidth=3, order=0, reduce_func=lambda x: x**0.5)
+    expected_prof = np.array([[1.34164079, 0.77459667, 0.77459667],
+                              [0.77459667, 1.34164079, 1.34164079],
+                              [0., 0.77459667, 1.34164079],
+                              [0., 0., 0.77459667]])
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_reduce_func_sumofsqrt_linewidth_3():
+    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
+                        reduce_func=lambda x: np.sum(x**0.5))
+    expected_prof = np.array([2.89083412, 3.45787824, 2.11623746, 0.77459667])
+    assert_almost_equal(prof, expected_prof)

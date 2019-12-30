@@ -1,7 +1,9 @@
 import sys
 import os
-import hashlib
-import subprocess
+from distutils.version import LooseVersion
+from multiprocessing import cpu_count
+
+CYTHON_VERSION = '0.23.4'
 
 # WindowsError is not defined on unix systems
 try:
@@ -9,6 +11,19 @@ try:
 except NameError:
     class WindowsError(Exception):
         pass
+
+
+def _compiled_filename(f):
+    """Check for the presence of a .pyx[.in] file as a .c or .cpp."""
+    basename = f.replace('.in', '').replace('.pyx', '')
+    for ext in ('.c', '.cpp'):
+        filename = basename + ext
+        if os.path.exists(filename):
+            return filename
+    else:
+        raise RuntimeError('Cython >= %s is required to build '
+                           'scikit-image from git checkout' %
+                           CYTHON_VERSION)
 
 
 def cython(pyx_files, working_path=''):
@@ -25,47 +40,47 @@ def cython(pyx_files, working_path=''):
         return
 
     try:
+        from Cython import __version__
+        if LooseVersion(__version__) < CYTHON_VERSION:
+            raise RuntimeError('Cython >= %s needed to build scikit-image' % CYTHON_VERSION)
+
         from Cython.Build import cythonize
     except ImportError:
-        # If cython is not found, we do nothing -- the build will make use of
-        # the distributed .c files
-        print("Cython not found; falling back to pre-built %s" \
-              % " ".join([f.replace('.pyx', '.c') for f in pyx_files]))
+        # If cython is not found, the build will make use of
+        # the distributed .c or .cpp files if present
+        c_files_used = [_compiled_filename(os.path.join(working_path, f))
+                        for f in pyx_files]
+
+        print("Cython >= %s not found; falling back to pre-built %s" \
+              % (CYTHON_VERSION, " ".join(c_files_used)))
     else:
-        for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
+        pyx_files = [os.path.join(working_path, f) for f in pyx_files]
+        for i, pyxfile in enumerate(pyx_files):
+            if pyxfile.endswith('.pyx.in'):
+                process_tempita_pyx(pyxfile)
+                pyx_files[i] = pyxfile.replace('.pyx.in', '.pyx')
 
-            # if the .pyx file stayed the same, we don't need to recompile
-            if not _changed(pyxfile):
-                continue
-
-            cythonize(pyxfile)
-
-def _md5sum(f):
-    m = hashlib.new('md5')
-    while True:
-        # Hash one 8096 byte block at a time
-        d = f.read(8096)
-        if not d:
-            break
-        m.update(d)
-    return m.hexdigest()
+        # Cython doesn't automatically choose a number of threads > 1
+        # https://github.com/cython/cython/blob/a0bbb940c847dfe92cac446c8784c34c28c92836/Cython/Build/Dependencies.py#L923-L925
+        cythonize(pyx_files, nthreads=cpu_count(),
+                  compiler_directives={'language_level': 3})
 
 
-def _changed(filename):
-    """Compare the hash of a Cython file to the cached hash value on disk.
-
-    """
-    filename_cache = filename + '.md5'
-
+def process_tempita_pyx(fromfile):
     try:
-        md5_cached = open(filename_cache, 'rb').read()
-    except IOError:
-        md5_cached = '0'
+        try:
+            from Cython import Tempita as tempita
+        except ImportError:
+            import tempita
+    except ImportError:
+        raise Exception('Building requires Tempita: '
+                        'pip install --user Tempita')
+    template = tempita.Template.from_filename(fromfile,
+                                              encoding=sys.getdefaultencoding())
+    pyxcontent = template.substitute()
+    if not fromfile.endswith('.pyx.in'):
+        raise ValueError("Unexpected extension of %s." % fromfile)
 
-    with open(filename, 'rb') as f:
-        md5_new = _md5sum(f)
-
-        with open(filename_cache, 'wb') as cf:
-            cf.write(md5_new.encode('utf-8'))
-
-    return md5_cached != md5_new.encode('utf-8')
+    pyxfile = os.path.splitext(fromfile)[0]    # split off the .in ending
+    with open(pyxfile, "w") as f:
+        f.write(pyxcontent)
