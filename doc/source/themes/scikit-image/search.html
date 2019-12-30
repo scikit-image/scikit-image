@@ -14,7 +14,9 @@
     <script type="text/javascript" src="{{ pathto('_static/searchtools.js', 1) }}"></script>
 {%- endblock %}
 {%- block extrahead %}
-  <script type="text/javascript" src="{{ pathto('searchindex.js', 1) }}" defer></script>
+  <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
   {{ super() }}
 {% endblock %}
 {%- block body %}
