@@ -851,10 +851,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
-    .. [4] http://en.wikipedia.org/wiki/Image_moment
+    .. [4] https://en.wikipedia.org/wiki/Image_moment
     .. [5] W. Pabst, E. Gregorová. Characterization of particles and particle
            systems, pp. 27-28. ICT Prague, 2007.
-           http://old.vscht.cz/sil/keramika/Characterization_of_particles/CPPS%20_English%20version_.pdf
+           https://old.vscht.cz/sil/keramika/Characterization_of_particles/CPPS%20_English%20version_.pdf
 
     Examples
     --------
