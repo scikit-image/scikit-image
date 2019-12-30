@@ -20,6 +20,7 @@ This release of scikit-image officially supports Python 3.6 and 3.7.
 New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
+- Added a new perimeter function - ``measure.perimeter_crofton``.
 
 
 Improvements
@@ -60,7 +61,8 @@ API Changes
   the range of the data or clips the output to the range [0, 1] or [-1, 1].
   For non-float inputs, rescaling and clipping still occurs as in prior
   releases (although with a bugfix related to the scaling of ``sigma``).
-
+- ``skimage.measure.euler_number`` is added to handle different adjacency
+  configurations. See also bugfixes.
 
 Bugfixes
 --------
@@ -68,7 +70,8 @@ Bugfixes
   rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
   preserve the relative scale of the noise estimate. To restore the old,
   behaviour, the user can manually specify ``rescale_sigma=False``.
-
+- Euler characteristic property of ``skimage.measure.regionprops`` was erroneous
+  The bug is corrected. It is defined for 2D and 3D objects.
 
 Deprecations
 ------------
