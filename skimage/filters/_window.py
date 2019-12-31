@@ -82,13 +82,13 @@ def window(window_type, shape, warp_kwargs=None):
     >>> from skimage.filters import window
     >>> w = window('hann', (512, 512))
 
-    Return a Kaiser window with beta parameter of 16 and shape (256, 256, 256):
+    Return a Kaiser window with beta parameter of 16 and shape (256, 256, 35):
 
-    >>> w = window(16, (256, 256, 256))
+    >>> w = window(16, (256, 256, 35))
 
-    Return a Tukey window with an alpha parameter of 0.8 and shape (100, 100):
+    Return a Tukey window with an alpha parameter of 0.8 and shape (100, 300):
 
-    >>> w = window(('tukey', 0.8), (100, 100))
+    >>> w = window(('tukey', 0.8), (100, 300))
 
     References
     ----------
