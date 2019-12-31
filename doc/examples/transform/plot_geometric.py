@@ -20,11 +20,12 @@ from skimage import transform as tf
 # ======
 #
 # Several different geometric transformation types are supported: similarity,
-# affine, projective and polynomial.
+# affine, projective and polynomial. For a tutorial on the available types of
+# transformations, see :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`
 #
 # Geometric transformations can either be created using the explicit
 # parameters (e.g. scale, shear, rotation and translation) or the
-# transformation matrix:
+# transformation matrix.
 #
 # First we create a transformation using explicit parameters:
 
