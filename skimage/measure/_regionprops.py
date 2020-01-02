@@ -7,7 +7,7 @@ from scipy.spatial.distance import pdist
 from ._label import label
 from . import _moments
 from ._find_contours import find_contours
-
+from ._marching_cubes_lewiner import marching_cubes
 
 
 from functools import wraps
@@ -86,6 +86,7 @@ COL_DTYPES = {
     'equivalent_diameter': float,
     'euler_number': int,
     'extent': float,
+    'feret_diameter': float,
     'filled_area': int,
     'filled_image': object,
     'moments_hu': float,
@@ -238,8 +239,11 @@ class RegionProperties:
         label_image = self._label_image
         label = self.label
         identity_convex_hull = convex_hull_image(label_image == label)
-        coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, 
-                                              fully_connected = 'high'))
+        if self._ndim == 2:
+            coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, 
+                                                  fully_connected = 'high'))
+        elif self._ndim == 3:
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=0.5)
         distances = pdist(coordinates, 'sqeuclidean')
         return sqrt(np.max(distances))
 

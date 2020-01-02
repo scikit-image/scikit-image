@@ -76,6 +76,15 @@ def test_feret_diameter():
     comparator_result = 17.029386365926403
     test_result = regionprops(SAMPLE)[0].feret_diameter
     assert_almost_equal(comparator_result, test_result)
+    # square, test that Feret diameter is sqrt(2) * square side
+    img = np.zeros((20, 20), dtype=np.uint8)
+    img[2:-2, 2:-2] = 1
+    feret_diameter = regionprops(img)[0].feret_diameter
+    assert np.abs(feret_diameter - 16 * np.sqrt(2)) < 1
+    # 3d example
+    img_3d = np.dstack((img,) * 3)
+    feret_diameter = regionprops(img_3d)[0].feret_diameter
+    assert np.abs(feret_diameter - 16 * np.sqrt(2)) < 1
 
 
 def test_area():
