@@ -236,14 +236,13 @@ class RegionProperties:
     @property
     def feret_diameter(self):
         from ..morphology.convex_hull import convex_hull_image
-        label_image = self._label_image
-        label = self.label
-        identity_convex_hull = convex_hull_image(label_image == label)
+        identity_convex_hull = np.pad(self.convex_image,
+                                      2, mode='constant', constant_values=0)
         if self._ndim == 2:
-            coordinates = np.vstack(find_contours(identity_convex_hull, 0.5, 
+            coordinates = np.vstack(find_contours(identity_convex_hull, .5, 
                                                   fully_connected = 'high'))
         elif self._ndim == 3:
-            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=0.5)
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
         distances = pdist(coordinates, 'sqeuclidean')
         return sqrt(np.max(distances))
 
