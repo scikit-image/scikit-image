@@ -4,7 +4,7 @@ Types of homographies
 ===================================
 
 `Homographies <https://en.wikipedia.org/wiki/Homography>`_
-are transformations of an Euclidean space that preserve the alignment of points. 
+are transformations of a Euclidean space that preserve the alignment of points. 
 Specific cases of homographies correspond to the conservation of more properties,
 such as parallelism (affine transformation), shape (similar transformation) or distances (Euclidean transformation). 
 

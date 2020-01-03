@@ -113,5 +113,10 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
-
 plt.show()
+
+######################################################################
+# For an estimation robust to outliers using the 
+# `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_, 
+# see the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial.
+

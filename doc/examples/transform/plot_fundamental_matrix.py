@@ -3,10 +3,13 @@
 Fundamental matrix estimation
 =============================
 
-This example demonstrates how to robustly estimate epipolar geometry between two
-views using sparse ORB feature correspondences.
+This example demonstrates how to robustly estimate 
+`epipolar geometry <https://en.wikipedia.org/wiki/Epipolar_geometry>` 
+(the geometry of stereo vision) between two views using sparse ORB feature
+correspondences.
 
-The fundamental matrix relates corresponding points between a pair of
+The `fundamental matrix <https://en.wikipedia.org/wiki/Fundamental_matrix_(computer_vision)>`_ 
+relates corresponding points between a pair of
 uncalibrated images. The matrix transforms homogeneous image points in one image
 to epipolar lines in the other image.
 
@@ -15,7 +18,6 @@ principal point) of the two cameras is not known. The fundamental matrix thus
 enables projective 3D reconstruction of the captured scene. If the calibration
 is known, estimating the essential matrix enables metric 3D reconstruction of
 the captured scene.
-
 """
 import numpy as np
 from skimage import data
