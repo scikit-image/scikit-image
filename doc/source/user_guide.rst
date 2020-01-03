@@ -8,6 +8,8 @@ User Guide
    user_guide/numpy_images
    user_guide/data_types
    user_guide/transforming_image_data
+   user_guide/geometrical_transform
+   user_guide/features
    user_guide/plugins
    user_guide/video
    user_guide/tutorials
