@@ -68,11 +68,11 @@ plt.show()
 # Python library dedicated to statistical data visualization) with argument
 # `jitter=True`.
 
-sns_fig, sns_ax = plt.subplots()
+fig, ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True,
-              ax=sns_ax)
+              ax=ax)
 # Fix floating point rendering
-sns_ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
+ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
 plt.show()
 
 #####################################################################
@@ -97,10 +97,10 @@ for fraction, table in zip(fractions, tables):
 
 blob_volumes = pd.concat(tables, axis=0)
 
-d3_fig, d3_ax = plt.subplots()
+fig, ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=blob_volumes, jitter=True,
-              ax=d3_ax)
-d3_ax.set_ylabel('blob size (3D)')
+              ax=ax)
+ax.set_ylabel('blob size (3D)')
 # Fix floating point rendering
-d3_ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
+ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
 plt.show()
