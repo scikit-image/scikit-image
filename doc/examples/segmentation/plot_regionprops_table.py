@@ -5,13 +5,13 @@ Explore and visualize region properties with pandas
 
 This toy example shows how to compute the size of every labelled region in a
 series of 10 images. We use 2D images and then 3D images. The blob-like
-regions are generated synthetically. As the volume fraction (i.e., number of
+regions are generated synthetically. As the volume fraction (i.e., ratio of
 pixels or voxels covered by the blobs) increases, the number of blobs
 (regions) decreases, and the size (area or volume) of a single region can get
 larger and larger. The area (size) values are available in a pandas-compatible
 format, which makes for convenient data analysis and visualization.
 
-Beyond area, many other region properties are available.
+Besides area, many other region properties are available.
 
 """
 import matplotlib.pyplot as plt
