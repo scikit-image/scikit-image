@@ -20,6 +20,7 @@ import warnings
 from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
+
 def _validate_scalar_to_multi(value, size=3, dtype=float):
     """
     If value's length is 1, upcast it to match size. 
@@ -32,13 +33,13 @@ def _validate_scalar_to_multi(value, size=3, dtype=float):
     try:
         size = int(size)
     except (TypeError, ValueError):
-        raise TypeError(f"size must be interpretable as an integer.\n"
-            f"type(size): {type(size)}.")
-    
+        raise TypeError(
+            f"size must be interpretable as an integer.\n" f"type(size): {type(size)}."
+        )
+
     if size < 0:
-        raise ValueError(f"size must be non-negative.\n"
-            f"size: {size}.")
-    
+        raise ValueError(f"size must be non-negative.\n" f"size: {size}.")
+
     # Cast value to np.ndarray.
     try:
         value = np.array(value, dtype)
@@ -54,26 +55,40 @@ def _validate_scalar_to_multi(value, size=3, dtype=float):
             value = np.full(size, value, dtype=dtype)
         elif len(value) != size:
             # value's length is incompatible with size.
-            raise ValueError(f"The length of value must either be 1 or it must match size.\n"
-                f"len(value): {len(value)}, size: {size}.")
+            raise ValueError(
+                f"The length of value must either be 1 or it must match size.\n"
+                f"len(value): {len(value)}, size: {size}."
+            )
     else:
         # value.ndim > 1.
-        raise ValueError(f"value must not have more than 1 dimension.\n"
-            f"value.ndim: {value.ndim}.")
-    
+        raise ValueError(
+            f"value must not have more than 1 dimension.\n" f"value.ndim: {value.ndim}."
+        )
+
     # TODO: verify that this is necessary and rewrite/remove accordingly.
     # Check for np.nan values.
     if np.any(np.isnan(value)):
-        raise NotImplementedError("np.nan values encountered. What input led to this result?\n"
-            "Write in an exception as appropriate.")
-        raise ValueError(f"value contains inappropriate values for the chosen dtype "
-            f"and thus contains np.nan values.")
-            
+        raise NotImplementedError(
+            "np.nan values encountered. What input led to this result?\n"
+            "Write in an exception as appropriate."
+        )
+        raise ValueError(
+            f"value contains inappropriate values for the chosen dtype "
+            f"and thus contains np.nan values."
+        )
+
     return value
 
 
-def _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
-forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None):
+def _validate_ndarray(
+    array,
+    minimum_ndim=0,
+    required_ndim=None,
+    dtype=None,
+    forbid_object_dtype=True,
+    broadcast_to_shape=None,
+    reshape_to_shape=None,
+):
     """Cast (a copy of) array to a np.ndarray if possible and return it 
     unless it is noncompliant with minimum_ndim, required_ndim, and dtype.
     
@@ -96,45 +111,60 @@ forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None):
 
     # Verify minimum_ndim.
     if not isinstance(minimum_ndim, int):
-        raise TypeError(f"minimum_ndim must be of type int.\n"
-            f"type(minimum_ndim): {type(minimum_ndim)}.")
+        raise TypeError(
+            f"minimum_ndim must be of type int.\n"
+            f"type(minimum_ndim): {type(minimum_ndim)}."
+        )
     if minimum_ndim < 0:
-        raise ValueError(f"minimum_ndim must be non-negative.\n"
-            f"minimum_ndim: {minimum_ndim}.")
+        raise ValueError(
+            f"minimum_ndim must be non-negative.\n" f"minimum_ndim: {minimum_ndim}."
+        )
 
     # Verify required_ndim.
     if required_ndim is not None:
         if not isinstance(required_ndim, int):
-            raise TypeError(f"required_ndim must be either None or of type int.\n"
-                f"type(required_ndim): {type(required_ndim)}.")
+            raise TypeError(
+                f"required_ndim must be either None or of type int.\n"
+                f"type(required_ndim): {type(required_ndim)}."
+            )
         if required_ndim < 0:
-            raise ValueError(f"required_ndim must be non-negative.\n"
-                f"required_ndim: {required_ndim}.")
+            raise ValueError(
+                f"required_ndim must be non-negative.\n"
+                f"required_ndim: {required_ndim}."
+            )
 
     # Verify dtype.
     if dtype is not None:
         if not isinstance(dtype, type):
-            raise TypeError(f"dtype must be either None or a valid type.\n"
-                f"type(dtype): {type(dtype)}.")
+            raise TypeError(
+                f"dtype must be either None or a valid type.\n"
+                f"type(dtype): {type(dtype)}."
+            )
 
     # Validate array.
 
     # Cast array to np.ndarray.
     # Validate compliance with dtype.
     try:
-        array = np.array(array, dtype) # Side effect: breaks alias.
+        array = np.array(array, dtype)  # Side effect: breaks alias.
     except TypeError:
-        raise TypeError(f"array is of a type that is incompatible with dtype.\n"
-            f"type(array): {type(array)}, dtype: {dtype}.")
+        raise TypeError(
+            f"array is of a type that is incompatible with dtype.\n"
+            f"type(array): {type(array)}, dtype: {dtype}."
+        )
     except ValueError:
-        raise ValueError(f"array has a value that is incompatible with dtype.\n"
-            f"array: {array}, \ntype(array): {type(array)}, dtype: {dtype}.")
+        raise ValueError(
+            f"array has a value that is incompatible with dtype.\n"
+            f"array: {array}, \ntype(array): {type(array)}, dtype: {dtype}."
+        )
 
     # Verify compliance with forbid_object_dtype.
     if forbid_object_dtype:
         if array.dtype == object and dtype != object:
-            raise TypeError(f"Casting array to a np.ndarray produces an array of dtype object \n"
-                f"while forbid_object_dtype == True and dtype != object.")
+            raise TypeError(
+                f"Casting array to a np.ndarray produces an array of dtype object \n"
+                f"while forbid_object_dtype == True and dtype != object."
+            )
 
     # Validate compliance with required_ndim.
     if required_ndim is not None and array.ndim != required_ndim:
@@ -142,14 +172,18 @@ forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None):
         if array.ndim == 0 and required_ndim == 1:
             array = np.array([array])
         else:
-            raise ValueError(f"If required_ndim is not None, array.ndim must equal it unless array.ndim == 0 and required_ndin == 1.\n"
-                f"array.ndim: {array.ndim}, required_ndim: {required_ndim}.")
+            raise ValueError(
+                f"If required_ndim is not None, array.ndim must equal it unless array.ndim == 0 and required_ndin == 1.\n"
+                f"array.ndim: {array.ndim}, required_ndim: {required_ndim}."
+            )
 
     # Verify compliance with minimum_ndim.
     if array.ndim < minimum_ndim:
-        raise ValueError(f"array.ndim must be at least equal to minimum_ndim.\n"
-            f"array.ndim: {array.ndim}, minimum_ndim: {minimum_ndim}.")
-    
+        raise ValueError(
+            f"array.ndim must be at least equal to minimum_ndim.\n"
+            f"array.ndim: {array.ndim}, minimum_ndim: {minimum_ndim}."
+        )
+
     # Broadcast array if appropriate.
     if broadcast_to_shape is not None:
         array = np.copy(np.broadcast_to(array=array, shape=broadcast_to_shape))
@@ -160,6 +194,7 @@ forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None):
 
     return array
 
+
 # TODO: reverse order of arguments and propagate change throughout ardent.
 def _validate_resolution(ndim, resolution):
     """Validate resolution to assure its length matches the dimensionality of image."""
@@ -167,13 +202,15 @@ def _validate_resolution(ndim, resolution):
     resolution = _validate_scalar_to_multi(resolution, size=ndim)
 
     if np.any(resolution <= 0):
-        raise ValueError(f"All elements of resolution must be positive.\n"
-            f"np.min(resolution): {np.min(resolution)}.")
+        raise ValueError(
+            f"All elements of resolution must be positive.\n"
+            f"np.min(resolution): {np.min(resolution)}."
+        )
 
     return resolution
 
 
-def _compute_axes(shape, resolution=1, origin='center'):
+def _compute_axes(shape, resolution=1, origin="center"):
     """Returns the real_axes defining an image with the given shape 
     at the given resolution as a list of numpy arrays.
     """
@@ -187,68 +224,92 @@ def _compute_axes(shape, resolution=1, origin='center'):
     # Create axes.
 
     # axes is a list of arrays matching each shape element from shape, spaced by the corresponding resolution.
-    axes = [np.arange(dim_size) * dim_res for dim_size, dim_res in zip(shape, resolution)]
+    axes = [
+        np.arange(dim_size) * dim_res for dim_size, dim_res in zip(shape, resolution)
+    ]
 
     # List all presently recognized origin values.
-    origins = ['center', 'zero']
+    origins = ["center", "zero"]
 
-    if origin == 'center':
+    if origin == "center":
         # Center each axes array to its mean.
         for axis_index, axis in enumerate(axes):
             axes[axis_index] -= np.mean(axis)
-    elif origin == 'zero':
+    elif origin == "zero":
         # Allow each axis to increase from 0 along each dimension.
         pass
     else:
-        raise NotImplementedError(f"origin must be one of these supported values: {origins}.\n"
-            f"origin: {origin}.")
-    
+        raise NotImplementedError(
+            f"origin must be one of these supported values: {origins}.\n"
+            f"origin: {origin}."
+        )
+
     return axes
 
 
-def _compute_coords(shape, resolution=1, origin='center'):
+def _compute_coords(shape, resolution=1, origin="center"):
     """Returns the real_coordinates of an image with the given shape 
     at the given resolution as a single numpy array of shape (*shape, len(shape))."""
 
     axes = _compute_axes(shape, resolution, origin)
 
-    meshes = np.meshgrid(*axes, indexing='ij')
+    meshes = np.meshgrid(*axes, indexing="ij")
 
     return np.stack(meshes, axis=-1)
 
 
 def _multiply_coords_by_affine(affine, array):
-    
+
     # Validate inputs.
 
     # Verify that affine is square.
     if affine.ndim != 2:
-        raise ValueError(f"affine must be a 2-dimensional matrix.\n"
-            f"affine.ndim: {affine.ndim}.")
+        raise ValueError(
+            f"affine must be a 2-dimensional matrix.\n" f"affine.ndim: {affine.ndim}."
+        )
     # affine is 2-dimensional.
     if affine.shape[0] != affine.shape[1]:
-        raise ValueError(f"affine must be a square matrix.\n"
-            f"affine.shape: {affine.shape}.")
+        raise ValueError(
+            f"affine must be a square matrix.\n" f"affine.shape: {affine.shape}."
+        )
     # affine is square.
 
     # Verify compatibility between affine and array.
     if array.shape[-1] != len(affine) - 1:
-        raise ValueError(f"array is incompatible with affine. The length of the last dimension of array should be 1 less than the length of affine.\n"
-            f"array.shape: {array.shape}, affine.shape: {affine.shape}.")
-    
+        raise ValueError(
+            f"array is incompatible with affine. The length of the last dimension of array should be 1 less than the length of affine.\n"
+            f"array.shape: {array.shape}, affine.shape: {affine.shape}."
+        )
+
     # Raise warning if affine is not in homogenous coordinates.
     if not np.array_equal(affine[-1], np.array([0] * (len(affine) - 1) + [1])):
-        warnings.warn(message=f"affine is not in homogenous coordinates.\n"
+        warnings.warn(
+            message=f"affine is not in homogenous coordinates.\n"
             f"affine[-1] should be zeros with a 1 on the right.\n"
-            f"affine[-1]: {affine[-1]}.", category=RuntimeWarning)
+            f"affine[-1]: {affine[-1]}.",
+            category=RuntimeWarning,
+        )
 
     # Perform affine matrix multiplication.
 
     ndims = len(affine) - 1
-    return np.squeeze(np.matmul(affine[:ndims, :ndims], array[...,None]), -1) + affine[:ndims, ndims]
-    
+    return (
+        np.squeeze(np.matmul(affine[:ndims, :ndims], array[..., None]), -1)
+        + affine[:ndims, ndims]
+    )
 
-def resample(image, new_resolution, old_resolution=1, err_to_larger=True, extrapolation_fill_value=None, origin='center', method='linear', image_is_coords=False, anti_aliasing=True):
+
+def resample(
+    image,
+    new_resolution,
+    old_resolution=1,
+    err_to_larger=True,
+    extrapolation_fill_value=None,
+    origin="center",
+    method="linear",
+    image_is_coords=False,
+    anti_aliasing=True,
+):
     """
     Resamples image from an old resolution to a new resolution.
     
@@ -268,7 +329,7 @@ def resample(image, new_resolution, old_resolution=1, err_to_larger=True, extrap
     """
 
     # Validate inputs and define ndim & old_shape based on image_is_coords.
-    image = _validate_ndarray(image) # Breaks alias.
+    image = _validate_ndarray(image)  # Breaks alias.
     if image_is_coords:
         ndim = image.ndim - 1
         old_shape = image.shape[:-1]
@@ -280,8 +341,10 @@ def resample(image, new_resolution, old_resolution=1, err_to_larger=True, extrap
 
     # Handle trivial case.
     if np.array_equal(new_resolution, old_resolution):
-        return image # Note: this is a copy of the input image and is not the same object.
-    
+        return (
+            image  # Note: this is a copy of the input image and is not the same object.
+        )
+
     # Compute new_coords and old_axes.
     if err_to_larger:
         new_shape = np.ceil(old_shape * old_resolution / new_resolution)
@@ -293,20 +356,23 @@ def resample(image, new_resolution, old_resolution=1, err_to_larger=True, extrap
     # Apply anti-aliasing gaussian filter if downsampling.
     if anti_aliasing:
         if image_is_coords:
-            downsample_factors = np.insert(old_shape / new_shape, image.ndim - 1, values=0, axis=0)
-            print(f"downsample_factors: {downsample_factors}")
+            downsample_factors = np.insert(
+                old_shape / new_shape, image.ndim - 1, values=0, axis=0
+            )
         else:
             downsample_factors = old_shape / new_shape
         anti_aliasing_sigma = np.maximum(0, (downsample_factors - 1) / 2)
-        gaussian_filter(image, anti_aliasing_sigma, output=image, mode='nearest') # Mutates image.
+        gaussian_filter(
+            image, anti_aliasing_sigma, output=image, mode="nearest"
+        )  # Mutates image.
 
     # Interpolate image.
     new_image = interpn(
-        points=old_axes, 
-        values=image, 
-        xi=new_coords, 
-        bounds_error=False, 
-        fill_value=extrapolation_fill_value, 
+        points=old_axes,
+        values=image,
+        xi=new_coords,
+        bounds_error=False,
+        fill_value=extrapolation_fill_value,
     )
 
     return new_image

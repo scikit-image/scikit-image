@@ -28,10 +28,29 @@ class _Lddmm:
     Accessed in a functional manner via the lddmm_register function; it instantiates an _Lddmm object and calls its register method.
     """
 
-    def __init__(self, template, target, template_resolution=1, target_resolution=1, check_artifacts=False, num_iterations=200, num_affine_only_iterations=50, 
-    num_timesteps=5, initial_affine=None, initial_velocity_fields = None, contrast_order=1, sigmaM=None, sigmaA=None, smooth_length=None, sigmaR=None, 
-    translational_stepsize=None, linear_stepsize=None, deformative_stepsize=None, contrast_stepsize=1, calibrate=False):
-    
+    def __init__(
+        self,
+        template,
+        target,
+        template_resolution=1,
+        target_resolution=1,
+        check_artifacts=False,
+        num_iterations=200,
+        num_affine_only_iterations=50,
+        num_timesteps=5,
+        initial_affine=None,
+        initial_velocity_fields=None,
+        contrast_order=1,
+        sigmaM=None,
+        sigmaA=None,
+        smooth_length=None,
+        sigmaR=None,
+        translational_stepsize=None,
+        linear_stepsize=None,
+        deformative_stepsize=None,
+        contrast_stepsize=1,
+        calibrate=False,
+    ):    
         # Inputs.
 
         # Images.
@@ -250,10 +269,6 @@ class _Lddmm:
             bounds_error=False, 
             fill_value=None, 
         )
-
-            # DEBUG future tests pytest
-            # print('max of phi_inv - template_coords:',np.max(self.phi_inv - self.template_coords))
-            # print('max dif of phi_inv_affine_inv:',np.max(self.phi_inv_affine_inv - self.target_coords))
 
 
     def _apply_contrast_map(self):
@@ -551,16 +566,25 @@ r'''
                                                                                             
 '''
 
-def lddmm_register(template, target, template_resolution=1, target_resolution=1, 
-    translational_stepsize=0, 
-    linear_stepsize=0, 
-    deformative_stepsize=0, 
-    sigmaR=0, 
-    num_iterations=200, 
-    num_affine_only_iterations=50, 
-    initial_affine=None, initial_velocity_fields=None, 
-    num_timesteps=5, contrast_order=1, sigmaM=None, smooth_length=None, 
-    calibrate=False):
+def lddmm_register(
+    template,
+    target,
+    template_resolution=1,
+    target_resolution=1,
+    translational_stepsize=0,
+    linear_stepsize=0,
+    deformative_stepsize=0,
+    sigmaR=0,
+    num_iterations=200,
+    num_affine_only_iterations=50,
+    initial_affine=None,
+    initial_velocity_fields=None,
+    num_timesteps=5,
+    contrast_order=1,
+    sigmaM=None,
+    smooth_length=None,
+    calibrate=False,
+):
     """
     Compute a registration between template and target, to be applied with apply_lddmm.
     
@@ -629,8 +653,16 @@ def lddmm_register(template, target, template_resolution=1, target_resolution=1,
     return lddmm.register()
 
 
-def _generate_position_field(affine, velocity_fields, velocity_field_resolution, 
-template_shape, template_resolution, target_shape, target_resolution, deform_to="template"):
+def _generate_position_field(
+    affine,
+    velocity_fields,
+    velocity_field_resolution,
+    template_shape,
+    template_resolution,
+    target_shape,
+    target_resolution,
+    deform_to="template",
+):
 
     # Validate inputs.
     # Validate template_shape. Not rigorous.
@@ -712,7 +744,14 @@ template_shape, template_resolution, target_shape, target_resolution, deform_to=
         return phi_inv_affine_inv
 
 
-def _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value=None):
+def _apply_position_field(
+    subject,
+    subject_resolution,
+    output_resolution,
+    position_field,
+    position_field_resolution,
+    extrapolation_fill_value=None,
+):
 
     # Validate inputs.
 
@@ -749,8 +788,18 @@ def _apply_position_field(subject, subject_resolution, output_resolution, positi
     return deformed_subject
 
 
-def apply_lddmm(subject, subject_resolution=1, affine_phi=None, phi_inv_affine_inv=None, 
-template_resolution=1, target_resolution=1, output_resolution=None, deform_to="template", extrapolation_fill_value=None, **unused_kwargs):
+def apply_lddmm(
+    subject,
+    subject_resolution=1,
+    affine_phi=None,
+    phi_inv_affine_inv=None,
+    template_resolution=1,
+    target_resolution=1,
+    output_resolution=None,
+    deform_to="template",
+    extrapolation_fill_value=None,
+    **unused_kwargs,
+):
     """
     Apply the transform, or position field affine_phi or phi_inv_affine_inv, to the subject 
     to deform it to either the template or the target.

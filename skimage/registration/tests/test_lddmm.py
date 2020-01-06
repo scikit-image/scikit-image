@@ -11,6 +11,7 @@ from skimage.registration._lddmm import _generate_position_field
 from skimage.registration._lddmm import _apply_position_field
 from skimage.registration._lddmm import apply_lddmm
 
+
 @pytest.mark.parametrize('deform_to', ['template', 'target'])
 def test__generate_position_field(deform_to):
 
@@ -31,8 +32,16 @@ def test__generate_position_field(deform_to):
     elif deform_to == 'target':
         expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution)
 
-    position_field = _generate_position_field(affine=affine, velocity_fields=velocity_fields, velocity_field_resolution=velocity_field_resolution, 
-        template_shape=template_shape, template_resolution=template_resolution, target_shape=target_shape, target_resolution=target_resolution, deform_to=deform_to)
+    position_field = _generate_position_field(
+        affine=affine,
+        velocity_fields=velocity_fields,
+        velocity_field_resolution=velocity_field_resolution,
+        template_shape=template_shape,
+        template_resolution=template_resolution,
+        target_shape=target_shape,
+        target_resolution=target_resolution,
+        deform_to=deform_to,
+    )
 
     assert np.array_equal(position_field, expected_output)
 
@@ -53,8 +62,16 @@ def test__generate_position_field(deform_to):
     elif deform_to == 'target':
         expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution) - 1
 
-    position_field = _generate_position_field(affine=affine, velocity_fields=velocity_fields, velocity_field_resolution=velocity_field_resolution, 
-        template_shape=template_shape, template_resolution=template_resolution, target_shape=target_shape, target_resolution=target_resolution, deform_to=deform_to)
+    position_field = _generate_position_field(
+        affine=affine,
+        velocity_fields=velocity_fields,
+        velocity_field_resolution=velocity_field_resolution,
+        template_shape=template_shape,
+        template_resolution=template_resolution,
+        target_shape=target_shape,
+        target_resolution=target_resolution,
+        deform_to=deform_to,
+    )
 
     assert np.allclose(position_field, expected_output)
 
@@ -70,10 +87,10 @@ def test__generate_position_field(deform_to):
     velocity_field_resolution = 1
     # Indicates a 90 degree rotation to the right.
     affine = np.array([
-        [0,1,0,0],
-        [-1,0,0,0],
-        [0,0,1,0],
-        [0,0,0,1],
+        [0,1,0,0], 
+        [-1,0,0,0], 
+        [0,0,1,0], 
+        [0,0,0,1], 
     ])
 
     if deform_to == 'template':
@@ -83,8 +100,16 @@ def test__generate_position_field(deform_to):
         expected_output = _lddmm_utilities._multiply_coords_by_affine(inv(affine), 
             _lddmm_utilities._compute_coords(target_shape, target_resolution))
 
-    position_field = _generate_position_field(affine=affine, velocity_fields=velocity_fields, velocity_field_resolution=velocity_field_resolution, 
-        template_shape=template_shape, template_resolution=template_resolution, target_shape=target_shape, target_resolution=target_resolution, deform_to=deform_to)
+    position_field = _generate_position_field(
+        affine=affine,
+        velocity_fields=velocity_fields,
+        velocity_field_resolution=velocity_field_resolution,
+        template_shape=template_shape,
+        template_resolution=template_resolution,
+        target_shape=target_shape,
+        target_resolution=target_resolution,
+        deform_to=deform_to,
+    )
     
     assert np.allclose(position_field, expected_output)
 
@@ -275,9 +300,13 @@ def test_apply_lddmm(deform_to):
     elif deform_to == 'target':
         output_resolution = np.copy(target_resolution)
 
-    expected_output = _apply_position_field(subject, subject_resolution, output_resolution, 
+    expected_output = _apply_position_field(
+        subject, 
+        subject_resolution, 
+        output_resolution, 
         position_field=affine_phi if deform_to == 'template' else phi_inv_affine_inv, 
-        position_field_resolution=template_resolution if deform_to == 'template' else target_resolution)
+        position_field_resolution=template_resolution if deform_to == 'template' else target_resolution
+    )
 
     deformed_subject = apply_lddmm(
         subject=subject, subject_resolution=subject_resolution, 
@@ -311,22 +340,22 @@ def test_lddmm_register():
     smooth_length = None
 
     reg_output = lddmm_register(
-        template=template,
-        template_resolution=template_resolution,
-        target=target,
-        target_resolution=target_resolution,
-        translational_stepsize=translational_stepsize,
-        linear_stepsize=linear_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        sigmaR=sigmaR,
-        num_iterations=num_iterations,
-        num_affine_only_iterations=num_affine_only_iterations,
-        initial_affine=initial_affine,
-        initial_velocity_fields=initial_velocity_fields,
-        num_timesteps=num_timesteps,
-        contrast_order=contrast_order,
-        sigmaM=sigmaM,
-        smooth_length=smooth_length,
+        template=template, 
+        template_resolution=template_resolution, 
+        target=target, 
+        target_resolution=target_resolution, 
+        translational_stepsize=translational_stepsize, 
+        linear_stepsize=linear_stepsize, 
+        deformative_stepsize=deformative_stepsize, 
+        sigmaR=sigmaR, 
+        num_iterations=num_iterations, 
+        num_affine_only_iterations=num_affine_only_iterations, 
+        initial_affine=initial_affine, 
+        initial_velocity_fields=initial_velocity_fields, 
+        num_timesteps=num_timesteps, 
+        contrast_order=contrast_order, 
+        sigmaM=sigmaM, 
+        smooth_length=smooth_length, 
     )
 
     deformed_target = apply_lddmm(
@@ -368,22 +397,22 @@ def test_lddmm_register():
     smooth_length = None
 
     reg_output = lddmm_register(
-        template=template,
-        template_resolution=template_resolution,
-        target=target,
-        target_resolution=target_resolution,
-        translational_stepsize=translational_stepsize,
-        linear_stepsize=linear_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        sigmaR=sigmaR,
-        num_iterations=num_iterations,
-        num_affine_only_iterations=num_affine_only_iterations,
-        initial_affine=initial_affine,
-        initial_velocity_fields=initial_velocity_fields,
-        num_timesteps=num_timesteps,
-        contrast_order=contrast_order,
-        sigmaM=sigmaM,
-        smooth_length=smooth_length,
+        template=template, 
+        template_resolution=template_resolution, 
+        target=target, 
+        target_resolution=target_resolution, 
+        translational_stepsize=translational_stepsize, 
+        linear_stepsize=linear_stepsize, 
+        deformative_stepsize=deformative_stepsize, 
+        sigmaR=sigmaR, 
+        num_iterations=num_iterations, 
+        num_affine_only_iterations=num_affine_only_iterations, 
+        initial_affine=initial_affine, 
+        initial_velocity_fields=initial_velocity_fields, 
+        num_timesteps=num_timesteps, 
+        contrast_order=contrast_order, 
+        sigmaM=sigmaM, 
+        smooth_length=smooth_length, 
     )
 
     deformed_target = apply_lddmm(
@@ -399,13 +428,6 @@ def test_lddmm_register():
         deform_to='target', 
         **reg_output,
     )
-
-    print('template\n',np.round(template[0], 2), '\n'*4)
-    print('target\n',np.round(target[0], 2), '\n'*4)
-    print('deformed_template\n',np.round(deformed_template[0], 2), '\n'*4)
-    print('deformed_target\n',np.round(deformed_target[0], 2), '\n'*4)
-    print('affine\n', reg_output['affine'].round(2))
-    # for e in reg_output['total_energies']: print(e)
 
     assert np.allclose(deformed_template, target, rtol=0, atol=1-1e-9)
     assert np.allclose(deformed_target, template, rtol=0, atol=1-1e-9)
@@ -432,22 +454,22 @@ def test_lddmm_register():
     smooth_length = None
 
     reg_output = lddmm_register(
-        template=template,
-        template_resolution=template_resolution,
-        target=target,
-        target_resolution=target_resolution,
-        translational_stepsize=translational_stepsize,
-        linear_stepsize=linear_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        sigmaR=sigmaR,
-        num_iterations=num_iterations,
-        num_affine_only_iterations=num_affine_only_iterations,
-        initial_affine=initial_affine,
-        initial_velocity_fields=initial_velocity_fields,
-        num_timesteps=num_timesteps,
-        contrast_order=contrast_order,
-        sigmaM=sigmaM,
-        smooth_length=smooth_length,
+        template=template, 
+        template_resolution=template_resolution, 
+        target=target, 
+        target_resolution=target_resolution, 
+        translational_stepsize=translational_stepsize, 
+        linear_stepsize=linear_stepsize, 
+        deformative_stepsize=deformative_stepsize, 
+        sigmaR=sigmaR, 
+        num_iterations=num_iterations, 
+        num_affine_only_iterations=num_affine_only_iterations, 
+        initial_affine=initial_affine, 
+        initial_velocity_fields=initial_velocity_fields, 
+        num_timesteps=num_timesteps, 
+        contrast_order=contrast_order, 
+        sigmaM=sigmaM, 
+        smooth_length=smooth_length, 
     )
 
     deformed_target = apply_lddmm(
@@ -489,22 +511,22 @@ def test_lddmm_register():
     smooth_length = None
 
     reg_output = lddmm_register(
-        template=template,
-        template_resolution=template_resolution,
-        target=target,
-        target_resolution=target_resolution,
-        translational_stepsize=translational_stepsize,
-        linear_stepsize=linear_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        sigmaR=sigmaR,
-        num_iterations=num_iterations,
-        num_affine_only_iterations=num_affine_only_iterations,
-        initial_affine=initial_affine,
-        initial_velocity_fields=initial_velocity_fields,
-        num_timesteps=num_timesteps,
-        contrast_order=contrast_order,
-        sigmaM=sigmaM,
-        smooth_length=smooth_length,
+        template=template, 
+        template_resolution=template_resolution, 
+        target=target, 
+        target_resolution=target_resolution, 
+        translational_stepsize=translational_stepsize, 
+        linear_stepsize=linear_stepsize, 
+        deformative_stepsize=deformative_stepsize, 
+        sigmaR=sigmaR, 
+        num_iterations=num_iterations, 
+        num_affine_only_iterations=num_affine_only_iterations, 
+        initial_affine=initial_affine, 
+        initial_velocity_fields=initial_velocity_fields, 
+        num_timesteps=num_timesteps, 
+        contrast_order=contrast_order, 
+        sigmaM=sigmaM, 
+        smooth_length=smooth_length, 
     )
 
     deformed_target = apply_lddmm(

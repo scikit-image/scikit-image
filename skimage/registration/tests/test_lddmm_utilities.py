@@ -320,7 +320,6 @@ def test__multiply_coords_by_affine():
     array = np.arange(4*5*6*3).reshape(4,5,6,3)
     expected_warning = RuntimeWarning
     match = "affine is not in homogenous coordinates.\naffine\[-1] should be zeros with a 1 on the right."
-    print(len(match), 'match')
     with pytest.warns(expected_warning, match=match):
         _multiply_coords_by_affine(affine, array)
     
