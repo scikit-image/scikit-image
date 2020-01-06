@@ -17,7 +17,7 @@ third dimension)::
    >>> img = data.astronaut()
    >>> top_left = img[:100, :100]
 
-In order to change the shape of the image,  :mod:`skimage.color` provides several
+In order to change the shape of the image, :mod:`skimage.color` provides several
 functions described in :ref:`sphx_glr_auto_examples_transform_plot_rescale.py`
 .
 
