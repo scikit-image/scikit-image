@@ -23,8 +23,9 @@ def imshow_on_ax(
 ):
 
     ax = axes[dim, column]
-    ax.set_xticks([])
-    ax.set_yticks([])
+    ax.axis('off')
+    # ax.set_xticks([])
+    # ax.set_yticks([])
 
     scaled_image = scale_data(image, quantile_threshold)
 

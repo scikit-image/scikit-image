@@ -44,3 +44,28 @@ for i in range(20):
     ax[i].axis('off')
 fig.tight_layout()
 plt.show()
+
+######################################################################
+#
+# 3D mouse brain images
+# =====================
+#
+# The Allen Institute's mouse brain atlas and a cleared mouse brain are displayed.
+# The two columns respectively display the allen_mouse_brain_atlas and a cleared_mouse_brain.
+# Each row for a column shows a center slice along that dimension of the 3D image.
+
+fig, axes = plt.subplots(3, 2, figsize=(8, 12))
+
+standard_brain = data.allen_mouse_brain_atlas()
+specific_brain = data.cleared_mouse_brain()
+images = standard_brain, specific_brain
+
+# Plot the center slice of each image in each dimension.
+for image_index, image in enumerate(images):
+    for dim in range(3):
+        ax = axes[dim, image_index]
+        ax.imshow(image.take(image.shape[dim] // 2, axis=dim))
+        ax.axis('off')
+        
+fig.tight_layout()
+plt.show()

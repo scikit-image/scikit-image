@@ -785,3 +785,4 @@ def cleared_mouse_brain():
     """
     
     return _np.load(_os.path.join(data_dir, 'cleared_mouse_brain.npy'))
+    
