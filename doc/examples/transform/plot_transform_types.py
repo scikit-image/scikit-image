@@ -60,9 +60,9 @@ plt.title('Euclidean transformation')
 # For a rotation around the center of the image, one can either 
 # compose a translation to change the origin, a rotation, and finally
 # the inverse of the first translation, or use the utility function
-# :func:`skimage.transform.rotation` (note that its parameter is given)
+# :func:`skimage.transform.rotation` (note that its parameter is given
 # in degrees, while it is given in radians for the different kinds of
-# affine transformations:
+# affine transformations):
 
 plt.figure()
 rotated_img = tf.rotate(img, 45)
