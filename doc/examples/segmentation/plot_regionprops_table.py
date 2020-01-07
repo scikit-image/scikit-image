@@ -79,6 +79,9 @@ plt.show()
 # =========
 # Doing the same analysis in 3D, we find a much more dramatic behaviour: blobs
 # coalesce into a single, giant piece as the volume fraction crosses ~0.25.
+# This corresponds to the `percolation threshold
+# <https://en.wikipedia.org/wiki/Percolation_threshold>`_ in statistical
+# physics and graph theory.
 
 images = [data.binary_blobs(length=128, n_dim=3, volume_fraction=f)
           for f in fractions]
