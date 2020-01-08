@@ -116,6 +116,8 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
+    clip_limit /= nbins
+
     row_step = int(image.shape[0] // np.ceil(image.shape[0] / kernel_size[0]))
     col_step = int(image.shape[1] // np.ceil(image.shape[1] / kernel_size[1]))
 
@@ -138,9 +140,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
             sub_img = image[i0:i1, j0:j1]
 
             if clip_limit > 0.0:  # Calculate actual cliplimit
-                clim = int(clip_limit * sub_img.size / nbins)
-                if clim < 1:
-                    clim = 1
+                clim = max(int(clip_limit * sub_img.size), 1)
             else:
                 clim = NR_OF_GREY  # Large value, do not clip (AHE)
 
