@@ -3,14 +3,8 @@
 Measure region properties
 =========================
 
-This example shows how to measure properties of labelled image regions. It is
-a toy example, where the image regions are two ellipses. The outputs are the
-following:
-
-1. Drawing of certain properties for each region, computed via
-   :py:func:`regionprops`
-2. Table of certain properties for each region (one region per row), computed
-   via :py:func:`regionprops_table`
+This example shows how to measure properties of labelled image regions. We
+analyze an image with two ellipses.
 
 """
 import math
@@ -35,6 +29,11 @@ image[rrr, ccc] = 1
 
 label_img = label(image)
 regions = regionprops(label_img)
+
+#####################################################################
+# We use the :py:func:`skimage.measure.regionprops` result to draw certain
+# properties on each region. For example, in red, we plot the major and minor
+# axes of each ellipse.
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap=plt.cm.gray)
@@ -64,6 +63,9 @@ props = regionprops_table(label_img, properties=('centroid',
                                                  'major_axis_length',
                                                  'minor_axis_length'))
 
-props  # is a pandas-compatible dict
+#####################################################################
+# We now display a table of (selected) properties for each region (one region
+# per row), the :py:func:`skimage.measure.regionprops_table` result being a
+# a pandas-compatible dict.
 
 pd.DataFrame(props)
