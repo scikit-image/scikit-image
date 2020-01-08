@@ -19,9 +19,10 @@ regression, to label image patches from new images.
 
 References
 ----------
-.. [1] Haralick, RM.; Shanmugam, K., 
+.. [1] Haralick, RM.; Shanmugam, K.,
        "Textural features for image classification"
-       IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621. 
+       IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+       :DOI:`10.1109/TSMC.1973.4309314` 
 """
 import matplotlib.pyplot as plt
 
@@ -52,7 +53,8 @@ for loc in sky_locations:
 xs = []
 ys = []
 for patch in (grass_patches + sky_patches):
-    glcm = greycomatrix(patch, [5], [0], 256, symmetric=True, normed=True)
+    glcm = greycomatrix(patch, distances=[5], angles=[0], levels=256,
+                        symmetric=True, normed=True)
     xs.append(greycoprops(glcm, 'dissimilarity')[0, 0])
     ys.append(greycoprops(glcm, 'correlation')[0, 0])
 
