@@ -342,7 +342,7 @@ def resample(
     # Handle trivial case.
     if np.array_equal(new_resolution, old_resolution):
         return (
-            image  # Note: this is a copy of the input image and is not the same object.
+            image # Note: this is a copy of the input image and is not the same object.
         )
 
     # Compute new_coords and old_axes.
