@@ -44,17 +44,14 @@ fig, (ax0, ax1, ax2) = plt.subplots(nrows=1,
 ax0.imshow(image, cmap='gray')
 ax0.set_title('original image')
 ax0.axis('off')
-ax0.set_adjustable('box-forced')
 
 ax1.imshow(dilated, vmin=image.min(), vmax=image.max(), cmap='gray')
 ax1.set_title('dilated')
 ax1.axis('off')
-ax1.set_adjustable('box-forced')
 
 ax2.imshow(image - dilated, cmap='gray')
 ax2.set_title('image - dilated')
 ax2.axis('off')
-ax2.set_adjustable('box-forced')
 
 fig.tight_layout()
 

@@ -42,7 +42,7 @@ def _rename_node(graph, node_id, copy_id):
     """ Rename `node_id` in `graph` to `copy_id`. """
 
     graph._add_node_silent(copy_id)
-    graph.node[copy_id].update(graph.node[node_id])
+    graph.nodes[copy_id].update(graph.nodes[node_id])
 
     for nbr in graph.neighbors(node_id):
         wt = graph[node_id][nbr]['weight']

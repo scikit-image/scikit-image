@@ -1,4 +1,3 @@
-# coding: utf-8
 import numpy as np
 from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
 

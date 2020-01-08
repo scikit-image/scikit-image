@@ -1,13 +1,15 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
-import pytest
+import re
 from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform, matrix_transform,
                                EuclideanTransform, SimilarityTransform,
                                AffineTransform, FundamentalMatrixTransform,
                                EssentialMatrixTransform, ProjectiveTransform,
                                PolynomialTransform, PiecewiseAffineTransform)
-from skimage._shared._warnings import expected_warnings
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_almost_equal
+import textwrap
 
 
 SRC = np.array([
@@ -36,9 +38,8 @@ def test_estimate_transform():
     for tform in ('euclidean', 'similarity', 'affine', 'projective',
                   'polynomial'):
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
-    with pytest.raises(ValueError):
-        estimate_transform('foobar',
-                  SRC[:2, :], DST[:2, :])
+    with testing.raises(ValueError):
+        estimate_transform('foobar', SRC[:2, :], DST[:2, :])
 
 
 def test_matrix_transform():
@@ -139,7 +140,6 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
-
     # test special case for scale if rotation=90deg
     scale = 0.1
     rotation = np.pi / 2
@@ -239,7 +239,8 @@ def test_fundamental_matrix_inverse():
     tform = FundamentalMatrixTransform()
     tform.params = essential_matrix_tform.params
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_init():
@@ -279,7 +280,8 @@ def test_essential_matrix_inverse():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([1, 0, 0]))
     src = np.array([[0, 0], [0, 1], [1, 1]])
-    assert_almost_equal(tform.inverse(src), [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+    assert_almost_equal(tform.inverse(src),
+                        [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
 def test_essential_matrix_residuals():
@@ -337,7 +339,7 @@ def test_polynomial_default_order():
 
 
 def test_polynomial_inverse():
-    with pytest.raises(Exception):
+    with testing.raises(Exception):
         PolynomialTransform().inverse(0)
 
 
@@ -358,62 +360,87 @@ def test_union():
     tform = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
     assert_almost_equal((tform + tform.inverse).params, np.eye(3))
 
+    tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
+    tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform(scale=0.1 * 1/0.1, rotation=0.3 - 0.9)
+    tform = tform1 + tform2.inverse
+    assert_almost_equal(tform.params, tform3.params)
+
 
 def test_union_differing_types():
     tform1 = SimilarityTransform()
     tform2 = PolynomialTransform()
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         tform1.__add__(tform2)
 
 
 def test_geometric_tform():
     tform = GeometricTransform()
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform(0)
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform.inverse(0)
-    with pytest.raises(NotImplementedError):
+    with testing.raises(NotImplementedError):
         tform.__add__(0)
 
+    # See gh-3926 for discussion details
+    for i in range(20):
+        # Generate random Homography
+        H = np.random.rand(3, 3) * 100
+        H[2, H[2] == 0] += np.finfo(float).eps
+        H /= H[2, 2]
+
+        # Craft some src coords
+        src = np.array([
+            [(H[2, 1] + 1) / -H[2, 0], 1],
+            [1, (H[2, 0] + 1) / -H[2, 1]],
+            [1, 1],
+        ])
+        # Prior to gh-3926, under the above circumstances,
+        # destination coordinates could be returned with nan/inf values.
+        tform = ProjectiveTransform(H)  # Construct the transform
+        dst = tform(src)  # Obtain the dst coords
+        # Ensure dst coords are finite numeric values
+        assert(np.isfinite(dst).all())
 
 def test_invalid_input():
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         ProjectiveTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         AffineTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         SimilarityTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EuclideanTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         AffineTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         SimilarityTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EuclideanTransform(
             matrix=np.zeros((2, 3)), translation=(0, 0))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         PolynomialTransform(np.zeros((3, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         FundamentalMatrixTransform(matrix=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(matrix=np.zeros((3, 2)))
 
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.zeros((3, 3)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.eye(3))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.eye(3),
                                  translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(rotation=np.eye(3),
                                  translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         EssentialMatrixTransform(
             rotation=np.eye(3), translation=np.zeros((3,)))
 
@@ -433,7 +460,48 @@ def test_degenerate():
     tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
+    # See gh-3926 for discussion details
+    tform = ProjectiveTransform()
+    for i in range(20):
+        # Some random coordinates
+        src = np.random.rand(4, 2) * 100
+        dst = np.random.rand(4, 2) * 100
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+        # Degenerate the case by arranging points on a single line
+        src[:, 1] = np.random.rand()
+        # Prior to gh-3926, under the above circumstances,
+        # a transform could be returned with nan values.
+        assert(not tform.estimate(src, dst) or np.isfinite(tform.params).all())
+
+
+def test_projective_repr():
+    tform = ProjectiveTransform()
+    want = re.escape(textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=
+            [[1., 0., 0.],
+             [0., 1., 0.],
+             [0., 0., 1.]]) at
+        ''').strip()) + ' 0x[a-f0-9]+' + re.escape('>')
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
+    assert re.match(want, repr(tform))
+
+
+def test_projective_str():
+    tform = ProjectiveTransform()
+    want = re.escape(textwrap.dedent(
+        '''
+        <ProjectiveTransform(matrix=
+            [[1., 0., 0.],
+             [0., 1., 0.],
+             [0., 0., 1.]])>
+        ''').strip())
+    # Hack the escaped regex to allow whitespace before each number for
+    # compatibility with different numpy versions.
+    want = want.replace('0\\.', ' *0\\.')
+    want = want.replace('1\\.', ' *1\\.')
+    print(want)
+    assert re.match(want, str(tform))

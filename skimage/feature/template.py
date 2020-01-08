@@ -1,8 +1,7 @@
-from __future__ import division
 import numpy as np
 from scipy.signal import fftconvolve
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 def _window_sum_2d(image, window_shape):
@@ -76,16 +75,16 @@ def match_template(image, template, pad_input=False, mode='constant',
            and Magic.
     .. [2] Briechle and Hanebeck, "Template Matching using Fast Normalized
            Cross Correlation", Proceedings of the SPIE (2001).
-           DOI:10.1117/12.421129
+           :DOI:`10.1117/12.421129`
 
     Examples
     --------
     >>> template = np.zeros((3, 3))
     >>> template[1, 1] = 1
     >>> template
-    array([[ 0.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  0.]])
+    array([[0., 0., 0.],
+           [0., 1., 0.],
+           [0., 0., 0.]])
     >>> image = np.zeros((6, 6))
     >>> image[1, 1] = 1
     >>> image[4, 4] = -1
@@ -111,7 +110,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]])
     """
-    assert_nD(image, (2, 3))
+    check_nD(image, (2, 3))
 
     if image.ndim < template.ndim:
         raise ValueError("Dimensionality of template must be less than or "
@@ -177,4 +176,4 @@ def match_template(image, template, pad_input=False, mode='constant',
             d1 = d0 + image_shape[i] - template.shape[i] + 1
         slices.append(slice(d0, d1))
 
-    return response[slices]
+    return response[tuple(slices)]

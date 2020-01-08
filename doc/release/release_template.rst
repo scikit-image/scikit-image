@@ -9,12 +9,11 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 
 New Features
 ------------
-
 
 
 
@@ -23,17 +22,21 @@ Improvements
 
 
 
-
 API Changes
 -----------
 
+
+
+Bugfixes
+--------
 
 
 
 Deprecations
 ------------
 
-- Python 2.6 support has been dropped. Minimal required Python version is 2.7.
+- Python 2.x support has been dropped. The minimal required Python version
+  is 3.5
 
 
 Contributors to this release

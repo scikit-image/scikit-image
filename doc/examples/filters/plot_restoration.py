@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 =====================
 Image Deconvolution
@@ -43,8 +42,7 @@ astro += 0.1 * astro.std() * np.random.standard_normal(astro.shape)
 deconvolved, _ = restoration.unsupervised_wiener(astro, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5),
-                       sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
+                       sharex=True, sharey=True)
 
 plt.gray()
 

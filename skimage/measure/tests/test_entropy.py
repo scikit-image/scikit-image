@@ -1,7 +1,7 @@
-from numpy.testing import assert_almost_equal
 import numpy as np
-
 from skimage.measure import shannon_entropy
+
+from skimage._shared.testing import assert_almost_equal
 
 
 def test_shannon_ones():
@@ -14,7 +14,3 @@ def test_shannon_all_unique():
     img = np.arange(64)
     res = shannon_entropy(img, base=2)
     assert_almost_equal(res, np.log(64) / np.log(2))
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

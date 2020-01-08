@@ -7,10 +7,11 @@ Author: Damian Eads
 import os.path
 
 import numpy as np
-from numpy.testing import assert_equal
 
 from skimage import data_dir
 from skimage.morphology import selem
+
+from skimage._shared.testing import assert_equal
 
 
 class TestSElem():
@@ -135,7 +136,8 @@ class TestSElem():
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                                    [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                                   [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                                   [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
+                                  dtype=np.uint8)
         actual_mask1 = selem.star(4)
         expected_mask2 = np.array([[1, 1, 1],
                                    [1, 1, 1],
@@ -143,7 +145,3 @@ class TestSElem():
         actual_mask2 = selem.star(1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()

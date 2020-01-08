@@ -3,8 +3,8 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j 1
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXOPTS    ?= -j $(shell nproc || getconf _NPROCESSORS_ONLN || 1)
+SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 
@@ -129,7 +129,7 @@ gh-pages:
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
-	--project-url=http://scikit-image.org \
+	--project-url=https://scikit-image.org \
 	--project-ml-url=https://mail.python.org/mailman/listinfo/scikit-image \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \

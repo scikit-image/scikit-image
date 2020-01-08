@@ -1,59 +1,45 @@
 import os
-import os.path
-import numpy as np
-from numpy.testing import assert_array_almost_equal
-import unittest
-import pytest
-
 from tempfile import NamedTemporaryFile
 
+import numpy as np
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
-try:
-    import imageio as _imageio
-except ImportError:
-    imageio_available = False
-else:
-    imageio_available = True
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_almost_equal, TestCase
+from skimage._shared._warnings import expected_warnings
 
 
 def setup():
-    if imageio_available:
-        np.random.seed(0)
-        use_plugin('imageio')
+    use_plugin('imageio')
 
 
 def teardown():
     reset_plugins()
 
 
-@pytest.mark.skipif(not imageio_available, reason="imageio not installed")
-def test_imageio_flatten():
-    # a color image is flattened
-    img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
+def test_imageio_as_gray():
+    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
-    # check that flattening does not occur for an image that is grey already.
+    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
-@pytest.mark.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_palette():
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
 
-@pytest.mark.skipif(not imageio_available, reason="imageio not installed")
 def test_imageio_truncated_jpg():
     # imageio>2.0 uses Pillow / PIL to try and load the file.
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
-    with pytest.raises(SyntaxError):
+    with testing.raises(SyntaxError):
         imread(os.path.join(data_dir, 'truncated.jpg'))
 
 
-class TestSave(unittest.TestCase):
+class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
@@ -64,18 +50,21 @@ class TestSave(unittest.TestCase):
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
-    @pytest.mark.skipif(not imageio_available, reason="imageio not installed")
     def test_imsave_roundtrip(self):
         dtype = np.uint8
+        np.random.seed(0)
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
-            if np.issubdtype(dtype, float):
+            if np.issubdtype(dtype, np.floating):
                 yield self.roundtrip, x, 255
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+
+def test_return_class():
+    testing.assert_equal(
+        type(imread(os.path.join(data_dir, 'color.png'))),
+        np.ndarray
+    )

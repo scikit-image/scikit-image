@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_equal
+from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 import skimage.feature as F
 from skimage import data, img_as_float
@@ -104,3 +104,13 @@ class TestCanny(unittest.TestCase):
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=-100)
+
+    def test_dtype(self):
+        """Check that the same output is produced regardless of image dtype."""
+        image_uint8 = data.camera()
+        image_float = img_as_float(image_uint8)
+
+        result_uint8 = F.canny(image_uint8)
+        result_float = F.canny(image_float)
+
+        assert_equal(result_uint8, result_float)

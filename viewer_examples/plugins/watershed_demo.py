@@ -28,7 +28,7 @@ class WatershedPlugin(LabelPainter):
 
     def _show_watershed(self):
         viewer = self.image_viewer
-        edge_image = filter.sobel(viewer.image)
+        edge_image = filters.sobel(viewer.image)
         labels = morphology.watershed(edge_image, self.paint_tool.overlay)
         viewer.ax.imshow(labels, cmap=plt.cm.jet, alpha=0.5)
         viewer.redraw()

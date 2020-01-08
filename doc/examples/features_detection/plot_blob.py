@@ -63,13 +63,12 @@ titles = ['Laplacian of Gaussian', 'Difference of Gaussian',
           'Determinant of Hessian']
 sequence = zip(blobs_list, colors, titles)
 
-fig, axes = plt.subplots(1, 3, figsize=(9, 3), sharex=True, sharey=True,
-                         subplot_kw={'adjustable': 'box-forced'})
+fig, axes = plt.subplots(1, 3, figsize=(9, 3), sharex=True, sharey=True)
 ax = axes.ravel()
 
 for idx, (blobs, color, title) in enumerate(sequence):
     ax[idx].set_title(title)
-    ax[idx].imshow(image, interpolation='nearest')
+    ax[idx].imshow(image)
     for blob in blobs:
         y, x, r = blob
         c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)

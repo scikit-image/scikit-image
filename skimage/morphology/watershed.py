@@ -28,10 +28,12 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from . import _watershed
+from .extrema import local_minima
+from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import crop, regular_seeds
 
 
-def _validate_inputs(image, markers, mask):
+def _validate_inputs(image, markers, mask, connectivity):
     """Ensure that all inputs to watershed have matching shapes and types.
 
     Parameters
@@ -42,6 +44,8 @@ def _validate_inputs(image, markers, mask):
         The marker image.
     mask : array, or None
         A boolean mask, True where we want to compute the watershed.
+    connectivity : int in {1, ..., image.ndim}
+        The connectivity of the neighborhood of a pixel.
 
     Returns
     -------
@@ -55,83 +59,38 @@ def _validate_inputs(image, markers, mask):
     ValueError
         If the shapes of the given arrays don't match.
     """
-    if not isinstance(markers, (np.ndarray, list, tuple)):
-        # not array-like, assume int
-        markers = regular_seeds(image.shape, markers)
-    elif markers.shape != image.shape:
-        raise ValueError("`markers` (shape {}) must have same shape "
-                         "as `image` (shape {})".format(markers.shape, image.shape))
-    if mask is not None and mask.shape != image.shape:
-        raise ValueError("`mask` must have same shape as `image`")
+    n_pixels = image.size
     if mask is None:
         # Use a complete `True` mask if none is provided
         mask = np.ones(image.shape, bool)
+    else:
+        mask = np.asanyarray(mask, dtype=bool)
+        n_pixels = np.sum(mask)
+        if mask.shape != image.shape:
+            message = ("`mask` (shape {}) must have same shape as "
+                       "`image` (shape {})".format(mask.shape, image.shape))
+            raise ValueError(message)
+    if markers is None:
+        markers_bool = local_minima(image, connectivity=connectivity) * mask
+        markers = ndi.label(markers_bool)[0]
+    elif not isinstance(markers, (np.ndarray, list, tuple)):
+        # not array-like, assume int
+        # given int, assume that number of markers *within mask*.
+        markers = regular_seeds(image.shape,
+                                int(markers / (n_pixels / image.size)))
+        markers *= mask
+    else:
+        markers = np.asanyarray(markers) * mask
+        if markers.shape != image.shape:
+            message = ("`markers` (shape {}) must have same shape as "
+                       "`image` (shape {})".format(markers.shape, image.shape))
+            raise ValueError(message)
     return (image.astype(np.float64),
             markers.astype(np.int32),
             mask.astype(np.int8))
 
 
-def _validate_connectivity(image_dim, connectivity, offset):
-    """Convert any valid connectivity to a structuring element and offset.
-
-    Parameters
-    ----------
-    image_dim : int
-        The number of dimensions of the input image.
-    connectivity : int, array, or None
-        The neighborhood connectivity. An integer is interpreted as in
-        ``scipy.ndimage.generate_binary_structure``, as the maximum number
-        of orthogonal steps to reach a neighbor. An array is directly
-        interpreted as a structuring element and its shape is validated against
-        the input image shape. ``None`` is interpreted as a connectivity of 1.
-    offset : tuple of int, or None
-        The coordinates of the center of the structuring element.
-
-    Returns
-    -------
-    c_connectivity : array of bool
-        The structuring element corresponding to the input `connectivity`.
-    offset : array of int
-        The offset corresponding to the center of the structuring element.
-
-    Raises
-    ------
-    ValueError:
-        If the image dimension and the connectivity or offset dimensions don't
-        match.
-    """
-    if connectivity is None:
-        connectivity = 1
-    if np.isscalar(connectivity):
-        c_connectivity = ndi.generate_binary_structure(image_dim, connectivity)
-    else:
-        c_connectivity = np.array(connectivity, bool)
-        if c_connectivity.ndim != image_dim:
-            raise ValueError("Connectivity dimension must be same as image")
-    if offset is None:
-        if any([x % 2 == 0 for x in c_connectivity.shape]):
-            raise ValueError("Connectivity array must have an unambiguous "
-                             "center")
-        offset = np.array(c_connectivity.shape) // 2
-    return c_connectivity, offset
-
-
-def _compute_neighbors(image, structure, offset):
-    """Compute neighborhood as an array of linear offsets into the image.
-
-    These are sorted according to Euclidean distance from the center (given
-    by `offset`), ensuring that immediate neighbors are visited first.
-    """
-    structure[tuple(offset)] = 0  # ignore the center; it's not a neighbor
-    locations = np.transpose(np.nonzero(structure))
-    sqdistances = np.sum((locations - offset)**2, axis=1)
-    neighborhood = (np.ravel_multi_index(locations.T, image.shape) -
-                    np.ravel_multi_index(offset, image.shape)).astype(np.int32)
-    sorted_neighborhood = neighborhood[np.argsort(sqdistances)]
-    return sorted_neighborhood
-
-
-def watershed(image, markers, connectivity=1, offset=None, mask=None,
+def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
               compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
 
@@ -139,9 +98,11 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     ----------
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
-    markers: int, or ndarray of int, same shape as `image`
+    markers: int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
-        values to be assigned in the label matrix. Zero means not a marker.
+        values to be assigned in the label matrix. Zero means not a marker. If
+        ``None`` (no markers given), the local minima of the image are used as
+        markers.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
@@ -198,13 +159,13 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+    .. [1] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
     .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
 
     .. [3] Peer Neubert & Peter Protzel (2014). Compact Watershed and
            Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
-           Algorithms. ICPR 2014, pp 996-1001. DOI:10.1109/ICPR.2014.181
+           Algorithms. ICPR 2014, pp 996-1001. :DOI:`10.1109/ICPR.2014.181`
            https://www.tu-chemnitz.de/etit/proaut/forschung/rsrc/cws_pSLIC_ICPR.pdf
 
     Examples
@@ -238,7 +199,7 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    image, markers, mask = _validate_inputs(image, markers, mask)
+    image, markers, mask = _validate_inputs(image, markers, mask, connectivity)
     connectivity, offset = _validate_connectivity(image.ndim, connectivity,
                                                   offset)
 
@@ -249,9 +210,10 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
     mask = np.pad(mask, pad_width, mode='constant').ravel()
     output = np.pad(markers, pad_width, mode='constant')
 
-    flat_neighborhood = _compute_neighbors(image, connectivity, offset)
-    marker_locations = np.flatnonzero(output).astype(np.int32)
-    image_strides = np.array(image.strides, dtype=np.int32) // image.itemsize
+    flat_neighborhood = _offsets_to_raveled_neighbors(
+        image.shape, connectivity, center=offset)
+    marker_locations = np.flatnonzero(output)
+    image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
     _watershed.watershed_raveled(image.ravel(),
                                  marker_locations, flat_neighborhood,
@@ -260,9 +222,5 @@ def watershed(image, markers, connectivity=1, offset=None, mask=None,
                                  watershed_line)
 
     output = crop(output, pad_width, copy=True)
-
-    if watershed_line:
-        min_val = output.min()
-        output[output == min_val] = 0
 
     return output

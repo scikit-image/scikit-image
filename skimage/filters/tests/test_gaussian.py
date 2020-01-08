@@ -1,17 +1,17 @@
 import numpy as np
-import pytest
-from skimage.filters._gaussian import gaussian
+from skimage.filters._gaussian import gaussian, _guess_spatial_dimensions
+from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 
 
 def test_negative_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a, sigma=-1.0)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a, sigma=[-1.0, 1.0])
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         gaussian(a,
                  sigma=np.asarray([-1.0, 1.0]))
 
@@ -62,6 +62,23 @@ def test_preserve_range():
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
     gaussian(img, 1, preserve_range=True)
 
-if __name__ == "__main__":
-    from numpy import testing
-    testing.run_module_suite()
+
+def test_4d_ok():
+    img = np.zeros((5,) * 4)
+    img[2, 2, 2, 2] = 1
+    res = gaussian(img, 1, mode='reflect')
+    assert np.allclose(res.sum(), 1)
+
+
+def test_guess_spatial_dimensions():
+    im1 = np.zeros((5, 5))
+    im2 = np.zeros((5, 5, 5))
+    im3 = np.zeros((5, 5, 3))
+    im4 = np.zeros((5, 5, 5, 3))
+    im5 = np.zeros((5,))
+    testing.assert_equal(_guess_spatial_dimensions(im1), 2)
+    testing.assert_equal(_guess_spatial_dimensions(im2), 3)
+    testing.assert_equal(_guess_spatial_dimensions(im3), None)
+    testing.assert_equal(_guess_spatial_dimensions(im4), 3)
+    with testing.raises(ValueError):
+        _guess_spatial_dimensions(im5)

@@ -65,7 +65,7 @@ def _fast_skeletonize(image):
     _cleaned_skeleton = _skeleton.copy()
 
     # cdef'd numpy-arrays for fast, typed access
-    cdef cnp.ndarray[cnp.uint8_t, ndim=2] skeleton, cleaned_skeleton
+    cdef cnp.uint8_t [:, ::1] skeleton, cleaned_skeleton
 
     skeleton = _skeleton
     cleaned_skeleton = _cleaned_skeleton
@@ -74,39 +74,43 @@ def _fast_skeletonize(image):
 
     # the algorithm reiterates the thinning till
     # no further thinning occurred (variable pixel_removed set)
+    with nogil:
+        while pixel_removed:
+            pixel_removed = False
 
-    while pixel_removed:
-        pixel_removed = False
+            # there are two phases, in the first phase, pixels labeled (see below)
+            # 1 and 3 are removed, in the second 2 and 3
 
-        # there are two phases, in the first phase, pixels labeled (see below)
-        # 1 and 3 are removed, in the second 2 and 3
+            # nogil can't iterate through `(True, False)` because it is a Python
+            # tuple. Use the fact that 0 is Falsy, and 1 is truthy in C
+            # for the iteration instead.
+            # for first_pass in (True, False):
+            for pass_num in range(2):
+                first_pass = (pass_num == 0)
+                for row in range(1, nrows-1):
+                    for col in range(1, ncols-1):
+                        # all set pixels ...
+                        if skeleton[row, col]:
+                            # are correlated with a kernel (coefficients spread around here ...)
+                            # to apply a unique number to every possible neighborhood ...
 
-        for first_pass in (True, False):
-            for row in range(1, nrows-1):
-                for col in range(1, ncols-1):
-                    # all set pixels ...
-                    if skeleton[row, col]:
-                        # are correlated with a kernel (coefficients spread around here ...)
-                        # to apply a unique number to every possible neighborhood ...
+                            # which is used with the lut to find the "connectivity type"
 
-                        # which is used with the lut to find the "connectivity type"
+                            neighbors = lut[  1*skeleton[row - 1, col - 1] +   2*skeleton[row - 1, col] +\
+                                              4*skeleton[row - 1, col + 1] +   8*skeleton[row, col + 1] +\
+                                             16*skeleton[row + 1, col + 1] +  32*skeleton[row + 1, col] +\
+                                             64*skeleton[row + 1, col - 1] + 128*skeleton[row, col - 1]]
 
-                        neighbors = lut[  1*skeleton[row - 1, col - 1] +   2*skeleton[row - 1, col] +\
-                                          4*skeleton[row - 1, col + 1] +   8*skeleton[row, col + 1] +\
-                                         16*skeleton[row + 1, col + 1] +  32*skeleton[row + 1, col] +\
-                                         64*skeleton[row + 1, col - 1] + 128*skeleton[row, col - 1]]
+                            # if the condition is met, the pixel is removed (unset)
+                            if ((neighbors == 1 and first_pass) or
+                                    (neighbors == 2 and not first_pass) or
+                                    (neighbors == 3)):
+                                cleaned_skeleton[row, col] = 0
+                                pixel_removed = True
 
-                        # if the condition is met, the pixel is removed (unset)
-                        if ((neighbors == 1 and first_pass) or
-                                (neighbors == 2 and not first_pass) or
-                                (neighbors == 3)):
-                            cleaned_skeleton[row, col] = 0
-                            pixel_removed = True
-
-            # once a step has been processed, the original skeleton
-            # is overwritten with the cleaned version
-            _skeleton = _cleaned_skeleton.copy()
-            skeleton = _skeleton
+                # once a step has been processed, the original skeleton
+                # is overwritten with the cleaned version
+                skeleton[:, :] = cleaned_skeleton[:, :]
 
     return _skeleton[1:nrows-1, 1:ncols-1].astype(np.bool)
 
@@ -167,19 +171,20 @@ def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
         Py_ssize_t rows = result.shape[0]
         Py_ssize_t cols = result.shape[1]
 
-    for index in range(order.shape[0]):
-        accumulator = 16
-        order_index = order[index]
-        ii = i[order_index]
-        jj = j[order_index]
-        # Compute the configuration around the pixel
-        if ii > 0:
-            if jj > 0 and result[ii - 1, jj - 1]:
-                accumulator += 1
-            if result[ii - 1, jj]:
-                accumulator += 2
-            if jj < cols - 1 and result[ii - 1, jj + 1]:
-                    accumulator += 4
+    with nogil:
+        for index in range(order.shape[0]):
+            accumulator = 16
+            order_index = order[index]
+            ii = i[order_index]
+            jj = j[order_index]
+            # Compute the configuration around the pixel
+            if ii > 0:
+                if jj > 0 and result[ii - 1, jj - 1]:
+                    accumulator += 1
+                if result[ii - 1, jj]:
+                    accumulator += 2
+                if jj < cols - 1 and result[ii - 1, jj + 1]:
+                        accumulator += 4
             if jj > 0 and result[ii, jj - 1]:
                 accumulator += 8
             if jj < cols - 1 and result[ii, jj + 1]:
@@ -235,79 +240,79 @@ def _table_lookup_index(cnp.uint8_t[:, ::1] image):
     i_stride  = image.strides[0]
     assert i_shape >= 3 and j_shape >= 3, \
         "Please use the slow method for arrays < 3x3"
+    with nogil:
+        for i in range(1, i_shape-1):
+            offset = i_stride* i + 1
+            for j in range(1, j_shape - 1):
+                if p_image[offset]:
+                    p_indexer[offset + i_stride + 1] += 1
+                    p_indexer[offset + i_stride] += 2
+                    p_indexer[offset + i_stride - 1] += 4
+                    p_indexer[offset + 1] += 8
+                    p_indexer[offset] += 16
+                    p_indexer[offset - 1] += 32
+                    p_indexer[offset - i_stride + 1] += 64
+                    p_indexer[offset - i_stride] += 128
+                    p_indexer[offset - i_stride - 1] += 256
+                offset += 1
+        #
+        # Do the corner cases (literally)
+        #
+        if image[0, 0]:
+            indexer[0, 0] += 16
+            indexer[0, 1] += 8
+            indexer[1, 0] += 2
+            indexer[1, 1] += 1
 
-    for i in range(1, i_shape-1):
-        offset = i_stride* i + 1
+        if image[0, j_shape - 1]:
+            indexer[0, j_shape - 2] += 32
+            indexer[0, j_shape - 1] += 16
+            indexer[1, j_shape - 2] += 4
+            indexer[1, j_shape - 1] += 2
+
+        if image[i_shape - 1, 0]:
+            indexer[i_shape - 2, 0] += 128
+            indexer[i_shape - 2, 1] += 64
+            indexer[i_shape - 1, 0] += 16
+            indexer[i_shape - 1, 1] += 8
+
+        if image[i_shape - 1, j_shape - 1]:
+            indexer[i_shape - 2, j_shape - 2] += 256
+            indexer[i_shape - 2, j_shape - 1] += 128
+            indexer[i_shape - 1, j_shape - 2] += 32
+            indexer[i_shape - 1, j_shape - 1] += 16
+        #
+        # Do the edges
+        #
         for j in range(1, j_shape - 1):
-            if p_image[offset]:
-                p_indexer[offset + i_stride + 1] += 1
-                p_indexer[offset + i_stride] += 2
-                p_indexer[offset + i_stride - 1] += 4
-                p_indexer[offset + 1] += 8
-                p_indexer[offset] += 16
-                p_indexer[offset - 1] += 32
-                p_indexer[offset - i_stride + 1] += 64
-                p_indexer[offset - i_stride] += 128
-                p_indexer[offset - i_stride - 1] += 256
-            offset += 1
-    #
-    # Do the corner cases (literally)
-    #
-    if image[0, 0]:
-        indexer[0, 0] += 16
-        indexer[0, 1] += 8
-        indexer[1, 0] += 2
-        indexer[1, 1] += 1
+            if image[0, j]:
+                indexer[0, j - 1] += 32
+                indexer[0, j] += 16
+                indexer[0, j + 1] += 8
+                indexer[1, j - 1] += 4
+                indexer[1, j] += 2
+                indexer[1, j + 1] += 1
+            if image[i_shape - 1, j]:
+                indexer[i_shape - 2, j - 1] += 256
+                indexer[i_shape - 2, j] += 128
+                indexer[i_shape - 2, j + 1] += 64
+                indexer[i_shape - 1, j - 1] += 32
+                indexer[i_shape - 1, j] += 16
+                indexer[i_shape - 1, j + 1] += 8
 
-    if image[0, j_shape - 1]:
-        indexer[0, j_shape - 2] += 32
-        indexer[0, j_shape - 1] += 16
-        indexer[1, j_shape - 2] += 4
-        indexer[1, j_shape - 1] += 2
-
-    if image[i_shape - 1, 0]:
-        indexer[i_shape - 2, 0] += 128
-        indexer[i_shape - 2, 1] += 64
-        indexer[i_shape - 1, 0] += 16
-        indexer[i_shape - 1, 1] += 8
-
-    if image[i_shape - 1, j_shape - 1]:
-        indexer[i_shape - 2, j_shape - 2] += 256
-        indexer[i_shape - 2, j_shape - 1] += 128
-        indexer[i_shape - 1, j_shape - 2] += 32
-        indexer[i_shape - 1, j_shape - 1] += 16
-    #
-    # Do the edges
-    #
-    for j in range(1, j_shape - 1):
-        if image[0, j]:
-            indexer[0, j - 1] += 32
-            indexer[0, j] += 16
-            indexer[0, j + 1] += 8
-            indexer[1, j - 1] += 4
-            indexer[1, j] += 2
-            indexer[1, j + 1] += 1
-        if image[i_shape - 1, j]:
-            indexer[i_shape - 2, j - 1] += 256
-            indexer[i_shape - 2, j] += 128
-            indexer[i_shape - 2, j + 1] += 64
-            indexer[i_shape - 1, j - 1] += 32
-            indexer[i_shape - 1, j] += 16
-            indexer[i_shape - 1, j + 1] += 8
-
-    for i in range(1, i_shape - 1):
-        if image[i, 0]:
-            indexer[i - 1, 0] += 128
-            indexer[i, 0] += 16
-            indexer[i + 1, 0] += 2
-            indexer[i - 1, 1] += 64
-            indexer[i, 1] += 8
-            indexer[i + 1, 1] += 1
-        if image[i, j_shape - 1]:
-            indexer[i - 1, j_shape - 2] += 256
-            indexer[i, j_shape - 2] += 32
-            indexer[i + 1, j_shape - 2] += 4
-            indexer[i - 1, j_shape - 1] += 128
-            indexer[i, j_shape - 1] += 16
-            indexer[i + 1, j_shape - 1] += 2
+        for i in range(1, i_shape - 1):
+            if image[i, 0]:
+                indexer[i - 1, 0] += 128
+                indexer[i, 0] += 16
+                indexer[i + 1, 0] += 2
+                indexer[i - 1, 1] += 64
+                indexer[i, 1] += 8
+                indexer[i + 1, 1] += 1
+            if image[i, j_shape - 1]:
+                indexer[i - 1, j_shape - 2] += 256
+                indexer[i, j_shape - 2] += 32
+                indexer[i + 1, j_shape - 2] += 4
+                indexer[i - 1, j_shape - 1] += 128
+                indexer[i, j_shape - 1] += 16
+                indexer[i + 1, j_shape - 1] += 2
     return np.asarray(indexer)

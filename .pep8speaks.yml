@@ -5,6 +5,7 @@ pycodestyle:
   ignore:  # Errors and warnings to ignore
     - W391 # blank line at the end of file
     - E203 # whitespace before ,;:
+    - W503 # newline before binary operator
 
 no_blank_comment: True  # If True, no comment is made when the bot does not find any pep8 errors
 

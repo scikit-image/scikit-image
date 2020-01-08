@@ -3,7 +3,8 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-from .._shared.utils import assert_nD
+import warnings
+from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
@@ -62,7 +63,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
     .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [3] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
@@ -98,15 +99,15 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    assert_nD(image, 2)
-    assert_nD(distances, 1, 'distances')
-    assert_nD(angles, 1, 'angles')
+    check_nD(image, 2)
+    check_nD(distances, 1, 'distances')
+    check_nD(angles, 1, 'angles')
 
     image = np.ascontiguousarray(image)
 
     image_max = image.max()
 
-    if np.issubdtype(image.dtype, np.float):
+    if np.issubdtype(image.dtype, np.floating):
         raise ValueError("Float images are not supported by greycomatrix. "
                          "Convert the image to an unsigned integer type.")
 
@@ -140,7 +141,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
 
-    # normalize each GLMC
+    # normalize each GLCM
     if normed:
         P = P.astype(np.float64)
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
@@ -166,6 +167,8 @@ def greycoprops(P, prop='contrast'):
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
+    Each GLCM is normalized to have a sum of 1 before the computation of texture
+    properties.
 
     Parameters
     ----------
@@ -203,16 +206,25 @@ def greycoprops(P, prop='contrast'):
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
-    assert_nD(P, 4, 'P')
+    check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
-    assert num_level == num_level2
-    assert num_dist > 0
-    assert num_angle > 0
+    if num_level != num_level2:
+        raise ValueError('num_level and num_level2 must be equal.')
+    if num_dist <= 0:
+        raise ValueError('num_dist must be positive.')
+    if num_angle <= 0:
+        raise ValueError('num_angle must be positive.')
+
+    # normalize each GLCM
+    P = P.astype(np.float64)
+    glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+    glcm_sums[glcm_sums == 0] = 1
+    P /= glcm_sums
 
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
@@ -301,13 +313,13 @@ def local_binary_pattern(image, P, R, method='default'):
     .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
            Classification with Local Binary Patterns.
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
-           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/Articoliriferimento/LBP.pdf, 2002.
+           http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_94.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     methods = {
         'default': ord('D'),
@@ -369,8 +381,8 @@ def multiblock_lbp(int_image, r, c, width, height):
 
 def draw_multiblock_lbp(image, r, c, width, height,
                         lbp_code=0,
-                        color_greater_block=[1, 1, 1],
-                        color_less_block=[0, 0.69, 0.96],
+                        color_greater_block=(1, 1, 1),
+                        color_less_block=(0, 0.69, 0.96),
                         alpha=0.5
                         ):
     """Multi-block local binary pattern visualization.
@@ -396,15 +408,15 @@ def draw_multiblock_lbp(image, r, c, width, height,
     lbp_code : int
         The descriptor of feature to visualize. If not provided, the
         descriptor with 0 value will be used.
-    color_greater_block : list of 3 floats
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater
         intensity value. They should be in the range [0, 1].
         Corresponding values define (R, G, B) values. Default value
-        is white [1, 1, 1].
-    color_greater_block : list of 3 floats
+        is white (1, 1, 1).
+    color_greater_block : tuple of 3 floats
         Floats specifying the color for the block that has greater intensity
         value. They should be in the range [0, 1]. Corresponding values define
-        (R, G, B) values. Default value is cyan [0, 0.69, 0.96].
+        (R, G, B) values. Default value is cyan (0, 0.69, 0.96).
     alpha : float
         Value in the range [0, 1] that specifies opacity of visualization.
         1 - fully transparent, 0 - opaque.

@@ -1,19 +1,21 @@
-from __future__ import print_function, division
+import os
+import itertools
 
 import numpy as np
-import pytest
-import itertools
-import os.path
-
-from skimage.transform import radon, iradon, iradon_sart, rescale
-from skimage.io import imread
 from skimage import data_dir
+from skimage.io import imread
+from skimage.transform import radon, iradon, iradon_sart, rescale
+
+from skimage._shared.utils import convert_to_float
+from skimage._shared import testing
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
 
+
 PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
-                 as_grey=True)[::2, ::2]
-PHANTOM = rescale(PHANTOM, 0.5, order=1, multichannel=False)
+                 as_gray=True)[::2, ::2]
+PHANTOM = rescale(PHANTOM, 0.5, order=1,
+                  mode='constant', anti_aliasing=False, multichannel=False)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -44,27 +46,54 @@ def _rescale_intensity(x):
     return x
 
 
-def check_radon_center(shape, circle):
+def test_iradon_bias_circular_phantom():
+    """
+    test that a uniform circular phantom has a small reconstruction bias
+    """
+    pixels = 128
+    xy = np.arange(-pixels / 2, pixels / 2) + 0.5
+    x, y = np.meshgrid(xy, xy)
+    image = x**2 + y**2 <= (pixels/4)**2
+
+    theta = np.linspace(0., 180., max(image.shape), endpoint=False)
+    sinogram = radon(image, theta=theta)
+
+    reconstruction_fbp = iradon(sinogram, theta=theta)
+    error = reconstruction_fbp - image
+
+    tol = 5e-5
+    roi_err = np.abs(np.mean(error))
+    assert( roi_err < tol )
+
+
+def check_radon_center(shape, circle, dtype, preserve_range):
     # Create a test image with only a single non-zero pixel at the origin
-    image = np.zeros(shape, dtype=np.float)
+    image = np.zeros(shape, dtype=dtype)
     image[(shape[0] // 2, shape[1] // 2)] = 1.
     # Calculate the sinogram
     theta = np.linspace(0., 180., max(shape), endpoint=False)
-    sinogram = radon(image, theta=theta, circle=circle)
+    sinogram = radon(image, theta=theta, circle=circle,
+                     preserve_range=preserve_range)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
     print(sinogram_max)
     assert np.std(sinogram_max) < 1e-6
 
 
-def test_radon_center():
-    shapes = [(16, 16), (17, 17)]
-    circles = [False, True]
-    for shape, circle in itertools.product(shapes, circles):
-        yield check_radon_center, shape, circle
-    rectangular_shapes = [(32, 16), (33, 17)]
-    for shape in rectangular_shapes:
-        yield check_radon_center, shape, False
+@testing.parametrize("shape", [(16, 16), (17, 17)])
+@testing.parametrize("circle", [False, True])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
+def test_radon_center(shape, circle, dtype, preserve_range):
+    check_radon_center(shape, circle, dtype, preserve_range)
+
+
+@testing.parametrize("shape", [(32, 16), (33, 17)])
+@testing.parametrize("circle", [False])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
+def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
+    check_radon_center(shape, circle, dtype, preserve_range)
 
 
 def check_iradon_center(size, theta, circle):
@@ -105,19 +134,24 @@ def check_iradon_center(size, theta, circle):
     assert np.allclose(reconstruction, reconstruction_opposite)
 
 
-def test_iradon_center():
-    sizes = [16, 17]
-    thetas = [0, 90]
-    circles = [False, True]
-    for size, theta, circle in itertools.product(sizes, thetas, circles):
-        yield check_iradon_center, size, theta, circle
+sizes_for_test_iradon_center = [16, 17]
+thetas_for_test_iradon_center = [0, 90]
+circles_for_test_iradon_center = [False, True]
+
+
+@testing.parametrize("size, theta, circle",
+                     itertools.product(sizes_for_test_iradon_center,
+                                       thetas_for_test_iradon_center,
+                                       circles_for_test_iradon_center))
+def test_iradon_center(size, theta, circle):
+    check_iradon_center(size, theta, circle)
 
 
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
     reconstructed = iradon(radon(image, circle=False), filter=filter_type,
-                           interpolation=interpolation_type)
+                           interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
     if debug:
@@ -132,14 +166,18 @@ def check_radon_iradon(interpolation_type, filter_type):
     assert delta < allowed_delta
 
 
-def test_radon_iradon():
-    filter_types = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
-    interpolation_types = ['linear', 'nearest']
-    for interpolation_type, filter_type in \
-            itertools.product(interpolation_types, filter_types):
-        yield check_radon_iradon, interpolation_type, filter_type
-    # cubic interpolation is slow; only run one test for it
-    yield check_radon_iradon, 'cubic', 'shepp-logan'
+filter_types = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
+interpolation_types = ['linear', 'nearest']
+radon_iradon_inputs = list(itertools.product(interpolation_types,
+                                             filter_types))
+# cubic interpolation is slow; only run one test for it
+radon_iradon_inputs.append(('cubic', 'shepp-logan'))
+
+
+@testing.parametrize("interpolation_type, filter_type",
+                     radon_iradon_inputs)
+def test_radon_iradon(interpolation_type, filter_type):
+    check_radon_iradon(interpolation_type, filter_type)
 
 
 def test_iradon_angles():
@@ -185,21 +223,34 @@ def check_radon_iradon_minimal(shape, slices):
                 == np.unravel_index(np.argmax(image), image.shape))
 
 
-def test_radon_iradon_minimal():
-    shapes = [(3, 3), (4, 4), (5, 5)]
-    for shape in shapes:
+shapes = [(3, 3), (4, 4), (5, 5)]
+
+
+def generate_test_data_for_radon_iradon_minimal(shapes):
+    def shape2coordinates(shape):
         c0, c1 = shape[0] // 2, shape[1] // 2
         coordinates = itertools.product((c0 - 1, c0, c0 + 1),
                                         (c1 - 1, c1, c1 + 1))
-        for coordinate in coordinates:
-            yield check_radon_iradon_minimal, shape, coordinate
+        return coordinates
+
+    def shape2shapeandcoordinates(shape):
+        return itertools.product([shape], shape2coordinates(shape))
+
+    return itertools.chain.from_iterable([shape2shapeandcoordinates(shape)
+                                          for shape in shapes])
+
+
+@testing.parametrize("shape, coordinate",
+                     generate_test_data_for_radon_iradon_minimal(shapes))
+def test_radon_iradon_minimal(shape, coordinate):
+    check_radon_iradon_minimal(shape, coordinate)
 
 
 def test_reconstruct_with_wrong_angles():
     a = np.zeros((3, 3))
     p = radon(a, theta=[0, 1, 2], circle=False)
     iradon(p, theta=[0, 1, 2], circle=False)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         iradon(p, theta=[0, 1, 2, 3])
 
 
@@ -261,9 +312,9 @@ def check_sinogram_circle_to_square(size):
             argmax_shape(sinogram_circle_to_square))
 
 
-def test_sinogram_circle_to_square():
-    for size in (50, 51):
-        yield check_sinogram_circle_to_square, size
+@testing.parametrize("size", (50, 51))
+def test_sinogram_circle_to_square(size):
+    check_sinogram_circle_to_square(size)
 
 
 def check_radon_iradon_circle(interpolation, shape, output_size):
@@ -294,13 +345,20 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     np.allclose(reconstruction_rectangle, reconstruction_circle)
 
 
-def test_radon_iradon_circle():
-    shape = (61, 79)
-    interpolations = ('nearest', 'linear')
-    output_sizes = (None, min(shape), max(shape), 97)
-    for interpolation, output_size in itertools.product(interpolations,
-                                                        output_sizes):
-        yield check_radon_iradon_circle, interpolation, shape, output_size
+# if adding more shapes to test data, you might want to look at commit d0f2bac3f
+shapes_radon_iradon_circle = ((61, 79), )
+interpolations = ('nearest', 'linear')
+output_sizes = (None,
+                min(shapes_radon_iradon_circle[0]),
+                max(shapes_radon_iradon_circle[0]),
+                97)
+
+
+@testing.parametrize("shape, interpolation, output_size",
+                     itertools.product(shapes_radon_iradon_circle,
+                                       interpolations, output_sizes))
+def test_radon_iradon_circle(shape, interpolation, output_size):
+    check_radon_iradon_circle(interpolation, shape, output_size)
 
 
 def test_order_angles_golden_ratio():
@@ -320,7 +378,8 @@ def test_order_angles_golden_ratio():
 def test_iradon_sart():
     debug = False
 
-    image = rescale(PHANTOM, 0.8, mode='reflect')
+    image = rescale(PHANTOM, 0.8, mode='reflect',
+                    multichannel=False, anti_aliasing=False)
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
@@ -356,9 +415,9 @@ def test_iradon_sart():
         np.random.seed(1239867)
         shifts = np.random.uniform(-3, 3, sinogram.shape[1])
         x = np.arange(sinogram.shape[0])
-        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
-                                               sinogram[:, i])
-                                     for i in range(sinogram.shape[1])).T
+        sinogram_shifted = np.vstack([np.interp(x + shifts[i], x,
+                                                sinogram[:, i])
+                                      for i in range(sinogram.shape[1])]).T
         reconstructed = iradon_sart(sinogram_shifted, theta,
                                     projection_shifts=shifts)
         if debug:
@@ -379,6 +438,30 @@ def test_iradon_sart():
         assert delta < 0.022 * error_factor
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_radon_dtype():
+    img = convert_to_float(PHANTOM, False)
+    img32 = img.astype(np.float32)
+
+    assert radon(img).dtype == img.dtype
+    assert radon(img32).dtype == img32.dtype
+
+
+def test_iradon_sart_dtype():
+    sinogram = np.zeros((16, 1), dtype=int)
+    sinogram[8, 0] = 1.
+    sinogram64 = sinogram.astype('float64')
+    sinogram32 = sinogram.astype('float32')
+
+    with expected_warnings(['Input data is cast to float']):
+        assert iradon_sart(sinogram, theta=[0]).dtype == 'float64'
+
+    assert iradon_sart(sinogram64, theta=[0]).dtype == sinogram64.dtype
+    assert iradon_sart(sinogram32, theta=[0]).dtype == sinogram32.dtype
+
+
+def test_iradon_wrong_dtype():
+    sinogram = np.zeros((16, 1))
+
+    with testing.raises(ValueError):
+        iradon_sart(sinogram, dtype=int)
+

@@ -1,37 +1,37 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_warns
-import pytest
 
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_warns
 from skimage.util.shape import view_as_blocks, view_as_windows
 
 
 def test_view_as_blocks_block_not_a_tuple():
     A = np.arange(10)
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         view_as_blocks(A, [5])
 
 
 def test_view_as_blocks_negative_shape():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_blocks(A, (-2,))
 
 
 def test_view_as_blocks_block_too_large():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_blocks(A, (11,))
 
 
 def test_view_as_blocks_wrong_block_dimension():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_blocks(A, (2, 2))
 
 
 def test_view_as_blocks_1D_array_wrong_block_shape():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_blocks(A, (3,))
 
 
@@ -62,31 +62,31 @@ def test_view_as_blocks_3D_array():
 
 def test_view_as_windows_input_not_array():
     A = [1, 2, 3, 4, 5]
-    with pytest.raises(TypeError):
+    with testing.raises(TypeError):
         view_as_windows(A, (2,))
 
 
 def test_view_as_windows_wrong_window_dimension():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_windows(A, (2, 2))
 
 
 def test_view_as_windows_negative_window_length():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_windows(A, (-1,))
 
 
 def test_view_as_windows_window_too_large():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_windows(A, (11,))
 
 
 def test_view_as_windows_step_below_one():
     A = np.arange(10)
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         view_as_windows(A, (11,), step=0.9)
 
 
@@ -147,8 +147,25 @@ def test_views_non_contiguous():
     A = np.arange(16).reshape((4, 4))
     A = A[::2, :]
 
-    assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
-    assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
+    res_b = view_as_blocks(A, (2, 2))
+    res_w = view_as_windows(A, (2, 2))
+    print(res_b)
+    print(res_w)
+
+    expected_b = [[[[0,  1],
+                    [8,  9]],
+                   [[2,  3],
+                    [10, 11]]]]
+
+    expected_w = [[[[ 0,  1],
+                    [ 8,  9]],
+                   [[ 1,  2],
+                    [ 9, 10]],
+                   [[ 2,  3],
+                    [10, 11]]]]
+
+    assert_equal(res_b, expected_b)
+    assert_equal(res_w, expected_w)
 
 
 def test_view_as_windows_step_tuple():
@@ -168,12 +185,8 @@ def test_view_as_windows_step_tuple():
                        [6,  7],
                        [10, 11]]],
                      [[[12, 13],
-                         [16, 17],
-                         [20, 21]],
+                       [16, 17],
+                       [20, 21]],
                       [[14, 15],
-                         [18, 19],
-                         [22, 23]]]])
-
-
-if __name__ == '__main__':
-    np.testing.run_module_suite()
+                       [18, 19],
+                       [22, 23]]]])

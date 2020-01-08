@@ -23,7 +23,6 @@ def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
               double[:] orientations):
 
     cdef Py_ssize_t i, d, kr, kc, pr0, pr1, pc0, pc1, spr0, spc0, spr1, spc1
-    cdef int[:, ::1] steered_pos0, steered_pos1
     cdef double angle
     cdef unsigned char[:, ::1] descriptors = \
         np.zeros((keypoints.shape[0], POS.shape[0]), dtype=np.uint8)

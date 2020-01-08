@@ -1,13 +1,12 @@
-import os.path
+import os
 
 import numpy as np
-from numpy.testing import assert_equal, assert_allclose
-import pytest
-import unittest
-
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, alphanumeric_key
 from skimage.io import reset_plugins
+
+from skimage._shared import testing
+from skimage._shared.testing import assert_equal, assert_allclose, TestCase
 
 
 def test_string_split():
@@ -25,15 +24,30 @@ def test_string_sort():
     assert_equal(sorted_filenames, sorted_filenames)
 
 
-class TestImageCollection(unittest.TestCase):
+def test_imagecollection_input():
+    """Test function for ImageCollection. The new behavior (implemented
+    in 0.16) allows the `pattern` argument to accept a list of strings
+    as the input.
 
+    Notes
+    -----
+        If correct, `images` will receive three images.
+    """
+    pattern = [os.path.join(data_dir, pic)
+               for pic in ['palette_gray.png',
+                           'chessboard_GRAY_U16.tif',
+                           'rocket.jpg']]
+    images = ImageCollection(pattern)
+    assert len(images) == 3
+
+
+class TestImageCollection(TestCase):
     pattern = [os.path.join(data_dir, pic)
                for pic in ['camera.png', 'color.png']]
 
     pattern_matched = [os.path.join(data_dir, pic)
                        for pic in ['camera.png', 'moon.png']]
-                       
-    @pytest.fixture(autouse=True)
+
     def setUp(self):
         reset_plugins()
         # Generic image collection with images of different shapes.
@@ -47,15 +61,15 @@ class TestImageCollection(unittest.TestCase):
     def test_getitem(self):
         num = len(self.images)
         for i in range(-num, num):
-            assert type(self.images[i]) is np.ndarray
+            assert isinstance(self.images[i], np.ndarray)
         assert_allclose(self.images[0],
-                                  self.images[-num])
+                        self.images[-num])
 
         def return_img(n):
             return self.images[n]
-        with pytest.raises(IndexError):
+        with testing.raises(IndexError):
             return_img(num)
-        with pytest.raises(IndexError):
+        with testing.raises(IndexError):
             return_img(-num - 1)
 
     def test_slicing(self):
@@ -73,17 +87,8 @@ class TestImageCollection(unittest.TestCase):
 
         def set_files(f):
             self.images.files = f
-        with pytest.raises(AttributeError):
+        with testing.raises(AttributeError):
             set_files('newfiles')
-
-    def test_custom_load(self):
-        load_pattern = [(1, 'one'), (2, 'two')]
-
-        def load_fn(x):
-            return x
-
-        ic = ImageCollection(load_pattern, load_func=load_fn)
-        assert_equal(ic[1], (2, 'two'))
 
     def test_custom_load_func(self):
 
@@ -98,11 +103,6 @@ class TestImageCollection(unittest.TestCase):
         expected_shape = (len(self.images_matched),) + self.images[0].shape
         assert_equal(array.shape, expected_shape)
 
-    def test_concatentate_mismatched_image_shapes(self):
-        with pytest.raises(ValueError):
+    def test_concatenate_mismatched_image_shapes(self):
+        with testing.raises(ValueError):
             self.images.concatenate()
-
-
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()

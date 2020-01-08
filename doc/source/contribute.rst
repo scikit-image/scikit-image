@@ -1,2 +1,6 @@
-.. include:: ../../TASKS.txt
+.. toctree:: 
+   :hidden: 
+ 
+   gitwash/index
+
 .. include:: ../../CONTRIBUTING.txt

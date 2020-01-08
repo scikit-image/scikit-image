@@ -14,6 +14,7 @@ from .._shared.utils import safe_as_int
 from .corner_cy import _corner_moravec, _corner_orientations
 from warnings import warn
 
+
 def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
@@ -82,11 +83,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> Axx
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -102,7 +103,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
@@ -111,7 +112,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective x- and y-directions.
+    of the Gaussian kernel in the respective r- and c-directions.
 
     Parameters
     ----------
@@ -125,11 +126,11 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    order : {'xy', 'rc'}, optional
+    order : {'rc', 'xy'}, optional
         This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'xy' indicates the usage
-        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
-        the use of the first axis initially (Hrr, Hrc, Hcc).
+        the image axes in gradient computation. 'rc' indicates the use of
+        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
+        usage of the last axis initially (Hxx, Hxy, Hyy)
 
     Returns
     -------
@@ -145,7 +146,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
     >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
@@ -159,18 +160,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
 
-    if order is None:
-        if image.ndim == 2:
-            # The legacy 2D code followed (x, y) convention, so we swap the axis
-            # order to maintain compatibility with old code
-            warn('deprecation warning: the default order of the hessian matrix values '
-                 'will be "row-column" instead of "xy" starting in skimage version 0.15. '
-                 'Use order="rc" or order="xy" to set this explicitly')
-            order = 'xy'
-        else:
-            order = 'rc'
-
-
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
 
@@ -182,11 +171,36 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     return H_elems
 
-def hessian_matrix_det(image, sigma=1):
-    """Computes the approximate Hessian Determinant over an image.
 
-    This method uses box filters over integral images to compute the
-    approximate Hessian Determinant as described in [1]_.
+def _hessian_matrix_image(H_elems):
+    """Convert the upper-diagonal elements of the Hessian matrix to a matrix.
+
+    Parameters
+    ----------
+    H_elems : list of array
+        The upper-diagonal elements of the Hessian matrix, as returned by
+        `hessian_matrix`.
+
+    Returns
+    -------
+    hessian_image : array
+        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
+        containing the Hessian matrix corresponding to each coordinate.
+    """
+    image = H_elems[0]
+    hessian_image = np.zeros(image.shape + (image.ndim, image.ndim))
+    for idx, (row, col) in \
+            enumerate(combinations_with_replacement(range(image.ndim), 2)):
+        hessian_image[..., row, col] = H_elems[idx]
+        hessian_image[..., col, row] = H_elems[idx]
+    return hessian_image
+
+
+def hessian_matrix_det(image, sigma=1, approximate=True):
+    """Compute the approximate Hessian Determinant over an image.
+
+    The 2D approximate method uses box filters over integral images to
+    compute the approximate Hessian Determinant, as described in [1]_.
 
     Parameters
     ----------
@@ -195,6 +209,9 @@ def hessian_matrix_det(image, sigma=1):
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix.
+    approximate : bool, optional
+        If ``True`` and the image is 2D, use a much faster approximate
+        computation. This argument has no effect on 3D and higher images.
 
     Returns
     -------
@@ -209,16 +226,19 @@ def hessian_matrix_det(image, sigma=1):
 
     Notes
     -----
-    The running time of this method only depends on size of the image. It is
-    independent of `sigma` as one would expect. The downside is that the
-    result for `sigma` less than `3` is not accurate, i.e., not similar to
-    the result obtained if someone computed the Hessian and took it's
-    determinant.
+    For 2D images when ``approximate=True``, the running time of this method
+    only depends on size of the image. It is independent of `sigma` as one
+    would expect. The downside is that the result for `sigma` less than `3`
+    is not accurate, i.e., not similar to the result obtained if someone
+    computed the Hessian and took its determinant.
     """
-
     image = img_as_float(image)
-    image = integral_image(image)
-    return np.array(_hessian_matrix_det(image, sigma))
+    if image.ndim == 2 and approximate:
+        integral = integral_image(image)
+        return np.array(_hessian_matrix_det(integral, sigma))
+    else:  # slower brute-force implementation for nD images
+        hessian_mat_array = _hessian_matrix_image(hessian_matrix(image, sigma))
+        return np.linalg.det(hessian_mat_array)
 
 
 def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
@@ -253,52 +273,55 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
-def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
+def hessian_matrix_eigvals(H_elems):
     """Compute Eigenvalues of Hessian matrix.
 
     Parameters
     ----------
-    Hxx : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hxy : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray
-        Element of the Hessian matrix for each pixel in the input image.
+    H_elems : list of ndarray
+        The upper-diagonal elements of the Hessian matrix, as returned
+        by `hessian_matrix`.
 
     Returns
     -------
-    l1 : ndarray
-        Larger eigen value for each input matrix.
-    l2 : ndarray
-        Smaller eigen value for each input matrix.
+    eigs : ndarray
+        The eigenvalues of the Hessian matrix, in decreasing order. The
+        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
+        contains the ith-largest eigenvalue at position (j, k).
 
     Examples
     --------
     >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1, order='rc')
-    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
+    >>> H_elems = hessian_matrix(square, sigma=0.1, order='rc')
+    >>> hessian_matrix_eigvals(H_elems)[0]
     array([[ 0.,  0.,  2.,  0.,  0.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 2.,  0., -2.,  0.,  2.],
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
-
     """
-
-    return _image_orthogonal_matrix22_eigvals(Hxx, Hxy, Hyy)
+    if len(H_elems) == 3:  # Use fast Cython code for 2D
+        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
+    else:
+        matrices = _hessian_matrix_image(H_elems)
+        # eigvalsh returns eigenvalues in increasing order. We want decreasing
+        eigvals = np.linalg.eigvalsh(matrices)[..., ::-1]
+        leading_axes = tuple(range(eigvals.ndim - 1))
+        eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
+    return eigvals
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
@@ -351,7 +374,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     .. [1] Koenderink, J. J. & van Doorn, A. J.,
            "Surface shape and curvature scales",
            Image and Vision Computing, 1992, 10, 557-564.
-           DOI:10.1016/0262-8856(92)90076-F
+           :DOI:`10.1016/0262-8856(92)90076-F`
 
     Examples
     --------
@@ -367,8 +390,8 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
            [ nan,  nan, -0.5,  nan,  nan]])
     """
 
-    Hxx, Hxy, Hyy = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
-    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+    H = hessian_matrix(image, sigma=sigma, mode=mode, cval=cval, order='rc')
+    l1, l2 = hessian_matrix_eigvals(H)
 
     return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
@@ -399,6 +422,11 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     response : ndarray
         Kitchen and Rosenfeld response image.
 
+    References
+    ----------
+    .. [1] Kitchen, L., & Rosenfeld, A. (1982). Gray-level corner detection.
+           Pattern recognition letters, 1(2), 95-102.
+           :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
@@ -455,8 +483,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -525,8 +552,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -591,8 +617,12 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -647,13 +677,13 @@ def corner_fast(image, n=12, threshold=0.15):
     ----------
     image : 2D ndarray
         Input image.
-    n : int
+    n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
         that should all be either brighter or darker w.r.t testpixel.
         A point c on the circle is darker w.r.t test pixel p if
         `Ic < Ip - threshold` and brighter if `Ic > Ip + threshold`. Also
         stands for the n in `FAST-n` corner detector.
-    threshold : float
+    threshold : float, optional
         Threshold used in deciding whether the pixels on the circle are
         brighter, darker or similar w.r.t. the test pixel. Decrease the
         threshold when more corners are desired and vice-versa.
@@ -665,8 +695,10 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Edward Rosten and Tom Drummond
-           "Machine Learning for high-speed corner detection",
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
+           corner detection. In European conference on computer vision (pp. 430-443).
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
            https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
@@ -731,9 +763,12 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-           foerstner87.fast.pdf
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -755,7 +790,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     >>> coords = corner_peaks(corner_harris(img), min_distance=2)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
-    array([[ 4.5,  4.5]])
+    array([[4.5, 4.5]])
 
     """
 
@@ -878,9 +913,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
+def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None):
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -891,17 +926,28 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
 
+    See also
+    --------
+    skimage.feature.peak_local_max
+
+    Notes
+    -----
+    The `num_peaks` limit is applied before suppression of
+    connected peaks. If you want to limit the number of peaks
+    after suppression, you should set `num_peaks=np.inf` and
+    post-process the output of this function.
+
     Examples
     --------
     >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
     array([[3, 3],
            [3, 2],
@@ -911,19 +957,27 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     array([[2, 2]])
 
     """
+    if threshold_rel is None:
+        threshold_rel = 0.1
+        warn("Until the version 0.16, threshold_rel was set to 0.1 by default."
+             "Starting from version 0.16, the default value is set to None."
+             "Until version 0.18, a None value corresponds to a threshold value of 0.1."
+             "The default behavior will match skimage.feature.peak_local_max.",
+             category=FutureWarning, stacklevel=2)
 
     peaks = peak_local_max(image, min_distance=min_distance,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
                            indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels)
+                           footprint=footprint, labels=labels,
+                           num_peaks_per_label=num_peaks_per_label)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())
         for r, c in coords:
             if peaks[r, c]:
-                peaks[r - min_distance:r + min_distance + 1,
-                      c - min_distance:c + min_distance + 1] = False
+                peaks[max((r - min_distance), 0):r + min_distance + 1,
+                      max((c - min_distance), 0):c + min_distance + 1] = False
                 peaks[r, c] = True
 
     if indices is True:
@@ -952,8 +1006,7 @@ def corner_moravec(image, window_size=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------

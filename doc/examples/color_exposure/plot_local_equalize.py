@@ -3,7 +3,7 @@
 Local Histogram Equalization
 ============================
 
-This examples enhances an image with low contrast, using a method called *local
+This example enhances an image with low contrast, using a method called *local
 histogram equalization*, which spreads out the most frequent intensity values
 in an image.
 
@@ -15,8 +15,8 @@ graylevel variations.
 
 References
 ----------
-.. [1] http://en.wikipedia.org/wiki/Histogram_equalization
-.. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+.. [1] https://en.wikipedia.org/wiki/Histogram_equalization
+.. [2] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 """
 import numpy as np
@@ -74,11 +74,9 @@ img_eq = rank.equalize(img, selem=selem)
 # Display results
 fig = plt.figure(figsize=(8, 5))
 axes = np.zeros((2, 3), dtype=np.object)
-axes[0, 0] = plt.subplot(2, 3, 1, adjustable='box-forced')
-axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0],
-                         adjustable='box-forced')
-axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0],
-                         adjustable='box-forced')
+axes[0, 0] = plt.subplot(2, 3, 1)
+axes[0, 1] = plt.subplot(2, 3, 2, sharex=axes[0, 0], sharey=axes[0, 0])
+axes[0, 2] = plt.subplot(2, 3, 3, sharex=axes[0, 0], sharey=axes[0, 0])
 axes[1, 0] = plt.subplot(2, 3, 4)
 axes[1, 1] = plt.subplot(2, 3, 5)
 axes[1, 2] = plt.subplot(2, 3, 6)

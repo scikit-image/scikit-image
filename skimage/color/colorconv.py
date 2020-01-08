@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Functions for converting between color spaces.
 
 The "central" color space in this module is RGB, more specifically the linear
@@ -48,11 +45,10 @@ References
 ----------
 .. [1] Official specification of sRGB, IEC 61966-2-1:1999.
 .. [2] http://www.poynton.com/ColorFAQ.html
-.. [3] http://en.wikipedia.org/wiki/HSL_and_HSV
-.. [4] http://en.wikipedia.org/wiki/CIE_1931_color_space
+.. [3] https://en.wikipedia.org/wiki/HSL_and_HSV
+.. [4] https://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
-from __future__ import division
 
 from warnings import warn
 import numpy as np
@@ -79,65 +75,59 @@ def guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
-    if image.ndim == 2:
-        return 2
-    if image.ndim == 3 and image.shape[-1] != 3:
-        return 3
-    if image.ndim == 3 and image.shape[-1] == 3:
-        return None
-    if image.ndim == 4 and image.shape[-1] == 3:
-        return 3
-    else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+    from ..filters import _guess_spatial_dimensions
+    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
+    return _guess_spatial_dimensions(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
+    Valid color spaces are:
+        'RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr', 'YDbDr'
+
     Parameters
     ----------
     arr : array_like
         The image to convert.
-    fromspace : str
-        The color space to convert from. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
-        Value may also be specified as lower case.
-
-    tospace : str
-        The color space to convert to. Valid color space strings are
-        ``['RGB', 'HSV', 'RGB CIE', 'XYZ', 'YUV', 'YIQ', 'YPbPr', 'YCbCr']``.
-        Value may also be specified as lower case.
+    fromspace : valid color space
+        The color space to convert from. Can be specified in lower case.
+    tospace : valid color space
+        The color space to convert to. Can be specified in lower case.
 
     Returns
     -------
-    newarr : ndarray
+    out : ndarray
         The converted image.
 
     Notes
     -----
-    Conversion occurs through the "central" RGB color space, i.e. conversion
-    from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV`` instead of
-    directly.
+    Conversion is performed through the "central" RGB color space,
+    i.e. conversion from XYZ to HSV is implemented as ``XYZ -> RGB -> HSV``
+    instead of directly.
 
     Examples
     --------
     >>> from skimage import data
     >>> img = data.astronaut()
     >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
-    """
-    fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
-                'XYZ': xyz2rgb, 'YUV': yuv2rgb, 'YIQ': yiq2rgb,
-                'YPbPr': ypbpr2rgb, 'YCbCr': ycbcr2rgb}
-    todict = {'RGB': lambda im: im, 'HSV': rgb2hsv, 'RGB CIE': rgb2rgbcie,
-              'XYZ': rgb2xyz, 'YUV': rgb2yuv, 'YIQ': rgb2yiq,
-              'YPbPr': rgb2ypbpr, 'YCbCr': rgb2ycbcr}
 
-    fromspace = fromspace.upper()
-    tospace = tospace.upper()
-    if fromspace not in fromdict.keys():
-        raise ValueError('fromspace needs to be one of %s' % fromdict.keys())
-    if tospace not in todict.keys():
-        raise ValueError('tospace needs to be one of %s' % todict.keys())
+    """
+    fromdict = {'rgb': lambda im: im, 'hsv': hsv2rgb, 'rgb cie': rgbcie2rgb,
+                'xyz': xyz2rgb, 'yuv': yuv2rgb, 'yiq': yiq2rgb,
+                'ypbpr': ypbpr2rgb, 'ycbcr': ycbcr2rgb, 'ydbdr': ydbdr2rgb}
+    todict = {'rgb': lambda im: im, 'hsv': rgb2hsv, 'rgb cie': rgb2rgbcie,
+              'xyz': rgb2xyz, 'yuv': rgb2yuv, 'yiq': rgb2yiq,
+              'ypbpr': rgb2ypbpr, 'ycbcr': rgb2ycbcr, 'ydbdr': rgb2ydbdr}
+
+    fromspace = fromspace.lower()
+    tospace = tospace.lower()
+    if fromspace not in fromdict:
+        msg = '`fromspace` has to be one of {}'.format(fromdict.keys())
+        raise ValueError(msg)
+    if tospace not in todict:
+        msg = '`tospace` has to be one of {}'.format(todict.keys())
+        raise ValueError(msg)
 
     return todict[tospace](fromdict[fromspace](arr))
 
@@ -246,7 +236,7 @@ def rgb2hsv(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
@@ -321,7 +311,7 @@ def hsv2rgb(hsv):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
+    .. [1] https://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
@@ -367,7 +357,7 @@ xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
-# From http://en.wikipedia.org/wiki/CIE_1931_color_space
+# From https://en.wikipedia.org/wiki/CIE_1931_color_space
 # Note: Travis's code did not have the divide by 0.17697
 xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
                             [0.17697, 0.81240, 0.01063],
@@ -376,8 +366,8 @@ xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
 rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
 
 # construct matrices to and from rgb:
-rgbcie_from_rgb = np.dot(rgbcie_from_xyz, xyz_from_rgb)
-rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgbcie)
+rgbcie_from_rgb = rgbcie_from_xyz @ xyz_from_rgb
+rgb_from_rgbcie = rgb_from_xyz @ xyz_from_rgbcie
 
 
 gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
@@ -408,6 +398,13 @@ ycbcr_from_rgb = np.array([[    65.481,   128.553,    24.966],
 
 rgb_from_ycbcr = linalg.inv(ycbcr_from_rgb)
 
+ydbdr_from_rgb = np.array([[    0.299,   0.587,    0.114],
+                           [   -0.45 ,  -0.883,    1.333],
+                           [   -1.333,   1.116,    0.217]])
+
+rgb_from_ydbdr = linalg.inv(ydbdr_from_rgb)
+
+
 # CIE LAB constants for Observer=2A, Illuminant=D65
 # NOTE: this is actually the XYZ values for the illuminant above.
 lab_ref_white = np.array([0.95047, 1., 1.08883])
@@ -433,7 +430,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 #
 #     References
 #    ----------
-#    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+#    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
 illuminants = \
     {"A": {'2': (1.098466069456375, 1, 0.3558228003436005),
@@ -450,7 +447,7 @@ illuminants = \
            '10': (1.0, 1.0, 1.0)}}
 
 
-def get_xyz_coords(illuminant, observer):
+def get_xyz_coords(illuminant, observer, dtype=float):
     """Get the XYZ coordinates of the given illuminant and observer [1]_.
 
     Parameters
@@ -459,11 +456,13 @@ def get_xyz_coords(illuminant, observer):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
+    dtype: dtype, optional
+        Output data type.
 
     Returns
     -------
-    (x, y, z) : tuple
-        A tuple with 3 elements containing the XYZ coordinates of the given
+    out : array
+        Array with 3 elements containing the XYZ coordinates of the given
         illuminant.
 
     Raises
@@ -474,12 +473,12 @@ def get_xyz_coords(illuminant, observer):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Standard_illuminant
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
     """
     illuminant = illuminant.upper()
     try:
-        return illuminants[illuminant][observer]
+        return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
@@ -497,7 +496,7 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
-# http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+# https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 # Hematoxylin + DAB
 rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
@@ -584,12 +583,12 @@ def _convert(matrix, arr):
 
     Returns
     -------
-    out : ndarray, dtype=float
+    out : ndarray
         The converted array.
     """
     arr = _prepare_colorarray(arr)
 
-    return np.dot(arr, matrix.T.copy())
+    return arr @ matrix.T.astype(arr.dtype)
 
 
 def xyz2rgb(xyz):
@@ -617,7 +616,7 @@ def xyz2rgb(xyz):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -633,8 +632,7 @@ def xyz2rgb(xyz):
     mask = arr > 0.0031308
     arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
-    arr[arr < 0] = 0
-    arr[arr > 1] = 1
+    np.clip(arr, 0, 1, out=arr)
     return arr
 
 
@@ -665,7 +663,7 @@ def rgb2xyz(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -702,7 +700,7 @@ def rgb2rgbcie(rgb):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -734,7 +732,7 @@ def rgbcie2rgb(rgbcie):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+    .. [1] https://en.wikipedia.org/wiki/CIE_1931_color_space
 
     Examples
     --------
@@ -794,12 +792,8 @@ def rgb2gray(rgb):
         return np.ascontiguousarray(rgb)
 
     rgb = _prepare_colorarray(rgb[..., :3])
-
-    gray = 0.2125 * rgb[..., 0]
-    gray[:] += 0.7154 * rgb[..., 1]
-    gray[:] += 0.0721 * rgb[..., 2]
-
-    return gray
+    coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
+    return rgb @ coeffs
 
 
 rgb2grey = rgb2gray
@@ -904,7 +898,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
-    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
 
     Examples
     --------
@@ -916,14 +910,14 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     """
     arr = _prepare_colorarray(xyz)
 
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = get_xyz_coords(illuminant, observer, arr.dtype)
 
     # scale by CIE XYZ tristimulus values of the reference white point
     arr = arr / xyz_ref_white
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
-    arr[mask] = np.power(arr[mask], 1. / 3.)
+    arr[mask] = np.cbrt(arr[mask])
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -973,7 +967,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
-    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
 
     """
 
@@ -986,7 +980,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     if np.any(z < 0):
         invalid = np.nonzero(z < 0)
-        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size)
+        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size,
+             stacklevel=2)
         z[invalid] = 0
 
     out = np.dstack([x, y, z])
@@ -1111,7 +1106,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://en.wikipedia.org/wiki/CIELUV
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     Examples
     --------
@@ -1129,14 +1124,14 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     eps = np.finfo(np.float).eps
 
     # compute y_r and L
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
-    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[mask] = 116. * np.cbrt(L[mask]) - 16.
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4 * xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / ([1, 15, 3] @ xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
@@ -1187,7 +1182,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     References
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://en.wikipedia.org/wiki/CIELUV
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     """
 
@@ -1206,9 +1201,9 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     y *= xyz_ref_white[1]
 
     # reference white x,z
-    uv_weights = [1, 15, 3]
-    u0 = 4 * xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
+    uv_weights = np.array([1, 15, 3])
+    u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
     # compute intermediate values
     a = u0 + u / (13. * L + eps)
@@ -1249,7 +1244,7 @@ def rgb2luv(rgb):
     ----------
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
     .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
-    .. [3] http://en.wikipedia.org/wiki/CIELUV
+    .. [3] https://en.wikipedia.org/wiki/CIELUV
 
     """
     return xyz2luv(rgb2xyz(rgb))
@@ -1395,7 +1390,7 @@ def separate_stains(rgb, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
@@ -1406,7 +1401,7 @@ def separate_stains(rgb, conv_matrix):
     """
     rgb = dtype.img_as_float(rgb, force_copy=True)
     rgb += 2
-    stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
+    stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
     return np.reshape(stains, rgb.shape)
 
 
@@ -1451,7 +1446,7 @@ def combine_stains(stains, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 
     Examples
@@ -1466,8 +1461,8 @@ def combine_stains(stains, conv_matrix):
     from ..exposure import rescale_intensity
 
     stains = dtype.img_as_float(stains)
-    logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
-    rgb2 = np.exp(logrgb2)
+    logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
+    rgb2 = np.power(10, logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
                              in_range=(-1, 1))
 
@@ -1695,6 +1690,40 @@ def rgb2ycbcr(rgb):
     return arr
 
 
+def rgb2ydbdr(rgb):
+    """RGB to YDbDr color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3- or 4-D array of shape
+        ``(M, N, [P,] 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in YDbDr format, in a 3- or 4-D array of shape
+        ``(M, N, [P,] 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    This is the color space which is commonly used
+    by video codecs, it is also the reversible color transform in JPEG2000.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YDbDr
+
+    """
+    arr = _convert(ydbdr_from_rgb, rgb)
+    return arr
+
+
 def yuv2rgb(yuv):
     """YUV to RGB color space conversion.
 
@@ -1809,3 +1838,37 @@ def ycbcr2rgb(ycbcr):
     arr[..., 1] -= 128
     arr[..., 2] -= 128
     return _convert(rgb_from_ycbcr, arr)
+
+
+def ydbdr2rgb(ydbdr):
+    """YDbDr to RGB color space conversion.
+
+    Parameters
+    ----------
+    ydbdr : array_like
+        The image in YDbDr format, in a 3- or 4-D array of shape
+        ``(M, N, [P,] 3)``.
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3- or 4-D array of shape
+        ``(M, N, [P,] 3)``.
+
+    Raises
+    ------
+    ValueError
+        If `ydbdr` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+
+    Notes
+    -----
+    This is the color space which is commonly used
+    by video codecs, it is also the reversible color transform in JPEG2000.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/YDbDr
+
+    """
+    arr = ydbdr.copy()
+    return _convert(rgb_from_ydbdr, arr)

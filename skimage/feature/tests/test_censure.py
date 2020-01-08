@@ -1,9 +1,9 @@
 import numpy as np
-from numpy.testing import assert_array_equal
-import pytest
+from skimage._shared.testing import assert_array_equal
 from skimage.data import moon
 from skimage.feature import CENSURE
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
 from skimage.transform import rescale
 
 
@@ -21,21 +21,21 @@ def test_censure_on_rectangular_images():
 
 def test_keypoints_censure_color_image_unsupported_error():
     """Censure keypoints can be extracted from gray-scale images only."""
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         CENSURE().detect(np.zeros((20, 20, 3)))
 
 
 def test_keypoints_censure_mode_validity_error():
     """Mode argument in keypoints_censure can be either DoB, Octagon or
     STAR."""
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         CENSURE(mode='dummy')
 
 
 def test_keypoints_censure_scale_range_error():
     """Difference between the the max_scale and min_scale parameters in
     keypoints_censure should be greater than or equal to two."""
-    with pytest.raises(ValueError):
+    with testing.raises(ValueError):
         CENSURE(min_scale=1, max_scale=2)
 
 
@@ -65,7 +65,11 @@ def test_keypoints_censure_moon_image_octagon():
     the expected values for Octagon filter."""
 
     detector = CENSURE(mode='octagon')
-    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    # quarter scale image for speed
+    detector.detect(rescale(img, 0.25,
+                            multichannel=False,
+                            anti_aliasing=False,
+                            mode='constant'))
     expected_keypoints = np.array([[ 23,  27],
                                    [ 29,  89],
                                    [ 31,  87],
@@ -82,7 +86,11 @@ def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
     detector = CENSURE(mode='star')
-    detector.detect(rescale(img, 0.25))     # quarter scale image for speed
+    # quarter scale image for speed
+    detector.detect(rescale(img, 0.25,
+                            multichannel=False,
+                            anti_aliasing=False,
+                            mode='constant'))
     expected_keypoints = np.array([[ 23,  27],
                                    [ 29,  89],
                                    [ 30,  86],
@@ -95,8 +103,3 @@ def test_keypoints_censure_moon_image_star():
 
     assert_array_equal(expected_keypoints, detector.keypoints)
     assert_array_equal(expected_scales, detector.scales)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

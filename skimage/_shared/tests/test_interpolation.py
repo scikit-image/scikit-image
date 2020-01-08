@@ -1,6 +1,5 @@
 from skimage._shared.interpolation import coord_map_py
-from numpy.testing import assert_array_equal
-
+from skimage._shared.testing import assert_array_equal
 
 def test_coord_map():
     symmetric = [coord_map_py(4, n, 'S') for n in range(-6, 6)]
@@ -17,6 +16,10 @@ def test_coord_map():
 
     reflect = [coord_map_py(4, n, 'R') for n in range(-6, 6)]
     expected_reflect = [0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1]
+    assert_array_equal(reflect, expected_reflect)
+
+    reflect = [coord_map_py(1, n, 'R') for n in range(-6, 6)]
+    expected_reflect = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert_array_equal(reflect, expected_reflect)
 
     other = [coord_map_py(4, n, 'undefined') for n in range(-6, 6)]

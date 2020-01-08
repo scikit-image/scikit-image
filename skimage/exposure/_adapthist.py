@@ -13,7 +13,6 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
-from __future__ import division
 import numbers
 import numpy as np
 from ..util import img_as_float, img_as_uint
