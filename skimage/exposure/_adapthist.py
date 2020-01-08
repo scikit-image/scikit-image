@@ -165,7 +165,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
         for c in range(nc + 1):
             cL = max(0, c - 1)
             cR = min(nc - 1, c)
-            if c in [0, nc]:  # special case: left and right rows
+            if c in [0, nc]:  # special case: left and right columns
                 c_offset = col_step // 2
             else:  # default values
                 c_offset = col_step
