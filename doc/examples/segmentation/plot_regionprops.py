@@ -24,8 +24,8 @@ image[rr, cc] = 1
 
 image = rotate(image, angle=15, order=0)
 
-rrr, ccc = ellipse(100, 100, 60, 50)
-image[rrr, ccc] = 1
+rr, cc = ellipse(100, 100, 60, 50)
+image[rr, cc] = 1
 
 label_img = label(image)
 regions = regionprops(label_img)
