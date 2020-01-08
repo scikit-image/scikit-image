@@ -146,7 +146,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
 
             hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
-            hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
+            hist = np.pad(hist, (0, nbins - hist.size))
             hist = clip_histogram(hist, clim)
             hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
