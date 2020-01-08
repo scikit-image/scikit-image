@@ -1,7 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
+
 from skimage.registration import lddmm_register, apply_lddmm, resample
 from skimage.data import allen_mouse_brain_atlas, cleared_mouse_brain
+
 
 def scale_data(data, quantile_threshold=0.001):
     """Rescales data such that the central data points (ignoring the extrema) lie on the interval [0, 1]."""
@@ -20,7 +22,8 @@ def scale_data(data, quantile_threshold=0.001):
 
 def imshow_on_ax(axes, dim, column, image, overlaid_image=None, quantile_threshold=0.001):
     """
-    Rescales image using scale_data and displays it on the specified element of axes. 
+    Rescales image using scale_data and displays a central slice of it across the given dimension 
+    on the specified element of <axes>.
 
     If an overlaid_image is provided, it is likewise rescaled and an RGB display is produced 
     using image as the Red and Blue channels and overlaid_image as the Green channel.
@@ -53,6 +56,7 @@ target = cleared_mouse_brain()
 # Downsample images if desired.
 # Note: with downsample_factor = 1, lddmm_register runs in approximately 40-50 minutes.
 # This runtime declines roughly as the cube of downsample_factor.
+# Optimization parameters may require adjustment for sufficiently large downsample_factor values.
 downsample_factor = 2
 template = resample(template, downsample_factor)
 target   = resample(  target, downsample_factor)
@@ -62,7 +66,7 @@ target   = resample(  target, downsample_factor)
 # The stepsizes for lddmm_register are calibrated for this data without any downsampling (downsample_factor = 1 above), hence the correction.
 print(
     "Please allow approximately 3-4 minutes for lddmm_register to finish with these inputs,\n"
-    "or ~15-20 minutes if running on a single CPU."
+    "or ~15-20 minutes if running with a single CPU."
 )
 lddmm_dict = lddmm_register(
     template                   = template, 
