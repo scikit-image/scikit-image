@@ -331,6 +331,17 @@ def test_adapthist_alpha():
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
 
 
+def test_adapthist_borders():
+    """Test border processing
+    """
+    img = np.random.rand(35, 35)
+    adapted = exposure.equalize_adapthist(img, kernel_size=3)
+    # Check last column is procesed
+    assert np.any(adapted[:, -1] != img[:, -1])
+    # Check last row is procesed
+    assert np.any(adapted[-1, :] != img[-1, :])
+
+
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 
