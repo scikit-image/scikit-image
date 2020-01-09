@@ -334,12 +334,13 @@ def test_adapthist_alpha():
 def test_adapthist_borders():
     """Test border processing
     """
-    img = np.random.rand(35, 35)
-    adapted = exposure.equalize_adapthist(img, kernel_size=3)
-    # Check last column is procesed
-    assert np.any(adapted[:, -1] != img[:, -1])
-    # Check last row is procesed
-    assert np.any(adapted[-1, :] != img[-1, :])
+    img = rgb2gray(util.img_as_float(data.astronaut()))
+    adapted = exposure.equalize_adapthist(img, 11)
+    width = 42
+    # Check last columns are procesed
+    assert norm_brightness_err(adapted[:, -width], img[:, -width]) > 1e-3
+    # Check last rows are procesed
+    assert norm_brightness_err(adapted[-width, :], img[-width, :]) > 1e-3
 
 
 def peak_snr(img1, img2):
