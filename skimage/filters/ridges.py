@@ -117,7 +117,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
 
     # Make nD hessian
     hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
-                                      mode=mode)
+                                      mode=mode, cval=cval)
 
     # Correct for scale
     hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
@@ -312,9 +312,10 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     return np.max(filtered_array, axis=0)
 
 
-def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-           beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-           black_ridges=True):
+def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
+           scale_step=None, beta1=None, beta2=None, alpha=0.5,
+           beta=0.5, gamma=15, black_ridges=True, mode='reflect',
+           cval=0):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -349,6 +350,11 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -426,7 +432,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         # Calculate (abs sorted) eigenvalues
         lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
                                                         sorting='abs',
-                                                        mode='reflect')
+                                                        mode=mode, cval=cval)
 
         # Compute sensitivity to deviation from a plate-like
         # structure see equations (11) and (15) in reference [1]_
