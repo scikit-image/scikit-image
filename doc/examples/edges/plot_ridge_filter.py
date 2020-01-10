@@ -65,7 +65,7 @@ for i, black_ridges in enumerate([1, 0]):
     for j, func in enumerate([identity, meijering, sato, frangi, hessian]):
         kwargs['black_ridges'] = black_ridges
         result = func(image, **kwargs)
-        if func in (meijering, frangi):
+        if func in (meijering):
             # Crop by 4 pixels for rendering purpose.
             result = result[4:-4, 4:-4]
         axes[i, j].imshow(result, cmap=cmap, aspect='auto')
