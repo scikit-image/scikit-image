@@ -207,12 +207,12 @@ def test_border_management():
     border_mean = np.stack([out[:4, :], out[-4:, :],
                             out[:, :4].T, out[:, -4:].T]).mean()
 
-    assert abs(full_std-inside_std) < 1e-7
-    assert abs(full_std- border_std) < 1e-7
-    assert abs(inside_std-border_std) < 1e-7
-    assert abs(full_mean-inside_mean) < 1e-7
-    assert abs(full_mean- border_mean) < 1e-7
-    assert abs(inside_mean-border_mean) < 1e-7
+    assert abs(full_std - inside_std) < 1e-7
+    assert abs(full_std -  border_std) < 1e-7
+    assert abs(inside_std - border_std) < 1e-7
+    assert abs(full_mean - inside_mean) < 1e-7
+    assert abs(full_mean - border_mean) < 1e-7
+    assert abs(inside_mean - border_mean) < 1e-7
 
 
 if __name__ == "__main__":
