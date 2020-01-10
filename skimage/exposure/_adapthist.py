@@ -144,9 +144,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
             else:
                 clim = NR_OF_GREY  # Large value, do not clip (AHE)
 
-            hist = lut[sub_img.ravel()]
-            hist = np.bincount(hist)
-            hist = np.pad(hist, (0, nbins - hist.size), mode='constant')
+            hist = np.bincount(lut[sub_img.ravel()], minlength=nbins)
             hist = clip_histogram(hist, clim)
             hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
@@ -164,7 +162,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
         else:  # default values
             r_offset = row_step
 
-        rslice = np.arange(rstart, rstart + r_offset)
+        rslice = slice(rstart, rstart + r_offset)
 
         for c in range(nc + 1):
             cL = max(0, c - 1)
@@ -174,15 +172,15 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
             else:  # default values
                 c_offset = col_step
 
-            cslice = np.arange(cstart, cstart + c_offset)
+            cslice = slice(cstart, cstart + c_offset)
 
             mapLU = map_array[rU, cL]
             mapRU = map_array[rU, cR]
             mapLB = map_array[rB, cL]
             mapRB = map_array[rB, cR]
 
-            interpolate(image, cslice, rslice,
-                        mapLU, mapRU, mapLB, mapRB, lut)
+            _interpolate(image, cslice, rslice,
+                         mapLU, mapRU, mapLB, mapRB, lut)
 
             cstart += c_offset  # set pointer on next matrix */
 
@@ -216,7 +214,7 @@ def clip_histogram(hist, clip_limit):
     n_excess = excess.sum() - excess.size * clip_limit
 
     # Second part: clip histogram and redistribute excess pixels in each bin
-    bin_incr = int(n_excess / hist.size)  # average binincrement
+    bin_incr = n_excess // hist.size  # average binincrement
     upper = clip_limit - bin_incr  # Bins larger than upper set to cliplimit
 
     hist[excess_mask] = clip_limit
@@ -225,29 +223,23 @@ def clip_histogram(hist, clip_limit):
     n_excess -= hist[low_mask].size * bin_incr
     hist[low_mask] += bin_incr
 
-    mid_mask = (hist >= upper) & (hist < clip_limit)
+    mid_mask = np.logical_and(hist >= upper, hist < clip_limit)
     mid = hist[mid_mask]
-    n_excess -= mid.size * clip_limit - mid.sum()
+    n_excess += mid.sum() - mid.size * clip_limit
     hist[mid_mask] = clip_limit
 
-    prev_n_excess = n_excess
-
     while n_excess > 0:  # Redistribute remaining excess
-        index = 0
-        while n_excess > 0 and index < hist.size:
-            under_mask = hist < 0
-            step_size = int(hist[hist < clip_limit].size / n_excess)
-            step_size = max(step_size, 1)
-            indices = np.arange(index, hist.size, step_size)
-            under_mask[indices] = True
-            under_mask = (under_mask) & (hist < clip_limit)
-            hist[under_mask] += 1
-            n_excess -= under_mask.sum()
-            index += 1
-        # bail if we have not distributed any excess
+        prev_n_excess = n_excess
+        for index in range(hist.size):
+            under_mask = hist < clip_limit
+            step_size = max(1, np.count_nonzero(under_mask) // n_excess)
+            under_mask = under_mask[index::step_size]
+            hist[index::step_size][under_mask] += 1
+            n_excess -= np.count_nonzero(under_mask)
+            if n_excess <= 0:
+                break
         if prev_n_excess == n_excess:
             break
-        prev_n_excess = n_excess
 
     return hist
 
@@ -281,6 +273,47 @@ def map_histogram(hist, min_val, max_val, n_pixels):
     return out.astype(int)
 
 
+def _interpolate(image, xslice, yslice,
+                 mapLU, mapRU, mapLB, mapRB, lut):
+    """Find the new grayscale level for a region using bilinear interpolation.
+
+    Parameters
+    ----------
+    image : ndarray
+        Full image.
+    xslice, yslice : slice
+       Slices of the region.
+    map* : ndarray
+        Mappings of greylevels from histograms.
+    lut : ndarray
+        Maps grayscale levels in image to histogram levels.
+
+    Returns
+    -------
+    out : ndarray
+        Original image with the subregion replaced.
+
+    Notes
+    -----
+    This function calculates the new greylevel assignments of pixels within
+    a submatrix of the image. This is done by a bilinear interpolation between
+    four different mappings in order to eliminate boundary artifacts.
+    """
+    view = image[yslice, xslice]
+    y_size, x_size = view.shape
+    # interpolation weight matrices
+    x_coef, y_coef = np.meshgrid(np.arange(x_size), np.arange(y_size))
+    x_inv_coef, y_inv_coef = x_coef[:, ::-1] + 1, y_coef[::-1] + 1
+
+    im_slice = lut[view]
+    new = (y_inv_coef * (x_inv_coef * mapLU[im_slice]
+                         + x_coef * mapRU[im_slice])
+           + y_coef * (x_inv_coef * mapLB[im_slice]
+                       + x_coef * mapRB[im_slice]))
+    view[:, :] = new / (x_size * y_size)
+    return image
+
+
 def interpolate(image, xslice, yslice,
                 mapLU, mapRU, mapLB, mapRB, lut):
     """Find the new grayscale level for a region using bilinear interpolation.
@@ -307,19 +340,6 @@ def interpolate(image, xslice, yslice,
     a submatrix of the image. This is done by a bilinear interpolation between
     four different mappings in order to eliminate boundary artifacts.
     """
-    norm = xslice.size * yslice.size  # Normalization factor
-    # interpolation weight matrices
-    x_coef, y_coef = np.meshgrid(np.arange(xslice.size),
-                                 np.arange(yslice.size))
-    x_inv_coef, y_inv_coef = x_coef[:, ::-1] + 1, y_coef[::-1] + 1
-
-    view = image[int(yslice[0]):int(yslice[-1] + 1),
-                 int(xslice[0]):int(xslice[-1] + 1)]
-    im_slice = lut[view]
-    new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
-                          + x_coef * mapRU[im_slice])
-            + y_coef * (x_inv_coef * mapLB[im_slice]
-                        + x_coef * mapRB[im_slice]))
-           / norm)
-    view[:, :] = new
-    return image
+    xslice = slice(xslice[0], xslice[-1] + 1)
+    yslice = slice(yslice[0], yslice[-1] + 1)
+    return _interpolate(image, xslice, yslice, mapLU, mapRU, mapLB, mapRB, lut)
