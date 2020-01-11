@@ -212,7 +212,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
 
     # Creating the inverse of ar
     if in_place:
-        out = np.logical_not(out, out)
+        np.logical_not(out, out=out)
     else:
         out = np.logical_not(out)
 
@@ -220,7 +220,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     out = remove_small_objects(out, area_threshold, connectivity, in_place)
 
     if in_place:
-        out = np.logical_not(out, out)
+        np.logical_not(out, out=out)
     else:
         out = np.logical_not(out)
 
