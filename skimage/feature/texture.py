@@ -61,9 +61,13 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
+    .. [2] Haralick, RM.; Shanmugam, K.,
+           "Textural features for image classification"
+           IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+           :DOI:`10.1109/TSMC.1973.4309314`
+    .. [3] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [4] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
