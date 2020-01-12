@@ -58,14 +58,21 @@ for props in regions:
 ax.axis((0, 600, 600, 0))
 plt.show()
 
+#####################################################################
+# We use the :py:func:`skimage.measure.regionprops_table` to compute
+# (selected) properties for each region. Note that
+# ``skimage.measure.regionprops_table`` actually computes the properties,
+# whereas ``skimage.measure.regionprops`` computes them when they come in use
+# (lazy evaluation).
+
 props = regionprops_table(label_img, properties=('centroid',
                                                  'orientation',
                                                  'major_axis_length',
                                                  'minor_axis_length'))
 
 #####################################################################
-# We now display a table of (selected) properties for each region (one region
-# per row), the :py:func:`skimage.measure.regionprops_table` result being a
-# a pandas-compatible dict.
+# We now display a table of these selected properties (one region per row),
+# the ``skimage.measure.regionprops_table`` result being a pandas-compatible
+# dict.
 
 pd.DataFrame(props)
