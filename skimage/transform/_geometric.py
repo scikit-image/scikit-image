@@ -253,6 +253,11 @@ class FundamentalMatrixTransform(GeometricTransform):
         if matrix.shape != (dimensionality + 1, dimensionality + 1):
             raise ValueError("Invalid shape of transformation matrix")
         self.params = matrix
+        if dimensionality != 2:
+            raise NotImplementedError(
+                f'{self.__class__} is only implemented for 2D coordinates '
+                '(i.e. 3D transformation matrices).'
+            )
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -442,8 +447,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     def __init__(self, rotation=None, translation=None, matrix=None,
                  *, dimensionality=2):
-        if dimensionality != 2:
-            raise ValueError('EssentialMatrixTransform is 2D only.')
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
         if rotation is not None:
             if translation is None:
                 raise ValueError("Both rotation and translation required")
