@@ -1008,8 +1008,55 @@ class PiecewiseAffineTransform(GeometricTransform):
         return out
 
 
+def _euler_rotation(axis, angle):
+    """Produce a single-axis Euler rotation matrix.
+
+    Parameters
+    ----------
+    axis : int in {0, 1, 2}
+        The axis of rotation.
+    angle : float
+        The angle of rotation in radians.
+
+    Returns
+    -------
+    Ri : array of float, shape (3, 3)
+        The rotation matrix along axis `axis`.
+    """
+    i = axis
+    s, c = np.sin(angle), np.cos(angle)
+    R2 = np.array([[          c, (-1)**(i+1) * s],
+                   [(-1)**i * s,               c]])
+    Ri = np.eye(3)
+    axes = sorted({0, 1, 2} - {axis})
+    Ri[axes][:, axes] = R2
+    return Ri
+
+
+def _euler_rotation_matrix(angles):
+    """Produce an Euler rotation matrix from the given angles.
+
+    The matrix will have dimension equal to the number of angles given.
+
+    Parameters
+    ----------
+    angles : array of float, shape (3,)
+        The transformation angles in radians.
+
+    Returns
+    -------
+    R : array of float, shape (3, 3)
+        The Euler rotation matrix.
+    """
+    dim = len(angles)
+    R = np.eye(dim)
+    for i, angle in enumerate(angles):
+        R @= _euler_rotation(i, angle)
+    return R
+
+
 class EuclideanTransform(ProjectiveTransform):
-    """2D Euclidean transformation.
+    """Euclidean transformation, also known as a rigid transform.
 
     Has the following form::
 
@@ -1031,47 +1078,76 @@ class EuclideanTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (3, 3) array, optional
+    matrix : (D+1, D+1) array, optional
         Homogeneous transformation matrix.
-    rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians.
-    translation : (tx, ty) as array, list or tuple, optional
-        x, y translation parameters.
+    rotation : float or sequence of float, optional
+        Rotation angle in counter-clockwise direction as radians. If given as
+        a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
+        (single rotation) and 3D (Euler rotations) values are supported. For
+        higher dimensions, you must provide or estimate the transformation
+        matrix.
+    translation : sequence of float, length D, optional
+        Translation parameters for each axis.
+    dimensionality : int, optional
+        The dimensionality of the transform.
 
     Attributes
     ----------
-    params : (3, 3) array
+    params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
     """
 
     def __init__(self, matrix=None, rotation=None, translation=None,
                  *, dimensionality=2):
-        params = any(param is not None
-                     for param in (rotation, translation))
+        params_given = rotation is not None or translation is not None
 
-        if params and matrix is not None:
+        if params_given and matrix is not None:
             raise ValueError("You cannot specify the transformation matrix and"
                              " the implicit parameters at the same time.")
         elif matrix is not None:
-            if matrix.shape != (3, 3):
+            if matrix.shape[0] != matrix.shape[1]:
                 raise ValueError("Invalid shape of transformation matrix.")
             self.params = matrix
-        elif params:
+        elif params_given:
             if rotation is None:
-                rotation = 0
+                dimensionality = len(translation)
+                if dimensionality == 2:
+                    rotation = 0
+                elif dimensionality == 3:
+                    rotation = np.zeros(3)
+                else:
+                    raise ValueError(
+                        'Parameters cannot be specified for dimension '
+                        f'{dimensionality} transforms'
+                    )
+            else:
+                if not np.isscalar(rotation) or len(rotation) == 3:
+                    raise ValueError(
+                        'Parameters cannot be specified for dimension '
+                        f'{dimensionality} transforms'
+                    )
             if translation is None:
-                translation = (0, 0)
+                translation = (0,) * dimensionality
 
-            self.params = np.array([
-                [math.cos(rotation), - math.sin(rotation), 0],
-                [math.sin(rotation),   math.cos(rotation), 0],
-                [                 0,                    0, 1]
-            ])
-            self.params[0:2, 2] = translation
+            if dimensionality == 2:
+                self.params = np.array([
+                    [math.cos(rotation), - math.sin(rotation), 0],
+                    [math.sin(rotation),   math.cos(rotation), 0],
+                    [                 0,                    0, 1]
+                ])
+            elif dimensionality == 3:
+                self.params = np.eye(dimensionality + 1)
+                self.params[:dimensionality, :dimensionality] = (
+                    _euler_rotation_matrix(rotation)
+                )
+            self.params[0:dimensionality, dimensionality] = translation
         else:
             # default to an identity transform
-            self.params = np.eye(3)
+            self.params = np.eye(dimensionality + 1)
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
