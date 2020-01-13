@@ -874,7 +874,7 @@ class AffineTransform(ProjectiveTransform):
 
 
 class PiecewiseAffineTransform(GeometricTransform):
-    """2D piecewise affine transformation.
+    """Piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
     a Delaunay triangulation of the points to form a mesh. Each triangle is
@@ -902,9 +902,9 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : (N, D) array
             Source coordinates.
-        dst : (N, 2) array
+        dst : (N, D) array
             Destination coordinates.
 
         Returns
@@ -944,7 +944,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
@@ -979,12 +979,12 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array
+        coords : (N, D) array
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : (N, D) array
             Transformed coordinates.
 
         """
