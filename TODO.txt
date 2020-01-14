@@ -46,6 +46,8 @@ Version 0.19
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * Remove the definition of `skimage.util.pad` and
   skimage/util/tests/test_arraypad.py.
+* In ``skimage/exposure/_adapthist.py`` remove deprecated clip_histogram,
+  map_histogram and interpolate functions
 
 
 Other
