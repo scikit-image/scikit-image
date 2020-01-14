@@ -13,6 +13,7 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
+import warnings
 import numbers
 import numpy as np
 from ..util import img_as_float, img_as_uint
@@ -87,7 +88,7 @@ def equalize_adapthist(image, kernel_size=None,
     return rescale_intensity(image)
 
 
-def _clahe(image, kernel_size, clip_limit, nbins=128):
+def _clahe(image, kernel_size, clip_limit, nbins):
     """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
@@ -145,8 +146,8 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
                 clim = NR_OF_GREY  # Large value, do not clip (AHE)
 
             hist = np.bincount(lut[sub_img.ravel()], minlength=nbins)
-            hist = clip_histogram(hist, clim)
-            hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
+            hist = _clip_histogram(hist, clim)
+            hist = _map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
             j0 = j1
         i0 = i1
@@ -189,7 +190,7 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     return image
 
 
-def clip_histogram(hist, clip_limit):
+def _clip_histogram(hist, clip_limit):
     """Perform clipping of the histogram and redistribution of bins.
 
     The histogram is clipped and the number of excess pixels is counted.
@@ -212,12 +213,11 @@ def clip_histogram(hist, clip_limit):
     excess_mask = hist > clip_limit
     excess = hist[excess_mask]
     n_excess = excess.sum() - excess.size * clip_limit
+    hist[excess_mask] = clip_limit
 
     # Second part: clip histogram and redistribute excess pixels in each bin
     bin_incr = n_excess // hist.size  # average binincrement
     upper = clip_limit - bin_incr  # Bins larger than upper set to cliplimit
-
-    hist[excess_mask] = clip_limit
 
     low_mask = hist < upper
     n_excess -= hist[low_mask].size * bin_incr
@@ -244,7 +244,32 @@ def clip_histogram(hist, clip_limit):
     return hist
 
 
-def map_histogram(hist, min_val, max_val, n_pixels):
+def clip_histogram(hist, clip_limit):
+    """Perform clipping of the histogram and redistribution of bins.
+
+    The histogram is clipped and the number of excess pixels is counted.
+    Afterwards the excess pixels are equally redistributed across the
+    whole histogram (providing the bin count is smaller than the cliplimit).
+
+    Parameters
+    ----------
+    hist : ndarray
+        Histogram array.
+    clip_limit : int
+        Maximum allowed bin count.
+
+    Returns
+    -------
+    hist : ndarray
+        Clipped histogram.
+    """
+    warnings.warn("clip_histogram is deprecated and will be removed in version "
+                  "0.19. Please use the rivate function _clip_histogram "
+                  "instead.")
+    return _clip_histogram(hist, clip_limit)
+
+
+def _map_histogram(hist, min_val, max_val, n_pixels):
     """Calculate the equalized lookup table (mapping).
 
     It does so by cumulating the input histogram.
@@ -266,11 +291,37 @@ def map_histogram(hist, min_val, max_val, n_pixels):
        Mapped intensity LUT.
     """
     out = np.cumsum(hist).astype(float)
-    scale = ((float)(max_val - min_val)) / n_pixels
-    out *= scale
+    out *= (max_val - min_val) / n_pixels
     out += min_val
-    out[out > max_val] = max_val
+    np.clip(out, a_min=None, a_max=max_val, out=out)
     return out.astype(int)
+
+
+def map_histogram(hist, min_val, max_val, n_pixels):
+    """Calculate the equalized lookup table (mapping).
+
+    It does so by cumulating the input histogram.
+
+    Parameters
+    ----------
+    hist : ndarray
+        Clipped histogram.
+    min_val : int
+        Minimum value for mapping.
+    max_val : int
+        Maximum value for mapping.
+    n_pixels : int
+        Number of pixels in the region.
+
+    Returns
+    -------
+    out : ndarray
+       Mapped intensity LUT.
+    """
+    warnings.warn("map_histogram is deprecated and will be removed in version "
+                  "0.19. Please use the rivate function _map_histogram "
+                  "instead.")
+    return _map_histogram(hist, min_val, max_val, n_pixels)
 
 
 def _interpolate(image, xslice, yslice,
@@ -340,6 +391,9 @@ def interpolate(image, xslice, yslice,
     a submatrix of the image. This is done by a bilinear interpolation between
     four different mappings in order to eliminate boundary artifacts.
     """
+    warnings.warn("interpolate is deprecated and will be removed in version "
+                  "0.19. Please use the rivate function _interpolate "
+                  "instead.")
     xslice = slice(xslice[0], xslice[-1] + 1)
     yslice = slice(yslice[0], yslice[-1] + 1)
     return _interpolate(image, xslice, yslice, mapLU, mapRU, mapLB, mapRB, lut)
