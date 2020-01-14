@@ -263,9 +263,9 @@ def clip_histogram(hist, clip_limit):
     hist : ndarray
         Clipped histogram.
     """
-    warnings.warn("clip_histogram is deprecated and will be removed in version "
-                  "0.19. Please use the rivate function _clip_histogram "
-                  "instead.")
+    warnings.warn("clip_histogram is deprecated and will be removed in "
+                  "version 0.19. Please use the rivate function "
+                  "_clip_histogram instead.")
     return _clip_histogram(hist, clip_limit)
 
 
