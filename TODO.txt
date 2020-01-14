@@ -75,3 +75,5 @@ Other
 * Remove pillow version related warning for MPO file format in
   `io._plugins.pil_plugin.imread` when upgrading pillow min version to
   6.0.0
+* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
+  when ``scipy`` upgrades to 1.1. 
