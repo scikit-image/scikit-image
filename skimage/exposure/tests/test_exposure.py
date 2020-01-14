@@ -281,6 +281,37 @@ def test_rescale_same_values():
     assert_array_almost_equal(out, image)
 
 
+@pytest.mark.parametrize(
+    "in_range,out_range", [("image", "dtype"),
+                           ("dtype", "image")]
+)
+def test_rescale_nan_warning(in_range, out_range):
+    image = np.arange(12, dtype=float).reshape(3, 4)
+    image[1, 1] = np.nan
+
+    msg = (
+        r"One or more intensity levels are NaN\."
+        r" Rescaling will broadcast NaN to the full image\."
+    )
+
+    # 2019/11/10 Passing NaN to np.clip raises a DeprecationWarning for
+    # versions above 1.17
+    # TODO: Remove once NumPy removes this DeprecationWarning
+    numpy_warning_1_17_plus = (
+        r"Passing `np.nan` to mean no clipping in np.clip "
+        r"has always been unreliable|\A\Z"
+    )
+    # 2019/12/06 Passing NaN to np.min and np.max raises a RuntimeWarning for
+    # NumPy < 1.16
+    # TODO: Remove once minimal required NumPy version is 1.16
+    numpy_warning_smaller_1_16 = r"invalid value encountered in reduce|\A\Z"
+
+    with expected_warnings(
+            [msg, numpy_warning_1_17_plus, numpy_warning_smaller_1_16]
+    ):
+        exposure.rescale_intensity(image, in_range, out_range)
+
+
 # Test adaptive histogram equalization
 # ====================================
 

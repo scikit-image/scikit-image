@@ -2,8 +2,9 @@
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_less, assert_equal
 from skimage.filters import meijering, sato, frangi, hessian
-from skimage.data import camera
+from skimage.data import camera, retina
 from skimage.util import crop, invert
+from skimage.color import rgb2gray
 
 
 def test_2d_null_matrix():
@@ -191,6 +192,27 @@ def test_3d_cropped_camera_image():
 
     assert_allclose(hessian(a_black, black_ridges=True), ones, atol=1 - 1e-7)
     assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
+
+
+def test_border_management():
+    img = rgb2gray(retina()[300:500, 700:900])
+    out = frangi(img, sigmas=[1])
+
+    full_std = out.std()
+    full_mean = out.mean()
+    inside_std = out[4:-4, 4:-4].std()
+    inside_mean = out[4:-4, 4:-4].mean()
+    border_std = np.stack([out[:4, :], out[-4:, :],
+                           out[:, :4].T, out[:, -4:].T]).std()
+    border_mean = np.stack([out[:4, :], out[-4:, :],
+                            out[:, :4].T, out[:, -4:].T]).mean()
+
+    assert abs(full_std - inside_std) < 1e-7
+    assert abs(full_std - border_std) < 1e-7
+    assert abs(inside_std - border_std) < 1e-7
+    assert abs(full_mean - inside_mean) < 1e-7
+    assert abs(full_mean - border_mean) < 1e-7
+    assert abs(inside_mean - border_mean) < 1e-7
 
 
 if __name__ == "__main__":
