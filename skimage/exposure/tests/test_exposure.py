@@ -362,6 +362,18 @@ def test_adapthist_alpha():
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
 
 
+def test_adapthist_borders():
+    """Test border processing
+    """
+    img = rgb2gray(util.img_as_float(data.astronaut()))
+    adapted = exposure.equalize_adapthist(img, 11)
+    width = 42
+    # Check last columns are procesed
+    assert norm_brightness_err(adapted[:, -width], img[:, -width]) > 1e-3
+    # Check last rows are procesed
+    assert norm_brightness_err(adapted[-width, :], img[-width, :]) > 1e-3
+
+
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 

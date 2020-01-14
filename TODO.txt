@@ -81,3 +81,5 @@ Other
 * When ``numpy`` is set to >= 1.17, revisit the warning assertion in
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
+* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
+  when ``scipy`` upgrades to 1.1. 

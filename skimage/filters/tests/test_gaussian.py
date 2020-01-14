@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 from skimage.filters._gaussian import gaussian, _guess_spatial_dimensions
 from skimage._shared import testing
@@ -82,3 +84,22 @@ def test_guess_spatial_dimensions():
     testing.assert_equal(_guess_spatial_dimensions(im4), 3)
     with testing.raises(ValueError):
         _guess_spatial_dimensions(im5)
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.float32, np.float64]
+)
+def test_preserve_output(dtype):
+    image = np.arange(9, dtype=dtype).reshape((3, 3))
+    output = np.zeros_like(image, dtype=dtype)
+    gaussian_image = gaussian(image, sigma=1, output=output,
+                              preserve_range=True)
+    assert gaussian_image is output
+
+
+def test_output_error():
+    image = np.arange(9, dtype=np.float32).reshape((3, 3))
+    output = np.zeros_like(image, dtype=np.uint8)
+    with pytest.raises(ValueError):
+        gaussian(image, sigma=1, output=output,
+                 preserve_range=True)
