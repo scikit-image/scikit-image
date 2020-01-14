@@ -23,12 +23,13 @@ adjusted accordingly. The user may provide a mask image (same size as input
 image) where non zero values are the part of the image participating in the
 histogram computation. By default the entire image is filtered.
 
-This implementation outperforms gray.dilation for large structuring elements.
+This implementation outperforms :func:`skimage.morphology.dilation`
+for large structuring elements.
 
 Input images will be cast in unsigned 8-bit integer or unsigned 16-bit integer
 if necessary. The number of histogram bins is then determined from the maximum
-value present in the image. Eventually, the output image is cast in the desired
-dtype.
+value present in the image. Eventually, the output image is cast in the input
+dtype, or the `output_dtype` if set.
 
 To do
 -----
@@ -61,7 +62,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _handle_input(image, selem=None, out=None, mask=None, out_dtype=None,
+def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
                   pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
@@ -178,7 +179,7 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _handle_input(image,
+    image, selem, out, mask, n_bins = _preprocess_input(image,
                                                     selem,
                                                     out,
                                                     mask,
@@ -230,7 +231,7 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _handle_input(image,
+    image, selem, out, mask, n_bins = _preprocess_input(image,
                                                     selem,
                                                     out,
                                                     mask,
