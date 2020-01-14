@@ -265,7 +265,8 @@ def clip_histogram(hist, clip_limit):
     """
     warnings.warn("clip_histogram is deprecated and will be removed in "
                   "version 0.19. Please use the rivate function "
-                  "_clip_histogram instead.")
+                  "_clip_histogram instead.", category=FutureWarning,
+                  stacklevel=2)
     return _clip_histogram(hist, clip_limit)
 
 
@@ -320,7 +321,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
     """
     warnings.warn("map_histogram is deprecated and will be removed in version "
                   "0.19. Please use the rivate function _map_histogram "
-                  "instead.")
+                  "instead.", category=FutureWarning, stacklevel=2)
     return _map_histogram(hist, min_val, max_val, n_pixels)
 
 
@@ -393,7 +394,7 @@ def interpolate(image, xslice, yslice,
     """
     warnings.warn("interpolate is deprecated and will be removed in version "
                   "0.19. Please use the rivate function _interpolate "
-                  "instead.")
+                  "instead.", category=FutureWarning, stacklevel=2)
     xslice = slice(xslice[0], xslice[-1] + 1)
     yslice = slice(yslice[0], yslice[-1] + 1)
     return _interpolate(image, xslice, yslice, mapLU, mapRU, mapLB, mapRB, lut)
