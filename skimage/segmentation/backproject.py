@@ -33,7 +33,7 @@ def _normalize_hsv(hsv):
 
 
 def histogram_backprojection(image, template, multichannel=True):
-    """Project the histogram of one image onto another
+    """Project the histogram of one image onto another.
 
     Parameters
     ----------
