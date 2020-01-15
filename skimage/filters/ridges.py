@@ -478,7 +478,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
             beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-            black_ridges=True, mode='reflect', cval=0):
+            black_ridges=True, mode='constant', cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
