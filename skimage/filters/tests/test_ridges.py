@@ -212,7 +212,7 @@ def test_3d_cropped_camera_image():
 
 @pytest.mark.parametrize('func, tol', [(frangi, 1e-7),
                                        (meijering, 1e-2),
-                                       (sato, 1e-4),
+                                       (sato, 1e-3),
                                        (hessian, 2e-2)])
 def test_border_management(func, tol):
     img = rgb2gray(retina()[300:500, 700:900])
