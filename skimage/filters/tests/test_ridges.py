@@ -1,4 +1,4 @@
-
+import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_less, assert_equal
 from skimage.filters import meijering, sato, frangi, hessian
@@ -15,8 +15,8 @@ def test_2d_null_matrix():
     zeros = np.zeros((3, 3))
     ones = np.ones((3, 3))
 
-    assert_equal(meijering(a_black, black_ridges=True), ones)
-    assert_equal(meijering(a_white, black_ridges=False), ones)
+    assert_equal(meijering(a_black, black_ridges=True), zeros)
+    assert_equal(meijering(a_white, black_ridges=False), zeros)
 
     assert_equal(sato(a_black, black_ridges=True), zeros)
     assert_equal(sato(a_white, black_ridges=False), zeros)
@@ -36,8 +36,8 @@ def test_3d_null_matrix():
     zeros = np.zeros((3, 3, 3))
     ones = np.ones((3, 3, 3))
 
-    assert_allclose(meijering(a_black, black_ridges=True), ones, atol=1e-1)
-    assert_allclose(meijering(a_white, black_ridges=False), ones, atol=1e-1)
+    assert_allclose(meijering(a_black, black_ridges=True), zeros, atol=1e-1)
+    assert_allclose(meijering(a_white, black_ridges=False), zeros, atol=1e-1)
 
     assert_equal(sato(a_black, black_ridges=True), zeros)
     assert_equal(sato(a_white, black_ridges=False), zeros)
@@ -194,9 +194,10 @@ def test_3d_cropped_camera_image():
     assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
 
 
-def test_border_management():
+@pytest.mark.parametrize('func', [frangi, meijering])
+def test_border_management(func):
     img = rgb2gray(retina()[300:500, 700:900])
-    out = frangi(img, sigmas=[1])
+    out = func(img, sigmas=[1])
 
     full_std = out.std()
     full_mean = out.mean()
@@ -207,12 +208,14 @@ def test_border_management():
     border_mean = np.stack([out[:4, :], out[-4:, :],
                             out[:, :4].T, out[:, -4:].T]).mean()
 
-    assert abs(full_std - inside_std) < 1e-7
-    assert abs(full_std - border_std) < 1e-7
-    assert abs(inside_std - border_std) < 1e-7
-    assert abs(full_mean - inside_mean) < 1e-7
-    assert abs(full_mean - border_mean) < 1e-7
-    assert abs(inside_mean - border_mean) < 1e-7
+    tol = 1e-2
+
+    assert abs(full_std - inside_std) < tol
+    assert abs(full_std - border_std) < tol
+    assert abs(inside_std - border_std) < tol
+    assert abs(full_mean - inside_mean) < tol
+    assert abs(full_mean - border_mean) < tol
+    assert abs(inside_mean - border_mean) < tol
 
 
 if __name__ == "__main__":
