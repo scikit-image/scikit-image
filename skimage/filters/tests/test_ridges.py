@@ -194,8 +194,11 @@ def test_3d_cropped_camera_image():
     assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
 
 
-@pytest.mark.parametrize('func', [frangi, meijering, sato])
-def test_border_management(func):
+@pytest.mark.parametrize('func, tol', [(frangi, 1e-7),
+                                       (meijering, 1e-2),
+                                       (sato, 1e-4),
+                                       (hessian, 2e-2)])
+def test_border_management(func, tol):
     img = rgb2gray(retina()[300:500, 700:900])
     out = func(img, sigmas=[1])
 
@@ -207,8 +210,6 @@ def test_border_management(func):
                            out[:, :4].T, out[:, -4:].T]).std()
     border_mean = np.stack([out[:4, :], out[-4:, :],
                             out[:, :4].T, out[:, -4:].T]).mean()
-
-    tol = 1e-2
 
     assert abs(full_std - inside_std) < tol
     assert abs(full_std - border_std) < tol
