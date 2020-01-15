@@ -194,7 +194,7 @@ def test_3d_cropped_camera_image():
     assert_allclose(hessian(a_white, black_ridges=False), ones, atol=1 - 1e-7)
 
 
-@pytest.mark.parametrize('func', [frangi, meijering])
+@pytest.mark.parametrize('func', [frangi, meijering, sato])
 def test_border_management(func):
     img = rgb2gray(retina()[300:500, 700:900])
     out = func(img, sigmas=[1])
