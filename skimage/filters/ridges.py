@@ -243,7 +243,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
-         mode='constant', cval=0):
+         mode=None, cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -297,6 +297,13 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     sigmas = np.asarray(sigmas)
     if np.any(sigmas < 0.0):
         raise ValueError('Sigma values less than zero are not valid')
+
+    if mode is None:
+        warn("'constant' borders handling mode is deprecated and will be "
+             "replaced by 'reflect' mode in version 0.19. To avoid this "
+             "warning, please explicitely set the mode argument.",
+             category=FutureWarning, stacklevel=2)
+        mode = 'constant'
 
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
@@ -478,7 +485,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
             beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-            black_ridges=True, mode='constant', cval=0):
+            black_ridges=True, mode=None, cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -539,6 +546,13 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         :DOI:`10.1007/978-3-319-16811-1_40`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
+
+    if mode is None:
+        warn("'constant' borders handling mode is deprecated and will be "
+             "replaced by 'reflect' mode in version 0.19. To avoid this "
+             "warning, please explicitely set the mode argument.",
+             category=FutureWarning, stacklevel=2)
+        mode = 'constant'
 
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
                       scale_step=scale_step, beta1=beta1, beta2=beta2,
