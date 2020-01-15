@@ -509,6 +509,11 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
