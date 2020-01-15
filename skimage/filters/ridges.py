@@ -243,7 +243,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
 
 def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
-         mode='reflect', cval=0):
+         mode='constant', cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
