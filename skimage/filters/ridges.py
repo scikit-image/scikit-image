@@ -140,7 +140,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none',
 
 
 def meijering(image, sigmas=range(1, 10, 2), alpha=None,
-              black_ridges=True):
+              black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -163,6 +163,11 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -208,7 +213,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
+                                                  mode=mode, cval=cval)
 
         if ndim > 1:
 
