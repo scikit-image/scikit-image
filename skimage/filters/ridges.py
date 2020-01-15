@@ -242,7 +242,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     return np.max(filtered_array, axis=0)
 
 
-def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
+def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
+         mode='reflect', cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -263,6 +264,11 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -305,7 +311,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
 
         # Calculate (sorted) eigenvalues
         lamba1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                       sorting='val')
+                                                       sorting='val',
+                                                       mode=mode, cval=cval)
 
         # Compute tubeness, see  equation (9) in reference [1]_.
         # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
