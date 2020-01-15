@@ -48,7 +48,7 @@ def histogram_backprojection(image, template, multichannel=True):
     Returns
     -------
     out : (M, N) ndarray
-        Backprojected image. Greyscale image that indicates the
+        Backprojected image. Grayscale image that indicates the
         level of correspondence to the histogram of the object image.
 
     References
