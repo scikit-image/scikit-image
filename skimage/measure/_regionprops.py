@@ -7,6 +7,7 @@ from ._label import label
 from . import _moments
 
 from functools import wraps
+from ..morphology.convex_hull import convex_hull_image
 
 
 __all__ = ['regionprops', 'perimeter']
@@ -192,7 +193,6 @@ class RegionProperties:
     @property
     @_cached
     def convex_image(self):
-        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @property
