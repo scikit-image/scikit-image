@@ -26,7 +26,7 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
-
+from .haar_fast import (haar_like_feature_fast)
 
 __all__ = ['canny',
            'Cascade',
@@ -66,4 +66,5 @@ __all__ = ['canny',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'draw_haar_like_feature']
+           'draw_haar_like_feature',
+           'haar_like_feature_fast']
