@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det
-from skimage.transform import resize
 from matplotlib import pyplot as plt
 
 from skimage.registration._lddmm_utilities import _validate_ndarray
