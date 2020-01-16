@@ -211,7 +211,8 @@ def _validate_resolution(ndim, resolution):
 
 
 def _compute_axes(shape, resolution=1, origin="center"):
-    """Returns the real_axes defining an image with the given shape 
+    """
+    Returns the real_axes defining an image with the given shape 
     at the given resolution as a list of numpy arrays.
     """
 
@@ -248,8 +249,10 @@ def _compute_axes(shape, resolution=1, origin="center"):
 
 
 def _compute_coords(shape, resolution=1, origin="center"):
-    """Returns the real_coordinates of an image with the given shape 
-    at the given resolution as a single numpy array of shape (*shape, len(shape))."""
+    """
+    Returns the real_coordinates of an image with the given shape 
+    at the given resolution as a single numpy array of shape (*shape, len(shape)).
+    """
 
     axes = _compute_axes(shape, resolution, origin)
 
@@ -285,8 +288,8 @@ def _multiply_coords_by_affine(affine, array):
     if not np.array_equal(affine[-1], np.array([0] * (len(affine) - 1) + [1])):
         warnings.warn(
             message=f"affine is not in homogenous coordinates.\n"
-            f"affine[-1] should be zeros with a 1 on the right.\n"
-            f"affine[-1]: {affine[-1]}.",
+                    f"affine[-1] should be zeros with a 1 on the right.\n"
+                    f"affine[-1]: {affine[-1]}.",
             category=RuntimeWarning,
         )
 
