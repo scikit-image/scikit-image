@@ -6,7 +6,7 @@ from scipy import spatial
 from ..util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_matrix_det
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from .._shared.utils import check_nD
 
 
