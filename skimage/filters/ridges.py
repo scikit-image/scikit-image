@@ -299,11 +299,12 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
         raise ValueError('Sigma values less than zero are not valid')
 
     if mode is None:
-        warn("'constant' borders handling mode is deprecated and will be "
-             "replaced by 'reflect' mode in version 0.19. To avoid this "
-             "warning, please explicitely set the mode argument.",
-             category=FutureWarning, stacklevel=2)
-        mode = 'constant'
+        warn("Previously, sato implicitly used 'constant' as the "
+             "border mode when dealing with the edge of the array. The new "
+             "behavior is 'reflect'. To recover the old behavior, use "
+             "mode='constant'. To avoid this warning, please explicitely "
+             "set the mode.", category=FutureWarning, stacklevel=2)
+        mode = 'reflect'
 
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
@@ -548,11 +549,12 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     """
 
     if mode is None:
-        warn("'constant' borders handling mode is deprecated and will be "
-             "replaced by 'reflect' mode in version 0.19. To avoid this "
-             "warning, please explicitely set the mode argument.",
-             category=FutureWarning, stacklevel=2)
-        mode = 'constant'
+        warn("Previously, hessian implicitly used 'constant' as the "
+             "border mode when dealing with the edge of the array. The new "
+             "behavior is 'reflect'. To recover the old behavior, use "
+             "mode='constant'. To avoid this warning, please explicitely "
+             "set the mode.", category=FutureWarning, stacklevel=2)
+        mode = 'reflect'
 
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
                       scale_step=scale_step, beta1=beta1, beta2=beta2,
