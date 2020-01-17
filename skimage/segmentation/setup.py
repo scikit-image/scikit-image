@@ -11,7 +11,8 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('segmentation', parent_package, top_path)
 
-    cython(['_felzenszwalb_cy.pyx',
+    cython(['_watershed.pyx',
+            '_felzenszwalb_cy.pyx',
             '_quickshift_cy.pyx',
             '_slic.pyx'], working_path=base_path)
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
@@ -19,6 +20,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_quickshift_cy', sources=['_quickshift_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_slic', sources=['_slic.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

@@ -1,93 +1,4 @@
-"""watershed.py - watershed algorithm
-
-This module implements a watershed algorithm that apportions pixels into
-marked basins. The algorithm uses a priority queue to hold the pixels
-with the metric for the priority queue being pixel value, then the time
-of entry into the queue - this settles ties in favor of the closest marker.
-
-Some ideas taken from
-Soille, "Automated Basin Delineation from Digital Elevation Models Using
-Mathematical Morphology", Signal Processing 20 (1990) 171-182.
-
-The most important insight in the paper is that entry time onto the queue
-solves two problems: a pixel should be assigned to the neighbor with the
-largest gradient or, if there is no gradient, pixels on a plateau should
-be split between markers on opposite sides.
-
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-
-Original author: Lee Kamentsky
-"""
-
-import numpy as np
-from scipy import ndimage as ndi
-
-from . import _watershed
-from .extrema import local_minima
-from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
-from ..util import crop, regular_seeds
-
-
-def _validate_inputs(image, markers, mask, connectivity):
-    """Ensure that all inputs to watershed have matching shapes and types.
-
-    Parameters
-    ----------
-    image : array
-        The input image.
-    markers : int or array of int
-        The marker image.
-    mask : array, or None
-        A boolean mask, True where we want to compute the watershed.
-    connectivity : int in {1, ..., image.ndim}
-        The connectivity of the neighborhood of a pixel.
-
-    Returns
-    -------
-    image, markers, mask : arrays
-        The validated and formatted arrays. Image will have dtype float64,
-        markers int32, and mask int8. If ``None`` was given for the mask,
-        it is a volume of all 1s.
-
-    Raises
-    ------
-    ValueError
-        If the shapes of the given arrays don't match.
-    """
-    n_pixels = image.size
-    if mask is None:
-        # Use a complete `True` mask if none is provided
-        mask = np.ones(image.shape, bool)
-    else:
-        mask = np.asanyarray(mask, dtype=bool)
-        n_pixels = np.sum(mask)
-        if mask.shape != image.shape:
-            message = ("`mask` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(mask.shape, image.shape))
-            raise ValueError(message)
-    if markers is None:
-        markers_bool = local_minima(image, connectivity=connectivity) * mask
-        markers = ndi.label(markers_bool)[0]
-    elif not isinstance(markers, (np.ndarray, list, tuple)):
-        # not array-like, assume int
-        # given int, assume that number of markers *within mask*.
-        markers = regular_seeds(image.shape,
-                                int(markers / (n_pixels / image.size)))
-        markers *= mask
-    else:
-        markers = np.asanyarray(markers) * mask
-        if markers.shape != image.shape:
-            message = ("`markers` (shape {}) must have same shape as "
-                       "`image` (shape {})".format(markers.shape, image.shape))
-            raise ValueError(message)
-    return (image.astype(np.float64),
-            markers.astype(np.int32),
-            mask.astype(np.int8))
+from warnings import warn
 
 
 def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
@@ -199,28 +110,105 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    image, markers, mask = _validate_inputs(image, markers, mask, connectivity)
-    connectivity, offset = _validate_connectivity(image.ndim, connectivity,
-                                                  offset)
+    from ..segmentation import watershed as _watershed
+    warn("skimage.morphology.watershed is deprecated and will be removed "
+         "in version 0.19. Please use skimage.segmentation.watershed "
+         "instead", FutureWarning, stacklevel=2)
+    return _watershed(image, markers, connectivity, offset, mask,
+                      compactness, watershed_line)
 
-    # pad the image, markers, and mask so that we can use the mask to
-    # keep from running off the edges
-    pad_width = [(p, p) for p in offset]
-    image = np.pad(image, pad_width, mode='constant')
-    mask = np.pad(mask, pad_width, mode='constant').ravel()
-    output = np.pad(markers, pad_width, mode='constant')
 
-    flat_neighborhood = _offsets_to_raveled_neighbors(
-        image.shape, connectivity, center=offset)
-    marker_locations = np.flatnonzero(output)
-    image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
+def label(input, neighbors=None, background=None, return_num=False,
+          connectivity=None):
+    r"""Label connected regions of an integer array.
 
-    _watershed.watershed_raveled(image.ravel(),
-                                 marker_locations, flat_neighborhood,
-                                 mask, image_strides, compactness,
-                                 output.ravel(),
-                                 watershed_line)
+    Two pixels are connected when they are neighbors and have the same value.
+    In 2D, they can be neighbors either in a 1- or 2-connected sense.
+    The value refers to the maximum number of orthogonal hops to consider a
+    pixel/voxel a neighbor::
 
-    output = crop(output, pad_width, copy=True)
+      1-connectivity     2-connectivity     diagonal connection close-up
 
-    return output
+           [ ]           [ ]  [ ]  [ ]             [ ]
+            |               \  |  /                 |  <- hop 2
+      [ ]--[x]--[ ]      [ ]--[x]--[ ]        [x]--[ ]
+            |               /  |  \             hop 1
+           [ ]           [ ]  [ ]  [ ]
+
+    Parameters
+    ----------
+    input : ndarray of dtype int
+        Image to label.
+    neighbors : {4, 8}, int, optional
+        Whether to use 4- or 8-"connectivity".
+        In 3D, 4-"connectivity" means connected pixels have to share face,
+        whereas with 8-"connectivity", they have to share only edge or vertex.
+        **Deprecated, use** ``connectivity`` **instead.**
+    background : int, optional
+        Consider all pixels with this value as background pixels, and label
+        them as 0. By default, 0-valued pixels are considered as background
+        pixels.
+    return_num : bool, optional
+        Whether to return the number of assigned labels.
+    connectivity : int, optional
+        Maximum number of orthogonal hops to consider a pixel/voxel
+        as a neighbor.
+        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
+        connectivity of ``input.ndim`` is used.
+
+    Returns
+    -------
+    labels : ndarray of dtype int
+        Labeled array, where all connected regions are assigned the
+        same integer value.
+    num : int, optional
+        Number of labels, which equals the maximum label index and is only
+        returned if return_num is `True`.
+
+    See Also
+    --------
+    regionprops
+
+    References
+    ----------
+    .. [1] Christophe Fiorio and Jens Gustedt, "Two linear time Union-Find
+           strategies for image processing", Theoretical Computer Science
+           154 (1996), pp. 165-181.
+    .. [2] Kensheng Wu, Ekow Otoo and Arie Shoshani, "Optimizing connected
+           component labeling algorithms", Paper LBNL-56864, 2005,
+           Lawrence Berkeley National Laboratory (University of California),
+           http://repositories.cdlib.org/lbnl/LBNL-56864
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> x = np.eye(3).astype(int)
+    >>> print(x)
+    [[1 0 0]
+     [0 1 0]
+     [0 0 1]]
+    >>> print(label(x, connectivity=1))
+    [[1 0 0]
+     [0 2 0]
+     [0 0 3]]
+    >>> print(label(x, connectivity=2))
+    [[1 0 0]
+     [0 1 0]
+     [0 0 1]]
+    >>> print(label(x, background=-1))
+    [[1 2 2]
+     [2 1 2]
+     [2 2 1]]
+    >>> x = np.array([[1, 0, 0],
+    ...               [1, 1, 5],
+    ...               [0, 0, 0]])
+    >>> print(label(x))
+    [[1 0 0]
+     [1 1 2]
+     [0 0 0]]
+    """
+    from ..measure import label as _label
+    warn("skimage.morphology.label is deprecated and will be removed "
+         "in version 0.19. Please use skimage.measure.label instead",
+         FutureWarning, stacklevel=2)
+    return _label(input, neighbors, background, return_num, connectivity)
