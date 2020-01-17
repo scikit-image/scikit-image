@@ -16,12 +16,15 @@ def configuration(parent_package='', top_path=None):
     cython(['geometry.pyx',
             'transform.pyx',
             '_warps_cy.pyx',
+            '_convex_hull.pyx',
             'interpolation.pyx'], working_path=base_path)
 
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_convex_hull', sources=['_convex_hull.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('interpolation', sources=['interpolation.c'])
     return config

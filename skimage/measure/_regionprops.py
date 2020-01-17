@@ -7,7 +7,7 @@ from ._label import label
 from . import _moments
 
 from functools import wraps
-from ..morphology.convex_hull import convex_hull_image
+from .._shared.convex_hull import convex_hull_image
 
 
 __all__ = ['regionprops', 'perimeter']
