@@ -1,14 +1,10 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
-                                      _log_polar_mapping)
-from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
-                               AffineTransform,
-                               ProjectiveTransform,
-                               SimilarityTransform,
-                               downscale_local_mean,
-                               warp_polar)
+from .._warp import (warp, _stackcopy, _linear_polar_mapping,
+                     _log_polar_mapping)
+from .._geometric import (AffineTransform, ProjectiveTransform,
+                          SimilarityTransform)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 from skimage.draw import circle_perimeter_aa

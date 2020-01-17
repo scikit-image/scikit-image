@@ -10,7 +10,7 @@ Original author: Lee Kamentsky
 
 """
 import numpy as np
-from .. import img_as_float
+from ..util.dtype import img_as_float
 from .._shared.utils import check_nD
 from scipy import ndimage as ndi
 from scipy.ndimage import convolve, binary_erosion

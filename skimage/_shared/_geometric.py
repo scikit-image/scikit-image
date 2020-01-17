@@ -3,7 +3,7 @@ import numpy as np
 from scipy import spatial
 import textwrap
 
-from .utils import get_bound_method_class, safe_as_int
+from .._shared.utils import get_bound_method_class, safe_as_int
 
 
 def _to_ndimage_mode(mode):
