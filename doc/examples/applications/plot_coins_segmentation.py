@@ -126,7 +126,9 @@ ax.axis('off')
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
 
-segmentation = morphology.watershed(elevation_map, markers)
+from skimage.segmentation import watershed
+
+segmentation = watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation, cmap=plt.cm.gray)
