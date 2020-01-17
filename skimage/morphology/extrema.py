@@ -14,7 +14,7 @@ from scipy import ndimage as ndi
 
 from ..util import dtype_limits, invert, crop
 from .._shared.utils import warn
-from . import greyreconstruct
+from .greyreconstruct import reconstruction
 from ._util import _offsets_to_raveled_neighbors
 from ._extrema_cy import _local_maxima
 
@@ -120,8 +120,7 @@ def h_maxima(image, h, selem=None):
         shifted_img = _subtract_constant_clip(image, h)
         h_corrected = h
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
-                                             method='dilation', selem=selem)
+    rec_img = reconstruction(shifted_img, image, method='dilation', selem=selem)
     residue_img = image - rec_img
     h_max = np.zeros(image.shape, dtype=np.uint8)
     h_max[residue_img >= h_corrected] = 1
@@ -201,8 +200,7 @@ def h_minima(image, h, selem=None):
         shifted_img = _add_constant_clip(image, h)
         h_corrected = h
 
-    rec_img = greyreconstruct.reconstruction(shifted_img, image,
-                                             method='erosion', selem=selem)
+    rec_img = reconstruction(shifted_img, image, method='erosion', selem=selem)
     residue_img = rec_img - image
     h_min = np.zeros(image.shape, dtype=np.uint8)
     h_min[residue_img >= h_corrected] = 1
