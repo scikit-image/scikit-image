@@ -4,7 +4,6 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
-from ..measure._label import label
 from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
@@ -35,7 +34,6 @@ __all__ = ['binary_erosion',
            'ball',
            'octagon',
            'star',
-           'label',
            'watershed',
            'skeletonize',
            'skeletonize_3d',
