@@ -120,7 +120,8 @@ def h_maxima(image, h, selem=None):
         shifted_img = _subtract_constant_clip(image, h)
         h_corrected = h
 
-    rec_img = reconstruction(shifted_img, image, method='dilation', selem=selem)
+    rec_img = reconstruction(shifted_img, image,
+                             method='dilation', selem=selem)
     residue_img = image - rec_img
     h_max = np.zeros(image.shape, dtype=np.uint8)
     h_max[residue_img >= h_corrected] = 1
