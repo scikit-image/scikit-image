@@ -6,7 +6,7 @@
 from functools import partial
 import numpy as np
 from scipy import ndimage as ndi
-from skimage.transform import warp
+from .._shared._warp import warp
 
 from ._optical_flow_utils import coarse_to_fine
 

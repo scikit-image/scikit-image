@@ -1,11 +1,10 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from .._warp import (warp, _stackcopy, _linear_polar_mapping,
-                     _log_polar_mapping, warp_coords)
+from .._warp import warp, _stackcopy, warp_coords, resize
 from .._geometric import (AffineTransform, ProjectiveTransform,
                           SimilarityTransform)
-from ..dtype import img_as_float
+from skimage.util.dtype import img_as_float
 from skimage import data
 from skimage.color import rgb2gray
 from skimage.draw import circle_perimeter_aa
@@ -170,49 +169,154 @@ def test_zero_image_size():
              SimilarityTransform())
 
 
-def test_linear_polar_mapping():
-    output_coords = np.array([[0, 0],
-                             [0, 90],
-                             [0, 180],
-                             [0, 270],
-                             [99, 0],
-                             [99, 180],
-                             [99, 270],
-                             [99, 45]])
-    ground_truth = np.array([[100, 100],
-                             [100, 100],
-                             [100, 100],
-                             [100, 100],
-                             [199, 100],
-                             [1, 100],
-                             [100, 1],
-                             [170.00357134, 170.00357134]])
-    k_angle = 360 / (2 * np.pi)
-    k_radius = 1
-    center = (100, 100)
-    coords = _linear_polar_mapping(output_coords, k_angle, k_radius, center)
-    assert np.allclose(coords, ground_truth)
+def test_resize2d():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    resized = resize(x, (10, 10), order=0, anti_aliasing=False,
+                     mode='constant')
+    ref = np.zeros((10, 10))
+    ref[2:4, 2:4] = 1
+    assert_almost_equal(resized, ref)
 
 
-def test_log_polar_mapping():
-    output_coords = np.array([[0, 0],
-                              [0, 90],
-                              [0, 180],
-                              [0, 270],
-                              [99, 0],
-                              [99, 180],
-                              [99, 270],
-                              [99, 45]])
-    ground_truth = np.array([[101, 100],
-                             [100, 101],
-                             [99, 100],
-                             [100, 99],
-                             [195.4992586, 100],
-                             [4.5007414, 100],
-                             [100, 4.5007414],
-                             [167.52817336, 167.52817336]])
-    k_angle = 360 / (2 * np.pi)
-    k_radius = 100 / np.log(100)
-    center = (100, 100)
-    coords = _log_polar_mapping(output_coords, k_angle, k_radius, center)
-    assert np.allclose(coords, ground_truth)
+def test_resize3d_keep():
+    # keep 3rd dimension
+    x = np.zeros((5, 5, 3), dtype=np.double)
+    x[1, 1, :] = 1
+    resized = resize(x, (10, 10), order=0, anti_aliasing=False,
+                     mode='constant')
+    with testing.raises(ValueError):
+        # output_shape too short
+        resize(x, (10, ), order=0, anti_aliasing=False, mode='constant')
+    ref = np.zeros((10, 10, 3))
+    ref[2:4, 2:4, :] = 1
+    assert_almost_equal(resized, ref)
+    resized = resize(x, (10, 10, 3), order=0, anti_aliasing=False,
+                     mode='constant')
+    assert_almost_equal(resized, ref)
+
+
+def test_resize3d_resize():
+    # resize 3rd dimension
+    x = np.zeros((5, 5, 3), dtype=np.double)
+    x[1, 1, :] = 1
+    resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
+                     mode='constant')
+    ref = np.zeros((10, 10, 1))
+    ref[2:4, 2:4] = 1
+    assert_almost_equal(resized, ref)
+
+
+def test_resize3d_2din_3dout():
+    # 3D output with 2D input
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    resized = resize(x, (10, 10, 1), order=0, anti_aliasing=False,
+                     mode='constant')
+    ref = np.zeros((10, 10, 1))
+    ref[2:4, 2:4] = 1
+    assert_almost_equal(resized, ref)
+
+
+def test_resize2d_4d():
+    # resize with extra output dimensions
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    out_shape = (10, 10, 1, 1)
+    resized = resize(x, out_shape, order=0, anti_aliasing=False,
+                     mode='constant')
+    ref = np.zeros(out_shape)
+    ref[2:4, 2:4, ...] = 1
+    assert_almost_equal(resized, ref)
+
+
+def test_resize_nd():
+    for dim in range(1, 6):
+        shape = 2 + np.arange(dim) * 2
+        x = np.ones(shape)
+        out_shape = np.asarray(shape) * 1.5
+        resized = resize(x, out_shape, order=0, mode='reflect',
+                         anti_aliasing=False)
+        expected_shape = 1.5 * shape
+        assert_equal(resized.shape, expected_shape)
+        assert np.all(resized == 1)
+
+
+def test_resize3d_bilinear():
+    # bilinear 3rd dimension
+    x = np.zeros((5, 5, 2), dtype=np.double)
+    x[1, 1, 0] = 0
+    x[1, 1, 1] = 1
+    resized = resize(x, (10, 10, 1), order=1, mode='constant',
+                     anti_aliasing=False)
+    ref = np.zeros((10, 10, 1))
+    ref[1:5, 1:5, :] = 0.03125
+    ref[1:5, 2:4, :] = 0.09375
+    ref[2:4, 1:5, :] = 0.09375
+    ref[2:4, 2:4, :] = 0.28125
+    assert_almost_equal(resized, ref)
+
+
+def test_resize_dtype():
+    x = np.zeros((5, 5))
+    x_f32 = x.astype(np.float32)
+    x_u8 = x.astype(np.uint8)
+    x_b = x.astype(bool)
+
+    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
+    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
+    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+
+
+def test_downsize():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2:4, 2:4] = 1
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=False, mode='constant')
+    assert_equal(scaled.shape, (5, 5))
+    assert_equal(scaled[1, 1], 1)
+    assert_equal(scaled[2:, :].sum(), 0)
+    assert_equal(scaled[:, 2:].sum(), 0)
+
+
+def test_downsize_anti_aliasing():
+    x = np.zeros((10, 10), dtype=np.double)
+    x[2, 2] = 1
+    scaled = resize(x, (5, 5), order=1, anti_aliasing=True, mode='constant')
+    assert_equal(scaled.shape, (5, 5))
+    assert np.all(scaled[:3, :3] > 0)
+    assert_equal(scaled[3:, :].sum(), 0)
+    assert_equal(scaled[:, 3:].sum(), 0)
+
+    sigma = 0.125
+    out_size = (5, 5)
+    resize(x, out_size, order=1, mode='constant',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='edge',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='symmetric',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='reflect',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+    resize(x, out_size, order=1, mode='wrap',
+           anti_aliasing=True, anti_aliasing_sigma=sigma)
+
+    with testing.raises(ValueError):  # Unknown mode, or cannot translate mode
+        resize(x, out_size, order=1, mode='non-existent',
+               anti_aliasing=True, anti_aliasing_sigma=sigma)
+
+
+def test_downsize_anti_aliasing_invalid_stddev():
+    x = np.zeros((10, 10), dtype=np.double)
+    with testing.raises(ValueError):
+        resize(x, (5, 5), order=0, anti_aliasing=True, anti_aliasing_sigma=-1,
+               mode='constant')
+    with expected_warnings(["Anti-aliasing standard deviation greater"]):
+        resize(x, (5, 15), order=0, anti_aliasing=True,
+               anti_aliasing_sigma=(1, 1), mode="reflect")
+        resize(x, (5, 15), order=0, anti_aliasing=True,
+               anti_aliasing_sigma=(0, 1), mode="reflect")

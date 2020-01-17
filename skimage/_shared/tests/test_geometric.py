@@ -1,14 +1,15 @@
 import numpy as np
 import re
-from ._geometric import GeometricTransform
-from ..transform import (estimate_transform, matrix_transform,
-                         EuclideanTransform, SimilarityTransform,
-                         AffineTransform, FundamentalMatrixTransform,
-                         EssentialMatrixTransform, ProjectiveTransform,
-                         PolynomialTransform, PiecewiseAffineTransform)
+from .._geometric import (GeometricTransform, estimate_transform,
+                          matrix_transform, EuclideanTransform,
+                          SimilarityTransform, AffineTransform,
+                          FundamentalMatrixTransform,
+                          EssentialMatrixTransform,
+                          ProjectiveTransform, PolynomialTransform,
+                          PiecewiseAffineTransform)
 
-from . import testing
-from .testing import assert_equal, assert_almost_equal
+from .. import testing
+from ..testing import assert_equal, assert_almost_equal
 import textwrap
 
 

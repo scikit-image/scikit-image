@@ -1,7 +1,7 @@
 import numpy as np
 from skimage._shared import testing
 from skimage.registration import optical_flow_tvl1
-from skimage.transform import warp
+from skimage._shared._warp import warp
 
 
 def _sin_flow_gen(image0, max_motion=4.5, npics=5):
