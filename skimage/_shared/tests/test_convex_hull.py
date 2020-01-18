@@ -155,15 +155,20 @@ def test_non_c_contiguous():
     assert_array_equal(convex_hull_image(image), image)
 
 
-@testing.fixture
-def images2d3d():
-    from ...measure.tests.test_regionprops import SAMPLE as image
+def test_consistent_2d_3d_hulls():
+    image = np.array(
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+         [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+         [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+         [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]]
+    )
     image3d = np.stack((image, image, image))
-    return image, image3d
-
-
-def test_consistent_2d_3d_hulls(images2d3d):
-    image, image3d = images2d3d
     chimage = convex_hull_image(image)
     chimage[8, 0] = True  # correct for single point exactly on hull edge
     chimage3d = convex_hull_image(image3d)

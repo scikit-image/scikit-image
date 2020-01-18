@@ -18,7 +18,8 @@ def configuration(parent_package='', top_path=None):
             'transform.pyx',
             '_warps_cy.pyx',
             '_convex_hull.pyx',
-            'interpolation.pyx'], working_path=base_path)
+            'interpolation.pyx',
+            '_pnpoly.pyx'], working_path=base_path)
 
     config.add_extension('_ccomp', sources=['_ccomp.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -30,6 +31,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('interpolation', sources=['interpolation.c'])
+    config.add_extension('_pnpoly', sources=['_pnpoly.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     return config
 
 
