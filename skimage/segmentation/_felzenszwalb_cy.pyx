@@ -6,7 +6,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 cimport numpy as cnp
-from ..measure._ccomp cimport find_root, join_trees
+from .._shared._ccomp cimport find_root, join_trees
 
 from ..util import img_as_float64
 from .._shared.utils import warn
