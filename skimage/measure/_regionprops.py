@@ -3,7 +3,7 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
 
-from ._label import label
+from .._shared._label import label
 from . import _moments
 
 from functools import wraps

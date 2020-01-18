@@ -13,12 +13,15 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('_shared', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['geometry.pyx',
+    cython(['_ccomp.pyx',
+            'geometry.pyx',
             'transform.pyx',
             '_warps_cy.pyx',
             '_convex_hull.pyx',
             'interpolation.pyx'], working_path=base_path)
 
+    config.add_extension('_ccomp', sources=['_ccomp.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
