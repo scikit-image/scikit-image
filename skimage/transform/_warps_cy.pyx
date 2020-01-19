@@ -2,8 +2,10 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import numpy as np
-cimport numpy as cnp
+cimport numpy as np
+np.import_array()
+
+
 from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
@@ -67,8 +69,30 @@ cdef inline void _transform_projective(np_floats x, np_floats y, np_floats* H,
     y_[0] = (H[3] * x + H[4] * y + H[5]) / z_
 
 
-def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
-               int order=1, mode='constant', np_floats cval=0):
+ctypedef void (*ftransform)(
+    np_floats, np_floats,
+    np_floats*,
+    np_floats*, np_floats*
+) nogil
+
+
+ctypedef void (*finterpolate)(
+    np_floats*,
+    Py_ssize_t, Py_ssize_t,
+    np_floats, np_floats,
+    char, np_floats,
+    np_floats*
+) nogil
+
+
+def _warp_fast(
+    np.ndarray image not None,
+    np.ndarray H not None,
+    np.intp_t[:] output_shape=None,
+    int order=1,
+    str mode='constant',
+    np_floats cval=0
+):
     """Projective transformation (homography).
 
     Perform a projective transformation (homography) of a floating
@@ -120,36 +144,21 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
 
     """
 
-    cdef np_floats[:, ::1] img = np.ascontiguousarray(image)
-    cdef np_floats[:, ::1] M = np.ascontiguousarray(H)
+    cdef np_floats[:, ::1] img = np.PyArray_GETCONTIGUOUS(image)
+    cdef np_floats[:, ::1] M = np.PyArray_GETCONTIGUOUS(H)
 
-    if np_floats is cnp.float32_t:
-        dtype = np.float32
+    cdef int dtype
+    if np_floats is np.float32_t:
+        dtype = np.NPY_FLOAT32
     else:
-        dtype = np.float64
+        dtype = np.NPY_FLOAT64
 
     if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
                          "`edge`, `wrap`, `reflect` or `symmetric`.")
     cdef char mode_c = ord(mode[0].upper())
 
-    cdef Py_ssize_t out_r, out_c
-    if output_shape is None:
-        out_r = int(img.shape[0])
-        out_c = int(img.shape[1])
-    else:
-        out_r = int(output_shape[0])
-        out_c = int(output_shape[1])
-
-    cdef np_floats[:, ::1] out = np.zeros((out_r, out_c), dtype=dtype)
-
-    cdef Py_ssize_t tfr, tfc
-    cdef np_floats r, c
-    cdef Py_ssize_t rows = img.shape[0]
-    cdef Py_ssize_t cols = img.shape[1]
-
-    cdef void (*transform_func)(np_floats, np_floats, np_floats*,
-                                np_floats*, np_floats*) nogil
+    cdef ftransform transform_func
     if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
         if M[0, 1] == 0 and M[1, 0] == 0:
             transform_func = _transform_metric
@@ -158,9 +167,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     else:
         transform_func = _transform_projective
 
-    cdef void (*interp_func)(np_floats*, Py_ssize_t , Py_ssize_t ,
-                             np_floats, np_floats, char, np_floats,
-                             np_floats*) nogil
+    cdef finterpolate interp_func
     if order == 0:
         interp_func = nearest_neighbour_interpolation[np_floats, np_floats,
                                                       np_floats]
@@ -173,11 +180,36 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     else:
         raise ValueError("Unsupported interpolation order", order)
 
+    cdef np.intp_t[2] shape
+    if output_shape is None:
+        shape[0] = img.shape[0]
+        shape[1] = img.shape[1]
+    else:
+        shape[0] = output_shape[0]
+        shape[1] = output_shape[1]
+
+    cdef np.ndarray out = np.PyArray_ZEROS(2, shape, dtype, 0)
+    cdef np_floats[:, ::1] vout = out
+
+    cdef Py_ssize_t out_r = vout.shape[0]
+    cdef Py_ssize_t out_c = vout.shape[1]
+    cdef Py_ssize_t rows = img.shape[0]
+    cdef Py_ssize_t cols = img.shape[1]
+
+    cdef Py_ssize_t tfr
+    cdef Py_ssize_t tfc
+    cdef np_floats r
+    cdef np_floats c
+
+    cdef np_floats *pimg = &img[0, 0]
+    cdef np_floats *pM = &M[0, 0]
+    cdef np_floats *pout = &vout[0, 0]
+
     with nogil:
         for tfr in range(out_r):
             for tfc in range(out_c):
-                transform_func(tfc, tfr, &M[0, 0], &c, &r)
-                interp_func(&img[0, 0], rows, cols, r, c,
-                            mode_c, cval, &out[tfr, tfc])
+                transform_func(tfc, tfr, pM, &c, &r)
+                interp_func(pimg, rows, cols, r, c, mode_c, cval, pout)
+                pout += 1
 
-    return np.asarray(out)
+    return out
