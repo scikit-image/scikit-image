@@ -13,7 +13,7 @@ from .profile import profile_line
 from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
 from .entropy import shannon_entropy
-from .._shared._label import label
+from ._deprecated import label
 from .._shared.pnpoly import points_in_poly, grid_points_in_poly
 
 
@@ -49,5 +49,4 @@ __all__ = ['find_contours',
            'compare_mse',
            'compare_nrmse',
            'compare_psnr',
-           'shannon_entropy'
-]
+           'shannon_entropy']

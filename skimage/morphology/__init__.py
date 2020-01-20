@@ -8,12 +8,12 @@ from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects, remove_small_holes
 from .extrema import h_minima, h_maxima, local_maxima, local_minima
-from ._flood_fill import flood, flood_fill
 from .max_tree import (max_tree, area_opening, area_closing,
                        diameter_opening, diameter_closing,
                        max_tree_local_maxima)
-from ._deprecated import watershed, label
+from ._deprecated import watershed, flood, flood_fill
 from .._shared.convex_hull import convex_hull_image, convex_hull_object
+from .._shared._label import label
 
 
 __all__ = ['binary_erosion',

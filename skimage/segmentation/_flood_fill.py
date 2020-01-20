@@ -7,10 +7,10 @@ connected to a given seed point with a different value.
 import numpy as np
 from warnings import warn
 
-from .extrema import (_resolve_neighborhood, _set_edge_values_inplace,
-                      _fast_pad)
-from ._util import _offsets_to_raveled_neighbors
+from ..morphology.extrema import (_resolve_neighborhood,
+                                  _set_edge_values_inplace, _fast_pad)
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
+from .._shared.morpho_util import _offsets_to_raveled_neighbors
 
 
 def flood_fill(image, seed_point, new_value, *, selem=None, connectivity=None,

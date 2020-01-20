@@ -7,11 +7,11 @@ from .boundaries import find_boundaries, mark_boundaries
 from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_from_one, relabel_sequential
 from .watershed import watershed
+from ._flood_fill import flood, flood_fill
 from ._chan_vese import chan_vese
 from .morphsnakes import (morphological_geodesic_active_contour,
                           morphological_chan_vese, inverse_gaussian_gradient,
                           circle_level_set, checkerboard_level_set)
-from ..morphology import flood, flood_fill
 
 
 __all__ = ['random_walker',
