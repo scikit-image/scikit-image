@@ -5,6 +5,7 @@ from skimage.filters import meijering, sato, frangi, hessian
 from skimage.data import camera, retina
 from skimage.util import crop, invert
 from skimage.color import rgb2gray
+from skimage._shared._warnings import expected_warnings
 
 
 def test_2d_null_matrix():
@@ -233,6 +234,14 @@ def test_border_management(func, tol):
     assert abs(full_mean - inside_mean) < tol
     assert abs(full_mean - border_mean) < tol
     assert abs(inside_mean - border_mean) < tol
+
+
+@pytest.mark.parametrize('func', [sato, hessian])
+def test_border_warning(func):
+    img = rgb2gray(retina()[300:500, 700:900])
+
+    with expected_warnings(["implicitly used 'constant' as the border mode"]):
+        func(img, sigmas=[1])
 
 
 if __name__ == "__main__":
