@@ -20,6 +20,7 @@ from haar_fast import HaarCalculator
 from haar_fast import DirectHaarCalculator
 from skimage.feature import haar_like_feature_fast
 
+
 def test_haar_like_feature_error():
     img = np.ones((5, 5), dtype=np.float32)
     img_ii = integral_image(img)
@@ -34,6 +35,7 @@ def test_haar_like_feature_error():
     with pytest.raises(ValueError):
         haar_like_feature(img_ii, 0, 0, 5, 5, feature_type=feat_type[:3],
                           feature_coord=feat_coord)
+
 
 @pytest.mark.parametrize("feature_type", ['type-2-x', 'type-2-y',
                                           'type-3-x', 'type-3-y',
@@ -71,6 +73,7 @@ def test_draw_haar_like_feature(max_n_features, nnz_values):
     assert image.shape == (5, 5, 3)
     assert np.count_nonzero(image) == nnz_values
 
+
 @pytest.mark.parametrize("dtype", [np.uint8, np.int8,
                                    np.float32, np.float64])
 @pytest.mark.parametrize("feature_type", ['type-2-x', 'type-2-y',
@@ -88,8 +91,9 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
                                      feature_type=feature_type)
     assert haar_feature.dtype == expected_dtype
 
+
 @pytest.mark.parametrize("dtype", [np.int, np.float32, np.float64])
-@pytest.mark.parametrize("dimension", [(5,5),(10,5),(5,10),(24,24)]) 
+@pytest.mark.parametrize("dimension", [(5, 5), (10, 5), (5, 10), (24, 24)])
 @pytest.mark.parametrize("feature_type",
                          [('type-2-x'),
                           ('type-3-x'),
@@ -97,7 +101,8 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
                           ('type-3-y'),
                           ('type-4')])
 def test_haar_like_feature(feature_type, dtype, dimension):
-    img = np.random.randint(dimension[0]*dimension[1], size=dimension).astype(dtype)
+    img = np.random.randint(
+        dimension[0]*dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
@@ -107,7 +112,9 @@ def test_haar_like_feature(feature_type, dtype, dimension):
     calculator.caculate_fmap_from_type(feature_type)
     HaarResult = calculator.segmented_array
     fast_feature_value = HaarResult.get_feature()
-    assert_allclose(np.sort(np.unique(haar_feature)), np.sort(np.unique(fast_feature_value)))
+    assert_allclose(
+        np.sort(np.unique(haar_feature)),
+        np.sort(np.unique(fast_feature_value)))
 
 
 def test_haar_like_feature_list():
@@ -119,19 +126,20 @@ def test_haar_like_feature_list():
     haar_all = haar_like_feature(img_ii, 0, 0, 5, 5)
     assert_array_equal(haar_list, haar_all)
 
-# verify the ability of translate segment tree to coordinate
+
 @pytest.mark.parametrize("feature_type",
                          [('type-2-x'),
                           ('type-3-x'),
                           ('type-2-y'),
                           ('type-3-y'),
                           ('type-4')])
-@pytest.mark.parametrize("dimension", [(5,5), (10,10), (10,5), (5,10)]) 
+@pytest.mark.parametrize("dimension", [(5, 5), (10, 10), (10, 5), (5, 10)])
 def test_haar_like_feature_coord(feature_type, dimension):
-    img = np.random.randint(dimension[0]*dimension[1], size=dimension).astype(int)
+    img = np.random.randint(
+        dimension[0]*dimension[1], size=dimension).astype(int)
     img_ii = integral_image(img)
 
-    width  = dimension[1]
+    width = dimension[1]
     height = dimension[0]
     img = img.reshape(1, dimension[0], dimension[1])
 
@@ -145,14 +153,17 @@ def test_haar_like_feature_coord(feature_type, dimension):
                                                     feature_type)
 
     for i in range(0, all_features.shape[1]):
-        v1    = HaarResult.query_by_index(i)
+        v1 = HaarResult.query_by_index(i)
         ftype = HaarResult.to_feature_type(i)
         coord = HaarResult.to_feature_coord(i)
-        v2  = haar_like_feature(img_ii, 0, 0, img_ii.shape[1], img_ii.shape[0], np.array([feature_type]), coord)
+        v2 = haar_like_feature(
+            img_ii, 0, 0, img_ii.shape[1], img_ii.shape[0],
+            np.array([feature_type]), coord)
         assert(v1 == v2)
 
+
 @pytest.mark.parametrize("dtype", [np.int, np.float32, np.float64])
-@pytest.mark.parametrize("dimension", [(5,5),(10,5),(5,10),(24,24)]) 
+@pytest.mark.parametrize("dimension", [(5, 5), (10, 5), (5, 10), (24, 24)])
 @pytest.mark.parametrize("feature_type",
                          [('type-2-x'),
                           ('type-3-x'),
@@ -160,7 +171,8 @@ def test_haar_like_feature_coord(feature_type, dimension):
                           ('type-3-y'),
                           ('type-4')])
 def test_haar_like_feature_direct(feature_type, dtype, dimension):
-    img = np.random.randint(dimension[0]*dimension[1], size=dimension).astype(dtype)
+    img = np.random.randint(
+        dimension[0]*dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
@@ -168,11 +180,13 @@ def test_haar_like_feature_direct(feature_type, dtype, dimension):
 
     calculator = DirectHaarCalculator(img)
     direct_feature_value = calculator.calculate_pattern_by_type(feature_type)
-    assert_allclose(np.sort(np.unique(haar_feature)), np.sort(np.unique(direct_feature_value)))
+    assert_allclose(
+        np.sort(np.unique(haar_feature)),
+        np.sort(np.unique(direct_feature_value)))
 
 
 @pytest.mark.parametrize("dtype", [np.int, np.float32, np.float64])
-@pytest.mark.parametrize("dimension", [(5,5),(10,5),(5,10),(24,24)]) 
+@pytest.mark.parametrize("dimension", [(5, 5), (10, 5), (5, 10), (24, 24)])
 @pytest.mark.parametrize("feature_type",
                          [('type-2-x'),
                           ('type-3-x'),
@@ -180,18 +194,22 @@ def test_haar_like_feature_direct(feature_type, dtype, dimension):
                           ('type-3-y'),
                           ('type-4')])
 def test_haar_like_feature_direct(feature_type, dtype, dimension):
-    img = np.random.randint(dimension[0]*dimension[1], size=dimension).astype(dtype)
+    img = np.random.randint(
+        dimension[0]*dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
     img = img.reshape(1, img.shape[0], img.shape[1])
 
     calculator = DirectHaarCalculator(img)
-    direct_feature_value = calculator.calculate_pattern_by_type(feature_type, flatten=True)
-    assert_allclose(np.sort(np.unique(haar_feature)), np.sort(np.unique(direct_feature_value)))
+    direct_feature_value = calculator.calculate_pattern_by_type(
+        feature_type, flatten=True)
+    assert_allclose(np.sort(
+        np.unique(haar_feature)), np.sort(np.unique(direct_feature_value)))
+
 
 @pytest.mark.parametrize("dtype", [np.int, np.float32, np.float64])
-@pytest.mark.parametrize("dimension", [(5,5),(10,5),(5,10),(24,24)]) 
+@pytest.mark.parametrize("dimension", [(5, 5), (10, 5), (5, 10), (24, 24)])
 @pytest.mark.parametrize("feature_type",
                          [('type-2-x'),
                           ('type-3-x'),
@@ -199,12 +217,16 @@ def test_haar_like_feature_direct(feature_type, dtype, dimension):
                           ('type-3-y'),
                           ('type-4')])
 def test_haar_like_feature_direct_(feature_type, dtype, dimension):
-    img = np.random.randint(dimension[0]*dimension[1], size=dimension).astype(dtype)
+    img = np.random.randint(
+        dimension[0]*dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
     img = img.reshape(1, img.shape[0], img.shape[1])
 
     calculator = DirectHaarCalculator(img)
-    direct_feature_value = calculator.calculate_pattern_by_type(feature_type, flatten=True)
-    assert_allclose(np.sort(np.unique(haar_feature)), np.sort(np.unique(direct_feature_value)))
+    direct_feature_value = calculator.calculate_pattern_by_type(
+        feature_type, flatten=True)
+    assert_allclose(
+        np.sort(np.unique(haar_feature)),
+        np.sort(np.unique(direct_feature_value)))
