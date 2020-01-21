@@ -95,12 +95,12 @@ def integral_array(imgs):
     r = np.zeros(imgs.shape)
     if lengh == 3 or lengh == 4:  # "NHW" or "NHWC"
         r = np.cumsum(imgs, axis=1)
-        r = np.cumsum(r,    axis=2)
+        r = np.cumsum(r, axis=2)
     else:  # 'HW'
         if lengh != 2:
             raise RuntimeError('unsupported dim')
         r = np.cumsum(imgs, axis=0)
-        r = np.cumsum(r,    axis=1)
+        r = np.cumsum(r, axis=1)
     return r
 
 
@@ -159,7 +159,7 @@ class SegmentTreeNode():
     def get_pattern_by_index(self, index: int):
         res = []
         offset = self.__lookup_recursive(index, res)
-        dct = {item[0] :	 item[1] for item in res}
+        dct = {item[0] : item[1] for item in res}
         return {'pattern' : dct, 'offset' : offset}
 
     def dump(self):
@@ -512,8 +512,8 @@ class HaarCalculator():
                 fmap = basic_fmap[:, :, basic_dim[1]:] -
                 basic_fmap[:, :, 0:w_l]
             else:
-                fmap = basic_fmap[:, :, basic_dim[1]*2:] -
-                (basic_fmap[:, :, basic_dim[1]:basic_dim[1]+w_l]) +
+                fmap = basic_fmap[:, :, basic_dim[1]*2:] - 
+                (basic_fmap[:, :, basic_dim[1]:basic_dim[1]+w_l]) + 
                 basic_fmap[:, :, 0:w_l]
                 fmap = fmap * -1
         else:
@@ -521,8 +521,8 @@ class HaarCalculator():
                 fmap = basic_fmap[:, basic_dim[0]:, :] -
                 basic_fmap[:, 0:h_l, :]
             else:
-                fmap = basic_fmap[:, basic_dim[0]*2:, :] -
-                (basic_fmap[:, basic_dim[0]:basic_dim[0]+h_l, :]) +
+                fmap = basic_fmap[:, basic_dim[0]*2:, :] - 
+                (basic_fmap[:, basic_dim[0]:basic_dim[0]+h_l, :]) + 
                 basic_fmap[:, 0:h_l, :]
                 fmap = fmap * -1
         return fmap
@@ -539,7 +539,7 @@ class HaarCalculator():
             if minor_dim < 2:
                 return
             last_fmap = major_fmap
-            for md in range(2, minor_dim+1):
+            for md in range(2, minor_dim + 1):
                 shift = md - 1
                 len_ = w_ - shift
                 now = major_fmap[:, :, shift:] + last_fmap[:, :, :len_]
@@ -553,7 +553,7 @@ class HaarCalculator():
             if minor_dim < 2:
                 return
             last_fmap = major_fmap
-            for md in range(2, minor_dim+1):
+            for md in range(2, minor_dim + 1):
                 shift = md - 1
                 len_ = h_ - shift
                 now = major_fmap[:, shift:, :] + last_fmap[:, :len_, :]
@@ -567,7 +567,7 @@ class HaarCalculator():
             last_fmap = major_fmap
 
             shift = 1
-            for md in range(1, (minor_dim//2)+1):
+            for md in range(1, (minor_dim // 2) + 1):
                 shift = md
                 base_len = h_ - shift
                 len_ = last_fmap.shape[1] - shift
@@ -610,12 +610,12 @@ class DirectHaarCalculator():
         return
 
     def __sanity_check(self, type_, pattern):
-        if ((type_ == 'type-3-y' and (pattern[0] % 3 != 0)) or
-                (type_ == 'type-3-x' and (pattern[1] % 3 != 0)) or
-                (type_ == 'type-2-y' and (pattern[0] % 2 != 0)) or
-                (type_ == 'type-4' and (pattern[0] % 2 != 0)) or
-                (type_ == 'type-2-x' and (pattern[1] % 2 != 0)) or
-                (type_ == 'type-4' and (pattern[1] % 2 != 0))):
+        if ((type_ == 'type-3-y' and (pattern[0] % 3 != 0))
+                or (type_ == 'type-3-x' and (pattern[1] % 3 != 0))
+                or (type_ == 'type-2-y' and (pattern[0] % 2 != 0))
+                or (type_ == 'type-4' and (pattern[0] % 2 != 0))
+                or (type_ == 'type-2-x' and (pattern[1] % 2 != 0))
+                or (type_ == 'type-4' and (pattern[1] % 2 != 0))):
             raise ValueError('input pattern error', pattern)
 
     def calculate_assemble_pattern(self, type_, pattern):
@@ -654,7 +654,7 @@ class DirectHaarCalculator():
     def __vertical2_pattern_to_coordinate(self, pattern):
         dim_h = pattern[0]
         dim_w = pattern[1]
-        hh = dim_h//2
+        hh = dim_h // 2
         range_h = self.__pad_h - dim_h
         range_w = self.__pad_w - dim_w
 
@@ -671,7 +671,7 @@ class DirectHaarCalculator():
     def __horizontal2_pattern_to_coordinate(self, pattern):
         dim_h = pattern[0]
         dim_w = pattern[1]
-        hw = dim_w//2
+        hw = dim_w // 2
         range_h = self.__pad_h - dim_h
         range_w = self.__pad_w - dim_w
 
@@ -688,17 +688,17 @@ class DirectHaarCalculator():
     def __vertical3_pattern_to_coordinate(self, pattern):
         dim_h = pattern[0]
         dim_w = pattern[1]
-        th = dim_h//3
+        th = dim_h // 3
         range_h = self.__pad_h - dim_h
         range_w = self.__pad_w - dim_w
 
-        p_rb_b = (-1, dim_h, self.__pad_h,   dim_w, self.__pad_w)
-        p_rt_b = (2, th*2, (th*2+range_h), dim_w, self.__pad_w)
+        p_rb_b = (-1, dim_h, self.__pad_h, dim_w, self.__pad_w)
+        p_rt_b = (2, th * 2, (th * 2 + range_h), dim_w, self.__pad_w)
         p_lb_b = (1, dim_h, self.__pad_h, 0, range_w)
-        p_lt_b = (-2, th*2,  (th*2+range_h), 0, range_w)
+        p_lt_b = (-2, th * 2,  (th * 2 + range_h), 0, range_w)
 
-        n_rt = (-2, th, (th+range_h), dim_w, self.__pad_w)
-        n_lt = (2, th, (th+range_h), 0, range_w)
+        n_rt = (-2, th, (th + range_h), dim_w, self.__pad_w)
+        n_lt = (2, th, (th + range_h), 0, range_w)
 
         p_rt_t = (1, 0, range_h, dim_w, self.__pad_w)
         p_lt_t = (-1, 0, range_h, 0, range_w)
@@ -734,8 +734,8 @@ class DirectHaarCalculator():
         fdig = []
         if (d > 0):
             fdig = (hfmap[:, 0:d, :] - hfmap[:, fh:, :])
-            fdig = (hfmap[:, 0:d, :] -
-                    hfmap[:, fh:, :]).reshape(self.__pad_imgs.shape[0], -1)
+            fdig = (hfmap[:, 0:d, :]
+                    - hfmap[:, fh:, :]).reshape(self.__pad_imgs.shape[0], -1)
         return fdig
 
     def __get_all_assemble_pattern(self, type_):
