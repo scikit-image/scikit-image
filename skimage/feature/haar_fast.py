@@ -439,7 +439,7 @@ class HaarCalculator():
 
         major_pattern = \
             np.transpose(
-               [np.tile(h_dim, len(w_dim)),
+                [np.tile(h_dim, len(w_dim)),
                 np.repeat(w_dim, len(h_dim))])
         return major_pattern
 
@@ -509,21 +509,21 @@ class HaarCalculator():
 
         if direction == 'h' or direction == 'd':
             if base_length == 2:
-                fmap = basic_fmap[:, :, basic_dim[1]:] -
-                basic_fmap[:, :, 0:w_l]
+                fmap = basic_fmap[:, :, basic_dim[1]:]
+                - basic_fmap[:, :, 0:w_l]
             else:
-                fmap = basic_fmap[:, :, basic_dim[1]*2:] - 
-                (basic_fmap[:, :, basic_dim[1]:basic_dim[1]+w_l]) + 
-                basic_fmap[:, :, 0:w_l]
+                fmap = basic_fmap[:, :, basic_dim[1]*2:]
+                - (basic_fmap[:, :, basic_dim[1]:basic_dim[1]+w_l])
+                + basic_fmap[:, :, 0:w_l]
                 fmap = fmap * -1
         else:
             if base_length == 2:
-                fmap = basic_fmap[:, basic_dim[0]:, :] -
-                basic_fmap[:, 0:h_l, :]
+                fmap = basic_fmap[:, basic_dim[0]:, :]
+                - basic_fmap[:, 0:h_l, :]
             else:
-                fmap = basic_fmap[:, basic_dim[0]*2:, :] - 
-                (basic_fmap[:, basic_dim[0]:basic_dim[0]+h_l, :]) + 
-                basic_fmap[:, 0:h_l, :]
+                fmap = basic_fmap[:, basic_dim[0]*2:, :]
+                - (basic_fmap[:, basic_dim[0]:basic_dim[0]+h_l, :])
+                + basic_fmap[:, 0:h_l, :]
                 fmap = fmap * -1
         return fmap
 
@@ -647,8 +647,8 @@ class DirectHaarCalculator():
         res = np.zeros((self.__int_imgs.shape[0], range_[0], range_[1]))
 
         for item in coords:
-            res += (item[0] *
-                    self.__int_imgs[:, item[1]:item[2], item[3]:item[4]])
+            res += (item[0]
+                    * self.__int_imgs[:, item[1]:item[2], item[3]:item[4]])
         return res
 
     def __vertical2_pattern_to_coordinate(self, pattern):
@@ -695,7 +695,7 @@ class DirectHaarCalculator():
         p_rb_b = (-1, dim_h, self.__pad_h, dim_w, self.__pad_w)
         p_rt_b = (2, th * 2, (th * 2 + range_h), dim_w, self.__pad_w)
         p_lb_b = (1, dim_h, self.__pad_h, 0, range_w)
-        p_lt_b = (-2, th * 2,  (th * 2 + range_h), 0, range_w)
+        p_lt_b = (-2, th * 2, (th * 2 + range_h), 0, range_w)
 
         n_rt = (-2, th, (th + range_h), dim_w, self.__pad_w)
         n_lt = (2, th, (th + range_h), 0, range_w)
@@ -709,7 +709,7 @@ class DirectHaarCalculator():
     def __horizontal3_pattern_to_coordinate(self, pattern):
         dim_h = pattern[0]
         dim_w = pattern[1]
-        tw = dim_w//3
+        tw = dim_w // 3
         range_h = self.__pad_h - dim_h
         range_w = self.__pad_w - dim_w
 

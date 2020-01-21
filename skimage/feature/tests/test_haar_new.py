@@ -102,7 +102,7 @@ def test_haar_like_feature_fused_type(dtype, feature_type):
                           ('type-4')])
 def test_haar_like_feature(feature_type, dtype, dimension):
     img = np.random.randint(
-        dimension[0]*dimension[1], size=dimension).astype(dtype)
+        dimension[0] * dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
@@ -136,7 +136,7 @@ def test_haar_like_feature_list():
 @pytest.mark.parametrize("dimension", [(5, 5), (10, 10), (10, 5), (5, 10)])
 def test_haar_like_feature_coord(feature_type, dimension):
     img = np.random.randint(
-        dimension[0]*dimension[1], size=dimension).astype(int)
+        dimension[0] * dimension[1], size=dimension).astype(int)
     img_ii = integral_image(img)
 
     width = dimension[1]
@@ -172,7 +172,7 @@ def test_haar_like_feature_coord(feature_type, dimension):
                           ('type-4')])
 def test_haar_like_feature_direct(feature_type, dtype, dimension):
     img = np.random.randint(
-        dimension[0]*dimension[1], size=dimension).astype(dtype)
+        dimension[0] * dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
@@ -195,7 +195,7 @@ def test_haar_like_feature_direct(feature_type, dtype, dimension):
                           ('type-4')])
 def test_haar_like_feature_direct(feature_type, dtype, dimension):
     img = np.random.randint(
-        dimension[0]*dimension[1], size=dimension).astype(dtype)
+        dimension[0] * dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
@@ -218,7 +218,7 @@ def test_haar_like_feature_direct(feature_type, dtype, dimension):
                           ('type-4')])
 def test_haar_like_feature_direct_(feature_type, dtype, dimension):
     img = np.random.randint(
-        dimension[0]*dimension[1], size=dimension).astype(dtype)
+        dimension[0] * dimension[1], size=dimension).astype(dtype)
     img_ii = integral_image(img)
     haar_feature = haar_like_feature(img_ii, 0, 0, dimension[1], dimension[0],
                                      feature_type=feature_type)
