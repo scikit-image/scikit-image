@@ -79,7 +79,7 @@ def cost_nmi(image0, image1, *, bins=100):
     return -normalized_mutual_information(image0, image1, bins=bins)
 
 
-def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
+def register_affine(reference, moving, *, cost=cost_nmi, minimum_size=8,
                     multichannel=False, inverse=True,
                     level_callback=None, method='Powell', **kwargs):
     """Find a transformation matrix to register a target image to a reference.
@@ -88,7 +88,7 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
     ----------
     reference : ndimage
         A reference image to compare against the target.
-    target : ndimage
+    moving : ndimage
         Our target for registration. Transforming this image using the
         returned matrix aligns it with the reference.
     cost : function, optional
@@ -149,21 +149,21 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
 
     pyramid_ref = pyramid_gaussian(reference, max_layer=nlevels,
                                    multichannel=multichannel)
-    pyramid_tgt = pyramid_gaussian(target, max_layer=nlevels,
+    pyramid_mvg = pyramid_gaussian(moving, max_layer=nlevels,
                                    multichannel=multichannel)
-    image_pairs = reversed(list(zip(pyramid_ref, pyramid_tgt)))
+    image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
     parameter_vector = _matrix_to_parameter_vector(np.identity(ndim + 1))
 
-    for ref, tgt in image_pairs:
+    for ref, mvg in image_pairs:
         def _cost(param):
             transformation = _parameter_vector_to_matrix(param, ndim)
             if not multichannel:
-                transformed = ndi.affine_transform(tgt, transformation,
+                transformed = ndi.affine_transform(mvg, transformation,
                                                    order=1)
             else:
-                transformed = np.zeros_like(tgt)
-                for ch in range(tgt.shape[-1]):
-                    ndi.affine_transform(tgt[..., ch], transformation,
+                transformed = np.zeros_like(mvg)
+                for ch in range(mvg.shape[-1]):
+                    ndi.affine_transform(mvg[..., ch], transformation,
                                          order=1, output=transformed[..., ch])
             return cost(ref, transformed)
 
@@ -171,7 +171,7 @@ def register_affine(reference, target, *, cost=cost_nmi, minimum_size=8,
         parameter_vector = result.x
         if level_callback is not None:
             level_callback(
-                (tgt,
+                (mvg,
                  _parameter_vector_to_matrix(parameter_vector, ndim),
                  result.fun)
             )
