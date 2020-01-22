@@ -30,8 +30,7 @@ def test_register_affine_multichannel():
     for ch in range(reference.shape[-1]):
         ndi.affine_transform(reference[..., ch], forward,
                              output=target[..., ch])
-    matrix = registration.register_affine(reference, target,
-                                          multichannel=True)
+    matrix = registration.register_affine(reference, target, multichannel=True)
     assert_array_almost_equal(matrix, inverse, decimal=1)
 
 
