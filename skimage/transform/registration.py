@@ -35,28 +35,6 @@ def _parameter_vector_to_matrix(parameter_vector, ndim):
     return np.concatenate((top_matrix, bottom_row), axis=0)
 
 
-def _matrix_to_parameter_vector(matrix):
-    """
-    Converts a (N+1)x(N+1) transformation matrix to the optimisation parameters
-
-    See the inverse function `_parameter_vector_to_matrix`.
-
-    Parameters
-    ----------
-    matrix : (N+1, N+1) array
-        A transformation matrix used to obtain a new image
-
-    Returns
-    -------
-    parameter_vector : (N*(N+1)) array
-        Output array giving the argument of the minimum function to
-        optimise against
-
-    """
-
-    return matrix[:-1, :].ravel()
-
-
 def cost_nmi(image0, image1, *, bins=100):
     """Negative of the normalized mutual information.
 
@@ -79,7 +57,10 @@ def cost_nmi(image0, image1, *, bins=100):
     return -normalized_mutual_information(image0, image1, bins=bins)
 
 
-def register_affine(reference, moving, *, cost=cost_nmi, minimum_size=8,
+def register_affine(reference, moving,
+                    *,
+                    cost=cost_nmi, initial_vector=None,
+                    minimum_size=8,
                     multichannel=False, inverse=True,
                     level_callback=None, method='Powell', **kwargs):
     """Find a transformation matrix to register a target image to a reference.
@@ -95,6 +76,11 @@ def register_affine(reference, moving, *, cost=cost_nmi, minimum_size=8,
         A cost function which takes two images and returns a score which is
         at a minimum when images are aligned. Uses the normalized mutual
         information by default.
+    initial_vector : array of float, optional
+        The initial vector to optimize. This vector should have the same
+        dimensionality as the transform being optimized. For example, a 2D
+        affine transform has 6 parameters. A 2D rigid transform, on the other
+        hand, only has 3 parameters.
     minimum_size : integer, optional
         The smallest size for an image along any dimension. This value
         determines the size of the image pyramid used. Choosing a smaller value
@@ -152,7 +138,10 @@ def register_affine(reference, moving, *, cost=cost_nmi, minimum_size=8,
     pyramid_mvg = pyramid_gaussian(moving, max_layer=nlevels,
                                    multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
-    parameter_vector = _matrix_to_parameter_vector(np.identity(ndim + 1))
+
+    if initial_vector is None:
+        initial_vector = np.eye(ndim, ndim + 1).ravel()
+    parameter_vector = initial_vector
 
     for ref, mvg in image_pairs:
         def _cost(param):
