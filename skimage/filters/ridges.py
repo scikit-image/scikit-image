@@ -81,6 +81,30 @@ def _sortbyabs(array, axis=0):
     return array[tuple(index)]
 
 
+def _check_sigmas(sigmas):
+    """Check sigma values for ridges filters.
+
+    Parameters
+    ----------
+    sigmas : iterable of floats
+        Sigmas argument to be checked
+
+    Returns
+    -------
+    sigmas : ndarray
+        input iterable converted to ndarray
+
+    Raises
+    ------
+    ValueError if any input value is negative
+
+    """
+    sigmas = np.asarray(sigmas).ravel()
+    if np.any(sigmas < 0.0):
+        raise ValueError('Sigma values should be greater than zero.')
+    return sigmas
+
+
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0):
     """
@@ -190,9 +214,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     """
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
 
     # Get image dimensions
     ndim = image.ndim
@@ -294,15 +316,13 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     check_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
 
     if mode is None:
         warn("Previously, sato implicitly used 'constant' as the "
              "border mode when dealing with the edge of the array. The new "
              "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitely "
+             "mode='constant'. To avoid this warning, please explicitly "
              "set the mode.", category=FutureWarning, stacklevel=2)
         mode = 'reflect'
 
@@ -426,9 +446,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     check_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas).ravel()
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
 
     # Rescale filter parameters
     alpha_sq = 2 * alpha ** 2
@@ -552,7 +570,7 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         warn("Previously, hessian implicitly used 'constant' as the "
              "border mode when dealing with the edge of the array. The new "
              "behavior is 'reflect'. To recover the old behavior, use "
-             "mode='constant'. To avoid this warning, please explicitely "
+             "mode='constant'. To avoid this warning, please explicitly "
              "set the mode.", category=FutureWarning, stacklevel=2)
         mode = 'reflect'
 
