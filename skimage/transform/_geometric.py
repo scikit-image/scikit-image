@@ -1125,7 +1125,7 @@ class EuclideanTransform(ProjectiveTransform):
                         f'{dimensionality} transforms'
                     )
             else:
-                if not np.isscalar(rotation) or len(rotation) == 3:
+                if not np.isscalar(rotation) and len(rotation) != 3:
                     raise ValueError(
                         'Parameters cannot be specified for dimension '
                         f'{dimensionality} transforms'
