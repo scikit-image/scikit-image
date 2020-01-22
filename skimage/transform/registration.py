@@ -139,7 +139,8 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
     ndim = reference_image.ndim if not multichannel else reference_image.ndim - 1
     if ndim == 0:
         raise ValueError(
-            'Input images must have at least 1 spatial dimension.')
+            'Input images must have at least 1 spatial dimension.'
+        )
 
     min_dim = min(reference_image.shape[:ndim])
     nlevels = int(np.floor(np.log2(min_dim) - np.log2(pyramid_minimum_size)))
