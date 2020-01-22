@@ -8,21 +8,17 @@ from ..metrics import normalized_mutual_information
 __all__ = ['register_affine']
 
 
-def _parameter_vector_to_matrix(parameter_vector, ndim):
-    """
-    Converts the optimisation parameters to a 3x3 transformation matrix
+def _parameter_vector_to_matrix(parameter_vector):
+    """Convert m optimization parameters to a (n+1, n+1) transformation matrix.
 
-    The optimisation paramters are known as the parameter_vector and are
-    composed of the first ``ndim`` rows of the transformation matrix, as
-    that is all that is used in an affine transformation.
+    By default (the case of this function), the parameter vector is taken to
+    be the first n rows of the affine transformation matrix in homogeneous
+    coordinate space.
 
     Parameters
     ----------
     parameter_vector : (ndim*(ndim+1)) array
-        Input array giving the argument for the minimize function to
-        optimise against.
-    ndim : int
-        The dimensionality of the space being transformed.
+        A vector of M = N * (N+1) parameters.
 
     Returns
     -------
@@ -30,6 +26,8 @@ def _parameter_vector_to_matrix(parameter_vector, ndim):
         A transformation matrix used to affine-map coordinates in an
         ``ndim``-dimensional space.
     """
+    m = parameter_vector.shape[0]
+    ndim = int((np.sqrt(4*m + 1) - 1) / 2)
     top_matrix = np.reshape(parameter_vector, (ndim, ndim+1))
     bottom_row = np.array([[0] * ndim + [1]])
     return np.concatenate((top_matrix, bottom_row), axis=0)
@@ -59,6 +57,7 @@ def cost_nmi(image0, image1, *, bins=100):
 
 def register_affine(reference_image, moving_image, *, cost=cost_nmi,
                     initial_vector=None, translation_indices=None,
+                    vector_to_matrix=None,
                     pyramid_scale=2, pyramid_minimum_size=8, multichannel=False,
                     inverse=True, level_callback=None, method='Powell',
                     **kwargs):
@@ -87,6 +86,10 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
         example, in a 2D transform, the translation parameters are in the
         top two positions of the third column of the 3 x 3 matrix, which
         corresponds to the linear indices [2, 5].
+    vector_to_matrix : callable, array (M,) -> array-like (N+1, N+1), optional
+        A function to convert a linear vector of parameters, as used by
+        `scipy.optimize.minimize`, to an affine transformation matrix in
+        homogeneous coordinates.
     pyramid_scale : float, optional
         Scaling factor to generate the image pyramid.
     pyramid_minimum_size : integer, optional
@@ -127,9 +130,9 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
     >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
-    >>> target_image = ndi.affine_transform(reference_image, matrix_transform)
-    >>> matrix = register_affine(reference_image,target_image)
-    >>> registered_target = ndi.affine_transform(target_image, matrix)
+    >>> moving_image = ndi.affine_transform(reference_image, matrix_transform)
+    >>> matrix = register_affine(reference_image, moving_image)
+    >>> registered_moving = ndi.affine_transform(moving_image, matrix)
     """
 
     # ignore the channels if present
@@ -153,10 +156,13 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
         initial_vector = np.eye(ndim, ndim + 1).ravel()
     parameter_vector = initial_vector
 
+    if vector_to_matrix is None:
+        vector_to_matrix = _parameter_vector_to_matrix
+
     for ref, mvg in image_pairs:
         parameter_vector[translation_indices] *= pyramid_scale
         def _cost(param):
-            transformation = _parameter_vector_to_matrix(param, ndim)
+            transformation = vector_to_matrix(param)
             if not multichannel:
                 transformed = ndi.affine_transform(mvg, transformation,
                                                    order=1)
@@ -172,11 +178,11 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
         if level_callback is not None:
             level_callback(
                 (mvg,
-                 _parameter_vector_to_matrix(parameter_vector, ndim),
+                 vector_to_matrix(parameter_vector),
                  result.fun)
             )
 
-    matrix = _parameter_vector_to_matrix(parameter_vector, ndim)
+    matrix = vector_to_matrix(parameter_vector)
 
     if not inverse:
         # estimated is already inverse, so we invert for forward transform
