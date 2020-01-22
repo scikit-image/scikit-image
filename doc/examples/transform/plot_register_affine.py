@@ -144,6 +144,17 @@ plt.show()
 # Euclidean transform, we can use scikit-image's transformation classes to use
 # a smaller parameter set over which to optimize. This can make the
 # registration faster and more robust.
+#
+# It is important to note that out of the components of an affine
+# transformation, scale, rotation, and skew are scale-invariant, but
+# translation is not. Therefore, parameters representing translation in the
+# parameter vector need to be rescaled between different levels of the
+# pyramid. `register_affine` does this automatically, but it needs to know
+# which parts of the parameter vector represent translation. The keyword
+# argument ``translation_indices`` is provided for this purpose.
+#
+# Finally, in this case, a too-small pyramid image causes the registration to
+# fail to converge to the correct result, so we set the smallest size to 64.
 
 from skimage.transform import EuclideanTransform
 
@@ -154,7 +165,9 @@ def rigid_transform(params):
 
 t2 = time.time()
 rigid_matrix = register_affine(image, target, initial_vector=np.zeros(3),
-                               vector_to_matrix=rigid_transform)
+                               vector_to_matrix=rigid_transform,
+                               pyramid_minimum_size=64,
+                               translation_indices=slice(1, None))
 t3 = time.time()
 
 
