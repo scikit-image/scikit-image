@@ -30,7 +30,7 @@ try:
             pass
     umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
-except Exception:
+except ImportError:
     UmfpackContext = None
 
 try:
