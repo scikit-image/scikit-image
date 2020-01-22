@@ -160,8 +160,11 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
     if vector_to_matrix is None:
         vector_to_matrix = _parameter_vector_to_matrix
 
+    if translation_indices is None:
+        translation_indices = slice(ndim, ndim**2 - 1, ndim)
+
     for ref, mvg in image_pairs:
-        #parameter_vector[translation_indices] *= pyramid_scale
+        parameter_vector[translation_indices] *= pyramid_scale
         def _cost(param):
             transformation = vector_to_matrix(param)
             if not multichannel:
