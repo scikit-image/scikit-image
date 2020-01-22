@@ -1,5 +1,6 @@
 import urllib.parse
 import urllib.request
+from urllib.error import URLError, HTTPError
 
 import os
 import re
@@ -28,7 +29,15 @@ def file_or_url_context(resource_name):
                 f.write(u.read())
             # f must be closed before yielding
             yield f.name
-        finally:
+        except (URLError, HTTPError):
+            # could not open URL
+            os.remove(f.name)
+            raise
+        except (FileNotFoundError, FileExistsError,
+                PermissionError, BaseException):
+            # could not create temporary file
+            raise
+        else:
             os.remove(f.name)
     else:
         yield resource_name

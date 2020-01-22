@@ -132,7 +132,7 @@ def test_crop():
 
 @testing.skipif(not has_qt, reason="Qt not installed")
 def test_color_histogram():
-    image = util.img_as_float(data.load('color.png'))
+    image = util.img_as_float(data.colorwheel())
     viewer = ImageViewer(image)
     ch = ColorHistogram(dock='right')
     viewer += ch

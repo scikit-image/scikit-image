@@ -86,3 +86,32 @@ def test_invalid_block_size():
         block_reduce(image, [1, 2, 3])
     with testing.raises(ValueError):
         block_reduce(image, [1, 0.5])
+
+
+def test_func_kwargs_same_dtype():
+    image = np.array([[97, 123, 173, 227],
+                     [217, 241, 221, 214],
+                     [211,  11, 170,  53],
+                     [214, 205, 101,  57]], dtype=np.uint8)
+
+    out = block_reduce(image, (2, 2), func=np.mean,
+                       func_kwargs={'dtype': np.uint8})
+    expected = np.array([[41, 16], [32, 31]], dtype=np.uint8)
+
+    assert_equal(out, expected)
+    assert out.dtype == expected.dtype
+
+
+def test_func_kwargs_different_dtype():
+    image = np.array([[0.45745366, 0.67479345, 0.20949775, 0.3147348],
+                      [0.7209286, 0.88915504, 0.66153409, 0.07919526],
+                      [0.04640037, 0.54008495, 0.34664343, 0.56152301],
+                      [0.58085003, 0.80144708, 0.87844473, 0.29811511]],
+                     dtype=np.float64)
+
+    out = block_reduce(image, (2, 2), func=np.mean,
+                       func_kwargs={'dtype': np.float16})
+    expected = np.array([[0.6855, 0.3164], [0.4922, 0.521]], dtype=np.float16)
+
+    assert_equal(out, expected)
+    assert out.dtype == expected.dtype

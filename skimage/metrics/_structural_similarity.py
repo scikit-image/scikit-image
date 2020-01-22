@@ -1,4 +1,4 @@
-
+from warnings import warn
 import numpy as np
 from scipy.ndimage import uniform_filter, gaussian_filter
 
@@ -9,9 +9,11 @@ from .._shared.utils import warn, check_shape_equality
 __all__ = ['structural_similarity']
 
 
-def structural_similarity(im1, im2, win_size=None, gradient=False,
-                          data_range=None, multichannel=False,
-                          gaussian_weights=False, full=False, **kwargs):
+def structural_similarity(im1, im2,
+                          *,
+                          win_size=None, gradient=False, data_range=None,
+                          multichannel=False, gaussian_weights=False,
+                          full=False, **kwargs):
     """
     Compute the mean structural similarity index between two images.
 
@@ -64,6 +66,10 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
     -----
     To match the implementation of Wang et. al. [1]_, set `gaussian_weights`
     to True, `sigma` to 1.5, and `use_sample_covariance` to False.
+
+    .. versionchanged:: 0.16
+        This function was renamed from ``skimage.measure.compare_ssim`` to
+        ``skimage.metrics.structural_similarity``.
 
     References
     ----------
@@ -153,7 +159,7 @@ def structural_similarity(im1, im2, win_size=None, gradient=False,
     if data_range is None:
         if im1.dtype != im2.dtype:
             warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "im1.dtype.")
+                 "im1.dtype.", stacklevel=2)
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
 

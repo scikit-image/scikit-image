@@ -268,6 +268,9 @@ class ApiDocWriter(object):
         if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
             print('WARNING: Empty -', uri)
             return ''
+        functions = sorted(functions)
+        classes = sorted(classes)
+        submodules = sorted(submodules)
 
         # Make a shorter version of the uri that omits the package name for
         # titles
@@ -314,6 +317,8 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
+            full_c = uri + '.' + c
+            ad += '\n.. include:: ' + full_c + '.examples\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):

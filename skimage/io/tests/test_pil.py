@@ -9,7 +9,6 @@ from .. import imread, imsave, use_plugin, reset_plugins
 from PIL import Image
 from .._plugins.pil_plugin import (
     pil_to_ndarray, ndarray_to_pil, _palette_is_grayscale)
-from ...measure import compare_ssim as ssim
 from ...color import rgb2lab
 
 from skimage._shared import testing
@@ -19,6 +18,8 @@ from skimage._shared.testing import (mono_check, color_check,
                                      assert_allclose)
 from skimage._shared._warnings import expected_warnings
 from skimage._shared._tempfile import temporary_file
+
+from skimage.metrics import structural_similarity
 
 
 def setup():
@@ -139,8 +140,9 @@ def test_jpg_quality_arg():
     with temporary_file(suffix='.jpg') as jpg:
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
-        sim = ssim(chessboard, im,
-                   data_range=chessboard.max() - chessboard.min())
+        sim = structural_similarity(
+            chessboard, im,
+            data_range=chessboard.max() - chessboard.min())
         assert sim > 0.99
 
 
@@ -285,7 +287,8 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = ssim(refi, newi, data_range=refi.max() - refi.min())
+        sim = structural_similarity(refi, newi,
+                                    data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 

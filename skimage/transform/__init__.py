@@ -14,7 +14,7 @@ from ._geometric import (estimate_transform,
                          PiecewiseAffineTransform)
 from .registration import register_affine
 from ._warps import (swirl, resize, rotate, rescale,
-                     downscale_local_mean, warp, warp_coords)
+                     downscale_local_mean, warp, warp_coords, warp_polar)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 
@@ -36,6 +36,7 @@ __all__ = ['match_histograms',
            'integrate',
            'warp',
            'warp_coords',
+           'warp_polar',
            'estimate_transform',
            'matrix_transform',
            'EuclideanTransform',

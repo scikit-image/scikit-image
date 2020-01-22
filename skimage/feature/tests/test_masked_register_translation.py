@@ -8,10 +8,11 @@ from skimage.feature.register_translation import register_translation
 from skimage.feature.masked_register_translation import (
     masked_register_translation, cross_correlate_masked)
 from skimage.io import imread
+from skimage._shared.fft import fftmodule as fft
 
 # Location of test images
 # These images are taken from Dirk Padfields' MATLAB package
-# available on his website: www.dirkpadfield.com 
+# available on his website: www.dirkpadfield.com
 IMAGES_DIR = Path(__file__).parent / 'data'
 
 def test_masked_registration_vs_register_translation():
@@ -19,8 +20,8 @@ def test_masked_registration_vs_register_translation():
     register_translation in the case of trivial masks."""
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(
-        np.fft.fft2(reference_image), shift)))
+    shifted = np.real(fft.ifft2(fourier_shift(
+        fft.fft2(reference_image), shift)))
     trivial_mask = np.ones_like(reference_image)
 
     nonmasked_result, *_ = register_translation(reference_image, shifted)
@@ -38,8 +39,8 @@ def test_masked_registration_random_masks():
 
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(
-        np.fft.fft2(reference_image), shift)))
+    shifted = np.real(fft.ifft2(fourier_shift(
+        fft.fft2(reference_image), shift)))
 
     # Random masks with 75% of pixels being valid
     ref_mask = np.random.choice(
@@ -61,8 +62,8 @@ def test_masked_registration_random_masks_non_equal_sizes():
 
     reference_image = camera()
     shift = (-7, 12)
-    shifted = np.real(np.fft.ifft2(fourier_shift(
-        np.fft.fft2(reference_image), shift)))
+    shifted = np.real(fft.ifft2(fourier_shift(
+        fft.fft2(reference_image), shift)))
 
     # Crop the shifted image
     shifted = shifted[64:-64, 64:-64]
@@ -82,15 +83,15 @@ def test_masked_registration_random_masks_non_equal_sizes():
 
 
 def test_masked_registration_padfield_data():
-    """ Masked translation registration should behave like in the original 
+    """ Masked translation registration should behave like in the original
     publication """
-    # Test translated from MATLABimplementation `MaskedFFTRegistrationTest` 
-    # file. You can find the source code here: 
+    # Test translated from MATLABimplementation `MaskedFFTRegistrationTest`
+    # file. You can find the source code here:
     # http://www.dirkpadfield.com/Home/MaskedFFTRegistrationCode.zip
 
     shifts = [(75, 75), (-130, 130), (130, 130)]
     for xi, yi in shifts:
-        
+
         fixed_image = imread(
             IMAGES_DIR / 'OriginalX{:d}Y{:d}.png'.format(xi, yi))
         moving_image = imread(
@@ -101,13 +102,13 @@ def test_masked_registration_padfield_data():
         moving_mask = (moving_image != 0)
 
         # Note that shifts in x and y and shifts in cols and rows
-        shift_y, shift_x = masked_register_translation(fixed_image, 
-                                                       moving_image, 
-                                                       fixed_mask, 
-                                                       moving_mask, 
+        shift_y, shift_x = masked_register_translation(fixed_image,
+                                                       moving_image,
+                                                       fixed_mask,
+                                                       moving_mask,
                                                        overlap_ratio = 1/10)
-        # Note: by looking at the test code from Padfield's 
-        # MaskedFFTRegistrationCode repository, the 
+        # Note: by looking at the test code from Padfield's
+        # MaskedFFTRegistrationCode repository, the
         # shifts were not xi and yi, but xi and -yi
         assert_equal((shift_x, shift_y), (-xi, yi))
 
@@ -216,7 +217,7 @@ def test_cross_correlate_masked_over_axes():
                                                         arr2[:, :, index],
                                                         m1[:, :, index],
                                                         m2[:, :, index],
-                                                        axes=(0, 1), 
+                                                        axes=(0, 1),
                                                         mode='same')
 
     over_axes = cross_correlate_masked(

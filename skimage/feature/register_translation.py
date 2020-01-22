@@ -4,6 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
+from .._shared.fft import fftmodule as fft
 
 
 def _upsampled_dft(data, upsampled_region_size,
@@ -64,7 +65,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
         kernel = ((np.arange(ups_size) - ax_offset)[:, None]
-                  * np.fft.fftfreq(n_items, upsample_factor))
+                  * fft.fftfreq(n_items, upsample_factor))
         kernel = np.exp(-im2pi * kernel)
 
         # Equivalent to:
@@ -165,8 +166,8 @@ def register_translation(src_image, target_image, upsample_factor=1,
         target_freq = target_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = np.fft.fftn(src_image)
-        target_freq = np.fft.fftn(target_image)
+        src_freq = fft.fftn(src_image)
+        target_freq = fft.fftn(target_image)
     else:
         raise ValueError("Error: register_translation only knows the \"real\" "
                          "and \"fourier\" values for the ``space`` argument.")
@@ -174,7 +175,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = np.fft.ifftn(image_product)
+    cross_correlation = fft.ifftn(image_product)
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),

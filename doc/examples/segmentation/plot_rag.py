@@ -67,7 +67,7 @@ g.add_edge(1, 3, weight=50)
 
 # Assigning dummy labels.
 for n in g.nodes():
-    g.node[n]['labels'] = [n]
+    g.nodes[n]['labels'] = [n]
 
 gc = g.copy()
 

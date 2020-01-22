@@ -51,7 +51,8 @@ ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
 # max_shift = 3 -> shifts of (0, 1, 2, 3) along each axis
 # etc...
 
-denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1')
+denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1',
+                      rescale_sigma=True)
 
 all_psnr = []
 max_shifts = [0, 1, 3, 5]

@@ -20,7 +20,8 @@ def _coords_inside_image(rr, cc, shape, val=None):
         Indices of pixels.
     shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates.  Must be at least length 2. Only the first two values
+        are used to determine the extent of the input image.
     val : (N, D) ndarray of float, optional
         Values of pixels at coordinates ``[rr, cc]``.
 

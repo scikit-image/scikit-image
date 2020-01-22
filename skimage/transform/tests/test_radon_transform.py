@@ -6,6 +6,7 @@ from skimage import data_dir
 from skimage.io import imread
 from skimage.transform import radon, iradon, iradon_sart, rescale
 
+from skimage._shared.utils import convert_to_float
 from skimage._shared import testing
 from skimage._shared.testing import test_parallel
 from skimage._shared._warnings import expected_warnings
@@ -59,42 +60,40 @@ def test_iradon_bias_circular_phantom():
 
     reconstruction_fbp = iradon(sinogram, theta=theta)
     error = reconstruction_fbp - image
-    
+
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
     assert( roi_err < tol )
-    
 
-def check_radon_center(shape, circle):
+
+def check_radon_center(shape, circle, dtype, preserve_range):
     # Create a test image with only a single non-zero pixel at the origin
-    image = np.zeros(shape, dtype=np.float)
+    image = np.zeros(shape, dtype=dtype)
     image[(shape[0] // 2, shape[1] // 2)] = 1.
     # Calculate the sinogram
     theta = np.linspace(0., 180., max(shape), endpoint=False)
-    sinogram = radon(image, theta=theta, circle=circle)
+    sinogram = radon(image, theta=theta, circle=circle,
+                     preserve_range=preserve_range)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
     print(sinogram_max)
     assert np.std(sinogram_max) < 1e-6
 
 
-shapes_for_test_radon_center = [(16, 16), (17, 17)]
-circles_for_test_radon_center = [False, True]
+@testing.parametrize("shape", [(16, 16), (17, 17)])
+@testing.parametrize("circle", [False, True])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
+def test_radon_center(shape, circle, dtype, preserve_range):
+    check_radon_center(shape, circle, dtype, preserve_range)
 
 
-@testing.parametrize("shape, circle",
-                     itertools.product(shapes_for_test_radon_center,
-                                       circles_for_test_radon_center))
-def test_radon_center(shape, circle):
-    check_radon_center(shape, circle)
-
-
-rectangular_shapes = [(32, 16), (33, 17)]
-
-
-@testing.parametrize("shape", rectangular_shapes)
-def test_radon_center_rectangular(shape):
-    check_radon_center(shape, False)
+@testing.parametrize("shape", [(32, 16), (33, 17)])
+@testing.parametrize("circle", [False])
+@testing.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
+@testing.parametrize("preserve_range", [False, True])
+def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
+    check_radon_center(shape, circle, dtype, preserve_range)
 
 
 def check_iradon_center(size, theta, circle):
@@ -143,7 +142,7 @@ circles_for_test_iradon_center = [False, True]
 @testing.parametrize("size, theta, circle",
                      itertools.product(sizes_for_test_iradon_center,
                                        thetas_for_test_iradon_center,
-                                       circles_for_test_radon_center))
+                                       circles_for_test_iradon_center))
 def test_iradon_center(size, theta, circle):
     check_iradon_center(size, theta, circle)
 
@@ -437,3 +436,32 @@ def test_iradon_sart():
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.022 * error_factor
+
+
+def test_radon_dtype():
+    img = convert_to_float(PHANTOM, False)
+    img32 = img.astype(np.float32)
+
+    assert radon(img).dtype == img.dtype
+    assert radon(img32).dtype == img32.dtype
+
+
+def test_iradon_sart_dtype():
+    sinogram = np.zeros((16, 1), dtype=int)
+    sinogram[8, 0] = 1.
+    sinogram64 = sinogram.astype('float64')
+    sinogram32 = sinogram.astype('float32')
+
+    with expected_warnings(['Input data is cast to float']):
+        assert iradon_sart(sinogram, theta=[0]).dtype == 'float64'
+
+    assert iradon_sart(sinogram64, theta=[0]).dtype == sinogram64.dtype
+    assert iradon_sart(sinogram32, theta=[0]).dtype == sinogram32.dtype
+
+
+def test_iradon_wrong_dtype():
+    sinogram = np.zeros((16, 1))
+
+    with testing.raises(ValueError):
+        iradon_sart(sinogram, dtype=int)
+

@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import exposure
-from skimage.transform import match_histograms
+from skimage.exposure import match_histograms
 
 reference = data.coffee()
 image = data.chelsea()

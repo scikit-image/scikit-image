@@ -1,4 +1,5 @@
 import numpy as np
+from skimage import data
 from skimage import filters
 from skimage.filters.edges import _mask_filter_result
 
@@ -18,7 +19,7 @@ def test_roberts_diagonal1():
     image = np.tri(10, 10, 0)
     expected = ~(np.tri(10, 10, -1).astype(bool) |
                  np.tri(10, 10, -2).astype(bool).transpose())
-    expected = _mask_filter_result(expected, None)
+    expected[-1, -1] = 0  # due to 'reflect' & image shape, last pixel not edge
     result = filters.roberts(image).astype(bool)
     assert_array_almost_equal(result, expected)
 
@@ -52,7 +53,6 @@ def test_sobel_horizontal():
     image = (i >= 0).astype(float)
     result = filters.sobel(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -62,7 +62,6 @@ def test_sobel_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.sobel(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -86,7 +85,6 @@ def test_sobel_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.sobel_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -118,7 +116,6 @@ def test_sobel_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.sobel_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -150,7 +147,6 @@ def test_scharr_horizontal():
     image = (i >= 0).astype(float)
     result = filters.scharr(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert_allclose(result[i == 0], 1)
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -160,7 +156,6 @@ def test_scharr_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.scharr(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert_allclose(result[j == 0], 1)
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -185,7 +180,6 @@ def test_scharr_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.scharr_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert (np.all(result[np.abs(i) > 1] == 0))
 
@@ -218,7 +212,6 @@ def test_scharr_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.scharr_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert (np.all(result[np.abs(j) > 1] == 0))
 
@@ -251,7 +244,6 @@ def test_prewitt_horizontal():
     image = (i >= 0).astype(float)
     result = filters.prewitt(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
 
@@ -261,7 +253,6 @@ def test_prewitt_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.prewitt(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert_allclose(result[j == 0], 1)
     assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
 
@@ -286,7 +277,6 @@ def test_prewitt_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.prewitt_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == 1))
     assert_allclose(result[np.abs(i) > 1], 0, atol=1e-10)
 
@@ -319,7 +309,6 @@ def test_prewitt_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.prewitt_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == 1))
     assert_allclose(result[np.abs(j) > 1], 0, atol=1e-10)
 
@@ -362,14 +351,15 @@ def test_laplace_mask():
 
 def test_farid_zeros():
     """Farid on an array of all zeros."""
-    result = filters.farid(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid(np.zeros((10, 10)),
+                           mask=np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_mask():
     """Farid on a masked array should be zero."""
     result = filters.farid(np.random.uniform(size=(10, 10)),
-                           np.zeros((10, 10), dtype=bool))
+                           mask=np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -379,7 +369,6 @@ def test_farid_horizontal():
     image = (i >= 0).astype(float)
     result = filters.farid(image) * np.sqrt(2)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert (np.all(result[i == 0] == result[i == 0][0]))
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
@@ -389,21 +378,21 @@ def test_farid_vertical():
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = filters.farid(image) * np.sqrt(2)
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
     assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
 
 def test_farid_h_zeros():
     """Horizontal Farid on an array of all zeros."""
-    result = filters.farid_h(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid_h(np.zeros((10, 10)),
+                             mask=np.ones((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
 def test_farid_h_mask():
     """Horizontal Farid on a masked array should be zero."""
     result = filters.farid_h(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), dtype=bool))
+                             mask=np.zeros((10, 10), dtype=bool))
     assert (np.all(result == 0))
 
 
@@ -413,7 +402,6 @@ def test_farid_h_horizontal():
     image = (i >= 0).astype(float)
     result = filters.farid_h(image)
     # Check if result match transform direction
-    i[np.abs(j) == 5] = 10000
     assert np.all(result[i == 0] == result[i == 0][0])
     assert_allclose(result[np.abs(i) > 2], 0, atol=1e-10)
 
@@ -428,14 +416,15 @@ def test_farid_h_vertical():
 
 def test_farid_v_zeros():
     """Vertical Farid on an array of all zeros."""
-    result = filters.farid_v(np.zeros((10, 10)), np.ones((10, 10), dtype=bool))
+    result = filters.farid_v(np.zeros((10, 10)),
+                             mask=np.ones((10, 10), dtype=bool))
     assert_allclose(result, 0, atol=1e-10)
 
 
 def test_farid_v_mask():
     """Vertical Farid on a masked array should be zero."""
     result = filters.farid_v(np.random.uniform(size=(10, 10)),
-                             np.zeros((10, 10), dtype=bool))
+                             mask=np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 
@@ -445,7 +434,6 @@ def test_farid_v_vertical():
     image = (j >= 0).astype(float)
     result = filters.farid_v(image)
     # Check if result match transform direction
-    j[np.abs(i) == 5] = 10000
     assert (np.all(result[j == 0] == result[j == 0][0]))
     assert_allclose(result[np.abs(j) > 2], 0, atol=1e-10)
 
@@ -494,18 +482,87 @@ def test_vertical_mask_line(grad_func):
     assert_allclose(result, expected)
 
 
-def test_range():
+# The below three constant 3x3x3 cubes were empirically found to maximise the
+# output of each of their respective filters. We use them to test that the
+# output of the filter on the blobs image matches expectation in terms of
+# scale.
+
+# maximum Sobel 3D edge on axis 0
+MAX_SOBEL_0 = np.array([
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]],
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]],
+    [[1, 1, 1],
+     [1, 1, 1],
+     [1, 1, 1]],
+]).astype(float)
+
+# maximum Sobel 3D edge in magnitude
+MAX_SOBEL_ND = np.array([
+    [[1, 0, 0],
+     [1, 0, 0],
+     [1, 0, 0]],
+
+    [[1, 0, 0],
+     [1, 1, 0],
+     [1, 1, 0]],
+
+    [[1, 1, 0],
+     [1, 1, 0],
+     [1, 1, 0]]
+]).astype(float)
+
+# maximum Scharr 3D edge in magnitude. This illustrates the better rotation
+# invariance of the Scharr filter!
+MAX_SCHARR_ND = np.array([
+    [[0, 0, 0],
+     [0, 0, 1],
+     [0, 1, 1]],
+    [[0, 0, 1],
+     [0, 1, 1],
+     [0, 1, 1]],
+    [[0, 0, 1],
+     [0, 1, 1],
+     [1, 1, 1]]
+]).astype(float)
+
+
+@testing.parametrize(
+    ('func', 'max_edge'),
+    [(filters.prewitt, MAX_SOBEL_ND),
+     (filters.sobel, MAX_SOBEL_ND),
+     (filters.scharr, MAX_SCHARR_ND)]
+)
+def test_3d_edge_filters(func, max_edge):
+    blobs = data.binary_blobs(length=128, n_dim=3)
+    edges = func(blobs)
+    testing.assert_allclose(np.max(edges), func(max_edge)[1, 1, 1])
+
+
+@testing.parametrize(
+    'func', (filters.prewitt, filters.sobel, filters.scharr)
+)
+def test_3d_edge_filters_single_axis(func):
+    blobs = data.binary_blobs(length=128, n_dim=3)
+    edges0 = func(blobs, axis=0)
+    testing.assert_allclose(np.max(edges0), func(MAX_SOBEL_0, axis=0)[1, 1, 1])
+
+
+@testing.parametrize(
+    'detector',
+    [filters.sobel, filters.scharr, filters.prewitt,
+     filters.roberts, filters.farid]
+)
+def test_range(detector):
     """Output of edge detection should be in [0, 1]"""
     image = np.random.random((100, 100))
-    for detector in (filters.sobel, filters.scharr,
-                     filters.prewitt, filters.roberts,
-                     filters.farid):
-        out = detector(image)
-        assert_(out.min() >= 0,
-                "Minimum of `{0}` is smaller than zero".format(
-                    detector.__name__)
-                )
-        assert_(out.max() <= 1,
-                "Maximum of `{0}` is larger than 1".format(
-                    detector.__name__)
-                )
+    out = detector(image)
+    assert_(
+        out.min() >= 0, f'Minimum of `{detector.__name__}` is smaller than 0.'
+    )
+    assert_(
+        out.max() <= 1, f'Maximum of `{detector.__name__}` is larger than 1.'
+    )

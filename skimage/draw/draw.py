@@ -13,7 +13,8 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
     Parameters
     ----------
     shape :  iterable of ints
-        Shape of the input image.  Must be length 2.
+        Shape of the input image.  Must be at least length 2. Only the first
+        two values are used to determine the extent of the input image.
     center : iterable of floats
         (row, column) position of center inside the given shape.
     radii : iterable of floats
@@ -53,7 +54,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extent of the ellipse are used.
+        By default the full extent of the ellipse are used. Must be at least
+        length 2. Only the first two values are used to determine the extent.
     rotation : float, optional (default 0.)
         Set the ellipse rotation (rotation) in range (-PI, PI)
         in contra clock wise direction, so PI/2 degree means swap ellipse axis
@@ -152,7 +154,9 @@ def circle(r, c, radius, shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for circles that exceed the image
-        size. If None, the full extent of the circle is used.
+        size. If None, the full extent of the circle is used.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
 
     Returns
     -------
@@ -194,7 +198,9 @@ def polygon_perimeter(r, c, shape=None, clip=False):
     shape : tuple, optional
         Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons that exceed the image size.
-        If None, the full extents of the polygon is used.
+        If None, the full extents of the polygon is used.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
     clip : bool, optional
         Whether to clip the polygon to the provided shape.  If this is set
         to True, the drawn figure will always be a closed polygon with all
@@ -419,7 +425,9 @@ def polygon(r, c, shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
-        size. If None, the full extent of the polygon is used.
+        size. If None, the full extent of the polygon is used.  Must be at
+        least length 2. Only the first two values are used to determine the
+        extent of the input image.
 
     Returns
     -------
@@ -467,7 +475,9 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for circles that exceed the image
-        size. If None, the full extent of the circle is used.
+        size. If None, the full extent of the circle is used.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
 
     Returns
     -------
@@ -525,7 +535,9 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for circles that exceed the image
-        size. If None, the full extent of the circle is used.
+        size. If None, the full extent of the circle is used.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
 
     Returns
     -------
@@ -537,6 +549,9 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     -----
     Wu's method draws anti-aliased circle. This implementation doesn't use
     lookup table optimization.
+
+    Use the function ``draw.set_color`` to apply ``circle_perimeter_aa``
+    results to color images.
 
     References
     ----------
@@ -560,6 +575,11 @@ def circle_perimeter_aa(r, c, radius, shape=None):
            [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
+
+    >>> from skimage import data, draw
+    >>> image = data.chelsea()
+    >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
+    >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """
     return _circle_perimeter_aa(r, c, radius, shape)
 
@@ -578,7 +598,9 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for ellipses that exceed the image
-        size. If None, the full extent of the ellipse is used.
+        size. If None, the full extent of the ellipse is used.  Must be at
+        least length 2. Only the first two values are used to determine the
+        extent of the input image.
 
     Returns
     -------
@@ -778,8 +800,9 @@ def rectangle(start, end=None, extent=None, shape=None):
     tl, br = _rectangle_slice(start=start, end=end, extent=extent)
 
     if shape is not None:
-        br = np.minimum(shape, br)
-        tl = np.maximum(np.zeros_like(shape), tl)
+        n_dim = len(start)
+        br = np.minimum(shape[0:n_dim], br)
+        tl = np.maximum(np.zeros_like(shape[0:n_dim]), tl)
     coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
                                                                tuple(br))])
     return coords
@@ -806,7 +829,9 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     shape : tuple, optional
         Image shape used to determine the maximum bounds of the output
         coordinates. This is useful for clipping perimeters that exceed
-        the image size. By default, no clipping is done.
+        the image size. By default, no clipping is done.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
     clip : bool, optional
         Whether to clip the perimeter to the provided shape. If this is set
         to True, the drawn figure will always be a closed polygon with all

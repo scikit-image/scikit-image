@@ -515,6 +515,27 @@ def test_ellipse_with_shape():
 
     assert_array_equal(img, img_)
 
+    img = np.zeros((10, 9, 3), 'uint8')
+
+    rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+    img[rr, cc, 0] = 1
+
+    img_ = np.zeros_like(img)
+    img_[..., 0] = np.array(
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1]],
+    )
+
+    assert_array_equal(img, img_)
+
 
 def test_ellipse_negative():
     rr, cc = ellipse(-3, -3, 1.7, 1.7)
@@ -909,6 +930,13 @@ def test_rectangle_extent():
     rr, cc = rectangle(start, extent=extent, shape=img.shape)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
+
+    img = np.zeros((5, 5, 3), dtype=np.uint8)
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[rr, cc, 0] = 1
+    expected_2 = np.zeros_like(img)
+    expected_2[..., 0] = expected
+    assert_array_equal(img, expected_2)
 
 
 def test_rectangle_extent_negative():

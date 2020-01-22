@@ -76,8 +76,9 @@ def expected_warnings(matching):
 
     Parameters
     ----------
-    matching : list of strings or compiled regexes
+    matching : None or a list of strings or compiled regexes
         Regexes for the desired warning to catch
+        If matching is None, this behaves as a no-op.
 
     Examples
     --------
@@ -108,6 +109,11 @@ def expected_warnings(matching):
     if isinstance(matching, str):
         raise ValueError('``matching`` should be a list of strings and not '
                          'a string itself.')
+
+    # Special case for disabling the context manager
+    if matching is None:
+        yield None
+        return
 
     strict_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS', '1')
     if strict_warnings.lower() == 'true':

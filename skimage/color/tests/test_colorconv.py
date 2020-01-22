@@ -15,7 +15,7 @@ from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import TestCase
 
-from skimage.util import img_as_float, img_as_ubyte
+from skimage.util import img_as_float, img_as_ubyte, img_as_float32
 from skimage.io import imread
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
@@ -93,6 +93,13 @@ class TestColorconv(TestCase):
     def test_rgba2rgb_error_rgb(self):
         self.assertRaises(ValueError, rgba2rgb, self.img_rgb)
 
+    def test_rgba2rgb_dtype(self):
+        rgba = self.img_rgba.astype('float64')
+        rgba32 = img_as_float32(rgba)
+
+        assert rgba2rgb(rgba).dtype == rgba.dtype
+        assert rgba2rgb(rgba32).dtype == rgba32.dtype
+
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
         rgb = img_as_float(self.img_rgb)[::16, ::16]
@@ -109,6 +116,13 @@ class TestColorconv(TestCase):
     def test_rgb2hsv_error_one_element(self):
         self.assertRaises(ValueError, rgb2hsv, self.img_rgb[0, 0])
 
+    def test_rgb2hsv_dtype(self):
+        rgb = img_as_float(self.img_rgb)
+        rgb32 = img_as_float32(self.img_rgb)
+
+        assert rgb2hsv(rgb).dtype == rgb.dtype
+        assert rgb2hsv(rgb32).dtype == rgb32.dtype
+
     # HSV to RGB
     def test_hsv2rgb_conversion(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
@@ -124,6 +138,17 @@ class TestColorconv(TestCase):
 
     def test_hsv2rgb_error_one_element(self):
         self.assertRaises(ValueError, hsv2rgb, self.img_rgb[0, 0])
+
+    def test_hsv2rgb_dtype(self):
+        rgb = self.img_rgb.astype("float32")[::16, ::16]
+        # create HSV image with colorsys
+        hsv = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
+                        for pt in rgb.reshape(-1, 3)],
+                       dtype='float64').reshape(rgb.shape)
+        hsv32 = hsv.astype('float32')
+
+        assert hsv2rgb(hsv).dtype == hsv.dtype
+        assert hsv2rgb(hsv32).dtype == hsv32.dtype
 
     # RGB to XYZ
     def test_rgb2xyz_conversion(self):
@@ -145,10 +170,24 @@ class TestColorconv(TestCase):
     def test_rgb2xyz_error_one_element(self):
         self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0, 0])
 
+    def test_rgb2xyz_dtype(self):
+        img = self.colbars_array
+        img32 = img.astype('float32')
+
+        assert rgb2xyz(img).dtype == img.dtype
+        assert rgb2xyz(img32).dtype == img32.dtype
+
     # XYZ to RGB
     def test_xyz2rgb_conversion(self):
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
+
+    def test_xyz2rgb_dtype(self):
+        img = rgb2xyz(self.colbars_array)
+        img32 = img.astype('float32')
+
+        assert xyz2rgb(img).dtype == img.dtype
+        assert xyz2rgb(img32).dtype == img32.dtype
 
     # RGB<->XYZ roundtrip on another image
     def test_xyz_rgb_roundtrip(self):
@@ -194,11 +233,25 @@ class TestColorconv(TestCase):
                         [ 0.        ,  0.        ,  0.        ]]])
         assert_almost_equal(rgb2rgbcie(self.colbars_array), gt)
 
+    def test_rgb2rgbcie_dtype(self):
+        img = self.colbars_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgb2rgbcie(img).dtype == img.dtype
+        assert rgb2rgbcie(img32).dtype == img32.dtype
+
     # RGB CIE to RGB
     def test_rgbcie2rgb_conversion(self):
         # only roundtrip test, we checked rgb2rgbcie above already
         assert_almost_equal(rgbcie2rgb(rgb2rgbcie(self.colbars_array)),
                             self.colbars_array)
+
+    def test_rgbcie2rgb_dtype(self):
+        img = rgb2rgbcie(self.colbars_array).astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgbcie2rgb(img).dtype == img.dtype
+        assert rgbcie2rgb(img32).dtype == img32.dtype
 
     def test_convert_colorspace(self):
         colspaces = ['HSV', 'RGB CIE', 'XYZ', 'YCbCr', 'YPbPr', 'YDbDr']
@@ -247,6 +300,13 @@ class TestColorconv(TestCase):
     def test_rgb2grey_on_grey(self):
         rgb2grey(np.random.rand(5, 5))
 
+    def test_rgb2grey_dtype(self):
+        img = np.random.rand(10, 10, 3).astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgb2grey(img).dtype == img.dtype
+        assert rgb2grey(img32).dtype == img32.dtype
+
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
@@ -270,6 +330,13 @@ class TestColorconv(TestCase):
             assert_array_almost_equal(lab_array_I_obs,
                                       xyz2lab(self.xyz_array, I, "2"),
                                       decimal=2)
+
+    def test_xyz2lab_dtype(self):
+        img = self.xyz_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert xyz2lab(img).dtype == img.dtype
+        assert xyz2lab(img32).dtype == img32.dtype
 
     def test_lab2xyz(self):
         assert_array_almost_equal(lab2xyz(self.lab_array),
@@ -301,6 +368,13 @@ class TestColorconv(TestCase):
         except ValueError:
             pass
 
+    def test_lab2xyz_dtype(self):
+        img = self.lab_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert lab2xyz(img).dtype == img.dtype
+        assert lab2xyz(img32).dtype == img32.dtype
+
     def test_rgb2lab_brucelindbloom(self):
         """
         Test the RGB->Lab conversion by comparing to the calculator on the
@@ -323,6 +397,20 @@ class TestColorconv(TestCase):
     def test_lab_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+
+    def test_rgb2lab_dtype(self):
+        img = self.colbars_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgb2lab(img).dtype == img.dtype
+        assert rgb2lab(img32).dtype == img32.dtype
+
+    def test_lab2rgb_dtype(self):
+        img = self.lab_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert lab2rgb(img).dtype == img.dtype
+        assert lab2rgb(img32).dtype == img32.dtype
 
     # test matrices for xyz2luv and luv2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
@@ -348,6 +436,13 @@ class TestColorconv(TestCase):
                                       xyz2luv(self.xyz_array, I, "2"),
                                       decimal=2)
 
+    def test_xyz2luv_dtype(self):
+        img = self.xyz_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert xyz2luv(img).dtype == img.dtype
+        assert xyz2luv(img32).dtype == img32.dtype
+
     def test_luv2xyz(self):
         assert_array_almost_equal(luv2xyz(self.luv_array),
                                   self.xyz_array, decimal=3)
@@ -366,6 +461,13 @@ class TestColorconv(TestCase):
                 os.path.join(os.path.dirname(__file__), 'data', fname))
             assert_array_almost_equal(luv2xyz(luv_array_I_obs, I, "2"),
                                       self.xyz_array, decimal=3)
+
+    def test_luv2xyz_dtype(self):
+        img = self.luv_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert luv2xyz(img).dtype == img.dtype
+        assert luv2xyz(img32).dtype == img32.dtype
 
     def test_rgb2luv_brucelindbloom(self):
         """
@@ -386,6 +488,20 @@ class TestColorconv(TestCase):
         gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
         assert_array_almost_equal(rgb2luv(self.colbars_array),
                                   gt_array, decimal=2)
+
+    def test_rgb2luv_dtype(self):
+        img = self.colbars_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgb2luv(img).dtype == img.dtype
+        assert rgb2luv(img32).dtype == img32.dtype
+
+    def test_luv2rgb_dtype(self):
+        img = self.luv_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert luv2rgb(img).dtype == img.dtype
+        assert luv2rgb(img32).dtype == img32.dtype
 
     def test_luv_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
@@ -468,6 +584,20 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(ypbpr2rgb(rgb2ypbpr(img_rgb)), img_rgb)
         assert_array_almost_equal(ycbcr2rgb(rgb2ycbcr(img_rgb)), img_rgb)
         assert_array_almost_equal(ydbdr2rgb(rgb2ydbdr(img_rgb)), img_rgb)
+
+    def test_rgb2yuv_dtype(self):
+        img = self.colbars_array.astype('float64')
+        img32 = img.astype('float32')
+
+        assert rgb2yuv(img).dtype == img.dtype
+        assert rgb2yuv(img32).dtype == img32.dtype
+
+    def test_yuv2rgb_dtype(self):
+        img = rgb2yuv(self.colbars_array).astype('float64')
+        img32 = img.astype('float32')
+
+        assert yuv2rgb(img).dtype == img.dtype
+        assert yuv2rgb(img32).dtype == img32.dtype
 
     def test_rgb2yiq_conversion(self):
         rgb = img_as_float(self.img_rgb)[::16, ::16]

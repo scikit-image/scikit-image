@@ -12,12 +12,7 @@ http://www.dirkpadfield.com/
 import numpy as np
 from functools import partial
 
-# next_fast_len was implemented in scipy 0.18
-# In case it cannot be imported, we use the id function
-try:
-    from scipy.fftpack import next_fast_len
-except ImportError:
-    next_fast_len = lambda size: size
+from .._shared.fft import fftmodule, next_fast_len
 
 
 def masked_register_translation(
@@ -47,10 +42,10 @@ def masked_register_translation(
         as ``target_image``. If ``None``, ``src_mask`` will be used.
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for
-        translations corresponding with an overlap ratio lower than this 
-        threshold will be ignored. A lower `overlap_ratio` leads to smaller 
-        maximum translation, while a higher `overlap_ratio` leads to greater 
-        robustness against spurious matches due to small overlap between 
+        translations corresponding with an overlap ratio lower than this
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller
+        maximum translation, while a higher `overlap_ratio` leads to greater
+        robustness against spurious matches due to small overlap between
         masked images.
 
     Returns
@@ -62,11 +57,11 @@ def masked_register_translation(
     References
     ----------
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
-           IEEE Transactions on Image Processing, vol. 21(5), 
+           IEEE Transactions on Image Processing, vol. 21(5),
            pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
-    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and 
-           Pattern Recognition, pp. 2918-2925 (2010).  
-           :DOI:`10.1109/CVPR.2010.5540032`         
+    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+           Pattern Recognition, pp. 2918-2925 (2010).
+           :DOI:`10.1109/CVPR.2010.5540032`
     """
     if target_mask is None:
         target_mask = np.array(src_mask, dtype=np.bool, copy=True)
@@ -81,9 +76,9 @@ def masked_register_translation(
     # cross-correlation
     size_mismatch = np.array(target_image.shape) - np.array(src_image.shape)
 
-    xcorr = cross_correlate_masked(target_image, src_image, 
-                 target_mask, src_mask, axes=(0, 1), mode='full', 
-                 overlap_ratio=overlap_ratio)
+    xcorr = cross_correlate_masked(target_image, src_image, target_mask,
+                                   src_mask, axes=(0, 1), mode='full',
+                                   overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
     maxima = np.transpose(np.nonzero(xcorr == xcorr.max()))
@@ -92,7 +87,7 @@ def masked_register_translation(
     return -shifts + (size_mismatch / 2)
 
 
-def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1), 
+def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
                            overlap_ratio=3 / 10):
     """
     Masked normalized cross-correlation between arrays.
@@ -122,10 +117,10 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         Axes along which to compute the cross-correlation.
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for
-        translations corresponding with an overlap ratio lower than this 
-        threshold will be ignored. A lower `overlap_ratio` leads to smaller 
-        maximum translation, while a higher `overlap_ratio` leads to greater 
-        robustness against spurious matches due to small overlap between 
+        translations corresponding with an overlap ratio lower than this
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller
+        maximum translation, while a higher `overlap_ratio` leads to greater
+        robustness against spurious matches due to small overlap between
         masked images.
 
     Returns
@@ -141,10 +136,10 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     References
     ----------
     .. [1] Dirk Padfield. Masked Object Registration in the Fourier Domain.
-           IEEE Transactions on Image Processing, vol. 21(5), 
+           IEEE Transactions on Image Processing, vol. 21(5),
            pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
-    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and 
-           Pattern Recognition, pp. 2918-2925 (2010).  
+    .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+           Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
@@ -162,7 +157,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
         if fixed_image.shape[axis] != moving_image.shape[axis]:
             raise ValueError(
                 "Array shapes along non-transformation axes should be "
-                    "equal, but dimensions along axis {a} not".format(a=axis))
+                "equal, but dimensions along axis {a} are not".format(a=axis))
 
     # Determine final size along transformation axes
     # Note that it might be faster to compute Fourier transform in a slightly
@@ -179,12 +174,13 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     # 7)
     fast_shape = tuple([next_fast_len(final_shape[ax]) for ax in axes])
 
-    # We use numpy's fft because it allows to leave transform axes unchanged,
-    # which is not possible with SciPy's fftn/ifftn
-    # E.g. arr shape (2,3,7), transform along axes (0, 1) with shape (4,4)
-    # results in arr_fft shape (4,4, 7)
-    fft = partial(np.fft.fftn, s=fast_shape, axes=axes)
-    ifft = partial(np.fft.ifftn, s=fast_shape, axes=axes)
+    # We use numpy.fft or the new scipy.fft because they allow leaving the
+    # transform axes unchanged which was not possible with scipy.fftpack's
+    # fftn/ifftn in older versions of SciPy.
+    # E.g. arr shape (2, 3, 7), transform along axes (0, 1) with shape (4, 4)
+    # results in arr_fft shape (4, 4, 7)
+    fft = partial(fftmodule.fftn, s=fast_shape, axes=axes)
+    ifft = partial(fftmodule.ifftn, s=fast_shape, axes=axes)
 
     fixed_image[np.logical_not(fixed_mask)] = 0.0
     moving_image[np.logical_not(moving_mask)] = 0.0

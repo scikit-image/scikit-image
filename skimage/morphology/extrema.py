@@ -415,7 +415,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_maxima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -425,7 +425,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude maxima that border the image edge:
 
@@ -433,7 +433,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     image = np.asarray(image, order="C")
     if image.size == 0:
@@ -572,7 +572,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_minima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -582,7 +582,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude minima that border the image edge:
 
@@ -590,7 +590,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     return local_maxima(
         image=invert(image),
