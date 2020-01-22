@@ -440,7 +440,7 @@ class HaarCalculator():
         major_pattern = \
             np.transpose(
                 [np.tile(h_dim, len(w_dim)),
-                np.repeat(w_dim, len(h_dim))])
+                    np.repeat(w_dim, len(h_dim))])
         return major_pattern
 
     def caculate_all_fmap(self):
@@ -512,8 +512,8 @@ class HaarCalculator():
                 fmap = basic_fmap[:, :, basic_dim[1]:]
                 - basic_fmap[:, :, 0:w_l]
             else:
-                fmap = basic_fmap[:, :, basic_dim[1]*2:]
-                - (basic_fmap[:, :, basic_dim[1]:basic_dim[1]+w_l])
+                fmap = basic_fmap[:, :, basic_dim[1] * 2:]
+                - (basic_fmap[:, :, basic_dim[1]:basic_dim[1] + w_l])
                 + basic_fmap[:, :, 0:w_l]
                 fmap = fmap * -1
         else:
@@ -521,8 +521,8 @@ class HaarCalculator():
                 fmap = basic_fmap[:, basic_dim[0]:, :]
                 - basic_fmap[:, 0:h_l, :]
             else:
-                fmap = basic_fmap[:, basic_dim[0]*2:, :]
-                - (basic_fmap[:, basic_dim[0]:basic_dim[0]+h_l, :])
+                fmap = basic_fmap[:, basic_dim[0] * 2:, :]
+                - (basic_fmap[:, basic_dim[0]:basic_dim[0] + h_l, :])
                 + basic_fmap[:, 0:h_l, :]
                 fmap = fmap * -1
         return fmap
