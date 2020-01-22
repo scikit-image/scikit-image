@@ -57,8 +57,12 @@ target = ndi.affine_transform(image, matrix_transform)
 
 level_alignments = []
 
+
+import time
+t0 = time.time()
 register_matrix = register_affine(image, target,
                                   level_callback=level_alignments.append)
+t1 = time.time()
 
 ###############################################################################
 # Once we have the matrix, it's easy to transform the target image to match
@@ -134,3 +138,29 @@ for axis_num, level_num in enumerate([0, 2, 4, 5], start=1):
     ax[axis_num].set_axis_off()
 
 plt.show()
+
+###############################################################################
+# If we know that our transform is a *rigid* transform, also known as a
+# Euclidean transform, we can use scikit-image's transformation classes to use
+# a smaller parameter set over which to optimize. This can make the
+# registration faster and more robust.
+
+from skimage.transform import EuclideanTransform
+
+
+def rigid_transform(params):
+    return EuclideanTransform(rotation=params[0], translation=params[1:])
+
+
+t2 = time.time()
+rigid_matrix = register_affine(image, target, initial_vector=np.zeros(3),
+                               vector_to_matrix=rigid_transform)
+t3 = time.time()
+
+
+print('original matrix:')
+print(matrix_transform)
+print(f'full registration result in {t1 - t0:.1f} seconds:')
+print(register_matrix)
+print(f'rigid registration result in {t3 - t2:.1f} seconds:')
+print(rigid_matrix)
