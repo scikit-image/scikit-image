@@ -1,3 +1,4 @@
+import functools
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
@@ -53,6 +54,20 @@ def cost_nmi(image0, image1, *, bins=100):
         and ``image1``.
     """
     return -normalized_mutual_information(image0, image1, bins=bins)
+
+
+def _param_cost(reference_image, moving_image, parameter_vector, *,
+                vector_to_matrix, cost, multichannel):
+    transformation = vector_to_matrix(parameter_vector)
+    if not multichannel:
+        transformed = ndi.affine_transform(moving_image, transformation,
+                                           order=1)
+    else:
+        transformed = np.zeros_like(moving_image)
+        for ch in range(moving_image.shape[-1]):
+            ndi.affine_transform(moving_image[..., ch], transformation,
+                                 order=1, output=transformed[..., ch])
+    return cost(reference_image, transformed)
 
 
 def register_affine(reference_image, moving_image, *, cost=cost_nmi,
@@ -165,18 +180,9 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
 
     for ref, mvg in image_pairs:
         parameter_vector[translation_indices] *= pyramid_scale
-        def _cost(param):
-            transformation = vector_to_matrix(param)
-            if not multichannel:
-                transformed = ndi.affine_transform(mvg, transformation,
-                                                   order=1)
-            else:
-                transformed = np.zeros_like(mvg)
-                for ch in range(mvg.shape[-1]):
-                    ndi.affine_transform(mvg[..., ch], transformation,
-                                         order=1, output=transformed[..., ch])
-            return cost(ref, transformed)
-
+        _cost = functools.partial(_param_cost, ref, mvg,
+                                  vector_to_matrix=vector_to_matrix,
+                                  cost=cost, multichannel=multichannel)
         result = minimize(_cost, x0=parameter_vector, method=method, **kwargs)
         parameter_vector = result.x
         if level_callback is not None:
