@@ -580,6 +580,12 @@ class ProjectiveTransform(GeometricTransform):
 
         return dst[:, :ndim]
 
+    def __array__(self, dtype=None):
+        if dtype is None:
+            return self.params
+        else:
+            return self.params.astype(dtype)
+
     def __call__(self, coords):
         """Apply forward transformation.
 
