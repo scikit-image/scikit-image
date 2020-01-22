@@ -101,7 +101,8 @@ def _check_sigmas(sigmas):
     """
     sigmas = np.asarray(sigmas).ravel()
     if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values should be greater than zero.')
+        raise ValueError('Sigma values should be equal to or greater '
+                         'than zero.')
     return sigmas
 
 
