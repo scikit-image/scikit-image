@@ -15,19 +15,19 @@ def test_normalize():
     assert_almost_equal(np.linalg.norm(uX), 1)
 
 
-def test_axis_0_rotation_matrix():
-    """test that rotation matrix properly rotates vector to face axis 0"""
-    # trivial case
+def test_axis_0_rotation_matrix_on_axis_vector():
+    """test that rotation matrix rotates axis vector to face axis 0"""
     M = _axis_0_rotation_matrix([0, 1, 0])
     assert_almost_equal(M @ [0, 1, 0], [1, 0, 0])
 
-    # non-trivial case
+def test_axis_0_rotation_matrix_on_arbitrary_vector():
+    """test that rotation matrix rotates arbitrary vector to face axis 0"""
     M = _axis_0_rotation_matrix([0, .5, .5])
     assert_almost_equal(M @ [0, .5, .5], [np.hypot(.5, .5), 0, 0])
 
 
 def test_compute_rotation_matrix():
-    """test that rotation matrix properly rotates X to coincide with Y"""
+    """test that rotation matrix rotates X to coincide with Y"""
     # trivial case
     X = [1, 0, 0]
     Y = [0, 0, 1]
@@ -49,7 +49,8 @@ def test_compute_rotation_matrix():
 
     assert_almost_equal(Z, uY)
 
-    # ensure preserves expected length
+def test_compute_rotation_matrix_preserves_length():
+    """test that rotation matrix preserves vector length"""
     X = np.arange(0, 50)
     Y = np.arange(175, 225)
 
@@ -62,11 +63,11 @@ def test_compute_rotation_matrix():
 
 
 def test_compute_rotation_matrix_homogeneous():
-    """test that rotation matrix properly handles homogeneity"""
+    """test that rotation matrix handles homogeneity"""
     X = np.arange(5)
     Y = np.arange(5, 10)
 
-    M = compute_rotation_matrix(X, Y, use_homogeneous_coords=True)
+    M = compute_rotation_matrix(X, Y, homogeneous_coords=True)
 
     assert_equal(M[-1], [0, 0, 0, 0, 1])
     assert_equal(M[:, -1], [0, 0, 0, 0, 1])

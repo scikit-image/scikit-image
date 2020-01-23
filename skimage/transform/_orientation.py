@@ -2,16 +2,16 @@ import numpy as np
 
 
 def _normalize(x):
-    """Normalizes an array.
+    """Scale an array to have norm=1.
 
     Parameters
     ----------
-    x : array_like
+    x : array-like
         Array to normalize.
 
     Returns
     -------
-    u : array
+    u : ndarray
         Unitary array.
 
     Examples
@@ -21,28 +21,27 @@ def _normalize(x):
     >>> np.isclose(np.linalg.norm(uX), 1)
     True
     """
-    u = np.asarray(x)
+    v = np.asarray(x)
 
-    norm = np.linalg.norm(u)
+    norm = np.linalg.norm(v)
 
-    return u / norm
+    return v / norm
 
 
 def _axis_0_rotation_matrix(unit_vector, indices=None):
-    """Generate a matrix that rotates a vector to coincide with the 0th (y-)
-       coordinate axis.
+    """Generate a matrix that rotates a vector to be collinear with axis 0.
 
     Parameters
     ----------
-    unit_vector : (N, ) array
+    unit_vector : (N, ) array-like
         Unit vector.
     indices : sequence of int, optional
-        Indices of the components of `axis` that should be transformed.
-        If `None`, defaults to all of the indices of `axis`.
+        Indices of the components of `unit_vector` that should be transformed.
+        If `None`, defaults to all of the indices of `unit_vector`.
 
     Returns
     -------
-    rotation_matrix : (N, N) array
+    rotation_matrix : (N, N) ndarray
         Orthogonal projection matrix.
 
     References
@@ -60,10 +59,11 @@ def _axis_0_rotation_matrix(unit_vector, indices=None):
     >>> rotation_matrix @ [0, 1, 0]
     array([ 1.,  0.,  0.])
     """
+    unit_vector = np.array(unit_vector)  # copy it since it will be mutated
     ndim = len(unit_vector)
 
     if indices is None:
-        indices = range(ndim)
+        indices = list(range(ndim))
 
     rotation_matrix = np.eye(ndim)
 
@@ -103,34 +103,34 @@ def _axis_0_rotation_matrix(unit_vector, indices=None):
     return rotation_matrix
 
 
-def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
-    """Generate a matrix for the rotation of one vector to the direction
-    of another.
+def compute_rotation_matrix(src, dst, homogeneous_coords=False):
+    """Generate a matrix to rotate one vector onto another.
 
-    The MNMRG algorithm [1]_ can be summarized as follows:
-        1. directional vectors ``X`` and ``Y`` are normalized
-        2. a vector ``w`` is initialized containing the
+    The MNMRG algorithm [1]_, implemented here, is summarized as:
+        1. normalize directional vectors ``X`` and ``Y``
+        2. initialize vector ``w`` containing the
            indices of the differences between ``X`` and ``Y``
-        3. matrices ``Mx`` and ``My`` are generated for the rotation
+        3. generate matrices ``Mx`` and ``My`` for the rotation
            of ``X`` and ``Y`` to the same axis for all indices
            in ``w``
-        4. the inverse of ``My`` is mulitplied by ``Mx`` to form
+        4. multiply the inverse of ``My`` by ``Mx`` to form
            the rotation matrix ``M`` which rotates vector ``X`` to the
            direction of vector ``Y``
 
     Parameters
     ----------
-    src : (N, ) array
+    src : (N, ) array-like
         Vector to rotate.
-    dst : (N, ) array
+    dst : (N, ) array-like
         Vector of desired direction.
-    use_homogeneous_coords : bool, optional
-        Whether the input vectors should be treated as homogeneous coordinates.
+    homogeneous_coords : bool, optional
+        Whether the input vectors should be treated
+        as homogeneous coordinates [3]_.
 
     Returns
     -------
-    rotation_matrix : (N, N) array
-        Matrix that rotates ``src`` to coincide with ``dst``.
+    rotation_matrix : (N, N) ndarray
+        Matrix that rotates ``src`` onto ``dst``.
 
     References
     ----------
@@ -139,6 +139,7 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
            Journal of Chemistry, Mathematics, and Physics, Vol. 2 No. 2, 2018:
            pp. 13-18. https://dx.doi.org/10.22161/ijcmp.2.2.1
     .. [2] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+    .. [3] https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
     Examples
     --------
@@ -151,11 +152,11 @@ def compute_rotation_matrix(src, dst, use_homogeneous_coords=False):
     True
     """
     # step 1: vectors are normalized
-    homogeneous_slice = -use_homogeneous_coords or None
+    homogeneous_slice = -1 if homogeneous_coords else None
     src = _normalize(src[:homogeneous_slice])
     dst = _normalize(dst[:homogeneous_slice])
 
-    if use_homogeneous_coords:
+    if homogeneous_coords:
         src = np.append(src, 1)
         dst = np.append(dst, 1)
 
