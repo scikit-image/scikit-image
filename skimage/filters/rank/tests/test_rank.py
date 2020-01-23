@@ -51,7 +51,7 @@ def test_subtract_mean_uint16():
     arr = np.array([[10, 10, 40]], dtype=np.uint16)
     result = subtract_mean(arr, np.ones((1, 3)))
 
-    arr = np.array([[0, 10, 0]], dtype=np.uint16)
+    expected = np.array([[0, 65526, 15]], dtype=np.uint16)
     assert_array_equal(result, expected)
 
 
@@ -332,6 +332,7 @@ class TestRank:
         kwargs = {}
         if func == subtract_mean:
             kwargs['shift_val'] = 127
+            kwargs['scale_val'] = 2
         f8 = func(image8, disk(3), **kwargs)
         f16 = func(image16, disk(3), **kwargs)
         assert_equal(f8, f16)

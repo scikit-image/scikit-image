@@ -113,9 +113,7 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=np.uint8)
-    else:
+    if mask is not None:
         mask = img_as_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
@@ -585,24 +583,23 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
         raise ValueError('shift_val must be an integer')
 
     if scale_val is None:
-        scale_val = 0.5
+        scale_val = 2
         if image.dtype == np.uint16:
             scale_val = 1
-    elif scale_val <= 0:
+    elif scale_val < 1:
         raise ValueError('scale_val must be postive')
 
     out = _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
                                   out=out, mask=mask,
                                   shift_x=shift_x, shift_y=shift_y)
 
-    if scale_val != 1:
-        if float(scale_val).is_integer():
-            out *= scale_val
-        else:
-            out = (out * scale_val).astype(out.dtype)
-    if shift_val != 0:
-        out += shift_val
+    out_dtype = out.dtype
     return out
+    # if scale_val != 1:
+    #     out = out // 2
+    # if shift_val != 0:
+    #     out += 127
+    # return out.astype(out_dtype)
 
 
 def median(image, selem=None, out=None, mask=None,
