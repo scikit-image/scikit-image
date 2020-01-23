@@ -48,7 +48,6 @@ References
 
 """
 
-import functools
 import numpy as np
 from scipy import ndimage as ndi
 from ...util import img_as_ubyte
@@ -63,7 +62,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 
 
 def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
-                  pixel_size=1):
+                      pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -179,17 +178,15 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image,
-                                                    selem,
-                                                    out,
-                                                    mask,
-                                                    out_dtype)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.reshape(out.shape[:2])
+    return np.squeeze(out, axis=-1)
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -231,12 +228,10 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image,
-                                                    selem,
-                                                    out,
-                                                    mask,
-                                                    out_dtype,
-                                                    pixel_size)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype,
+                                                        pixel_size)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
@@ -543,7 +538,7 @@ def geometric_mean(image, selem, out=None, mask=None,
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
-                  shift_y=False):
+                  shift_y=False, *, scale_val=None, shift_val=None):
     """Return image subtracted from its local mean.
 
     Parameters
@@ -561,6 +556,11 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
+    scale_val : float
+        Scale factor to apply to image intensity values after mean
+        value subtraction.
+    shift_val : int
+        Shift to apply to image intensity values.
 
     Returns
     -------
@@ -577,9 +577,32 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    if shift_val is None:
+        shift_val = 127
+        if image.dtype == np.uint16:
+            shift_val = 0
+    elif not float(shift_val).is_integer():
+        raise ValueError('shift_val must be an integer')
+
+    if scale_val is None:
+        scale_val = 0.5
+        if image.dtype == np.uint16:
+            scale_val = 1
+    elif scale_val <= 0:
+        raise ValueError('scale_val must be postive')
+
+    out = _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
+                                  out=out, mask=mask,
+                                  shift_x=shift_x, shift_y=shift_y)
+
+    if scale_val != 1:
+        if float(scale_val).is_integer():
+            out *= scale_val
+        else:
+            out = (out * scale_val).astype(out.dtype)
+    if shift_val != 0:
+        out += shift_val
+    return out
 
 
 def median(image, selem=None, out=None, mask=None,

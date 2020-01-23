@@ -10,9 +10,9 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
+from skimage.filters.rank import subtract_mean
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel, arch32, parametrize, xfail
-from pytest import param
+from skimage._shared.testing import test_parallel, parametrize
 
 
 def test_otsu_edge_case():
@@ -39,6 +39,20 @@ def test_otsu_edge_case():
                     [  0, 172,   0]], dtype=np.uint8)
     result = rank.otsu(img, selem)
     assert result[1, 1] in [141, 172]
+
+
+def test_subtract_mean_uint16():
+    arr = np.array([[10, 10, 10]], dtype=np.uint16)
+    result = subtract_mean(arr, np.ones((1, 3)))
+
+    expected = np.zeros_like(arr)
+    assert_array_equal(result, expected)
+
+    arr = np.array([[10, 10, 40]], dtype=np.uint16)
+    result = subtract_mean(arr, np.ones((1, 3)))
+
+    arr = np.array([[0, 10, 0]], dtype=np.uint16)
+    assert_array_equal(result, expected)
 
 
 class TestRank:
@@ -315,8 +329,11 @@ class TestRank:
         assert_equal(image8, image16)
 
         func = getattr(rank, method)
-        f8 = func(image8, disk(3))
-        f16 = func(image16, disk(3))
+        kwargs = {}
+        if func == subtract_mean:
+            kwargs['shift_val'] = 127
+        f8 = func(image8, disk(3), **kwargs)
+        f16 = func(image16, disk(3), **kwargs)
         assert_equal(f8, f16)
 
     def test_trivial_selem8(self):
