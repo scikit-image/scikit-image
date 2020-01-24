@@ -565,8 +565,8 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     Subtracting the mean value amy introduce underflow. To compensate
     this potential underflow, the obtained difference is downscaled by
     a factor of 2 and shifted by `n_bins / 2 - 1`, the median value of
-    the local histogram (`n_bins = max(3, image.max()) for 16-bits
-    images and 256 otherwise`).
+    the local histogram (`n_bins = max(3, image.max()) +1` for 16-bits
+    images and 256 otherwise).
 
     Examples
     --------

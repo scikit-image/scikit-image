@@ -1,4 +1,5 @@
 import os
+import pytest
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
@@ -41,18 +42,31 @@ def test_otsu_edge_case():
     assert result[1, 1] in [141, 172]
 
 
-def test_subtract_mean_uint16():
-    arr = np.array([[10, 10, 10]], dtype=np.uint16)
-    result = subtract_mean(arr, np.ones((1, 3)))
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+def test_subtract_mean_underflow_correction(dtype):
+    # Input: [10, 10, 10]
+    selem = np.ones((1, 3))
+    arr = np.array([[10, 10, 10]], dtype=dtype)
+    result = subtract_mean(arr, selem)
 
-    expected = np.zeros_like(arr)
-    assert_array_equal(result, expected)
+    if dtype == np.uint8:
+        expected_val = 127
+    else:
+        expected_val = (arr.max() + 1) // 2 - 1
 
-    arr = np.array([[10, 10, 40]], dtype=np.uint16)
-    result = subtract_mean(arr, np.ones((1, 3)))
+    assert np.all(result == expected_val)
 
-    expected = np.array([[0, 65526, 15]], dtype=np.uint16)
-    assert_array_equal(result, expected)
+    # Input: [10, 10, 40]
+    shift = 10
+    arr[0, 2] += arr.shape[1] * shift
+    result = subtract_mean(arr, selem)
+
+    if dtype == np.uint8:
+        expected_val -= shift // 2
+    else:
+        expected_val += shift
+
+    assert result[0, 1] == expected_val
 
 
 class TestRank:
@@ -329,12 +343,8 @@ class TestRank:
         assert_equal(image8, image16)
 
         func = getattr(rank, method)
-        kwargs = {}
-        if func == subtract_mean:
-            kwargs['shift_val'] = 127
-            kwargs['scale_val'] = 2
-        f8 = func(image8, disk(3), **kwargs)
-        f16 = func(image16, disk(3), **kwargs)
+        f8 = func(image8, disk(3))
+        f16 = func(image16, disk(3))
         assert_equal(f8, f16)
 
     def test_trivial_selem8(self):
