@@ -537,7 +537,7 @@ def geometric_mean(image, selem, out=None, mask=None,
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=False):
-    """Return image subtracted from its local mean.)
+    """Return image subtracted from its local mean.
 
     Parameters
     ----------
