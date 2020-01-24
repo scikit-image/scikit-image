@@ -143,6 +143,13 @@ def _warp_fast(
     would be [0, 1, 2, 1, 0, 1, 2].
 
     """
+    cdef np.intp_t[2] shape
+    if output_shape is None:
+        shape[0] = np.PyArray_DIM(image, 0)
+        shape[1] = np.PyArray_DIM(image, 1)
+    else:
+        shape[0] = output_shape[0]
+        shape[1] = output_shape[1]
 
     cdef np_floats[:, ::1] img = np.PyArray_GETCONTIGUOUS(image)
     cdef np_floats[:, ::1] M = np.PyArray_GETCONTIGUOUS(H)
@@ -180,14 +187,6 @@ def _warp_fast(
     else:
         raise ValueError("Unsupported interpolation order", order)
 
-    cdef np.intp_t[2] shape
-    if output_shape is None:
-        shape[0] = img.shape[0]
-        shape[1] = img.shape[1]
-    else:
-        shape[0] = output_shape[0]
-        shape[1] = output_shape[1]
-
     cdef np.ndarray out = np.PyArray_ZEROS(2, shape, dtype, 0)
     cdef np_floats[:, ::1] vout = out
 
@@ -211,5 +210,158 @@ def _warp_fast(
                 transform_func(tfc, tfr, pM, &c, &r)
                 interp_func(pimg, rows, cols, r, c, mode_c, cval, pout)
                 pout += 1
+
+    return out
+
+
+def _warp_fast_batch(
+    np.ndarray image not None,
+    np.ndarray H not None,
+    np.intp_t[:] output_shape=None,
+    int order=1,
+    str mode='constant',
+    np_floats cval=0,
+    int channel_axis=-1,  # (0, -1) API CHANGE
+    bint channel_innermost_loop=False  # For test only, replace with logic
+):
+    cdef np.intp_t[3] shape
+    if output_shape is None:
+        shape[0] = np.PyArray_DIM(image, 0)
+        shape[1] = np.PyArray_DIM(image, 1)
+        shape[2] = np.PyArray_DIM(image, 2)
+    else:
+        shape[0] = output_shape[0]
+        shape[1] = output_shape[1]
+        shape[2] = output_shape[2]
+
+    # Interpolation functions expect image to be contiguous in column axis
+    # Hence, transpose image that its channels are placed first
+    # Solving this would require changes in the interpolation functions
+    cdef np.intp_t[3] permute_ptr
+    if channel_axis == -1:
+        permute_ptr = [2, 0, 1]
+    elif channel_axis != 0:
+        raise ValueError("Unsupported channel axis", channel_axis)
+
+    cdef np.PyArray_Dims permute
+    if channel_axis != 0:
+        permute = [permute_ptr, 3]
+        image = np.PyArray_Transpose(image, &permute)
+
+    cdef np_floats[:, :, ::1] img = np.PyArray_GETCONTIGUOUS(image)
+    cdef np_floats[:, ::1] M = np.PyArray_GETCONTIGUOUS(H)
+
+    cdef int dtype
+    if np_floats is np.float32_t:
+        dtype = np.NPY_FLOAT32
+    else:
+        dtype = np.NPY_FLOAT64
+
+    if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
+        raise ValueError("Invalid mode specified.  Please use `constant`, "
+                         "`edge`, `wrap`, `reflect` or `symmetric`.")
+    cdef char mode_c = ord(mode[0].upper())
+
+    cdef ftransform transform_func
+    if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
+        if M[0, 1] == 0 and M[1, 0] == 0:
+            transform_func = _transform_metric
+        else:
+            transform_func = _transform_affine
+    else:
+        transform_func = _transform_projective
+
+    cdef finterpolate interp_func
+    if order == 0:
+        interp_func = nearest_neighbour_interpolation[np_floats, np_floats,
+                                                      np_floats]
+    elif order == 1:
+        interp_func = bilinear_interpolation[np_floats, np_floats, np_floats]
+    elif order == 2:
+        interp_func = biquadratic_interpolation[np_floats, np_floats, np_floats]
+    elif order == 3:
+        interp_func = bicubic_interpolation[np_floats, np_floats, np_floats]
+    else:
+        raise ValueError("Unsupported interpolation order", order)
+
+    cdef np.ndarray out = np.PyArray_ZEROS(3, shape, dtype, 0)
+    cdef np_floats[:, :, ::1] vout = out
+
+    cdef Py_ssize_t out_n
+    cdef Py_ssize_t out_r
+    cdef Py_ssize_t out_c
+
+    if channel_axis == 0:
+        out_n = vout.shape[0]
+        out_r = vout.shape[1]
+        out_c = vout.shape[2]
+    else:
+        out_n = vout.shape[2]
+        out_r = vout.shape[0]
+        out_c = vout.shape[1]
+
+    cdef Py_ssize_t chns = img.shape[0] if img.shape[0] < out_n else out_n
+    cdef Py_ssize_t rows = img.shape[1]
+    cdef Py_ssize_t cols = img.shape[2]
+
+    cdef Py_ssize_t tfn
+    cdef Py_ssize_t tfr
+    cdef Py_ssize_t tfc
+    cdef np_floats r
+    cdef np_floats c
+
+    cdef np_floats *pM = &M[0, 0]
+
+    with nogil:
+        if channel_axis == 0:
+            if channel_innermost_loop:
+                for tfr in range(out_r):
+                    for tfc in range(out_c):
+                        transform_func(tfc, tfr, pM, &c, &r)
+                        for tfn in range(chns):
+                            interp_func(
+                                &img[tfn, 0, 0],
+                                rows, cols,
+                                r, c,
+                                mode_c, cval,
+                                &vout[tfn, tfr, tfc]
+                            )
+            else:
+                for tfn in range(chns):
+                    for tfr in range(out_r):
+                        for tfc in range(out_c):
+                            transform_func(tfc, tfr, pM, &c, &r)
+                            interp_func(
+                                &img[tfn, 0, 0],
+                                rows, cols,
+                                r, c,
+                                mode_c, cval,
+                                &vout[tfn, tfr, tfc]
+                            )
+        else:
+            if channel_innermost_loop:
+                for tfr in range(out_r):
+                    for tfc in range(out_c):
+                        transform_func(tfc, tfr, pM, &c, &r)
+                        for tfn in range(chns):
+                            interp_func(
+                                &img[tfn, 0, 0],
+                                rows, cols,
+                                r, c,
+                                mode_c, cval,
+                                &vout[tfr, tfc, tfn]
+                            )
+            else:
+                for tfn in range(chns):
+                    for tfr in range(out_r):
+                        for tfc in range(out_c):
+                            transform_func(tfc, tfr, pM, &c, &r)
+                            interp_func(
+                                &img[tfn, 0, 0],
+                                rows, cols,
+                                r, c,
+                                mode_c, cval,
+                                &vout[tfr, tfc, tfn]
+                            )
 
     return out
