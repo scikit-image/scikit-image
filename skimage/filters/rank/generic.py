@@ -536,8 +536,8 @@ def geometric_mean(image, selem, out=None, mask=None,
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
-                  shift_y=False, *, scale_val=None, shift_val=None):
-    """Return image subtracted from its local mean.
+                  shift_y=False):
+    """Return image subtracted from its local mean.)
 
     Parameters
     ----------
@@ -554,16 +554,19 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
-    scale_val : float
-        Scale factor to apply to image intensity values after mean
-        value subtraction.
-    shift_val : int
-        Shift to apply to image intensity values.
 
     Returns
     -------
     out : 2-D array (same dtype as input image)
         Output image.
+
+    Notes
+    -----
+    Subtracting the mean value amy introduce underflow. To compensate
+    this potential underflow, the obtained difference is downscaled by
+    a factor of 2 and shifted by `n_bins / 2 - 1`, the median value of
+    the local histogram (`n_bins = max(3, image.max()) for 16-bits
+    images and 256 otherwise`).
 
     Examples
     --------
@@ -575,31 +578,9 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    if shift_val is None:
-        shift_val = 127
-        if image.dtype == np.uint16:
-            shift_val = 0
-    elif not float(shift_val).is_integer():
-        raise ValueError('shift_val must be an integer')
-
-    if scale_val is None:
-        scale_val = 2
-        if image.dtype == np.uint16:
-            scale_val = 1
-    elif scale_val < 1:
-        raise ValueError('scale_val must be postive')
-
-    out = _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
-                                  out=out, mask=mask,
-                                  shift_x=shift_x, shift_y=shift_y)
-
-    out_dtype = out.dtype
-    return out
-    # if scale_val != 1:
-    #     out = out // 2
-    # if shift_val != 0:
-    #     out += 127
-    # return out.astype(out_dtype)
+    return _apply_scalar_per_pixel(generic_cy._subtract_mean, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)
 
 
 def median(image, selem=None, out=None, mask=None,
