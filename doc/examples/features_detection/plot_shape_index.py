@@ -159,7 +159,7 @@ ax3 = fig.add_subplot(1, 3, 3, sharex=ax1, sharey=ax1)
 
 ax3.imshow(s, cmap=plt.cm.gray)
 ax3.axis('off')
-ax3.set_title('Shape index, $\sigma=1$')
+ax3.set_title(r'Shape index, $\sigma=1$')
 
 fig.tight_layout()
 
