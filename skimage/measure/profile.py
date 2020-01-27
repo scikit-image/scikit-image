@@ -14,10 +14,11 @@ def profile_line(image, src, dst, linewidth=1,
         (3D array, where the final axis contains the channel
         information).
     src : 2-tuple of numeric scalar (float or int)
-        The start point of the scan line.
+        The positive coordinates of the start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line. The destination point is *included*
-        in the profile, in contrast to standard numpy indexing.
+        The positive coordinates of the end point of the scan
+        line. The destination point is *included* in the profile, in
+        contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -85,7 +86,16 @@ def profile_line(image, src, dst, linewidth=1,
            [1.        , 1.        , 0.        ],
            [1.        , 1.        , 0.        ],
            [1.41421356, 1.41421356, 0.        ]])
+
     """
+    if len(src) != 2:
+        raise ValueError('src must be a couple of indices.')
+    if len(dst) != 2:
+        raise ValueError('dst must be a couple of indices.')
+    if (src[0] < 0) or (src[1] < 0):
+        raise ValueError('src values must be positive')
+    if (dst[0] < 0) or (dst[1] < 0):
+        raise ValueError('dst values must be positive')
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
         pixels = [ndi.map_coordinates(image[..., i], perp_lines,
