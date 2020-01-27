@@ -154,4 +154,4 @@ def _line_profile_coordinates(src, dst, linewidth=1):
                                       linewidth) for row_i in line_row])
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
-    return np.array([perp_rows, perp_cols])
+    return np.clip([perp_rows, perp_cols], 0, None)
