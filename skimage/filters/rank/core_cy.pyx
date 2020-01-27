@@ -31,12 +31,12 @@ cdef inline void histogram_decrement(Py_ssize_t* histo, double* pop,
 
 cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
                             Py_ssize_t r, Py_ssize_t c,
-                            char* mask) nogil:
+                            cnp.uint8_t[:, ::1] mask) nogil:
     """Check whether given coordinate is within image and mask is true."""
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
     else:
-        if mask[r * cols + c]:
+        if mask[r, c]:
             return 1
         else:
             return 0
@@ -46,8 +46,8 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
-                char[:, ::1] selem,
-                char[:, ::1] mask,
+                cnp.uint8_t[:, ::1] selem,
+                cnp.uint8_t[:, ::1] mask,
                 dtype_t_out[:, :, ::1] out,
                 signed char shift_x, signed char shift_y,
                 double p0, double p1,
@@ -74,9 +74,6 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
     cdef Py_ssize_t mid_bin = n_bins / 2
 
-    # define pointers to the data
-    cdef char* mask_data = &mask[0, 0]
-
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
 
@@ -85,16 +82,16 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
     # build attack and release borders by using difference along axis
     t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
-    cdef unsigned char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
+    cdef cnp.uint8_t[:, ::1] t_e = np.ascontiguousarray(np.diff(t, axis=1) < 0, dtype=np.uint8)
 
     t = np.hstack((np.zeros((selem.shape[0], 1)), selem))
-    cdef unsigned char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
+    cdef cnp.uint8_t[:, ::1] t_w = np.ascontiguousarray(np.diff(t, axis=1) > 0, dtype=np.uint8)
 
     t = np.vstack((selem, np.zeros((1, selem.shape[1]))))
-    cdef unsigned char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
+    cdef cnp.uint8_t[:, ::1] t_s = np.ascontiguousarray(np.diff(t, axis=0) < 0, dtype=np.uint8)
 
     t = np.vstack((np.zeros((1, selem.shape[1])), selem))
-    cdef unsigned char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
+    cdef cnp.uint8_t[:, ::1] t_n = np.ascontiguousarray(np.diff(t, axis=0) > 0, dtype=np.uint8)
 
     # the current local histogram distribution
     cdef Py_ssize_t* histo
@@ -171,7 +168,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 rr = r - centre_r
                 cc = c - centre_c
                 if selem[r, c]:
-                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                    if is_in_mask(rows, cols, rr, cc, mask):
                         histogram_increment(histo, &pop, image[rr, cc])
 
         r = 0
@@ -188,13 +185,13 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 for s in range(num_se_e):
                     rr = r + se_e_r[s]
                     cc = c + se_e_c[s]
-                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                    if is_in_mask(rows, cols, rr, cc, mask):
                         histogram_increment(histo, &pop, image[rr, cc])
 
                 for s in range(num_se_w):
                     rr = r + se_w_r[s]
                     cc = c + se_w_c[s] - 1
-                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                    if is_in_mask(rows, cols, rr, cc, mask):
                         histogram_decrement(histo, &pop, image[rr, cc])
 
                 kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
@@ -208,13 +205,13 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
             for s in range(num_se_s):
                 rr = r + se_s_r[s]
                 cc = c + se_s_c[s]
-                if is_in_mask(rows, cols, rr, cc, mask_data):
+                if is_in_mask(rows, cols, rr, cc, mask):
                     histogram_increment(histo, &pop, image[rr, cc])
 
             for s in range(num_se_n):
                 rr = r + se_n_r[s] - 1
                 cc = c + se_n_c[s]
-                if is_in_mask(rows, cols, rr, cc, mask_data):
+                if is_in_mask(rows, cols, rr, cc, mask):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
@@ -225,13 +222,13 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 for s in range(num_se_w):
                     rr = r + se_w_r[s]
                     cc = c + se_w_c[s]
-                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                    if is_in_mask(rows, cols, rr, cc, mask):
                         histogram_increment(histo, &pop, image[rr, cc])
 
                 for s in range(num_se_e):
                     rr = r + se_e_r[s]
                     cc = c + se_e_c[s] + 1
-                    if is_in_mask(rows, cols, rr, cc, mask_data):
+                    if is_in_mask(rows, cols, rr, cc, mask):
                         histogram_decrement(histo, &pop, image[rr, cc])
 
                 kernel(&out[r, c, 0], odepth, histo, pop, image[r, c], n_bins,
@@ -245,13 +242,13 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
             for s in range(num_se_s):
                 rr = r + se_s_r[s]
                 cc = c + se_s_c[s]
-                if is_in_mask(rows, cols, rr, cc, mask_data):
+                if is_in_mask(rows, cols, rr, cc, mask):
                     histogram_increment(histo, &pop, image[rr, cc])
 
             for s in range(num_se_n):
                 rr = r + se_n_r[s] - 1
                 cc = c + se_n_c[s]
-                if is_in_mask(rows, cols, rr, cc, mask_data):
+                if is_in_mask(rows, cols, rr, cc, mask):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             kernel(&out[r, c, 0], odepth, histo, pop, image[r, c],
