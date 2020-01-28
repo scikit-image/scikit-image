@@ -329,13 +329,19 @@ def hsv2rgb(hsv):
     t = arr[..., 2] * (1 - (1 - f) * arr[..., 1])
     v = arr[..., 2]
 
-    hi = np.dstack([hi, hi, hi]).astype(np.uint8) % 6
-    out = np.choose(hi, [np.dstack((v, t, p)),
-                         np.dstack((q, v, p)),
-                         np.dstack((p, v, t)),
-                         np.dstack((p, q, v)),
-                         np.dstack((t, p, v)),
-                         np.dstack((v, p, q))])
+    hi = hi[..., np.newaxis]
+    f = f[..., np.newaxis]
+    p = p[..., np.newaxis]
+    q = q[..., np.newaxis]
+    t = t[..., np.newaxis]
+    v = v[..., np.newaxis]
+    hi = np.concatenate([hi, hi, hi], axis=-1).astype(np.uint8) % 6
+    out = np.choose(hi, [np.concatenate((v, t, p), axis=-1),
+                         np.concatenate((q, v, p), axis=-1),
+                         np.concatenate((p, v, t), axis=-1),
+                         np.concatenate((p, q, v), axis=-1),
+                         np.concatenate((t, p, v), axis=-1),
+                         np.concatenate((v, p, q), axis=-1)])
 
     return out
 
@@ -992,7 +998,9 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
              stacklevel=2)
         z[invalid] = 0
 
-    out = np.dstack([x, y, z])
+    out = np.concatenate([x[..., np.newaxis],
+                          y[..., np.newaxis],
+                          z[..., np.newaxis]], axis=-1)
 
     mask = out > 0.2068966
     out[mask] = np.power(out[mask], 3.)
@@ -1000,6 +1008,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     # rescale to the reference white (illuminant)
     xyz_ref_white = get_xyz_coords(illuminant, observer)
+    print(xyz_ref_white.shape, out.shape, arr.shape, x.shape)
     out *= xyz_ref_white
     return out
 
