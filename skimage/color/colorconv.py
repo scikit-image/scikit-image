@@ -745,6 +745,38 @@ def rgbcie2rgb(rgbcie):
     return _convert(rgb_from_rgbcie, rgbcie)
 
 
+def rgba2gray(rgba, background=(1, 1, 1)):
+    """Compute luminance of an RGBA image.
+
+    Parameters
+    ----------
+    rgba : array_like
+        The image in RGBA format, in a 3-D array of shape ``(.., .., 4)``.
+    background : array_like
+        The color of the background to blend the image with. A tuple
+        containing 3 floats between 0 to 1 - the RGB value of the background.
+
+    Returns
+    -------
+    out : ndarray
+        The luminance image - an array which is the same size as the input
+        array, but with the channel dimension removed.
+
+    Raises
+    ------
+    ValueError
+        If `rgba` is not a 3-D array of shape ``(.., .., 4)``.
+
+    Examples
+    --------
+    >>> from skimage.color import rgba2gray
+    >>> from skimage import data
+    >>> img = data.logo()
+    >>> img_gray = rgba2gray(img)
+    """
+    return rgb2gray(rgba2rgb(rgba, background))
+
+
 def rgb2gray(rgb):
     """Compute luminance of an RGB image.
 
