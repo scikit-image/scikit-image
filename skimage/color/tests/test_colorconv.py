@@ -11,6 +11,7 @@ Authors
 import os.path
 
 import numpy as np
+import pytest
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import TestCase
@@ -656,3 +657,27 @@ def test_gray2rgb_alpha():
                           alpha=True)[0, 0, 3], 1)
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                           alpha=True)[0, 0, 3], 255)
+
+
+@pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,
+                                  rgb2xyz, xyz2rgb,
+                                  rgb2hed, hed2rgb,
+                                  rgb2rgbcie, rgbcie2rgb,
+                                  rgb2grey,
+                                  xyz2lab, lab2xyz,
+                                  lab2rgb, rgb2lab,
+                                  xyz2luv, luv2xyz,
+                                  luv2rgb, rgb2luv,
+                                  lab2lch, lch2lab,
+                                  rgb2yuv, yuv2rgb,
+                                  rgb2yiq, yiq2rgb,
+                                  rgb2ypbpr, ypbpr2rgb,
+                                  rgb2ycbcr, ycbcr2rgb,
+                                  rgb2ydbdr, ydbdr2rgb])
+@pytest.mark.parametrize("shape", ([(4, 5, 3), (5, 4, 5, 3),
+                                    (4, 5, 4, 5, 3)]))
+def test_nD_color_array(func, shape):
+    img = np.random.rand(*shape)
+    out = func(img)
+
+    assert out.shape == shape[:out.ndim]
