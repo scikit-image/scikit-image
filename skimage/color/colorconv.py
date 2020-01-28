@@ -756,7 +756,7 @@ def rgb2gray(rgb):
         ``(.., ..,[ ..,] 4)``
         or
         The image in grayscale format, in a 2-D array of shape
-        `(M, N)``
+        ``(M, N)``
 
     Returns
     -------
