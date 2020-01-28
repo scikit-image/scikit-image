@@ -142,7 +142,7 @@ def _prepare_colorarray(arr):
 
     if arr.ndim < 2 or arr.shape[-1] != 3:
         raise ValueError("Input array must have a shape == (.., [..,] 3)), "
-                         "got " + arr.shape.__str__)
+                         "got " + arr.shape.__str__())
 
     return dtype.img_as_float(arr)
 
