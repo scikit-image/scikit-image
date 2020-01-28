@@ -110,21 +110,21 @@ def test_pythagorean_triangle_transpose_left_down_linewidth():
 def test_reduce_func_mean():
     prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
                         reduce_func=np.mean)
-    expected_prof = np.array([0, 0.8, 1, 0.2])
+    expected_prof = pyth_image[:4, :3].mean(-1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_max():
     prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
                         reduce_func=np.max)
-    expected_prof = np.array([0, 1.8, 1.8, 0.6])
+    expected_prof = pyth_image[:4, :3].max(-1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_sum():
     prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
                         reduce_func=np.sum)
-    expected_prof = np.array([0, 2.4, 3, 0.6])
+    expected_prof = pyth_image[:4, :3].sum(-1)
     assert_almost_equal(prof, expected_prof)
 
 
