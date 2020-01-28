@@ -295,10 +295,12 @@ class TestColorconv(TestCase):
 
     def test_rgb2grey_alpha(self):
         x = np.random.rand(10, 10, 4)
-        assert rgb2grey(x).ndim == 2
+        with expected_warnings(['RGBA image conversion']):
+            assert rgb2grey(x).ndim == 2
 
     def test_rgb2grey_on_grey(self):
-        rgb2grey(np.random.rand(5, 5))
+        with expected_warnings(['Gray scale image conversion']):
+            rgb2grey(np.random.rand(5, 5))
 
     def test_rgb2grey_dtype(self):
         img = np.random.rand(10, 10, 3).astype('float64')

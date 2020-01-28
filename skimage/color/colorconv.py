@@ -76,7 +76,8 @@ def guess_spatial_dimensions(image):
         If the image array has less than two or more than four dimensions.
     """
     from ..filters import _guess_spatial_dimensions
-    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
+    warn('This function is deprecated and will be removed in 0.18',
+         stacklevel=2)
     return _guess_spatial_dimensions(image)
 
 
@@ -139,8 +140,8 @@ def _prepare_colorarray(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim not in [3, 4] or arr.shape[-1] != 3:
-        msg = ("the input array must be have a shape == (.., ..,[ ..,] 3)), " +
+    if arr.ndim < 2 or arr.shape[-1] != 3:
+        msg = ("Input array must have a shape == (.., [..,] 3)), " +
                "got (" + (", ".join(map(str, arr.shape))) + ")")
         raise ValueError(msg)
 
@@ -260,25 +261,25 @@ def rgb2hsv(rgb):
 
     # -- H channel
     # red is max
-    idx = (arr[:, :, 0] == out_v)
+    idx = (arr[..., 0] == out_v)
     out[idx, 0] = (arr[idx, 1] - arr[idx, 2]) / delta[idx]
 
     # green is max
-    idx = (arr[:, :, 1] == out_v)
+    idx = (arr[..., 1] == out_v)
     out[idx, 0] = 2. + (arr[idx, 2] - arr[idx, 0]) / delta[idx]
 
     # blue is max
-    idx = (arr[:, :, 2] == out_v)
+    idx = (arr[..., 2] == out_v)
     out[idx, 0] = 4. + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
-    out_h = (out[:, :, 0] / 6.) % 1.
+    out_h = (out[..., 0] / 6.) % 1.
     out_h[delta == 0.] = 0.
 
     np.seterr(**old_settings)
 
     # -- output
-    out[:, :, 0] = out_h
-    out[:, :, 1] = out_s
-    out[:, :, 2] = out_v
+    out[..., 0] = out_h
+    out[..., 1] = out_s
+    out[..., 2] = out_v
 
     # remove NaN
     out[np.isnan(out)] = 0
@@ -322,12 +323,12 @@ def hsv2rgb(hsv):
     """
     arr = _prepare_colorarray(hsv)
 
-    hi = np.floor(arr[:, :, 0] * 6)
-    f = arr[:, :, 0] * 6 - hi
-    p = arr[:, :, 2] * (1 - arr[:, :, 1])
-    q = arr[:, :, 2] * (1 - f * arr[:, :, 1])
-    t = arr[:, :, 2] * (1 - (1 - f) * arr[:, :, 1])
-    v = arr[:, :, 2]
+    hi = np.floor(arr[..., 0] * 6)
+    f = arr[..., 0] * 6 - hi
+    p = arr[..., 2] * (1 - arr[..., 1])
+    q = arr[..., 2] * (1 - f * arr[..., 1])
+    t = arr[..., 2] * (1 - (1 - f) * arr[..., 1])
+    v = arr[..., 2]
 
     hi = np.dstack([hi, hi, hi]).astype(np.uint8) % 6
     out = np.choose(hi, [np.dstack((v, t, p)),
@@ -750,10 +751,8 @@ def rgb2gray(rgb):
 
     Parameters
     ----------
-    rgb : array_like
-        The image in RGB format, in a 3-D or 4-D array of shape
-        ``(.., ..,[ ..,] 3)``, or in RGBA format with shape
-        ``(.., ..,[ ..,] 4)``.
+    rgb : (.., [ ..,] 3) array_like
+        The image in RGB format.
 
     Returns
     -------
@@ -764,8 +763,7 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb2gray` is not a 3-D or 4-D arrays of shape
-        ``(.., ..,[ ..,] 3)`` or ``(.., ..,[ ..,] 4)``.
+        If `rgb` last dimension length is not 3.
 
     References
     ----------
@@ -788,10 +786,21 @@ def rgb2gray(rgb):
     >>> img_gray = rgb2gray(img)
     """
 
-    if rgb.ndim == 2:
+    rgb = np.asanyarray(rgb)
+
+    if rgb.ndim == 2 and rgb.shape[-1] != 3:
+        warn('Gray scale image conversion is now deprecated. In version 0.19, '
+             'a ValueError will be raised if input image last dimension '
+             'length is not 3.', FutureWarning, stacklevel=2)
         return np.ascontiguousarray(rgb)
 
-    rgb = _prepare_colorarray(rgb[..., :3])
+    if rgb.shape[-1] == 4:
+        warn('RGBA image conversion is now deprecated. In version 0.19, '
+             'a ValueError will be raised if input image last dimension '
+             'length is not 3.', FutureWarning, stacklevel=2)
+        rgb = rgb[..., :3]
+
+    rgb = _prepare_colorarray(rgb)
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return rgb @ coeffs
 
@@ -973,7 +982,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     arr = _prepare_colorarray(lab).copy()
 
-    L, a, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
     y = (L + 16.) / 116.
     x = (a / 500.) + y
     z = y - (b / 200.)
@@ -1188,7 +1197,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     arr = _prepare_colorarray(luv).copy()
 
-    L, u, v = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
     eps = np.finfo(np.float).eps
 
