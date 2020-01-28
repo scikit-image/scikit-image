@@ -35,7 +35,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgb2ydbdr, ydbdr2rgb,
-                           rgba2rgb)
+                           rgba2rgb, rgba2gray)
 
 from skimage import data_dir
 from skimage._shared._warnings import expected_warnings
@@ -76,6 +76,27 @@ class TestColorconv(TestCase):
                           [[32.303, -9.400, -130.358]],   # blue
                           [[46.228, -43.774, 56.589]],   # green
                           ])
+
+    # RGBA to gray
+    def test_rgba2gray_conversion(self):
+        rgba = self.img_rgba
+        out = rgba2gray(rgba)
+        expected = np.array([[1., 0.4298, 0.7149]])
+        self.assertEqual(out.shape, expected.shape[:2])
+        assert_almost_equal(out, expected)
+
+    def test_rgba2gray_error_grayscale(self):
+        self.assertRaises(ValueError, rgba2gray, self.img_grayscale)
+
+    def test_rgba2gray_error_rgb(self):
+        self.assertRaises(ValueError, rgba2gray, self.img_rgb)
+
+    def test_rgba2gray_dtype(self):
+        rgba = self.img_rgba.astype('float64')
+        rgba32 = img_as_float32(rgba)
+
+        assert rgba2gray(rgba).dtype == rgba.dtype
+        assert rgba2gray(rgba32).dtype == rgba32.dtype
 
     # RGBA to RGB
     def test_rgba2rgb_conversion(self):
