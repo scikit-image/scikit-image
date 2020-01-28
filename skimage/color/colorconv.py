@@ -141,9 +141,8 @@ def _prepare_colorarray(arr):
     arr = np.asanyarray(arr)
 
     if arr.ndim < 2 or arr.shape[-1] != 3:
-        msg = ("Input array must have a shape == (.., [..,] 3)), " +
-               "got (" + (", ".join(map(str, arr.shape))) + ")")
-        raise ValueError(msg)
+        raise ValueError("Input array must have a shape == (.., [..,] 3)), "
+                         "got " + arr.shape.__str__)
 
     return dtype.img_as_float(arr)
 
