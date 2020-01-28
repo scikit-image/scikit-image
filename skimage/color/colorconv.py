@@ -753,7 +753,10 @@ def rgb2gray(rgb):
     rgb : array_like
         The image in RGB format, in a 3-D or 4-D array of shape
         ``(.., ..,[ ..,] 3)``, or in RGBA format with shape
-        ``(.., ..,[ ..,] 4)``.
+        ``(.., ..,[ ..,] 4)``
+        or
+        The image in grayscale format, in a 2-D array of shape
+        `(M, N)``
 
     Returns
     -------
@@ -764,7 +767,7 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb2gray` is not a 3-D or 4-D arrays of shape
+        If `rgb` is a 1-D array, or not a 3-D or 4-D array of shape
         ``(.., ..,[ ..,] 3)`` or ``(.., ..,[ ..,] 4)``.
 
     References
@@ -779,6 +782,9 @@ def rgb2gray(rgb):
         Y = 0.2125 R + 0.7154 G + 0.0721 B
 
     If there is an alpha channel present, it is ignored.
+
+    If the input array is 2-D, it is converted to a row-major (i.e. C-style)
+    array (f needed) and returned without any further changes.
 
     Examples
     --------
