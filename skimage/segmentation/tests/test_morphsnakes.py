@@ -40,7 +40,7 @@ def test_morphsnakes_incorrect_ndim():
 
 def test_morphsnakes_black():
     img = np.zeros((11, 11))
-    ls = disk_level_set(img.shape, (5, 5), 3)
+    ls = disk_level_set(img.shape, center=(5, 5), radius=3)
 
     ref_zeros = np.zeros(img.shape, dtype=np.int8)
     ref_ones = np.ones(img.shape, dtype=np.int8)
@@ -63,8 +63,8 @@ def test_morphsnakes_black():
 
 def test_morphsnakes_simple_shape_chan_vese():
     img = gaussian_blob()
-    ls1 = disk_level_set(img.shape, (5, 5), 3)
-    ls2 = disk_level_set(img.shape, (5, 5), 6)
+    ls1 = disk_level_set(img.shape, center=(5, 5), radius=3)
+    ls2 = disk_level_set(img.shape, center=(5, 5), radius=6)
 
     acwe_ls1 = morphological_chan_vese(img, iterations=10, init_level_set=ls1)
     acwe_ls2 = morphological_chan_vese(img, iterations=10, init_level_set=ls2)
@@ -75,9 +75,9 @@ def test_morphsnakes_simple_shape_chan_vese():
 
 
 def test_morphsnakes_simple_shape_geodesic_active_contour():
-    img = np.float_(disk_level_set((11, 11), (5, 5), 3.5))
+    img = np.float_(disk_level_set((11, 11), center=(5, 5), radius=3.5))
     gimg = inverse_gaussian_gradient(img, alpha=10.0, sigma=1.0)
-    ls = disk_level_set(img.shape, (5, 5), 6)
+    ls = disk_level_set(img.shape, center=(5, 5), radius=6)
 
     ref = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
