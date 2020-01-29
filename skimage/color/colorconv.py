@@ -696,7 +696,7 @@ def rgb2xyz(rgb):
     mask = arr > 0.04045
     arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
     arr[~mask] /= 12.92
-    return _convert(xyz_from_rgb, arr)
+    return arr @ xyz_from_rgb.T.astype(arr.dtype)
 
 
 def rgb2rgbcie(rgb):
