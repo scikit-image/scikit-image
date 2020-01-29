@@ -1601,7 +1601,7 @@ def lch2lab(lch):
     return lch
 
 
-def _prepare_lab_array(arr):
+def _prepare_lab_array(arr, force_copy=True):
     """Ensure input for lab2lch, lch2lab are well-posed.
 
     Arrays must be in floating point and have at least 3 elements in
@@ -1611,7 +1611,7 @@ def _prepare_lab_array(arr):
     shape = arr.shape
     if shape[-1] < 3:
         raise ValueError('Input array has less than 3 color channels')
-    return dtype.img_as_float(arr, force_copy=True)
+    return dtype.img_as_float(arr, force_copy=force_copy)
 
 
 def rgb2yuv(rgb):
