@@ -820,6 +820,10 @@ def gray2rgba(image, alpha=None):
         RGBA image. A new dimension of length 4 is added to input
         image shape.
 
+    Raises
+    ------
+    ValueError
+
     """
 
     arr = dtype.img_as_float(image)
@@ -866,6 +870,11 @@ def gray2rgb(image, alpha=None):
     If the input is a 1-dimensional image of shape ``(M, )``, the output
     will be shape ``(M, 3)``.
     """
+
+    if alpha is not None:
+        warn("alpha argument is deprecated and will be removed in "
+             "version 0.19. Please use the gray2rgba to obtain an "
+             "RGBA image.", FutureWarning, stacklevel=2)
     is_rgb = False
     is_alpha = False
     dims = np.squeeze(image).ndim
