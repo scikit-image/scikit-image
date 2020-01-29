@@ -141,7 +141,7 @@ def convert_colorspace(arr, fromspace, tospace):
     return todict[tospace](fromdict[fromspace](arr))
 
 
-def _prepare_colorarray(arr):
+def _prepare_colorarray(arr, force_copy=True):
     """Check the shape of the array and convert it to
     floating point representation.
 
@@ -152,7 +152,7 @@ def _prepare_colorarray(arr):
         raise ValueError("Input array must have a shape == (.., [..,] 3)), "
                          "got {0}".format(arr.shape))
 
-    return dtype.img_as_float(arr)
+    return dtype.img_as_float(arr, force_copy=force_copy)
 
 
 def _prepare_rgba_array(arr):
