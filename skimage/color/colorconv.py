@@ -142,7 +142,7 @@ def _prepare_colorarray(arr):
 
     if arr.ndim < 2 or arr.shape[-1] != 3:
         raise ValueError("Input array must have a shape == (.., [..,] 3)), "
-                         "got " + arr.shape.__str__())
+                         "got {0}".format(arr.shape))
 
     return dtype.img_as_float(arr)
 
@@ -154,8 +154,8 @@ def _prepare_rgba_array(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim not in [3, 4] or arr.shape[-1] != 4:
-        msg = ("the input array must have a shape == (.., ..,[ ..,] 4)), "
+    if arr.ndim < 2 or arr.shape[-1] != 4:
+        msg = ("the input array must have a shape == (.., [..,] 4)), "
                "got {0}".format(arr.shape))
         raise ValueError(msg)
 
@@ -163,25 +163,27 @@ def _prepare_rgba_array(arr):
 
 
 def rgba2rgb(rgba, background=(1, 1, 1)):
-    """RGBA to RGB conversion.
+    """RGBA to RGB conversion using alpha blending [1]_.
 
     Parameters
     ----------
-    rgba : array_like
-        The image in RGBA format, in a 3-D array of shape ``(.., .., 4)``.
+    rgba : (.., [ ..,] 4) array_like
+        The image in RGBA format.
     background : array_like
-        The color of the background to blend the image with. A tuple
-        containing 3 floats between 0 to 1 - the RGB value of the background.
+
+        The color of the background to blend the image with (3 floats
+        between 0 to 1 - the RGB value of the background).
 
     Returns
     -------
-    out : ndarray
-        The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
+    out : (.., [ ..,] 3) ndarray
+        The image in RGB format.
 
     Raises
     ------
     ValueError
-        If `rgba` is not a 3-D array of shape ``(.., .., 4)``.
+        If `rgba` is not at least 2-D with last dimension length equal
+        to 4.
 
     References
     ----------
@@ -193,21 +195,24 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     >>> from skimage import data
     >>> img_rgba = data.logo()
     >>> img_rgb = color.rgba2rgb(img_rgba)
+
     """
     arr = _prepare_rgba_array(rgba)
-    if isinstance(background, tuple) and len(background) != 3:
-        raise ValueError('the background must be a tuple with 3 items - the '
-                         'RGB color of the background. Got {0} items.'
-                         .format(len(background)))
+    background = np.ravel(background).astype(arr.dtype)
+    if len(background) != 3:
+        raise ValueError('background must be an iterable containing 3 RGB '
+                         'values. Got {0} items'.format(len(background)))
+    if np.any(background < 0) or np.any(background > 1):
+        raise ValueError('background RGB values must be floats between '
+                         '0 and 1.')
 
-    alpha = arr[..., -1]
-    channels = arr[..., :-1]
-    out = np.empty_like(channels)
+    background = background[np.newaxis, ...]
+    alpha = arr[..., -1, np.newaxis]
+    channels = arr[np.newaxis, ..., :-1]
 
-    for ichan in range(channels.shape[-1]):
-        out[..., ichan] = np.clip(
-            (1 - alpha) * background[ichan] + alpha * channels[..., ichan],
-            a_min=0, a_max=1)
+    out = np.squeeze(np.clip((1 - alpha) * background + alpha * channels,
+                             a_min=0, a_max=1),
+                     axis=0)
     return out
 
 
