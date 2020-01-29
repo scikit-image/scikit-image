@@ -48,6 +48,7 @@ References
 
 """
 
+import warnings
 import functools
 import numpy as np
 from scipy import ndimage as ndi
@@ -56,9 +57,9 @@ from ..._shared.utils import check_nD, warn
 
 from . import generic_cy
 
-__all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
+__all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
-           'enhance_contrast', 'pop', 'threshold', 'tophat', 'noise_filter',
+           'enhance_contrast', 'pop', 'threshold', 'noise_filter',
            'entropy', 'otsu']
 
 
@@ -316,6 +317,14 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
@@ -325,6 +334,11 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
     >>> out = bottomhat(img, disk(5))
 
     """
+    warnings.warn("rank.bottomhat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
 
     return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
                                    out=out, mask=mask,
@@ -944,6 +958,14 @@ def tophat(image, selem, out=None, mask=None, shift_x=False,
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
@@ -953,7 +975,11 @@ def tophat(image, selem, out=None, mask=None, shift_x=False,
     >>> out = tophat(img, disk(5))
 
     """
-
+    warnings.warn("rank.tophat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
     return _apply_scalar_per_pixel(generic_cy._tophat, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
