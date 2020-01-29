@@ -745,7 +745,7 @@ def rgbcie2rgb(rgbcie):
     return _convert(rgb_from_rgbcie, rgbcie)
 
 
-def rgba2gray(rgba, background=(1, 1, 1)):
+def rgba2gray(rgba, *, background=(1, 1, 1)):
     """Compute luminance of an RGBA image.
 
     Parameters
