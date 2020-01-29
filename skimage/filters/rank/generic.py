@@ -48,7 +48,6 @@ References
 
 """
 
-import functools
 import numpy as np
 from scipy import ndimage as ndi
 from ...util import img_as_ubyte
@@ -63,7 +62,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 
 
 def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
-                  pixel_size=1):
+                      pixel_size=1):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -114,9 +113,7 @@ def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=np.uint8)
-    else:
+    if mask is not None:
         mask = img_as_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
@@ -179,17 +176,15 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image,
-                                                    selem,
-                                                    out,
-                                                    mask,
-                                                    out_dtype)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, n_bins=n_bins)
 
-    return out.reshape(out.shape[:2])
+    return np.squeeze(out, axis=-1)
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
@@ -231,12 +226,10 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
 
     """
     # preprocess and verify the input
-    image, selem, out, mask, n_bins = _preprocess_input(image,
-                                                    selem,
-                                                    out,
-                                                    mask,
-                                                    out_dtype,
-                                                    pixel_size)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype,
+                                                        pixel_size)
 
     # apply cython function
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
@@ -566,6 +559,14 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     -------
     out : 2-D array (same dtype as input image)
         Output image.
+
+    Notes
+    -----
+    Subtracting the mean value may introduce underflow. To compensate
+    this potential underflow, the obtained difference is downscaled by
+    a factor of 2 and shifted by `n_bins / 2 - 1`, the median value of
+    the local histogram (`n_bins = max(3, image.max()) +1` for 16-bits
+    images and 256 otherwise).
 
     Examples
     --------
