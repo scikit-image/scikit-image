@@ -145,7 +145,7 @@ def circle_level_set(image_shape, center=None, radius=None):
     warnings.warn("circle_level_set is deprecated in favor of "
                   "disk_level_set."
                   "circle_level_set will be removed in version 0.19",
-                  FutureWarning)
+                  FutureWarning, stacklevel=2)
 
     return disk_level_set(image_shape, center=center, radius=radius)
 
