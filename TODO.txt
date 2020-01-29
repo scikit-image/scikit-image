@@ -42,6 +42,7 @@ Version 0.18
 Version 0.19
 ------------
 
+* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * Remove the definition of `skimage.util.pad` and
@@ -49,7 +50,6 @@ Version 0.19
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-
 
 Other
 -----
