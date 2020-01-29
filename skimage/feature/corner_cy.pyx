@@ -8,7 +8,6 @@ from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
 from ..util import img_as_float64
-from ..color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
 

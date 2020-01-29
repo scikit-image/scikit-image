@@ -104,7 +104,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
                   "marching_cubes with `method='_lorensen'` "
                   "to apply Lorensen et al. algorithm. "
                   "marching_cubes_classic will be removed in version 0.19",
-                  FutureWarning)
+                  FutureWarning, stacklevel=2)
 
     return _marching_cubes_classic(volume, level, spacing, gradient_direction)
 
