@@ -840,7 +840,7 @@ def gray2rgb(image, alpha=None):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M[, N][, P])``.
+        Input image.
     alpha : bool, optional
         Ensure that the output image has an alpha layer. If None,
         alpha layers are passed through but not created.
@@ -848,12 +848,7 @@ def gray2rgb(image, alpha=None):
     Returns
     -------
     rgb : (.., [ ..,] 3) ndarray
-        RGB image of shape ``(M[, N][, P], 3)``.
-
-    Raises
-    ------
-    ValueError
-        If the input is not a 1-, 2- or 3-dimensional image.
+        RGB image. A new dimension of length 3 is added to input image.
 
     Notes
     -----
@@ -872,6 +867,9 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
+        warn('RGB and RGBA images conversion is now deprecated. In version '
+             '0.19, input image  will be considered as grey scale, whatever '
+             'is its shape.', FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
@@ -882,17 +880,15 @@ def gray2rgb(image, alpha=None):
 
         return image
 
-    elif dims in (1, 2, 3):
+    else:
         image = image[..., np.newaxis]
 
         if alpha:
-            alpha_layer = (np.ones_like(image) * dtype_limits(image, clip_negative=False)[1])
+            alpha_layer = (np.ones_like(image)
+                           * dtype_limits(image, clip_negative=False)[1])
             return np.concatenate(3 * (image,) + (alpha_layer,), axis=-1)
         else:
             return np.concatenate(3 * (image,), axis=-1)
-
-    else:
-        raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
 
 @functools.wraps(gray2rgb)
