@@ -1440,7 +1440,7 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    rgb = _prepare_rgba_array(rgb, force_copy=True)
+    rgb = _prepare_colorarray(rgb, force_copy=True)
     rgb += 2
     stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
     return np.reshape(stains, rgb.shape)
@@ -1501,7 +1501,7 @@ def combine_stains(stains, conv_matrix):
     """
     from ..exposure import rescale_intensity
 
-    stains = _prepare_rgba_array(stains)
+    stains = _prepare_colorarray(stains)
     logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
     rgb2 = np.power(10, logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
