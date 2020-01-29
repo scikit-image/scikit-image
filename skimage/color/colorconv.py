@@ -804,6 +804,42 @@ def rgb2grey(rgb):
     return rgb2gray(rgb)
 
 
+def gray2rgba(image, alpha=None):
+    """Create an RGBA representation of a gray-level image.
+
+    Parameters
+    ----------
+    image : array_like
+        Input image.
+    alpha : array_like, optional
+        alpha channel of the output image. Same shape as ``image``.
+
+    Returns
+    -------
+    rgba : ndarray
+        RGBA image. A new dimension of length 4 is added to input
+        image shape.
+
+    """
+
+    arr = dtype.img_as_float(image)
+
+    if alpha is None:
+        _, alpha = dtype_limits(arr, clip_negative=False)
+    elif not np.isscalar(alpha):
+        alpha = np.asarray(alpha)
+        if image.shape != alpha.shape:
+            raise ValueError("If alpha is an array, it must have the same "
+                             "shape as the input image.")
+        alpha = alpha[..., np.newaxis]
+
+    rgba = np.empty(image.shape + (4, ))
+    rgba[..., :3] = arr[..., np.newaxis]
+    rgba[..., 3] = alpha
+
+    return rgba
+
+
 def gray2rgb(image, alpha=None):
     """Create an RGB representation of a gray-level image.
 
