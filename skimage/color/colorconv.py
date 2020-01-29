@@ -50,8 +50,9 @@ References
 """
 
 
-from warnings import warn
+import functools
 import numpy as np
+from warnings import warn
 from scipy import linalg
 from ..util import dtype, dtype_limits
 
@@ -826,7 +827,11 @@ def rgb2gray(rgb):
     return rgb @ coeffs
 
 
-rgb2grey = rgb2gray
+@functools.wraps(rgb2gray)
+def rgb2grey(rgb):
+    warn('rgb2grey is deprecated. It will be removed in version 0.19.'
+         'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
+    return rgb2gray(rgb)
 
 
 def gray2rgb(image, alpha=None):
@@ -889,7 +894,12 @@ def gray2rgb(image, alpha=None):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
-grey2rgb = gray2rgb
+
+@functools.wraps(gray2rgb)
+def grey2rgb(image):
+    warn('grey2rgb is deprecated. It will be removed in version 0.19.'
+         'Please use gray2rgb instead.', FutureWarning, stacklevel=2)
+    return gray2rgb(image)
 
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
