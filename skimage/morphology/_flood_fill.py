@@ -7,7 +7,7 @@ connected to a given seed point with a different value.
 import numpy as np
 from warnings import warn
 
-from ._util import (_resolve_neighborhood, _set_edge_values_inplace,
+from ._util import (_resolve_neighborhood, _set_border_values,
                     _fast_pad, _offsets_to_raveled_neighbors)
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 
@@ -249,7 +249,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
     flags = np.zeros(working_image.shape, dtype=np.uint8)
-    _set_edge_values_inplace(flags, value=2)
+    _set_border_values(flags, value=2)
 
     try:
         if tolerance is not None:

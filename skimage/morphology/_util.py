@@ -136,13 +136,13 @@ def _resolve_neighborhood(selem, connectivity, ndim):
 
     Parameters
     ----------
-    selem : ndarray, optional
+    selem : ndarray
         A structuring element used to determine the neighborhood of each
         evaluated pixel (``True`` denotes a connected pixel). It must be a
         boolean array and have the same number of dimensions as `image`. If
         neither `selem` nor `connectivity` are given, all adjacent pixels are
         considered as part of the neighborhood.
-    connectivity : int, optional
+    connectivity : int
         A number used to determine the neighborhood of each evaluated pixel.
         Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
@@ -184,7 +184,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     return selem
 
 
-def _set_edge_values_inplace(image, value):
+def _set_border_values(image, value):
     """Set edge values along all axes to a constant value.
 
     Parameters
@@ -197,7 +197,7 @@ def _set_edge_values_inplace(image, value):
     Examples
     --------
     >>> image = np.zeros((4, 5), dtype=int)
-    >>> _set_edge_values_inplace(image, 1)
+    >>> _set_border_values(image, 1)
     >>> image
     array([[1, 1, 1, 1, 1],
            [1, 0, 0, 0, 1],
@@ -254,6 +254,6 @@ def _fast_pad(image, value):
     sl = (slice(1, -1),) * image.ndim
     new_image[sl] = image
     # and set the edge values
-    _set_edge_values_inplace(new_image, value)
+    _set_border_values(new_image, value)
 
     return new_image

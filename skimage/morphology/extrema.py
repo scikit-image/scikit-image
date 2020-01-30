@@ -331,7 +331,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
     flags = np.zeros(image.shape, dtype=np.uint8)
-    _util._set_edge_values_inplace(flags, value=3)
+    _util._set_border_values(flags, value=3)
 
     if any(s < 3 for s in image.shape):
         # Warn and skip if any dimension is smaller than 3
@@ -362,7 +362,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         flags = crop(flags, 1)
     else:
         # No padding was performed but set edge values back to 0
-        _util._set_edge_values_inplace(flags, value=0)
+        _util._set_border_values(flags, value=0)
 
     if indices:
         return np.nonzero(flags)
