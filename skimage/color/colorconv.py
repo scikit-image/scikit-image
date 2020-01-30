@@ -805,14 +805,16 @@ def rgb2grey(rgb):
 
 
 def gray2rgba(image, alpha=None):
-    """Create an RGBA representation of a gray-level image.
+    """Create a RGBA representation of a gray-level image.
 
     Parameters
     ----------
     image : array_like
         Input image.
     alpha : array_like, optional
-        alpha channel of the output image. Same shape as ``image``.
+        Alpha channel of the output image. It may be a scalar or an
+        array with the same shape as ``image``. If not specified it is
+        set to the maximum limit correspondin to ``image`` data type.
 
     Returns
     -------
@@ -823,7 +825,11 @@ def gray2rgba(image, alpha=None):
     Raises
     ------
     ValueError
-
+        If ``alpha`` is an array and have a different shape then
+        ``image``.
+    ValueError
+        If ``alpha`` is an array and have a different data type then
+        ``image``.
     """
 
     arr = np.asarray(image)
