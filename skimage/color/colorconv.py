@@ -826,18 +826,28 @@ def gray2rgba(image, alpha=None):
 
     """
 
-    arr = dtype.img_as_float(image)
+    arr = np.asarray(image)
+
+    alpha_min, alpha_max = dtype_limits(arr, clip_negative=False)
 
     if alpha is None:
-        _, alpha = dtype_limits(arr, clip_negative=False)
-    elif not np.isscalar(alpha):
+        alpha = alpha_max
+    elif np.isscalar(alpha):
+        if alpha_min > alpha or alpha > alpha_max:
+            raise ValueError("alpha is not in image data type limits.")
+        alpha_cast = arr.dtype.type(alpha)
+        if alpha_cast != alpha:
+            warn("alpha is cast to {}".format(arr.dtype.name))
+        alpha = alpha_cast
+    else:
         alpha = np.asarray(alpha)
-        if image.shape != alpha.shape:
-            raise ValueError("If alpha is an array, it must have the same "
-                             "shape as the input image.")
+        if alpha.shape != image.shape:
+            raise ValueError("alpha and image must have the same shape")
+        if alpha.dtype != image.dtype:
+            raise ValueError("alpha and image must have the same dtype")
         alpha = alpha[..., np.newaxis]
 
-    rgba = np.empty(image.shape + (4, ))
+    rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
     rgba[..., :3] = arr[..., np.newaxis]
     rgba[..., 3] = alpha
 
