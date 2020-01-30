@@ -1,5 +1,6 @@
 ## Description
 
+(Note: for guidance on how to use `scikit-image`, please post on https://forum.image.sc/tag/scikit-image)
 
 ## Way to reproduce
 ```python
