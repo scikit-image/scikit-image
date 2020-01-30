@@ -101,7 +101,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     if order == 'F':
         offsets = offsets[:, ::-1]
         image_shape = image_shape[::-1]
-    elif not order == 'C':
+    elif order != 'C':
         raise ValueError("order was not 'C' or 'F'")
 
     # Scale offsets in each dimension and sum

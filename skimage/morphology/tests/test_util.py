@@ -68,8 +68,8 @@ class TestOffsetsToRaveledNeighbors:
     @pytest.mark.parametrize("order", ["C", "F"])
     def test_selem_smaller_image(self, image_shape, order):
         """
-        Test if a dimension in `selem` is smaller than indicated by
-        `image_shape`.
+        Test if a dimension indicated by `image_shape` is smaller than in
+        `selem`.
         """
         selem = np.ones((3,) * len(image_shape), dtype=bool)
         center = (1,) * len(image_shape)
