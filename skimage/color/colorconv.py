@@ -824,7 +824,14 @@ def rgb2gray(rgb):
     if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)
 
-    rgb = _prepare_colorarray(rgb[..., :3])
+    if rgb.shape[-1] == 4:
+        warn('RGBA image conversion using rgb2gray is now deprecated, '
+             'please use rgba2gray instead. In version 0.19, '
+             'a ValueError will be raised if input image last dimension '
+             'length is not 3.', FutureWarning, stacklevel=2)
+        rgb = rgb[..., :3]
+
+    rgb = _prepare_colorarray(rgb)
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return rgb @ coeffs
 
