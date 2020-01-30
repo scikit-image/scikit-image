@@ -50,8 +50,9 @@ References
 """
 
 
-from warnings import warn
+import functools
 import numpy as np
+from warnings import warn
 from scipy import linalg
 from ..util import dtype, dtype_limits
 
@@ -447,7 +448,7 @@ illuminants = \
            '10': (1.0, 1.0, 1.0)}}
 
 
-def get_xyz_coords(illuminant, observer):
+def get_xyz_coords(illuminant, observer, dtype=float):
     """Get the XYZ coordinates of the given illuminant and observer [1]_.
 
     Parameters
@@ -456,11 +457,13 @@ def get_xyz_coords(illuminant, observer):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
+    dtype: dtype, optional
+        Output data type.
 
     Returns
     -------
-    (x, y, z) : tuple
-        A tuple with 3 elements containing the XYZ coordinates of the given
+    out : array
+        Array with 3 elements containing the XYZ coordinates of the given
         illuminant.
 
     Raises
@@ -476,7 +479,7 @@ def get_xyz_coords(illuminant, observer):
     """
     illuminant = illuminant.upper()
     try:
-        return illuminants[illuminant][observer]
+        return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
@@ -581,12 +584,12 @@ def _convert(matrix, arr):
 
     Returns
     -------
-    out : ndarray, dtype=float
+    out : ndarray
         The converted array.
     """
     arr = _prepare_colorarray(arr)
 
-    return arr @ matrix.T.copy()
+    return arr @ matrix.T.astype(arr.dtype)
 
 
 def xyz2rgb(xyz):
@@ -794,7 +797,11 @@ def rgb2gray(rgb):
     return rgb @ coeffs
 
 
-rgb2grey = rgb2gray
+@functools.wraps(rgb2gray)
+def rgb2grey(rgb):
+    warn('rgb2grey is deprecated. It will be removed in version 0.19.'
+         'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
+    return rgb2gray(rgb)
 
 
 def gray2rgb(image, alpha=None):
@@ -857,7 +864,12 @@ def gray2rgb(image, alpha=None):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
-grey2rgb = gray2rgb
+
+@functools.wraps(gray2rgb)
+def grey2rgb(image):
+    warn('grey2rgb is deprecated. It will be removed in version 0.19.'
+         'Please use gray2rgb instead.', FutureWarning, stacklevel=2)
+    return gray2rgb(image)
 
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
@@ -908,7 +920,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     """
     arr = _prepare_colorarray(xyz)
 
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = get_xyz_coords(illuminant, observer, arr.dtype)
 
     # scale by CIE XYZ tristimulus values of the reference white point
     arr = arr / xyz_ref_white

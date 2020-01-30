@@ -134,11 +134,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
                     sobel(img[:, :, 2])]
         else:
             edge = [sobel(img)]
-        for i in range(3 if RGB else 1):
-            edge[i][0, :] = edge[i][1, :]
-            edge[i][-1, :] = edge[i][-2, :]
-            edge[i][:, 0] = edge[i][:, 1]
-            edge[i][:, -1] = edge[i][:, -2]
     else:
         edge = [0]
 
