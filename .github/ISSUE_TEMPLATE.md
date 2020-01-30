@@ -1,6 +1,6 @@
 ## Description
 
-(Note: for guidance on how to use `scikit-image`, please post on https://forum.image.sc/tag/scikit-image)
+(Note: for guidance on how to use `scikit-image`, please post instead on https://forum.image.sc/tag/scikit-image)
 
 ## Way to reproduce
 ```python
@@ -23,4 +23,3 @@ import numpy; print("numpy version: {}".format(numpy.__version__))
 # your output here
 
 ```
-
