@@ -825,11 +825,15 @@ def gray2rgba(image, alpha=None):
     Raises
     ------
     ValueError
+        If ``alpha`` is a scala and is not in ``image`` data type
+        limits.
+    ValueError
         If ``alpha`` is an array and have a different shape then
         ``image``.
     ValueError
         If ``alpha`` is an array and have a different data type then
         ``image``.
+
     """
 
     arr = np.asarray(image)
@@ -851,7 +855,6 @@ def gray2rgba(image, alpha=None):
             raise ValueError("alpha and image must have the same shape")
         if alpha.dtype != image.dtype:
             raise ValueError("alpha and image must have the same dtype")
-        alpha = alpha[..., np.newaxis]
 
     rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
     rgba[..., :3] = arr[..., np.newaxis]
