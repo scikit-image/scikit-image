@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 
 from .._shared._geometry import polygon_clip
@@ -148,28 +149,66 @@ def circle(r, c, radius, shape=None):
     Parameters
     ----------
     r, c : double
-        Centre coordinate of circle.
+        Center coordinate of disk.
     radius : double
-        Radius of circle.
+        Radius of disk.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. This is useful for circles that exceed the image
-        size. If None, the full extent of the circle is used.  Must be at least
+        pixel coordinates. This is useful for disks that exceed the image
+        size. If None, the full extent of the disk is used.  Must be at least
         length 2. Only the first two values are used to determine the extent of
         the input image.
 
     Returns
     -------
     rr, cc : ndarray of int
-        Pixel coordinates of circle.
+        Pixel coordinates of disk.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+            This function is deprecated and will be removed in scikit-image 0.19.
+            Please use the function named ``disk`` instead.
+    """
+    warnings.warn("circle is deprecated in favor of "
+                  "disk."
+                  "circle will be removed in version 0.19",
+                  FutureWarning, stacklevel=2)
+    return disk(r, c, radius, shape=shape)
+
+
+def disk(r, c, radius, *, shape=None):
+    """Generate coordinates of pixels within circle.
+
+    Parameters
+    ----------
+    r, c : double
+        Center coordinate of disk.
+    radius : double
+        Radius of disk.
+    shape : tuple, optional
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for disks that exceed the image
+        size. If None, the full extent of the disk is used.  Must be at least
+        length 2. Only the first two values are used to determine the extent of
+        the input image.
+
+    Returns
+    -------
+    rr, cc : ndarray of int
+        Pixel coordinates of disk.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
     Examples
     --------
-    >>> from skimage.draw import circle
+    >>> from skimage.draw import disk
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = circle(4, 4, 5)
+    >>> rr, cc = disk(4, 4, 5)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
