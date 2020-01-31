@@ -178,15 +178,15 @@ def circle(r, c, radius, shape=None):
                   "disk."
                   "circle will be removed in version 0.19",
                   FutureWarning, stacklevel=2)
-    return disk(r, c, radius, shape=shape)
+    return disk((r, c), radius, shape=shape)
 
 
-def disk(r, c, radius, *, shape=None):
+def disk(center, radius, *, shape=None):
     """Generate coordinates of pixels within circle.
 
     Parameters
     ----------
-    r, c : double
+    center : tuple
         Center coordinate of disk.
     radius : double
         Radius of disk.
@@ -208,7 +208,7 @@ def disk(r, c, radius, *, shape=None):
     --------
     >>> from skimage.draw import disk
     >>> img = np.zeros((10, 10), dtype=np.uint8)
-    >>> rr, cc = disk(4, 4, 5)
+    >>> rr, cc = disk((4, 4), 5)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -222,6 +222,7 @@ def disk(r, c, radius, *, shape=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
+    r, c = center
     return ellipse(r, c, radius, radius, shape)
 
 

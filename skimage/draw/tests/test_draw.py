@@ -222,7 +222,7 @@ def test_circle_deprecated():
 def test_disk():
     img = np.zeros((15, 15), 'uint8')
 
-    rr, cc = disk(7, 7, 6)
+    rr, cc = disk((7, 7), 6)
     img[rr, cc] = 1
 
     img_ = np.array(

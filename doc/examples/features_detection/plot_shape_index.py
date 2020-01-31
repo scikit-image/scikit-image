@@ -63,8 +63,8 @@ def create_test_image(
 
     for _ in range(spot_count):
         rr, cc = disk(
-            np.random.randint(image.shape[0]),
-            np.random.randint(image.shape[1]),
+            (np.random.randint(image.shape[0]),
+             np.random.randint(image.shape[1])),
             spot_radius,
             shape=image.shape
         )
