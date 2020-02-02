@@ -55,7 +55,7 @@ project in concrete ways, such as:
 - discussing the design of the library, website, or tutorials on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_,
   in the
-  `project chat room <https://skimage.zulipchat.com/`_, or in existing issues and pull
+  `project chat room <https://skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
 - reviewing
   `open pull requests <https://github.com/scikit-image/scikit-image/pulls>`_,
