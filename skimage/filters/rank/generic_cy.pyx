@@ -166,7 +166,7 @@ cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
     if pop:
         for i in range(n_bins):
             mean += histo[i] * i
-        out[0] = <dtype_t_out>((g - mean / pop) / 2. + 127)
+        out[0] = <dtype_t_out>((g - mean / pop) / 2 + mid_bin - 1)
     else:
         out[0] = <dtype_t_out>0
 

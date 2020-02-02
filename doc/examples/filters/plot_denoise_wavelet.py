@@ -85,7 +85,7 @@ ax[0, 1].set_title(
 ax[0, 2].imshow(im_visushrink)
 ax[0, 2].axis('off')
 ax[0, 2].set_title(
-    ('Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}$)\n'
+    (r'Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}$)\n'
      'PSNR=%0.4g' % psnr_visushrink))
 ax[1, 0].imshow(original)
 ax[1, 0].axis('off')
@@ -93,12 +93,12 @@ ax[1, 0].set_title('Original')
 ax[1, 1].imshow(im_visushrink2)
 ax[1, 1].axis('off')
 ax[1, 1].set_title(
-    ('Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}/2$)\n'
+    (r'Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}/2$)\n'
      'PSNR=%0.4g' % psnr_visushrink2))
 ax[1, 2].imshow(im_visushrink4)
 ax[1, 2].axis('off')
 ax[1, 2].set_title(
-    ('Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}/4$)\n'
+    (r'Wavelet denoising\n(VisuShrink, $\sigma=\sigma_{est}/4$)\n'
      'PSNR=%0.4g' % psnr_visushrink4))
 fig.tight_layout()
 

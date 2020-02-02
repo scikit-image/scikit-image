@@ -57,6 +57,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     Integer arrays are converted to float.
 
+    The ``output`` should be floating point data type since gaussian converts
+    to float provided ``image``. If ``output`` is not provided, another array
+    will be allocated and returned as the result.
+
     The multi-dimensional filter is implemented as a sequence of
     one-dimensional convolution filters. The intermediate arrays are
     stored in the same data type as the output. Therefore, for output
@@ -113,8 +117,13 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
-                               truncate=truncate)
+    if output is None:
+        output = np.empty_like(image)
+    elif not np.issubdtype(output.dtype, np.floating):
+        raise ValueError("Provided output data type is not float")
+    ndi.gaussian_filter(image, sigma, output=output, mode=mode, cval=cval,
+                        truncate=truncate)
+    return output
 
 
 def _guess_spatial_dimensions(image):
