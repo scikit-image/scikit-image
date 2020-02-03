@@ -817,7 +817,8 @@ def rgb2gray(rgb):
         return np.ascontiguousarray(rgb)
 
     if rgb.shape[-1] == 4:
-        warn('RGBA image conversion is now deprecated. In version 0.19, '
+        warn('RGBA image conversion is now deprecated. Please use '
+             'rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
              'a ValueError will be raised if input image last dimension '
              'length is not 3.', FutureWarning, stacklevel=2)
         rgb = rgb[..., :3]
