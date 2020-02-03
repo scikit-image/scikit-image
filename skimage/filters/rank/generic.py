@@ -1161,7 +1161,6 @@ def otsu(image, selem, out=None, mask=None,
 
     Parameters
     ----------
-<<<<<<< HEAD
     image : ndarray
         Image array (uint8 array).
     selem : (N, M[,P]) ndarray
@@ -1172,18 +1171,6 @@ def otsu(image, selem, out=None, mask=None,
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
-=======
-    image : 2-D array (integer or float)
-        Input image.
-    selem : 2-D array (integer or float)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
-        If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int, optional
->>>>>>> 8f51ffa3704873fbdabb582876266c9a26de4609
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).

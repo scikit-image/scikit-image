@@ -153,7 +153,7 @@ def plot_img_and_hist(image, axes, bins=256):
 
 
 # Load an example image
-img = img_as_ubyte(data.neuron())
+img = img_as_ubyte(data.brain())
 
 # Global equalize
 def normalize_pixels(i):

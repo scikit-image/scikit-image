@@ -106,7 +106,7 @@ def test_cell():
     data.cell()
 
 
-def test_neuron():
+def test_brain():
     """ Test that "neuron" image can be loaded. """
-    neuron = data.neuron()
-    assert_equal(neuron.ndim, 3)
+    brain = data.brain()
+    assert_equal(brain.ndim, 3)

@@ -117,7 +117,6 @@ class TestRank:
 
         check()
 
-<<<<<<< HEAD
 
     @parametrize('filter', ['equalize', 'otsu'])
     def test_rank_filters_3D(self, filter):
@@ -130,8 +129,6 @@ class TestRank:
         check()
 
 
-=======
->>>>>>> 8f51ffa3704873fbdabb582876266c9a26de4609
     def test_random_sizes(self):
         # make sure the size is not a problem
 
@@ -334,7 +331,6 @@ class TestRank:
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
-<<<<<<< HEAD
         methods_3d = ['equalize', 'otsu']
 
         for method in methods_3d:
@@ -345,8 +341,6 @@ class TestRank:
             assert_equal(out_u, out_f)
 
 
-=======
->>>>>>> 8f51ffa3704873fbdabb582876266c9a26de4609
     def test_compare_8bit_unsigned_vs_signed(self):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -409,7 +403,6 @@ class TestRank:
         f16 = func(image16, disk(3))
         assert_equal(f8, f16)
 
-<<<<<<< HEAD
         if (method in methods_3d):
             f8 = func(volume8, ball(3))
             f16 = func(volume16, ball(3))
@@ -417,8 +410,6 @@ class TestRank:
             assert_equal(f8, f16)
 
 
-=======
->>>>>>> 8f51ffa3704873fbdabb582876266c9a26de4609
     def test_trivial_selem8(self):
         # check that min, max and mean returns identity if structuring element
         # contains only central pixel

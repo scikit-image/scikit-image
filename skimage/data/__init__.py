@@ -22,6 +22,7 @@ __all__ = ['data_dir',
            'load',
            'astronaut',
            'binary_blobs',
+           'brain',
            'brick',
            'camera',
            'cell',
@@ -756,17 +757,20 @@ def lfw_subset():
     return _np.load(_os.path.join(data_dir, 'lfw_subset.npy'))
 
 
-def neuron():
-    """3D volume data of a neuron in MouseLight dataset
+def brain():
+    """Subset of data from the University of North Carolina Volume Rendering
+    Test Data Set.
+
+    The full dataset is available at [2]_.
 
     Returns
     -------
-    images : (200, 25, 25) uint8 ndarray
-        100 first images are faces and subsequent 100 are non-faces.
+    image : (10, 256, 256) uint16 ndarray
+
 
     Notes
     -----
-    This is extracted from the Mouselight dataset collected by Janelia.
+    The 3D volume consists of 10 layers from the larger volume.
 
     """
-    return _load("neuron.tif")
+    return _load("brain.tiff")
