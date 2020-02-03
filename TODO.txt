@@ -50,8 +50,6 @@ Version 0.19
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-* In ``skimage/exposure/_adapthist.py`` remove deprecated clip_histogram,
-  map_histogram and interpolate functions
 
 
 Other
