@@ -134,7 +134,7 @@ def plot_img_and_hist(image, axes, bins=256):
     ax_cdf = ax_hist.twinx()
 
     # Display Slice of Image
-    ax_img.imshow(image[5], cmap=plt.cm.gray)
+    ax_img.imshow(image[0], cmap=plt.cm.gray)
     ax_img.set_axis_off()
 
     # Display histogram
