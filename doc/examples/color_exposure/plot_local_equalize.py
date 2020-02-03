@@ -30,6 +30,7 @@ from skimage.util.dtype import dtype_range
 from skimage.util import img_as_ubyte
 from skimage import exposure
 from skimage.morphology import disk
+from skimage.morphology import ball
 from skimage.filters import rank
 
 
@@ -100,7 +101,6 @@ fig.tight_layout()
 plt.show()
 
 
-
 ######################################################################
 #
 # 3D Equalization
@@ -109,18 +109,6 @@ plt.show()
 # 3D Volumes can also be equalized in a similar fashion
 # Here we run equalize a 3D volume. The histograms are collected from
 # the entire image, but only a single slice is shown for visual inspection
-
-
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-
-from skimage import data
-from skimage.util.dtype import dtype_range
-from skimage.util import img_as_ubyte
-from skimage import exposure
-from skimage.morphology import ball
-from skimage.filters import rank
 
 
 matplotlib.rcParams['font.size'] = 9
@@ -157,7 +145,7 @@ img = img_as_ubyte(data.brain())
 
 # Global equalize
 def normalize_pixels(i):
-    i = 256*(i/np.amax(i))
+    i = 256*(i / np.amax(i))
     return i.astype(np.uint8)
 
 img_rescale = exposure.equalize_hist(img)
