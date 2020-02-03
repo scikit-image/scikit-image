@@ -224,28 +224,6 @@ def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
         Desired output data-type. Default is None, which means we cast output
         in input dtype.
 
-<<<<<<< HEAD
-def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
-                               shift_z, out_dtype=None):
-
-    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
-                                                       out_dtype)
-
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
-         mask=mask, out=out, n_bins=n_bins)
-
-    return out.reshape(out.shape[:3])
-
-
-def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
-                            out_dtype=None, pixel_size=1):
-=======
-    Returns
-    -------
-    out : 2-D array (same dtype as out_dtype or same as input image)
-        Output image.
->>>>>>> 8f51ffa3704873fbdabb582876266c9a26de4609
-
     """
     # preprocess and verify the input
     image, selem, out, mask, n_bins = _preprocess_input(image, selem,
@@ -257,6 +235,18 @@ def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
          out=out, n_bins=n_bins)
 
     return np.squeeze(out, axis=-1)
+
+
+def _apply_scalar_per_pixel_3D(func, image, selem, out, mask, shift_x, shift_y,
+                               shift_z, out_dtype=None):
+
+    image, selem, out, mask, n_bins = _handle_input_3D(image, selem, out, mask,
+                                                       out_dtype)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
+         mask=mask, out=out, n_bins=n_bins)
+
+    return out.reshape(out.shape[:3])
 
 
 def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
