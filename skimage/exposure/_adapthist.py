@@ -13,7 +13,6 @@ Gems - authors, editors, publishers, or webmasters - are to be held
 responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
 """
-import warnings
 import numbers
 import numpy as np
 from ..util import img_as_float, img_as_uint
@@ -21,7 +20,7 @@ from ..color.adapt_rgb import adapt_rgb, hsv_value
 from ..exposure import rescale_intensity
 
 
-NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
+NR_OF_GRAY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
@@ -37,7 +36,7 @@ def equalize_adapthist(image, kernel_size=None,
     ----------
     image : (M, N[, C]) ndarray
         Input image.
-    kernel_size: integer or list-like, optional
+    kernel_size: array_like, optional
         Defines the shape of contextual regions used in the algorithm. If
         iterable is passed, it must have the same number of elements as
         ``image.ndim`` (without color channel). If integer, it is broadcasted
@@ -72,7 +71,7 @@ def equalize_adapthist(image, kernel_size=None,
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
     image = img_as_uint(image)
-    image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
+    image = rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
 
     if kernel_size is None:
         kernel_size = (image.shape[0] // 8, image.shape[1] // 8)
@@ -99,7 +98,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         Defines the shape of contextual regions used in the algorithm.
     clip_limit : float
         Normalized clipping limit (higher values give more contrast).
-    nbins : int, optional
+    nbins : int
         Number of gray bins for histogram ("data range").
 
     Returns
@@ -107,7 +106,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     out : (M, N) ndarray
         Equalized image.
 
-    The number of "effective" greylevels in the output image is set by `nbins`;
+    The number of "effective" graylevels in the output image is set by `nbins`;
     selecting a small value (eg. 128) speeds up processing and still produce
     an output image of good quality. The output image will have the same
     minimum and maximum value as the input image. A clip limit smaller than 1
@@ -125,13 +124,13 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     nr = image.shape[0] // row_step
     nc = image.shape[1] // col_step
 
-    bin_size = 1 + NR_OF_GREY // nbins
-    lut = np.arange(NR_OF_GREY)
+    bin_size = 1 + NR_OF_GRAY // nbins
+    lut = np.arange(NR_OF_GRAY)
     lut //= bin_size
 
     map_array = np.zeros((nr, nc, nbins), dtype=int)
 
-    # Calculate greylevel mappings for each contextual region
+    # Calculate graylevel mappings for each contextual region
     i0 = 0
     for r in range(nr):
         i1 = i0 + row_step
@@ -143,16 +142,16 @@ def _clahe(image, kernel_size, clip_limit, nbins):
             if clip_limit > 0.0:  # Calculate actual cliplimit
                 clim = max(int(clip_limit * sub_img.size), 1)
             else:
-                clim = NR_OF_GREY  # Large value, do not clip (AHE)
+                clim = NR_OF_GRAY  # Large value, do not clip (AHE)
 
             hist = np.bincount(lut[sub_img.ravel()], minlength=nbins)
-            hist = _clip_histogram(hist, clim)
-            hist = _map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
+            hist = clip_histogram(hist, clim)
+            hist = map_histogram(hist, 0, NR_OF_GRAY - 1, sub_img.size)
             map_array[r, c] = hist
             j0 = j1
         i0 = i1
 
-    # Interpolate greylevel mappings to get CLAHE image
+    # Interpolate graylevel mappings to get CLAHE image
     rstart = 0
     for r in range(nr + 1):
         cstart = 0
@@ -180,8 +179,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
             mapLB = map_array[rB, cL]
             mapRB = map_array[rB, cR]
 
-            _interpolate(image, cslice, rslice,
-                         mapLU, mapRU, mapLB, mapRB, lut)
+            interpolate(image, cslice, rslice,
+                        mapLU, mapRU, mapLB, mapRB, lut)
 
             cstart += c_offset  # set pointer on next matrix */
 
@@ -190,7 +189,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     return image
 
 
-def _clip_histogram(hist, clip_limit):
+def clip_histogram(hist, clip_limit):
     """Perform clipping of the histogram and redistribution of bins.
 
     The histogram is clipped and the number of excess pixels is counted.
@@ -244,33 +243,7 @@ def _clip_histogram(hist, clip_limit):
     return hist
 
 
-def clip_histogram(hist, clip_limit):
-    """Perform clipping of the histogram and redistribution of bins.
-
-    The histogram is clipped and the number of excess pixels is counted.
-    Afterwards the excess pixels are equally redistributed across the
-    whole histogram (providing the bin count is smaller than the cliplimit).
-
-    Parameters
-    ----------
-    hist : ndarray
-        Histogram array.
-    clip_limit : int
-        Maximum allowed bin count.
-
-    Returns
-    -------
-    hist : ndarray
-        Clipped histogram.
-    """
-    warnings.warn("clip_histogram is deprecated and will be removed in "
-                  "version 0.19. Please use the rivate function "
-                  "_clip_histogram instead.", category=FutureWarning,
-                  stacklevel=2)
-    return _clip_histogram(hist, clip_limit)
-
-
-def _map_histogram(hist, min_val, max_val, n_pixels):
+def map_histogram(hist, min_val, max_val, n_pixels):
     """Calculate the equalized lookup table (mapping).
 
     It does so by cumulating the input histogram.
@@ -298,35 +271,8 @@ def _map_histogram(hist, min_val, max_val, n_pixels):
     return out.astype(int)
 
 
-def map_histogram(hist, min_val, max_val, n_pixels):
-    """Calculate the equalized lookup table (mapping).
-
-    It does so by cumulating the input histogram.
-
-    Parameters
-    ----------
-    hist : ndarray
-        Clipped histogram.
-    min_val : int
-        Minimum value for mapping.
-    max_val : int
-        Maximum value for mapping.
-    n_pixels : int
-        Number of pixels in the region.
-
-    Returns
-    -------
-    out : ndarray
-       Mapped intensity LUT.
-    """
-    warnings.warn("map_histogram is deprecated and will be removed in version "
-                  "0.19. Please use the rivate function _map_histogram "
-                  "instead.", category=FutureWarning, stacklevel=2)
-    return _map_histogram(hist, min_val, max_val, n_pixels)
-
-
-def _interpolate(image, xslice, yslice,
-                 mapLU, mapRU, mapLB, mapRB, lut):
+def interpolate(image, xslice, yslice,
+                mapLU, mapRU, mapLB, mapRB, lut):
     """Find the new grayscale level for a region using bilinear interpolation.
 
     Parameters
@@ -336,7 +282,7 @@ def _interpolate(image, xslice, yslice,
     xslice, yslice : slice
        Slices of the region.
     map* : ndarray
-        Mappings of greylevels from histograms.
+        Mappings of graylevels from histograms.
     lut : ndarray
         Maps grayscale levels in image to histogram levels.
 
@@ -347,7 +293,7 @@ def _interpolate(image, xslice, yslice,
 
     Notes
     -----
-    This function calculates the new greylevel assignments of pixels within
+    This function calculates the new graylevel assignments of pixels within
     a submatrix of the image. This is done by a bilinear interpolation between
     four different mappings in order to eliminate boundary artifacts.
     """
@@ -364,37 +310,3 @@ def _interpolate(image, xslice, yslice,
                        + x_coef * mapRB[im_slice]))
     view[:, :] = new / (x_size * y_size)
     return image
-
-
-def interpolate(image, xslice, yslice,
-                mapLU, mapRU, mapLB, mapRB, lut):
-    """Find the new grayscale level for a region using bilinear interpolation.
-
-    Parameters
-    ----------
-    image : ndarray
-        Full image.
-    xslice, yslice : array-like
-       Indices of the region.
-    map* : ndarray
-        Mappings of greylevels from histograms.
-    lut : ndarray
-        Maps grayscale levels in image to histogram levels.
-
-    Returns
-    -------
-    out : ndarray
-        Original image with the subregion replaced.
-
-    Notes
-    -----
-    This function calculates the new greylevel assignments of pixels within
-    a submatrix of the image. This is done by a bilinear interpolation between
-    four different mappings in order to eliminate boundary artifacts.
-    """
-    warnings.warn("interpolate is deprecated and will be removed in version "
-                  "0.19. Please use the rivate function _interpolate "
-                  "instead.", category=FutureWarning, stacklevel=2)
-    xslice = slice(xslice[0], xslice[-1] + 1)
-    yslice = slice(yslice[0], yslice[-1] + 1)
-    return _interpolate(image, xslice, yslice, mapLU, mapRU, mapLB, mapRB, lut)
