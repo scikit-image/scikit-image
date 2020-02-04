@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
@@ -8,9 +9,11 @@ from skimage import data, util, morphology
 from skimage.morphology import grey, disk
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
+from skimage.filters.rank import subtract_mean
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, parametrize, fetch
 import pytest
+
 
 
 def test_otsu_edge_case():
@@ -39,17 +42,41 @@ def test_otsu_edge_case():
     assert result[1, 1] in [141, 172]
 
 
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
-
 
 @pytest.fixture(scope='module')
 def refs():
     yield np.load(fetch("data/rank_filter_tests.npz"))
 
 
-class TestRank():
+
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+def test_subtract_mean_underflow_correction(dtype):
+    # Input: [10, 10, 10]
+    selem = np.ones((1, 3))
+    arr = np.array([[10, 10, 10]], dtype=dtype)
+    result = subtract_mean(arr, selem)
+
+    if dtype == np.uint8:
+        expected_val = 127
+    else:
+        expected_val = (arr.max() + 1) // 2 - 1
+
+    assert np.all(result == expected_val)
+
+    # Input: [10, 10, 40]
+    shift = 10
+    arr[0, 2] += arr.shape[1] * shift
+    result = subtract_mean(arr, selem)
+
+    if dtype == np.uint8:
+        expected_val -= shift // 2
+    else:
+        expected_val += shift
+
+    assert result[0, 1] == expected_val
+
+
+class TestRank:
     def setup(self):
         np.random.seed(0)
         # This image is used along with @test_parallel
@@ -89,7 +116,6 @@ class TestRank():
                 assert_array_equal(expected, result)
 
         check()
-
 
     def test_random_sizes(self):
         # make sure the size is not a problem
@@ -137,7 +163,6 @@ class TestRank():
                                  selem=elem, shift_x=+1, shift_y=+1, p0=.1, p1=.9)
             assert_equal(image16.shape, out16.shape)
 
-
     def test_compare_with_grey_dilation(self):
         # compare the result of maximum filter with dilate
 
@@ -151,7 +176,6 @@ class TestRank():
             cm = grey.dilation(image=image, selem=elem)
             assert_equal(out, cm)
 
-
     def test_compare_with_grey_erosion(self):
         # compare the result of maximum filter with erode
 
@@ -164,7 +188,6 @@ class TestRank():
             rank.minimum(image=image, selem=elem, out=out, mask=mask)
             cm = grey.erosion(image=image, selem=elem)
             assert_equal(out, cm)
-
 
     def test_bitdepth(self):
         # test the different bit depth for rank16
@@ -184,7 +207,6 @@ class TestRank():
                 rank.mean_percentile(image=image, selem=elem, mask=mask,
                                      out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
-
     def test_population(self):
         # check the number of valid pixels in the neighborhood
 
@@ -200,7 +222,6 @@ class TestRank():
                       [6, 9, 9, 9, 6],
                       [4, 6, 6, 6, 4]])
         assert_equal(r, out)
-
 
     def test_structuring_element8(self):
         # check the output for a custom structuring element
@@ -232,7 +253,6 @@ class TestRank():
                      shift_x=1, shift_y=1)
         assert_equal(r, out)
 
-
     def test_pass_on_bitdepth(self):
         # should pass because data bitdepth is not too high for the function
 
@@ -243,7 +263,6 @@ class TestRank():
         with expected_warnings(["Bad rank filter performance"]):
             rank.maximum(image=image, selem=elem, out=out, mask=mask)
 
-
     def test_inplace_output(self):
         # rank filters are not supposed to filter inplace
 
@@ -252,7 +271,6 @@ class TestRank():
         out = image
         with testing.raises(NotImplementedError):
             rank.mean(image, selem, out=out)
-
 
     def test_compare_autolevels(self):
         # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
@@ -267,10 +285,9 @@ class TestRank():
 
         assert_equal(loc_autolevel, loc_perc_autolevel)
 
-
     def test_compare_autolevels_16bit(self):
-        # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0
-        # and p1=1.0 should returns the same arrays
+        # compare autolevel(16-bit) and percentile autolevel(16-bit) with
+        # p0=0.0 and p1=1.0 should returns the same arrays
 
         image = data.camera().astype(np.uint16) * 4
 
@@ -280,7 +297,6 @@ class TestRank():
                                                        p0=.0, p1=1.)
 
         assert_equal(loc_autolevel, loc_perc_autolevel)
-
 
     def test_compare_ubyte_vs_float(self):
 
@@ -297,7 +313,6 @@ class TestRank():
             with expected_warnings(["Possible precision loss"]):
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
-
 
     def test_compare_8bit_unsigned_vs_signed(self):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
@@ -337,7 +352,6 @@ class TestRank():
         f16 = func(image16, disk(3))
         assert_equal(f8, f16)
 
-
     def test_trivial_selem8(self):
         # check that min, max and mean returns identity if structuring element
         # contains only central pixel
@@ -362,7 +376,6 @@ class TestRank():
         rank.maximum(image=image, selem=elem, out=out, mask=mask,
                      shift_x=0, shift_y=0)
         assert_equal(image, out)
-
 
     def test_trivial_selem16(self):
         # check that min, max and mean returns identity if structuring element
@@ -389,7 +402,6 @@ class TestRank():
                      shift_x=0, shift_y=0)
         assert_equal(image, out)
 
-
     def test_smallest_selem8(self):
         # check that min, max and mean returns identity if structuring element
         # contains only central pixel
@@ -411,7 +423,6 @@ class TestRank():
         rank.maximum(image=image, selem=elem, out=out, mask=mask,
                      shift_x=0, shift_y=0)
         assert_equal(image, out)
-
 
     def test_smallest_selem16(self):
         # check that min, max and mean returns identity if structuring element
@@ -437,7 +448,6 @@ class TestRank():
         rank.maximum(image=image, selem=elem, out=out, mask=mask,
                      shift_x=0, shift_y=0)
         assert_equal(image, out)
-
 
     def test_empty_selem(self):
         # check that min, max and mean returns zeros if structuring element is
@@ -466,7 +476,6 @@ class TestRank():
                      shift_x=0, shift_y=0)
         assert_equal(res, out)
 
-
     def test_otsu(self):
         # test the local Otsu segmentation on a synthetic image
         # (left to right ramp * sinus)
@@ -479,7 +488,6 @@ class TestRank():
         selem = np.ones((6, 6), dtype=np.uint8)
         th = 1 * (test >= rank.otsu(test, selem))
         assert_equal(th, res)
-
 
     def test_entropy(self):
         #  verify that entropy is coherent with bitdepth of the input data
@@ -525,7 +533,6 @@ class TestRank():
             out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
         assert out.dtype == np.double
 
-
     def test_selem_dtypes(self):
 
         image = np.zeros((5, 5), dtype=np.uint8)
@@ -535,7 +542,7 @@ class TestRank():
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (np.uint8, np.uint16, np.int32, np.int64,
+        for dtype in (np.bool_, np.uint8, np.uint16, np.int32, np.int64,
                       np.float32, np.float64):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
             rank.mean(image=image, selem=elem, out=out, mask=mask,
@@ -547,7 +554,6 @@ class TestRank():
             rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                                  shift_x=0, shift_y=0)
             assert_equal(image, out)
-
 
     def test_16bit(self):
         image = np.zeros((21, 21), dtype=np.uint16)
@@ -565,7 +571,6 @@ class TestRank():
                 assert rank.maximum(image, selem)[10, 10] == value
                 assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
 
-
     def test_bilateral(self):
         image = np.zeros((21, 21), dtype=np.uint16)
         selem = np.ones((3, 3), dtype=np.uint8)
@@ -578,7 +583,6 @@ class TestRank():
         assert rank.pop_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1
         assert rank.mean_bilateral(image, selem, s0=11, s1=11)[10, 10] == 1005
         assert rank.pop_bilateral(image, selem, s0=11, s1=11)[10, 10] == 2
-
 
     def test_percentile_min(self):
         # check that percentile p0 = 0 is identical to local min
@@ -594,7 +598,6 @@ class TestRank():
         img_min = rank.minimum(img16, selem=selem)
         assert_equal(img_p0, img_min)
 
-
     def test_percentile_max(self):
         # check that percentile p0 = 1 is identical to local max
         img = data.camera()
@@ -609,7 +612,6 @@ class TestRank():
         img_max = rank.maximum(img16, selem=selem)
         assert_equal(img_p0, img_max)
 
-
     def test_percentile_median(self):
         # check that percentile p0 = 0.5 is identical to local median
         img = data.camera()
@@ -623,7 +625,6 @@ class TestRank():
         img_p0 = rank.percentile(img16, selem=selem, p0=.5)
         img_max = rank.median(img16, selem=selem)
         assert_equal(img_p0, img_max)
-
 
     def test_sum(self):
         # check the number of valid pixels in the neighborhood
@@ -671,7 +672,6 @@ class TestRank():
             image=image16, selem=elem, out=out16, mask=mask, s0=1000, s1=1000)
         assert_equal(r, out16)
 
-
     def test_windowed_histogram(self):
         # check the number of valid pixels in the neighborhood
 
@@ -711,7 +711,6 @@ class TestRank():
                                                 mask=mask, n_bins=5)
         assert larger_output.shape[2] == 5
 
-
     def test_median_default_value(self):
         a = np.zeros((3, 3), dtype=np.uint8)
         a[1] = 1
@@ -720,10 +719,23 @@ class TestRank():
         assert rank.median(a)[1, 1] == 0
         assert rank.median(a, disk(1))[1, 1] == 1
 
-
     def test_majority(self):
         img = data.camera()
         elem = np.ones((3, 3), dtype=np.uint8)
         expected = rank.windowed_histogram(
             img, elem).argmax(-1).astype(np.uint8)
         assert_equal(expected, rank.majority(img, elem))
+
+    def test_output_same_dtype(self):
+        image = (np.random.rand(100, 100) * 256).astype(np.uint8)
+        out = np.empty_like(image)
+        mask = np.ones(image.shape, dtype=np.uint8)
+        elem = np.ones((3, 3), dtype=np.uint8)
+        rank.maximum(image=image, selem=elem, out=out, mask=mask)
+        assert_equal(image.dtype, out.dtype)
+
+    def test_input_boolean_dtype(self):
+        image = (np.random.rand(100, 100) * 256).astype(np.bool_)
+        elem = np.ones((3, 3), dtype=np.bool_)
+        with testing.raises(ValueError):
+            rank.maximum(image=image, selem=elem)

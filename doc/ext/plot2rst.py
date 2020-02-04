@@ -397,7 +397,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
                          for role in sphinx_roles)
 
     # Grab all references to inject them in cells where needed
-    ref_regexp = re.compile('\n(\.\. \[(\d+)\].*(?:\n[ ]{7,8}.*)+)')
+    ref_regexp = re.compile(r'\n(\.\. \[(\d+)\].*(?:\n[ ]{7,8}.*)+)')
     math_role_regexp = re.compile(':math:`(.*?)`')
 
     text = '\n'.join((content for (cell_type, _, content) in blocks
@@ -624,4 +624,3 @@ def save_all_figures(image_path):
         plt.savefig(image_path.format(fig_num))
         figure_list.append(image_fmt_str.format(fig_num))
     return figure_list
-

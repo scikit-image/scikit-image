@@ -21,7 +21,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            combine_stains,
                            rgb2rgbcie, rgbcie2rgb,
                            convert_colorspace,
-                           rgb2grey, gray2rgb,
+                           rgb2gray, gray2rgb,
                            xyz2lab, lab2xyz,
                            lab2rgb, rgb2lab,
                            xyz2luv, luv2xyz,
@@ -278,31 +278,31 @@ class TestColorconv(TestCase):
         self.assertRaises(ValueError, convert_colorspace,
                           self.colbars_array, 'RGB', 'nokey')
 
-    def test_rgb2grey(self):
+    def test_rgb2gray(self):
         x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)
-        g = rgb2grey(x)
+        g = rgb2gray(x)
         assert_array_almost_equal(g, 1)
 
         assert_equal(g.shape, (1, 1))
 
-    def test_rgb2grey_contiguous(self):
+    def test_rgb2gray_contiguous(self):
         x = np.random.rand(10, 10, 3)
-        assert rgb2grey(x).flags["C_CONTIGUOUS"]
-        assert rgb2grey(x[:5, :5]).flags["C_CONTIGUOUS"]
+        assert rgb2gray(x).flags["C_CONTIGUOUS"]
+        assert rgb2gray(x[:5, :5]).flags["C_CONTIGUOUS"]
 
-    def test_rgb2grey_alpha(self):
+    def test_rgb2gray_alpha(self):
         x = np.random.rand(10, 10, 4)
-        assert rgb2grey(x).ndim == 2
+        assert rgb2gray(x).ndim == 2
 
-    def test_rgb2grey_on_grey(self):
-        rgb2grey(np.random.rand(5, 5))
+    def test_rgb2gray_on_gray(self):
+        rgb2gray(np.random.rand(5, 5))
 
-    def test_rgb2grey_dtype(self):
+    def test_rgb2gray_dtype(self):
         img = np.random.rand(10, 10, 3).astype('float64')
         img32 = img.astype('float32')
 
-        assert rgb2grey(img).dtype == img.dtype
-        assert rgb2grey(img32).dtype == img32.dtype
+        assert rgb2gray(img).dtype == img.dtype
+        assert rgb2gray(img32).dtype == img32.dtype
 
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC

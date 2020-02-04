@@ -59,6 +59,8 @@ def test_dtype():
         regionprops(np.zeros((10, 10), dtype=np.float))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.bool))
 
 
 def test_ndim():

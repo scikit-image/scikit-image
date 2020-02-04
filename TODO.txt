@@ -42,11 +42,15 @@ Version 0.18
 Version 0.19
 ------------
 
+* In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * Remove the definition of `skimage.util.pad` and
   skimage/util/tests/test_arraypad.py.
-
+* Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
+  functions.
+* In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
 
 Other
 -----
@@ -75,3 +79,11 @@ Other
 * Remove pillow version related warning for MPO file format in
   `io._plugins.pil_plugin.imread` when upgrading pillow min version to
   6.0.0
+* When ``numpy`` is set to >= 1.16, remove the warning assertion in
+  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
+  regarding ``invalid value encountered in reduce``.
+* When ``numpy`` is set to >= 1.17, revisit the warning assertion in
+  ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
+  regarding ``Passing `np.nan` to mean no clipping in np.clip``.
+* Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
+  when ``scipy`` upgrades to 1.1. 
