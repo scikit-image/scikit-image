@@ -1,3 +1,4 @@
+from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -51,15 +52,11 @@ def profile_line(image, src, dst, linewidth=1,
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 4))
     array([1., 1., 2., 2.])
-    >>> profile_line(img, (1, 0), (1, 6), cval=4)
-    array([1., 1., 1., 2., 2., 2., 4.])
 
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     For example:
 
-    >>> profile_line(img, (1, 0), (1, 6))  # The final point is out of bounds
-    array([1., 1., 1., 2., 2., 2., 0.])
     >>> profile_line(img, (1, 0), (1, 5))  # This accesses the full first row
     array([1., 1., 1., 2., 2., 2.])
 
@@ -88,14 +85,38 @@ def profile_line(image, src, dst, linewidth=1,
            [1.41421356, 1.41421356, 0.        ]])
 
     """
+    nr, nc = image.shape[:2]
     if len(src) != 2:
         raise ValueError('src must be a couple of indices.')
     if len(dst) != 2:
         raise ValueError('dst must be a couple of indices.')
-    if (src[0] < 0) or (src[1] < 0):
-        raise ValueError('src values must be positive')
-    if (dst[0] < 0) or (dst[1] < 0):
-        raise ValueError('dst values must be positive')
+
+    if src[0] > (nr - 1) or src[1] > (nc - 1):
+        raise ValueError("src coordinates must be inside image bounds")
+
+    if dst[0] > (nr - 1) or dst[1] > (nc - 1):
+        raise ValueError("dst coordinates must be inside image bounds")
+
+    warn_msg = ("{} coordinates are assumed to be inside image bounds. "
+                "Negative values are indexed from the end of the image. "
+                "To avoid this warning, please use positive coordinates.")
+
+    src = np.asarray(src)
+    if src[0] > (nr - 1):
+        warn(warn_msg.format(src))
+        src[0] += nr - 1
+    if src[1] > (nc - 1):
+        warn(warn_msg.format(src))
+        src[1] += nc - 1
+
+    dst = np.asarray(dst)
+    if dst[0] > (nr - 1):
+        warn(warn_msg.format(dst))
+        dst[0] += nr - 1
+    if dst[1] > (nc - 1):
+        warn(warn_msg.format(dst))
+        dst[1] += nc - 1
+
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
         pixels = [ndi.map_coordinates(image[..., i], perp_lines,
