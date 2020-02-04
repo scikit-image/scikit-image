@@ -9,14 +9,14 @@ def profile_line(image, src, dst, linewidth=1,
 
     Parameters
     ----------
-    image : numeric array, shape (M, N[, C])
+    image : ndarray, shape (M, N[, C])
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
-    src : 2-tuple of numeric scalar (float or int)
-        The positive coordinates of the start point of the scan line.
-    dst : 2-tuple of numeric scalar (float or int)
-        The positive coordinates of the end point of the scan
+    src :
+        The coordinates of the start point of the scan line.
+    dst : array_like, shape (2, )
+        The coordinates of the end point of the scan
         line. The destination point is *included* in the profile, in
         contrast to standard numpy indexing.
     linewidth : int, optional
