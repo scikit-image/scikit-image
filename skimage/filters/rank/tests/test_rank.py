@@ -19,6 +19,7 @@ from skimage._shared.testing import test_parallel, parametrize
 all_rank_filters.remove('tophat')
 all_rank_filters.remove('bottomhat')
 
+
 def test_deprecation():
     selem = disk(3)
     image = img_as_ubyte(data.camera()[:50, :50])
