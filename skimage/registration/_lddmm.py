@@ -48,6 +48,7 @@ class _Lddmm:
         linear_stepsize=None,
         deformative_stepsize=None,
         contrast_stepsize=1,
+        spatially_varying_contrast_map=False,
         calibrate=False,
     ):    
         # Inputs.
@@ -75,6 +76,7 @@ class _Lddmm:
         self.sigmaM = sigmaM or np.std(self.target)
         self.sigmaA = sigmaA or 5 * self.sigmaM
         self.smooth_length = smooth_length or 2 * np.max(self.template_resolution)
+        self.spatially_varying_contrast_map = spatially_varying_contrast_map
         self.calibrate = calibrate
 
         # Flags.
@@ -114,12 +116,15 @@ class _Lddmm:
             bounds_error=False, 
             fill_value=None, 
         )
-        self.contrast_coefficients = np.zeros(self.contrast_order + 1)
-        self.contrast_coefficients[0] = np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template)
-        self.contrast_coefficients[1] = np.std(self.target) / np.std(self.template)
-        self.B = np.empty((self.target.size, self.contrast_order + 1))
+        if spatially_varying_contrast_map:
+            self.contrast_coefficients = np.zeros((*self.target.shape, self.contrast_order + 1))
+        else:
+            self.contrast_coefficients = np.zeros(self.contrast_order + 1)
+        self.contrast_coefficients[..., 0] = np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template)
+        self.contrast_coefficients[..., 1] = np.std(self.target) / np.std(self.template)
+        self.contrast_polynomial_basis = np.empty((*self.target.shape, self.contrast_order + 1))
         for power in range(self.contrast_order + 1):
-            self.B[:, power] = self.deformed_template.ravel()**power
+            self.contrast_polynomial_basis[..., power] = self.deformed_template**power
         self.contrast_deformed_template = None
         fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.low_pass_filter = 1 / (
@@ -275,7 +280,7 @@ class _Lddmm:
         Apply contrast_coefficients to deformed_template to produce contrast_deformed_template.
         """
 
-        self.contrast_deformed_template = np.matmul(self.B, self.contrast_coefficients).reshape(self.target.shape)
+        self.contrast_deformed_template = np.sum(self.contrast_polynomial_basis * self.contrast_coefficients, axis=-1)
 
 
     def _compute_weights(self):
@@ -324,19 +329,25 @@ class _Lddmm:
         Compute contrast_coefficients mapping deformed_template to target.
         """
 
-        # Ravel necessary components.
+        if self.spatially_varying_contrast_map:
+            raise NotImplementedError(f"spatially_varying_contrast_map functionality not yet fully implemented.")
+
+        # Set contrast_polynomial_basis (basis).
+        for power in range(self.contrast_order + 1):
+            self.contrast_polynomial_basis[..., power] = self.deformed_template**power
+
+        # Ravel necessary components for convenient matrix multiplication.
         deformed_template_ravel = np.ravel(self.deformed_template)
         target_ravel = np.ravel(self.target)
         matching_weights_ravel = np.ravel(self.matching_weights)
+        contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(self.target.size, -1) # A view, not a copy.
 
-        # Set basis array B and create composites.
-        for power in range(self.contrast_order + 1):
-            self.B[:, power] = deformed_template_ravel**power
-        B_transpose_B = np.matmul(self.B.T * matching_weights_ravel, self.B)
-        B_transpose_target = np.matmul(self.B.T * matching_weights_ravel, target_ravel)
+         # Create intermediate composites.
+        basis_transpose_basis = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, contrast_polynomial_basis_semi_ravel)
+        basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
 
         # Solve for contrast_coefficients.
-        optimal_contrast_coefficients = solve(B_transpose_B, B_transpose_target, assume_a='pos')
+        optimal_contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
 
         # We do this so we can use the optimal gradient descent.
         # The format is used so that we could substitute a different approach to computing the gradient.
@@ -397,7 +408,7 @@ class _Lddmm:
         matching_error_prime = (self.contrast_deformed_template - self.target) * self.matching_weights / self.sigmaM**2
         contrast_map_prime = np.zeros_like(self.target, float)
         for power in range(1, self.contrast_order + 1):
-            contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[power]
+            contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[..., power]
         d_matching_d_deformed_template = matching_error_prime * contrast_map_prime
 
         affine_inv_gradient = matching_affine_inv_gradient * d_matching_d_deformed_template[...,None,None]
@@ -427,7 +438,7 @@ class _Lddmm:
         matching_error_prime = (self.contrast_deformed_template - self.target) * self.matching_weights / self.sigmaM**2
         contrast_map_prime = np.zeros_like(self.target, float)
         for power in range(1, self.contrast_order + 1):
-            contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[power]
+            contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[..., power]
         d_matching_d_deformed_template = matching_error_prime * contrast_map_prime
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
@@ -582,6 +593,7 @@ def lddmm_register(
     contrast_order=1,
     sigmaM=None,
     smooth_length=None,
+    spatially_varying_contrast_map=False,
     calibrate=False,
 ):
     """
@@ -604,6 +616,7 @@ def lddmm_register(
         contrast_order (int, optional): The order of the polynomial fit between the contrasts of the template and target. Defaults to 3.
         sigmaM (float, optional): A measure of spread. Defaults to None.
         smooth_length (float, optional): The length scale of smoothing. Defaults to None.
+        spatially_varying_contrast_map (bool, optional): If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. Defaults to False.
         calibrate (bool, optional): A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. Defaults to False.
     
     Example:
@@ -646,6 +659,7 @@ def lddmm_register(
         translational_stepsize=translational_stepsize,
         linear_stepsize=linear_stepsize,
         deformative_stepsize=deformative_stepsize,
+        spatially_varying_contrast_map=spatially_varying_contrast_map,
         calibrate=calibrate,
     )
 
