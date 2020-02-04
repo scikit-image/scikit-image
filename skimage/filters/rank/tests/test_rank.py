@@ -14,6 +14,9 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel, arch32, parametrize, xfail
 from pytest import param
 
+# To be removed along with tophat and bottomhat functions.
+all_rank_filters.remove('tophat')
+all_rank_filters.remove('bottomhat')
 
 def test_deprecation():
     selem = disk(3)
