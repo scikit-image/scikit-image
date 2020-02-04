@@ -206,6 +206,9 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError("exclude_border cannot be True")
     elif exclude_border is False:
         return (0,) * (img_ndim + 1)
+    else:
+        raise ValueError(
+            "Unsupported value ({}) for exclude_border".format(exclude_border))
 
 
 def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
