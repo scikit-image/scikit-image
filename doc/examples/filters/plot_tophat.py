@@ -4,6 +4,7 @@ Removing small objects in grayscale images with a top hat filter
 ================================================================
 
 This example shows how to remove small objects from grayscale images. The top-hat transform is an operation that extracts small elements and details from given images. Here we use a white top-hat transform, which is defined as the difference between the input image and its (mathematical morphology) opening.
+
 .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
 
 """
