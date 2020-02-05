@@ -132,7 +132,7 @@ def _fetch(data_filename):
     # In this case, the file would be located relative to the
     # skimage_distribution_dir
     gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
-    if _has_hash(gh_repository_path):
+    if _has_hash(gh_repository_path, expected_hash):
         parent = osp.dirname(resolved_path)
         os.makedirs(parent, exist_ok=True)
         shutil.copy2(gh_repository_path, resolved_path)
