@@ -2,7 +2,7 @@ import numpy as np
 from skimage.measure import profile_line
 
 from skimage._shared.testing import assert_equal, assert_almost_equal
-
+from skimage._shared._warnings import expected_warnings
 
 image = np.arange(100).reshape((10, 10)).astype(np.float)
 
@@ -176,4 +176,12 @@ def test_reduce_func_sumofsqrt_linewidth_3():
                         reduce_func=reduce_func)
     expected_prof = np.apply_along_axis(reduce_func,
                                         arr=pyth_image[1:5, 1:4], axis=1)
+    assert_almost_equal(prof, expected_prof)
+
+
+def test_negative_coodinates():
+    with expected_warnings(["coordinates are assumed to be inside image"]):
+        prof = profile_line(pyth_image, (1, 2), (-2, 2),
+                            linewidth=1, order=0, reduce_func=None)
+    expected_prof = pyth_image[1:-1, 2, np.newaxis]
     assert_almost_equal(prof, expected_prof)
