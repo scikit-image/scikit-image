@@ -85,41 +85,8 @@ def profile_line(image, src, dst, linewidth=1,
            [1.41421356, 1.41421356, 0.        ]])
 
     """
-    nr, nc = image.shape[:2]
-    if len(src) != 2:
-        raise ValueError('src must be a couple of indices.')
-    if len(dst) != 2:
-        raise ValueError('dst must be a couple of indices.')
-
-    warn_msg = ("Out of bound {} coordinates are deprecated. In version 0.19, "
-                "src and dst coordinates will be required to be inside "
-                "image bounds")
-
-    if src[0] > (nr - 1) or src[1] > (nc - 1):
-        warn(warn_msg.format('src'), FutureWarning, stacklevel=2)
-
-    if dst[0] > (nr - 1) or dst[1] > (nc - 1):
-        warn(warn_msg.format('dst'), FutureWarning, stacklevel=2)
-
-    warn_msg = ("{} coordinates are assumed to be inside image bounds. "
-                "Negative values are indexed from the end of the image. "
-                "To avoid this warning, please use positive coordinates.")
-
-    src = np.asarray(src)
-    if src[0] > (nr - 1):
-        warn(warn_msg.format('src'))
-        src[0] += nr - 1
-    if src[1] > (nc - 1):
-        warn(warn_msg.format('src'))
-        src[1] += nc - 1
-
-    dst = np.asarray(dst)
-    if dst[0] > (nr - 1):
-        warn(warn_msg.format('dst'))
-        dst[0] += nr - 1
-    if dst[1] > (nc - 1):
-        warn(warn_msg.format('dst'))
-        dst[1] += nc - 1
+    src = _preprocess_coordinates(src, image.shape[:2])
+    dst = _preprocess_coordinates(dst, image.shape[:2])
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
@@ -143,6 +110,41 @@ def profile_line(image, src, dst, linewidth=1,
             intensities = np.apply_along_axis(reduce_func, arr=pixels, axis=1)
 
     return intensities
+
+
+def _preprocess_coordinates(coord, bounds):
+    """Check and preprocess input coordinates.
+
+    """
+    if len(coord) != 2:
+        raise ValueError('coodinates must be a couple of indices.')
+
+    err_msg = "{} is out of bound for image with shape {}"
+
+    nr, nc = bounds
+    if coord[0] < -nr:
+        raise ValueError(err_msg.format(coord, bounds))
+    if coord[1] < -nc:
+        raise ValueError(err_msg.format(coord, bounds))
+
+    warn_msg = ("coordinates are assumed to be inside image bounds. "
+                "Negative values are indexed from the end of the image. "
+                "To avoid this warning, please use positive coordinates.")
+
+    coord = np.asarray(coord)
+    if coord[0] < 0:
+        warn(warn_msg)
+        coord[0] += nr
+    if coord[1] < 0:
+        warn(warn_msg)
+        coord[1] += nc
+
+    if coord[0] > (nr - 1) or coord[1] > (nc - 1):
+        warn("Out of bound coordinates are deprecated. In version 0.19, "
+             "src and dst coordinates will be required to be inside "
+             "image bounds.", FutureWarning, stacklevel=2)
+
+    return coord
 
 
 def _line_profile_coordinates(src, dst, linewidth=1):
