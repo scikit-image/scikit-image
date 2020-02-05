@@ -185,3 +185,14 @@ def test_negative_coodinates():
                             linewidth=1, order=0, reduce_func=None)
     expected_prof = pyth_image[1:-1, 2, np.newaxis]
     assert_almost_equal(prof, expected_prof)
+
+
+def test_oob_coodinates():
+    offset = 2
+    idx = pyth_image.shape[0] + offset
+    with expected_warnings(["Out of bound coordinates are deprecated"]):
+        prof = profile_line(pyth_image, (1, 2), (idx, 2),
+                            linewidth=1, order=0, reduce_func=None)
+    expected_prof = np.vstack([pyth_image[1:, 2, np.newaxis],
+                               np.zeros((offset + 1, 1))])
+    assert_almost_equal(prof, expected_prof)
