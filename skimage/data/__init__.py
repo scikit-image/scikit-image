@@ -78,7 +78,7 @@ except ImportError:
         return hasher.hexdigest()
 
 
-def _hash_hash(path, expected_hash):
+def _has_hash(path, expected_hash):
     """Check if the provided path has the expected hash."""
     if not osp.exists(path):
         return False
