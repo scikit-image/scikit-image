@@ -65,7 +65,6 @@ registry = {
     "data/brick.png": "7966caf324f6ba843118d98f7a07746d22f6a343430add0233eca5f6eaaa8fcf",
     "data/cell.png": "8d23a7fb81f7cc877cd09f330357fc7f595651306e84e17252f6e0a1b3f61515",
     "data/camera.png": "361a6d56d22ee52289cd308d5461d090e06a56cb36007d8dfc3226cbe8aaa5db",
-    "data/cells_qpi.npz": "a9c5212894bd4de8fddebd679500aff67f04b4e25e41c3f347f3e876ce648252",
     "data/chessboard_GRAY.png": "3e51870774515af4d07d820bd8827364c70839bf9b573c746e485095e893df90",
     "data/chessboard_RGB.png": "1ac01eff2d4e50f4eda55a2ddecdc28a6576623a58d7a7ef84513c5cc19a0331",
     "data/chelsea.png": "596aa1e7cb875eb79f437e310381d26b338a81c2da23439704a73c4651e8c4bb",
