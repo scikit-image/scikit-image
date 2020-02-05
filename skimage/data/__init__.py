@@ -121,7 +121,7 @@ def _fetch(data_filename):
     # The file may already be in the data_dir regardless of if Pooch is
     # installed. We may have decided to ship it in the scikit-image
     # distribution
-    if _hash_hash(resolved_path, expected_hash):
+    if _has_hash(resolved_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return resolved_path
 
