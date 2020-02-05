@@ -14,7 +14,7 @@ def profile_line(image, src, dst, linewidth=1,
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
-    src :
+    src : array_like, shape (2, )
         The coordinates of the start point of the scan line.
     dst : array_like, shape (2, )
         The coordinates of the end point of the scan
@@ -91,11 +91,15 @@ def profile_line(image, src, dst, linewidth=1,
     if len(dst) != 2:
         raise ValueError('dst must be a couple of indices.')
 
+    warn_msg = ("Out of bound {} coordinates are deprecated. In version 0.19, "
+                "src and dst coordinates will be required to be inside "
+                "image bounds")
+
     if src[0] > (nr - 1) or src[1] > (nc - 1):
-        raise ValueError("src coordinates must be inside image bounds")
+        warn(warn_msg.format('src'), FutureWarning, stacklevel=2)
 
     if dst[0] > (nr - 1) or dst[1] > (nc - 1):
-        raise ValueError("dst coordinates must be inside image bounds")
+        warn(warn_msg.format('dst'), FutureWarning, stacklevel=2)
 
     warn_msg = ("{} coordinates are assumed to be inside image bounds. "
                 "Negative values are indexed from the end of the image. "
@@ -103,18 +107,18 @@ def profile_line(image, src, dst, linewidth=1,
 
     src = np.asarray(src)
     if src[0] > (nr - 1):
-        warn(warn_msg.format(src))
+        warn(warn_msg.format('src'))
         src[0] += nr - 1
     if src[1] > (nc - 1):
-        warn(warn_msg.format(src))
+        warn(warn_msg.format('src'))
         src[1] += nc - 1
 
     dst = np.asarray(dst)
     if dst[0] > (nr - 1):
-        warn(warn_msg.format(dst))
+        warn(warn_msg.format('dst'))
         dst[0] += nr - 1
     if dst[1] > (nc - 1):
-        warn(warn_msg.format(dst))
+        warn(warn_msg.format('dst'))
         dst[1] += nc - 1
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
