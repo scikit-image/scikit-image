@@ -236,7 +236,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         Number of times moving_image is warped.
     gaussian : bool
         if True, a gaussian kernel is used for the local
-        intagration. Otherwise, a uniform kernel is used.
+        integration. Otherwise, a uniform kernel is used.
     prefilter : bool
         Whether to prefilter the estimated optical flow before each
         image warp. This helps to remove potential outliers.
