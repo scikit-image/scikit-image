@@ -52,7 +52,7 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
     dtype = reference_image.dtype
     grid = np.meshgrid(*[np.arange(n, dtype=dtype)
                          for n in reference_image.shape],
-                       indexing='ij')
+                       indexing='ij', sparse=True)
 
     dt = 0.5 / reference_image.ndim
     reg_num_iter = 2
@@ -75,7 +75,8 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
             flow_current = ndi.median_filter(flow_current,
                                              [1] + reference_image.ndim * [3])
 
-        image1_warp = warp(moving_image, grid + flow_current, mode='nearest')
+        image1_warp = warp(moving_image, get_warp_points(grid, flow_current),
+                           mode='nearest')
         grad = np.array(np.gradient(image1_warp))
         NI = (grad*grad).sum(0)
         NI[NI == 0] = 1
