@@ -42,8 +42,6 @@ Version 0.18
 Version 0.19
 ------------
 
-* Remove the warnings in ``skimage/feature/_canny.py`` from canny
-  function.
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
