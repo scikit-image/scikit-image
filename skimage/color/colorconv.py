@@ -90,7 +90,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Parameters
     ----------
-    arr : (.., 3)) array_like
+    arr : (.., 3) array_like
         The image to convert. Final dimension denotes channels.
     fromspace : str
         The color space to convert from. Can be specified in lower case.
@@ -99,7 +99,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Returns
     -------
-    out : (.., 3)) ndarray
+    out : (.., 3) ndarray
         The converted image. Same dimensions as input.
 
     Raises
