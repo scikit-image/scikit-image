@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from . import _ncut
 from . import _ncut_cy
-from ..._shared.utils import check_random_state
+from skimage._shared.utils import check_random_state
 from scipy.sparse import linalg
 
 

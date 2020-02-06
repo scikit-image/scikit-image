@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import as_strided
 from scipy import ndimage as ndi
 from scipy import sparse
 import math
-from ... import measure, segmentation, util, color
+from skimage import measure, segmentation, util, color
 
 
 def _edge_generator_from_csr(csr_matrix):
