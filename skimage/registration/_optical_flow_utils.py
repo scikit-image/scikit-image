@@ -9,6 +9,29 @@ from ..transform import pyramid_reduce
 from ..util.dtype import convert
 
 
+def get_warp_points(grid, flow):
+    """Compute warp point coordinates.
+
+    Parameters
+    ----------
+    grid : iterable
+        The sparse grid to be warped (optained using
+        ``np.meshgrid(..., sparse=True)).``)
+    flow : ndarray
+        The warping motion field.
+
+    Returns
+    -------
+    out : ndarray
+        The warp point coordinates.
+
+    """
+    out = flow.copy()
+    for idx, g in enumerate(grid):
+        out[idx, ...] += g
+    return out
+
+
 def resize_flow(flow, shape):
     """Rescale the values of the vector field (u, v) to the desired shape.
 
