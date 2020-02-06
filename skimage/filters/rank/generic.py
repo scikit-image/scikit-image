@@ -177,9 +177,9 @@ def _handle_input_3D(image, selem, out, mask, out_dtype=None, pixel_size=1):
     if out is None:
         if out_dtype is None:
             out_dtype = image.dtype
-        out = np.empty(image.shape+(pixel_size,), dtype=out_dtype)
+        out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
-        out = out.reshape(out.shape+(pixel_size,))
+        out = out.reshape(out.shape + (pixel_size,))
 
     is_8bit = image.dtype in (np.uint8, np.int8)
 
@@ -384,6 +384,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
     return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
+
 
 def equalize(image, selem, out=None, mask=None,
              shift_x=False, shift_y=False, shift_z=False):

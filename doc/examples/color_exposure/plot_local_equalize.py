@@ -143,10 +143,12 @@ def plot_img_and_hist(image, axes, bins=256):
 # Load an example image
 img = img_as_ubyte(data.brain())
 
+
 # Global equalize
 def normalize_pixels(i):
-    i = 256*(i / np.amax(i))
+    i = 256 * (i / np.amax(i))
     return i.astype(np.uint8)
+
 
 img_rescale = exposure.equalize_hist(img)
 img_rescale = normalize_pixels(img_rescale - np.min(img_rescale))

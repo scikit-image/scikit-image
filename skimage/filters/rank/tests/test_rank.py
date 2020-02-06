@@ -117,7 +117,6 @@ class TestRank:
 
         check()
 
-
     @parametrize('filter', ['equalize', 'otsu'])
     def test_rank_filters_3D(self, filter):
         @test_parallel(warnings_matching=['Possible precision loss'])
@@ -317,8 +316,8 @@ class TestRank:
         image_float = img_as_float(image_uint)
 
         np.random.seed(0)
-        volume_uint = np.random.randint(0, high = 256,
-                                        size = (10, 10, 10), dtype = np.uint8)
+        volume_uint = np.random.randint(0, high=256,
+                                        size=(10, 10, 10), dtype=np.uint8)
         volume_float = img_as_float(volume_uint)
 
         methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
@@ -353,8 +352,8 @@ class TestRank:
         assert_equal(image_u, img_as_ubyte(image_s))
 
         np.random.seed(0)
-        volume_s = np.random.randint(0, high = 127,
-                                        size = (10, 10, 10), dtype = np.int8)
+        volume_s = np.random.randint(0, high=127,
+                                     size=(10, 10, 10), dtype=np.int8)
         volume_u = img_as_ubyte(volume_s)
         assert_equal(volume_u, img_as_ubyte(volume_s))
 
@@ -391,8 +390,8 @@ class TestRank:
         assert_equal(image8, image16)
 
         np.random.seed(0)
-        volume8 = np.random.randint(128, high = 256,
-                                        size = (10, 10, 10), dtype = np.uint8)
+        volume8 = np.random.randint(128, high=256,
+                                    size=(10, 10, 10), dtype=np.uint8)
         volume16 = volume8.astype(np.uint16)
         assert_equal(volume8, volume16)
 
