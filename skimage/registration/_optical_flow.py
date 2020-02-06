@@ -9,7 +9,7 @@ import numpy as np
 from scipy import ndimage as ndi
 from skimage.transform import warp
 
-from ._optical_flow_utils import coarse_to_fine
+from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 
 def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
@@ -267,13 +267,15 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
     b = np.zeros(reference_image.shape + (ndim, ), dtype=dtype)
 
     grid = np.meshgrid(*[np.arange(n, dtype=dtype)
-                         for n in reference_image.shape], indexing='ij')
+                         for n in reference_image.shape],
+                       indexing='ij', sparse=True)
 
     for _ in range(num_warp):
         if prefilter:
             flow = ndi.filters.median_filter(flow, (1, ) + ndim * (3, ))
 
-        moving_image_warp = warp(moving_image, grid + flow, mode='nearest')
+        moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
+                                 mode='nearest')
         grad = np.array(np.gradient(moving_image_warp))
         It = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
