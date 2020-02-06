@@ -239,7 +239,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         intagration. Otherwise, a uniform kernel is used.
     prefilter : bool
         whether to prefilter the estimated optical flow before each
-        image warp. This helps to remove the potential outliers.
+        image warp. This helps to remove potential outliers.
 
     Returns
     -------
