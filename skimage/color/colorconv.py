@@ -189,8 +189,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     Raises
     ------
     ValueError
-        If `rgba` is not at least 2-D with last dimension length equal
-        to 4.
+        If `rgba` is not at least 2-D with shape (.., 4).
 
     References
     ----------
@@ -239,8 +238,7 @@ def rgb2hsv(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -315,8 +313,7 @@ def hsv2rgb(hsv):
     Raises
     ------
     ValueError
-        If `hsv` is not at least 2-D with last dimension length equal
-        to 3.
+        If `hsv` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -627,8 +624,7 @@ def xyz2rgb(xyz):
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with last dimension length equal
-        to 3.
+        If `xyz` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -673,8 +669,7 @@ def rgb2xyz(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -716,8 +711,7 @@ def rgb2rgbcie(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -749,8 +743,7 @@ def rgbcie2rgb(rgbcie):
     Raises
     ------
     ValueError
-        If `rgbcie` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgbcie` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -784,8 +777,7 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -919,8 +911,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with last dimension length equal
-        to 3.
+        If `xyz` is not at least 2-D with shape (.., 3).
     ValueError
         If either the illuminant or the observer angle is unsupported or
         unknown.
@@ -986,8 +977,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `lab` is not at least 2-D with last dimension length equal
-        to 3.
+        If `lab` is not at least 2-D with shape (.., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1056,8 +1046,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1093,8 +1082,7 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `lab` is not at least 2-D with last dimension length equal
-        to 3.
+        If `lab` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1130,8 +1118,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with last dimension length equal
-        to 3.
+        If `xyz` is not at least 2-D with shape (.., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1207,8 +1194,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     Raises
     ------
     ValueError
-        If `luv` is not at least 2-D with last dimension length equal
-        to 3.
+        If `luv` is not at least 2-D with shape (.., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1273,8 +1259,7 @@ def rgb2luv(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1306,8 +1291,7 @@ def luv2rgb(luv):
     Raises
     ------
     ValueError
-        If `luv` is not at least 2-D with last dimension length equal
-        to 3.
+        If `luv` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1333,9 +1317,7 @@ def rgb2hed(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
-
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1370,8 +1352,7 @@ def hed2rgb(hed):
     Raises
     ------
     ValueError
-        If `hed` is not at least 2-D with last dimension length equal
-        to 3.
+        If `hed` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1409,8 +1390,7 @@ def separate_stains(rgb, conv_matrix):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1465,8 +1445,7 @@ def combine_stains(stains, conv_matrix):
     Raises
     ------
     ValueError
-        If `stains` is not at least 2-D with last dimension length equal
-        to 3.
+        If `stains` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1627,8 +1606,7 @@ def rgb2yuv(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1659,8 +1637,7 @@ def rgb2yiq(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
     """
     return _convert(yiq_from_rgb, rgb)
 
@@ -1681,8 +1658,7 @@ def rgb2ypbpr(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1708,8 +1684,7 @@ def rgb2ycbcr(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1744,8 +1719,7 @@ def rgb2ydbdr(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with last dimension length equal
-        to 3.
+        If `rgb` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1777,8 +1751,7 @@ def yuv2rgb(yuv):
     Raises
     ------
     ValueError
-        If `yuv` is not at least 2-D with last dimension length equal
-        to 3.
+        If `yuv` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1804,7 +1777,7 @@ def yiq2rgb(yiq):
     Raises
     ------
     ValueError
-        If `yiq` is not a 3- or 4-D array of shape ``(M, N, [P,] 3)``.
+        If `yiq` is not at least 2-D with shape (.., 3).
     """
     return _convert(rgb_from_yiq, yiq)
 
@@ -1825,8 +1798,7 @@ def ypbpr2rgb(ypbpr):
     Raises
     ------
     ValueError
-        If `ypbpr` is not at least 2-D with last dimension length equal
-        to 3.
+        If `ypbpr` is not at least 2-D with shape (.., 3).
 
     References
     ----------
@@ -1852,8 +1824,7 @@ def ycbcr2rgb(ycbcr):
     Raises
     ------
     ValueError
-        If `ycbcr` is not at least 2-D with last dimension length equal
-        to 3.
+        If `ycbcr` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
@@ -1888,8 +1859,7 @@ def ydbdr2rgb(ydbdr):
     Raises
     ------
     ValueError
-        If `ydbdr` is not at least 2-D with last dimension length equal
-        to 3.
+        If `ydbdr` is not at least 2-D with shape (.., 3).
 
     Notes
     -----
