@@ -638,25 +638,27 @@ def test_gray2rgb():
 
 def test_gray2rgb_rgb():
     x = np.random.rand(5, 5, 4)
-    y = gray2rgb(x)
+    with expected_warnings(['RGB and RGBA images conversion']):
+        y = gray2rgb(x)
     assert_equal(x, y)
 
 
 def test_gray2rgb_alpha():
     x = np.random.random((5, 5, 4))
-    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+    with expected_warnings(['RGB and RGBA images conversion']):
+        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
+        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
     x = np.random.random((5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
-
-    assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
-                          alpha=True)[0, 0, 3], 1)
-    assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
-                          alpha=True)[0, 0, 3], 255)
+    with expected_warnings(['RGB and RGBA images conversion']):
+        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
+        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+        assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
+                              alpha=True)[0, 0, 3], 1)
+        assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
+                              alpha=True)[0, 0, 3], 255)
 
 
 @pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,

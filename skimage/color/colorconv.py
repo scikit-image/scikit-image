@@ -203,7 +203,15 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     >>> img_rgb = color.rgba2rgb(img_rgba)
 
     """
-    arr = _prepare_rgba_array(rgba)
+    arr = np.asanyarray(rgba)
+
+    if arr.ndim < 2 or arr.shape[-1] != 4:
+        msg = ("the input array must have a shape == (.., 4)), "
+               "got {0}".format(arr.shape))
+        raise ValueError(msg)
+
+    arr = dtype.img_as_float(arr)
+
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
         raise ValueError('background must be an iterable containing 3 RGB '
