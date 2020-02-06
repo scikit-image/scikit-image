@@ -334,7 +334,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
         intagration. Otherwise, a uniform kernel is used.
     prefilter : bool, optional
         whether to prefilter the estimated optical flow before each
-        image warp. This helps to remove the potential outliers.
+        image warp. This helps to remove potential outliers.
     dtype : dtype, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
