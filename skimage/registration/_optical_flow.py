@@ -317,7 +317,7 @@ def optical_flow_ilk(reference_image, moving_image, *,
     The iterative Lucas-Kanade (iLK) solver is applied at each level
     of the image pyramid. iLK is a fast and robust algorithm
     developped by Le Besnerais and Champagnat [4]_ and improved in
-    [5]_..
+    [5]_.
 
     Parameters
     ----------
