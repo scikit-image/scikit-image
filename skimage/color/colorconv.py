@@ -175,7 +175,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
 
     Parameters
     ----------
-    rgba : (.., [ ..,] 4) array_like
+    rgba : (.., 4) array_like
         The image in RGBA format. Final dimension denotes channels.
     background : array_like
         The color of the background to blend the image with (3 floats
@@ -183,7 +183,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -228,12 +228,12 @@ def rgb2hsv(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in HSV format. Same dimensions as input.
 
     Raises
@@ -304,12 +304,12 @@ def hsv2rgb(hsv):
 
     Parameters
     ----------
-    hsv : (.., [ ..,] 3) array_like
+    hsv : (.., 3) array_like
         The image in HSV format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -598,12 +598,12 @@ def _convert(matrix, arr):
     ----------
     matrix : array_like
         The 3x3 matrix to use.
-    arr : (.., [ ..,] 3) array_like
+    arr : (.., 3) array_like
         The input array. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The converted array. Same dimensions as input.
     """
     arr = _prepare_colorarray(arr)
@@ -616,12 +616,12 @@ def xyz2rgb(xyz):
 
     Parameters
     ----------
-    xyz : (.., [ ..,] 3) array_like
+    xyz : (.., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -662,12 +662,12 @@ def rgb2xyz(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
@@ -705,12 +705,12 @@ def rgb2rgbcie(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB CIE format. Same dimensions as input.
 
     Raises
@@ -738,12 +738,12 @@ def rgbcie2rgb(rgbcie):
 
     Parameters
     ----------
-    rgbcie : (.., [ ..,] 3) array_like
+    rgbcie : (.., 3) array_like
         The image in RGB CIE format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -772,7 +772,7 @@ def rgb2gray(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
@@ -848,7 +848,7 @@ def gray2rgb(image, alpha=None):
 
     Returns
     -------
-    rgb : (.., [ ..,] 3) ndarray
+    rgb : (.., 3) ndarray
         RGB image. A new dimension of length 3 is added to input image.
 
     Notes
@@ -904,7 +904,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    xyz : (.., [ ..,] 3) array_like
+    xyz : (.., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -913,7 +913,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in CIE-LAB format. Same dimensions as input.
 
     Raises
@@ -971,7 +971,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    lab : (.., [ ..,] 3) array_like
+    lab : (.., 3) array_like
         The image in Lab format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -980,7 +980,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
@@ -1041,7 +1041,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1050,7 +1050,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in Lab format. Same dimensions as input.
 
     Raises
@@ -1078,7 +1078,7 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    lab : (.., [ ..,] 3) array_like
+    lab : (.., 3) array_like
         The image in Lab format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1087,7 +1087,7 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1115,7 +1115,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    xyz : (.., [ ..,] 3) array_like
+    xyz : (.., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1124,7 +1124,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in CIE-Luv format. Same dimensions as input.
 
     Raises
@@ -1192,7 +1192,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    luv : (.., [ ..,] 3) array_like
+    luv : (.., 3) array_like
         The image in CIE-Luv format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1201,7 +1201,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
@@ -1262,12 +1262,12 @@ def rgb2luv(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in CIE Luv format. Same dimensions as input.
 
     Raises
@@ -1295,12 +1295,12 @@ def luv2rgb(luv):
 
     Parameters
     ----------
-    luv : (.., [ ..,] 3) array_like
+    luv : (.., 3) array_like
         The image in CIE Luv format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1322,12 +1322,12 @@ def rgb2hed(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in HED format. Same dimensions as input.
 
     Raises
@@ -1359,12 +1359,12 @@ def hed2rgb(hed):
 
     Parameters
     ----------
-    hed : (.., [ ..,] 3) array_like
+    hed : (.., 3) array_like
         The image in the HED color space. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB. Same dimensions as input.
 
     Raises
@@ -1396,14 +1396,14 @@ def separate_stains(rgb, conv_matrix):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in stain color space. Same dimensions as input.
 
     Raises
@@ -1452,14 +1452,14 @@ def combine_stains(stains, conv_matrix):
 
     Parameters
     ----------
-    stains : (.., [ ..,] 3) array_like
+    stains : (.., 3) array_like
         The image in stain color space. Final dimension denotes channels.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1516,14 +1516,14 @@ def lab2lch(lab):
 
     Parameters
     ----------
-    lab : (.., [ ..,] 3) array_like
+    lab : (.., 3) array_like
         The N-D image in CIE-LAB format. The last (``N+1``-th) dimension must
         have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
         color channels. Subsequent elements are copied.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in LCH format, in a N-D array with same shape as input `lab`.
 
     Raises
@@ -1567,14 +1567,14 @@ def lch2lab(lch):
 
     Parameters
     ----------
-    lch : (.., [ ..,] 3) array_like
+    lch : (.., 3) array_like
         The N-D image in CIE-LCH format. The last (``N+1``-th) dimension must
         have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
         color channels.  Subsequent elements are copied.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in LAB format, with same shape as input `lch`.
 
     Raises
@@ -1616,12 +1616,12 @@ def rgb2yuv(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in YUV format. Same dimensions as input.
 
     Raises
@@ -1648,12 +1648,12 @@ def rgb2yiq(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in YIQ format. Same dimensions as input.
 
     Raises
@@ -1670,12 +1670,12 @@ def rgb2ypbpr(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in YPbPr format. Same dimensions as input.
 
     Raises
@@ -1697,12 +1697,12 @@ def rgb2ycbcr(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in YCbCr format. Same dimensions as input.
 
     Raises
@@ -1733,12 +1733,12 @@ def rgb2ydbdr(rgb):
 
     Parameters
     ----------
-    rgb : (.., [ ..,] 3) array_like
+    rgb : (.., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in YDbDr format. Same dimensions as input.
 
     Raises
@@ -1766,12 +1766,12 @@ def yuv2rgb(yuv):
 
     Parameters
     ----------
-    yuv : (.., [ ..,] 3) array_like
+    yuv : (.., 3) array_like
         The image in YUV format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1793,12 +1793,12 @@ def yiq2rgb(yiq):
 
     Parameters
     ----------
-    yiq : (.., [ ..,] 3) array_like
+    yiq : (.., 3) array_like
         The image in YIQ format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1814,12 +1814,12 @@ def ypbpr2rgb(ypbpr):
 
     Parameters
     ----------
-    ypbpr : (.., [ ..,] 3) array_like
+    ypbpr : (.., 3) array_like
         The image in YPbPr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1841,12 +1841,12 @@ def ycbcr2rgb(ycbcr):
 
     Parameters
     ----------
-    ycbcr : (.., [ ..,] 3) array_like
+    ycbcr : (.., 3) array_like
         The image in YCbCr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
@@ -1877,12 +1877,12 @@ def ydbdr2rgb(ydbdr):
 
     Parameters
     ----------
-    ydbdr : (.., [ ..,] 3) array_like
+    ydbdr : (.., 3) array_like
         The image in YDbDr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., [ ..,] 3) ndarray
+    out : (.., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises

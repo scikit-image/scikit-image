@@ -299,7 +299,7 @@ class TestColorconv(TestCase):
         with expected_warnings(['RGBA image conversion']):
             assert rgb2gray(x).ndim == 2
 
-    def test_rgb2grey_on_grey(self):
+    def test_rgb2gray_on_gray(self):
         with expected_warnings(['Gray scale image conversion']):
             rgb2gray(np.random.rand(5, 5))
 
