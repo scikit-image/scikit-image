@@ -90,7 +90,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Parameters
     ----------
-    arr : (.., [..,] 3)) array_like
+    arr : (.., 3)) array_like
         The image to convert. Final dimension denotes channels.
     fromspace : str
         The color space to convert from. Can be specified in lower case.
@@ -99,7 +99,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Returns
     -------
-    out : (.., [..,] 3)) ndarray
+    out : (.., 3)) ndarray
         The converted image. Same dimensions as input.
 
     Raises
@@ -149,7 +149,7 @@ def _prepare_colorarray(arr, force_copy=False):
     arr = np.asanyarray(arr)
 
     if arr.ndim < 2 or arr.shape[-1] != 3:
-        raise ValueError("Input array must have a shape == (.., [..,] 3)), "
+        raise ValueError("Input array must have a shape == (.., 3)), "
                          "got {0}".format(arr.shape))
 
     return dtype.img_as_float(arr, force_copy=force_copy)
@@ -163,7 +163,7 @@ def _prepare_rgba_array(arr):
     arr = np.asanyarray(arr)
 
     if arr.ndim < 2 or arr.shape[-1] != 4:
-        msg = ("the input array must have a shape == (.., [..,] 4)), "
+        msg = ("the input array must have a shape == (.., 4)), "
                "got {0}".format(arr.shape))
         raise ValueError(msg)
 
