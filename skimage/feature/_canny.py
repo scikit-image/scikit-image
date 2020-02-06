@@ -92,30 +92,28 @@ def _preprocess(image, mask, sigma, mode, preserve_range):
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
+        masked_image = image.copy()
+    else:
+        masked_image = np.zeros_like(image)
+        masked_image[mask] = image[mask]
 
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
-
     bleed_over = gaussian(mask.astype(float), sigma=sigma, mode=mode,
-                          preserve_range=preserve_range)
+                          preserve_range=preserve_range) + np.finfo(float).eps
 
     # Smooth the masked image
-
-    masked_image = np.zeros_like(image)
-    masked_image[mask] = image[mask]
     smoothed_image = gaussian(masked_image, sigma=sigma, mode=mode,
                               preserve_range=preserve_range)
 
     # Lower the result by the bleed-over fraction, so you can
     # recalibrate by dividing by the function on the mask to recover
     # the effect of smoothing from just the significant pixels.
-
-    smoothed_image /= (bleed_over + np.finfo(float).eps)
+    smoothed_image /= bleed_over
 
     # Make the eroded mask. Setting the border value to zero will wipe
     # out the image edges for us.
-
     s = ndi.generate_binary_structure(2, 2)
     eroded_mask = ndi.binary_erosion(mask, s, border_value=0)
 
@@ -138,6 +136,7 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
     c2 = magnitude[r_3, c_3][pts[r_2, c_2]]
     c_minus = c2 * w + c1 * (1 - w) <= m
     out[pts] = c_plus & c_minus
+
     return out
 
 
@@ -219,8 +218,8 @@ def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
     return local_maxima
 
 
-def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
-          use_quantiles=False, preserve_range=False):
+def canny(image, sigma=1., low_threshold=None, high_threshold=None,
+          mask=None, use_quantiles=False, preserve_range=False):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -240,12 +239,15 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     use_quantiles : bool, optional
         If True then treat low_threshold and high_threshold as
         quantiles of the edge magnitude image, rather than absolute
-        edge magnitude values. If True then the thresholds must be in
-        the range [0, 1].
+        edge magnitude values. If True then the thresholds ar also
+        must be in the range [0, 1].
     preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
+        Whether to keep the original range of values. Otherwise, the
+        input image converted according to the conventions of
+        `img_as_float`. Also see
+        https://scikit-image.org/docs/dev/user_guide/data_types.html
+        If use_quantile is False, low_threshold and high_threshold are
+        also converted.
 
     Returns
     -------
@@ -330,29 +332,22 @@ def canny(image, sigma=1., low_threshold=0.1, high_threshold=0.2, mask=None,
     # because who knows what lies beyond the edge of the image?
     #
     check_nD(image, 2)
+    dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        warnings.warn("Setting low_threshold to None is deprecated. "
-                      "It will raise an error starting from version 0.19. "
-                      "To remove this warning, use the default value or "
-                      "explicitely set its value.", FutureWarning)
-        low_threshold = 0.1
+        low_threshold = 0.1 * dtype_max
 
     if high_threshold is None:
-        warnings.warn("Setting high_threshold to None is deprecated. "
-                      "It will raise an error starting from version 0.19. "
-                      "To remove this warning, use the default value or "
-                      "explicitely set its value.", FutureWarning)
-        high_threshold = 0.2
+        high_threshold = 0.2 * dtype_max
+
+    if high_threshold < low_threshold:
+        raise ValueError("low_threshold should be lower then high_threshold")
+
+    if not (preserve_range or use_quantiles):
+        low_threshold = low_threshold / dtype_max
+        high_threshold = high_threshold / dtype_max
 
     if use_quantiles:
-        if preserve_range:
-            dtype_max = dtype_limits(image, clip_negative=False)[1]
-            low_threshold = low_threshold / dtype_max
-            high_threshold = high_threshold / dtype_max
-        if high_threshold < low_threshold:
-            raise ValueError(
-                "low_threshold should be lower then high_threshold")
         if high_threshold > 1.0 or low_threshold > 1.0:
             raise ValueError("Quantile thresholds must not be > 1.0")
         if high_threshold < 0.0 or low_threshold < 0.0:
