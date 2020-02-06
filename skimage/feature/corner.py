@@ -3,7 +3,7 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
-from scipy.spatial.distance import pdist
+from scipy import spatial
 
 from ..util import img_as_float
 from ..feature import peak_local_max
@@ -917,7 +917,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
                  footprint=None, labels=None, *, num_peaks_per_label=np.inf,
-                 metric='chebyshev'):
+                 p=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -925,10 +925,26 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
 
     Parameters
     ----------
+    image : ndarray
+        Input image.
+    min_distance : int, optional
+        The minimum distance seperating peaks. Use the ``p`` argument
+        to set the Minkowski p-norm defining the distance.
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
-    metric: str
-        The metric used for measuring the distance.
+    p : float
+        Which Minkowski p-norm to use. Should be in the range [1, inf].
+        A finite large p may cause a ValueError if overflow can occur.
+        inf corresponds to the chebychev distance and 2 to the
+        euclidean distance.
+
+    Returns
+    -------
+    output : ndarray or ndarray of bools
+
+        * If `indices = True`  : (row, column, ...) coordinates of peaks.
+        * If `indices = False` : Boolean array shaped like `image`, with peaks
+          represented by True values.
 
     See also
     --------
@@ -965,51 +981,38 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         threshold_rel = 0.1
         warn("Until the version 0.16, threshold_rel was set to 0.1 by default."
              "Starting from version 0.16, the default value is set to None."
-             "Until version 0.18, a None value corresponds to a threshold value of 0.1."
-             "The default behavior will match skimage.feature.peak_local_max.",
-             category=FutureWarning, stacklevel=2)
-
-    if metric not in ['chebyshev', 'euclidean']:
-        raise ValueError("metric should be 'chebyshev' or 'euclidean'.")
-
-    peaks = peak_local_max(image, min_distance=min_distance,
-                           threshold_abs=threshold_abs,
-                           threshold_rel=threshold_rel,
-                           exclude_border=exclude_border,
-                           indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels,
-                           num_peaks_per_label=num_peaks_per_label)
+             "Until version 0.18, a None value corresponds to a threshold "
+             "value of 0.1. The default behavior will match "
+             "skimage.feature.peak_local_max.", category=FutureWarning,
+             stacklevel=2)
 
     # Get the coordinates of the detected peaks
-    coords = np.transpose(peaks.nonzero())
-    num_peaks = coords.shape[0]
-    # Compute the distance between each detected distance
-    dist = pdist(coords, metric)  # dist is a condensed distance matrix
-    rejected_peaks = set()
+    coords = peak_local_max(image, min_distance=min_distance,
+                            threshold_abs=threshold_abs,
+                            threshold_rel=threshold_rel,
+                            exclude_border=exclude_border,
+                            indices=True, num_peaks=num_peaks,
+                            footprint=footprint, labels=labels,
+                            num_peaks_per_label=num_peaks_per_label)
 
-    # To save memory, dist is not converted to a square distance
-    # matrix. Instead, the indices `start` and `end` are updated such
-    # that each row of the distance matrix is dist[start:end]:
-    start = end = 0
-    step = num_peaks - 1
-    for i in range(num_peaks - 1):
-        end += step
-        # If i is already in rejected_peaks, nothing more to do.
-        if i not in rejected_peaks:
-            candidates = i + 1 + np.nonzero(dist[start:end] <= min_distance)[0]
+    # Use KDtree to find the peaks that are too close to each others
+    tree = spatial.cKDTree(coords)
+
+    rejected_peaks = set()
+    for idx, point in enumerate(coords):
+        if idx not in rejected_peaks:
+            candidates = tree.query_ball_point(point, r=min_distance, p=p)
+            candidates.remove(idx)
             rejected_peaks.update(candidates)
-        start = end
-        step -= 1
 
     # Remove the peaks that are too close to each others
-    rejected_peaks = tuple(rejected_peaks)
-    if indices is True:
-        return np.delete(coords, rejected_peaks, axis=0)
-
-    peaks[tuple(coords[rejected_peaks, :].T)] = False
+    coords = np.delete(coords, tuple(rejected_peaks), axis=0)[::-1]
 
     if indices is True:
-        return np.transpose(peaks.nonzero())
+        return coords
+
+    peaks = np.zeros_like(image, dtype=bool)
+    peaks[tuple(coords.T)] = True
 
     return peaks
 

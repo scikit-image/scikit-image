@@ -361,31 +361,31 @@ def test_corner_peaks():
                            threshold_rel=0)
     assert corners.shape == (2, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1)
+    corners = corner_peaks(response, exclude_border=False,
+                           min_distance=1, threshold_rel=0.1)
     assert corners.shape == (5, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                           indices=False)
+                           indices=False, threshold_rel=0.1)
     assert np.sum(corners) == 5
 
     # Test Euclidean distance
 
     corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, metric='chebyshev')
+                           min_distance=2, p=np.inf, threshold_rel=0.1)
     assert len(corners) == 2
 
     corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, metric='chebyshev',
-                           indices=False)
+                           min_distance=2, p=np.inf,
+                           indices=False, threshold_rel=0.1)
     assert np.sum(corners) == 2
 
     corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, metric='euclidean')
+                           min_distance=2, p=2, threshold_rel=0.1)
     assert len(corners) == 3
 
-    corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, metric='euclidean',
-                           indices=False)
+    corners = corner_peaks(response, exclude_border=False, threshold_rel=0.1,
+                           min_distance=2, p=2, indices=False)
     assert np.sum(corners) == 3
 
 
