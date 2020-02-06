@@ -21,40 +21,6 @@ from .. import dtype_limits
 from .._shared.utils import check_nD
 
 
-def smooth_with_function_and_mask(image, function, mask):
-    """Smooth an image with a linear function, ignoring masked pixels.
-
-    Parameters
-    ----------
-    image : array
-        Image you want to smooth.
-    function : callable
-        A function that does image smoothing.
-    mask : array
-        Mask with 1's for significant pixels, 0's for masked pixels.
-
-    Notes
-    ------
-    This function calculates the fractional contribution of masked pixels
-    by applying the function to the mask (which gets you the fraction of
-    the pixel data that's due to significant points). We then mask the image
-    and apply the function. The resulting values will be lower by the
-    bleed-over fraction, so you can recalibrate by dividing by the function
-    on the mask to recover the effect of smoothing from just the significant
-    pixels.
-    """
-    warnings.warn("smooth_with_function_and_mask is deprecated and will be "
-                  "removed in version 0.19", FutureWarning)
-
-    bleed_over = function(mask.astype(float))
-    masked_image = np.zeros_like(image)
-    masked_image[mask] = image[mask]
-    smoothed_image = function(masked_image)
-    output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
-
-    return output_image
-
-
 def _preprocess(image, mask, sigma, mode, preserve_range):
     """Preprocess the image and mask before applying canny edge detection.
 
