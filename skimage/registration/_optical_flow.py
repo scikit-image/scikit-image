@@ -4,6 +4,7 @@
 """
 
 from functools import partial
+from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 from skimage.transform import warp
@@ -255,12 +256,10 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         sigma = (0, ) + ndim * (size / 4, )
         filter_func = partial(ndi.gaussian_filter, sigma=sigma, mode='mirror')
     else:
-        filter_func = partial(ndi.uniform_filter, size=(1, ) + ndim * (size, ),
+        filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
                               mode='mirror')
 
     flow = flow0
-    coef = np.zeros((int((ndim * (ndim + 1)) / 2 + ndim), )
-                    + reference_image.shape, dtype=dtype)
     # For each pixel location (i, j), the optical flow X = flow[:, i, j]
     # is the solution of the ndim x ndim linear system
     # A[i, j] * X = b[i, j]
@@ -279,23 +278,11 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
         It = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
         # Local linear systems creation
-        k = 0
-        for i in range(ndim):
-            for j in range(i, ndim):
-                coef[k] = grad[i] * grad[j]
-                k += 1
-            coef[i - ndim] = grad[i] * It
+        for i, j in combinations_with_replacement(range(ndim), 2):
+            A[..., i, j] = A[..., j, i] = filter_func(grad[i] * grad[j])
 
-        filter_func(coef, output=coef)
-
-        k = 0
         for i in range(ndim):
-            A[..., i, i] = coef[k]
-            b[..., i] = coef[i - ndim]
-            k += 1
-            for j in range(i + 1, ndim):
-                A[..., i, j] = A[..., j, i] = coef[k]
-                k += 1
+            b[..., i] = filter_func(grad[i] * It)
 
         # Don't consider badly conditioned linear systems
         idx = abs(np.linalg.det(A)) < 1e-14
