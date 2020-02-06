@@ -1029,7 +1029,6 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     # rescale to the reference white (illuminant)
     xyz_ref_white = get_xyz_coords(illuminant, observer)
-    print(xyz_ref_white.shape, out.shape, arr.shape, x.shape)
     out *= xyz_ref_white
     return out
 
