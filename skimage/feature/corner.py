@@ -974,7 +974,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
            [2, 3],
            [2, 2]])
     >>> corner_peaks(response)
-    array([[2, 2]])
+    array([[3, 3]])
 
     """
     if threshold_rel is None:
