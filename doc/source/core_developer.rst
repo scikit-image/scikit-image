@@ -11,7 +11,7 @@ so far.
 This document offers guidelines for your new role.  First and
 foremost, you should familiarize yourself with the project's
 `mission, vision, and values
-<https://github.com/scikit-image/scikit-image/pull/3585>`__.  When in
+<https://scikit-image.org/docs/dev/values.html>`__.  When in
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
@@ -121,6 +121,49 @@ and see this as a great learning opportunity.
 While we collectively "own" any patches (and bugs!) that become part
 of the code base, you are vouching for changes you merge.  Please take
 that responsibility seriously.
+
+Closing issues and pull requests
+--------------------------------
+
+Sometimes, an issue must be closed that was not fully resolved. This can be
+for a number of reasons:
+
+- the person behind the original post has not responded to calls for
+  clarification, and none of the core developers have been able to reproduce
+  their issue;
+- fixing the issue is difficult, and it is deemed too niche a use case to
+  devote sustained effort or prioritize over other issues; or
+- the use case or feature request is something that core developers feel
+  does not belong in scikit-image,
+
+among others. Similarly, pull requests sometimes need to be closed without
+merging, because:
+
+- the pull request implements a niche feature that we consider not worth the
+  added maintenance burden;
+- the pull request implements a useful feature, but requires significant
+  effort to bring up to scikit-image's standards, and the original
+  contributor has moved on, and no other developer can be found to make the
+  necessary changes; or
+- the pull request makes changes that do not align with our values, such as
+  increasing the code complexity of a function significantly to implement a
+  marginal speedup,
+
+among others.
+
+All these may be valid reasons for closing, but we must be wary not to alienate
+contributors by closing an issue or pull request without an explanation. When
+closing, your message should:
+
+- explain clearly how the decision was made to close. This is particularly
+  important when the decision was made in a community meeting, which does not
+  have as visible a record as the comments thread on the issue itself;
+- thank the contributor(s) for their work; and
+- provide a clear path for the contributor or anyone else to appeal the
+  decision.
+
+These points help ensure that all contributors feel welcome and empowered to
+keep contributing, regardless of the outcome of past contributions.
 
 Further resources
 -----------------

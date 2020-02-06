@@ -116,11 +116,13 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    nr = int(np.ceil(image.shape[0] / kernel_size[0]))
-    nc = int(np.ceil(image.shape[1] / kernel_size[1]))
+    clip_limit /= nbins
 
-    row_step = int(np.floor(image.shape[0] / nr))
-    col_step = int(np.floor(image.shape[1] / nc))
+    row_step = int(image.shape[0] // np.ceil(image.shape[0] / kernel_size[0]))
+    col_step = int(image.shape[1] // np.ceil(image.shape[1] / kernel_size[1]))
+
+    nr = image.shape[0] // row_step
+    nc = image.shape[1] // col_step
 
     bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
@@ -129,63 +131,55 @@ def _clahe(image, kernel_size, clip_limit, nbins=128):
     map_array = np.zeros((nr, nc, nbins), dtype=int)
 
     # Calculate greylevel mappings for each contextual region
+    i0 = 0
     for r in range(nr):
+        i1 = i0 + row_step
+        j0 = 0
         for c in range(nc):
-            sub_img = image[r * row_step: (r + 1) * row_step,
-                            c * col_step: (c + 1) * col_step]
+            j1 = j0 + col_step
+            sub_img = image[i0:i1, j0:j1]
 
             if clip_limit > 0.0:  # Calculate actual cliplimit
-                clim = int(clip_limit * sub_img.size / nbins)
-                if clim < 1:
-                    clim = 1
+                clim = max(int(clip_limit * sub_img.size), 1)
             else:
                 clim = NR_OF_GREY  # Large value, do not clip (AHE)
 
             hist = lut[sub_img.ravel()]
             hist = np.bincount(hist)
-            hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
+            hist = np.pad(hist, (0, nbins - hist.size), mode='constant')
             hist = clip_histogram(hist, clim)
             hist = map_histogram(hist, 0, NR_OF_GREY - 1, sub_img.size)
             map_array[r, c] = hist
+            j0 = j1
+        i0 = i1
 
     # Interpolate greylevel mappings to get CLAHE image
     rstart = 0
     for r in range(nr + 1):
         cstart = 0
-        if r == 0:  # special case: top row
-            r_offset = row_step / 2.0
-            rU = 0
-            rB = 0
-        elif r == nr:  # special case: bottom row
-            r_offset = row_step / 2.0
-            rU = nr - 1
-            rB = rU
+        rU = max(0, r - 1)
+        rB = min(nr - 1, r)
+        if r in [0, nr]:  # special case: top and bottom rows
+            r_offset = row_step // 2
         else:  # default values
             r_offset = row_step
-            rU = r - 1
-            rB = rB + 1
+
+        rslice = np.arange(rstart, rstart + r_offset)
 
         for c in range(nc + 1):
-            if c == 0:  # special case: left column
-                c_offset = col_step / 2.0
-                cL = 0
-                cR = 0
-            elif c == nc:  # special case: right column
-                c_offset = col_step / 2.0
-                cL = nc - 1
-                cR = cL
+            cL = max(0, c - 1)
+            cR = min(nc - 1, c)
+            if c in [0, nc]:  # special case: left and right columns
+                c_offset = col_step // 2
             else:  # default values
                 c_offset = col_step
-                cL = c - 1
-                cR = cL + 1
+
+            cslice = np.arange(cstart, cstart + c_offset)
 
             mapLU = map_array[rU, cL]
             mapRU = map_array[rU, cR]
             mapLB = map_array[rB, cL]
             mapRB = map_array[rB, cR]
-
-            cslice = np.arange(cstart, cstart + c_offset)
-            rslice = np.arange(rstart, rstart + r_offset)
 
             interpolate(image, cslice, rslice,
                         mapLU, mapRU, mapLB, mapRB, lut)

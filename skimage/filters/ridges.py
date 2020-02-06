@@ -15,6 +15,7 @@ import numpy as np
 
 from ..util import img_as_float, invert
 from .._shared.utils import check_nD
+from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
 
 def _divide_nonzero(array1, array2, cval=1e-10):
@@ -80,7 +81,33 @@ def _sortbyabs(array, axis=0):
     return array[tuple(index)]
 
 
-def compute_hessian_eigenvalues(image, sigma, sorting='none'):
+def _check_sigmas(sigmas):
+    """Check sigma values for ridges filters.
+
+    Parameters
+    ----------
+    sigmas : iterable of floats
+        Sigmas argument to be checked
+
+    Returns
+    -------
+    sigmas : ndarray
+        input iterable converted to ndarray
+
+    Raises
+    ------
+    ValueError if any input value is negative
+
+    """
+    sigmas = np.asarray(sigmas).ravel()
+    if np.any(sigmas < 0.0):
+        raise ValueError('Sigma values should be equal to or greater '
+                         'than zero.')
+    return sigmas
+
+
+def compute_hessian_eigenvalues(image, sigma, sorting='none',
+                                mode='constant', cval=0):
     """
     Compute Hessian eigenvalues of nD images.
 
@@ -97,6 +124,11 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
     sorting : {'val', 'abs', 'none'}, optional
         Sorting of eigenvalues by values ('val') or absolute values ('abs'),
         or without sorting ('none'). Default is 'none'.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -105,20 +137,18 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
         of the input image.
     """
 
-    # Import has to be here due to circular import error
-    from ..feature import hessian_matrix, hessian_matrix_eigvals
-
     # Convert image to float
     image = img_as_float(image)
 
     # Make nD hessian
-    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc')
+    hessian_elements = hessian_matrix(image, sigma=sigma, order='rc',
+                                      mode=mode, cval=cval)
 
     # Correct for scale
     hessian_elements = [(sigma ** 2) * e for e in hessian_elements]
 
     # Compute Hessian eigenvalues
-    hessian_eigenvalues = np.array(hessian_matrix_eigvals(hessian_elements))
+    hessian_eigenvalues = hessian_matrix_eigvals(hessian_elements)
 
     if sorting == 'abs':
 
@@ -135,7 +165,7 @@ def compute_hessian_eigenvalues(image, sigma, sorting='none'):
 
 
 def meijering(image, sigmas=range(1, 10, 2), alpha=None,
-              black_ridges=True):
+              black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -158,6 +188,11 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -180,9 +215,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     """
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
 
     # Get image dimensions
     ndim = image.ndim
@@ -203,7 +236,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     for i, sigma in enumerate(sigmas):
 
         # Calculate (sorted) eigenvalues
-        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs')
+        eigenvalues = compute_hessian_eigenvalues(image, sigma, sorting='abs',
+                                                  mode=mode, cval=cval)
 
         if ndim > 1:
 
@@ -231,7 +265,8 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     return np.max(filtered_array, axis=0)
 
 
-def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
+def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
+         mode=None, cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -252,6 +287,11 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -277,9 +317,15 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     check_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
+
+    if mode is None:
+        warn("Previously, sato implicitly used 'constant' as the "
+             "border mode when dealing with the edge of the array. The new "
+             "behavior is 'reflect'. To recover the old behavior, use "
+             "mode='constant'. To avoid this warning, please explicitly "
+             "set the mode.", category=FutureWarning, stacklevel=2)
+        mode = 'reflect'
 
     # Invert image to detect bright ridges on dark background
     if not black_ridges:
@@ -294,7 +340,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
 
         # Calculate (sorted) eigenvalues
         lamba1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                       sorting='val')
+                                                       sorting='val',
+                                                       mode=mode, cval=cval)
 
         # Compute tubeness, see  equation (9) in reference [1]_.
         # np.abs(lambda2) in 2D, np.sqrt(np.abs(lambda2 * lambda3)) in 3D
@@ -307,9 +354,10 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True):
     return np.max(filtered_array, axis=0)
 
 
-def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-           beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-           black_ridges=True):
+def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
+           scale_step=None, beta1=None, beta2=None, alpha=0.5,
+           beta=0.5, gamma=15, black_ridges=True, mode='reflect',
+           cval=0):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -344,6 +392,11 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -374,17 +427,17 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     """
 
     # Check deprecated keyword parameters
-    if beta1:
+    if beta1 is not None:
         warn('Use keyword parameter `beta` instead of `beta1` which '
              'will be removed in version 0.17.', stacklevel=2)
         beta = beta1
 
-    if beta2:
+    if beta2 is not None:
         warn('Use keyword parameter `gamma` instead of `beta2` which '
              'will be removed in version 0.17.', stacklevel=2)
         gamma = beta2
 
-    if scale_range and scale_step:
+    if scale_range is not None and scale_step is not None:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
              '`scale_range` which will be removed in version 0.17.',
              stacklevel=2)
@@ -394,9 +447,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     check_nD(image, [2, 3])
 
     # Check (sigma) scales
-    sigmas = np.asarray(sigmas)
-    if np.any(sigmas < 0.0):
-        raise ValueError('Sigma values less than zero are not valid')
+    sigmas = _check_sigmas(sigmas)
 
     # Rescale filter parameters
     alpha_sq = 2 * alpha ** 2
@@ -413,17 +464,18 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     # Generate empty (n+1)D arrays for storing auxiliary images filtered
     # at different (sigma) scales
     filtered_array = np.zeros(sigmas.shape + image.shape)
-    lambdas_array = np.zeros(sigmas.shape + image.shape)
+    lambdas_array = np.zeros_like(filtered_array)
 
     # Filtering for all (sigma) scales
     for i, sigma in enumerate(sigmas):
 
         # Calculate (abs sorted) eigenvalues
         lambda1, *lambdas = compute_hessian_eigenvalues(image, sigma,
-                                                        sorting='abs')
+                                                        sorting='abs',
+                                                        mode=mode, cval=cval)
 
-        # Compute sensitivity to deviation from a plate-like structure
-        # see equations (11) and (15) in reference [1]_
+        # Compute sensitivity to deviation from a plate-like
+        # structure see equations (11) and (15) in reference [1]_
         r_a = np.inf if ndim == 2 else _divide_nonzero(*lambdas) ** 2
 
         # Compute sensitivity to deviation from a blob-like structure,
@@ -441,6 +493,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         filtered_array[i] = ((1 - np.exp(-r_a / alpha_sq))
                              * np.exp(-r_b / beta_sq)
                              * (1 - np.exp(-r_g / gamma_sq)))
+
         lambdas_array[i] = np.max(lambdas, axis=0)
 
     # Remove background
@@ -452,7 +505,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
             beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-            black_ridges=True):
+            black_ridges=True, mode=None, cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -483,6 +536,11 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -509,10 +567,18 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
 
+    if mode is None:
+        warn("Previously, hessian implicitly used 'constant' as the "
+             "border mode when dealing with the edge of the array. The new "
+             "behavior is 'reflect'. To recover the old behavior, use "
+             "mode='constant'. To avoid this warning, please explicitly "
+             "set the mode.", category=FutureWarning, stacklevel=2)
+        mode = 'reflect'
+
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
                       scale_step=scale_step, beta1=beta1, beta2=beta2,
                       alpha=alpha, beta=beta, gamma=gamma,
-                      black_ridges=black_ridges)
+                      black_ridges=black_ridges, mode=mode, cval=cval)
 
     filtered[filtered <= 0] = 1
     return filtered
