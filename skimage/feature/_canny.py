@@ -12,7 +12,6 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 
-import warnings
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -58,10 +57,9 @@ def _preprocess(image, mask, sigma, mode, preserve_range):
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
-        masked_image = image.copy()
-    else:
-        masked_image = np.zeros_like(image)
-        masked_image[mask] = image[mask]
+
+    masked_image = np.zeros_like(image)
+    masked_image[mask] = image[mask]
 
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
@@ -309,15 +307,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     if high_threshold < low_threshold:
         raise ValueError("low_threshold should be lower then high_threshold")
 
-    if not (preserve_range or use_quantiles):
+    if not preserve_range:
         low_threshold = low_threshold / dtype_max
         high_threshold = high_threshold / dtype_max
-
-    if use_quantiles:
-        if high_threshold > 1.0 or low_threshold > 1.0:
-            raise ValueError("Quantile thresholds must not be > 1.0")
-        if high_threshold < 0.0 or low_threshold < 0.0:
-            raise ValueError("Quantile thresholds must not be < 0.0")
 
     smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant',
                                         preserve_range)
@@ -326,10 +318,11 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     isobel = ndi.sobel(smoothed, axis=0)
     magnitude = np.hypot(isobel, jsobel)
 
-    #
-    # ---- If use_quantiles is set then calculate the thresholds to use
-    #
     if use_quantiles:
+        if high_threshold > 1.0 or low_threshold > 1.0:
+            raise ValueError("Quantile thresholds must not be > 1.0")
+        if high_threshold < 0.0 or low_threshold < 0.0:
+            raise ValueError("Quantile thresholds must not be < 0.0")
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
