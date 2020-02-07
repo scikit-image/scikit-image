@@ -120,12 +120,8 @@ class TestCanny(unittest.TestCase):
 
         assert_equal(result_uint8, result_float)
 
-    def test_preserve_range(self):
-        img = data.coins()  # uint8 data
-
         low = 0.1
         high = 0.2
 
-        assert_equal(F.canny(img, 1.0, low, high, preserve_range=False),
-                     F.canny(img, 1.0, 255 * low, 255 * high,
-                             preserve_range=True))
+        assert_equal(F.canny(image_float, 1.0, low, high),
+                     F.canny(image_uint8, 1.0, 255 * low, 255 * high))

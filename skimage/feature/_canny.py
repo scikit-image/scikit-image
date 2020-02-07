@@ -20,7 +20,7 @@ from .. import dtype_limits
 from .._shared.utils import check_nD
 
 
-def _preprocess(image, mask, sigma, mode, preserve_range):
+def _preprocess(image, mask, sigma, mode):
     """Preprocess the image and mask before applying canny edge detection.
 
     The image is smoothed using a gaussian filter ignoring masked
@@ -64,12 +64,11 @@ def _preprocess(image, mask, sigma, mode, preserve_range):
     # Compute the fractional contribution of masked pixels by applying
     # the function to the mask (which gets you the fraction of the
     # pixel data that's due to significant points)
-    bleed_over = gaussian(mask.astype(float), sigma=sigma, mode=mode,
-                          preserve_range=preserve_range) + np.finfo(float).eps
+    bleed_over = (gaussian(mask.astype(float), sigma=sigma, mode=mode)
+                  + np.finfo(float).eps)
 
     # Smooth the masked image
-    smoothed_image = gaussian(masked_image, sigma=sigma, mode=mode,
-                              preserve_range=preserve_range)
+    smoothed_image = gaussian(masked_image, sigma=sigma, mode=mode)
 
     # Lower the result by the bleed-over fraction, so you can
     # recalibrate by dividing by the function on the mask to recover
@@ -183,7 +182,7 @@ def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
 
 
 def canny(image, sigma=1., low_threshold=None, high_threshold=None,
-          mask=None, use_quantiles=False, preserve_range=False):
+          mask=None, use_quantiles=False):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -205,13 +204,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         quantiles of the edge magnitude image, rather than absolute
         edge magnitude values. If True then the thresholds ar also
         must be in the range [0, 1].
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the
-        input image converted according to the conventions of
-        `img_as_float`. Also see
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
-        If use_quantile is False, low_threshold and high_threshold are
-        also converted.
 
     Returns
     -------
@@ -299,30 +291,31 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     dtype_max = dtype_limits(image, clip_negative=False)[1]
 
     if low_threshold is None:
-        low_threshold = 0.1 * dtype_max
+        low_threshold = 0.1
+    elif use_quantiles:
+        if not(0.0 <= low_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must not be > 1.0")
+    else:
+        low_threshold /= dtype_max
 
     if high_threshold is None:
-        high_threshold = 0.2 * dtype_max
+        high_threshold = 0.2
+    elif use_quantiles:
+        if not(0.0 <= high_threshold <= 1.0):
+            raise ValueError("Quantile thresholds must not be > 1.0")
+    else:
+        high_threshold /= dtype_max
 
     if high_threshold < low_threshold:
         raise ValueError("low_threshold should be lower then high_threshold")
 
-    if not preserve_range:
-        low_threshold = low_threshold / dtype_max
-        high_threshold = high_threshold / dtype_max
-
-    smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant',
-                                        preserve_range)
+    smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant')
 
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
     magnitude = np.hypot(isobel, jsobel)
 
     if use_quantiles:
-        if high_threshold > 1.0 or low_threshold > 1.0:
-            raise ValueError("Quantile thresholds must not be > 1.0")
-        if high_threshold < 0.0 or low_threshold < 0.0:
-            raise ValueError("Quantile thresholds must not be < 0.0")
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
