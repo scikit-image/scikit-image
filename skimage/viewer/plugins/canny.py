@@ -13,8 +13,7 @@ class CannyPlugin(OverlayPlugin):
     name = 'Canny Filter'
 
     def __init__(self, *args, **kwargs):
-        filter_func = functools.partial(canny, preserve_range=True)
-        super(CannyPlugin, self).__init__(image_filter=filter_func, **kwargs)
+        super(CannyPlugin, self).__init__(image_filter=canny, **kwargs)
 
     def attach(self, image_viewer):
         image = image_viewer.image
