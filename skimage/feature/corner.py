@@ -995,18 +995,19 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                             footprint=footprint, labels=labels,
                             num_peaks_per_label=num_peaks_per_label)
 
-    # Use KDtree to find the peaks that are too close to each others
-    tree = spatial.cKDTree(coords)
+    if len(coords):
+        # Use KDtree to find the peaks that are too close to each others
+        tree = spatial.cKDTree(coords)
 
-    rejected_peaks = set()
-    for idx, point in enumerate(coords):
-        if idx not in rejected_peaks:
-            candidates = tree.query_ball_point(point, r=min_distance, p=p)
-            candidates.remove(idx)
-            rejected_peaks.update(candidates)
+        rejected_peaks = set()
+        for idx, point in enumerate(coords):
+            if idx not in rejected_peaks:
+                candidates = tree.query_ball_point(point, r=min_distance, p=p)
+                candidates.remove(idx)
+                rejected_peaks.update(candidates)
 
-    # Remove the peaks that are too close to each others
-    coords = np.delete(coords, tuple(rejected_peaks), axis=0)[::-1]
+        # Remove the peaks that are too close to each others
+        coords = np.delete(coords, tuple(rejected_peaks), axis=0)[::-1]
 
     if indices is True:
         return coords
