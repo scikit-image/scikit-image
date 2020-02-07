@@ -36,7 +36,7 @@ def equalize_adapthist(image, kernel_size=None,
     ----------
     image : (M, N[, C]) ndarray
         Input image.
-    kernel_size: array_like, optional
+    kernel_size: integer or array_like, optional
         Defines the shape of contextual regions used in the algorithm. If
         iterable is passed, it must have the same number of elements as
         ``image.ndim`` (without color channel). If integer, it is broadcasted
