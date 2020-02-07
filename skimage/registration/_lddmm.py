@@ -1,6 +1,8 @@
+import warnings
 import numpy as np
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det
+from scipy.sparse.linalg import cg, LinearOperator
 from matplotlib import pyplot as plt
 
 from skimage.registration._lddmm_utilities import _validate_ndarray
@@ -47,7 +49,6 @@ class _Lddmm:
         translational_stepsize=None,
         linear_stepsize=None,
         deformative_stepsize=None,
-        contrast_stepsize=1,
         spatially_varying_contrast_map=False,
         calibrate=False,
     ):    
@@ -69,7 +70,6 @@ class _Lddmm:
         self.translational_stepsize = float(translational_stepsize)
         self.linear_stepsize = float(linear_stepsize)
         self.deformative_stepsize = float(deformative_stepsize)
-        self.contrast_stepsize = contrast_stepsize
         self.contrast_order = int(contrast_order)
         if self.contrast_order < 1: raise ValueError(f"contrast_order must be at least 1.\ncontrast_order: {self.contrast_order}")
         self.sigmaR = sigmaR or 10 * np.max(self.template_resolution)
@@ -108,7 +108,7 @@ class _Lddmm:
         self.phi_inv_affine_inv = np.copy(self.target_coords)
         self.fourier_velocity_fields = np.zeros_like(self.velocity_fields, np.complex128)
         self.matching_weights = np.ones_like(self.target)
-        self.deformed_template_to_t = []
+        self.deformed_template_to_time = []
         self.deformed_template = interpn(
             points=self.template_axes, 
             values=self.template, 
@@ -170,15 +170,13 @@ class _Lddmm:
 
             # Backward pass: update contrast map, affine, & velocity_fields.
             
-            # Compute contrast map gradient.
-            # Let the contrast map gradient be the optimal minus the current.
-            contrast_map_gradient = self._compute_contrast_map_gradient()
+            # Compute contrast map.
+            self._compute_contrast_map()
+
             # Compute affine gradient.
             affine_inv_gradient = self._compute_affine_inv_gradient()
             # Compute velocity_fields gradient.
             if iteration >= self.num_affine_only_iterations: velocity_fields_gradients = self._compute_velocity_fields_gradients()
-            # Update contrast map.
-            self._update_contrast_map(contrast_map_gradient)
             # Update affine.
             self._update_affine(affine_inv_gradient)
             # Update velocity_fields.
@@ -221,13 +219,19 @@ class _Lddmm:
         Calculate phi_inv from v
         Compose on the right with Ainv
         Apply phi_invAinv to template
+
+        Updates attributes:
+            phi_inv
+            deformed_template_to_time
+            phi_inv_affine_inv
+            deformed_template
         """
 
         # Set self.phi_inv to identity.
         self.phi_inv = np.copy(self.template_coords)
         
-        # Reset self.deformed_template_to_t.
-        self.deformed_template_to_t = []
+        # Reset self.deformed_template_to_time.
+        self.deformed_template_to_time = []
         for timestep in range(self.num_timesteps):
             # Compute phi_inv.
             sample_coords = self.template_coords - self.velocity_fields[..., timestep, :] * self.delta_t
@@ -239,8 +243,8 @@ class _Lddmm:
                 fill_value=None, 
             ) + sample_coords
 
-            # Compute deformed_template_to_t
-            self.deformed_template_to_t.append(
+            # Compute deformed_template_to_time
+            self.deformed_template_to_time.append(
                 interpn(
                     points=self.template_axes, 
                     values=self.template, 
@@ -278,6 +282,9 @@ class _Lddmm:
     def _apply_contrast_map(self):
         """
         Apply contrast_coefficients to deformed_template to produce contrast_deformed_template.
+
+        Updates attributes:
+            contrast_deformed_template
         """
 
         self.contrast_deformed_template = np.sum(self.contrast_polynomial_basis * self.contrast_coefficients, axis=-1)
@@ -286,6 +293,10 @@ class _Lddmm:
     def _compute_weights(self):
         """
         Compute the matching_weights between the contrast_deformed_template and the target.
+
+        Updates attributes:
+            artifact_mean_value
+            matching_weights
         """
         # TODO: rename.
         
@@ -300,8 +311,9 @@ class _Lddmm:
     def _compute_cost(self):
         """
         Compute the matching cost using a weighted sum of square error.
-        Appends to:
-            matching_energies
+
+        Updates attributes:
+            matchin_energies
             regularization_energies
             total_energies
         """
@@ -324,44 +336,75 @@ class _Lddmm:
         self.total_energies.append(total_energy)
 
 
-    def _compute_contrast_map_gradient(self):
+    def _compute_contrast_map(self):
         """
         Compute contrast_coefficients mapping deformed_template to target.
+
+        Updates attributes:
+            contrast_polynomial_basis
+            contrast_coefficients
         """
 
         if self.spatially_varying_contrast_map:
-            raise NotImplementedError(f"spatially_varying_contrast_map functionality not yet fully implemented.")
+            # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
 
-        # Set contrast_polynomial_basis (basis).
-        for power in range(self.contrast_order + 1):
-            self.contrast_polynomial_basis[..., power] = self.deformed_template**power
+            sigma_matching = 1
+            sigma_contrast = 1
 
-        # Ravel necessary components for convenient matrix multiplication.
-        deformed_template_ravel = np.ravel(self.deformed_template)
-        target_ravel = np.ravel(self.target)
-        matching_weights_ravel = np.ravel(self.matching_weights)
-        contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(self.target.size, -1) # A view, not a copy.
+            # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
+            contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
+            matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / sigma_matching**2) @ contrast_polynomial_basis_transpose
 
-         # Create intermediate composites.
-        basis_transpose_basis = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, contrast_polynomial_basis_semi_ravel)
-        basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
+            # Shape: (*self.target.shape, self.contrast_order + 1)
+            target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / sigma_matching**2
 
-        # Solve for contrast_coefficients.
-        optimal_contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
+            def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
+                """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) - regularization_matrix).ravel()."""
 
-        # We do this so we can use the optimal gradient descent.
-        # The format is used so that we could substitute a different approach to computing the gradient.
-        contrast_coefficients_gradient = optimal_contrast_coefficients - self.contrast_coefficients
+                contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
 
-        return contrast_coefficients_gradient
+                regularization_matrix = np.zeros_like(self.target)
+                for dim in range(self.target.ndim):
+                    regularization_matrix += (np.roll(self.contrast_coefficients, 1, axis=dim) - 2 * self.contrast_coefficients + np.roll(self.contrast_coefficients, -1, axis=dim)) / (self.target_resolution[dim]**2)
+                regularization_matrix /= sigma_contrast**2
 
+                return (matching_matrix @ contrast_coefficients - regularization_matrix).ravel()
+            linear_operator = LinearOperator((self.target.size * (self.contrast_order + 1), self.target.size * (self.contrast_order + 1)), matvec=_matvec)
 
-    def _update_contrast_map(self, contrast_map_gradient):
+            # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
+            contrast_coefficients_update = cg(linear_operator, target_matrix.ravel())[0].reshape(contrast_coefficients.shape)
+            if contrast_coefficients_update[1] != 0:
+                warnings.warn(
+                    f"WARNING: scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
+                    RuntimeWarning
+                )
+            self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
 
-        self.contrast_coefficients += contrast_map_gradient * self.contrast_stepsize
+        else:
+            # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == False.
+
+            # Set contrast_polynomial_basis (basis).
+            for power in range(self.contrast_order + 1):
+                self.contrast_polynomial_basis[..., power] = self.deformed_template**power
+
+            # Ravel necessary components for convenient matrix multiplication.
+            deformed_template_ravel = np.ravel(self.deformed_template)
+            target_ravel = np.ravel(self.target)
+            matching_weights_ravel = np.ravel(self.matching_weights)
+            contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(self.target.size, -1) # A view, not a copy.
+
+            # Create intermediate composites.
+            basis_transpose_basis = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, contrast_polynomial_basis_semi_ravel)
+            basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
+
+            # Solve for contrast_coefficients.
+            self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
 
 
     def _compute_affine_inv_gradient(self):
+        """
+        Compute and return the affine_inv gradient.
+        """
 
         # Generate the template image deformed by phi_inv but not affected by the affine.
         non_affine_deformed_template = interpn(
@@ -417,6 +460,16 @@ class _Lddmm:
 
 
     def _update_affine(self, affine_inv_gradient):
+        """
+        Update self.affine_inv and self.affine based on affine_inv_gradient.
+
+        if self.calibrate, appends the current self.affine to self.affines.
+
+        Updates attributes:
+            affine
+            affines
+        """
+        
 
         linear_and_translational_stepsize_matrix = np.zeros((4,4))
         linear_and_translational_stepsize_matrix[:3, :3] = self.linear_stepsize
@@ -434,6 +487,13 @@ class _Lddmm:
 
 
     def _compute_velocity_fields_gradients(self):
+        """
+        Compute and return the gradients of the self.velocity_fields.
+
+        Updates attributes:
+            phi
+            affine_phi
+        """
 
         matching_error_prime = (self.contrast_deformed_template - self.target) * self.matching_weights / self.sigmaM**2
         contrast_map_prime = np.zeros_like(self.target, float)
@@ -481,14 +541,14 @@ class _Lddmm:
             )
 
             # The gradient of the template image deformed to time t.
-            deformed_template_to_t_gradient = np.stack(np.gradient(self.deformed_template_to_t[timestep], *self.template_resolution, axis=[0,1,2]), -1)
+            deformed_template_to_time_gradient = np.stack(np.gradient(self.deformed_template_to_time[timestep], *self.template_resolution, axis=[0,1,2]), -1)
 
             # The derivative of the matching cost with respect to the velocity at time t
             # is the product of 
             # (the error deformed to time t), 
             # (the template gradient deformed to time t), 
             # & (the determinant of the jacobian of the transformation).
-            d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_t_gradient * (-1.0) * det(self.affine)
+            d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_time_gradient * (-1.0) * det(self.affine)
 
             # To convert from derivative to gradient we smooth by applying a low-pass filter in the frequency domain.
             matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=(0,1,2)) * np.expand_dims(self.low_pass_filter, -1)
@@ -504,6 +564,15 @@ class _Lddmm:
 
     
     def _update_velocity_fields(self, velocity_fields_gradients):
+        """
+        Update self.velocity_fields based on velocity_fields_gradient.
+
+        if self.calibrate, calculates and appends the maximum velocity to self.maximum_velocities.
+
+        Updates attributes:
+            velocity_fields
+            maximum_velocities
+        """
 
             for timestep in range(self.num_timesteps):
                 self.velocity_fields[...,timestep,:] -= velocity_fields_gradients[timestep] * self.deformative_stepsize
@@ -515,6 +584,13 @@ class _Lddmm:
 
     
     def _compute_affine_phi(self):
+        """
+        Compute and set self.affine_phi. Called once in case there were no deformative iterations to set it.
+
+        Updates attributes:
+            phi
+            affine_phi
+        """
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
         # it will be phi_10_inv = phi_01 = phi.
@@ -539,6 +615,9 @@ class _Lddmm:
     
 
     def _generate_calibration_plots(self):
+        """
+        Plot the energies, maximum velocities, translation components, and linear components as functions of the number of iterations.
+        """
 
         fig, axes = plt.subplots(2, 2, figsize=(6, 6))
 
@@ -821,16 +900,16 @@ def apply_lddmm(
     It is expected that the rest of the arguments will be provided by keyword argument from the output of the register function.
 
     Example use:
-        register_output_dict = lddmm_register(*args, **kwargs)
-        deformed_subject = apply_lddmm(subject, subject_resolution, **register_output_dict)
+        register_output_dict = lddmm_register(\*args, \*\*kwargs)
+        deformed_subject = apply_lddmm(subject, subject_resolution, \*\*register_output_dict)
 
     Args:
         subject (np.ndarray): The image to be deformed to the template or target from the results of the register function.
         subject_resolution (float, seq, optional): The resolution of subject in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
         affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming to the template. Defaults to None.
-        phi_inv_affine_inv ([np.ndarray, optional): The position field in the shape of the target for deforming to the target. Defaults to None.
+        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming to the target. Defaults to None.
         template_resolution (float, seq, optional): The resolution of the template in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
-        target_resolution ([float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
+        target_resolution (float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
         output_resolution (NoneType, float, seq, optional): The resolution of the output deformed_subject in each dimension, 
             or just one scalar to indicate isotropy, or None to indicate the resolution of template or target based on deform_to. 
             Defaults to None.
@@ -840,7 +919,7 @@ def apply_lddmm(
     Raises:
         TypeError: Raised if deform_to is not of type str.
         ValueError: Raised if deform_to is a string other than "template" or "target".
-        ValueError: Raised if deform_to=='template' and affine_phi is None or deform_to=='target' and phi_inv_affine_inv is None.
+        ValueError: Raised if deform_to=="template" and affine_phi is None or deform_to=="target" and phi_inv_affine_inv is None.
 
     Returns:
         np.ndarray: The result of applying the appropriate position field to subject, deforming it based on deform_to.
