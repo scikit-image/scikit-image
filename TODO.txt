@@ -52,6 +52,7 @@ Version 0.19
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
 
+
 Other
 -----
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
