@@ -3,7 +3,6 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-cimport numpy as cnp
 import numpy as np
 from libc.math cimport exp, fabs, sqrt
 from libc.float cimport DBL_MAX
@@ -110,6 +109,7 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
     shape_ext = (rows2, cols2, dims)
 
     cdef:
+        np_floats[:, :, ::1] cu = u
         np_floats[:, :, ::1] dx = out.copy()
         np_floats[:, :, ::1] dy = out.copy()
         np_floats[:, :, ::1] bx = out.copy()
@@ -135,9 +135,9 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
 
         rmse = 0
 
-        for r in range(1, rows + 1):
-            for c in range(1, cols + 1):
-                for k in range(dims):
+        for k in range(dims):
+            for r in range(1, rows):
+                for c in range(1, cols):
 
                     uprev = out[r, c, k]
 

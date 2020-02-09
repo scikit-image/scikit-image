@@ -232,7 +232,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               range_lut, empty_dims, out)
 
 
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+                       clip=True):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -252,16 +253,19 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
         Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when::
 
-            SUM((u(n) - u(n-1))**2) < eps
+            SUM((out(n) - out(n-1))**2) < eps
 
     max_iter : int, optional
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
+    clip : boolean, optional
+        Ensure that the output values are in the range [0, 1] for a
+        non-negative input image, or [-1, 1] for a signed input image.
 
     Returns
     -------
-    u : ndarray
+    out : ndarray
         Denoised image.
 
     References
@@ -288,6 +292,12 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     out = np.zeros(shape_ext, image.dtype)
     _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
                         isotropic, out)
+
+    if clip:
+        minvalue = -1. if np.any(image < 0) else 0.
+        maxvalue = 1.
+        np.clip(out, minvalue, maxvalue, out=out)
+
     return np.squeeze(out[1:-1, 1:-1])
 
 
