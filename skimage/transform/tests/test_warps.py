@@ -698,7 +698,7 @@ def test_resize_local_mean_nd():
         resized = resize_local_mean(x, out_shape)
         expected_shape = 1.5 * shape
         assert_equal(resized.shape, expected_shape)
-        assert np.all(resized == 1)
+        assert_array_equal(resized, 1)
 
 
 def test_resize_local_mean3d():
