@@ -790,6 +790,8 @@ def rgb2gray(rgb):
     """
 
     if rgb.ndim == 2:
+        warn('Gray scale image conversion is now deprecated.',
+             FutureWarning, stacklevel=2)
         return np.ascontiguousarray(rgb)
 
     rgb = _prepare_colorarray(rgb[..., :3])
