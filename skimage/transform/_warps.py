@@ -57,7 +57,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     elif output_ndim == image.ndim - 1:
         # multichannel case: append shape of last axis
         output_shape = output_shape + (image.shape[-1], )
-    elif output_ndim < image.ndim - 1:
+    elif output_ndim < image.ndim:
         raise ValueError("output_shape length cannot be smaller than the "
                          "image number of dimensions")
 
