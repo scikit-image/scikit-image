@@ -695,6 +695,7 @@ def test_gray2rgba_dtype():
 
 def test_gray2rgba_alpha():
     img = np.random.random((5, 5))
+    img_u8 = img_as_ubyte(img)
 
     # Default
     alpha = None
@@ -716,30 +717,20 @@ def test_gray2rgba_alpha():
 
     # Warning about alpha cast
     alpha = 0.5
-    img_u8 = img_as_ubyte(img)
-    with expected_warnings(["alpha is cast to uint8"]):
+    with expected_warnings(["alpha can't be safely cast to image dtype"]):
         rgba = gray2rgba(img_u8, alpha)
 
     # Invalid scalar value
     alpha = 255
-    expected_err_msg = "alpha is not in image data type limits."
 
-    with pytest.raises(ValueError) as err:
+    with expected_warnings(["alpha = 255 is not in image data type limits."]):
         rgba = gray2rgba(img, alpha)
-        assert expected_err_msg == str(err.value)
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))
-    expected_err_msg = "alpha and image must have the same shape"
+    expected_err_msg = ("could not broadcast input array from shape (5,5,1) "
+                        "into shape (5,5)")
 
     with pytest.raises(ValueError) as err:
         rgba = gray2rgba(img, alpha)
-        assert expected_err_msg == str(err.value)
-
-    # Invalid dtype
-    alpha = img_as_ubyte(np.random.random((5, 5)))
-    expected_err_msg = "alpha and image must have the same data type"
-
-    with pytest.raises(ValueError) as err:
-        rgba = gray2rgba(img, alpha)
-        assert expected_err_msg == str(err.value)
+    assert expected_err_msg == str(err.value)

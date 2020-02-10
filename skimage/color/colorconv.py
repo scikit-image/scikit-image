@@ -844,17 +844,12 @@ def gray2rgba(image, alpha=None):
         alpha = alpha_max
     elif np.isscalar(alpha):
         if alpha_min > alpha or alpha > alpha_max:
-            raise ValueError("alpha is not in image data type limits.")
-        alpha_cast = arr.dtype.type(alpha)
-        if alpha_cast != alpha:
-            warn("alpha is cast to {}".format(arr.dtype.name))
-        alpha = alpha_cast
-    else:
-        alpha = np.asarray(alpha)
-        if alpha.shape != image.shape:
-            raise ValueError("alpha and image must have the same shape")
-        if alpha.dtype != image.dtype:
-            raise ValueError("alpha and image must have the same dtype")
+            warn("alpha = {} is not in image data type limits."
+                 .format(alpha))
+
+    if not np.can_cast(alpha, image.dtype):
+        warn("alpha can't be safely cast to image dtype {}"
+             .format(arr.dtype.name))
 
     rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
     rgba[..., :3] = arr[..., np.newaxis]
@@ -892,8 +887,8 @@ def gray2rgb(image, alpha=None):
 
     if alpha is not None:
         warn("alpha argument is deprecated and will be removed in "
-             "version 0.19. Please use the gray2rgba to obtain an "
-             "RGBA image.", FutureWarning, stacklevel=2)
+             "version 0.19. Please use the gray2rgba function instead"
+             "to obtain an RGBA image.", FutureWarning, stacklevel=2)
     is_rgb = False
     is_alpha = False
     dims = np.squeeze(image).ndim
