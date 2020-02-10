@@ -101,6 +101,7 @@ def test_descriptor_orb():
     detector_extractor.extract(img, detector_extractor.keypoints,
                                detector_extractor.scales,
                                detector_extractor.orientations)
+
     assert_equal(exp_descriptors,
                  detector_extractor.descriptors[100:120, 10:20])
 

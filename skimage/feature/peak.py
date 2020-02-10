@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.ndimage as ndi
-from ..segmentation import relabel_sequential
 from .. import measure
 from ..filters import rank_order
 
