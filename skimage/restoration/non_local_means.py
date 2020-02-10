@@ -105,10 +105,6 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     ``h = 0.8 * sigma`` when `fast_mode` is `True`, or ``h = 0.6 * sigma`` when
     `fast_mode` is `False`.
 
-    Artifacts may appear in fast mode when large single precision
-    (float32) volumetric data is processed. These artifacts are caused
-    by round-off errors accumulation.
-
     References
     ----------
     .. [1] A. Buades, B. Coll, & J-M. Morel. A non-local algorithm for image
