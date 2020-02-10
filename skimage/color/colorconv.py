@@ -794,7 +794,7 @@ def rgb2gray(rgb):
 
     if rgb.shape[-1] > 3:
         warn('Non RGB image conversion is now deprecated. For RGBA images, '
-             'Please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
+             'please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
              'a ValueError will be raised if input image last dimension '
              'length is not 3.', FutureWarning, stacklevel=2)
         rgb = rgb[..., :3]
