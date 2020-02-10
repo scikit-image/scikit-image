@@ -155,21 +155,6 @@ def _prepare_colorarray(arr, force_copy=False):
     return dtype.img_as_float(arr, force_copy=force_copy)
 
 
-def _prepare_rgba_array(arr):
-    """Check the shape of the array to be RGBA and convert it to
-    floating point representation.
-
-    """
-    arr = np.asanyarray(arr)
-
-    if arr.ndim < 2 or arr.shape[-1] != 4:
-        msg = ("the input array must have a shape == (.., 4)), "
-               "got {0}".format(arr.shape))
-        raise ValueError(msg)
-
-    return dtype.img_as_float(arr)
-
-
 def rgba2rgb(rgba, background=(1, 1, 1)):
     """RGBA to RGB conversion using alpha blending [1]_.
 
