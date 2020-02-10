@@ -790,7 +790,11 @@ def rgb2gray(rgb):
     """
 
     if rgb.ndim == 2:
-        warn('Gray scale image conversion is now deprecated.',
+        warn('The behavior of rgb2gray will change in scikit-image 0.19. '
+             'Currently, rgb2gray allows 2D grayscale image to be passed '
+             'as inputs and leaves them unmodified as outputs. '
+             'In version 0.19, this will no longer be these images will '
+             'be treated as 1D images with 3 channels.',
              FutureWarning, stacklevel=2)
         return np.ascontiguousarray(rgb)
 
