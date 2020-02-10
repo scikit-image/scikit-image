@@ -6,7 +6,7 @@ from ..util import img_as_float
 from .._shared.utils import warn, convert_to_float
 
 
-__all__ = ['gaussian']
+__all__ = ['gaussian', 'difference_of_gaussians']
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
@@ -155,3 +155,71 @@ def _guess_spatial_dimensions(image):
         return 3
     else:
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+
+
+def difference_of_gaussians(image, sigma1, sigma2=None, output=None,
+                            mode='nearest', cval=0, multichannel=False,
+                            truncate=4.0):
+
+    """Multi-dimensional band-pass filter using the Difference of Gaussians
+    method.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input array to filter.
+    sigma1 : scalar or sequence of scalars
+        Standard deviation(s) for the Gaussian kernel with the smaller sigmas
+        across all axes. The standard deviations are given for each axis as a
+        sequence, or as a single number, in which case the single number is
+        used as the standard deviation value for all axes.
+    sigma2 : scalar or sequence of scalars, optional (default is None)
+        Standard deviation(s) for the Gaussian kernel with the larger sigmas
+        across all axes. The standard deviations are given for each axis as a
+        sequence, or as a single number, in which case the single number is
+        used as the standard deviation value for all axes. If None is given
+        (default), sigmas for all axes are calculated as 1.6 * sigma1,
+        in which case the Difference of Gaussians calculation will approximate
+        the Laplacian of Gaussian.
+    output : array, optional
+        The ``output`` parameter passes an array in which to store the
+        filter output.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        The ``mode`` parameter determines how the array borders are
+        handled, where ``cval`` is the value when mode is equal to
+        'constant'. Default is 'nearest'.
+    cval : scalar, optional
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        is 0.0
+    multichannel : bool, optional (default: False)
+        Whether the last axis of the image is to be interpreted as multiple
+        channels. If True, each channel is filtered separately (channels are
+        not mixed together).
+    truncate : float, optional (default is 4.0)
+        Truncate the filter at this many standard deviations.
+
+    Returns
+    -------
+    filtered_image : ndarray
+        the filtered array
+
+    Notes
+    -----
+    This function will subtract an array filtered with a guassian kernel
+    with sigmas given by ``sigma2`` from an array filtered with a gaussian
+    kernel with sigmas provided by ``sigma1``. The values for ``sigma2`` must
+    always be greater than the corresponding values in ``sigma1``, or a
+    ``ValueError`` will be raised.
+
+    When ``sigma2`` is none, the values for ``sigma2`` will be calculated
+    as 1.6x the corresponding values in ``sigma1``. This approximates the
+    inverted Laplacian of Guassian, commonly used in edge and blob detection.
+
+    Input image is converted according to the conventions of ``img_as_float``.
+
+
+
+    Examples
+    --------
+
+    """
