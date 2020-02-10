@@ -1138,7 +1138,10 @@ def _local_mean_weights(old_size, new_size, grid_mode, dtype):
         old, new = old_size - 1, new_size - 1
         old_breaks = np.pad(np.linspace(0.5, old - 0.5, old, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
-        val = 0.5 * old / new
+        if new == 0:
+            val = np.inf
+        else:
+            val = 0.5 * old / new
         new_breaks = np.pad(np.linspace(val, old - val, new, dtype=dtype),
                             1, 'constant', constant_values=(0, old))
 

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy.ndimage import map_coordinates
 
 from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
@@ -16,7 +17,7 @@ from skimage.draw import circle_perimeter_aa
 from skimage.feature import peak_local_max
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
+                                     test_parallel, assert_array_equal)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -690,15 +691,15 @@ def test_resize_local_mean2d_4d():
     assert_almost_equal(resized, ref)
 
 
-def test_resize_local_mean_nd():
-    for dim in range(1, 6):
-        shape = 2 + np.arange(dim) * 2
-        x = np.ones(shape)
-        out_shape = np.asarray(shape) * 1.5
-        resized = resize_local_mean(x, out_shape)
-        expected_shape = 1.5 * shape
-        assert_equal(resized.shape, expected_shape)
-        assert_array_equal(resized, 1)
+@pytest.mark.parametrize("dim", range(1, 6))
+def test_resize_local_mean_nd(dim):
+    shape = 2 + np.arange(dim) * 2
+    x = np.ones(shape)
+    out_shape = (np.asarray(shape) * 1.5).astype(int)
+    resized = resize_local_mean(x, out_shape)
+    expected_shape = 1.5 * shape
+    assert_equal(resized.shape, expected_shape)
+    assert_array_equal(resized, 1)
 
 
 def test_resize_local_mean3d():
