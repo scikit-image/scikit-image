@@ -295,7 +295,8 @@ class TestColorconv(TestCase):
 
     def test_rgb2gray_alpha(self):
         x = np.random.rand(10, 10, 4)
-        assert rgb2gray(x).ndim == 2
+        with expected_warnings(['Non RGB image conversion']):
+            assert rgb2gray(x).ndim == 2
 
     def test_rgb2gray_on_gray(self):
         rgb2gray(np.random.rand(5, 5))
