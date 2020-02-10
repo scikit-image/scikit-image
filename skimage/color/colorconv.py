@@ -842,6 +842,9 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
+        warn('Non gray scale images conversion is now deprecated. In version '
+             '0.19, input image  will be considered as grey scale, whatever '
+             'is its shape.', FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
