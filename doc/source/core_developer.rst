@@ -11,7 +11,7 @@ so far.
 This document offers guidelines for your new role.  First and
 foremost, you should familiarize yourself with the project's
 `mission, vision, and values
-<https://github.com/scikit-image/scikit-image/pull/3585>`__.  When in
+<https://scikit-image.org/docs/dev/values.html>`__.  When in
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
