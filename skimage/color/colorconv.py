@@ -825,7 +825,7 @@ def gray2rgba(image, alpha=None):
     Raises
     ------
     ValueError
-        If ``alpha`` is a scala and is not in ``image`` data type
+        If ``alpha`` is a scalar and is not in ``image`` data type
         limits.
     ValueError
         If ``alpha`` is an array and have a different shape then
