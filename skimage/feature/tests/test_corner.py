@@ -330,7 +330,7 @@ def test_subpix_border():
                     [24.5       , 24.5       ],
                     [24.52040816, 48.47959184],
                     [48.47959184, 24.52040816],
-                    [48.47959184, 48.47959184]])[::-1]
+                    [48.47959184, 48.47959184]])
     assert_almost_equal(subpix, ref)
 
 
@@ -449,7 +449,7 @@ def test_corner_fast_astronaut():
                         [489, 155],
                         [492, 139],
                         [494, 169],
-                        [496, 266]])[::-1]
+                        [496, 266]])
     actual = corner_peaks(corner_fast(img, 12, 0.3),
                           min_distance=10, threshold_rel=0)
     assert_array_equal(actual, expected)
@@ -487,7 +487,7 @@ def test_corner_orientations_astronaut():
                           2.47305654e+00, -1.63869275e+00,  5.46905279e-02,
                          -4.40598471e-01,  3.14918803e-01, -1.76069982e+00,
                           3.05330950e+00,  2.39291733e+00, -1.22091334e-01,
-                         -3.09279990e-01,  1.45931342e+00])[::-1]
+                         -3.09279990e-01,  1.45931342e+00])
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
@@ -499,6 +499,6 @@ def test_corner_orientations_square():
                            min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     actual_orientations_degrees = np.rad2deg(actual_orientations)
-    expected_orientations_degree = np.array([45., 135., -45., -135.])[::-1]
+    expected_orientations_degree = np.array([45., 135., -45., -135.])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
