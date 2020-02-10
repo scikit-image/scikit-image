@@ -813,7 +813,7 @@ def gray2rgba(image, alpha=None):
         Input image.
     alpha : array_like, optional
         Alpha channel of the output image. It may be a scalar or an
-        array with the same shape as ``image``. If not specified it is
+        array that can be broadcast to ``image``. If not specified it is
         set to the maximum limit correspondin to ``image`` data type.
 
     Returns
@@ -825,7 +825,7 @@ def gray2rgba(image, alpha=None):
     Raises
     ------
     ValueError
-        If ``alpha`` is a scala and is not in ``image`` data type
+        If ``alpha`` is a scalar and is not in ``image`` data type
         limits.
     ValueError
         If ``alpha`` is an array and have a different shape then
