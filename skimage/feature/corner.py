@@ -935,7 +935,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
     p : float
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
-        inf corresponds to the chebychev distance and 2 to the
+        inf corresponds to the Chebyshev distance and 2 to the
         euclidean distance.
 
     Returns
