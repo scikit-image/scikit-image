@@ -996,7 +996,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                             num_peaks_per_label=num_peaks_per_label)
 
     if len(coords):
-        # Use KDtree to find the peaks that are too close to each others
+        # Use KDtree to find the peaks that are too close to each other
         tree = spatial.cKDTree(coords)
 
         rejected_peaks = set()
