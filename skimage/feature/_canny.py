@@ -270,11 +270,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None,
     #---- If use_quantiles is set then calculate the thresholds to use
     #
     if use_quantiles:
-        if high_threshold > 1.0 or low_threshold > 1.0:
-            raise ValueError("Quantile thresholds must not be > 1.0")
-        if high_threshold < 0.0 or low_threshold < 0.0:
-            raise ValueError("Quantile thresholds must not be < 0.0")
-
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
