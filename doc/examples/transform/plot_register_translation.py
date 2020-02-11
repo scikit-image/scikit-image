@@ -1,9 +1,9 @@
 """
 =====================================
-Cross-Correlation (Phase Correlation)
+Image Registration
 =====================================
 
-In this example, we use phase correlation to identify the relative shift
+In this example, we use cross-correlation to identify the relative shift
 between two similar-sized images.
 
 The ``register_translation`` function uses cross-correlation in Fourier space,

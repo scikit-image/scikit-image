@@ -28,8 +28,9 @@ def test_two_connectivity():
 
 
 def test_in_place():
-    observed = remove_small_objects(test_image, min_size=6, in_place=True)
-    assert_equal(observed is test_image, True,
+    image = test_image.copy()
+    observed = remove_small_objects(image, min_size=6, in_place=True)
+    assert_equal(observed is image, True,
                  "remove_small_objects in_place argument failed.")
 
 
@@ -117,9 +118,9 @@ def test_two_connectivity_holes():
 
 
 def test_in_place_holes():
-    observed = remove_small_holes(test_holes_image, area_threshold=3,
-                                  in_place=True)
-    assert_equal(observed is test_holes_image, True,
+    image = test_holes_image.copy()
+    observed = remove_small_holes(image, area_threshold=3, in_place=True)
+    assert_equal(observed is image, True,
                  "remove_small_holes in_place argument failed.")
 
 

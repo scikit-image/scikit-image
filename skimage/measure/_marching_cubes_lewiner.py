@@ -242,7 +242,7 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     warnings.warn("marching_cubes_lewiner is deprecated in favor of "
                   "marching_cubes. marching_cubes_lewiner will "
                   "be removed in version 0.19",
-                  FutureWarning)
+                  FutureWarning, stacklevel=2)
 
     return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
                                    step_size, allow_degenerate, use_classic)
