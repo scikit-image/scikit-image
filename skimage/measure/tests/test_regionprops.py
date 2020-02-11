@@ -59,6 +59,8 @@ def test_dtype():
         regionprops(np.zeros((10, 10), dtype=np.float))
     with testing.raises(TypeError):
         regionprops(np.zeros((10, 10), dtype=np.double))
+    with testing.raises(TypeError):
+        regionprops(np.zeros((10, 10), dtype=np.bool))
 
 
 def test_ndim():
@@ -538,6 +540,32 @@ def test_props_dict_complete():
 
 def test_column_dtypes_complete():
     assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
+
+
+def test_column_dtypes_correct():
+    msg = 'mismatch with expected type,'
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
+    for col in COL_DTYPES:
+        r = region[col]
+
+        if col in OBJECT_COLUMNS:
+            assert COL_DTYPES[col] == object
+            continue
+
+        t = type(np.ravel(r)[0])
+
+        if np.issubdtype(t, np.floating):
+            assert COL_DTYPES[col] == float, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
+        elif np.issubdtype(t, np.integer):
+            assert COL_DTYPES[col] == int, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
+        else:
+            assert False, (
+                f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
+            )
 
 
 def test_deprecated_coords_argument():

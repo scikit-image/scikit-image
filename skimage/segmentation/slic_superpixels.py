@@ -232,6 +232,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     image = img_as_float(image)
     use_mask = mask is not None
+    dtype = image.dtype
 
     is_2d = False
 
@@ -282,15 +283,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         centroids, steps = _get_grid_centroids(image, n_segments)
 
     if spacing is None:
-        spacing = np.ones(3)
+        spacing = np.ones(3, dtype=dtype)
     elif isinstance(spacing, (list, tuple)):
-        spacing = np.ascontiguousarray(spacing, dtype=np.double)
+        spacing = np.ascontiguousarray(spacing, dtype=dtype)
 
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
-        sigma /= spacing.astype(np.double)
+        sigma = np.array([sigma, sigma, sigma], dtype=dtype)
+        sigma /= spacing.astype(dtype)
     elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, dtype=np.double)
+        sigma = np.array(sigma, dtype=dtype)
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
