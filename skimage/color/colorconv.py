@@ -792,7 +792,14 @@ def rgb2gray(rgb):
     if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)
 
-    rgb = _prepare_colorarray(rgb[..., :3])
+    if rgb.shape[-1] > 3:
+        warn('Non RGB image conversion is now deprecated. For RGBA images, '
+             'please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
+             'a ValueError will be raised if input image last dimension '
+             'length is not 3.', FutureWarning, stacklevel=2)
+        rgb = rgb[..., :3]
+
+    rgb = _prepare_colorarray(rgb)
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return rgb @ coeffs
 
@@ -901,6 +908,12 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
+        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
+             'In version 0.19, input arrays will always be considered '
+             'grayscale, even if the last dimension has length 3 or 4. '
+             'To prevent this warning and ensure compatibility with future '
+             'versions, detect RGB images outside of this function.',
+             FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
