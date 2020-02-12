@@ -828,19 +828,6 @@ def gray2rgba(image, alpha=None):
     rgba : ndarray
         RGBA image. A new dimension of length 4 is added to input
         image shape.
-
-    Raises
-    ------
-    ValueError
-        If ``alpha`` is a scalar and is not in ``image`` data type
-        limits.
-    ValueError
-        If ``alpha`` is an array and have a different shape then
-        ``image``.
-    ValueError
-        If ``alpha`` is an array and have a different data type then
-        ``image``.
-
     """
 
     arr = np.asarray(image)
