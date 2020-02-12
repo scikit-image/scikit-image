@@ -40,3 +40,8 @@ __inline double fast_exp (double y)
 
     return _eco.d;
 }
+
+__inline float fast_expf (float y)
+{
+  return (float)fast_exp((double)y);
+}

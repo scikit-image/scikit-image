@@ -295,7 +295,8 @@ class TestColorconv(TestCase):
 
     def test_rgb2gray_alpha(self):
         x = np.random.rand(10, 10, 4)
-        assert rgb2gray(x).ndim == 2
+        with expected_warnings(['Non RGB image conversion']):
+            assert rgb2gray(x).ndim == 2
 
     def test_rgb2gray_on_gray(self):
         rgb2gray(np.random.rand(5, 5))
@@ -635,20 +636,27 @@ def test_gray2rgb():
 
 def test_gray2rgb_rgb():
     x = np.random.rand(5, 5, 4)
-    y = gray2rgb(x)
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        y = gray2rgb(x)
     assert_equal(x, y)
 
 
 def test_gray2rgb_alpha():
     x = np.random.random((5, 5, 4))
-    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
     x = np.random.random((5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
+    with expected_warnings(['Pass-through of possibly RGB images']):
+        assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
     assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
                           alpha=True)[0, 0, 3], 1)

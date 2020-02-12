@@ -294,7 +294,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         low_threshold = 0.1
     elif use_quantiles:
         if not(0.0 <= low_threshold <= 1.0):
-            raise ValueError("Quantile thresholds must not be > 1.0")
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         low_threshold /= dtype_max
 
@@ -302,7 +302,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         high_threshold = 0.2
     elif use_quantiles:
         if not(0.0 <= high_threshold <= 1.0):
-            raise ValueError("Quantile thresholds must not be > 1.0")
+            raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         high_threshold /= dtype_max
 
