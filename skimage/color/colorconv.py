@@ -908,6 +908,12 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
+        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
+             'In version 0.19, input arrays will always be considered '
+             'grayscale, even if the last dimension has length 3 or 4. '
+             'To prevent this warning and ensure compatibility with future '
+             'versions, detect RGB images outside of this function.',
+             FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
