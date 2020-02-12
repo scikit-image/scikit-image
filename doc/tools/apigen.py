@@ -40,7 +40,7 @@ class ApiDocWriter(object):
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  ):
-        ''' Initialize package for parsing
+        r''' Initialize package for parsing
 
         Parameters
         ----------
@@ -317,6 +317,8 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
+            full_c = uri + '.' + c
+            ad += '\n.. include:: ' + full_c + '.examples\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -361,7 +363,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        r''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters

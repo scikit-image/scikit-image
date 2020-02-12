@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import sqrt, pi, arctan2, cos, sin, exp
+from numpy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
 from .. import img_as_float, draw
 from ..color import gray2rgb
