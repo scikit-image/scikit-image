@@ -75,7 +75,7 @@ def radon(image, theta=None, circle=True, *, preserve_range=None):
              '(preserve_range=True). In scikit-image 0.18 this behavior will '
              'change to preserve_range=False. To avoid this warning, '
              'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
+             FutureWarning, stacklevel=2)
         preserve_range = True
 
     image = convert_to_float(image, preserve_range)
@@ -273,7 +273,7 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp",
              '(preserve_range=True). In scikit-image 0.19 this behavior will '
              'change to preserve_range=False. To avoid this warning, '
              'explicitly specify the preserve_range parameter.',
-             stacklevel=2)
+             FutureWarning, stacklevel=2)
         preserve_range = True
 
     radon_image = convert_to_float(radon_image, preserve_range)
