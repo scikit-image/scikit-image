@@ -1,4 +1,5 @@
 from ._expand_labels import expand_labels
+from . import graph
 from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
 from ._felzenszwalb import felzenszwalb
@@ -18,6 +19,7 @@ from ..morphology import flood, flood_fill
 
 __all__ = [
     'expand_labels',
+    'graph',
     'random_walker',
     'active_contour',
     'felzenszwalb',
