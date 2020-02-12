@@ -186,7 +186,6 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     >>> from skimage import data
     >>> img_rgba = data.logo()
     >>> img_rgb = color.rgba2rgb(img_rgba)
-
     """
     arr = np.asanyarray(rgba)
 
@@ -793,17 +792,12 @@ def rgb2gray(rgb):
     >>> img_gray = rgb2gray(img)
     """
 
-    rgb = np.asanyarray(rgb)
-
-    if rgb.ndim == 2 and rgb.shape[-1] != 3:
-        warn('Gray scale image conversion is now deprecated. In version 0.19, '
-             'a ValueError will be raised if input image last dimension '
-             'length is not 3.', FutureWarning, stacklevel=2)
+    if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)
 
-    if rgb.shape[-1] == 4:
-        warn('RGBA image conversion is now deprecated. Please use '
-             'rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
+    if rgb.shape[-1] > 3:
+        warn('Non RGB image conversion is now deprecated. For RGBA images, '
+             'please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
              'a ValueError will be raised if input image last dimension '
              'length is not 3.', FutureWarning, stacklevel=2)
         rgb = rgb[..., :3]
@@ -853,9 +847,12 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
-        warn('RGB and RGBA images conversion is now deprecated. In version '
-             '0.19, input image  will be considered as grey scale, whatever '
-             'is its shape.', FutureWarning, stacklevel=2)
+        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
+             'In version 0.19, input arrays will always be considered '
+             'grayscale, even if the last dimension has length 3 or 4. '
+             'To prevent this warning and ensure compatibility with future '
+             'versions, detect RGB images outside of this function.',
+             FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
@@ -1288,7 +1285,6 @@ def luv2rgb(luv):
     Notes
     -----
     This function uses luv2xyz and xyz2rgb.
-
     """
     return xyz2rgb(luv2xyz(luv))
 
