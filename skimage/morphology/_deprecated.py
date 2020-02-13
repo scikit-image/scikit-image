@@ -1,6 +1,7 @@
-from warnings import warn
+from .._shared.utils import deprecated
 
 
+@deprecated('skimage.segmentation.watershed', removed_version='0.19')
 def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
               compactness=0, watershed_line=False):
     """Find watershed basins in `image` flooded from given `markers`.
@@ -106,8 +107,5 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     separate overlapping spheres.
     """
     from ..segmentation import watershed as _watershed
-    warn("skimage.morphology.watershed is deprecated and will be removed "
-         "in version 0.19. Please use skimage.segmentation.watershed "
-         "instead", FutureWarning, stacklevel=2)
     return _watershed(image, markers, connectivity, offset, mask,
                       compactness, watershed_line)
