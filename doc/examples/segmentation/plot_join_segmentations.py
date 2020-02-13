@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 
 from skimage.filters import sobel
 from skimage.measure import label
-from skimage.segmentation import slic, join_segmentations
-from skimage.morphology import watershed
+from skimage.segmentation import slic, join_segmentations, watershed
 from skimage.color import label2rgb
 from skimage import data
 

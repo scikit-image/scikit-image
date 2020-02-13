@@ -27,9 +27,10 @@ Original author: Lee Kamentsky
 import numpy as np
 from scipy import ndimage as ndi
 
-from . import _watershed
-from .extrema import local_minima
-from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
+from . import _watershed_cy
+from ..morphology.extrema import local_minima
+from ..morphology._util import (_validate_connectivity,
+                                _offsets_to_raveled_neighbors)
 from ..util import crop, regular_seeds
 
 
@@ -215,11 +216,11 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     marker_locations = np.flatnonzero(output)
     image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
-    _watershed.watershed_raveled(image.ravel(),
-                                 marker_locations, flat_neighborhood,
-                                 mask, image_strides, compactness,
-                                 output.ravel(),
-                                 watershed_line)
+    _watershed_cy.watershed_raveled(image.ravel(),
+                                    marker_locations, flat_neighborhood,
+                                    mask, image_strides, compactness,
+                                    output.ravel(),
+                                    watershed_line)
 
     output = crop(output, pad_width, copy=True)
 
