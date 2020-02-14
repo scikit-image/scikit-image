@@ -43,9 +43,9 @@ class deprecate_kwarg:
             self.warning_msg = ("'{old_arg}' is a deprecated argument name "
                                 "for `{func_name}`. ")
             if removed_version is not None:
-                self.warning_msg += (f"It will be removed in version "
-                                     "{removed_version}. ")
-            self.warning_msg += "Use '{new_arg}' instead."
+                self.warning_msg += ("It will be removed in version {}. "
+                                     .format(removed_version))
+            self.warning_msg += "Please use '{new_arg}' instead."
         else:
             self.warning_msg = warning_msg
 

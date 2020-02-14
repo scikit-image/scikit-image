@@ -474,4 +474,3 @@ def test_iradon_wrong_dtype():
 
     with testing.raises(ValueError):
         iradon_sart(sinogram, dtype=int)
-

@@ -189,7 +189,8 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
-@deprecate_kwarg({'filter': 'filter_name'}, removed_version="0.19")
+@deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
+                 removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
