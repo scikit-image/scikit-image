@@ -157,8 +157,8 @@ class RAG(nx.Graph):
                                   strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
         # add default weight
-        for edge in self.edges():
-            edge['weight'] = 1.0
+        for n1, n2, data in self.edges(data=True):
+            data['weight'] = 1.0
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
