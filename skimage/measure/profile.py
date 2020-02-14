@@ -93,7 +93,7 @@ def profile_line(image, src, dst, linewidth=1,
     if mode is None:
         warn("Default out of bounds interpolation mode 'constant' is "
              "deprecated. In version 0.19 it will be set to 'reflect'. "
-             "To avoid this warning please set explicitely the mode argument.",
+             "To avoid this warning, set `mode=` explicitly.",
              FutureWarning, stacklevel=2)
         mode = 'constant'
 
