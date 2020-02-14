@@ -210,8 +210,8 @@ class RAG(nx.Graph):
                                **extra_keywords)
             self.add_edge(neighbor, new, attr_dict=data)
 
-        self.nodes[new]['labels'] = (self.nodes[src]['labels'] +
-                                     self.nodes[dst]['labels'])
+        self.nodes[new]['labels'] = (self.nodes[src].get('labels', [src]) +
+                                     self.nodes[dst].get('labels', [dst]))
         self.remove_node(src)
 
         if not in_place:
@@ -356,8 +356,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     nchannels = image.shape[-1]
 
     for n in graph:
-        graph.nodes[n].update({'labels': [n],
-                               'pixel count': 0,
+        graph.nodes[n].update({'pixel count': 0,
                                'total color': np.zeros(nchannels)})
 
     for index in np.ndindex(labels.shape):

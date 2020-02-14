@@ -17,7 +17,7 @@ def test_rag_merge():
     g = graph.rag.RAG()
 
     for i in range(5):
-        g.add_node(i, {'labels': [i]})
+        g.add_node(i)
 
     g.add_edge(0, 1, {'weight': 10})
     g.add_edge(1, 2, {'weight': 20})
