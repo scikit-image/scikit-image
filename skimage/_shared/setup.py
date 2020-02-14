@@ -13,16 +13,26 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('_shared', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['geometry.pyx',
+    cython(['_ccomp.pyx',
+            'geometry.pyx',
             'transform.pyx',
+            '_warps_cy.pyx',
+            '_convex_hull.pyx',
             'interpolation.pyx',
-            'fast_exp.pyx'], working_path=base_path)
+            '_pnpoly.pyx'], working_path=base_path)
 
+    config.add_extension('_ccomp', sources=['_ccomp.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_warps_cy', sources=['_warps_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_convex_hull', sources=['_convex_hull.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('interpolation', sources=['interpolation.c'])
-    config.add_extension('fast_exp', sources=['fast_exp.c'])
+    config.add_extension('_pnpoly', sources=['_pnpoly.c'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     return config
 
 

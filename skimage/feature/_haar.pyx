@@ -6,7 +6,7 @@
 
 import numpy as np
 
-from ..transform import integral_image
+from ..transform.integral import integral_image
 from .._shared.transform cimport integrate
 
 FEATURE_TYPE = {'type-2-x': 0, 'type-2-y': 1,

@@ -1,7 +1,7 @@
 import numpy as np
 from pytest import raises
 
-from skimage.morphology import flood, flood_fill
+from skimage.segmentation import flood, flood_fill
 from skimage._shared.testing import expected_warnings
 
 eps = 1e-12

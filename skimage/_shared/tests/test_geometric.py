@@ -1,14 +1,15 @@
 import numpy as np
 import re
-from skimage.transform._geometric import GeometricTransform
-from skimage.transform import (estimate_transform, matrix_transform,
-                               EuclideanTransform, SimilarityTransform,
-                               AffineTransform, FundamentalMatrixTransform,
-                               EssentialMatrixTransform, ProjectiveTransform,
-                               PolynomialTransform, PiecewiseAffineTransform)
+from .._geometric import (GeometricTransform, estimate_transform,
+                          matrix_transform, EuclideanTransform,
+                          SimilarityTransform, AffineTransform,
+                          FundamentalMatrixTransform,
+                          EssentialMatrixTransform,
+                          ProjectiveTransform, PolynomialTransform,
+                          PiecewiseAffineTransform)
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from .. import testing
+from ..testing import assert_equal, assert_almost_equal
 import textwrap
 
 

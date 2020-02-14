@@ -6,15 +6,15 @@ from ._regionprops import regionprops, perimeter, regionprops_table
 from .simple_metrics import compare_mse, compare_nrmse, compare_psnr
 from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
-from .pnpoly import points_in_poly, grid_points_in_poly
 from ._moments import (moments, moments_central, moments_coords,
                        moments_coords_central, moments_normalized, centroid,
                        moments_hu, inertia_tensor, inertia_tensor_eigvals)
 from .profile import profile_line
 from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
-from ._label import label
 from .entropy import shannon_entropy
+from ._deprecated import label
+from .._shared.pnpoly import points_in_poly, grid_points_in_poly
 
 
 __all__ = ['find_contours',
@@ -34,6 +34,7 @@ __all__ = ['find_contours',
            'moments_coords_central',
            'moments_normalized',
            'moments_hu',
+           'centroid',
            'inertia_tensor',
            'inertia_tensor_eigvals',
            'marching_cubes',
@@ -48,5 +49,4 @@ __all__ = ['find_contours',
            'compare_mse',
            'compare_nrmse',
            'compare_psnr',
-           'shannon_entropy',
-]
+           'shannon_entropy']

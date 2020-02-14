@@ -1,7 +1,7 @@
 import scipy.stats
 import numpy as np
 from math import ceil
-from .. import img_as_float
+from ..util.dtype import img_as_float
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .._shared.utils import warn
 import pywt

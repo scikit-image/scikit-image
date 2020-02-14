@@ -1,7 +1,7 @@
 import numpy as np
-from skimage.measure import points_in_poly, grid_points_in_poly
+from ..pnpoly  import points_in_poly, grid_points_in_poly
 
-from skimage._shared.testing import assert_array_equal
+from ..testing import assert_array_equal
 
 
 class TestNpnpoly():

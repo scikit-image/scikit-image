@@ -5,7 +5,7 @@ from scipy.sparse.linalg import spsolve
 import scipy.ndimage as ndi
 from scipy.ndimage.filters import laplace
 import skimage
-from ..measure import label
+from .._shared._label import label
 
 
 def _get_neighborhood(nd_idx, radius, nd_shape):

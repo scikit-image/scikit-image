@@ -1,6 +1,6 @@
 import functools
 import numpy as np
-from ..transform import warp
+from .._shared._warp import warp
 from .._shared.utils import safe_as_int
 from scipy.signal import get_window
 

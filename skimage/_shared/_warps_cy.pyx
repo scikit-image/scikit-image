@@ -4,11 +4,11 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from .._shared.interpolation cimport (nearest_neighbour_interpolation,
-                                      bilinear_interpolation,
-                                      biquadratic_interpolation,
-                                      bicubic_interpolation)
-from .._shared.fused_numerics cimport np_floats
+from .interpolation cimport (nearest_neighbour_interpolation,
+                             bilinear_interpolation,
+                             biquadratic_interpolation,
+                             bicubic_interpolation)
+from .fused_numerics cimport np_floats
 
 
 cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,

@@ -1,7 +1,8 @@
 import numpy as np
 from numpy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
-from .. import img_as_float, draw
+from ..util.dtype import img_as_float
+from .. import draw
 from ..color import gray2rgb
 from .._shared.utils import check_nD
 

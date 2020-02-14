@@ -3,10 +3,11 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
 
-from ._label import label
+from .._shared._label import label
 from . import _moments
 
 from functools import wraps
+from .._shared.convex_hull import convex_hull_image
 
 
 __all__ = ['regionprops', 'perimeter']
@@ -192,7 +193,6 @@ class RegionProperties:
     @property
     @_cached
     def convex_image(self):
-        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @property

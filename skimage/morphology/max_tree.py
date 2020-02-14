@@ -39,10 +39,11 @@ References:
 
 import numpy as np
 
-from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
+from . import _max_tree
+from .._shared.morpho_util import (_validate_connectivity,
+                                   _offsets_to_raveled_neighbors)
 from ..util import invert
 
-from . import _max_tree
 
 unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
 signed_int_types = [np.int8, np.int16, np.int32, np.int64]
