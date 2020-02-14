@@ -15,7 +15,7 @@ For an example of how to construct region boundary based RAGs, see
 """
 
 from skimage import data, segmentation, filters, color
-from skimage.future import graph
+from skimage.segmentation import graph
 from matplotlib import pyplot as plt
 
 
@@ -74,10 +74,12 @@ g = graph.rag_boundary(labels, edges)
 graph.show_rag(labels, g, img)
 plt.title('Initial RAG')
 
-labels2 = graph.merge_hierarchical(labels, g, thresh=0.08, rag_copy=False,
-                                   in_place_merge=True,
-                                   merge_func=merge_boundary,
-                                   weight_func=weight_boundary)
+labels2 = graph.merge_hierarchical(
+    labels, g, thresh=0.08, rag_copy=False,
+    in_place_merge=True,
+    merge_func=merge_boundary,
+    weight_func=weight_boundary,
+)
 
 graph.show_rag(labels, g, img)
 plt.title('RAG after hierarchical merging')
