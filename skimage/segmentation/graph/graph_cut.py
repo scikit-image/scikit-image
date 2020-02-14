@@ -64,7 +64,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     map_array = np.arange(labels.max() + 1, dtype=labels.dtype)
     for i, nodes in enumerate(comps):
         for node in nodes:
-            for label in rag.nodes[node]['labels']:
+            for label in rag.nodes[node].get('labels', [node]):
                 map_array[label] = i
 
     return map_array[labels]
@@ -237,7 +237,7 @@ def _label_all(rag, attr_name):
         The attribute to which a unique integer is assigned.
     """
     node = min(rag.nodes())
-    new_label = rag.nodes[node]['labels'][0]
+    new_label = rag.nodes[node].get('labels', [node])[0]
     for n, d in rag.nodes(data=True):
         d[attr_name] = new_label
 
