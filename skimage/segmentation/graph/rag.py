@@ -156,6 +156,9 @@ class RAG(nx.Graph):
                                   shape=label_image.shape,
                                   strides=((0,) * label_image.ndim)),
                 extra_arguments=(self,))
+        # add default weight
+        for edge in self.edges():
+            edge['weight'] = 1.0
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
                     extra_arguments=[], extra_keywords={}):
@@ -238,8 +241,24 @@ class RAG(nx.Graph):
             attr_dict = attr
         else:
             attr_dict.update(attr)
+        if 'weight' not in attr_dict:
+            attr_dict['weight'] = 1.0
         super(RAG, self).add_edge(u, v, **attr_dict)
         self.max_id = max(u, v, self.max_id)
+
+    def add_edges_from(self, ebunch_to_add, **attr):
+        """Add edges from an iterable of edges.
+
+        If 'weight' is not given as an attribute, it is added with default
+        value 1.0.
+
+        See Also
+        --------
+        :py:meth:`networkx.Graph.add_edges_from`
+        """
+        if 'weight' not in attr:
+            attr['weight'] = 1.0
+        super().add_edges_from(ebunch_to_add, **attr)
 
     def copy(self):
         """Copy the graph with its max node id.

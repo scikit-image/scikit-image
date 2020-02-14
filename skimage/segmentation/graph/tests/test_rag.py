@@ -13,6 +13,19 @@ def max_edge(g, src, dst, n):
     return {'weight': max(w1, w2)}
 
 
+def test_default_weights():
+    image = np.arange(4, dtype=np.int_)
+    g = graph.rag.RAG()
+    g.add_edges_from([(0, 1), (1, 2), (0, 2), (2, 3)])
+    g.adj[2][3]['weight'] = 2.0
+    cut = graph.cut_threshold(image, g, 1.5, in_place=False)
+    assert len(np.unique(cut)) == 2
+
+    g.adj[2][3]['weight'] = 0.5
+    cut2 = graph.cut_threshold(image, g, 0.75, in_place=False)
+    assert len(np.unique(cut2)) == 3
+
+
 def test_rag_merge():
     g = graph.rag.RAG()
 
