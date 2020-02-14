@@ -8,6 +8,7 @@ Defines:
         _compute_axes(shape, resolution=1, origin='center')
         _compute_coords(shape, resolution=1, origin='center')
         _multiply_coords_by_affine(array, affine)
+        _compute_tail_determinant(array)
     User functions:
         resample(image, new_resolution, old_resolution=1, 
             err_to_larger=True, extrapolation_fill_value=None, 
@@ -262,6 +263,7 @@ def _compute_coords(shape, resolution=1, origin="center"):
 
 
 def _multiply_coords_by_affine(affine, array):
+    """Applies affine to the elements of array at each spatial position and returns the result."""
 
     # Validate inputs.
 
@@ -300,6 +302,30 @@ def _multiply_coords_by_affine(affine, array):
         np.squeeze(np.matmul(affine[:ndims, :ndims], array[..., None]), -1)
         + affine[:ndims, ndims]
     )
+
+
+def _compute_tail_determinant(array):
+    """Computes and returns the determinant of array along its last 2 dimensions."""
+
+    # Validate that array is square on its last 2 dimensions.
+    if array.shape[-1] != array.shape[-2]:
+        raise ValueError(f"array must be square on its last 2 dimensions.\n"
+                         f"array.shape[-2:]: {array.shape[-2:]}.")
+
+    # Compute the determinant recursively.
+
+    if array.shape[-1] == 2:
+        # Handle 2-dimensional base case.
+        determinant = array[...,0,0] * array[...,1,1] - array[...,0,1] * array[...,1,0]
+    else:
+        # Handle more than 2-dimensional recursive case.
+        determinant = 0
+        for dim in range(array.shape[-1]):
+            recursive_indices = list(range(array.shape[-1]))
+            recursive_indices.remove(dim)
+            determinant += (-1)**dim * array[...,0,dim] * _compute_tail_determinant(array[...,1:,recursive_indices])
+    
+    return determinant
 
 
 def resample(
