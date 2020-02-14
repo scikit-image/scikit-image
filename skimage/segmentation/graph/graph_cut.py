@@ -35,7 +35,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     Examples
     --------
     >>> from skimage import data, segmentation
-    >>> from skimage.future import graph
+    >>> from skimage.segmentation import graph
     >>> img = data.astronaut()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels)
@@ -115,7 +115,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
     Examples
     --------
     >>> from skimage import data, segmentation
-    >>> from skimage.future import graph
+    >>> from skimage.segmentation import graph
     >>> img = data.astronaut()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels, mode='similarity')
