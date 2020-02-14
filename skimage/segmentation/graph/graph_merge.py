@@ -131,7 +131,7 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
 
     label_map = np.arange(labels.max() + 1)
     for ix, (n, d) in enumerate(rag.nodes(data=True)):
-        for label in d['labels']:
+        for label in d.get('labels', [n]):
             label_map[label] = ix
 
     return label_map[labels]
