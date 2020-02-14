@@ -57,7 +57,7 @@ target = cleared_mouse_brain()
 # Note: with downsample_factor = 1, lddmm_register runs in approximately 40-50 minutes.
 # This runtime declines roughly as the cube of downsample_factor.
 # Optimization parameters may require adjustment for sufficiently large downsample_factor values.
-downsample_factor = 2
+downsample_factor = 4
 template = resample(template, downsample_factor)
 target   = resample(  target, downsample_factor)
 
@@ -74,12 +74,14 @@ lddmm_dict = lddmm_register(
     translational_stepsize     = 1e-5 * downsample_factor, 
     linear_stepsize            = 1e-8 * downsample_factor,
     deformative_stepsize       = 5e-1 * downsample_factor,
-    sigmaR                     = 2e1,
+    sigma_regularization       = 2e1,
     contrast_order             = 3, 
     num_iterations             = 100, 
     num_affine_only_iterations = 50, 
     # calibrate=True outputs a diagnostic plot at the end of lddmm_register that is useful for determining appropriate stepsizes.
-    calibrate                  = False, 
+    calibrate                  = False,
+    # track_progress=True prints a progress update every 10 iterations of registration. 
+    track_progress             = True, 
 )
 
 
