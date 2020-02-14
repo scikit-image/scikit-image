@@ -189,7 +189,7 @@ def _get_fourier_filter(size, filter_name):
     return fourier_filter[:, np.newaxis]
 
 
-@deprecate_kwarg({'filter': 'filter_name'})
+@deprecate_kwarg({'filter': 'filter_name'}, removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
@@ -228,6 +228,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Reconstructed image. The rotation axis will be located in the pixel
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
+
+    .. versionchanged :: 0.19
+        In ``iradon``, ``filter`` argument is deprecated in favor of
+        ``filter_name``.
 
     References
     ----------
