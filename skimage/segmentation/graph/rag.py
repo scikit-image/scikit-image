@@ -312,7 +312,7 @@ class RAG(nx.Graph):
 
 
 def rag_mean_color(image, labels, connectivity=2, mode='distance',
-                   sigma=255.0):
+                   sigma=255.0, multichannel=True):
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
@@ -351,6 +351,8 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         close to each other two colors should be, for their corresponding edge
         weight to be significant. A very large value of `sigma` could make
         any two colors behave as though they were similar.
+    multichannel : bool, optional
+        If false, the image is assumed to be grayscale.
 
     Returns
     -------
@@ -372,7 +374,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
            :DOI:`10.1109/83.841950`
     """
     graph = RAG(labels, connectivity=connectivity)
-    nchannels = image.shape[-1]
+    nchannels = image.shape[-1] if multichannel else 1
 
     for n in graph:
         graph.nodes[n].update({'pixel count': 0,

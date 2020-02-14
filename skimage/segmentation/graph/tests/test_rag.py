@@ -61,7 +61,7 @@ def test_rag_merge():
 
 
 @pytest.mark.parametrize(
-    'nchannels', range(2, 6)
+    'nchannels', range(1, 6)
 )
 def test_threshold_cut(nchannels):
 
@@ -77,7 +77,10 @@ def test_threshold_cut(nchannels):
     labels[50:, :50] = 2
     labels[50:, 50:] = 3
 
-    rag = graph.rag_mean_color(img, labels)
+    if nchannels == 1:
+        rag = graph.rag_mean_color(img[..., 0], labels, multichannel=False)
+    else:
+        rag = graph.rag_mean_color(img, labels)
     new_labels = graph.cut_threshold(labels, rag, 10, in_place=False)
     # Two labels
     assert new_labels.max() == 1
