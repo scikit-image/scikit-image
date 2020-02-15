@@ -290,13 +290,13 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
+    channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
 
     if multichannel:
         for c in range(image.shape[-1]):
             # the algorithm below expects 3 dimensions to always be present.
             # slicing the array in this fashion preserves the channel dimension for us
             channel_in = np.ascontiguousarray(image[..., c:c+1])
-            channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
 
             _denoise_tv_bregman(channel_in, image.dtype.type(weight),
                                 max_iter, eps, isotropic, channel_out)
