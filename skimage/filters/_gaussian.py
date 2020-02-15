@@ -157,10 +157,9 @@ def _guess_spatial_dimensions(image):
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
-def difference_of_gaussians(image, sigma1, sigma2=None, output=None,
+def difference_of_gaussians(image, sigma1, sigma2=None,
                             mode='nearest', cval=0, multichannel=False,
                             truncate=4.0):
-
     """Multi-dimensional band-pass filter using the Difference of Gaussians
     method.
 
@@ -178,12 +177,7 @@ def difference_of_gaussians(image, sigma1, sigma2=None, output=None,
         across all axes. The standard deviations are given for each axis as a
         sequence, or as a single number, in which case the single number is
         used as the standard deviation value for all axes. If None is given
-        (default), sigmas for all axes are calculated as 1.6 * sigma1,
-        in which case the Difference of Gaussians calculation will approximate
-        the Laplacian of Gaussian.
-    output : array, optional
-        The ``output`` parameter passes an array in which to store the
-        filter output.
+        (default), sigmas for all axes are calculated as 1.6 * sigma1.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
@@ -208,8 +202,8 @@ def difference_of_gaussians(image, sigma1, sigma2=None, output=None,
     This function will subtract an array filtered with a guassian kernel
     with sigmas given by ``sigma2`` from an array filtered with a gaussian
     kernel with sigmas provided by ``sigma1``. The values for ``sigma2`` must
-    always be greater than the corresponding values in ``sigma1``, or a
-    ``ValueError`` will be raised.
+    always be greater than or equal to the corresponding values in ``sigma1``,
+    or a ``ValueError`` will be raised.
 
     When ``sigma2`` is none, the values for ``sigma2`` will be calculated
     as 1.6x the corresponding values in ``sigma1``. This approximates the
@@ -217,9 +211,42 @@ def difference_of_gaussians(image, sigma1, sigma2=None, output=None,
 
     Input image is converted according to the conventions of ``img_as_float``.
 
-
+    Except for sigma values, all parameters are used for both filters.
 
     Examples
     --------
 
     """
+    image = img_as_float(image)
+    sigma1 = np.array(sigma1, dtype='float', ndmin=1)
+    if sigma2 is None:
+        sigma2 = sigma1 * 1.6
+    else:
+        sigma2 = np.array(sigma2, dtype='float', ndmin=1)
+
+    if multichannel is True:
+        spatial_dims = image.ndim - 1
+    else:
+        spatial_dims = image.ndim
+
+    if len(sigma1) != 1 and len(sigma1) != spatial_dims:
+        raise ValueError('sigma1 must have length equal to number of spatial'
+                         ' dimensions of input')
+    if len(sigma2) != 1 and len(sigma2) != spatial_dims:
+        raise ValueError('sigma2 must have length equal to number of spatial'
+                         ' dimensions of input')
+
+    sigma1 = sigma1 * np.ones(spatial_dims)
+    sigma2 = sigma2 * np.ones(spatial_dims)
+
+    if any(sigma2 < sigma1):
+        raise ValueError('sigma2 must be equal to or larger than sigma1 for'
+                         ' all axes')
+
+    im1 = gaussian(image, sigma1, mode=mode, cval=cval,
+                   multichannel=multichannel, truncate=truncate)
+
+    im2 = gaussian(image, sigma2, mode=mode, cval=cval,
+                   multichannel=multichannel, truncate=truncate)
+
+    return im1 - im2
