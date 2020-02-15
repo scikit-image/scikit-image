@@ -233,7 +233,7 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
 
 
 def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
-                       multichannel=False):
+                       *, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
