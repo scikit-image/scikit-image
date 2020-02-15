@@ -178,6 +178,21 @@ def test_denoise_tv_bregman_3d():
     assert_(img[30:45, 5:15].std() > out1[30:45, 5:15].std())
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
+def test_denoise_tv_bregman_multichannel():
+    img_astro = astro.copy()
+    denoised0 = restoration.denoise_tv_bregman(img_astro[..., 0], weight=60.0)
+    denoised = restoration.denoise_tv_bregman(img_astro, weight=60.0,
+                                                multichannel=True)
+    assert_equal(denoised[..., 0], denoised0)
+
+    # tile astronaut subset to generate 3D+channels data
+    astro3 = np.tile(img_astro[:64, :64, np.newaxis, :], [1, 1, 2, 1])
+    # modify along tiled dimension to give non-zero gradient on 3rd axis
+    astro3[:, :, 0, :] = 2*astro3[:, :, 0, :]
+    denoised0 = restoration.denoise_tv_bregman(astro3[..., 0], weight=60.0)
+    denoised = restoration.denoise_tv_bregman(astro3, weight=60.0,
+                                                multichannel=True)
+    assert_equal(denoised[..., 0], denoised0)
 
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()[:50, :50]

@@ -232,7 +232,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               range_lut, empty_dims, out)
 
 
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+                       multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -258,6 +259,10 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
+    multichannel : bool, optional
+        Apply total-variation denoising separately for each channel. This
+        option should be true for color images, otherwise the denoising is
+        also applied in the channels dimension.
 
     Returns
     -------
@@ -277,17 +282,38 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     """
     image = np.atleast_3d(img_as_float(image))
-    image = np.ascontiguousarray(image)
 
-    rows = image.shape[0]
-    cols = image.shape[1]
-    dims = image.shape[2]
-
-    shape_ext = (rows + 2, cols + 2, dims)
+    shape_ext = np.asarray(image.shape)
+    shape_ext[0:2] += 2
 
     out = np.zeros(shape_ext, image.dtype)
-    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
-                        isotropic, out)
+
+    if multichannel:
+        for c in range(image.shape[-1]):
+            if np.ndim(image) == 3:
+                channel_in = np.ascontiguousarray(image[..., c, None])
+                channel_out = np.ascontiguousarray(out[..., c, None])
+
+                _denoise_tv_bregman(channel_in, image.dtype.type(weight), max_iter, eps,
+                                    isotropic, channel_out)
+
+                out[..., c] = channel_out[..., -1]
+
+            else:
+                channel_in = np.ascontiguousarray(image[..., c])
+                channel_out = np.ascontiguousarray(out[..., c])
+
+                _denoise_tv_bregman(channel_in, image.dtype.type(weight), max_iter, eps,
+                                    isotropic, channel_out)
+
+                out[..., c] = channel_out
+
+    else:
+        image = np.ascontiguousarray(image)
+
+        _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+                            isotropic, out)
+
     return np.squeeze(out[1:-1, 1:-1])
 
 
