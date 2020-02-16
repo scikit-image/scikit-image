@@ -157,7 +157,7 @@ def _guess_spatial_dimensions(image):
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
-def difference_of_gaussians(image, sigma1, sigma2=None,
+def difference_of_gaussians(image, sigma1, sigma2=None, *,
                             mode='nearest', cval=0, multichannel=False,
                             truncate=4.0):
     """Multi-dimensional band-pass filter using the Difference of Gaussians
@@ -215,6 +215,25 @@ def difference_of_gaussians(image, sigma1, sigma2=None,
 
     Examples
     --------
+    Apply a simple Difference of Gaussians filter to a color image:
+
+    >>> from skimage.data import astronaut
+    >>> from skimage.filters import difference_of_gaussians
+    >>> image = astronaut()
+    >>> filtered_image = difference_of_gaussians(image, 2, 10,
+    ...                                          multichannel=True)
+
+    Apply a Laplacian of Gaussian filter as approximated by the Difference
+    of Gaussians filter:
+
+    >>> filtered_image = difference_of_gaussians(image, 2, multichannel=True)
+
+    Apply a Difference of Gaussians filter to a grayscale image using different
+    sigma values for each axis:
+
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> filtered_image = difference_of_gaussians(image, (2,5), (3,20))
 
     """
     image = img_as_float(image)
