@@ -228,8 +228,7 @@ def test_denoise_bregman_types(dtype):
     img = np.clip(img, 0, 1).astype(dtype)
 
     # check that we can process multiple float types
-    out = restoration.denoise_bilateral(img, sigma_color=0.1,
-                                        sigma_spatial=10, multichannel=False)
+    out = restoration.denoise_tv_bregman(img, weight=5)
 
 
 def test_denoise_bilateral_zeros():
