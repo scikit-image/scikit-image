@@ -101,7 +101,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Finally, we run the watershed on the image and markers:
 
-    >>> labels = watershed(-distance, markers, mask=image)
+    >>> labels = watershed(-distance, markers, mask=image)  # doctest: +SKIP
 
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
