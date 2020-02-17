@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..io.manage_plugins import call_plugin
-from ..color import rgb2gray, rgba2rgb
+from ..color.colorconv import rgb2gray, rgba2rgb
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
 from .._shared.utils import warn
