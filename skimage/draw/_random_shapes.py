@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import polygon as draw_polygon, circle as draw_circle
+from . import polygon as draw_polygon, disk as draw_disk
 from .._shared.utils import warn
 
 
@@ -60,10 +60,10 @@ def _generate_rectangle_mask(point, image, shape, random):
     return rectangle, label
 
 
-def _generate_circle_mask(point, image, shape, random):
-    """Generate a mask for a filled circle shape.
+def _generate_disk_mask(point, image, shape, random):
+    """Generate a mask for a filled disk shape.
 
-    The radius of the circle is generated randomly.
+    The radius of the disk is generated randomly.
 
     Parameters
     ----------
@@ -92,7 +92,7 @@ def _generate_circle_mask(point, image, shape, random):
         A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
-        raise ValueError('size must be > 1 for circles')
+        raise ValueError('size must be > 1 for disks')
     min_radius = shape[0] / 2.0
     max_radius = shape[1] / 2.0
     left = point[1]
@@ -103,11 +103,17 @@ def _generate_circle_mask(point, image, shape, random):
     if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
-    circle = draw_circle(point[0], point[1], radius)
+    # TODO: think about how to deprecate this
+    # Unfortunately, renaming `circle` to `disk` directly would break
+    # downstream code that switches between `circle` and disk.
+    # See discussion on naming convention here
+    # https://github.com/scikit-image/scikit-image/pull/4428
+    disk = draw_disk((point[0], point[1]), radius)
+    # Until a deprecation path is decided, always return `'circle'`
     label = ('circle', ((point[0] - radius + 1, point[0] + radius),
                         (point[1] - radius + 1, point[1] + radius)))
 
-    return circle, label
+    return disk, label
 
 
 def _generate_triangle_mask(point, image, shape, random):
@@ -166,7 +172,7 @@ def _generate_triangle_mask(point, image, shape, random):
 # Allows lookup by key as well as random selection.
 SHAPE_GENERATORS = dict(
     rectangle=_generate_rectangle_mask,
-    circle=_generate_circle_mask,
+    circle=_generate_disk_mask,
     triangle=_generate_triangle_mask)
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
