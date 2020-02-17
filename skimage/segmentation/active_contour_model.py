@@ -47,7 +47,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         Maximum pixel distance to move per iteration.
     max_iterations : int, optional
         Maximum iterations to optimize snake shape.
-    convergence: float, optional
+    convergence : float, optional
         Convergence criteria.
     boundary_condition : string, optional
         Boundary conditions for the contour. Can be one of 'periodic',
