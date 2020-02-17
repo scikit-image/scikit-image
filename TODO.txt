@@ -38,6 +38,10 @@ Version 0.18
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
 * In ``skimage/transform`` remove histogram_matching.py.
+* In ``skimage/restoration/_denoise.py`` remove warning regarding
+  ``rescale_sigma``.
+    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
+      now that the denoise warning is gone.
 
 Version 0.19
 ------------
