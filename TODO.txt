@@ -43,7 +43,8 @@ Version 0.19
 ------------
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py`` remove
+  ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
@@ -57,6 +58,8 @@ Version 0.19
 
 Other
 -----
+* Remove the conditional import and function call when ``numpy`` is set
+  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
