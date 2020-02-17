@@ -97,21 +97,21 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Parameters
     ----------
-    image: ndarray (2-D, 3-D, ...) of integers
+    image : ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
-    markers: int, or ndarray of int, same shape as `image`, optional
+    markers : int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
         ``None`` (no markers given), the local minima of the image are used as
         markers.
-    connectivity: ndarray, optional
+    connectivity : ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
         Following the scipy convention, default is a one-connected array of
         the dimension of the image.
-    offset: array_like of shape image.ndim, optional
+    offset : array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
-    mask: ndarray of bools or 0s and 1s, optional
+    mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         will be labeled.
     compactness : float, optional
@@ -123,7 +123,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Returns
     -------
-    out: ndarray
+    out : ndarray
         A labeled matrix of the same type and shape as markers
 
     See also
