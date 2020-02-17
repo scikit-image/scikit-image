@@ -46,7 +46,7 @@ class _Lddmm:
         contrast_order=1,
         contrast_tolerance=1e-5,
         contrast_maxiter=100,
-        sigma_contrast=None,#TODO: update with default.
+        sigma_contrast=1e-2,
         sigma_matching=None,
         sigma_artifact=None,
         sigma_regularization=None,
@@ -55,7 +55,7 @@ class _Lddmm:
         deformative_stepsize=None,
         spatially_varying_contrast_map=False,
         calibrate=False,
-        track_progress=False,
+        track_progress_every_n=0,
     ):    
         # Inputs.
 
@@ -86,7 +86,7 @@ class _Lddmm:
         self.smooth_length = smooth_length or 2 * np.max(self.template_resolution)
         self.spatially_varying_contrast_map = spatially_varying_contrast_map
         self.calibrate = calibrate
-        self.track_progress = track_progress
+        self.track_progress_every_n = int(track_progress_every_n)
 
         # Flags.
         self.check_artifacts = check_artifacts
@@ -164,8 +164,9 @@ class _Lddmm:
 
         # Iteratively perform each step of the registration.
         for iteration in range(self.num_iterations):
-            # If self.track_progress, print progress updates every 10 iterations.
-            if self.track_progress and not iteration%10: print(f"Progress: iteration {iteration}/{self.num_iterations}.")
+            # If self.track_progress_every_n > 0, print progress updates every 10 iterations.
+            if self.track_progress_every_n > 0 and not iteration % self.track_progress_every_n:
+                print(f"Progress: iteration {iteration}/{self.num_iterations}{' affine only' if iteration < self.num_affine_only_iterations}.")
 
             # Forward pass: apply transforms to the template and compute the costs.
 
@@ -679,11 +680,11 @@ def lddmm_register(
     contrast_order=1,
     contrast_tolerance=1e-5,
     contrast_maxiter=100,
-    sigma_contrast=None,
+    sigma_contrast=1e-2,
     sigma_matching=None,
     spatially_varying_contrast_map=False,
     calibrate=False,
-    track_progress=False,
+    track_progress_every_n=0,
 ):
     """
     Compute a registration between template and target, to be applied with apply_lddmm.
@@ -706,11 +707,11 @@ def lddmm_register(
         contrast_order (int, optional): The order of the polynomial fit between the contrasts of the template and target. Defaults to 3.
         contrast_tolerance (float, optional): The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 1e-5.
         contrast_maxiter (int, optional): The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 100.
-        sigma_contrast (float, optional): The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Defaults to None.
+        sigma_contrast (float, optional): The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 1e-2.
         sigma_matching (float, optional): A measure of spread. Defaults to None.
         spatially_varying_contrast_map (bool, optional): If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. Defaults to False.
         calibrate (bool, optional): A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. Defaults to False.
-        track_progress (bool, optional): If True, a progress update will be printed every 10 iterations of registration. Defaults to False.
+        track_progress_every_n (int, optional): If positive, a progress update will be printed every track_progress_every_n iterations of registration. Defaults to 0.
     
     Example:
         >>> import numpy as np
@@ -726,9 +727,9 @@ def lddmm_register(
         >>> # 
         >>> # Register the template to the target, then deform the template and target to match the other.
         >>> # 
-        >>> lddmm_register_output = lddmm_register(template, target, translational_stepsize = 0.00001, linear_stepsize = 0.00001, deformative_stepsize = 0.5)
-        >>> deformed_target   = apply_lddmm(target,   deform_to='template', **lddmm_register_output)
-        >>> deformed_template = apply_lddmm(template, deform_to='target',   **lddmm_register_output)
+        >>> lddmm_dict = lddmm_register(template, target, translational_stepsize = 0.00001, linear_stepsize = 0.00001, deformative_stepsize = 0.5)
+        >>> deformed_target   = apply_lddmm(target,   deform_to='template', **lddmm_dict)
+        >>> deformed_template = apply_lddmm(template, deform_to='target',   **lddmm_dict)
 
     Returns:
         dict: A dictionary containing all important saved quantities computed during the registration.
@@ -757,7 +758,7 @@ def lddmm_register(
         deformative_stepsize=deformative_stepsize,
         spatially_varying_contrast_map=spatially_varying_contrast_map,
         calibrate=calibrate,
-        track_progress=track_progress,
+        track_progress_every_n=track_progress_every_n,
     )
 
     return lddmm.register()
@@ -901,13 +902,14 @@ def _apply_position_field(
 def apply_lddmm(
     subject,
     subject_resolution=1,
+    output_resolution=None,
+    deform_to="template",
+    extrapolation_fill_value=None,
+    # lddmm_register output (lddmm_dict).
     affine_phi=None,
     phi_inv_affine_inv=None,
     template_resolution=1,
     target_resolution=1,
-    output_resolution=None,
-    deform_to="template",
-    extrapolation_fill_value=None,
     **unused_kwargs,
 ):
     """
@@ -924,15 +926,16 @@ def apply_lddmm(
     Args:
         subject (np.ndarray): The image to be deformed to the template or target from the results of the register function.
         subject_resolution (float, seq, optional): The resolution of subject in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
-        affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming to the template. Defaults to None.
-        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming to the target. Defaults to None.
-        template_resolution (float, seq, optional): The resolution of the template in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
-        target_resolution (float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
         output_resolution (NoneType, float, seq, optional): The resolution of the output deformed_subject in each dimension, 
             or just one scalar to indicate isotropy, or None to indicate the resolution of template or target based on deform_to. 
             Defaults to None.
         deform_to (str, optional): Either "template" or "target", indicating which position field to apply to subject. Defaults to "template".
-        extrapolation_fill_value (float, NoneType, optional): The fill_value kwarg passed to scipy.interpolate.interpn. Defaults to None.
+        extrapolation_fill_value (float, NoneType, optional): The fill_value kwarg passed to scipy.interpolate.interpn. 
+            If None, this is set to a low quantile of the subject's 10**-subject.ndim quantile to estimate background. Defaults to None.
+        affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming to the template. Defaults to None.
+        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming to the target. Defaults to None.
+        template_resolution (float, seq, optional): The resolution of the template in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
+        target_resolution (float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
 
     Raises:
         TypeError: Raised if deform_to is not of type str.
@@ -943,7 +946,7 @@ def apply_lddmm(
         np.ndarray: The result of applying the appropriate position field to subject, deforming it based on deform_to.
     """
 
-    # Validate inputs: subject, subject_resolution, deform_to, & output_resolution.
+    # Validate inputs: subject, subject_resolution, deform_to, output_resolution, & extrapolation_fill_value.
 
     # Validate subject.
     subject = _validate_ndarray(subject)
@@ -962,6 +965,9 @@ def apply_lddmm(
         output_resolution = np.copy(target_resolution)
     else:
         output_resolution = _validate_resolution(subject.ndim, output_resolution)
+    # Validate extrapolation_fill_value.
+    if extrapolation_fill_value is None:
+        extrapolation_fill_value = np.quantile(subject, 10**-subject.ndim)
 
     # Define position_field and position_field_resolution.
 
