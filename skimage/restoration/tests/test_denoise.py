@@ -179,6 +179,27 @@ def test_denoise_tv_bregman_3d():
     assert_(out1[30:45, 5:15].std() > out2[30:45, 5:15].std())
 
 
+def test_denoise_tv_bregman_3d_multichannel():
+    img_astro = astro.copy()
+    denoised0 = restoration.denoise_tv_bregman(img_astro[..., 0], weight=60.0)
+    denoised = restoration.denoise_tv_bregman(img_astro, weight=60.0,
+                                              multichannel=True)
+
+    assert_equal(denoised0, denoised[..., 0])
+
+
+def test_denoise_tv_bregman_multichannel():
+    img = checkerboard_gray.copy()[:50, :50]
+    # add some random noise
+    img += 0.5 * img.std() * np.random.rand(*img.shape)
+    img = np.clip(img, 0, 1)
+
+    out1 = restoration.denoise_tv_bregman(img, weight=60.0)
+    out2 = restoration.denoise_tv_bregman(img, weight=60.0, multichannel=True)
+
+    assert_equal(out1, out2)
+
+
 def test_denoise_bilateral_2d():
     img = checkerboard_gray.copy()[:50, :50]
     # add some random noise
