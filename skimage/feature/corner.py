@@ -501,7 +501,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> corner_peaks(corner_harris(square), min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -570,7 +570,8 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1,
+    ...              threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -644,7 +645,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> corner_peaks(foerstner, min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -721,7 +722,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -787,7 +788,8 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2,
+    ...                       threshold_rel=0)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
     array([[4.5, 4.5]])
@@ -953,7 +955,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
            [3, 2],
            [2, 3],
            [2, 2]])
-    >>> corner_peaks(response)
+    >>> corner_peaks(response, threshold_rel=0)
     array([[2, 2]])
 
     """
@@ -1087,7 +1089,8 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1,
+    ...                        threshold_rel=0)
     >>> corners
     array([[3, 3],
            [3, 8],
