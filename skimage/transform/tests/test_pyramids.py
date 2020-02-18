@@ -64,8 +64,7 @@ def test_pyramid_expand_nd():
 
 def test_build_gaussian_pyramid_rgb():
     rows, cols, dim = image.shape
-    with expected_warnings(['The default multichannel',
-                            'will become keyword-only argument']):
+    with expected_warnings(['will become keyword-only argument']):
         pyramid = pyramids.pyramid_gaussian(image, downscale=2,
                                             multichannel=True)
         for layer, out in enumerate(pyramid):
@@ -75,10 +74,8 @@ def test_build_gaussian_pyramid_rgb():
 
 def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
-    with expected_warnings(['The default multichannel',
-                            'will become keyword-only argument']):
-        pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2,
-                                            multichannel=False)
+    with expected_warnings(['will become keyword-only argument']):
+        pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2)
         for layer, out in enumerate(pyramid):
             layer_shape = (rows / 2 ** layer, cols / 2 ** layer)
             assert_array_equal(out.shape, layer_shape)
