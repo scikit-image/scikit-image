@@ -8,6 +8,7 @@ from .._shared.fft import fftmodule
 from .._shared.utils import deprecate_kwarg, convert_to_float
 from warnings import warn
 from functools import partial
+from .._shared._deprecators import kwonly_change
 
 if fftmodule is np.fft:
     # fallback from scipy.fft to scipy.fftpack instead of numpy.fft
@@ -21,7 +22,8 @@ else:
 __all__ = ['radon', 'order_angles_golden_ratio', 'iradon', 'iradon_sart']
 
 
-def radon(image, theta=None, circle=True, *, preserve_range=None):
+@kwonly_change('1.0', previous_arg_order=['image', 'theta', 'circle'])
+def radon(image, *, theta=None, circle=True, preserve_range=None):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -191,6 +193,9 @@ def _get_fourier_filter(size, filter_name):
 
 @deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
                  removed_version="0.19")
+@kwonly_change('1.0', previous_arg_order=['radon_image', 'theta',
+                                          'output_size', 'filter_name',
+                                          'interpolation', 'circle'])
 def iradon(radon_image, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
@@ -372,7 +377,10 @@ def order_angles_golden_ratio(theta):
             yield remaining_indices.pop(index_above)
 
 
-def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
+@kwonly_change('1.0', previous_arg_order=['radon_image', 'theta', 'image',
+                                          'projection_shifts', 'clip', 'relaxation',
+                                          'dtype'])
+def iradon_sart(radon_image, *, theta=None, image=None, projection_shifts=None,
                 clip=None, relaxation=0.15, dtype=None):
     """Inverse radon transform.
 

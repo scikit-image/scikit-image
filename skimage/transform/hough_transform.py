@@ -4,9 +4,10 @@ from ._hough_transform import (_hough_circle,
                                _hough_ellipse,
                                _hough_line,
                                _probabilistic_hough_line as _prob_hough_line)
+from .._shared._deprecators import kwonly_change
 
-
-def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
+@kwonly_change('1.0')
+def hough_line_peaks(hspace, angles, dists, *, min_distance=9, min_angle=10,
                      threshold=None, num_peaks=np.inf):
     """Return peaks in a straight line Hough transform.
 
@@ -68,7 +69,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
         return (h, np.array([]), np.array([]))
 
 
-def hough_circle(image, radius, normalize=True, full_output=False):
+@kwonly_change('1.0')
+def hough_circle(image, radius, *, normalize=True, full_output=False):
     """Perform a circular Hough transform.
 
     Parameters
@@ -112,7 +114,8 @@ def hough_circle(image, radius, normalize=True, full_output=False):
                          normalize=normalize, full_output=full_output)
 
 
-def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
+@kwonly_change('1.0')
+def hough_ellipse(image, *, threshold=4, accuracy=1, min_size=4, max_size=None):
     """Perform an elliptical Hough transform.
 
     Parameters
@@ -164,7 +167,8 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
                           min_size=min_size, max_size=max_size)
 
 
-def hough_line(image, theta=None):
+@kwonly_change('1.0')
+def hough_line(image, *, theta=None):
     """Perform a straight line Hough transform.
 
     Parameters
@@ -222,7 +226,8 @@ def hough_line(image, theta=None):
     return _hough_line(image, theta=theta)
 
 
-def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
+@kwonly_change('1.0')
+def probabilistic_hough_line(image, *, threshold=10, line_length=50, line_gap=10,
                              theta=None, seed=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
@@ -267,7 +272,8 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
                             line_gap=line_gap, theta=theta, seed=seed)
 
 
-def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
+@kwonly_change('1.0')
+def hough_circle_peaks(hspaces, radii, *, min_xdistance=1, min_ydistance=1,
                        threshold=None, num_peaks=np.inf,
                        total_num_peaks=np.inf, normalize=False):
     """Return peaks in a circle Hough transform.

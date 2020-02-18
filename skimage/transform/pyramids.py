@@ -233,6 +233,7 @@ def pyramid_gaussian(image, *, downscale=2, sigma=None, order=1,
         yield layer_image
 
 
+@kwonly_change('1.0')
 def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                       mode='reflect', cval=0, multichannel=False,
                       preserve_range=False):
