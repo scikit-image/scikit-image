@@ -54,6 +54,8 @@ Version 0.19
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
 * In ``skimage/color/colorconv.py``, remove the deprecation warning
   from `rgb2gray`.
+* In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
+  decoration from ``iradon``.
 
 Other
 -----
