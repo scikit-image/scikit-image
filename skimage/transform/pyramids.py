@@ -216,8 +216,11 @@ def pyramid_gaussian(image, *, downscale=2, sigma=None, order=1,
     while layer != max_layer:
         layer += 1
 
-        layer_image = pyramid_reduce(prev_layer_image, downscale, sigma, order,
-                                     mode, cval, multichannel=multichannel)
+        layer_image = pyramid_reduce(prev_layer_image,
+                                     downscale=downscale,
+                                     sigma=sigma, order=order,
+                                     mode=mode, cval=cval,
+                                     multichannel=multichannel)
 
         prev_shape = np.asarray(current_shape)
         prev_layer_image = layer_image
