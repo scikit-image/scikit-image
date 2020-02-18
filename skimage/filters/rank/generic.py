@@ -325,7 +325,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import bottomhat
     >>> img = data.camera()
-    >>> out = bottomhat(img, disk(5))
+    >>> out = bottomhat(img, disk(5))  # doctest: +SKIP
 
     """
     warnings.warn("rank.bottomhat is deprecated. This filter is named"
@@ -974,7 +974,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False,
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import tophat
     >>> img = data.camera()
-    >>> out = tophat(img, disk(5))
+    >>> out = tophat(img, disk(5))  # doctest: +SKIP
 
     """
     warnings.warn("rank.tophat is deprecated. This filter is named"
