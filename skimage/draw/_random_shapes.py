@@ -172,7 +172,7 @@ def _generate_triangle_mask(point, image, shape, random):
 # Allows lookup by key as well as random selection.
 SHAPE_GENERATORS = dict(
     rectangle=_generate_rectangle_mask,
-    circle=_generate_disk_mask,
+    disk=_generate_disk_mask,
     triangle=_generate_triangle_mask)
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
