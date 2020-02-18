@@ -147,7 +147,8 @@ def test_relabel_sequential_nonpositive_offset(data_already_sequential,
 @pytest.mark.parametrize('offset', (1, 5))
 @pytest.mark.parametrize('with0', (False, True))
 @pytest.mark.parametrize('input_starts_at_offset', (False, True))
-def test_relabel_sequential_already_sequential(offset, with0, input_starts_at_offset):
+def test_relabel_sequential_already_sequential(offset, with0,
+                                               input_starts_at_offset):
     if with0:
         ar = np.array([1, 3, 0, 2, 5, 4])
     else:
