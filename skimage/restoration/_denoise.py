@@ -823,7 +823,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
             "avoid this warning the user should explicitly set rescale_sigma "
             "to True or False."
         )
-        warn(msg, DeprecationWarning)
+        warn(msg, FutureWarning, stacklevel=2)
         rescale_sigma = True
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,
