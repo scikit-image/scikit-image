@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
 from .._shared.utils import warn
 
@@ -561,8 +561,11 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     False
     """
     image = np.asanyarray(image)
-    if image.ndim == 3 and image.shape[2] in [3, 4]:
-        image = rgb2gray(image)
+    if image.ndim == 3:
+        if image.shape[2] == 4:
+            image = rgba2rgb(image)
+        if image.shape[2] == 3:
+            image = rgb2gray(image)
 
     dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])
