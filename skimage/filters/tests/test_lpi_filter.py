@@ -10,10 +10,7 @@ from skimage.filters import LPIFilter2D, inverse, wiener
 from skimage._shared._warnings import expected_warnings
 
 
-if (Version(scipy.__version__) <= '1.1.0'):
-    SCIPY_ND_INDEXING_WARNING = None
-else:
-    SCIPY_ND_INDEXING_WARNING = None
+SCIPY_ND_INDEXING_WARNING = None
 
 
 class TestLPIFilter2D(unittest.TestCase):
