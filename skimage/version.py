@@ -1,2 +1,2 @@
 # Avoid circular imports
-__version__ = '0.15.dev0'
+__version__ = '0.17.dev0'
