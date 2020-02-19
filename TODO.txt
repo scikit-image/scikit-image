@@ -43,6 +43,8 @@ Version 0.19
 ------------
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py``, remove the if statement
+  ``_init_level_set`` that relates to using the set ``circle``.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
