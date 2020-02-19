@@ -131,16 +131,11 @@ def relabel_sequential(label_field, offset=1):
     required_type = np.min_scalar_type(offset + len(labels0))
     if np.dtype(required_type).itemsize > np.dtype(label_field.dtype).itemsize:
         label_field = label_field.astype(required_type)
-    new_labels0 = np.arange(offset, offset + len(labels0))
-    if offset == 1 and np.all(labels0 == new_labels0):
-        if not (labels == 0).any():
-            labels = np.concatenate(([0], labels))
-        return label_field, labels, labels
+    new_m = offset - 1 + len(labels0)
+    new_labels0 = np.arange(offset, int(new_m + 1))
     forward_map = np.zeros(int(m + 1), dtype=label_field.dtype)
     forward_map[labels0] = new_labels0
-    if not (labels == 0).any():
-        labels = np.concatenate(([0], labels))
-    inverse_map = np.zeros(offset - 1 + len(labels), dtype=label_field.dtype)
-    inverse_map[(offset - 1):] = labels
+    inverse_map = np.zeros(int(new_m + 1), dtype=label_field.dtype)
+    inverse_map[offset:] = labels0
     relabeled = forward_map[label_field]
     return relabeled, forward_map, inverse_map
