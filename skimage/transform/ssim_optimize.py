@@ -59,8 +59,8 @@ def optimize_func(minimize, img, _lambda, iters, sigma):
         raise ValueError(
             "Array values should me in range [0, 1]")
 
-    noise = np.random.randint(0, 255, size = img.shape)/255.
-    noise = noise * _lambda/norm(noise)
+    noise = np.random.randint(0, 255, size=img.shape) / 255.
+    noise = noise * _lambda / norm(noise)
     adv_x = np.clip(img + noise, 0, 1)
 
     prev_ssim = ssim(img, adv_x, multichannel=True)
