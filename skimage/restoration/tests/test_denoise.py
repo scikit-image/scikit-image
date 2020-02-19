@@ -16,7 +16,7 @@ from distutils.version import LooseVersion as Version
 
 
 if (Version(pywt.__version__) <= '0.5.2'):
-    PYWAVELET_ND_INDEXING_WARNING = None
+    PYWAVELET_ND_INDEXING_WARNING = 'Using a non-tuple sequence'
 else:
     PYWAVELET_ND_INDEXING_WARNING = None
 
