@@ -16,8 +16,7 @@ from distutils.version import LooseVersion as Version
 
 
 if (Version(pywt.__version__) <= '0.5.2'):
-    PYWAVELET_ND_INDEXING_WARNING = ('Using a non-tuple sequence for '
-                                     'multidimensional')
+    PYWAVELET_ND_INDEXING_WARNING = None
 else:
     PYWAVELET_ND_INDEXING_WARNING = None
 
