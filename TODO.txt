@@ -48,6 +48,7 @@ Version 0.19
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
+  * Also make sure to look in the function ``_init_level_set``
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
@@ -95,4 +96,4 @@ Other
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1. 
+  when ``scipy`` upgrades to 1.1.
