@@ -104,8 +104,9 @@ def _generate_disk_mask(point, image, shape, random):
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
     # TODO: think about how to deprecate this
-    # Unfortunately, renaming `circle` to `disk` directly would break
-    # downstream code that switches between `circle` and disk.
+    # while the 'circle' argument has been deprecated in favor of the
+    # 'disk' argument, switching the return value to 'disk' here
+    # would be a breaking change for downstream libraries
     # See discussion on naming convention here
     # https://github.com/scikit-image/scikit-image/pull/4428
     disk = draw_disk((point[0], point[1]), radius)
