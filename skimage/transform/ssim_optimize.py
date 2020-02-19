@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.linalg import norm
 
-from ..metrics._structural_similarity import 
+from ..metrics._structural_similarity import structural_similarity as ssim
 
 def E(X, Y):
     return (Y - X) / norm(Y - X)
 
-def optimize_func(minimize=False, img, _lambda, iters, sigma):
+def optimize_func(minimize, img, _lambda, iters, sigma):
     if len(img.shape) != 3:
         img = img[0]
 
@@ -49,16 +49,14 @@ def optimize_func(minimize=False, img, _lambda, iters, sigma):
 
     """
 
-        
-    try:
-        assert len(img.shape) == 3:
-    except AssertionError:
-        print("Array should have dimensions (width, height, channel)\n")
 
-    try:
-        assert np.max(img) <= 1.0:
-    except AssertionError:
-        print("Array values should me in range [0, 1]")     
+    if len(img.shape) != 3:
+        raise ValueError(
+            "Array should have dimensions (width, height, channel)\n")
+
+    if np.max(img) > 1.0:
+        raise ValueError(
+            "Array values should me in range [0, 1]")     
         
     noise = np.random.randint(0, 255, size = img.shape) / 255.
     noise = noise * _lambda / norm(noise)
@@ -91,21 +89,29 @@ def optimize_func(minimize=False, img, _lambda, iters, sigma):
         # ----------- Conditional update -----------
         ssim_score = ssim(img, adv_x, multichannel=True)
 
-        if ssim_score > prev_ssim:
-            adv_x = np.copy(prev_img)
-            sigma /= 2
+        if minimize:
+            if ssim_score > prev_ssim:
+                adv_x = np.copy(prev_img)
+                sigma *= 0.9
+            else:
+                prev_img = np.copy(adv_x)
+                prev_ssim = ssim_score
         else:
-            prev_img = np.copy(adv_x)
-            prev_ssim = ssim_score
-
+            if ssim_score < prev_ssim:
+                adv_x = np.copy(prev_img)
+                sigma *= 0.9
+            else:
+                prev_img = np.copy(adv_x)
+                prev_ssim = ssim_score
+            
     return adv_x
     
 
 def minimize_ssim(img, _lambda, iters=50, sigma=30):
-    adv_x = optimize_func(minimize=True, img, _lambda, iters, sigma)
+    adv_x = optimize_func(True, img, _lambda, iters, sigma)
     return adv_x
     
 def maximize_ssim(img, _lambda, iters=50, sigma=30):
-    adv_x = optimize_func(minimize=False, img, _lambda, iters, sigma)
+    adv_x = optimize_func(False, img, _lambda, iters, sigma)
     return adv_x
     
