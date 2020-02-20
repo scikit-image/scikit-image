@@ -304,6 +304,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (SH ** 2)
+
     return np.sqrt(dE2)
 
 
@@ -327,6 +328,10 @@ def get_dH2(lab1, lab2):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
+
+    if np.allclose(lab1, lab2):
+        return np.zeros(lab1.shape[0])
+
     a1, b1 = np.rollaxis(lab1, -1)[1:3]
     a2, b2 = np.rollaxis(lab2, -1)[1:3]
 
