@@ -1,22 +1,22 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
-                                      _log_polar_mapping)
-from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
-                               AffineTransform,
-                               ProjectiveTransform,
-                               SimilarityTransform,
-                               downscale_local_mean,
-                               warp_polar)
-from skimage import transform as tf, data, img_as_float
-from skimage.color import rgb2gray
-from skimage.draw import circle_perimeter_aa
-from skimage.feature import peak_local_max
-from skimage._shared import testing
-from skimage._shared.testing import (assert_almost_equal, assert_equal,
-                                     test_parallel)
-from skimage._shared._warnings import expected_warnings
+from ...data import checkerboard, astronaut
+from ...util.dtype import img_as_float
+from ...color.colorconv import rgb2gray
+from ...draw.draw import circle_perimeter_aa
+from ...feature.peak import peak_local_max
+from ..._shared import testing
+from ..._shared.testing import (assert_almost_equal, assert_equal,
+                                test_parallel)
+from ..._shared._warnings import expected_warnings
+
+from .._warps import (_stackcopy, _linear_polar_mapping,
+                      _log_polar_mapping, warp, warp_coords, rotate,
+                      resize, rescale, warp_polar, swirl,
+                      downscale_local_mean)
+from .._geometric import (AffineTransform, ProjectiveTransform,
+                          SimilarityTransform)
 
 
 np.random.seed(0)
@@ -353,21 +353,21 @@ def test_resize_dtype():
 
 
 def test_swirl():
-    image = img_as_float(data.checkerboard())
+    image = img_as_float(checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
     swirl_params.pop('mode')
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
@@ -380,7 +380,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(data.astronaut()))
+    img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -394,7 +394,7 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
-    image = data.astronaut().astype(np.float32)
+    image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
