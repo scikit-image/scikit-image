@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
 from .._shared.utils import warn
 
@@ -346,6 +346,15 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     imin, imax = intensity_range(image, in_range)
     omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
 
+    # Fast test for multiple values, operations with at least 1 NaN return NaN
+    if np.isnan(imin + imax + omin + omax):
+        warn(
+            "One or more intensity levels are NaN. Rescaling will broadcast "
+            "NaN to the full image. Provide intensity levels yourself to "
+            "avoid this. E.g. with np.nanmin(image), np.nanmax(image).",
+            stacklevel=2
+        )
+
     image = np.clip(image, imin, imax)
 
     if imin != imax:
@@ -552,8 +561,11 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     False
     """
     image = np.asanyarray(image)
-    if image.ndim == 3 and image.shape[2] in [3, 4]:
-        image = rgb2gray(image)
+    if image.ndim == 3:
+        if image.shape[2] == 4:
+            image = rgba2rgb(image)
+        if image.shape[2] == 3:
+            image = rgb2gray(image)
 
     dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])

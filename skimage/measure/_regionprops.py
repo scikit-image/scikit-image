@@ -73,7 +73,7 @@ COL_DTYPES = {
     'bbox': int,
     'bbox_area': int,
     'moments_central': float,
-    'centroid': int,
+    'centroid': float,
     'convex_area': int,
     'convex_image': object,
     'coords': object,
@@ -89,11 +89,11 @@ COL_DTYPES = {
     'inertia_tensor_eigvals': float,
     'intensity_image': object,
     'label': int,
-    'local_centroid': int,
+    'local_centroid': float,
     'major_axis_length': float,
-    'max_intensity': float,
+    'max_intensity': int,
     'mean_intensity': float,
-    'min_intensity': float,
+    'min_intensity': int,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -102,10 +102,10 @@ COL_DTYPES = {
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
-    'weighted_centroid': int,
+    'weighted_centroid': float,
     'weighted_moments_hu': float,
-    'weighted_local_centroid': int,
-    'weighted_moments': int,
+    'weighted_local_centroid': float,
+    'weighted_moments': float,
     'weighted_moments_normalized': float
 }
 
@@ -853,7 +853,16 @@ def regionprops(label_image, intensity_image=None, cache=True,
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        raise TypeError('Label image must be of integer type.')
+        if np.issubdtype(label_image.dtype, np.bool_):
+            raise TypeError(
+                    'Non-integer image types are ambiguous: '
+                    'use skimage.measure.label to label the connected'
+                    'components of label_image,'
+                    'or label_image.astype(np.uint8) to interpret'
+                    'the True values as a single label.')
+        else:
+            raise TypeError(
+                    'Non-integer label_image types are ambiguous')
 
     if coordinates is not None:
         if coordinates == 'rc':

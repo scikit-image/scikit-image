@@ -65,21 +65,21 @@ def max_tree(image, connectivity=1):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         The input image for which the max-tree is to be calculated.
         This image can be of any type.
-    connectivity: unsigned int, optional
+    connectivity : unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
 
     Returns
     -------
-    parent: ndarray, int64
+    parent : ndarray, int64
         Array of same shape as image. The value of each pixel is the index of
         its parent in the ravelled array.
 
-    tree_traverser: 1D array, int64
+    tree_traverser : 1D array, int64
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
@@ -166,27 +166,27 @@ def area_opening(image, area_threshold=64, connectivity=1,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
-    area_threshold: unsigned int
+    area_threshold : unsigned int
         The size parameter (number of pixels). The default value is arbitrarily
         chosen to be 64.
-    connectivity: unsigned int, optional
+    connectivity : unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent: ndarray, int64, optional
+    parent : ndarray, int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
-    tree_traverser: 1D array, int64, optional
+    tree_traverser : 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
 
     Returns
     -------
-    output: ndarray
+    output : ndarray
         Output image of the same shape and type as the input image.
 
     See also
@@ -270,27 +270,27 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         The input image for which the area_opening is to be calculated.
         This image can be of any type.
-    diameter_threshold: unsigned int
+    diameter_threshold : unsigned int
         The maximal extension parameter (number of pixels). The default value
         is 8.
-    connectivity: unsigned int, optional
+    connectivity : unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent: ndarray, int64, optional
+    parent : ndarray, int64, optional
         Parent image representing the max tree of the image. The
         value of each pixel is the index of its parent in the ravelled array.
-    tree_traverser: 1D array, int64, optional
+    tree_traverser : 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
 
     Returns
     -------
-    output: ndarray
+    output : ndarray
         Output image of the same shape and type as the input image.
 
     See also
@@ -368,28 +368,28 @@ def area_closing(image, area_threshold=64, connectivity=1,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         The input image for which the area_closing is to be calculated.
         This image can be of any type.
-    area_threshold: unsigned int
+    area_threshold : unsigned int
         The size parameter (number of pixels). The default value is arbitrarily
         chosen to be 64.
-    connectivity: unsigned int, optional
+    connectivity : unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent: ndarray, int64, optional
+    parent : ndarray, int64, optional
         Parent image representing the max tree of the inverted image. The
         value of each pixel is the index of its parent in the ravelled array.
         See Note for further details.
-    tree_traverser: 1D array, int64, optional
+    tree_traverser : 1D array, int64, optional
         The ordered pixel indices (referring to the ravelled array). The pixels
         are ordered such that every pixel is preceded by its parent (except for
         the root which has no parent).
 
     Returns
     -------
-    output: ndarray
+    output : ndarray
         Output image of the same shape and type as input image.
 
     See also
@@ -488,21 +488,21 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         The input image for which the diameter_closing is to be calculated.
         This image can be of any type.
-    diameter_threshold: unsigned int
+    diameter_threshold : unsigned int
         The maximal extension parameter (number of pixels). The default value
         is 8.
-    connectivity: unsigned int, optional
+    connectivity : unsigned int, optional
         The neighborhood connectivity. The integer represents the maximum
         number of orthogonal steps to reach a neighbor. In 2D, it is 1 for
         a 4-neighborhood and 2 for a 8-neighborhood. Default value is 1.
-    parent: ndarray, int64, optional
+    parent : ndarray, int64, optional
         Precomputed parent image representing the max tree of the inverted
         image. This function is fast, if precomputed parent and tree_traverser
         are provided. See Note for further details.
-    tree_traverser: 1D array, int64, optional
+    tree_traverser : 1D array, int64, optional
         Precomputed traverser, where the pixels are ordered such that every
         pixel is preceded by its parent (except for the root which has no
         parent). This function is fast, if precomputed parent and
@@ -510,7 +510,7 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
 
     Returns
     -------
-    output: ndarray
+    output : ndarray
         Output image of the same shape and type as input image.
 
     See also

@@ -7,7 +7,6 @@ from scipy import ndimage as ndi
 from .rank import generic
 
 
-@generic._default_selem
 def median(image, selem=None, out=None, mask=None, shift_x=False,
            shift_y=False, mode='nearest', cval=0.0, behavior='ndimage'):
     """Return local median of an image.
@@ -93,5 +92,7 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         warn("Change 'behavior' to 'rank' if you want to use the "
              "parameters 'mask', 'shift_x', 'shift_y'. They will be "
              "discarded otherwise.")
+    if selem is None:
+        selem = ndi.generate_binary_structure(image.ndim, image.ndim)
     return ndi.median_filter(image, footprint=selem, output=out, mode=mode,
                              cval=cval)
