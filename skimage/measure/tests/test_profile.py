@@ -186,9 +186,9 @@ def test_bool_array_input():
     center_x, center_y = (140, 150)
     radius = 20
     x, y = np.meshgrid(range(shape[1]), range(shape[0]))
-    mask = (y - center_y)**2 + (x - center_x)**2 < radius**2
+    mask = (y - center_y) ** 2 + (x - center_x) ** 2 < radius ** 2
     src = (center_y, center_x)
-    phi = 4*np.pi/9.
+    phi = 4 * np.pi / 9.
     dy = 31 * np.cos(phi)
     dx = 31 * np.sin(phi)
     dst = (center_y + dy, center_x + dx)
