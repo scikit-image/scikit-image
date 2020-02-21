@@ -632,3 +632,30 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
     with testing.raises(ValueError):
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
+
+
+def test_boll_array_rescaling():
+    img = np.zeros((100, 120), dtype=bool)
+    img[20:80, 30:90] = True
+    res = rescale(img, 0.305)
+
+    assert_equal(res[6:24, 9:27], np.ones((18, 18)))
+
+
+def test_boll_array_warnings():
+    img = np.zeros((10, 10), dtype=bool)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        warp(img, np.eye(3), order=1)
