@@ -104,10 +104,11 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
     image_is_bool = image.dtype == bool
 
-    if anti_aliasing is None and image_is_bool:
-        anti_aliasing = False
-    else:
-        anti_aliasing = True
+    if anti_aliasing is None:
+        if image_is_bool:
+            anti_aliasing = False
+        else:
+            anti_aliasing = True
 
     if image_is_bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution "
@@ -181,7 +182,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _set_order(image, order)
+        order = _set_order(image.dtype, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
@@ -693,10 +694,11 @@ def _set_order(image_dtype, order):
 
     image_is_bool = image_dtype == bool
 
-    if order is None and image_is_bool:
-        order = 0
-    else:
-        order = 1
+    if order is None:
+        if image_is_bool:
+            order = 0
+        else:
+            order = 1
 
     if image_is_bool and order != 0:
         warn("Input image dtype is bool. Interpolation is not defined "
