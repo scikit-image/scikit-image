@@ -157,10 +157,10 @@ def _guess_spatial_dimensions(image):
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
-def difference_of_gaussians(image, lesser_sigma, greater_sigma=None, *,
+def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
                             mode='nearest', cval=0, multichannel=False,
                             truncate=4.0):
-    """Find features between ``lesser_sigma`` and ``greater_sigma`` in size.
+    """Find features between ``low_sigma`` and ``high_sigma`` in size.
 
     This function uses the Difference of Gaussians method for applying
     band-pass filters to multi-dimensional arrays. The input array is
@@ -175,17 +175,17 @@ def difference_of_gaussians(image, lesser_sigma, greater_sigma=None, *,
     ----------
     image : ndarray
         Input array to filter.
-    lesser_sigma : scalar or sequence of scalars
+    low_sigma : scalar or sequence of scalars
         Standard deviation(s) for the Gaussian kernel with the smaller sigmas
         across all axes. The standard deviations are given for each axis as a
         sequence, or as a single number, in which case the single number is
         used as the standard deviation value for all axes.
-    greater_sigma : scalar or sequence of scalars, optional (default is None)
+    high_sigma : scalar or sequence of scalars, optional (default is None)
         Standard deviation(s) for the Gaussian kernel with the larger sigmas
         across all axes. The standard deviations are given for each axis as a
         sequence, or as a single number, in which case the single number is
         used as the standard deviation value for all axes. If None is given
-        (default), sigmas for all axes are calculated as 1.6 * lesser_sigma.
+        (default), sigmas for all axes are calculated as 1.6 * low_sigma.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
@@ -208,13 +208,13 @@ def difference_of_gaussians(image, lesser_sigma, greater_sigma=None, *,
     Notes
     -----
     This function will subtract an array filtered with a guassian kernel
-    with sigmas given by ``greater_sigma`` from an array filtered with a
-    gaussian kernel with sigmas provided by ``lesser_sigma``. The values for
-    ``greater_sigma`` must always be greater than or equal to the corresponding
-    values in ``lesser_sigma``, or a ``ValueError`` will be raised.
+    with sigmas given by ``high_sigma`` from an array filtered with a
+    gaussian kernel with sigmas provided by ``low_sigma``. The values for
+    ``high_sigma`` must always be greater than or equal to the corresponding
+    values in ``low_sigma``, or a ``ValueError`` will be raised.
 
-    When ``greater_sigma`` is none, the values for ``greater_sigma`` will be
-    calculated as 1.6x the corresponding values in ``lesser_sigma``. This ratio
+    When ``high_sigma`` is none, the values for ``high_sigma`` will be
+    calculated as 1.6x the corresponding values in ``low_sigma``. This ratio
     was originally proposed by Marr and Hildreth (1980) [1]_ and is commonly
     used when approximating the inverted Laplacian of Guassian, which is used
     in edge and blob detection.
@@ -252,35 +252,35 @@ def difference_of_gaussians(image, lesser_sigma, greater_sigma=None, *,
 
     """
     image = img_as_float(image)
-    lesser_sigma = np.array(lesser_sigma, dtype='float', ndmin=1)
-    if greater_sigma is None:
-        greater_sigma = lesser_sigma * 1.6
+    low_sigma = np.array(low_sigma, dtype='float', ndmin=1)
+    if high_sigma is None:
+        high_sigma = low_sigma * 1.6
     else:
-        greater_sigma = np.array(greater_sigma, dtype='float', ndmin=1)
+        high_sigma = np.array(high_sigma, dtype='float', ndmin=1)
 
     if multichannel is True:
         spatial_dims = image.ndim - 1
     else:
         spatial_dims = image.ndim
 
-    if len(lesser_sigma) != 1 and len(lesser_sigma) != spatial_dims:
-        raise ValueError('lesser_sigma must have length equal to number of'
+    if len(low_sigma) != 1 and len(low_sigma) != spatial_dims:
+        raise ValueError('low_sigma must have length equal to number of'
                          ' spatial dimensions of input')
-    if len(greater_sigma) != 1 and len(greater_sigma) != spatial_dims:
-        raise ValueError('greater_sigma must have length equal to number of'
+    if len(high_sigma) != 1 and len(high_sigma) != spatial_dims:
+        raise ValueError('high_sigma must have length equal to number of'
                          ' spatial dimensions of input')
 
-    lesser_sigma = lesser_sigma * np.ones(spatial_dims)
-    greater_sigma = greater_sigma * np.ones(spatial_dims)
+    low_sigma = low_sigma * np.ones(spatial_dims)
+    high_sigma = high_sigma * np.ones(spatial_dims)
 
-    if any(greater_sigma < lesser_sigma):
-        raise ValueError('greater_sigma must be equal to or larger than'
-                         'lesser_sigma for all axes')
+    if any(high_sigma < low_sigma):
+        raise ValueError('high_sigma must be equal to or larger than'
+                         'low_sigma for all axes')
 
-    im1 = gaussian(image, lesser_sigma, mode=mode, cval=cval,
+    im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
                    multichannel=multichannel, truncate=truncate)
 
-    im2 = gaussian(image, greater_sigma, mode=mode, cval=cval,
+    im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
                    multichannel=multichannel, truncate=truncate)
 
     return im1 - im2
