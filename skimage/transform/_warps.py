@@ -663,7 +663,7 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
             output_image[cval_mask] = cval
 
 
-def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
+def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
          mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
@@ -717,6 +717,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
          - 3: Bi-cubic
          - 4: Bi-quartic
          - 5: Bi-quintic
+         Default to 0 if image.dtype is bool and 1 otherwise.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
@@ -805,6 +806,11 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
     if image.size == 0:
         raise ValueError("Cannot warp empty image with dimensions", image.shape)
+
+    if order is None and image.dtype == bool:
+        order = 0
+    else:
+        order = 1
 
     image = convert_to_float(image, preserve_range)
 
