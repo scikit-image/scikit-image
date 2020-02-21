@@ -76,16 +76,13 @@ Sections
 
    * - `SKIPs <skips/index.html>`_
 
-     - 
-
-       SciKit-Image Proposals, documents describing major changes to the
+       **s**\ ci\ **k**\ it-\ **i**\ mage **p**\ roposals, documents describing major changes to the
        library.
 
-   * - `Code of Conduct <conduct/code_of_conduct.html>`_
-
-     -
+     - `Code of Conduct <conduct/code_of_conduct.html>`_
 
        Community interaction guidelines.
+
 
 Indices
 =======
