@@ -1,4 +1,4 @@
-.. _skip_values:
+.. _values:
 
 =======================================
 SKIP 2 — scikit-image mission statement
