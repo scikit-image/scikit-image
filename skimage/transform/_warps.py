@@ -105,7 +105,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
     if anti_aliasing is None:
         anti_aliasing = not image.dtype == bool
 
-    if not image.dtype == bool and anti_aliasing:
+    if image.dtype == bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution "
              "with bool data type is not defined. Please set anti_aliasing "
              "to False or explicitely cast input image to another data type.",
