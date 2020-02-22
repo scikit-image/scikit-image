@@ -102,18 +102,13 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         raise ValueError("len(output_shape) cannot be smaller than the image "
                          "dimensions")
 
-    image_is_bool = image.dtype == bool
-
     if anti_aliasing is None:
-        if image_is_bool:
-            anti_aliasing = False
-        else:
-            anti_aliasing = True
+        anti_aliasing = not image.dtype == bool
 
-    if image_is_bool and anti_aliasing:
+    if not image.dtype == bool and anti_aliasing:
         warn("Input image dtype is bool. Gaussian convolution "
              "with bool data type is not defined. Please set anti_aliasing "
-             "to False or explicitely cast input image to an other data type.",
+             "to False or explicitely cast input image to another data type.",
              stacklevel=2)
 
     factors = (np.asarray(input_shape, dtype=float) /
@@ -692,18 +687,13 @@ def _set_order(image_dtype, order):
 
     """
 
-    image_is_bool = image_dtype == bool
-
     if order is None:
-        if image_is_bool:
-            order = 0
-        else:
-            order = 1
+        order = 0 if image_dtype == bool else 1
 
-    if image_is_bool and order != 0:
+    if image_dtype == bool and order != 0:
         warn("Input image dtype is bool. Interpolation is not defined "
              "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to an other data type.")
+             "cast input image to another data type.", stacklevel=2)
 
     return order
 
