@@ -37,6 +37,6 @@ def test_register_affine_multichannel():
 def test_matrix_parameter_vector_conversion():
     for ndim in range(2, 5):
         p_v = np.random.rand((ndim + 1) * ndim)
-        matrix = registration._parameter_vector_to_matrix(p_v, ndim)
+        matrix = registration._parameter_vector_to_matrix(p_v)
         p_v_2 = registration._matrix_to_parameter_vector(matrix)
         assert_array_equal(p_v, p_v_2)
