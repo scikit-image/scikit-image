@@ -762,6 +762,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
          - 3: Bi-cubic
          - 4: Bi-quartic
          - 5: Bi-quintic
+
          Default is 0 if image.dtype is bool and 1 otherwise.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
