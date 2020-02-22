@@ -15,9 +15,8 @@ from skimage._shared._warnings import expected_warnings
 from distutils.version import LooseVersion as Version
 
 
-if (Version(np.__version__) >= '1.15.0' and
-        Version(pywt.__version__) <= '0.5.2'):
-    PYWAVELET_ND_INDEXING_WARNING = 'non-tuple sequence for multidimensional'
+if (Version(pywt.__version__) <= '0.5.2'):
+    PYWAVELET_ND_INDEXING_WARNING = 'Using a non-tuple sequence'
 else:
     PYWAVELET_ND_INDEXING_WARNING = None
 
@@ -492,13 +491,11 @@ def test_wavelet_denoising(img, multichannel, convert2ycbcr):
     assert_(psnr_denoised > psnr_noisy)
 
     # SNR is improved less with 1 wavelet level than with the default.
-    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
-        denoised_1 = restoration.denoise_wavelet(
-            noisy,
-            multichannel=multichannel,
-            wavelet_levels=1,
-            convert2ycbcr=convert2ycbcr,
-            rescale_sigma=True)
+    denoised_1 = restoration.denoise_wavelet(noisy,
+                                             multichannel=multichannel,
+                                             wavelet_levels=1,
+                                             convert2ycbcr=convert2ycbcr,
+                                             rescale_sigma=True)
     psnr_denoised_1 = peak_signal_noise_ratio(img, denoised_1)
     assert_(psnr_denoised > psnr_denoised_1)
     assert_(psnr_denoised_1 > psnr_noisy)
@@ -545,9 +542,8 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     multichannel = x.shape[-1] == 3
 
     if estimate_sigma:
-        with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
-            sigma_est = restoration.estimate_sigma(noisy,
-                                                   multichannel=multichannel)
+        sigma_est = restoration.estimate_sigma(noisy,
+                                               multichannel=multichannel)
     else:
         sigma_est = None
 
@@ -562,13 +558,11 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                                    rescale_sigma=True)
         return
 
-    with expected_warnings([PYWAVELET_ND_INDEXING_WARNING]):
-        denoised = restoration.denoise_wavelet(noisy,
-                                               sigma=sigma_est,
-                                               wavelet='sym4',
-                                               multichannel=multichannel,
-                                               convert2ycbcr=convert2ycbcr,
-                                               rescale_sigma=True)
+    denoised = restoration.denoise_wavelet(noisy, sigma=sigma_est,
+                                           wavelet='sym4',
+                                           multichannel=multichannel,
+                                           convert2ycbcr=convert2ycbcr,
+                                           rescale_sigma=True)
 
     data_range = x.max() - x.min()
     psnr_noisy = peak_signal_noise_ratio(x, noisy, data_range=data_range)
