@@ -22,9 +22,7 @@ def profile_line(image, src, dst, linewidth=1,
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
-        The order of the spline interpolation, default is 1. The order has to
         The order of the spline interpolation, default is 0 if
-        be in the range 0-5. See `skimage.transform.warp` for detail.
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'nearest', 'reflect', 'mirror', 'wrap'}, optional
@@ -90,31 +88,24 @@ def profile_line(image, src, dst, linewidth=1,
            [1.        , 1.        , 0.        ],
            [1.41421356, 1.41421356, 0.        ]])
     """
-    image_is_bool = image.dtype == bool
-
     if order is None:
-        if image_is_bool:
-            order = 0
-        else:
-            order = 1
+        order = 0 if image.dtype == bool else 1
 
-    if image_is_bool and order != 0:
+    if image.dtype == bool and order != 0:
         warn("Input image dtype is bool. Interpolation is not defined "
              "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to an other data type.")
-
-    prefilter = order > 1
+             "cast input image to another data type.", stacklevel=2)
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
         pixels = [ndi.map_coordinates(image[..., i], perp_lines,
-                                      prefilter=prefilter,
+                                      prefilter=order > 1,
                                       order=order, mode=mode,
                                       cval=cval) for i in
                   range(image.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = ndi.map_coordinates(image, perp_lines, prefilter=prefilter,
+        pixels = ndi.map_coordinates(image, perp_lines, prefilter=order > 1,
                                      order=order, mode=mode, cval=cval)
     # The outputted array with reduce_func=None gives an array where the
     # row values (axis=1) are flipped. Here, we make this consistent.
