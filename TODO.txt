@@ -61,6 +61,8 @@ Version 0.19
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
+* In ``skimage/measure/profile.py``, raise a ValueError instead of the
+  warning when order > 0 and input array is bool in profile_line.
 
 Other
 -----
