@@ -139,7 +139,7 @@ def test_cmc():
     # Equal colors have a distance of 0:
     lab1 = lab2
     expected = np.zeros_like(oracle)
-    assert_equal(deltaE_cmc(lab1, lab2), expected)
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected)
 
     # Small difference case
     lab2[0, 0] += np.finfo(float).eps
