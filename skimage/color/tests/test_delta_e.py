@@ -2,13 +2,11 @@
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from skimage._shared.testing import (assert_allclose, assert_equal,
-                                     assert_almost_equal)
+from ..._shared.testing import (assert_allclose, assert_equal,
+                                assert_almost_equal)
 
-from skimage.color import (deltaE_cie76,
-                           deltaE_ciede94,
-                           deltaE_ciede2000,
-                           deltaE_cmc)
+from ..delta_e import (deltaE_cie76, deltaE_ciede94, deltaE_ciede2000,
+                       deltaE_cmc)
 
 
 def test_ciede2000_dE():
