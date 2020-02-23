@@ -20,7 +20,7 @@ https://en.wikipedia.org/wiki/Color_difference
 
 import numpy as np
 
-from ..color.colorconv import lab2lch, _cart2polar_2pi
+from .colorconv import lab2lch, _cart2polar_2pi
 
 
 def deltaE_cie76(lab1, lab2):
@@ -116,7 +116,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (kH * SH) ** 2
-    return np.sqrt(dE2)
+    return np.sqrt(np.max(dE2, 0))
 
 
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
@@ -238,7 +238,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     dE2 += C_term ** 2
     dE2 += H_term ** 2
     dE2 += R_term
-    ans = np.sqrt(dE2)
+    ans = np.sqrt(max(0, dE2))
     if unroll:
         ans = ans[0]
     return ans
@@ -305,7 +305,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (SH ** 2)
 
-    return np.sqrt(dE2)
+    return np.sqrt(np.max(0, dE2))
 
 
 def get_dH2(lab1, lab2):
@@ -328,9 +328,6 @@ def get_dH2(lab1, lab2):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
-
-    if np.allclose(lab1, lab2):
-        return np.zeros(lab1.shape[0])
 
     a1, b1 = np.rollaxis(lab1, -1)[1:3]
     a2, b2 = np.rollaxis(lab2, -1)[1:3]
