@@ -87,7 +87,7 @@ def _generate_grid_slice(shape, *, offset, stride=3):
     return mask
 
 
-def _invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
+def _invariant_denoise(image, denoise_function, *, stride=4,
                        masks=None, denoiser_kwargs=None):
     """Apply a J-invariant version of `denoise_function`.
 
@@ -118,6 +118,10 @@ def _invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
     if denoiser_kwargs is None:
         denoiser_kwargs = {}
 
+    if 'multichannel' in denoiser_kwargs:
+        multichannel = denoiser_kwargs['multichannel']
+    else:
+        multichannel = False
     interp = _interpolate_image(image, multichannel=multichannel)
     output = np.zeros(image.shape)
 
@@ -159,7 +163,7 @@ def _product_from_dict(dictionary):
 
 
 def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
-                       stride=4, multichannel=False, approximate_loss=True,
+                       stride=4, approximate_loss=True,
                        full_output=False):
     """Calibrate a denoising function and return optimal J-invariant version.
 
@@ -239,7 +243,6 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
         image, denoise_function,
         denoise_parameters=denoise_parameters,
         stride=stride,
-        multichannel=multichannel,
         approximate_loss=approximate_loss
     )
 
@@ -250,7 +253,6 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
         _invariant_denoise,
         denoise_function=denoise_function,
         stride=stride,
-        multichannel=multichannel,
         denoiser_kwargs=best_parameters,
     )
 
@@ -261,8 +263,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
 
 
 def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
-                              stride=4, multichannel=False,
-                              approximate_loss=True):
+                               stride=4, approximate_loss=True):
     """Return a parameter search history with losses for a denoise function.
 
     Parameters
@@ -297,11 +298,14 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
     losses = []
 
     for denoiser_kwargs in parameters_tested:
+        if 'multichannel' in denoiser_kwargs:
+            multichannel = denoiser_kwargs['multichannel']
+        else:
+            multichannel = False
         if not approximate_loss:
             denoised = _invariant_denoise(
                 image, denoise_function,
                 stride=stride,
-                multichannel=multichannel,
                 denoiser_kwargs=denoiser_kwargs
             )
             loss = mean_squared_error(denoised, image)
@@ -314,7 +318,6 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
             masked_denoised = _invariant_denoise(
                 image, denoise_function,
                 masks=[mask],
-                multichannel=multichannel,
                 denoiser_kwargs=denoiser_kwargs
             )
 

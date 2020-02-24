@@ -52,8 +52,7 @@ default_output = denoise_wavelet(noisy, multichannel=True)
 # Calibrate denoiser
 calibrated_denoiser = calibrate_denoiser(noisy,
                                          denoise_wavelet,
-                                         denoise_parameters=parameter_ranges,
-                                         multichannel=True)
+                                         denoise_parameters=parameter_ranges)
 
 # Denoised image using calibrated denoiser
 calibrated_output = calibrated_denoiser(noisy)

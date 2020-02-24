@@ -26,8 +26,9 @@ def test_invariant_denoise():
 
 
 def test_invariant_denoise_color():
-    denoised_img_color = _invariant_denoise(noisy_img_color, denoise_wavelet,
-                                            multichannel=True)
+    denoised_img_color = _invariant_denoise(
+            noisy_img_color, denoise_wavelet,
+            denoiser_kwargs=dict(multichannel=True))
 
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)
