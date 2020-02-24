@@ -193,13 +193,12 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     best_denoise_function : function
         The optimal J-invariant version of `denoise_function`.
 
-    If `full_output` is True, the following objects are also returned:
+    If `full_output` is True, the following tuple is also returned:
 
-    parameters_tested : list of dict
-        List of parameters tested for `denoise_function`, as a dictionary of
-        kwargs.
-    losses : list of int
-        Self-supervised loss for each set of parameters in `parameters_tested`.
+    (parameters_tested, losses) : tuple (list of dict, list of int)
+        - List of parameters tested for `denoise_function`, as a dictionary of
+        kwargs
+        - Self-supervised loss for each set of parameters in `parameters_tested`.
 
 
 
@@ -256,7 +255,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     )
 
     if full_output:
-        return best_denoise_function, parameters_tested, losses
+        return best_denoise_function, (parameters_tested, losses)
     else:
         return best_denoise_function
 

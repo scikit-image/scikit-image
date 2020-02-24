@@ -44,7 +44,7 @@ def test_invariant_denoise_3d():
 
 def test_calibrate_denoiser_full_output():
     parameter_ranges = {'sigma': np.random.random(5) / 2}
-    _, parameters_tested, losses = calibrate_denoiser(
+    _, (parameters_tested, losses) = calibrate_denoiser(
         noisy_img,
         denoise_wavelet,
         denoise_parameters=parameter_ranges,
