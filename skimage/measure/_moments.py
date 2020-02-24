@@ -1,7 +1,6 @@
 import itertools
 import numpy as np
 from .._shared.utils import check_nD
-from ..util.dtype import convert
 from . import _moments_cy
 
 
@@ -353,7 +352,7 @@ def moments_hu(nu, dtype=None):
     if dtype.char not in 'fd':
         raise ValueError("Only floating point data type are supported "
                          "for moments_hu")
-    return _moments_cy.moments_hu(convert(nu, dtype))
+    return _moments_cy.moments_hu(nu.astype(dtype))
 
 
 def centroid(image):
