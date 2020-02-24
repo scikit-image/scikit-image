@@ -192,7 +192,8 @@ def _get_fourier_filter(size, filter_name):
 @deprecate_kwarg(kwarg_mapping={'filter': 'filter_name'},
                  removed_version="0.19")
 def iradon(radon_image, theta=None, output_size=None,
-           filter_name="ramp", interpolation="linear", circle=True):
+           filter_name="ramp", interpolation="linear", circle=True,
+           preserve_range=True):
     """Inverse radon transform.
 
     Reconstruct an image from the radon transform, using the filtered
@@ -226,7 +227,6 @@ def iradon(radon_image, theta=None, output_size=None,
         Whether to keep the original range of values. Otherwise, the input
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
-        By default, data range is preserved (ie ``preserve_range=True``).
 
     Returns
     -------
@@ -272,15 +272,6 @@ def iradon(radon_image, theta=None, output_size=None,
     filter_types = ('ramp', 'shepp-logan', 'cosine', 'hamming', 'hann', None)
     if filter_name not in filter_types:
         raise ValueError("Unknown filter: %s" % filter_name)
-
-    if preserve_range is None and np.issubdtype(radon_image.dtype, np.integer):
-        warn('Image dtype is not float. By default iradon will assume '
-             'you want to preserve the range of your image '
-             '(preserve_range=True). In scikit-image 0.19 this behavior will '
-             'change to preserve_range=False. To avoid this warning, '
-             'explicitly specify the preserve_range parameter.',
-             FutureWarning, stacklevel=2)
-        preserve_range = True
 
     radon_image = convert_to_float(radon_image, preserve_range)
     dtype = radon_image.dtype
