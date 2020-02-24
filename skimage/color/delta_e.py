@@ -116,7 +116,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (kH * SH) ** 2
-    return np.sqrt(np.maximum(dE2, 0))
+    return np.sqrt(np.maximum(dE2, 0, out=dE2), out=dE2)
 
 
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
@@ -238,7 +238,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     dE2 += C_term ** 2
     dE2 += H_term ** 2
     dE2 += R_term
-    ans = np.sqrt(np.maximum(0, dE2))
+    ans = np.sqrt(np.maximum(dE2, 0, out=dE2), out=dE2)
     if unroll:
         ans = ans[0]
     return ans
@@ -305,7 +305,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (SH ** 2)
 
-    return np.sqrt(np.maximum(0, dE2))
+    return np.sqrt(np.maximum(dE2, 0, out=dE2), out=dE2)
 
 
 def get_dH2(lab1, lab2):

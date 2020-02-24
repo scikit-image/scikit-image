@@ -143,7 +143,7 @@ def test_cmc():
 
     # Small difference case
     lab2[0, 0] += np.finfo(float).eps
-    assert_almost_equal(deltaE_cmc(lab1, lab2), expected)
+    assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
 
     # Single item case:
     lab1 = lab2 = np.array([0., 1.59607713, 0.87755709])
