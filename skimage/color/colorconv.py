@@ -1379,7 +1379,7 @@ def separate_stains(rgb, conv_matrix):
     ----------
     rgb : array_like
         The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
@@ -1436,7 +1436,7 @@ def combine_stains(stains, conv_matrix):
     stains : array_like
         The image in stain color space, in a 3-D array of shape
         ``(.., .., 3)``.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns

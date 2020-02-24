@@ -853,7 +853,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        if np.issubdtype(label_image.dtype, np.bool):
+        if np.issubdtype(label_image.dtype, np.bool_):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
                     'use skimage.measure.label to label the connected'

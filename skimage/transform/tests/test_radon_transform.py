@@ -1,5 +1,6 @@
 import os
 import itertools
+import pytest
 
 import numpy as np
 import pytest
@@ -64,7 +65,7 @@ def test_iradon_bias_circular_phantom():
 
     tol = 5e-5
     roi_err = np.abs(np.mean(error))
-    assert( roi_err < tol )
+    assert roi_err < tol
 
 
 def check_radon_center(shape, circle, dtype, preserve_range):
@@ -151,7 +152,7 @@ def test_iradon_center(size, theta, circle):
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
     image = PHANTOM
-    reconstructed = iradon(radon(image, circle=False), filter=filter_type,
+    reconstructed = iradon(radon(image, circle=False), filter_name=filter_type,
                            interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
     print('\n\tmean error:', delta)
@@ -179,6 +180,15 @@ radon_iradon_inputs.append(('cubic', 'shepp-logan'))
                      radon_iradon_inputs)
 def test_radon_iradon(interpolation_type, filter_type):
     check_radon_iradon(interpolation_type, filter_type)
+
+
+@pytest.mark.parametrize("filter_type", filter_types)
+def test_iradon_new_signature(filter_type):
+    image = PHANTOM
+    sinogram = radon(image, circle=False)
+    with pytest.warns(FutureWarning):
+        assert np.array_equal(iradon(sinogram, filter=filter_type),
+                              iradon(sinogram, filter_name=filter_type))
 
 
 def test_iradon_angles():

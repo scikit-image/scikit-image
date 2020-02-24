@@ -19,6 +19,53 @@ class skimage_deprecation(Warning):
     pass
 
 
+class deprecate_kwarg:
+    """Decorator ensuring backward compatibility when argument names are
+    modified in a function definition.
+
+    Parameters
+    ----------
+    arg_mapping: dict
+        Mapping between the function's old argument names and the new
+        ones.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
+    removed_version : str
+        The package version in which the deprecated argument will be
+        removed.
+
+    """
+
+    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
+        self.kwarg_mapping = kwarg_mapping
+        if warning_msg is None:
+            self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+                                "for `{func_name}`. ")
+            if removed_version is not None:
+                self.warning_msg += ("It will be removed in version {}. "
+                                     .format(removed_version))
+            self.warning_msg += "Please use '{new_arg}' instead."
+        else:
+            self.warning_msg = warning_msg
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            for old_arg, new_arg in self.kwarg_mapping.items():
+                if old_arg in kwargs:
+                    #  warn that the function interface has changed:
+                    warnings.warn(self.warning_msg.format(
+                        old_arg=old_arg, func_name=func.__name__,
+                        new_arg=new_arg), FutureWarning, stacklevel=2)
+                    # Substitute new_arg to old_arg
+                    kwargs[new_arg] = kwargs.pop(old_arg)
+
+            # Call the function with the fixed arguments
+            return func(*args, **kwargs)
+        return fixed_func
+
+
 class deprecated(object):
     """Decorator to mark deprecated functions with warning.
 
