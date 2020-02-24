@@ -136,12 +136,13 @@ def test_cmc():
 
     assert_allclose(dE2, oracle, rtol=1.e-8)
 
-    # Equal colors have a distance of 0:
+    # Equal or close colors make `delta_e.get_dH2` function to return
+    # negative values resulting in NaNs when passed to sqrt (see #1908
+    # issue on Github):
     lab1 = lab2
     expected = np.zeros_like(oracle)
     assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
 
-    # Small difference case
     lab2[0, 0] += np.finfo(float).eps
     assert_almost_equal(deltaE_cmc(lab1, lab2), expected, decimal=6)
 
