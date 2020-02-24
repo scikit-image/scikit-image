@@ -48,7 +48,7 @@ import pytest
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage.morphology.watershed import watershed
+from .._watershed import watershed
 from skimage.measure import label
 
 eps = 1e-12

@@ -12,8 +12,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('morphology', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_watershed.pyx',
-            '_skeletonize_cy.pyx',
+    cython(['_skeletonize_cy.pyx',
             '_convex_hull.pyx',
             '_greyreconstruct.pyx',
             '_extrema_cy.pyx'], working_path=base_path)
@@ -23,8 +22,6 @@ def configuration(parent_package='', top_path=None):
     cython(['_flood_fill_cy.pyx'], working_path=base_path)
     cython(['_max_tree.pyx'], working_path=base_path)
 
-    config.add_extension('_watershed', sources=['_watershed.c'],
-                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_skeletonize_cy', sources=['_skeletonize_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],

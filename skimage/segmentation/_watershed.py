@@ -27,9 +27,10 @@ Original author: Lee Kamentsky
 import numpy as np
 from scipy import ndimage as ndi
 
-from . import _watershed
-from .extrema import local_minima
-from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
+from . import _watershed_cy
+from ..morphology.extrema import local_minima
+from ..morphology._util import (_validate_connectivity,
+                                _offsets_to_raveled_neighbors)
 from ..util import crop, regular_seeds
 
 
@@ -96,21 +97,21 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Parameters
     ----------
-    image: ndarray (2-D, 3-D, ...) of integers
+    image : ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
-    markers: int, or ndarray of int, same shape as `image`, optional
+    markers : int, or ndarray of int, same shape as `image`, optional
         The desired number of markers, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
         ``None`` (no markers given), the local minima of the image are used as
         markers.
-    connectivity: ndarray, optional
+    connectivity : ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
         Following the scipy convention, default is a one-connected array of
         the dimension of the image.
-    offset: array_like of shape image.ndim, optional
+    offset : array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
-    mask: ndarray of bools or 0s and 1s, optional
+    mask : ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         will be labeled.
     compactness : float, optional
@@ -122,7 +123,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     Returns
     -------
-    out: ndarray
+    out : ndarray
         A labeled matrix of the same type and shape as markers
 
     See also
@@ -215,11 +216,11 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     marker_locations = np.flatnonzero(output)
     image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
-    _watershed.watershed_raveled(image.ravel(),
-                                 marker_locations, flat_neighborhood,
-                                 mask, image_strides, compactness,
-                                 output.ravel(),
-                                 watershed_line)
+    _watershed_cy.watershed_raveled(image.ravel(),
+                                    marker_locations, flat_neighborhood,
+                                    mask, image_strides, compactness,
+                                    output.ravel(),
+                                    watershed_line)
 
     output = crop(output, pad_width, copy=True)
 
