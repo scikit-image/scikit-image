@@ -20,6 +20,7 @@ def clear_border(labels, buffer_size=0, bgval=0, in_place=False, mask=None):
         Image data mask. Objects in labels image overlapping with
         False pixels of mask will be removed. If defined, the 
         argument buffer_size will be ignored.
+
     Returns
     -------
     out : (M[, N[, ..., P]]) array

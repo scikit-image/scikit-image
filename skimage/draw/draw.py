@@ -507,7 +507,7 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
     ----------
     r, c : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
     method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method (default)
@@ -570,7 +570,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     ----------
     r, c : int
         Centre coordinate of circle.
-    radius: int
+    radius : int
         Radius of circle.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
