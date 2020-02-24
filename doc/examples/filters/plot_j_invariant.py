@@ -77,7 +77,7 @@ for ax, img, title in zip(axes,
 #
 # This means that the best J-invariant denoiser for a given image can
 # be found using the noisy data alone, by selecting the denoiser minimizing
-# the self-supervised loss. Below, we demonstrate that this
+# the self-supervised loss. Below, we demonstrate this
 # for a family of wavelet denoisers with varying `sigma` parameter. The
 # self-supervised loss (solid blue line) and the ground-truth loss (dashed
 # blue line) have the same shape and the same minimizer.
