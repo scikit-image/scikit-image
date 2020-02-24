@@ -158,7 +158,7 @@ def _product_from_dict(dictionary):
         yield dict(zip(keys, element))
 
 
-def calibrate_denoiser(image, denoise_function, *, denoise_parameters,
+def calibrate_denoiser(image, denoise_function, denoise_parameters, *
                        stride=4, multichannel=False, approximate_loss=True):
     """Calibrate a denoising function and return optimal J-invariant version.
 
