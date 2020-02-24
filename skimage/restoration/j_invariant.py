@@ -4,7 +4,7 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 
-from ..measure import compare_mse
+from ..metrics import mean_squared_error
 from ..util import img_as_float
 
 
@@ -87,8 +87,8 @@ def _generate_grid_slice(shape, *, offset, stride=3):
     return mask
 
 
-def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
-                      masks=None, denoiser_kwargs=None):
+def _invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
+                       masks=None, denoiser_kwargs=None):
     """Apply a J-invariant version of `denoise_function`.
 
     Parameters
@@ -158,8 +158,9 @@ def _product_from_dict(dictionary):
         yield dict(zip(keys, element))
 
 
-def calibrate_denoiser(image, denoise_function, denoise_parameters, *
-                       stride=4, multichannel=False, approximate_loss=True):
+def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
+                       stride=4, multichannel=False, approximate_loss=True,
+                       full_output=False):
     """Calibrate a denoising function and return optimal J-invariant version.
 
     The returned function is partially evaluated with optimal parameter values
@@ -183,11 +184,23 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *
         Whether to approximate the self-supervised loss used to evaluate the
         denoiser by only computing it on one masked version of the image.
         If False, the runtime will be a factor of `stride**image.ndim` longer.
+    full_output : bool, optional
+        If True, return parameters and losses in addition to the calibrated
+        denoising function
 
     Returns
     -------
     best_denoise_function : function
         The optimal J-invariant version of `denoise_function`.
+
+    If `full_output` is True, the following tuple is also returned:
+
+    (parameters_tested, losses) : tuple (list of dict, list of int)
+        - List of parameters tested for `denoise_function`, as a dictionary of
+        kwargs
+        - Self-supervised loss for each set of parameters in `parameters_tested`.
+
+
 
     Notes
     -----
@@ -205,8 +218,8 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *
 
     References
     ----------
-    .. [1] J. Batson & L. Royer. Blind Denoising by Self-Supervison.
-           arxiv:1901.11365.
+    .. [1] J. Batson & L. Royer. Noise2Self: Blind Denoising by Self-Supervision,
+           International Conference on Machine Learning, p. 524-533 (2019).
 
     Examples
     --------
@@ -222,7 +235,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *
     >>> denoised_img = denoising_function(img)
 
     """
-    parameters_tested, losses = calibrate_denoiser_search(
+    parameters_tested, losses = _calibrate_denoiser_search(
         image, denoise_function,
         denoise_parameters=denoise_parameters,
         stride=stride,
@@ -234,17 +247,20 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *
     best_parameters = parameters_tested[idx]
 
     best_denoise_function = functools.partial(
-        invariant_denoise,
+        _invariant_denoise,
         denoise_function=denoise_function,
         stride=stride,
         multichannel=multichannel,
         denoiser_kwargs=best_parameters,
     )
 
-    return best_denoise_function
+    if full_output:
+        return best_denoise_function, (parameters_tested, losses)
+    else:
+        return best_denoise_function
 
 
-def calibrate_denoiser_search(image, denoise_function, *, denoise_parameters,
+def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
                               stride=4, multichannel=False,
                               approximate_loss=True):
     """Return a parameter search history with losses for a denoise function.
@@ -282,27 +298,27 @@ def calibrate_denoiser_search(image, denoise_function, *, denoise_parameters,
 
     for denoiser_kwargs in parameters_tested:
         if not approximate_loss:
-            denoised = invariant_denoise(
+            denoised = _invariant_denoise(
                 image, denoise_function,
                 stride=stride,
                 multichannel=multichannel,
                 denoiser_kwargs=denoiser_kwargs
             )
-            loss = compare_mse(denoised, image)
+            loss = mean_squared_error(denoised, image)
         else:
             spatialdims = image.ndim if not multichannel else image.ndim - 1
             n_masks = stride ** spatialdims
             mask = _generate_grid_slice(image.shape[:spatialdims],
                                         offset=n_masks // 2, stride=stride)
 
-            masked_denoised = invariant_denoise(
+            masked_denoised = _invariant_denoise(
                 image, denoise_function,
                 masks=[mask],
                 multichannel=multichannel,
                 denoiser_kwargs=denoiser_kwargs
             )
 
-            loss = compare_mse(masked_denoised[mask], image[mask])
+            loss = mean_squared_error(masked_denoised[mask], image[mask])
 
         losses.append(loss)
 
