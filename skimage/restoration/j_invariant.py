@@ -185,12 +185,23 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
         denoiser by only computing it on one masked version of the image.
         If False, the runtime will be a factor of `stride**image.ndim` longer.
     full_output : bool, optional
-        If True, return parameters and losses
+        If True, return parameters and losses in addition to the calibrated
+        denoising function
 
     Returns
     -------
     best_denoise_function : function
         The optimal J-invariant version of `denoise_function`.
+
+    If `full_output` is True, the following objects are also returned:
+
+    parameters_tested : list of dict
+        List of parameters tested for `denoise_function`, as a dictionary of
+        kwargs.
+    losses : list of int
+        Self-supervised loss for each set of parameters in `parameters_tested`.
+
+
 
     Notes
     -----
