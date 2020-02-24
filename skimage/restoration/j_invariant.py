@@ -200,9 +200,9 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     If `full_output` is True, the following tuple is also returned:
 
     (parameters_tested, losses) : tuple (list of dict, list of int)
-        - List of parameters tested for `denoise_function`, as a dictionary of
+        List of parameters tested for `denoise_function`, as a dictionary of
         kwargs
-        - Self-supervised loss for each set of parameters in `parameters_tested`.
+        Self-supervised loss for each set of parameters in `parameters_tested`.
 
 
 
