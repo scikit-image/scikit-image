@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import data
-from skimage.transform import registration
+from skimage.registration import _affine
 from skimage._shared.testing import (assert_array_equal,
                                      assert_array_almost_equal)
 
@@ -16,7 +16,7 @@ def test_register_affine():
     inverse = np.linalg.inv(forward)
 
     target = ndi.affine_transform(reference, forward)
-    matrix = registration.register_affine(reference, target)
+    matrix = _affine.register_affine(reference, target)
     assert_array_almost_equal(matrix, inverse, decimal=1)
 
 
@@ -30,14 +30,14 @@ def test_register_affine_multichannel():
     for ch in range(reference.shape[-1]):
         ndi.affine_transform(reference[..., ch], forward,
                              output=target[..., ch])
-    matrix = registration.register_affine(reference, target, multichannel=True)
+    matrix = _affine.register_affine(reference, target, multichannel=True)
     assert_array_almost_equal(matrix, inverse, decimal=1)
 
 
 def test_matrix_parameter_vector_conversion():
     for ndim in range(2, 5):
         p_v = np.random.rand((ndim + 1) * ndim)
-        matrix = registration._parameter_vector_to_matrix(p_v)
+        matrix = _affine._parameter_vector_to_matrix(p_v)
         en = np.zeros(ndim + 1)
         en[-1] = 1
         p_v_2 = np.concatenate(

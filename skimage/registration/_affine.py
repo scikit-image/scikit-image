@@ -3,8 +3,8 @@ import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
 
-from .pyramids import pyramid_gaussian
-from ..metrics import normalized_mutual_information
+from skimage.transform.pyramids import pyramid_gaussian
+from skimage.metrics import normalized_mutual_information
 
 __all__ = ['register_affine']
 
