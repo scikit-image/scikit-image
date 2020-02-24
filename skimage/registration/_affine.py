@@ -6,7 +6,7 @@ from scipy.optimize import minimize
 from skimage.transform.pyramids import pyramid_gaussian
 from skimage.metrics import normalized_mutual_information
 
-__all__ = ['register_affine']
+__all__ = ['affine']
 
 
 def _parameter_vector_to_matrix(parameter_vector):
@@ -70,12 +70,12 @@ def _param_cost(reference_image, moving_image, parameter_vector, *,
     return cost(reference_image, transformed)
 
 
-def register_affine(reference_image, moving_image, *, cost=cost_nmi,
-                    initial_vector=None, translation_indices=None,
-                    vector_to_matrix=None,
-                    pyramid_scale=2, pyramid_minimum_size=8, multichannel=False,
-                    inverse=True, level_callback=None, method='Powell',
-                    **kwargs):
+def affine(reference_image, moving_image, *,
+           cost=cost_nmi, initial_vector=None,
+           translation_indices=None, vector_to_matrix=None,
+           pyramid_scale=2, pyramid_minimum_size=8, multichannel=False,
+           inverse=True, level_callback=None, method='Powell',
+           **kwargs):
     """Find a transformation matrix to register a moving image to a reference.
 
     Parameters
@@ -146,7 +146,7 @@ def register_affine(reference_image, moving_image, *, cost=cost_nmi,
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
     >>> moving_image = ndi.affine_transform(reference_image, matrix_transform)
-    >>> matrix = register_affine(reference_image, moving_image)
+    >>> matrix = affine(reference_image, moving_image)
     >>> registered_moving = ndi.affine_transform(moving_image, matrix)
     """
 

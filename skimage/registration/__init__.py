@@ -1,2 +1,2 @@
 from ._optical_flow import optical_flow_tvl1
-from ._affine import register_affine
+from ._affine import affine

@@ -16,7 +16,7 @@ def test_register_affine():
     inverse = np.linalg.inv(forward)
 
     target = ndi.affine_transform(reference, forward)
-    matrix = _affine.register_affine(reference, target)
+    matrix = _affine.affine(reference, target)
     assert_array_almost_equal(matrix, inverse, decimal=1)
 
 
@@ -30,7 +30,7 @@ def test_register_affine_multichannel():
     for ch in range(reference.shape[-1]):
         ndi.affine_transform(reference[..., ch], forward,
                              output=target[..., ch])
-    matrix = _affine.register_affine(reference, target, multichannel=True)
+    matrix = _affine.affine(reference, target, multichannel=True)
     assert_array_almost_equal(matrix, inverse, decimal=1)
 
 

@@ -24,7 +24,8 @@ from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 
 from skimage.data import astronaut
-from skimage.transform import register_affine, pyramid_gaussian
+from skimage.transform import pyramid_gaussian
+from skimage import registration
 from skimage import metrics
 
 
@@ -45,23 +46,23 @@ image = astronaut()[..., 1]  # Just green channel
 target = ndi.affine_transform(image, matrix_transform)
 
 ###############################################################################
-# Next, we are going to see how ``register_affine`` can recover that
+# Next, we are going to see how ``registration.affine`` can recover that
 # transformation starting from only the two images. The registration works by
 # nudging the input image slightly and checking whether it is closer or further
 # away from the reference image. It does this initially on a much blurrier and
 # smaller version of the two images, then progressively refines the alignment
 # with sharper, full-resolution versions. This is called a Gaussian pyramid.
-# ``register_affine`` also allows a *callback* function to be passed, which is
-# executed at every level of the Gaussian pyramid. We can use the callback to
-# observe the process of alignment.
+# ``registration.affine`` also allows a *callback* function to be passed, which
+# is executed at every level of the Gaussian pyramid. We can use the callback
+# to observe the process of alignment.
 
 level_alignments = []
 
 
 import time
 t0 = time.time()
-register_matrix = register_affine(image, target,
-                                  level_callback=level_alignments.append)
+register_matrix = registration.affine(image, target,
+                                      level_callback=level_alignments.append)
 t1 = time.time()
 
 ###############################################################################
@@ -149,7 +150,7 @@ plt.show()
 # transformation, scale, rotation, and skew are scale-invariant, but
 # translation is not. Therefore, parameters representing translation in the
 # parameter vector need to be rescaled between different levels of the
-# pyramid. `register_affine` does this automatically, but it needs to know
+# pyramid. `registration.affine` does this automatically, but it needs to know
 # which parts of the parameter vector represent translation. The keyword
 # argument ``translation_indices`` is provided for this purpose.
 #
@@ -164,10 +165,10 @@ def rigid_transform(params):
 
 
 t2 = time.time()
-rigid_matrix = register_affine(image, target, initial_vector=np.zeros(3),
-                               vector_to_matrix=rigid_transform,
-                               pyramid_minimum_size=64,
-                               translation_indices=slice(1, None))
+rigid_matrix = registration.affine(image, target, initial_vector=np.zeros(3),
+                                   vector_to_matrix=rigid_transform,
+                                   pyramid_minimum_size=64,
+                                   translation_indices=slice(1, None))
 t3 = time.time()
 
 
