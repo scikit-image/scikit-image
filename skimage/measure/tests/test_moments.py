@@ -1,15 +1,14 @@
+import pytest
 import numpy as np
 from scipy import ndimage as ndi
-from skimage import draw
-import pytest
-from skimage.measure import (moments, moments_central, moments_coords,
-                             moments_coords_central, moments_normalized,
-                             moments_hu, centroid, inertia_tensor,
-                             inertia_tensor_eigvals)
-
-from skimage._shared import testing
-from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_allclose)
+from ...draw.draw3d import ellipsoid
+from ..._shared import testing
+from ..._shared.testing import (assert_equal, assert_almost_equal,
+                                assert_allclose)
+from .._moments import (moments, moments_central, moments_coords,
+                        moments_coords_central, moments_normalized,
+                        moments_hu, centroid, inertia_tensor,
+                        inertia_tensor_eigvals)
 
 
 def test_moments():
@@ -98,7 +97,7 @@ def test_moments_normalized():
 
 
 def test_moments_normalized_3d():
-    image = draw.ellipsoid(1, 1, 10)
+    image = ellipsoid(1, 1, 10)
     mu_image = moments_central(image)
     nu = moments_normalized(mu_image)
     assert nu[0, 0, 2] > nu[0, 2, 0]
@@ -133,13 +132,21 @@ def test_moments_hu():
     assert_almost_equal(hu, hu2, decimal=1)
 
 
-@pytest.mark.parametrize("dtype", [np.int8, np.int16, np.int32, np.int64,
-                                   np.uint8, np.uint16, np.uint32, np.uint64,
-                                   np.float32, np.float64])
-def test_moments_hu_dtype(dtype):
-    img = np.zeros((20, 20), dtype=dtype)
+@pytest.mark.parametrize("dtype_in", [np.int8, np.int16, np.int32, np.int64,
+                                      np.uint8, np.uint16, np.uint32,
+                                      np.uint64, np.float32, np.float64])
+@pytest.mark.parametrize("dtype_out", [np.float32, np.float64])
+def test_moments_hu_dtype(dtype_in, dtype_out):
+    img = np.zeros((20, 20), dtype=dtype_in)
 
-    assert moments_hu(img).dtype == img.dtype
+    # default dtype parameter
+    if dtype_in == np.float32:
+        assert moments_hu(img).dtype == np.float32
+    else:
+        assert moments_hu(img).dtype == np.float64
+
+    # explicit dtype setting
+    assert moments_hu(img, dtype=dtype_out).dtype == dtype_out
 
 
 def test_centroid():
@@ -161,7 +168,7 @@ def test_inertia_tensor_2d():
 
 
 def test_inertia_tensor_3d():
-    image = draw.ellipsoid(10, 5, 3)
+    image = ellipsoid(10, 5, 3)
     T0 = inertia_tensor(image)
     eig0, V0 = np.linalg.eig(T0)
     # principal axis of ellipse = eigenvector of smallest eigenvalue

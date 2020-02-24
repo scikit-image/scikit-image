@@ -1,7 +1,8 @@
+import itertools
 import numpy as np
 from .._shared.utils import check_nD
+from ..util.dtype import convert
 from . import _moments_cy
-import itertools
 
 
 def moments_coords(coords, order=3):
@@ -306,7 +307,7 @@ def moments_normalized(mu, order=3):
     return nu
 
 
-def moments_hu(nu):
+def moments_hu(nu, dtype=None):
     """Calculate Hu's set of image moments (2D-only).
 
     Note that this set of moments is proofed to be translation, scale and
@@ -321,6 +322,10 @@ def moments_hu(nu):
     -------
     nu : (7,) array
         Hu's set of image moments.
+    dtype : dtype, optional
+        Output data type: must be floating point. By default, nu data
+        type is used if it is floating point, otherwise, double
+        precision is used.
 
     References
     ----------
@@ -335,9 +340,20 @@ def moments_hu(nu):
            Berlin, 1993.
     .. [5] https://en.wikipedia.org/wiki/Image_moment
 
-
     """
-    return _moments_cy.moments_hu(nu)
+    nu = np.asarray(nu)
+    if dtype is None:
+        if nu.dtype.char in 'fd':
+            dtype = nu.dtype
+        else:
+            dtype = np.float64
+
+    dtype = np.dtype(dtype)
+
+    if dtype.char not in 'fd':
+        raise ValueError("Only floating point data type are supported "
+                         "for moments_hu")
+    return _moments_cy.moments_hu(convert(nu, dtype))
 
 
 def centroid(image):
