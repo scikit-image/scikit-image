@@ -3,8 +3,8 @@ import numpy as np
 from skimage._shared.testing import assert_
 from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
-from skimage.measure import compare_mse as mse
-from skimage.restoration import (calibrate_denoiser, calibrate_denoiser_search,
+from skimage.metrics import mean_squared_error as mse
+from skimage.restoration import (calibrate_denoiser,
                                  invariant_denoise, denoise_wavelet)
 from skimage.util import img_as_float, random_noise
 
@@ -41,12 +41,13 @@ def test_invariant_denoise_3d():
     assert_(denoised_mse < original_mse)
 
 
-def test_calibrate_denoiser_search():
+def test_calibrate_denoiser_full_output():
     parameter_ranges = {'sigma': np.random.random(5) / 2}
-    parameters_tested, losses = calibrate_denoiser_search(
+    _, parameters_tested, losses = calibrate_denoiser(
         noisy_img,
         denoise_wavelet,
-        denoise_parameters=parameter_ranges
+        denoise_parameters=parameter_ranges,
+        full_output=True
     )
 
     all_denoised = [invariant_denoise(noisy_img, denoise_wavelet,

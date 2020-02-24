@@ -16,9 +16,9 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 
 from skimage.data import chelsea, hubble_deep_field
-from skimage.measure import compare_mse as mse
-from skimage.measure import compare_psnr as psnr
-from skimage.restoration import (calibrate_denoiser, calibrate_denoiser_search,
+from skimage.metrics import mean_squared_error as mse
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.restoration import (calibrate_denoiser,
                                  invariant_denoise, denoise_wavelet,
                                  denoise_tv_chambolle, denoise_nl_means,
                                  estimate_sigma)
@@ -202,10 +202,11 @@ sigma = 0.4
 noisy = random_noise(image, mode='speckle', var=sigma ** 2)
 
 parameter_ranges_tv = {'weight': np.arange(0.01, 0.3, 0.02)}
-parameters_tested_tv, losses_tv = calibrate_denoiser_search(
+_, parameters_tested_tv, losses_tv = calibrate_denoiser(
                                     noisy,
                                     denoise_tv_chambolle,
-                                    denoise_parameters=parameter_ranges_tv)
+                                    denoise_parameters=parameter_ranges_tv,
+                                    full_output=True)
 print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
@@ -217,10 +218,11 @@ psnr_calibrated_tv = psnr(denoised_calibrated_tv, image)
 psnr_default_tv = psnr(denoised_default_tv, image)
 
 parameter_ranges_wavelet = {'sigma': np.arange(0.01, 0.3, 0.03)}
-parameters_tested_wavelet, losses_wavelet = calibrate_denoiser_search(
+_, parameters_tested_wavelet, losses_wavelet = calibrate_denoiser(
                                                 noisy,
                                                 denoise_wavelet,
-                                                parameter_ranges_wavelet)
+                                                parameter_ranges_wavelet,
+                                                full_output=True)
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
@@ -237,9 +239,10 @@ parameter_ranges_nl = {'sigma': np.arange(0.6, 1.4, 0.2) * sigma_est,
                        'h': np.arange(0.6, 1.2, 0.2) * sigma_est}
 
 parameter_ranges_nl = {'sigma': np.arange(0.01, 0.3, 0.03)}
-parameters_tested_nl, losses_nl = calibrate_denoiser_search(noisy,
-                                                            denoise_nl_means,
-                                                            parameter_ranges_nl)
+_, parameters_tested_nl, losses_nl = calibrate_denoiser(noisy,
+                                                        denoise_nl_means,
+                                                        parameter_ranges_nl,
+                                                        full_output=True)
 print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
