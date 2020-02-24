@@ -350,8 +350,8 @@ def moments_hu(nu, dtype=None):
     dtype = np.dtype(dtype)
 
     if dtype.char not in 'fd':
-        raise ValueError("Only floating point data type are supported "
-                         "for moments_hu")
+        raise ValueError("Only single and double precision floating point "
+                         "data types are supported for moments_hu")
     return _moments_cy.moments_hu(nu.astype(dtype))
 
 
