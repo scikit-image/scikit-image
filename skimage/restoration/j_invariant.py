@@ -219,8 +219,8 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
 
     References
     ----------
-    .. [1] J. Batson & L. Royer. Blind Denoising by Self-Supervison.
-           arxiv:1901.11365.
+    .. [1] J. Batson & L. Royer. Noise2Self: Blind Denoising by Self-Supervision,
+           International Conference on Machine Learning, p. 524-533 (2019).
 
     Examples
     --------
