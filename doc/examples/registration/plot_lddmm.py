@@ -80,21 +80,20 @@ lddmm_dict = lddmm_register(
     num_affine_only_iterations = 50, 
     # calibrate=True outputs a diagnostic plot at the end of lddmm_register that is useful for determining appropriate stepsizes.
     calibrate                  = False,
-    # track_progress=True prints a progress update every 10 iterations of registration. 
-    track_progress             = True, 
+    # track_progress_every_n=10 prints a progress update every 10 iterations of registration. 
+    track_progress_every_n     = 10, 
 )
 
 
 # Apply registration to template and target.
-# Note: the registration can be reasonably applied to any image in the template or target space
-# by substituting it for the corresponding image (template or target) as the subject kwarg in apply_lddmm.
+    # Note: the registration can be reasonably applied to any image in the template or target space
+        # by substituting it for the corresponding image (template or target) as the subject kwarg in apply_lddmm.
+    # Note: the registration can be applied at arbitrary resolution if specified with the output_resolution kwarg.
+        # If unspecified, it will default to the resolution of template or target, depending on deform_to.
 
-target_extrapolation_fill_value = np.quantile(target, 0.001)
-template_extrapolation_fill_value = np.quantile(template, 0.001)
+deformed_target = apply_lddmm(subject=target, deform_to='template', **lddmm_dict)
 
-deformed_target = apply_lddmm(subject=target, deform_to='template', extrapolation_fill_value=target_extrapolation_fill_value, **lddmm_dict)
-
-deformed_template = apply_lddmm(subject=template, deform_to='target', extrapolation_fill_value=template_extrapolation_fill_value, **lddmm_dict)
+deformed_template = apply_lddmm(subject=template, deform_to='target', **lddmm_dict)
 
 
 # Visualize results.

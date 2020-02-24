@@ -347,7 +347,7 @@ def resample(
         new_resolution (float, seq): The resolution of the resampled image.
         old_resolution (float, seq, optional): The resolution of the input image. Defaults to 1.
         err_to_larger (bool, optional): Determines whether to round the new shape up or down. Defaults to True.
-        extrapolation_fill_value (float, NoneType, optional): The fill_value kwarg passed to interpn. Defaults to None.
+        extrapolation_fill_value (float, optional): The fill_value kwarg passed to interpn. Defaults to None.
         origin (str, optional): The origin to use for the image axes and coordinates used internally. Defaults to 'center'.
         method (str, optional): The method of interpolation, passed as the method kwarg in interpn. Defaults to 'linear'.
         image_is_coords (bool, optional): If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. Defaults to False.
