@@ -5,7 +5,8 @@ from skimage.data import binary_blobs
 from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
 from skimage.restoration import (calibrate_denoiser,
-                                 invariant_denoise, denoise_wavelet)
+                                 denoise_wavelet)
+from skimage.restoration.j_invariant import _invariant_denoise
 from skimage.util import img_as_float, random_noise
 
 test_img = img_as_float(camera())
@@ -17,7 +18,7 @@ noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)
 
 
 def test_invariant_denoise():
-    denoised_img = invariant_denoise(noisy_img, denoise_wavelet)
+    denoised_img = _invariant_denoise(noisy_img, denoise_wavelet)
 
     denoised_mse = mse(denoised_img, test_img)
     original_mse = mse(noisy_img, test_img)
@@ -25,8 +26,8 @@ def test_invariant_denoise():
 
 
 def test_invariant_denoise_color():
-    denoised_img_color = invariant_denoise(noisy_img_color, denoise_wavelet,
-                                           multichannel=True)
+    denoised_img_color = _invariant_denoise(noisy_img_color, denoise_wavelet,
+                                            multichannel=True)
 
     denoised_mse = mse(denoised_img_color, test_img_color)
     original_mse = mse(noisy_img_color, test_img_color)
@@ -34,7 +35,7 @@ def test_invariant_denoise_color():
 
 
 def test_invariant_denoise_3d():
-    denoised_img_3d = invariant_denoise(noisy_img_3d, denoise_wavelet)
+    denoised_img_3d = _invariant_denoise(noisy_img_3d, denoise_wavelet)
 
     denoised_mse = mse(denoised_img_3d, test_img_3d)
     original_mse = mse(noisy_img_3d, test_img_3d)
@@ -50,8 +51,8 @@ def test_calibrate_denoiser_full_output():
         full_output=True
     )
 
-    all_denoised = [invariant_denoise(noisy_img, denoise_wavelet,
-                                      denoiser_kwargs=denoiser_kwargs)
+    all_denoised = [_invariant_denoise(noisy_img, denoise_wavelet,
+                                       denoiser_kwargs=denoiser_kwargs)
                     for denoiser_kwargs in parameters_tested]
 
     ground_truth_losses = [mse(img, test_img) for img in all_denoised]

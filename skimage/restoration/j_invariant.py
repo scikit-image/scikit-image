@@ -87,8 +87,8 @@ def _generate_grid_slice(shape, *, offset, stride=3):
     return mask
 
 
-def invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
-                      masks=None, denoiser_kwargs=None):
+def _invariant_denoise(image, denoise_function, *, stride=4, multichannel=False,
+                       masks=None, denoiser_kwargs=None):
     """Apply a J-invariant version of `denoise_function`.
 
     Parameters
@@ -237,7 +237,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     best_parameters = parameters_tested[idx]
 
     best_denoise_function = functools.partial(
-        invariant_denoise,
+        _invariant_denoise,
         denoise_function=denoise_function,
         stride=stride,
         multichannel=multichannel,
@@ -288,7 +288,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
 
     for denoiser_kwargs in parameters_tested:
         if not approximate_loss:
-            denoised = invariant_denoise(
+            denoised = _invariant_denoise(
                 image, denoise_function,
                 stride=stride,
                 multichannel=multichannel,
@@ -301,7 +301,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
             mask = _generate_grid_slice(image.shape[:spatialdims],
                                         offset=n_masks // 2, stride=stride)
 
-            masked_denoised = invariant_denoise(
+            masked_denoised = _invariant_denoise(
                 image, denoise_function,
                 masks=[mask],
                 multichannel=multichannel,

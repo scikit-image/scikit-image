@@ -19,7 +19,7 @@ from skimage.data import chelsea, hubble_deep_field
 from skimage.metrics import mean_squared_error as mse
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.restoration import (calibrate_denoiser,
-                                 invariant_denoise, denoise_wavelet,
+                                 denoise_wavelet,
                                  denoise_tv_chambolle, denoise_nl_means,
                                  estimate_sigma)
 from skimage.util import img_as_float, random_noise
@@ -83,14 +83,16 @@ for ax, img, title in zip(axes,
 # blue line) have the same shape and the same minimizer.
 #
 
+from skimage.restoration.j_invariant import _invariant_denoise
+
 sigma_range = np.arange(0.12, 0.26, 0.03)
 
 parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
                       'multichannel': True}
                      for sigma in sigma_range]
 
-denoised_invariant = [invariant_denoise(noisy, denoise_wavelet,
-                                        denoiser_kwargs=params)
+denoised_invariant = [_invariant_denoise(noisy, denoise_wavelet,
+                                         denoiser_kwargs=params)
                       for params in parameters_tested]
 
 self_supervised_loss = [mse(img, noisy) for img in denoised_invariant]
@@ -141,7 +143,7 @@ for spine in ax_image[1].spines.values():
 #####################################################################
 # Conversion to J-invariance
 # =========================================
-# The function `invariant_denoise` acts as a J-invariant version of a
+# The function `_invariant_denoise` acts as a J-invariant version of a
 # given denoiser. It works by masking a fraction of the pixels, interpolating
 # them, running the original denoiser, and extracting the values returned in
 # the masked pixels. Iterating over the image results in a fully J-invariant
@@ -210,8 +212,8 @@ _, parameters_tested_tv, losses_tv = calibrate_denoiser(
 print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
-denoised_calibrated_tv = invariant_denoise(noisy, denoise_tv_chambolle,
-                                           denoiser_kwargs=best_parameters_tv)
+denoised_calibrated_tv = _invariant_denoise(noisy, denoise_tv_chambolle,
+                                            denoiser_kwargs=best_parameters_tv)
 denoised_default_tv = denoise_tv_chambolle(noisy, **best_parameters_tv)
 
 psnr_calibrated_tv = psnr(denoised_calibrated_tv, image)
@@ -226,8 +228,9 @@ _, parameters_tested_wavelet, losses_wavelet = calibrate_denoiser(
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
-denoised_calibrated_wavelet = invariant_denoise(noisy, denoise_wavelet,
-                                                denoiser_kwargs=best_parameters_wavelet)
+denoised_calibrated_wavelet = _invariant_denoise(
+        noisy, denoise_wavelet,
+        denoiser_kwargs=best_parameters_wavelet)
 denoised_default_wavelet = denoise_wavelet(noisy, **best_parameters_wavelet)
 
 psnr_calibrated_wavelet = psnr(denoised_calibrated_wavelet, image)
@@ -246,8 +249,8 @@ _, parameters_tested_nl, losses_nl = calibrate_denoiser(noisy,
 print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
-denoised_calibrated_nl = invariant_denoise(noisy, denoise_nl_means,
-                                           denoiser_kwargs=best_parameters_nl)
+denoised_calibrated_nl = _invariant_denoise(noisy, denoise_nl_means,
+                                            denoiser_kwargs=best_parameters_nl)
 denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 
 psnr_calibrated_nl = psnr(denoised_calibrated_nl, image)
