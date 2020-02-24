@@ -8,7 +8,7 @@ from ..measure import compare_mse
 from ..util import img_as_float
 
 
-def _interpolate_image(image, multichannel=False):
+def _interpolate_image(image, *, multichannel=False):
     """Replacing each pixel in ``image`` with the average of its neighbors.
 
     Parameters
