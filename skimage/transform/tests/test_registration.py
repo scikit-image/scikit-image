@@ -38,5 +38,10 @@ def test_matrix_parameter_vector_conversion():
     for ndim in range(2, 5):
         p_v = np.random.rand((ndim + 1) * ndim)
         matrix = registration._parameter_vector_to_matrix(p_v)
-        p_v_2 = registration._matrix_to_parameter_vector(matrix)
-        assert_array_equal(p_v, p_v_2)
+        en = np.zeros(ndim + 1)
+        en[-1] = 1
+        p_v_2 = np.concatenate(
+            (p_v.reshape((ndim, ndim + 1)), en[np.newaxis]),
+            axis=0
+        )
+        assert_array_equal(matrix, p_v_2)
