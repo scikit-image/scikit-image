@@ -158,7 +158,7 @@ axes[3].set_title('Prewitt error')
 axes[4].imshow(diff_scharr, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
 axes[4].set_title('Scharr error')
 
-color_ax = ax[5].imshow(diff_farid, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
+color_ax = axes[5].imshow(diff_farid, cmap=plt.cm.inferno, vmin=0, vmax=0.02)
 axes[5].set_title('Farid error')
 
 fig.subplots_adjust(right=0.8)
