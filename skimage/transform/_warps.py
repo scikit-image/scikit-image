@@ -7,7 +7,7 @@ from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float)
+                             convert_to_float, _set_order)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -106,10 +106,11 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         anti_aliasing = not image.dtype == bool
 
     if image.dtype == bool and anti_aliasing:
-        warn("Input image dtype is bool. Gaussian convolution "
-             "with bool data type is not defined. Please set anti_aliasing "
-             "to False or explicitely cast input image to another data type.",
-             stacklevel=2)
+        warn("Input image dtype is bool. Gaussian convolution is not defined "
+             "with bool data type. Please set anti_aliasing to False or "
+             "explicitely cast input image to another data type. Starting "
+             "from version 0.19 a ValueError will be raised instead of this "
+             "warning.", FutureWarning, stacklevel=2)
 
     factors = (np.asarray(input_shape, dtype=float) /
                np.asarray(output_shape, dtype=float))
@@ -678,24 +679,6 @@ def _clip_warp_output(input_image, output_image, order, mode, cval, clip):
 
         if preserve_cval:
             output_image[cval_mask] = cval
-
-
-def _set_order(image_dtype, order):
-    """Validate spline interpolation's order.
-
-    If None, order is set to 0 if image.dtype is bool and 1 otherwise.
-
-    """
-
-    if order is None:
-        order = 0 if image_dtype == bool else 1
-
-    if image_dtype == bool and order != 0:
-        warn("Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type.", stacklevel=2)
-
-    return order
 
 
 def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
