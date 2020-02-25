@@ -310,7 +310,7 @@ def _set_order(image_dtype, order):
     """
 
     if order is None:
-        order = 0 if image_dtype == bool else 1
+        return 0 if image_dtype == bool else 1
 
     if order < 0 or order > 5:
         raise ValueError("Spline interpolation order has to be in the "
