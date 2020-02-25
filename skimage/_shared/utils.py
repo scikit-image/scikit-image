@@ -289,10 +289,7 @@ def convert_to_float(image, preserve_range):
 
 
 def _set_order(image_dtype, order):
-    """Validate spline interpolation's order.
-
-    If order is None, it is set to 0 if image_dtype is bool and 1
-    otherwise.
+    """Validate and return spline interpolation's order.
 
     Parameters
     ----------
@@ -305,7 +302,6 @@ def _set_order(image_dtype, order):
     Returns
     -------
     order : int
-
         if input order is None, returns 0 if image_dtype is bool and 1
         otherwise. Otherwise, image_dtype is checked and input order
         is validated accordingly (order > 0 is not supported for bool
