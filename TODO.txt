@@ -47,7 +47,8 @@ Version 0.19
 ------------
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py`` remove
+  ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
@@ -60,18 +61,16 @@ Version 0.19
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
+* In ``skimage/measure/profile.py``, raise a ValueError instead of the
+  warning when order > 0 and input array is bool in profile_line.
 
 Other
 -----
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for sparse matricies (``np.matrix``) used by scipy.sparse in
-  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
-  moves away from using ``np.matrix`` in a future version too.
 * Remove the conditional import and function call when ``numpy`` is set
-  to > 1.15.x in ``skimage/util/arraycrop.py``.
+  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
@@ -95,4 +94,4 @@ Other
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1. 
+  when ``scipy`` upgrades to 1.1.
