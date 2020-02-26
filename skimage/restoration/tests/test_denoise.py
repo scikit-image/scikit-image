@@ -13,9 +13,8 @@ from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
 
-
 try:
-    import dask
+    import dask  # noqa
 except ImportError:
     DASK_NOT_INSTALLED_WARNING = 'The optional dask dependency is not installed'
 else:
@@ -518,10 +517,89 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
     assert_(psnr_ok > psnr_wrong)
 
 
+def test_denoise_nl_means_4d():
+    rstate = np.random.RandomState(5)
+    img = np.zeros((10, 10, 8, 5))
+    img[2:-2, 2:-2, 2:-2, :2] = 0.5
+    img[2:-2, 2:-2, 2:-2, 2:] = 1.
+    sigma = 0.3
+    imgn = img + sigma * rstate.randn(*img.shape)
+
+    nlmeans_kwargs = dict(patch_size=3, patch_distance=2, h=0.3 * sigma,
+                          sigma=sigma, fast_mode=True)
+
+    psnr_noisy = peak_signal_noise_ratio(img, imgn, data_range=1.)
+
+    # denoise by looping over 3D slices
+    denoised_3d = np.zeros_like(imgn)
+    for ch in range(img.shape[-1]):
+        denoised_3d[..., ch] = restoration.denoise_nl_means(
+            imgn[..., ch],
+            multichannel=False,
+            **nlmeans_kwargs)
+    psnr_3d = peak_signal_noise_ratio(img, denoised_3d, data_range=1.)
+    assert_(psnr_3d > psnr_noisy)
+
+    # denoise as 4D
+    denoised_4d = restoration.denoise_nl_means(imgn,
+                                               multichannel=False,
+                                               **nlmeans_kwargs)
+    psnr_4d = peak_signal_noise_ratio(img, denoised_4d, data_range=1.)
+    assert_(psnr_4d > psnr_3d)
+
+    # denoise as 3D + channels instead
+    denoised_3dmc = restoration.denoise_nl_means(imgn,
+                                                 multichannel=True,
+                                                 **nlmeans_kwargs)
+    psnr_3dmc = peak_signal_noise_ratio(img, denoised_3dmc, data_range=1.)
+    assert_(psnr_3dmc > psnr_3d)
+
+
+def test_denoise_nl_means_4d_multichannel():
+    img = np.zeros((8, 8, 8, 4, 4))
+    img[2:-2, 2:-2, 2:-2, 1:-1, :] = 1.
+    sigma = 0.3
+    imgn = img + sigma * np.random.randn(*img.shape)
+
+    psnr_noisy = peak_signal_noise_ratio(img, imgn, data_range=1.)
+
+    denoised_4dmc = restoration.denoise_nl_means(imgn, 3, 3, h=0.35 * sigma,
+                                                 fast_mode=True,
+                                                 multichannel=True,
+                                                 sigma=sigma)
+    psnr_4dmc = peak_signal_noise_ratio(img, denoised_4dmc, data_range=1.)
+    assert_(psnr_4dmc > psnr_noisy)
+
+
 def test_denoise_nl_means_wrong_dimension():
+    # 1D not implemented
+    img = np.zeros((5, ))
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=False)
+
+    img = np.zeros((5, 3))
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=True)
+
+    # 3D + channels only for fast mode
     img = np.zeros((5, 5, 5, 5))
     with pytest.raises(NotImplementedError):
-        restoration.denoise_nl_means(img, channel_axis=-1)
+        restoration.denoise_nl_means(img, multichannel=True, fast_mode=False)
+
+    # 4D only for fast mode
+    img = np.zeros((5, 5, 5, 5))
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=False, fast_mode=False)
+
+    # 4D + channels only for fast mode
+    img = np.zeros((5, 5, 5, 5, 5))
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=True, fast_mode=False)
+
+    # 5D not implemented
+    img = np.zeros((5, 5, 5, 5, 5))
+    with pytest.raises(NotImplementedError):
+        restoration.denoise_nl_means(img, multichannel=False)
 
 
 @pytest.mark.parametrize('fast_mode', [False, True])
