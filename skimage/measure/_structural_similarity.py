@@ -10,9 +10,11 @@ def compare_ssim(X, Y, win_size=None, gradient=False,
     warn('DEPRECATED: skimage.measure.compare_ssim has been moved to '
          'skimage.metrics.structural_similarity. It will be removed from '
          'skimage.measure in version 0.18.', stacklevel=2)
-    return structural_similarity(X, Y, win_size, gradient,
-                                 data_range, multichannel,
-                                 gaussian_weights, full, **kwargs)
+    return structural_similarity(X, Y, win_size=win_size, gradient=gradient,
+                                 data_range=data_range,
+                                 multichannel=multichannel,
+                                 gaussian_weights=gaussian_weights, full=full,
+                                 **kwargs)
 
 
 if structural_similarity.__doc__ is not None:

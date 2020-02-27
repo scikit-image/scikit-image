@@ -1,5 +1,6 @@
 include setup*.py
 include MANIFEST.in
+include README.md
 include LICENSE.txt
 include *.txt
 include *.rst

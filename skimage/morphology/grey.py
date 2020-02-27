@@ -376,6 +376,14 @@ def white_tophat(image, selem=None, out=None):
     out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
+    See also
+    --------
+    black_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
     Examples
     --------
     >>> # Subtract grey background from bright peak
@@ -442,6 +450,14 @@ def black_tophat(image, selem=None, out=None):
     -------
     out : array, same shape and type as `image`
         The result of the morphological black top hat.
+
+    See also
+    --------
+    white_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
 
     Examples
     --------

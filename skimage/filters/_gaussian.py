@@ -57,6 +57,10 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     Integer arrays are converted to float.
 
+    The ``output`` should be floating point data type since gaussian converts
+    to float provided ``image``. If ``output`` is not provided, another array
+    will be allocated and returned as the result.
+
     The multi-dimensional filter is implemented as a sequence of
     one-dimensional convolution filters. The intermediate arrays are
     stored in the same data type as the output. Therefore, for output
@@ -70,22 +74,22 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
     >>> a
-    array([[ 0.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  0.]])
+    array([[0., 0., 0.],
+           [0., 1., 0.],
+           [0., 0., 0.]])
     >>> gaussian(a, sigma=0.4)  # mild smoothing
-    array([[ 0.00163116,  0.03712502,  0.00163116],
-           [ 0.03712502,  0.84496158,  0.03712502],
-           [ 0.00163116,  0.03712502,  0.00163116]])
+    array([[0.00163116, 0.03712502, 0.00163116],
+           [0.03712502, 0.84496158, 0.03712502],
+           [0.00163116, 0.03712502, 0.00163116]])
     >>> gaussian(a, sigma=1)  # more smoothing
-    array([[ 0.05855018,  0.09653293,  0.05855018],
-           [ 0.09653293,  0.15915589,  0.09653293],
-           [ 0.05855018,  0.09653293,  0.05855018]])
+    array([[0.05855018, 0.09653293, 0.05855018],
+           [0.09653293, 0.15915589, 0.09653293],
+           [0.05855018, 0.09653293, 0.05855018]])
     >>> # Several modes are possible for handling boundaries
     >>> gaussian(a, sigma=1, mode='reflect')
-    array([[ 0.08767308,  0.12075024,  0.08767308],
-           [ 0.12075024,  0.16630671,  0.12075024],
-           [ 0.08767308,  0.12075024,  0.08767308]])
+    array([[0.08767308, 0.12075024, 0.08767308],
+           [0.12075024, 0.16630671, 0.12075024],
+           [0.08767308, 0.12075024, 0.08767308]])
     >>> # For RGB images, each is filtered separately
     >>> from skimage.data import astronaut
     >>> image = astronaut()
@@ -113,8 +117,13 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
         if len(sigma) != image.ndim:
             sigma = np.concatenate((np.asarray(sigma), [0]))
     image = convert_to_float(image, preserve_range)
-    return ndi.gaussian_filter(image, sigma, mode=mode, cval=cval,
-                               truncate=truncate)
+    if output is None:
+        output = np.empty_like(image)
+    elif not np.issubdtype(output.dtype, np.floating):
+        raise ValueError("Provided output data type is not float")
+    ndi.gaussian_filter(image, sigma, output=output, mode=mode, cval=cval,
+                        truncate=truncate)
+    return output
 
 
 def _guess_spatial_dimensions(image):
