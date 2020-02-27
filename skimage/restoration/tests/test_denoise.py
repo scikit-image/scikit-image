@@ -448,13 +448,13 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
 
     with expected_warnings(['Image dtype is not float']):
         assert restoration.denoise_nl_means(
-            img, fast_mode=fast_mode).dtype == 'float64'
+            img, patch_distance=2, fast_mode=fast_mode).dtype == 'float64'
 
     assert restoration.denoise_nl_means(
-        img_f32, fast_mode=fast_mode).dtype == img_f32.dtype
+        img_f32, patch_distance=2, fast_mode=fast_mode).dtype == img_f32.dtype
 
     assert restoration.denoise_nl_means(
-        img_f64, fast_mode=fast_mode).dtype == img_f64.dtype
+        img_f64, patch_distance=2, fast_mode=fast_mode).dtype == img_f64.dtype
 
 
 @pytest.mark.parametrize(
