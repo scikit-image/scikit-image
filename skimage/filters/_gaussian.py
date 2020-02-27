@@ -205,11 +205,15 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     filtered_image : ndarray
         the filtered array.
 
+    See also
+    --------
+    skimage.feature.blog_dog
+
     Notes
     -----
-    This function will subtract an array filtered with a guassian kernel
+    This function will subtract an array filtered with a Guassian kernel
     with sigmas given by ``high_sigma`` from an array filtered with a
-    gaussian kernel with sigmas provided by ``low_sigma``. The values for
+    Gaussian kernel with sigmas provided by ``low_sigma``. The values for
     ``high_sigma`` must always be greater than or equal to the corresponding
     values in ``low_sigma``, or a ``ValueError`` will be raised.
 
