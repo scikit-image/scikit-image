@@ -318,14 +318,14 @@ def test_denoise_nl_means_2d(fast_mode):
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(img, 7, 5, 0.2,
                                                 fast_mode=fast_mode,
-                                                multichannel=True,
+                                                multichannel=False,
                                                 sigma=s)
         # make sure noise is reduced
         assert_(img.std() > denoised.std())
 
         denoised_f32 = restoration.denoise_nl_means(img_f32, 7, 5, 0.2,
                                                     fast_mode=fast_mode,
-                                                    multichannel=True,
+                                                    multichannel=False,
                                                     sigma=s)
         # make sure noise is reduced
         assert_(img.std() > denoised_f32.std())
@@ -415,11 +415,11 @@ def test_no_denoising_for_small_h(fast_mode, dtype):
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,
                                             fast_mode=fast_mode,
-                                            multichannel=True)
+                                            multichannel=False)
     assert_(np.allclose(denoised, img))
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,
                                             fast_mode=fast_mode,
-                                            multichannel=True)
+                                            multichannel=False)
     assert_(np.allclose(denoised, img))
 
 
