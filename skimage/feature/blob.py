@@ -270,7 +270,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
-
+    .. [2] https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf
     Examples
     --------
     >>> from skimage import data, feature
@@ -331,9 +331,10 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
     # computing difference between two successive Gaussian blurred images
-    # multiplying with average standard deviation provides scale invariance
-    dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
-                  * np.mean(sigma_list[i]) for i in range(k)]
+    # need to divide by (sigma_ratio-1) to obtain an approximation of the
+    # scale invariant Laplacian of the Gaussian operator
+    dog_images = [(gaussian_images[i] - gaussian_images[i + 1])/(sigma_ratio-1)
+                  for i in range(k)]
 
     image_cube = np.stack(dog_images, axis=-1)
 
