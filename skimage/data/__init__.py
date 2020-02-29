@@ -92,15 +92,6 @@ os.makedirs(data_dir, exist_ok=True)
 shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
              osp.join(data_dir, 'README.txt'))
 
-# Fech all legacy data so that it is available by default
-for filename in legacy_registry:
-    _fetch(filename)
-
-else:
-    # Without pooch, fallback on the standard data directory
-    # which for now, includes a few limited data samples
-    data_dir = legacy_data_dir
-
 
 def _has_hash(path, expected_hash):
     """Check if the provided path has the expected hash."""
@@ -172,6 +163,16 @@ def _fetch(data_filename):
             'connected to the internet.'
         ) from err
     return resolved_path
+
+
+# Fetch all legacy data so that it is available by default
+for filename in legacy_registry:
+    _fetch(filename)
+
+else:
+    # Without pooch, fallback on the standard data directory
+    # which for now, includes a few limited data samples
+    data_dir = legacy_data_dir
 
 
 def download_all(directory=None):
