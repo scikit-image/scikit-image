@@ -104,15 +104,17 @@ def _fetch(data_filename):
     Raises
     ------
     RuntimeError:
-        A runtime error can be raised if the file is known to the scikit-image
-        distribution, but the user doesn't have pooch. This will only happen
-        for datasets added after scikit-image 0.17 as public facing datasets
-        added before scikit-image 0.17 are shipped with the distribution.
+        If the file is known to the scikit-image distribution, but the user
+        doesn't have pooch. This will only happen for datasets added after
+        scikit-image 0.17 as public facing datasets added before scikit-image
+        0.17 are shipped with the distribution.
 
     ValueError:
-        This Error can be raised if the filename is not known to the
-        scikit-image distribution.
+        If the filename is not known to the scikit-image distribution.
 
+    ConnectionError:
+        If scikit-image is unable to connect to the internet but the dataset
+        has not been downloaded yet.
     """
     resolved_path = osp.join(data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
@@ -140,9 +142,20 @@ def _fetch(data_filename):
 
     # Case 3:
     # The user has Pooch installed, let the image fetcher use it to search
-    # for our data.
+    # for our data. A ConnectionError is raised if no internet connection is
+    # available.
     if has_pooch:
-        resolved_path = image_fetcher.fetch(data_filename)
+        try:
+            resolved_path = image_fetcher.fetch(data_filename)
+        except ConnectionError as err:
+            # If we decide in the future to suppress the underlying 'requests'
+            # error, change this to `raise ... from None`. See PEP 3134.
+            raise ConnectionError(
+                'Tried to download a scikit-image dataset, but no internet '
+                'connection is available. To avoid this message in the '
+                'future, try `skimage.data.download_all()` when you are '
+                'connected to the internet.'
+            ) from err
         return resolved_path
 
     # Case 4:
