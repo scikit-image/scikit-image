@@ -10,7 +10,7 @@ def configuration(parent_package='', top_path=None):
     # scikit-image 0.15 and will be retained until
     # further notice.
     # Testing data and additional datasets should only
-    # be made available by pooch
+    # be made available via pooch
     config.add_data_files(*legacy_datasets)
     # It seems hard to create a consistent hash for README.txt since
     # the line endings keep getting converted
@@ -29,4 +29,3 @@ if __name__ == '__main__':
           license='SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )
-
