@@ -42,13 +42,6 @@ def test_otsu_edge_case():
     assert result[1, 1] in [141, 172]
 
 
-
-@pytest.fixture(scope='module')
-def refs():
-    yield np.load(fetch("data/rank_filter_tests.npz"))
-
-
-
 @pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
 def test_subtract_mean_underflow_correction(dtype):
     # Input: [10, 10, 10]
@@ -85,12 +78,13 @@ class TestRank:
         # Set again the seed for the other tests.
         np.random.seed(0)
         self.selem = morphology.disk(1)
+        self.refs = np.load(fetch('data/rank_filter_tests.npz'))
 
     @parametrize('filter', all_rank_filters)
-    def test_rank_filter(self, filter, refs):
+    def test_rank_filter(self, filter):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
-            expected = refs[filter]
+            expected = self.refs[filter]
             result = getattr(rank, filter)(self.image, self.selem)
             if filter == "entropy":
                 # There may be some arch dependent rounding errors

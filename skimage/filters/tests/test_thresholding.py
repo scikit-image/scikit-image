@@ -304,10 +304,7 @@ def test_li_constant_image_with_nan():
 
 
 def test_li_arbitrary_start_point():
-    try:
-        cell = data.cell()
-    except RuntimeError:
-        pytest.skip('pooch or git repository needed to load data.cell')
+    cell = data.cell()
     max_stationary_point = threshold_li(cell)
     low_stationary_point = threshold_li(cell,
                                         initial_guess=np.percentile(cell, 5))
