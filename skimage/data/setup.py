@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from _registry import legacy_datasets
+from ._registry import legacy_datasets
 
 
 def configuration(parent_package='', top_path=None):
