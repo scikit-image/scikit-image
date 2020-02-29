@@ -10,8 +10,10 @@ gradient of the image intensity function.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.data import camera
 from skimage import filters
+from skimage.data import camera
+from skimage.util import compare_images
+
 
 image = camera()
 edge_roberts = filters.roberts(image)
@@ -62,8 +64,8 @@ edge_sobel = filters.sobel(image_rot)
 edge_scharr = filters.scharr(image_rot)
 edge_prewitt = filters.prewitt(image_rot)
 
-diff_scharr_prewitt = edge_scharr - edge_prewitt
-diff_scharr_sobel = edge_scharr - edge_sobel
+diff_scharr_prewitt = compare_images(edge_scharr, edge_prewitt)
+diff_scharr_sobel = compare_images(edge_scharr, edge_sobel)
 max_diff = np.max(np.maximum(diff_scharr_prewitt, diff_scharr_sobel))
 
 fig, axes = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True,
