@@ -214,9 +214,9 @@ def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
         return data._fetch(data_filename)
-    except RuntimeError:
-        pytest.skip('pooch or git repository needed to load {}'
-                    ''.format(data_filename))
+    except ConnectionError:
+        pytest.skip(f'Unable to download {data_filename}')
+
 
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.

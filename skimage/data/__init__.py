@@ -57,25 +57,49 @@ __all__ = ['data_dir',
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
-try:
-    import pooch
-    from pooch.utils import file_hash
-    has_pooch = True
-except ImportError:
-    has_pooch = False
-    import hashlib
 
-    def file_hash(fname):
-        # Vendored (i.e. copied from) from pooch.utils
-        # Calculate the hash in chunks to avoid overloading the memory
-        chunksize = 65536
-        hasher = hashlib.sha256()
-        with open(fname, "rb") as fin:
-            buff = fin.read(chunksize)
-            while buff:
-                hasher.update(buff)
-                buff = fin.read(chunksize)
-        return hasher.hexdigest()
+import pooch
+from pooch.utils import file_hash
+
+
+# Pooch expects a `+` to exist in development versions.
+# Since scikit-image doesn't follow that convention, we have to manually
+# remove `.dev` with a `+` if it exists.
+# This helps pooch understand that it should look in master
+# to find the required files
+pooch_version = __version__.replace('.dev', '+')
+url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+
+# Create a new friend to manage your sample data storage
+image_fetcher = pooch.create(
+    # Pooch uses appdirs to select an appropriate directory for the cache
+    # on each platform.
+    # https://github.com/ActiveState/appdirs
+    # On linux this converges to
+    # '$HOME/.cache/scikit-image'
+    # With a version qualifier
+    path=pooch.os_cache("scikit-image"),
+    base_url=url,
+    version=pooch_version,
+    env="SKIMAGE_DATADIR",
+    registry=registry,
+    urls=registry_urls,
+)
+
+data_dir = osp.join(str(image_fetcher.abspath), 'data')
+
+os.makedirs(data_dir, exist_ok=True)
+shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+             osp.join(data_dir, 'README.txt'))
+
+# Fech all legacy data so that it is available by default
+for filename in legacy_registry:
+    _fetch(filename)
+
+else:
+    # Without pooch, fallback on the standard data directory
+    # which for now, includes a few limited data samples
+    data_dir = legacy_data_dir
 
 
 def _has_hash(path, expected_hash):
@@ -103,12 +127,6 @@ def _fetch(data_filename):
 
     Raises
     ------
-    RuntimeError:
-        If the file is known to the scikit-image distribution, but the user
-        doesn't have pooch. This will only happen for datasets added after
-        scikit-image 0.17 as public facing datasets added before scikit-image
-        0.17 are shipped with the distribution.
-
     ValueError:
         If the filename is not known to the scikit-image distribution.
 
@@ -120,9 +138,8 @@ def _fetch(data_filename):
     expected_hash = registry[data_filename]
 
     # Case 1:
-    # The file may already be in the data_dir regardless of if Pooch is
-    # installed. We may have decided to ship it in the scikit-image
-    # distribution
+    # The file may already be in the data_dir. We may have decided to ship it
+    # in the scikit-image distribution.
     if _has_hash(resolved_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return resolved_path
@@ -130,7 +147,7 @@ def _fetch(data_filename):
 
     # Case 2:
     # The user is using a cloned version of the github repo, which
-    # contains both the publically shipped data, and test data.
+    # contains both the publicly shipped data, and test data.
     # In this case, the file would be located relative to the
     # skimage_distribution_dir
     gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
@@ -141,84 +158,20 @@ def _fetch(data_filename):
         return resolved_path
 
     # Case 3:
-    # The user has Pooch installed, let the image fetcher use it to search
-    # for our data. A ConnectionError is raised if no internet connection is
-    # available.
-    if has_pooch:
-        try:
-            resolved_path = image_fetcher.fetch(data_filename)
-        except ConnectionError as err:
-            # If we decide in the future to suppress the underlying 'requests'
-            # error, change this to `raise ... from None`. See PEP 3134.
-            raise ConnectionError(
-                'Tried to download a scikit-image dataset, but no internet '
-                'connection is available. To avoid this message in the '
-                'future, try `skimage.data.download_all()` when you are '
-                'connected to the internet.'
-            ) from err
-        return resolved_path
-
-    # Case 4:
-    # The user installed scikit-image from a distribution, but didn't install
-    # Pooch.
-    # Case 4A: The data is in the registry. So guide the user to install pooch.
-    if data_filename in registry:
-        # Legacy data might be available even without pooch
-        raise RuntimeError(
-            f"Loading the file {data_filename} requires the dependency "
-            "'pooch' to be installed. Install it with the command "
-            "'pip install pooch' or 'conda install pooch' as appropriate."
-        )
-    # Case 4b: The the data is not in the registry.
-    else:
-        # This is only expected to happen if the user calls
-        # ``skimage.data.load`` with a filename that isn't part of the
-        # skimage distribution
-        raise ValueError(
-            f"The requested file {data_filename} is not known to "
-            "scikit-image."
-        )
-
-
-if has_pooch:
-    # Pooch expects a `+` to exist in development versions.
-    # Since scikit-image doesn't follow that convention, we have to manually
-    # remove `.dev` with a `+` if it exists.
-    # This helps pooch understand that it should look in master
-    # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
-
-    # Create a new friend to manage your sample data storage
-    image_fetcher = pooch.create(
-        # Pooch uses appdirs to select an appropriate directory for the cache
-        # on each platform.
-        # https://github.com/ActiveState/appdirs
-        # On linux this converges to
-        # '$HOME/.cache/scikit-image'
-        # With a version qualifier
-        path=pooch.os_cache("scikit-image"),
-        base_url=url,
-        version=pooch_version,
-        env="SKIMAGE_DATADIR",
-        registry=registry,
-        urls=registry_urls,
-    )
-
-    data_dir = osp.join(str(image_fetcher.abspath), 'data')
-
-    os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
-
-    # Fech all legacy data so that it is available by default
-    for filename in legacy_registry:
-        _fetch(filename)
-
-else:
-    # Without pooch, fallback on the standard data directory
-    # which for now, includes a few limited data samples
-    data_dir = legacy_data_dir
+    # Pooch needs to download the data. Let the image fetcher to search for our
+    # data. A ConnectionError is raised if no internet connection is available.
+    try:
+        resolved_path = image_fetcher.fetch(data_filename)
+    except ConnectionError as err:
+        # If we decide in the future to suppress the underlying 'requests'
+        # error, change this to `raise ... from None`. See PEP 3134.
+        raise ConnectionError(
+            'Tried to download a scikit-image dataset, but no internet '
+            'connection is available. To avoid this message in the '
+            'future, try `skimage.data.download_all()` when you are '
+            'connected to the internet.'
+        ) from err
+    return resolved_path
 
 
 def download_all(directory=None):
@@ -257,9 +210,9 @@ def download_all(directory=None):
 
 
 def lbp_frontal_face_cascade_filename():
-    """
-    Returns the path to the XML file containing information about the weak
-    classifiers of a cascade classifier trained using LBP features. It is part
+    """Return the path to the XML file containing the weak classifier cascade.
+
+    These classifiers were trained using LBP features. The file is part
     of the OpenCV repository [1]_.
 
     References
