@@ -1,6 +1,6 @@
 SimpleITK
 astropy>=1.2.0
-tifffile
+tifffile>=0.11.1
 qtpy
 pyamg
 dask[array]>=0.15.0

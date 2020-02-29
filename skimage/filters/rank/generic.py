@@ -48,6 +48,8 @@ References
 
 """
 
+
+import warnings
 import numpy as np
 from scipy import ndimage as ndi
 from ...util import img_as_ubyte
@@ -309,15 +311,28 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import bottomhat
     >>> img = data.camera()
-    >>> out = bottomhat(img, disk(5))
+    >>> out = bottomhat(img, disk(5))  # doctest: +SKIP
 
     """
+    warnings.warn("rank.bottomhat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
 
     return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
                                    out=out, mask=mask,
@@ -945,16 +960,28 @@ def tophat(image, selem, out=None, mask=None, shift_x=False,
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import tophat
     >>> img = data.camera()
-    >>> out = tophat(img, disk(5))
+    >>> out = tophat(img, disk(5))  # doctest: +SKIP
 
     """
-
+    warnings.warn("rank.tophat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
     return _apply_scalar_per_pixel(generic_cy._tophat, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)

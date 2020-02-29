@@ -15,6 +15,20 @@ from skimage._shared.testing import test_parallel, parametrize, fetch
 import pytest
 
 
+# To be removed along with tophat and bottomhat functions.
+all_rank_filters.remove('tophat')
+all_rank_filters.remove('bottomhat')
+
+
+def test_deprecation():
+    selem = disk(3)
+    image = img_as_ubyte(data.camera()[:50, :50])
+
+    with expected_warnings(['rank.tophat is deprecated.']):
+        rank.tophat(image, selem)
+    with expected_warnings(['rank.bottomhat is deprecated.']):
+        rank.bottomhat(image, selem)
+
 
 def test_otsu_edge_case():
     # This is an edge case that causes OTSU to appear to misbehave
@@ -298,8 +312,8 @@ class TestRank:
         image_uint = img_as_ubyte(data.camera()[:50, :50])
         image_float = img_as_float(image_uint)
 
-        methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
-                   'subtract_mean', 'enhance_contrast', 'pop', 'tophat']
+        methods = ['autolevel', 'equalize', 'gradient', 'threshold',
+                   'subtract_mean', 'enhance_contrast', 'pop']
 
         for method in methods:
             func = getattr(rank, method)
@@ -319,9 +333,9 @@ class TestRank:
         image_u = img_as_ubyte(image_s)
         assert_equal(image_u, img_as_ubyte(image_s))
 
-        methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+        methods = ['autolevel', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
-                   'modal', 'enhance_contrast', 'pop', 'threshold', 'tophat']
+                   'modal', 'enhance_contrast', 'pop', 'threshold']
 
         for method in methods:
             func = getattr(rank, method)
@@ -331,9 +345,9 @@ class TestRank:
             assert_equal(out_u, out_s)
 
     @parametrize('method',
-                 ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+                 ['autolevel', 'equalize', 'gradient', 'maximum',
                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                  'enhance_contrast', 'pop', 'threshold', 'tophat'])
+                  'enhance_contrast', 'pop', 'threshold'])
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical

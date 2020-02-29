@@ -311,7 +311,7 @@ def brick():
 
     Returns
     -------
-    brick: (512, 512) uint8 image
+    brick : (512, 512) uint8 image
         A small section of a brick wall.
 
     Notes
@@ -377,7 +377,7 @@ def grass():
 
     Returns
     -------
-    grass: (512, 512) uint8 image
+    grass : (512, 512) uint8 image
         Some grass.
 
     Notes
@@ -425,7 +425,7 @@ def rough_wall():
 
     Returns
     -------
-    rough_wall: (512, 512) uint8 image
+    rough_wall : (512, 512) uint8 image
         Some rough wall.
 
     """
@@ -440,7 +440,7 @@ def gravel():
 
     Returns
     -------
-    gravel: (512, 512) uint8 image
+    gravel : (512, 512) uint8 image
         Grayscale gravel sample.
 
     Notes
@@ -799,7 +799,7 @@ def shepp_logan_phantom():
 
     Returns
     -------
-    phantom: (400, 400) float64 image
+    phantom : (400, 400) float64 image
         Image of the Shepp-Logan phantom in grayscale.
     """
     return _load("data/phantom.png", as_gray=True)
@@ -810,7 +810,7 @@ def colorwheel():
 
     Returns
     -------
-    colorwheel: (370, 371, 3) uint8 image
+    colorwheel : (370, 371, 3) uint8 image
         A colorwheel.
     """
     return _load("data/color.png")

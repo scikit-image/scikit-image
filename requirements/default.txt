@@ -1,4 +1,4 @@
-numpy>=1.14.1
+numpy>=1.15.1
 scipy>=1.0.1
 matplotlib>=2.0.0,!=3.0.0
 networkx>=2.0
