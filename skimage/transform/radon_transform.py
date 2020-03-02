@@ -196,7 +196,7 @@ def _get_fourier_filter(size, filter_name):
 @kwonly_change('1.0', previous_arg_order=['radon_image', 'theta',
                                           'output_size', 'filter_name',
                                           'interpolation', 'circle'])
-def iradon(radon_image, theta=None, output_size=None,
+def iradon(radon_image, *, theta=None, output_size=None,
            filter_name="ramp", interpolation="linear", circle=True):
     """Inverse radon transform.
 
@@ -241,8 +241,8 @@ def iradon(radon_image, theta=None, output_size=None,
 
     References
     ----------
-    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
-           Imaging", IEEE Press 1988.
+    .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic Imaging",
+           IEEE Press 1988.
     .. [2] B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
            the Discrete Radon Transform With Some Applications", Proceedings of
            the Fourth IEEE Region 10 International Conference, TENCON '89, 1989

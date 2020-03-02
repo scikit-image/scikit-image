@@ -234,7 +234,7 @@ def pyramid_gaussian(image, *, downscale=2, sigma=None, order=1,
 
 
 @kwonly_change('1.0')
-def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
+def pyramid_laplacian(image, *, max_layer=-1, downscale=2, sigma=None, order=1,
                       mode='reflect', cval=0, multichannel=False,
                       preserve_range=False):
     """Yield images of the laplacian pyramid formed by the input image.
