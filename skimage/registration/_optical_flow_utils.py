@@ -67,7 +67,8 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     count = 1
 
     while (count < nlevel) and (size > downscale * min_size):
-        J = pyramid_reduce(pyramid[-1], downscale, multichannel=False)
+        J = pyramid_reduce(pyramid[-1],
+                           downscale=downscale, multichannel=False)
         pyramid.append(J)
         size = min(J.shape)
         count += 1

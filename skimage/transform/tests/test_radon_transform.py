@@ -77,7 +77,7 @@ def check_radon_center(shape, circle, dtype, preserve_range):
                      preserve_range=preserve_range)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
-    print(sinogram_max)
+    # print(sinogram_max)
     assert np.std(sinogram_max) < 1e-6
 
 
@@ -109,16 +109,17 @@ def check_iradon_center(size, theta, circle):
         sinogram = np.zeros((diagonal, 1), dtype=np.float)
         sinogram[sinogram.shape[0] // 2, 0] = 1.
     maxpoint = np.unravel_index(np.argmax(sinogram), sinogram.shape)
-    print('shape of generated sinogram', sinogram.shape)
-    print('maximum in generated sinogram', maxpoint)
+    if debug:
+        print('shape of generated sinogram', sinogram.shape)
+        print('maximum in generated sinogram', maxpoint)
     # Compare reconstructions for theta=angle and theta=angle + 180;
     # these should be exactly equal
     reconstruction = iradon(sinogram, theta=[theta], circle=circle)
     reconstruction_opposite = iradon(sinogram, theta=[theta + 180],
                                      circle=circle)
-    print('rms deviance:',
-          np.sqrt(np.mean((reconstruction_opposite - reconstruction)**2)))
     if debug:
+        print('rms deviance:',
+              np.sqrt(np.mean((reconstruction_opposite - reconstruction)**2)))
         import matplotlib.pyplot as plt
         imkwargs = dict(cmap='gray', interpolation='nearest')
         plt.figure()
@@ -154,8 +155,8 @@ def check_radon_iradon(interpolation_type, filter_type):
     reconstructed = iradon(radon(image, circle=False), filter_name=filter_type,
                            interpolation=interpolation_type, circle=False)
     delta = np.mean(np.abs(image - reconstructed))
-    print('\n\tmean error:', delta)
     if debug:
+        print('\n\tmean error:', delta)
         _debug_plot(image, reconstructed)
     if filter_type in ('ramp', 'shepp-logan'):
         if interpolation_type == 'nearest':
@@ -223,10 +224,10 @@ def check_radon_iradon_minimal(shape, slices):
     theta = np.arange(180)
     image = np.zeros(shape, dtype=np.float)
     image[slices] = 1.
-    sinogram = radon(image, theta, circle=False)
-    reconstructed = iradon(sinogram, theta, circle=False)
-    print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
+    sinogram = radon(image, theta=theta, circle=False)
+    reconstructed = iradon(sinogram, theta=theta, circle=False)
     if debug:
+        print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
         _debug_plot(image, reconstructed, sinogram)
     if image.sum() == 1:
         assert (np.unravel_index(np.argmax(reconstructed), image.shape)
@@ -297,7 +298,7 @@ def test_radon_circle():
     mass = sinogram.sum(axis=0)
     average_mass = mass.mean()
     relative_error = np.abs(mass - average_mass) / average_mass
-    print(relative_error.max(), relative_error.mean())
+    # print(relative_error.max(), relative_error.mean())
     assert np.all(relative_error < 3.2e-3)
 
 
@@ -305,19 +306,19 @@ def check_sinogram_circle_to_square(size):
     from skimage.transform.radon_transform import _sinogram_circle_to_square
     image = _random_circle((size, size))
     theta = np.linspace(0., 180., size, False)
-    sinogram_circle = radon(image, theta, circle=True)
+    sinogram_circle = radon(image, theta=theta, circle=True)
 
     def argmax_shape(a):
         return np.unravel_index(np.argmax(a), a.shape)
 
-    print('\n\targmax of circle:', argmax_shape(sinogram_circle))
-    sinogram_square = radon(image, theta, circle=False)
-    print('\targmax of square:', argmax_shape(sinogram_square))
+    # print('\n\targmax of circle:', argmax_shape(sinogram_circle))
+    sinogram_square = radon(image, theta=theta, circle=False)
+    # print('\targmax of square:', argmax_shape(sinogram_square))
     sinogram_circle_to_square = _sinogram_circle_to_square(sinogram_circle)
-    print('\targmax of circle to square:',
-          argmax_shape(sinogram_circle_to_square))
+    # print('\targmax of circle to square:',
+          # argmax_shape(sinogram_circle_to_square))
     error = abs(sinogram_square - sinogram_circle_to_square)
-    print(np.mean(error), np.max(error))
+    # print(np.mean(error), np.max(error))
     assert (argmax_shape(sinogram_square) ==
             argmax_shape(sinogram_circle_to_square))
 
@@ -350,8 +351,8 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     c0, c1 = np.ogrid[0:width, 0:width]
     r = np.sqrt((c0 - width // 2)**2 + (c1 - width // 2)**2)
     reconstruction_rectangle[r > radius] = 0.
-    print(reconstruction_circle.shape)
-    print(reconstruction_rectangle.shape)
+    # print(reconstruction_circle.shape)
+    # print(reconstruction_rectangle.shape)
     np.allclose(reconstruction_rectangle, reconstruction_circle)
 
 
@@ -394,8 +395,8 @@ def test_iradon_sart():
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
                                 (theta_missing_wedge, 2.)):
-        sinogram = radon(image, theta, circle=True)
-        reconstructed = iradon_sart(sinogram, theta)
+        sinogram = radon(image, theta=theta, circle=True)
+        reconstructed = iradon_sart(sinogram, theta=theta)
 
         if debug:
             from matplotlib import pyplot as plt
@@ -411,15 +412,18 @@ def test_iradon_sart():
             plt.show()
 
         delta = np.mean(np.abs(reconstructed - image))
-        print('delta (1 iteration) =', delta)
+        if debug:
+            print('delta (1 iteration) =', delta)
         assert delta < 0.02 * error_factor
-        reconstructed = iradon_sart(sinogram, theta, reconstructed)
+        reconstructed = iradon_sart(sinogram, theta=theta, image=reconstructed)
         delta = np.mean(np.abs(reconstructed - image))
-        print('delta (2 iterations) =', delta)
+        if debug:
+            print('delta (2 iterations) =', delta)
         assert delta < 0.014 * error_factor
-        reconstructed = iradon_sart(sinogram, theta, clip=(0, 1))
+        reconstructed = iradon_sart(sinogram, theta=theta, clip=(0, 1))
         delta = np.mean(np.abs(reconstructed - image))
-        print('delta (1 iteration, clip) =', delta)
+        if debug:
+            print('delta (1 iteration, clip) =', delta)
         assert delta < 0.018 * error_factor
 
         np.random.seed(1239867)
@@ -428,7 +432,7 @@ def test_iradon_sart():
         sinogram_shifted = np.vstack([np.interp(x + shifts[i], x,
                                                 sinogram[:, i])
                                       for i in range(sinogram.shape[1])]).T
-        reconstructed = iradon_sart(sinogram_shifted, theta,
+        reconstructed = iradon_sart(sinogram_shifted, theta=theta,
                                     projection_shifts=shifts)
         if debug:
             from matplotlib import pyplot as plt
@@ -444,7 +448,8 @@ def test_iradon_sart():
             plt.show()
 
         delta = np.mean(np.abs(reconstructed - image))
-        print('delta (1 iteration, shifted sinogram) =', delta)
+        if debug:
+            print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.022 * error_factor
 
 

@@ -31,7 +31,7 @@ def test_hough_line_angles():
     img = np.zeros((10, 10))
     img[0, 0] = 1
 
-    out, angles, d = transform.hough_line(img, np.linspace(0, 360, 10))
+    out, angles, d = transform.hough_line(img, theta=np.linspace(0, 360, 10))
 
     assert_equal(len(angles), 10)
 
@@ -42,7 +42,7 @@ def test_hough_line_bad_input():
 
     # Expected error, img must be 2D
     with testing.raises(ValueError):
-        transform.hough_line(img, np.linspace(0, 360, 10))
+        transform.hough_line(img, theta=np.linspace(0, 360, 10))
 
 
 def test_probabilistic_hough():
@@ -147,14 +147,14 @@ def check_hough_line_peaks_angle():
                                           min_angle=90)[0]) == 1
 
     theta = np.linspace(0, np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
+    hspace, angles, dists = transform.hough_line(img, theta=theta)
     assert len(transform.hough_line_peaks(hspace, angles, dists,
                                           min_angle=45)[0]) == 2
     assert len(transform.hough_line_peaks(hspace, angles, dists,
                                           min_angle=90)[0]) == 1
 
     theta = np.linspace(np.pi / 3, 4. / 3 * np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
+    hspace, angles, dists = transform.hough_line(img, theta=theta)
     assert len(transform.hough_line_peaks(hspace, angles, dists,
                                           min_angle=45)[0]) == 2
     assert len(transform.hough_line_peaks(hspace, angles, dists,
@@ -175,7 +175,7 @@ def test_hough_line_peaks_zero_input():
     # Test to make sure empty input doesn't cause a failure
     img = np.zeros((100, 100), dtype='uint8')
     theta = np.linspace(0, np.pi, 100)
-    hspace, angles, dists = transform.hough_line(img, theta)
+    hspace, angles, dists = transform.hough_line(img, theta=theta)
     h, a, d = transform.hough_line_peaks(hspace, angles, dists)
     assert_equal(a, np.array([]))
 
