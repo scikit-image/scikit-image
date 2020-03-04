@@ -108,23 +108,19 @@ def h_maxima(image, h, selem=None):
 
     >>> maxima = extrema.h_maxima(f, 40)
 
-    The resulting image will contain 4 local maxima.
+    The resulting image will contain 3 local maxima.
     """
     if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
-        if h < resolution:
-            h = resolution
-        h_corrected = h - resolution / 2.0
-        shifted_img = image - h
+        resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
+        shifted_img = image - h - resolution
     else:
         shifted_img = _subtract_constant_clip(image, h)
-        h_corrected = h
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='dilation', selem=selem)
     residue_img = image - rec_img
     h_max = np.zeros(image.shape, dtype=np.uint8)
-    h_max[residue_img >= h_corrected] = 1
+    h_max[residue_img >= h] = 1
     return h_max
 
 
