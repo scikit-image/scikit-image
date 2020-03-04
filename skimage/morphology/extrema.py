@@ -111,6 +111,8 @@ def h_maxima(image, h, selem=None):
     The resulting image will contain 3 local maxima.
     """
     if np.issubdtype(image.dtype, np.floating):
+        if (h == 0.0):
+            raise ValueError("h = 0.0 is ambiguous, use local_maxima() instead?")
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image - h - resolution
     else:
@@ -185,23 +187,21 @@ def h_minima(image, h, selem=None):
 
     >>> minima = extrema.h_minima(f, 40)
 
-    The resulting image will contain 4 local minima.
+    The resulting image will contain 3 local minima.
     """
     if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
-        if h < resolution:
-            h = resolution
-        h_corrected = h - resolution / 2.0
-        shifted_img = image + h
+        if (h == 0.0):
+            raise ValueError("h = 0.0 is ambiguous, use local_minima() instead?")
+        resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
+        shifted_img = image + h + resolution
     else:
         shifted_img = _add_constant_clip(image, h)
-        h_corrected = h
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='erosion', selem=selem)
     residue_img = rec_img - image
     h_min = np.zeros(image.shape, dtype=np.uint8)
-    h_min[residue_img >= h_corrected] = 1
+    h_min[residue_img >= h] = 1    
     return h_min
 
 
