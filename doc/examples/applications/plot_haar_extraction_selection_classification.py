@@ -126,7 +126,7 @@ _ = fig.suptitle('The most important features')
 # of the total number of features).
 
 cdf_feature_importances = np.cumsum(clf.feature_importances_[idx_sorted])
-cdf_feature_importances /= cdf_feature_importances[-1] # divide by max value
+cdf_feature_importances /= cdf_feature_importances[-1]  # divide by max value
 sig_feature_count = np.count_nonzero(cdf_feature_importances < 0.7)
 sig_feature_percent = round(sig_feature_count /
                             len(cdf_feature_importances) * 100, 1)
