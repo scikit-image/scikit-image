@@ -190,6 +190,25 @@ class TestExtrema(unittest.TestCase):
             error = diff(expected_result, out)
             assert error < eps
 
+    def test_h_minima_float(self):
+        """specific tests for h-minima float type"""
+        w = 10
+        x, y = np.mgrid[0:w,0:w]
+        data = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
+        data[2:4,2:4] = 160
+        data[2:4,7:9] = 140
+        data[7:9,2:4] = 120
+        data[7:9,7:9] = 100
+        data = data.astype(np.float32)
+
+        expected_result = np.zeros_like(data)
+        expected_result[(data<180.1)] = 1.0
+
+        for h in [1.0e-12, 1.0e-6, 1.0e-3, 1.0e-2, 1.0e-1, 0.1]:
+            out = extrema.h_minima(data, h)
+            error = diff(expected_result, out)
+            assert error < eps
+            
 
 class TestLocalMaxima(unittest.TestCase):
     """Some tests for local_minima are included as well."""
