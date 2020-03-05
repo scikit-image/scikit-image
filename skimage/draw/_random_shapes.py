@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import polygon as draw_polygon, circle as draw_circle
+from . import polygon as draw_polygon, circle as draw_circle, ellipse as draw_ellipse
 from .._shared.utils import warn
 
 
@@ -163,11 +163,73 @@ def _generate_triangle_mask(point, image, shape, random):
     return triangle, label
 
 
+def _generate_ellipse_mask(point, image, shape, random):
+    """Generate a mask for a filled ellipse shape.
+
+    The rotation, major and minor semi-axes of the ellipse are generated randomly.
+
+    Parameters
+    ----------
+    point : tuple
+        The row and column of the top left corner of the rectangle.
+    image : tuple
+        The height, width and depth of the image into which the shape is placed.
+    shape : tuple
+        The minimum and maximum size and color of the shape to fit.
+    random : np.random.RandomState
+        The random state to use for random sampling.
+
+    Raises
+    ------
+    ArithmeticError
+        When a shape cannot be fit into the image with the given starting
+        coordinates. This usually means the image dimensions are too small or
+        shape dimensions too large.
+
+    Returns
+    -------
+    label : tuple
+        A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
+        bounding box coordinates of the shape.
+    indices : 2-D array
+        A mask of indices that the shape fills.
+    """
+    if shape[0] == 1 or shape[1] == 1:
+        raise ValueError('size must be > 1 for ellipses')
+    min_radius = shape[0] / 2.0
+    max_radius = shape[1] / 2.0
+    left = point[1]
+    right = image[1] - point[1]
+    top = point[0]
+    bottom = image[0] - point[0]
+    available_radius = min(left, right, top, bottom, max_radius)
+    if available_radius < min_radius:
+        raise ArithmeticError('cannot fit shape to image')
+    # NOTE: very conservative because we could take into account the fact that
+    # we have 2 different radii, but this is a good first approximation.
+    # Also, we can afford to have a uniform sampling because the ellipse will be
+    # rotated.
+    r_radius = random.uniform(min_radius, available_radius + 1)
+    c_radius = random.uniform(min_radius, available_radius + 1)
+    rotation = random.uniform(-np.pi, np.pi)
+    ellipse = draw_ellipse(point[0], point[1], r_radius, c_radius, rotation=rotation)
+    max_radius = max(r_radius, c_radius)
+    # NOTE: again taking max radius is very conservative, we could look into
+    # computing the exact bounding box, using e.g.
+    # https://gist.github.com/smidm/b398312a13f60c24449a2c7533877dc0
+    label = ('ellipse', ((point[0] - max_radius + 1, point[0] + max_radius),
+                        (point[1] - max_radius + 1, point[1] + max_radius)))
+
+    return ellipse, label
+
+
+
 # Allows lookup by key as well as random selection.
 SHAPE_GENERATORS = dict(
     rectangle=_generate_rectangle_mask,
     circle=_generate_circle_mask,
-    triangle=_generate_triangle_mask)
+    triangle=_generate_triangle_mask,
+    ellipse=_generate_ellipse_mask)
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
