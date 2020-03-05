@@ -171,8 +171,8 @@ class TestExtrema(unittest.TestCase):
         error = diff(expected_result, out)
         assert error < eps
 
-    def test_h_maxima_float(self):
-        """specific tests for h-maxima float type"""
+    def test_h_maxima_float_image(self):
+        """specific tests for h-maxima float image type"""
         w = 10
         x, y = np.mgrid[0:w,0:w]
         data = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -189,9 +189,47 @@ class TestExtrema(unittest.TestCase):
             out = extrema.h_maxima(data, h)
             error = diff(expected_result, out)
             assert error < eps
+            
+    def test_h_maxima_float_h(self):
+        """specific tests for h-maxima float h parameter"""
+        data = np.array([[0,0,0,0,0],
+                         [0,3,3,3,0],
+                         [0,3,4,3,0],
+                         [0,3,3,3,0],
+                         [0,0,0,0,0]], dtype = np.uint8)
 
-    def test_h_minima_float(self):
-        """specific tests for h-minima float type"""
+        h_vals = np.linspace(1.0, 2.0, 100)
+        failures = 0
+        for i in range(h_vals.size):
+            maxima = extrema.h_maxima(data, h_vals[i])
+
+            if (maxima[2,2] == 0):
+                failures += 1
+                
+        assert (failures == 0)
+
+    def test_h_maxima_large_h(self):
+        """test that h-maxima works correctly for large h"""
+        data = np.array([[0,0,0,0,0],
+                         [0,3,3,3,0],
+                         [0,3,4,3,0],
+                         [0,3,3,3,0],
+                         [0,0,0,0,0]], dtype = np.uint8)
+
+        maxima = extrema.h_maxima(data, 5)
+        assert (np.sum(maxima) == 0)
+
+        data = np.array([[0,0,0,0,0],
+                         [0,3,3,3,0],
+                         [0,3,4,3,0],
+                         [0,3,3,3,0],
+                         [0,0,0,0,0]], dtype = np.float32)
+
+        maxima = extrema.h_maxima(data, 5.0)
+        assert (np.sum(maxima) == 0)
+    
+    def test_h_minima_float_image(self):
+        """specific tests for h-minima float image type"""
         w = 10
         x, y = np.mgrid[0:w,0:w]
         data = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
