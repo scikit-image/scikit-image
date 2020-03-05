@@ -213,7 +213,7 @@ def _generate_ellipse_mask(point, image, shape, random):
     r_radius = random.uniform(min_radius, available_radius + 1)
     c_radius = random.uniform(min_radius, available_radius + 1)
     rotation = random.uniform(-np.pi, np.pi)
-    ellipse = draw_ellipse(point[0], point[1], r_radius, c_radius, rotation=rotation)
+    ellipse = draw_ellipse(point[0], point[1], r_radius, c_radius, shape=image[:2], rotation=rotation)
     max_radius = math.ceil(max(r_radius, c_radius))
     # NOTE: again taking max radius is very conservative, we could look into
     # computing the exact bounding box, using e.g.
