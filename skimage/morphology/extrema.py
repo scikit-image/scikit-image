@@ -112,7 +112,8 @@ def h_maxima(image, h, selem=None):
     """
     if np.issubdtype(image.dtype, np.floating):
         if (h == 0.0):
-            raise ValueError("h = 0.0 is ambiguous, use local_maxima() instead?")
+            raise ValueError("h = 0.0 is ambiguous, use local_maxima() \
+instead?")
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image - h - resolution
     else:
@@ -191,7 +192,8 @@ def h_minima(image, h, selem=None):
     """
     if np.issubdtype(image.dtype, np.floating):
         if (h == 0.0):
-            raise ValueError("h = 0.0 is ambiguous, use local_minima() instead?")
+            raise ValueError("h = 0.0 is ambiguous, use local_minima() \
+instead?")
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image + h + resolution
     else:
@@ -201,7 +203,7 @@ def h_minima(image, h, selem=None):
                                              method='erosion', selem=selem)
     residue_img = rec_img - image
     h_min = np.zeros(image.shape, dtype=np.uint8)
-    h_min[residue_img >= h] = 1    
+    h_min[residue_img >= h] = 1
     return h_min
 
 
