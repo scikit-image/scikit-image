@@ -338,7 +338,7 @@ def random_shapes(image_shape,
         If `True`, allow shapes to overlap.
     num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
-    seed : int, optional
+    random_seed : int, optional
         Seed to initialize the random number generator.
         If `None`, a random seed from the operating system is used.
 
