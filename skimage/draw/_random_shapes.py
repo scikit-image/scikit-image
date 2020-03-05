@@ -325,7 +325,7 @@ def random_shapes(image_shape,
         Number of channels in the generated image. If 1, generate monochrome
         images, else color images with multiple channels. Ignored if
         ``multichannel`` is set to False.
-    shape : {rectangle, circle, triangle, None} str, optional
+    shape : {rectangle, circle, triangle, ellipse, None} str, optional
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
         The range of values to sample pixel values from. For grayscale images
