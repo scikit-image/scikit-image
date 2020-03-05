@@ -225,11 +225,11 @@ def _generate_ellipse_mask(point, image, shape, random):
         rotation=rotation,
     )
     max_radius = math.ceil(max(r_radius, c_radius))
-    # NOTE: again taking max radius is very conservative, we could look into
-    # computing the exact bounding box, using e.g.
-    # https://gist.github.com/smidm/b398312a13f60c24449a2c7533877dc0
-    label = ('ellipse', ((point[0] - max_radius + 1, point[0] + max_radius),
-                         (point[1] - max_radius + 1, point[1] + max_radius)))
+    min_x = np.min(ellipse[0])
+    max_x = np.max(ellipse[0]) + 1
+    min_y = np.min(ellipse[1])
+    max_y = np.max(ellipse[1]) + 1
+    label = ('ellipse', ((min_x, max_x), (min_y, max_y)))
 
     return ellipse, label
 
