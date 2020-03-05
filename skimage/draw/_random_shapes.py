@@ -1,7 +1,8 @@
 import math
 import numpy as np
 
-from . import polygon as draw_polygon, circle as draw_circle, ellipse as draw_ellipse
+from . import (polygon as draw_polygon, circle as draw_circle,
+    ellipse as draw_ellipse)
 from .._shared.utils import warn
 
 
@@ -167,14 +168,16 @@ def _generate_triangle_mask(point, image, shape, random):
 def _generate_ellipse_mask(point, image, shape, random):
     """Generate a mask for a filled ellipse shape.
 
-    The rotation, major and minor semi-axes of the ellipse are generated randomly.
+    The rotation, major and minor semi-axes of the ellipse are generated
+    randomly.
 
     Parameters
     ----------
     point : tuple
         The row and column of the top left corner of the rectangle.
     image : tuple
-        The height, width and depth of the image into which the shape is placed.
+        The height, width and depth of the image into which the shape is
+        placed.
     shape : tuple
         The minimum and maximum size and color of the shape to fit.
     random : np.random.RandomState
@@ -208,12 +211,19 @@ def _generate_ellipse_mask(point, image, shape, random):
         raise ArithmeticError('cannot fit shape to image')
     # NOTE: very conservative because we could take into account the fact that
     # we have 2 different radii, but this is a good first approximation.
-    # Also, we can afford to have a uniform sampling because the ellipse will be
-    # rotated.
+    # Also, we can afford to have a uniform sampling because the ellipse will
+    # be rotated.
     r_radius = random.uniform(min_radius, available_radius + 1)
     c_radius = random.uniform(min_radius, available_radius + 1)
     rotation = random.uniform(-np.pi, np.pi)
-    ellipse = draw_ellipse(point[0], point[1], r_radius, c_radius, shape=image[:2], rotation=rotation)
+    ellipse = draw_ellipse(
+        point[0],
+        point[1],
+        r_radius,
+        c_radius,
+        shape=image[:2],
+        rotation=rotation,
+    )
     max_radius = math.ceil(max(r_radius, c_radius))
     # NOTE: again taking max radius is very conservative, we could look into
     # computing the exact bounding box, using e.g.
