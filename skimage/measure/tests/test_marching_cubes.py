@@ -48,8 +48,6 @@ def test_marching_cubes_anisotropic():
         verts, faces = marching_cubes(
             ellipsoid_anisotropic, 0., spacing=spacing,
             mask=np.array([]))[:2]
-        surf_calc = mesh_surface_area(verts, faces)
-        assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test spacing together with allow_degenerate=False
     marching_cubes(ellipsoid_anisotropic, 0, spacing=spacing,
@@ -179,7 +177,6 @@ def test_masked_marching_cubes_all_true():
     ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
     np.testing.assert_allclose(ver_m, ver, rtol=.00001)
     np.testing.assert_allclose(faces_m, faces, rtol=.00001)
-
 
 
 
