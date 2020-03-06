@@ -48,8 +48,6 @@ def test_marching_cubes_anisotropic():
         verts, faces = marching_cubes(
             ellipsoid_anisotropic, 0., spacing=spacing,
             mask=np.array([]))[:2]
-        surf_calc = mesh_surface_area(verts, faces)
-        assert surf > surf_calc and surf_calc > surf * 0.985
 
     # Test spacing together with allow_degenerate=False
     marching_cubes(ellipsoid_anisotropic, 0, spacing=spacing,
@@ -159,17 +157,17 @@ def test_masked_marching_cubes():
 
 
 def test_masked_marching_cubes_empty():
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.array([])
     with pytest.raises(ValueError):
-        ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
-        mask = np.array([])
-        ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
+        _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
 
 
-def test_masked_marching_cubes_lewiner():
+def test_masked_marching_cubes_old_lewiner():
+    ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
+    mask = np.array([])
     with pytest.raises(NotImplementedError):
-        ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
-        mask = np.array([])
-        ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask, method='_lorensen')
+        _ = marching_cubes(ellipsoid_scalar, 0, mask=mask, method='_lorensen')
 
 
 def test_masked_marching_cubes_all_true():
@@ -179,7 +177,4 @@ def test_masked_marching_cubes_all_true():
     ver, faces, _, _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
     np.testing.assert_allclose(ver_m, ver, rtol=.00001)
     np.testing.assert_allclose(faces_m, faces, rtol=.00001)
-
-
-
 
