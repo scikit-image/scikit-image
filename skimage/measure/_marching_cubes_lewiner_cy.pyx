@@ -949,7 +949,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
     cdef int case, config, subconfig
-
+    cdef bint use_mask = mask is not None
     # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
     # we have:  max_x = Nx_bound + st + st - 1
@@ -974,7 +974,7 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
             while x < Nx_bound:
                 x += st
                 x_st = x + st
-                if mask is None or mask[z_st, y_st, x_st]:
+                if use_mask is None and mask[z_st, y_st, x_st]:
                     # Initialize cell
                     cell.set_cube(isovalue, x, y, z, st,
                         im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
