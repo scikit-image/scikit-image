@@ -96,7 +96,7 @@ def h_maxima(image, h, selem=None):
 
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
-    The heights of the maxima are: 1, 21, 41, 61, 81, 101
+    The heights of the maxima are: 1, 21, 41, 61, 81
 
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
@@ -176,7 +176,7 @@ def h_minima(image, h, selem=None):
 
     We create an image (quadratic function with a minimum in the center and
     4 additional constant maxima.
-    The depth of the minima are: 1, 21, 41, 61, 81, 101
+    The depth of the minima are: 1, 21, 41, 61, 81
 
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
