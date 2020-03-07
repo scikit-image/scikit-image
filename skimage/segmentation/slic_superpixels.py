@@ -50,15 +50,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         segmentation. The input image *must* be RGB. Highly recommended.
         This option defaults to ``True`` when ``multichannel=True`` *and*
         ``image.shape[-1] == 3``.
-    enforce_connectivity: bool, optional
+    enforce_connectivity : bool, optional
         Whether the generated segments are connected or not
-    min_size_factor: float, optional
+    min_size_factor : float, optional
         Proportion of the minimum segment size to be removed with respect
         to the supposed segment size ```depth*width*height/n_segments```
-    max_size_factor: float, optional
+    max_size_factor : float, optional
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
-    slic_zero: bool, optional
+    slic_zero : bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
 
     Returns

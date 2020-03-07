@@ -119,7 +119,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold: int, optional
+    threshold : int, optional
         Accumulator threshold value.
     accuracy : double, optional
         Bin size on the minor axis used in the accumulator.

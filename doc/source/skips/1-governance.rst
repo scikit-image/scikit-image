@@ -107,7 +107,7 @@ van der Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
 Zachary Pincus. The SC membership is revisited every January. SC members who do
 not actively engage with the SC duties are expected to resign. New members are
 added by nomination by a core developer. Nominees should have demonstrated
-long-term, continued commitment to the project and its :ref:`values`. A
+long-term, continued commitment to the project and its :ref:`values <values>`. A
 nomination will result in discussion that cannot take more than a month and
 then admission to the SC by consensus.
 
