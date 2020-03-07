@@ -21,13 +21,15 @@ filtering.
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.data import gravel
-from skimage.filters import difference_of_gaussians
+from skimage.filters import difference_of_gaussians, window
 from scipy.fftpack import fftn, fftshift
 
 image = gravel()
+wimage = image * window('hann', image.shape)  # window image to improve FFT
 filtered_image = difference_of_gaussians(image, 1, 12)
-im_f_mag = fftshift(np.abs(fftn(image)))
-fim_f_mag = fftshift(np.abs(fftn(filtered_image)))
+filtered_wimage = filtered_image * window('hann', image.shape)
+im_f_mag = fftshift(np.abs(fftn(wimage)))
+fim_f_mag = fftshift(np.abs(fftn(filtered_wimage)))
 
 fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 8))
 ax[0, 0].imshow(image, cmap='gray')
@@ -47,9 +49,11 @@ plt.show()
 from skimage.data import camera
 
 image = camera()
+wimage = image * window('hann', image.shape)  # window image to improve FFT
 filtered_image = difference_of_gaussians(image, 1.5)
-im_f_mag = fftshift(np.abs(fftn(image)))
-fim_f_mag = fftshift(np.abs(fftn(filtered_image)))
+filtered_wimage = filtered_image * window('hann', image.shape)
+im_f_mag = fftshift(np.abs(fftn(wimage)))
+fim_f_mag = fftshift(np.abs(fftn(filtered_wimage)))
 
 fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 8))
 ax[0, 0].imshow(image, cmap='gray')
