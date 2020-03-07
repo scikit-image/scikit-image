@@ -167,7 +167,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     blurred with two Gaussian kernels of differing sigmas to produce two
     intermediate, filtered images. The more-blurred image is then subtracted
     from the less-blurred image. The final output image will therefore have
-    had high frequency components attenuated by the smaller-sigma Gaussian, and
+    had high-frequency components attenuated by the smaller-sigma Gaussian, and
     low frequency components will have been removed due to their presence in
     the more-blurred intermediate.
 
@@ -211,7 +211,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
 
     Notes
     -----
-    This function will subtract an array filtered with a Guassian kernel
+    This function will subtract an array filtered with a Gaussian kernel
     with sigmas given by ``high_sigma`` from an array filtered with a
     Gaussian kernel with sigmas provided by ``low_sigma``. The values for
     ``high_sigma`` must always be greater than or equal to the corresponding
@@ -220,7 +220,7 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
     When ``high_sigma`` is none, the values for ``high_sigma`` will be
     calculated as 1.6x the corresponding values in ``low_sigma``. This ratio
     was originally proposed by Marr and Hildreth (1980) [1]_ and is commonly
-    used when approximating the inverted Laplacian of Guassian, which is used
+    used when approximating the inverted Laplacian of Gaussian, which is used
     in edge and blob detection.
 
     Input image is converted according to the conventions of ``img_as_float``.
