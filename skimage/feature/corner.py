@@ -1008,7 +1008,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                 rejected_peaks.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks), axis=0)[::-1]
+        coords = np.delete(coords, tuple(rejected_peaks), axis=0)
 
     if indices is True:
         return coords
