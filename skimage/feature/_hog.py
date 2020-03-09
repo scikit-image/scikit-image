@@ -130,7 +130,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     -----
     The presented code implements the HOG extraction method from [2]_ with
     the following changes: (I) blocks of (3, 3) cells are used ((2, 2) in the
-    paper; (II) no smoothing within cells (Gaussian spatial window with sigma=8pix
+    paper); (II) no smoothing within cells (Gaussian spatial window with sigma=8pix
     in the paper); (III) L1 block normalization is used (L2-Hys in the paper).
 
     Power law compression, also known as Gamma correction, is used to reduce

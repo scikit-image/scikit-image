@@ -36,7 +36,9 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
     else:
-        if mask[r * cols + c]:
+        if not mask:
+            return 1
+        elif mask[r * cols + c]:
             return 1
         else:
             return 0
@@ -75,7 +77,9 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t mid_bin = n_bins / 2
 
     # define pointers to the data
-    cdef char* mask_data = &mask[0, 0]
+    cdef char * mask_data = NULL
+    if mask is not None:
+        mask_data = &mask[0, 0]
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row

@@ -2,7 +2,7 @@
 # https://github.com/sphinx-doc/sphinx/issues/5361
 sphinx>=1.3,!=1.7.8
 numpydoc>=0.9
-sphinx-gallery
+sphinx-gallery>=0.3.1
 sphinx-copybutton
 pytest-runner
 scikit-learn
@@ -10,3 +10,5 @@ matplotlib>=3.0.1
 dask[array]>=0.15.0
 # cloudpickle is necessary to provide the 'processes' scheduler for dask
 cloudpickle>=0.2.1
+pandas>=0.23.0
+seaborn>=0.7.1

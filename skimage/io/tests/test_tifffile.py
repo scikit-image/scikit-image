@@ -56,7 +56,7 @@ class TestSave:
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
-        imsave(fname, x)
+        imsave(fname, x, check_contrast=False)
         y = imread(fname)
         assert_array_equal(x, y)
 

@@ -6,9 +6,9 @@ from scipy import stats
 from scipy import spatial
 
 from ..util import img_as_float
-from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D
-from ..feature.corner_cy import _corner_fast
+from .peak import peak_local_max
+from .util import _prepare_grayscale_input_2D
+from .corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int

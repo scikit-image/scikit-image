@@ -73,7 +73,7 @@ COL_DTYPES = {
     'bbox': int,
     'bbox_area': int,
     'moments_central': float,
-    'centroid': int,
+    'centroid': float,
     'convex_area': int,
     'convex_image': object,
     'coords': object,
@@ -89,11 +89,11 @@ COL_DTYPES = {
     'inertia_tensor_eigvals': float,
     'intensity_image': object,
     'label': int,
-    'local_centroid': int,
+    'local_centroid': float,
     'major_axis_length': float,
-    'max_intensity': float,
+    'max_intensity': int,
     'mean_intensity': float,
-    'min_intensity': float,
+    'min_intensity': int,
     'minor_axis_length': float,
     'moments': float,
     'moments_normalized': float,
@@ -102,10 +102,10 @@ COL_DTYPES = {
     'slice': object,
     'solidity': float,
     'weighted_moments_central': float,
-    'weighted_centroid': int,
+    'weighted_centroid': float,
     'weighted_moments_hu': float,
-    'weighted_local_centroid': int,
-    'weighted_moments': int,
+    'weighted_local_centroid': float,
+    'weighted_moments': float,
     'weighted_moments_normalized': float
 }
 
@@ -568,7 +568,8 @@ def regionprops_table(label_image, intensity_image=None,
         Dictionary mapping property names to an array of values of that
         property, one value per region. This dictionary can be used as input to
         pandas ``DataFrame`` to map property names to columns in the frame and
-        regions to rows.
+        regions to rows. If the image has no regions,
+        the arrays will have length 0, but the correct type.
 
     Notes
     -----
@@ -622,6 +623,20 @@ def regionprops_table(label_image, intensity_image=None,
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
                           cache=cache)
+
+    if len(regions) == 0:
+        label_image = np.zeros((3,) * label_image.ndim, dtype=int)
+        label_image[(1,) * label_image.ndim] = 1
+        if intensity_image is not None:
+            intensity_image = np.zeros(label_image.shape,
+                                       dtype=intensity_image.dtype)
+        regions = regionprops(label_image, intensity_image=intensity_image,
+                              cache=cache)
+
+        out_d = _props_to_dict(regions, properties=properties,
+                               separator=separator)
+        return {k: v[:0] for k, v in out_d.items()}
+
     return _props_to_dict(regions, properties=properties, separator=separator)
 
 
@@ -838,7 +853,16 @@ def regionprops(label_image, intensity_image=None, cache=True,
         raise TypeError('Only 2-D and 3-D images supported.')
 
     if not np.issubdtype(label_image.dtype, np.integer):
-        raise TypeError('Label image must be of integer type.')
+        if np.issubdtype(label_image.dtype, np.bool_):
+            raise TypeError(
+                    'Non-integer image types are ambiguous: '
+                    'use skimage.measure.label to label the connected'
+                    'components of label_image,'
+                    'or label_image.astype(np.uint8) to interpret'
+                    'the True values as a single label.')
+        else:
+            raise TypeError(
+                    'Non-integer label_image types are ambiguous')
 
     if coordinates is not None:
         if coordinates == 'rc':

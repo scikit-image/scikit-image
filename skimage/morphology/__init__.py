@@ -5,7 +5,6 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from ..measure._label import label
-from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis, thin, skeletonize_3d
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
@@ -15,6 +14,7 @@ from ._flood_fill import flood, flood_fill
 from .max_tree import (max_tree, area_opening, area_closing,
                        diameter_opening, diameter_closing,
                        max_tree_local_maxima)
+from ._deprecated import watershed
 
 __all__ = ['binary_erosion',
            'binary_dilation',

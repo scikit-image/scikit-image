@@ -108,7 +108,8 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
-    >>> denoised = cycle_spin(img, func=denoise_wavelet, max_shifts=3)
+    >>> denoised = cycle_spin(img, func=denoise_wavelet,
+    ...                       max_shifts=3) # doctest: +SKIP
 
     """
     x = np.asanyarray(x)
