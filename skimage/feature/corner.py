@@ -917,7 +917,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
                  footprint=None, labels=None, *, num_peaks_per_label=np.inf,
-                 p=np.inf):
+                 p_norm=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -932,7 +932,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         to set the Minkowski p-norm defining the distance.
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
-    p : float
+    p_norm : float
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         inf corresponds to the Chebyshev distance and 2 to the
@@ -1002,7 +1002,8 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         rejected_peaks = set()
         for idx, point in enumerate(coords):
             if idx not in rejected_peaks:
-                candidates = tree.query_ball_point(point, r=min_distance, p=p)
+                candidates = tree.query_ball_point(point, r=min_distance,
+                                                   p=p_norm)
                 candidates.remove(idx)
                 rejected_peaks.update(candidates)
 
