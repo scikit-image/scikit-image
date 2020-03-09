@@ -46,16 +46,16 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
                              fast_threshold=0.33, downscale=2, n_scales=2)
     detector_extractor.detect(img)
 
-    exp_rows = np.array([  58.,   65.,  108.,  140.,  203.])
-    exp_cols = np.array([ 291.,  130.,  293.,  202.,  267.])
+    exp_rows = np.array([58., 65., 108., 140., 203.])[::-1]
+    exp_cols = np.array([291., 130., 293., 202., 267.])[::-1]
 
     exp_scales = np.array([1., 1., 1., 1., 1.])
 
-    exp_orientations = np.array([-158.26941428,  -59.42996346,  151.93905955,
-                                  -79.46341354,  -56.90052451])
+    exp_orientations = np.array([-158.26941428, -59.42996346, 151.93905955,
+                                 -79.46341354, -56.90052451])[::-1]
 
-    exp_response = np.array([ 0.2667641 ,  0.04009017, -0.17641695, -0.03243431,
-                              0.26521259])
+    exp_response = np.array([0.2667641, 0.04009017, -0.17641695, -0.03243431,
+                             0.26521259])[::-1]
 
     assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
@@ -76,27 +76,27 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
                'https://github.com/scikit-image/scikit-image/issues/2529'))
 def test_descriptor_orb():
     detector_extractor = ORB(fast_n=12, fast_threshold=0.20)
+    exp_descriptors = np.array([[1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
+                                [1, 0, 1, 0, 0, 1, 0, 0, 1, 0],
+                                [1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+                                [0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                                [1, 1, 1, 0, 1, 1, 0, 0, 0, 1],
+                                [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+                                [1, 1, 1, 0, 0, 0, 1, 0, 1, 0],
+                                [1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+                                [0, 0, 1, 1, 0, 0, 1, 1, 1, 1],
+                                [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                                [0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+                                [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+                                [0, 1, 1, 0, 0, 0, 1, 0, 0, 1],
+                                [0, 1, 0, 1, 0, 0, 0, 1, 1, 1],
+                                [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                                [0, 1, 1, 1, 0, 0, 0, 1, 1, 1],
+                                [0, 1, 0, 1, 0, 1, 1, 1, 1, 1],
+                                [0, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+                                [0, 1, 1, 1, 1, 0, 1, 0, 1, 0],
+                                [1, 0, 1, 0, 0, 1, 0, 0, 1, 1]], dtype=bool)
 
-    exp_descriptors = np.array([[0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-                                [1, 1, 1, 0, 0, 1, 0, 0, 1, 1],
-                                [1, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                                [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-                                [1, 1, 0, 1, 1, 1, 0, 0, 1, 1],
-                                [1, 1, 0, 1, 0, 0, 1, 0, 1, 1],
-                                [0, 0, 1, 0, 1, 0, 0, 1, 1, 0],
-                                [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-                                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                [1, 1, 0, 1, 0, 1, 0, 0, 1, 1],
-                                [1, 1, 1, 0, 0, 0, 1, 1, 1, 0],
-                                [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                                [1, 1, 1, 0, 1, 1, 1, 1, 0, 0],
-                                [1, 1, 0, 0, 1, 0, 0, 1, 0, 1],
-                                [1, 1, 0, 0, 0, 0, 1, 0, 0, 1],
-                                [0, 0, 0, 0, 1, 1, 1, 0, 1, 0],
-                                [0, 0, 0, 0, 1, 1, 1, 0, 0, 1],
-                                [0, 0, 0, 0, 0, 1, 1, 0, 1, 1],
-                                [0, 0, 0, 0, 1, 0, 1, 0, 1, 1]], dtype=bool)
     detector_extractor.detect(img)
     detector_extractor.extract(img, detector_extractor.keypoints,
                                detector_extractor.scales,
