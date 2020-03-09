@@ -929,8 +929,9 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0,
-                    np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
+def marching_cubes(float[:, :, :] im not None, double isovalue,
+                   LutProvider luts, int st=1, int classic=0,
+                   np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
     This is the main entry to compute marching cubes.
     Masked version of marching cubes. This function will check a masking array (same size as im) to decide if the
