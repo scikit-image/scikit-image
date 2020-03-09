@@ -47,19 +47,6 @@ def test_moments_central():
     assert_equal(mu, mu2)
 
 
-def test_moments_central_deprecated():
-    image = np.zeros((20, 20), dtype=np.double)
-    image[5:-5, 5:-5] = np.random.random((10, 10))
-    center = moments(image, 1)[[1, 0], [0, 1]]
-    cr, cc = center
-    with expected_warnings(['deprecated 2D-only']):
-        mu0 = moments_central(image, cr, cc)
-        mu1 = moments_central(image, cr=cr, cc=cc)
-    mu_ref = moments_central(image, center)
-    assert_almost_equal(mu0.T, mu_ref)
-    assert_almost_equal(mu1.T, mu_ref)
-
-
 def test_moments_coords():
     image = np.zeros((20, 20), dtype=np.double)
     image[13:17, 13:17] = 1

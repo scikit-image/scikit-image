@@ -18,7 +18,7 @@ than 0.
 
 import numpy as np
 from skimage import data, util, filters, color
-from skimage.morphology import watershed
+from skimage.segmentation import watershed
 import matplotlib.pyplot as plt
 
 coins = data.coins()

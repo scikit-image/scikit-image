@@ -4,7 +4,7 @@ Methods to characterize image textures.
 
 import numpy as np
 import warnings
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
@@ -63,9 +63,13 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
+    .. [2] Haralick, RM.; Shanmugam, K.,
+           "Textural features for image classification"
+           IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+           :DOI:`10.1109/TSMC.1973.4309314`
+    .. [3] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [4] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
@@ -101,9 +105,9 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    assert_nD(image, 2)
-    assert_nD(distances, 1, 'distances')
-    assert_nD(angles, 1, 'angles')
+    check_nD(image, 2)
+    check_nD(distances, 1, 'distances')
+    check_nD(angles, 1, 'angles')
 
     image = np.ascontiguousarray(image)
 
@@ -201,16 +205,19 @@ def greycoprops(P, prop='contrast', pre_normalized=False):
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
-    assert_nD(P, 4, 'P')
+    check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
-    assert num_level == num_level2
-    assert num_dist > 0
-    assert num_angle > 0
+    if num_level != num_level2:
+        raise ValueError('num_level and num_level2 must be equal.')
+    if num_dist <= 0:
+        raise ValueError('num_dist must be positive.')
+    if num_angle <= 0:
+        raise ValueError('num_angle must be positive.')
 
     # Ensure P is float64 type and in row-major / C_CONTIGUOUS order
     if P.dtype != np.float64 or not P.flags['C_CONTIGUOUS']:
@@ -300,7 +307,7 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     methods = {
         'default': ord('D'),

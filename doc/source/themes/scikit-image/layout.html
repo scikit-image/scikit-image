@@ -1,4 +1,4 @@
-{#
+{#-
     scikit-image/layout.html
     ~~~~~~~~~~~~~~~~~
 
@@ -6,19 +6,18 @@
     Johannes Schönberger.
 
 #}
-
 {%- set url_root = pathto('', 1) %}
-{# XXX necessary? #}
+{#- XXX necessary? #}
 {%- if url_root == '#' %}{% set url_root = '' %}{% endif %}
 {%- if not embedded and docstitle %}
   {%- set titlesuffix = " &mdash; "|safe + docstitle|e %}
 {%- else %}
   {%- set titlesuffix = "" %}
 {%- endif %}
-
 {%- macro script() %}
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.js"></script>
     <script src="{{ pathto('_static/', 1) }}js/bootstrap.min.js"></script>
+    <script src="{{ pathto('_static/', 1) }}js/togglebutton.js"></script>
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '{{ url_root }}',
@@ -28,30 +27,32 @@
         HAS_SOURCE:  {{ has_source|lower }}
       };
     </script>
-    {%- for scriptfile in script_files %}
-        <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
+    {%- for js in script_files %}
+    {{ js_tag(js) }}
     {%- endfor %}
 {%- endmacro %}
-
 {%- macro css() %}
     <link rel="stylesheet" href="{{ pathto('_static/pygments.css', 1) }}" type="text/css" />
     <link href="{{ pathto('_static/', 1) }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="{{ pathto('_static/', 1) }}css/custom.css" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
     {%- for cssfile in css_files %}
         <link rel="stylesheet" href="{{ pathto(cssfile, 1) }}" type="text/css" />
     {%- endfor %}
 {%- endmacro %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {%- block htmltitle %}
         <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
     {%- endblock %}
-    {{ metatags }}
-    {{ css() }}
+    {{- metatags }}
+    {%- block css %}
+    {{- css() }}
+    {%- endblock %}
+    {%- block scripts %}
     {{ script() }}
+    {%- endblock %}
     {%- if hasdoc('about') %}
         <link rel="author" title="{{ _('About these documents') }}" href="{{ pathto('about') }}" />
     {%- endif %}
@@ -94,32 +95,34 @@
                 {%- include sidebartemplate %}
             {%- endfor %}
         </div>
-        <div class="span9">
+        <div class="span9" class="body" role="main">
             {% block body %}{% endblock %}
         </div>
     </div>
-    <div class="well footer">
+    <div class="well footer" role="contentinfo">
         <small>
             &copy; Copyright the scikit-image development team.
-            Created using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://sphinx-doc.org/">Sphinx</a>.
+            Created using <a href="https://getbootstrap.com/">Bootstrap</a> and <a href="https://www.sphinx-doc.org/">Sphinx</a>.
         </small>
     </div>
 </body>
 </html>
 
 
-<!-- Piwik -->
+<!-- Matomo -->
 <script type="text/javascript">
-  var _paq = _paq || [];
+  var _paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.scikit-image.org"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
   (function() {
-    var u="//piwik.sciunto.org/piwik/";
-    _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', 2]);
+    var u="https://scikit-image.matomo.cloud/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src='//cdn.matomo.cloud/scikit-image.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
   })();
 </script>
-<noscript><p><img src="//piwik.sciunto.org/piwik/piwik.php?idsite=2" style="border:0;" alt="" /></p></noscript>
-<!-- End Piwik Code -->
+<!-- End Matomo Code -->

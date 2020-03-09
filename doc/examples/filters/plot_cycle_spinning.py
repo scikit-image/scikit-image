@@ -1,7 +1,7 @@
 """
-=================
-Wavelet denoising
-=================
+=================================
+Shift-invariant wavelet denoising
+=================================
 
 The discrete wavelet transform is not `shift-invariant`_.  Shift invariance can
 be achieved through an undecimated wavelet transform (also called stationary
@@ -12,9 +12,9 @@ transform is to use the technique known as "cycle spinning".  This involves
 averaging the results of the following 3-step procedure for multiple spatial
 shifts, n:
 
-1.) (circularly) shift the signal by an amount, n
-2.) apply denoising
-3.) apply the inverse shift
+1. (circularly) shift the signal by an amount, n
+2. apply denoising
+3. apply the inverse shift
 
 For 2D image denoising, we demonstrate here that such cycle-spinning can
 provide a substantial increase in quality, with much of the gain being
@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from skimage.restoration import denoise_wavelet, cycle_spin
 from skimage import data, img_as_float
 from skimage.util import random_noise
-from skimage.measure import compare_psnr
+from skimage.metrics import peak_signal_noise_ratio
 
 
 original = img_as_float(data.chelsea()[100:250, 50:300])
@@ -39,7 +39,7 @@ fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4),
                        sharex=False, sharey=False)
 ax = ax.ravel()
 
-psnr_noisy = compare_psnr(original, noisy)
+psnr_noisy = peak_signal_noise_ratio(original, noisy)
 ax[0].imshow(noisy)
 ax[0].axis('off')
 ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
@@ -51,7 +51,8 @@ ax[0].set_title('Noisy\nPSNR={:0.4g}'.format(psnr_noisy))
 # max_shift = 3 -> shifts of (0, 1, 2, 3) along each axis
 # etc...
 
-denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1')
+denoise_kwargs = dict(multichannel=True, convert2ycbcr=True, wavelet='db1',
+                      rescale_sigma=True)
 
 all_psnr = []
 max_shifts = [0, 1, 3, 5]
@@ -60,7 +61,7 @@ for n, s in enumerate(max_shifts):
                             func_kw=denoise_kwargs, multichannel=True)
     ax[n+1].imshow(im_bayescs)
     ax[n+1].axis('off')
-    psnr = compare_psnr(original, im_bayescs)
+    psnr = peak_signal_noise_ratio(original, im_bayescs)
     if s == 0:
         ax[n+1].set_title(
             "Denoised: no cycle shifts\nPSNR={:0.4g}".format(psnr))
@@ -73,7 +74,7 @@ for n, s in enumerate(max_shifts):
 ax[5].plot(max_shifts, all_psnr, 'k.-')
 ax[5].set_ylabel('PSNR (dB)')
 ax[5].set_xlabel('max cycle shift along each axis')
-ax[5].grid('on')
+ax[5].grid(True)
 plt.subplots_adjust(wspace=0.35, hspace=0.35)
 
 # Annotate with a cyan arrow on the 6x6 case vs. no cycle shift case to

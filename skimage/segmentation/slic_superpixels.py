@@ -1,4 +1,4 @@
-import collections as coll
+from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -50,15 +50,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         segmentation. The input image *must* be RGB. Highly recommended.
         This option defaults to ``True`` when ``multichannel=True`` *and*
         ``image.shape[-1] == 3``.
-    enforce_connectivity: bool, optional
+    enforce_connectivity : bool, optional
         Whether the generated segments are connected or not
-    min_size_factor: float, optional
+    min_size_factor : float, optional
         Proportion of the minimum segment size to be removed with respect
         to the supposed segment size ```depth*width*height/n_segments```
-    max_size_factor: float, optional
+    max_size_factor : float, optional
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
-    slic_zero: bool, optional
+    slic_zero : bool, optional
         Run SLIC-zero, the zero-parameter mode of SLIC. [2]_
 
     Returns
@@ -109,6 +109,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     """
 
     image = img_as_float(image)
+    dtype = image.dtype
+
     is_2d = False
     if image.ndim == 2:
         # 2D grayscale image
@@ -123,15 +125,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         image = image[..., np.newaxis]
 
     if spacing is None:
-        spacing = np.ones(3)
+        spacing = np.ones(3, dtype=dtype)
     elif isinstance(spacing, (list, tuple)):
-        spacing = np.array(spacing, dtype=np.double)
+        spacing = np.array(spacing, dtype=dtype)
 
-    if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
-        sigma /= spacing.astype(np.double)
+    if not isinstance(sigma, Iterable):
+        sigma = np.array([sigma, sigma, sigma], dtype=dtype)
+        sigma /= spacing.astype(dtype)
     elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, dtype=np.double)
+        sigma = np.array(sigma, dtype=dtype)
     if (sigma > 0).any():
         # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
@@ -146,7 +148,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     depth, height, width = image.shape[:3]
 
     # initialize cluster centroids for desired number of segments
-    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
+    grid_z, grid_y, grid_x = np.meshgrid(np.arange(depth, dtype=dtype),
+                                         np.arange(height, dtype=dtype),
+                                         np.arange(width, dtype=dtype),
+                                         indexing='ij')
     slices = regular_grid(image.shape[:3], n_segments)
     step_z, step_y, step_x = [int(s.step if s.step is not None else 1)
                               for s in slices]
@@ -154,7 +159,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     segments_y = grid_y[slices]
     segments_x = grid_x[slices]
 
-    segments_color = np.zeros(segments_z.shape + (image.shape[3],))
+    segments_color = np.zeros(segments_z.shape + (image.shape[3],),
+                              dtype=dtype)
     segments = np.concatenate([segments_z[..., np.newaxis],
                                segments_y[..., np.newaxis],
                                segments_x[..., np.newaxis],
@@ -164,8 +170,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    step = float(max((step_z, step_y, step_x)))
-    ratio = 1.0 / compactness
+    step = dtype.type(max((step_z, step_y, step_x)))
+    ratio = dtype.type(1.0 / compactness)
 
     image = np.ascontiguousarray(image * ratio)
 

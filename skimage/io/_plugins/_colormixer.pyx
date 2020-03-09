@@ -11,7 +11,6 @@ integers, so currently the only way to clip results efficiently
 one.
 
 """
-import cython
 
 cimport numpy as cnp
 from libc.math cimport exp, pow

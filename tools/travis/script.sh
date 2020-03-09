@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
 set -ev
-export PY=${TRAVIS_PYTHON_VERSION}
 
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
@@ -16,7 +15,10 @@ tools/build_versions.py
 section_end "List.installed.dependencies"
 
 section "Test"
-pytest $TEST_ARGS skimage
+# When installing from sdist
+# We can't run it in the git directory since there is a folder called `skimage`
+# in there. pytest will crawl that instead of the module we installed and want to test
+(cd .. && pytest $TEST_ARGS --pyargs skimage)
 section_end "Test"
 
 section "Flake8.test"
@@ -26,7 +28,7 @@ section_end "Flake8.test"
 section "Tests.examples"
 # Run example applications
 echo Build or run examples
-pip install --retries 3 -q -r ./requirements/docs.txt
+pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
 pip list
 tools/build_versions.py
 echo 'backend : Template' > $MPL_DIR/matplotlibrc

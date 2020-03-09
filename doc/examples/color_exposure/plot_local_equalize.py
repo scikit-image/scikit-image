@@ -3,7 +3,7 @@
 Local Histogram Equalization
 ============================
 
-This examples enhances an image with low contrast, using a method called *local
+This example enhances an image with low contrast, using a method called *local
 histogram equalization*, which spreads out the most frequent intensity values
 in an image.
 

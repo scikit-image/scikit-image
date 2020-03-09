@@ -1,4 +1,3 @@
-from warnings import warn
 
 from ...util.dtype import dtype_range
 from .base import Plugin
@@ -32,9 +31,6 @@ class OverlayPlugin(Plugin):
               'cyan': (0, 1, 1)}
 
     def __init__(self, **kwargs):
-        if not is_installed('matplotlib', '>=1.2'):
-            msg = "Matplotlib >= 1.2 required for OverlayPlugin."
-            warn(RuntimeWarning(msg))
         super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None

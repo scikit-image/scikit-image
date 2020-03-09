@@ -1,7 +1,25 @@
+Version 0.16
+------------
+- The following functions are deprecated and will be removed in 0.18:
+  ``skimage.measure.compare_mse``,
+  ``skimage.measure.compare_nrmse``,
+  ``skimage.measure.compare_pnsr``,
+  ``skimage.measure.compare_ssim``
+  Their functionality still exists, but under the new ``skimage.metrics``
+  submodule under different names.
+- Additionally, three new functions have been added to ``skimage.metrics``:
+  ``skimage.metrics.variation_of_information``
+  ``skimage.metrics.adapted_rand_error``
+  ``skimage.metrics.contingency_table``
+- A new example of plotting these evaluation metrics has been added to the docs.
+
 Version 0.15
 ------------
 - ``skimage.feature.canny`` now uses a more accurate Gaussian filter
   internally; output values will be different from 0.14.
+- ``skimage.filters.threshold_niblack`` and
+  ``skimage.filters.threshold_sauvola``
+  now accept a tuple as ``window_size`` besides integers.
 
 Version 0.14
 ------------

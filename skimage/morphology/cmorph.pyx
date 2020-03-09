@@ -55,6 +55,10 @@ def _dilate(np.uint8_t[:, :] image,
     cdef Py_ssize_t selem_num = np.sum(np.asarray(selem) != 0)
     cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
     cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
+    if sr is NULL or sc is NULL:
+        free(sr)
+        free(sc)
+        raise MemoryError()
 
     s = 0
     for r in range(srows):
@@ -129,6 +133,10 @@ def _erode(np.uint8_t[:, :] image,
     cdef Py_ssize_t selem_num = np.sum(np.asarray(selem) != 0)
     cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
     cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
+    if sr is NULL or sc is NULL:
+        free(sr)
+        free(sc)
+        raise MemoryError()
 
     s = 0
     for r in range(srows):

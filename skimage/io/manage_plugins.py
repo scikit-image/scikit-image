@@ -15,18 +15,15 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
-import sys
-
-from configparser import ConfigParser
 import os.path
+import warnings
+from configparser import ConfigParser
 from glob import glob
 
 from .collection import imread_collection_wrapper
 
-
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
-
 
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
@@ -114,8 +111,10 @@ def _scan_plugins():
 
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
+        if 'provides' not in meta_data:
+            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
+            continue
         plugin_meta_data[name] = meta_data
-
         provides = [s.strip() for s in meta_data['provides'].split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 

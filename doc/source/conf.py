@@ -14,6 +14,10 @@
 import sys
 import os
 import skimage
+from sphinx_gallery.sorting import ExplicitOrder
+from warnings import filterwarnings
+filterwarnings('ignore', message="Matplotlib is currently using agg",
+               category=UserWarning)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,7 +31,8 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = ['sphinx_copybutton',
+              'sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'numpydoc',
               'doi_role',
@@ -44,15 +49,26 @@ autosummary_generate = True
 #------------------------------------------------------------------------
 
 sphinx_gallery_conf = {
-    'doc_module'        : ('skimage',),
+    'doc_module': ('skimage',),
     # path to your examples scripts
-    'examples_dirs' : '../examples',
+    'examples_dirs': '../examples',
     # path where to save gallery generated examples
-    'gallery_dirs'  : 'auto_examples',
+    'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
-    'reference_url'     : {
-            'skimage': None,}
-    }
+    'reference_url': {'skimage': None},
+    'subsection_order': ExplicitOrder([
+        '../examples/data',
+        '../examples/numpy_operations',
+        '../examples/color_exposure',
+        '../examples/edges',
+        '../examples/transform',
+        '../examples/filters',
+        '../examples/features_detection',
+        '../examples/segmentation',
+        '../examples/applications',
+        '../examples/developers',
+    ]),
+}
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -122,7 +138,7 @@ release = version
 exclude_trees = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
-#default_role = None
+default_role = "autolink"
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True

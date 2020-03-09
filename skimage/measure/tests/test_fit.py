@@ -22,16 +22,16 @@ def test_line_model_predict():
 
 
 def test_line_model_nd_invalid_input():
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
         LineModelND().predict_x(np.zeros(1), np.zeros(1))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1))
 
     with testing.raises(ValueError):
@@ -40,7 +40,7 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().estimate(np.empty((1, 3)))
 
-    with testing.raises(AssertionError):
+    with testing.raises(ValueError):
         LineModelND().residuals(np.empty((1, 3)))
 
     data = np.empty((1, 2))
@@ -255,8 +255,7 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5,
-                                random_state=1)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, random_state=1)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -339,12 +338,51 @@ def test_ransac_dynamic_max_trials():
 
 
 def test_ransac_invalid_input():
+    # `residual_threshold` must be greater than zero
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=2,
+               residual_threshold=-0.5)
+    # "`max_trials` must be greater than zero"
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, max_trials=-1)
+    # `stop_probability` must be in range (0, 1)
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=-1)
+    # `stop_probability` must be in range (0, 1)
     with testing.raises(ValueError):
         ransac(np.zeros((10, 2)), None, min_samples=2,
                residual_threshold=0, stop_probability=1.01)
+    # `min_samples` as ratio must be in range (0, nb)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=0,
+               residual_threshold=0)
+    # `min_samples` as ratio must be in range (0, nb)
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=10,
+               residual_threshold=0)
+    # `min_samples` must be greater than zero
+    with testing.raises(ValueError):
+        ransac(np.zeros((10, 2)), None, min_samples=-1,
+               residual_threshold=0)
+
+
+def test_ransac_sample_duplicates():
+    class DummyModel(object):
+
+        """Dummy model to check for duplicates."""
+
+        def estimate(self, data):
+            # Assert that all data points are unique.
+            assert_equal(np.unique(data).size, data.size)
+            return True
+
+        def residuals(self, data):
+            return np.ones(len(data), dtype=np.double)
+
+    # Create dataset with four unique points. Force 10 iterations
+    # and check that there are no duplicated data points.
+    data = np.arange(4)
+    ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
+           max_trials=10)

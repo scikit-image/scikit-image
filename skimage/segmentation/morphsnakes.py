@@ -1,14 +1,16 @@
+import warnings
 from itertools import cycle
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 __all__ = ['morphological_chan_vese',
            'morphological_geodesic_active_contour',
            'inverse_gaussian_gradient',
            'circle_level_set',
+           'disk_level_set',
            'checkerboard_level_set'
            ]
 
@@ -84,7 +86,7 @@ _curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
 
 def _check_input(image, init_level_set):
     """Check that shapes of `image` and `init_level_set` match."""
-    assert_nD(image, [2, 3])
+    check_nD(image, [2, 3])
 
     if len(image.shape) != len(init_level_set.shape):
         raise ValueError("The dimensions of the initial level set do not "
@@ -127,6 +129,45 @@ def circle_level_set(image_shape, center=None, radius=None):
     -------
     out : array with shape `image_shape`
         Binary level set of the circle with the given `radius` and `center`.
+
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+            This function is deprecated and will be removed in scikit-image 0.19.
+            Please use the function named ``disk_level_set`` instead.
+
+    See also
+    --------
+    checkerboard_level_set
+    """
+    warnings.warn("circle_level_set is deprecated in favor of "
+                  "disk_level_set."
+                  "circle_level_set will be removed in version 0.19",
+                  FutureWarning, stacklevel=2)
+
+    return disk_level_set(image_shape, center=center, radius=radius)
+
+
+def disk_level_set(image_shape, *, center=None, radius=None):
+    """Create a disk level set with binary values.
+
+    Parameters
+    ----------
+    image_shape : tuple of positive integers
+        Shape of the image
+    center : tuple of positive integers, optional
+        Coordinates of the center of the disk given in (row, column). If not
+        given, it defaults to the center of the image.
+    radius : float, optional
+        Radius of the disk. If not given, it is set to the 75% of the
+        smallest image dimension.
+
+    Returns
+    -------
+    out : array with shape `image_shape`
+        Binary level set of the disk with the given `radius` and `center`.
 
     See also
     --------

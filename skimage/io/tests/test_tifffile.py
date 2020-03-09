@@ -37,6 +37,11 @@ def test_imread_multipage_rgb_tif():
     img = imread(os.path.join(data_dir, 'multipage_rgb.tif'))
     assert img.shape == (2, 10, 10, 3), img.shape
 
+def test_tifffile_kwarg_passthrough ():
+    img = imread(os.path.join(data_dir, 'multipage.tif'), key=[1],
+                 multifile=False, multifile_close=True, fastij=True, 
+                 is_ome=True)
+    assert img.shape == (15, 10), img.shape
 
 def test_imread_handle():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
@@ -51,7 +56,7 @@ class TestSave:
         f = NamedTemporaryFile(suffix='.tif')
         fname = f.name
         f.close()
-        imsave(fname, x)
+        imsave(fname, x, check_contrast=False)
         y = imread(fname)
         assert_array_equal(x, y)
 

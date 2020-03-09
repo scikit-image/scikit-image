@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 from skimage import img_as_float
@@ -39,11 +38,11 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
         The details will be amplified with this factor. The factor could be 0
         or negative. Typically, it is a small positive number, e.g. 1.0.
     multichannel : bool, optional
-        If True, the last `image` dimension is considered as a color channel,
+        If True, the last ``image`` dimension is considered as a color channel,
         otherwise as spatial. Color channels are processed individually.
-    preserve_range: bool, optional
+    preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of ``img_as_float``.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
@@ -83,27 +82,27 @@ def unsharp_mask(image, radius=1.0, amount=1.0, multichannel=False,
            [100, 100, 100, 100, 100],
            [100, 100, 100, 100, 100]], dtype=uint8)
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[ 0.39,  0.39,  0.39,  0.39,  0.39],
-           [ 0.39,  0.39,  0.38,  0.39,  0.39],
-           [ 0.39,  0.38,  0.53,  0.38,  0.39],
-           [ 0.39,  0.39,  0.38,  0.39,  0.39],
-           [ 0.39,  0.39,  0.39,  0.39,  0.39]])
+    array([[0.39, 0.39, 0.39, 0.39, 0.39],
+           [0.39, 0.39, 0.38, 0.39, 0.39],
+           [0.39, 0.38, 0.53, 0.38, 0.39],
+           [0.39, 0.39, 0.38, 0.39, 0.39],
+           [0.39, 0.39, 0.39, 0.39, 0.39]])
 
     >>> array = np.ones(shape=(5,5), dtype=np.int8)*100
     >>> array[2,2] = 127
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2),2)
-    array([[ 0.79,  0.79,  0.79,  0.79,  0.79],
-           [ 0.79,  0.78,  0.75,  0.78,  0.79],
-           [ 0.79,  0.75,  1.  ,  0.75,  0.79],
-           [ 0.79,  0.78,  0.75,  0.78,  0.79],
-           [ 0.79,  0.79,  0.79,  0.79,  0.79]])
+    array([[0.79, 0.79, 0.79, 0.79, 0.79],
+           [0.79, 0.78, 0.75, 0.78, 0.79],
+           [0.79, 0.75, 1.  , 0.75, 0.79],
+           [0.79, 0.78, 0.75, 0.78, 0.79],
+           [0.79, 0.79, 0.79, 0.79, 0.79]])
 
     >>> np.around(unsharp_mask(array, radius=0.5, amount=2, preserve_range=True), 2)
-    array([[ 100.  ,  100.  ,   99.99,  100.  ,  100.  ],
-           [ 100.  ,   99.39,   95.48,   99.39,  100.  ],
-           [  99.99,   95.48,  147.59,   95.48,   99.99],
-           [ 100.  ,   99.39,   95.48,   99.39,  100.  ],
-           [ 100.  ,  100.  ,   99.99,  100.  ,  100.  ]])
+    array([[100.  , 100.  ,  99.99, 100.  , 100.  ],
+           [100.  ,  99.39,  95.48,  99.39, 100.  ],
+           [ 99.99,  95.48, 147.59,  95.48,  99.99],
+           [100.  ,  99.39,  95.48,  99.39, 100.  ],
+           [100.  , 100.  ,  99.99, 100.  , 100.  ]])
 
 
     References

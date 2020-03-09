@@ -50,8 +50,9 @@ References
 """
 
 
-from warnings import warn
+import functools
 import numpy as np
+from warnings import warn
 from scipy import linalg
 from ..util import dtype, dtype_limits
 
@@ -75,16 +76,9 @@ def guess_spatial_dimensions(image):
     ValueError
         If the image array has less than two or more than four dimensions.
     """
-    if image.ndim == 2:
-        return 2
-    if image.ndim == 3 and image.shape[-1] != 3:
-        return 3
-    if image.ndim == 3 and image.shape[-1] == 3:
-        return None
-    if image.ndim == 4 and image.shape[-1] == 3:
-        return 3
-    else:
-        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+    from ..filters import _guess_spatial_dimensions
+    warn('This function is deprecated and will be removed in 0.18', stacklevel=2)
+    return _guess_spatial_dimensions(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -454,7 +448,7 @@ illuminants = \
            '10': (1.0, 1.0, 1.0)}}
 
 
-def get_xyz_coords(illuminant, observer):
+def get_xyz_coords(illuminant, observer, dtype=float):
     """Get the XYZ coordinates of the given illuminant and observer [1]_.
 
     Parameters
@@ -463,11 +457,13 @@ def get_xyz_coords(illuminant, observer):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10"}, optional
         The aperture angle of the observer.
+    dtype: dtype, optional
+        Output data type.
 
     Returns
     -------
-    (x, y, z) : tuple
-        A tuple with 3 elements containing the XYZ coordinates of the given
+    out : array
+        Array with 3 elements containing the XYZ coordinates of the given
         illuminant.
 
     Raises
@@ -483,7 +479,7 @@ def get_xyz_coords(illuminant, observer):
     """
     illuminant = illuminant.upper()
     try:
-        return illuminants[illuminant][observer]
+        return np.asarray(illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError("Unknown illuminant/observer combination\
         (\'{0}\', \'{1}\')".format(illuminant, observer))
@@ -501,7 +497,7 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
-# http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+# https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 # Hematoxylin + DAB
 rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
@@ -588,12 +584,12 @@ def _convert(matrix, arr):
 
     Returns
     -------
-    out : ndarray, dtype=float
+    out : ndarray
         The converted array.
     """
     arr = _prepare_colorarray(arr)
 
-    return arr @ matrix.T.copy()
+    return arr @ matrix.T.astype(arr.dtype)
 
 
 def xyz2rgb(xyz):
@@ -796,12 +792,23 @@ def rgb2gray(rgb):
     if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)
 
-    rgb = _prepare_colorarray(rgb[..., :3])
+    if rgb.shape[-1] > 3:
+        warn('Non RGB image conversion is now deprecated. For RGBA images, '
+             'please use rgb2gray(rgba2rgb(rgb)) instead. In version 0.19, '
+             'a ValueError will be raised if input image last dimension '
+             'length is not 3.', FutureWarning, stacklevel=2)
+        rgb = rgb[..., :3]
+
+    rgb = _prepare_colorarray(rgb)
     coeffs = np.array([0.2125, 0.7154, 0.0721], dtype=rgb.dtype)
     return rgb @ coeffs
 
 
-rgb2grey = rgb2gray
+@functools.wraps(rgb2gray)
+def rgb2grey(rgb):
+    warn('rgb2grey is deprecated. It will be removed in version 0.19.'
+         'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
+    return rgb2gray(rgb)
 
 
 def gray2rgb(image, alpha=None):
@@ -842,6 +849,12 @@ def gray2rgb(image, alpha=None):
             is_rgb = True
 
     if is_rgb:
+        warn('Pass-through of possibly RGB images in gray2rgb is deprecated. '
+             'In version 0.19, input arrays will always be considered '
+             'grayscale, even if the last dimension has length 3 or 4. '
+             'To prevent this warning and ensure compatibility with future '
+             'versions, detect RGB images outside of this function.',
+             FutureWarning, stacklevel=2)
         if alpha is False:
             image = image[..., :3]
 
@@ -864,7 +877,12 @@ def gray2rgb(image, alpha=None):
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
-grey2rgb = gray2rgb
+
+@functools.wraps(gray2rgb)
+def grey2rgb(image):
+    warn('grey2rgb is deprecated. It will be removed in version 0.19.'
+         'Please use gray2rgb instead.', FutureWarning, stacklevel=2)
+    return gray2rgb(image)
 
 
 def xyz2lab(xyz, illuminant="D65", observer="2"):
@@ -915,14 +933,14 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     """
     arr = _prepare_colorarray(xyz)
 
-    xyz_ref_white = get_xyz_coords(illuminant, observer)
+    xyz_ref_white = get_xyz_coords(illuminant, observer, arr.dtype)
 
     # scale by CIE XYZ tristimulus values of the reference white point
     arr = arr / xyz_ref_white
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
-    arr[mask] = np.power(arr[mask], 1. / 3.)
+    arr[mask] = np.cbrt(arr[mask])
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -985,7 +1003,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     if np.any(z < 0):
         invalid = np.nonzero(z < 0)
-        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size)
+        warn('Color data out of range: Z < 0 in %s pixels' % invalid[0].size,
+             stacklevel=2)
         z[invalid] = 0
 
     out = np.dstack([x, y, z])
@@ -1131,7 +1150,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     xyz_ref_white = np.array(get_xyz_coords(illuminant, observer))
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
-    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[mask] = 116. * np.cbrt(L[mask]) - 16.
     L[~mask] = 903.3 * L[~mask]
 
     u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
@@ -1360,7 +1379,7 @@ def separate_stains(rgb, conv_matrix):
     ----------
     rgb : array_like
         The image in RGB format, in a 3-D array of shape ``(.., .., 3)``.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
@@ -1394,7 +1413,7 @@ def separate_stains(rgb, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
@@ -1417,7 +1436,7 @@ def combine_stains(stains, conv_matrix):
     stains : array_like
         The image in stain color space, in a 3-D array of shape
         ``(.., .., 3)``.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
@@ -1450,7 +1469,7 @@ def combine_stains(stains, conv_matrix):
 
     References
     ----------
-    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 
     Examples

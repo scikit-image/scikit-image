@@ -1,9 +1,9 @@
 """
 =====================================
-Cross-Correlation (Phase Correlation)
+Image Registration
 =====================================
 
-In this example, we use phase correlation to identify the relative shift
+In this example, we use cross-correlation to identify the relative shift
 between two similar-sized images.
 
 The ``register_translation`` function uses cross-correlation in Fourier space,
@@ -28,7 +28,7 @@ shift = (-22.4, 13.32)
 # The shift corresponds to the pixel offset relative to the reference image
 offset_image = fourier_shift(np.fft.fftn(image), shift)
 offset_image = np.fft.ifftn(offset_image)
-print("Known offset (y, x): {}".format(shift))
+print(f"Known offset (y, x): {shift}")
 
 # pixel precision first
 shift, error, diffphase = register_translation(image, offset_image)
@@ -56,7 +56,7 @@ ax3.set_title("Cross-correlation")
 
 plt.show()
 
-print("Detected pixel offset (y, x): {}".format(shift))
+print(f"Detected pixel offset (y, x): {shift}")
 
 # subpixel precision
 shift, error, diffphase = register_translation(image, offset_image, 100)
@@ -85,4 +85,4 @@ ax3.set_title("Supersampled XC sub-area")
 
 plt.show()
 
-print("Detected subpixel offset (y, x): {}".format(shift))
+print(f"Detected subpixel offset (y, x): {shift}")

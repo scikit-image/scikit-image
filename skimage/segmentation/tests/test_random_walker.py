@@ -5,7 +5,6 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import xfail, arch32
 import scipy
-import numpy as np
 from distutils.version import LooseVersion as Version
 
 
@@ -15,8 +14,7 @@ SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
 PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
 
-if (Version(np.__version__) >= '1.15.0' and
-        Version(scipy.__version__) <= '1.1.0'):
+if Version(scipy.__version__) < '1.3':
     NUMPY_MATRIX_WARNING = 'matrix subclass'
 else:
     NUMPY_MATRIX_WARNING = None
@@ -71,17 +69,20 @@ def test_2d_bf():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
                                  return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
     # Now test with more than two labels
     labels[55, 80] = 3
-    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
                                  return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
@@ -128,6 +129,22 @@ def test_2d_cg_mg():
     return data, labels_cg_mg
 
 
+def test_2d_cg_j():
+    lx = 70
+    ly = 100
+    data, labels = make_2d_syntheticdata(lx, ly)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_cg = random_walker(data, labels, beta=90, mode='cg_j')
+    assert (labels_cg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        full_prob = random_walker(data, labels, beta=90, mode='cg_j',
+                                  return_full_prob=True)
+    assert (full_prob[1, 25:45, 40:60]
+            >= full_prob[0, 25:45, 40:60]).all()
+    assert data.shape == labels.shape
+
+
 def test_types():
     lx = 70
     ly = 100
@@ -146,7 +163,8 @@ def test_reorder_labels():
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[labels == 2] = 4
-    labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
     return data, labels_bf
@@ -158,7 +176,8 @@ def test_2d_inactive():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[10:20, 10:20] = -1
     labels[46:50, 33:38] = -2
-    labels = random_walker(data, labels, beta=90)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
     return data, labels
@@ -332,6 +351,26 @@ def test_trivial_cases():
         test = random_walker(img, labels, return_full_prob=True)
     np.testing.assert_array_equal(test, expected)
 
+    # Unlabeled voxels not connected to seed, so nothing can be done
+    img = np.full((10, 10), False)
+    object_A = np.array([(6,7), (6,8), (7,7), (7,8)])
+    object_B = np.array([(3,1), (4,1), (2,2), (3,2), (4,2), (2,3), (3,3)])
+    for x, y in np.vstack((object_A, object_B)):
+            img[y][x] = True
+
+    markers = np.zeros((10, 10), dtype=np.int8)
+    for x, y in object_B:
+            markers[y][x] = 1
+
+    markers[img == 0] = -1
+    with expected_warnings(["All unlabeled pixels are isolated"]):
+            output_labels = random_walker(img, markers)
+    assert np.all(output_labels[markers == 1] == 1)
+    # Here 0-labeled pixels could not be determined (no connexion to seed)
+    assert np.all(output_labels[markers == 0] == -1)
+    with expected_warnings(["All unlabeled pixels are isolated"]):
+        test = random_walker(img, markers, return_full_prob=True)
+
 
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
@@ -341,7 +380,8 @@ def test_length2_spacing():
     labels = np.zeros((10, 10), dtype=np.uint8)
     labels[2, 4] = 1
     labels[6, 8] = 4
-    random_walker(img, labels, spacing=(1., 2.))
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        random_walker(img, labels, spacing=(1., 2.))
 
 
 def test_bad_inputs():
@@ -390,8 +430,10 @@ def test_isolated_seeds():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    res = random_walker(a, mask)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask)
     assert res[1, 1] == 1
-    res = random_walker(a, mask, return_full_prob=True)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0

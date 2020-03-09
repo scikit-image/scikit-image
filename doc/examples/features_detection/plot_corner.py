@@ -17,21 +17,25 @@ from skimage.feature import corner_harris, corner_subpix, corner_peaks
 from skimage.transform import warp, AffineTransform
 from skimage.draw import ellipse
 
-
+# Sheared checkerboard
 tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7,
-                        translation=(210, 50))
-image = warp(data.checkerboard(), tform.inverse, output_shape=(350, 350))
-rr, cc = ellipse(310, 175, 10, 100)
+                        translation=(110, 30))
+image = warp(data.checkerboard()[:90, :90], tform.inverse,
+             output_shape=(200, 310))
+# Ellipse
+rr, cc = ellipse(160, 175, 10, 100)
 image[rr, cc] = 1
-image[180:230, 10:60] = 1
-image[230:280, 60:110] = 1
+# Two squares
+image[30:80, 200:250] = 1
+image[80:130, 250:300] = 1
 
 coords = corner_peaks(corner_harris(image), min_distance=5)
 coords_subpix = corner_subpix(image, coords, window_size=13)
 
 fig, ax = plt.subplots()
-ax.imshow(image, interpolation='nearest', cmap=plt.cm.gray)
-ax.plot(coords[:, 1], coords[:, 0], '.b', markersize=3)
+ax.imshow(image, cmap=plt.cm.gray)
+ax.plot(coords[:, 1], coords[:, 0], color='cyan', marker='o',
+        linestyle='None', markersize=6)
 ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=15)
-ax.axis((0, 350, 350, 0))
+ax.axis((0, 310, 200, 0))
 plt.show()

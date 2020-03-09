@@ -3,7 +3,8 @@ from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, expected_warnings
+from skimage._shared.testing import assert_array_equal
+from skimage._shared._warnings import expected_warnings
 
 
 def test_basic():
@@ -107,7 +108,7 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    expected4 = np.array(
+    expected_conn_1 = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -118,9 +119,10 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 4), expected4)
+    assert_array_equal(convex_hull_object(image, connectivity=1),
+                       expected_conn_1)
 
-    expected8 = np.array(
+    expected_conn_2 = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -131,10 +133,27 @@ def test_object():
          [1, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull_object(image, 8), expected8)
+    assert_array_equal(convex_hull_object(image, connectivity=2),
+                       expected_conn_2)
 
     with testing.raises(ValueError):
-        convex_hull_object(image, 7)
+        convex_hull_object(image, connectivity=3)
+
+    with expected_warnings(['`neighbors` is deprecated']):
+        out = convex_hull_object(image, neighbors=4)
+    assert_array_equal(out, expected_conn_1)
+
+
+def test_non_c_contiguous():
+    # 2D Fortran-contiguous
+    image = np.ones((2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D Fortran-contiguous
+    image = np.ones((2, 2, 2), order='F', dtype=bool)
+    assert_array_equal(convex_hull_image(image), image)
+    # 3D non-contiguous
+    image = np.transpose(np.ones((2, 2, 2), dtype=bool), [0, 2, 1])
+    assert_array_equal(convex_hull_image(image), image)
 
 
 @testing.fixture

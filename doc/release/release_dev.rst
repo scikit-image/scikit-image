@@ -11,87 +11,50 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
-
+Starting from release 0.16, scikit-image follows the spirit of the recently
+introduced NumPy deprecation policy -- NEP 29
+(https://github.com/numpy/numpy/blob/master/doc/neps/nep-0029-deprecation_policy.rst). 
+This release of scikit-image officially supports Python 3.6, 3.7, and
+3.8.
 
 New Features
 ------------
-
-- unsharp mask filtering (#2772)
-- New options ``connectivity``, ``indices`` and ``allow_borders`` for
-  ``skimage.morphology.local_maxima`` and ``.local_minima``. #3022
-- Image translation registration for masked data 
-  (``skimage.feature.masked_register_translation``)
 
 
 Improvements
 ------------
 
-- Performance of ``skimage.morphology.local_maxima`` and ``.local_minima`` was
-  improved with a new Cython-based implementation. #3022
-- ``skivi`` is now using ``qtpy`` for Qt4/Qt5/PySide/PySide2 compatibility (a
-  new optional dependency).
-- Performance is now monitored by
-  `Airspeed Velocity <https://asv.readthedocs.io/en/stable/>`_. Benchmark
-  results will appear at https://pandas.pydata.org/speed/
-
 
 API Changes
 -----------
-
-- Parameter ``dynamic_range`` in ``skimage.measure.compare_psnr`` has been
-  removed. Use parameter ``data_range`` instead.
-- imageio is now the preferred plugin for reading and writing images.
-- imageio is now a dependency of scikit-image.
-- ``rectangular_grid`` now returns a tuple instead of a list for compatibility
-  with numpy 1.15
-- ``colorconv.separate_stains`` and ``colorconv.combine_stains`` now uses
-  base10 instead of the natural logarithm as discussed in issue #2995.
-- Default value of ``clip_negative`` parameter in ``skimage.util.dtype_limits``
-  has been set to ``False``.
-- Default value of ``circle`` parameter in ``skimage.transform.radon``
-  has been set to ``True``.
-- Default value of ``circle`` parameter in ``skimage.transform.iradon``
-  has been set to ``True``.
-- Default value of ``mode`` parameter in ``skimage.transform.swirl``
-  has been set to ``reflect``.
-- Deprecated ``skimage.filters.threshold_adaptive`` has been removed.
-  Use ``skimage.filters.threshold_local`` instead.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_bilateral`` has been set to ``False``.
-- Default value of ``multichannel`` parameter in
-  ``skimage.restoration.denoise_nl_means`` has been set to ``False``.
-- Default value of ``mode`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``reflect``.
-- Default value of ``anti_aliasing`` parameter in ``skimage.transform.resize``
-  and ``skimage.transform.rescale`` has been set to ``True``.
-- Removed the ``skimage.test`` function. This functionality can be achieved
-  by calling ``pytest`` directly.
+- When used with floating point inputs, ``denoise_wavelet`` no longer rescales
+  the range of the data or clips the output to the range [0, 1] or [-1, 1].
+  For non-float inputs, rescaling and clipping still occurs as in prior
+  releases (although with a bugfix related to the scaling of ``sigma``).
+- For 2D input, edge filters (Sobel, Scharr, Prewitt, Roberts, and Farid)
+  no longer set the boundary pixels to 0 when a mask is not supplied. This was
+  changed because the boundary mode for `scipy.ndimage.convolve` is now
+  ``'reflect'``, which allows meaningful values at the borders for these
+  filters. To retain the old behavior, pass
+  ``mask=np.ones(image.shape, dtype=bool)`` (#4347)
 
 
 Bugfixes
 --------
-
+- ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
+  rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
+  preserve the relative scale of the noise estimate. To restore the old,
+  behaviour, the user can manually specify ``rescale_sigma=False``.
 
 
 Deprecations
 ------------
-
-- Python 2 support has been dropped in the development version. Users of the
-  development version should have Python >= 3.5.
-- ``skimage.util.montage2d`` has been removed. Use ``skimage.util.montage`` instead.
-- ``skimage.novice`` is deprecated and will be removed in 0.16.
-- ``skimage.transform.resize`` and ``skimage.transform.rescale`` option
-  ``anti_aliasing`` has been enabled by default.
-- ``regionprops`` will use row-column coordinates in 0.16. You can start
-  using them now with ``regionprops(..., coordinates='rc')``. You can silence
-  warning messages, and retain the old behavior, with
-  ``regionprops(..., coordinates='xy')``. However, that option will go away
-  in 0.16 and result in an error. This change has a number of consequences.
-  Specifically, the "orientation" region property will measure the
-  anticlockwise angle from a *vertical* line, i.e. from the vector (1, 0) in
-  row-column coordinates.
-- ``skimage.morphology.remove_small_holes`` ``min_size`` argument is deprecated
-  and will be removed in 0.16. Use ``area_threshold`` instead.
+- Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
+  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
+- ``skimage.segmentation.circle_level_set`` has been deprecated and will be
+  removed in 0.19. Use ``skimage.segmentation.disk_level_set`` instead.
+- ``skimage.draw.circle`` has been deprecated and will be removed in 0.19.
+  Use ``skimage.draw.disk`` instead.
 
 
 Contributors to this release

@@ -8,7 +8,7 @@ This example shows how to draw several different shapes:
 - line
 - Bezier curve
 - polygon
-- circle
+- disk
 - ellipse
 
 Anti-aliased drawing for:
@@ -21,7 +21,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import (line, polygon, circle,
+from skimage.draw import (line, polygon, disk,
                           circle_perimeter,
                           ellipse, ellipse_perimeter,
                           bezier_curve)
@@ -48,7 +48,7 @@ rr, cc = polygon(poly[:, 0], poly[:, 1], img.shape)
 img[rr, cc, 1] = 1
 
 # fill circle
-rr, cc = circle(200, 200, 100, img.shape)
+rr, cc = disk((200, 200), 100, shape=img.shape)
 img[rr, cc, :] = (1, 1, 0)
 
 # fill ellipse
@@ -90,7 +90,7 @@ rr, cc, val = circle_perimeter_aa(60, 40, 30)
 img[rr, cc] = val
 
 
-ax2.imshow(img, cmap=plt.cm.gray, interpolation='nearest')
+ax2.imshow(img, cmap=plt.cm.gray)
 ax2.set_title('Anti-aliasing')
 ax2.axis('off')
 

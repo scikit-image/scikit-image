@@ -2,71 +2,103 @@
 Script to show the results of the two marching cubes algorithms on different
 data.
 """
-
 import time
+from contextlib import contextmanager
 
 import numpy as np
-import visvis as vv
 
 from skimage.measure import marching_cubes_classic, marching_cubes_lewiner
 from skimage.draw import ellipsoid
 
 
-# Create test volume
-SELECT = 3
-gradient_dir = 'descent'  # ascent or descent
+def main(select=3, **kwargs):
+    """Script main function.
 
-if SELECT == 1:
-    # Medical data
-    vol = vv.volread('stent')
-    isovalue = 800
+    select: int
+        1: Medical data
+        2: Blocky data, different every time
+        3: Two donuts
+        4: Ellipsoid
 
-elif SELECT == 2:
-    # Blocky data
-    vol = vv.aVolume(20, 128) # Different every time
-    isovalue = 0.2
+    """
+    import visvis as vv  # noqa: delay import visvis and GUI libraries
 
-elif SELECT == 3:
-    # Generate two donuts using a formula by Thomas Lewiner
+    # Create test volume
+    if select == 1:
+        vol = vv.volread('stent')
+        isovalue = kwargs.pop('level', 800)
+    elif select == 2:
+        vol = vv.aVolume(20, 128)
+        isovalue = kwargs.pop('level', 0.2)
+    elif select == 3:
+        with timer('computing donuts'):
+            vol = donuts()
+        isovalue = kwargs.pop('level', 0.0)
+        # Uncommenting the line below will yield different results for
+        # classic MC
+        # vol *= -1
+    elif select == 4:
+        vol = ellipsoid(4, 3, 2, levelset=True)
+        isovalue = kwargs.pop('level', 0.0)
+    else:
+        raise ValueError('invalid selection')
+
+    # Get surface meshes
+    with timer('finding surface lewiner'):
+        vertices1, faces1 = marching_cubes_lewiner(vol, isovalue, **kwargs)[:2]
+
+    with timer('finding surface classic'):
+        vertices2, faces2 = marching_cubes_classic(vol, isovalue, **kwargs)
+
+    # Show
+    vv.figure(1)
+    vv.clf()
+    a1 = vv.subplot(121)
+    vv.title('Lewiner')
+    m1 = vv.mesh(np.fliplr(vertices1), faces1)
+    a2 = vv.subplot(122)
+    vv.title('Classic')
+    m2 = vv.mesh(np.fliplr(vertices2), faces2)
+    a1.camera = a2.camera
+
+    # visvis uses right-hand rule, gradient_direction param uses left-hand rule
+    m1.cullFaces = m2.cullFaces = 'front'  # None, front or back
+
+    vv.use().Run()
+
+
+def donuts():
+    """Return volume of two donuts based on a formula by Thomas Lewiner."""
     n = 48
-    a, b = 2.5 / n, -1.25
-    isovalue = 0.0
-    #
-    vol = np.empty((n, n, n), 'float32')
-    for iz in range(vol.shape[0]):
-        for iy in range(vol.shape[1]):
-            for ix in range(vol.shape[2]):
-                z, y, x = float(iz)*a+b, float(iy)*a+b, float(ix)*a+b
-                vol[iz, iy, ix] = ( (
-                    (8*x)**2 + (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) * ( (8*x)**2 +
-                    (8*y-2)**2 + (8*z)**2 + 16 - 1.85*1.85 ) - 64 * ( (8*x)**2 + (8*y-2)**2 )
-                    ) * ( ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 )
-                    * ( (8*x)**2 + ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2 + 16 - 1.85*1.85 ) -
-                    64 * ( ((8*y-2)+4)*((8*y-2)+4) + (8*z)**2
-                    ) ) + 1025
-    # Uncommenting the line below will yield different results for classic MC
-    #vol = -vol
+    a = 2.5 / n * 8.0
+    b = -1.25 * 8.0
+    c = 16.0 - 1.85 * 1.85
+    d = 64.0
 
-elif SELECT == 4:
-    vol = ellipsoid(4, 3, 2, levelset=True)
-    isovalue = 0
+    i = np.arange(n, dtype=int)
+    ia_plus_b = i * a + b
+    ia_plus_b_square = ia_plus_b ** 2
+    z = ia_plus_b_square[:, np.newaxis, np.newaxis]
+    zc = z + c
 
-# Get surface meshes
-t0 = time.time()
-vertices1, faces1, _ = marching_cubes_lewiner(vol, isovalue, gradient_direction=gradient_dir, use_classic=False)
-print('finding surface lewiner took %1.0f ms' % (1000*(time.time()-t0)) )
+    y1 = ((ia_plus_b - 2) ** 2)[np.newaxis, :, np.newaxis]
+    y2 = ((ia_plus_b + 2) ** 2)[np.newaxis, :, np.newaxis]
 
-t0 = time.time()
-vertices2, faces2, _ = marching_cubes_classic(vol, isovalue, gradient_direction=gradient_dir)
-print('finding surface classic took %1.0f ms' % (1000*(time.time()-t0)) )
+    x = ia_plus_b_square[np.newaxis, np.newaxis, :]
+    x1 = (x + y1 + zc) ** 2
+    x2 = (x + y2 + zc) ** 2
 
-# Show
-vv.figure(1); vv.clf()
-a1 = vv.subplot(121); m1 = vv.mesh(np.fliplr(vertices1), faces1)
-a2 = vv.subplot(122); m2 = vv.mesh(np.fliplr(vertices2), faces2)
-a1.camera = a2.camera
+    return ((x1 - d * (x + y1)) * (x2 - d * (z + y2))) + 1025
 
-# visvis uses right-hand rule, gradient_direction param uses left-hand rule
-m1.cullFaces = m2.cullFaces = 'front'  # None, front or back
 
-vv.use().Run()
+@contextmanager
+def timer(message):
+    """Context manager for timing execution speed of body."""
+    print(message, end=' ')
+    start = time.time()
+    yield
+    print('took {:1.0f} ms'.format(1000 * (time.time() - start)))
+
+
+if __name__ == '__main__':
+    main()

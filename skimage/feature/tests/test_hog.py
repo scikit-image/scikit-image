@@ -8,7 +8,6 @@ from skimage import img_as_float
 from skimage import draw
 from skimage._shared.testing import assert_almost_equal
 from skimage._shared import testing
-from skimage._shared.testing import expected_warnings
 
 
 def test_hog_output_size():
@@ -161,7 +160,7 @@ def test_hog_orientations_circle():
     width = height = 100
 
     image = np.zeros((height, width))
-    rr, cc = draw.circle(int(height / 2), int(width / 2), int(width / 3))
+    rr, cc = draw.disk((int(height / 2), int(width / 2)), int(width / 3))
     image[rr, cc] = 100
     image = ndi.gaussian_filter(image, 2)
 

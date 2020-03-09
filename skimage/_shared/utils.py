@@ -2,14 +2,13 @@ import warnings
 import functools
 import sys
 import numpy as np
-import types
 import numbers
 
 from ..util import img_as_float
 from ._warnings import all_warnings, warn
 
 __all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
-           'safe_as_int', 'assert_nD', 'warn']
+           'safe_as_int', 'check_nD', 'check_shape_equality', 'warn']
 
 
 class skimage_deprecation(Warning):
@@ -18,6 +17,53 @@ class skimage_deprecation(Warning):
 
     """
     pass
+
+
+class deprecate_kwarg:
+    """Decorator ensuring backward compatibility when argument names are
+    modified in a function definition.
+
+    Parameters
+    ----------
+    arg_mapping: dict
+        Mapping between the function's old argument names and the new
+        ones.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
+    removed_version : str
+        The package version in which the deprecated argument will be
+        removed.
+
+    """
+
+    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
+        self.kwarg_mapping = kwarg_mapping
+        if warning_msg is None:
+            self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+                                "for `{func_name}`. ")
+            if removed_version is not None:
+                self.warning_msg += ("It will be removed in version {}. "
+                                     .format(removed_version))
+            self.warning_msg += "Please use '{new_arg}' instead."
+        else:
+            self.warning_msg = warning_msg
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            for old_arg, new_arg in self.kwarg_mapping.items():
+                if old_arg in kwargs:
+                    #  warn that the function interface has changed:
+                    warnings.warn(self.warning_msg.format(
+                        old_arg=old_arg, func_name=func.__name__,
+                        new_arg=new_arg), FutureWarning, stacklevel=2)
+                    # Substitute new_arg to old_arg
+                    kwargs[new_arg] = kwargs.pop(old_arg)
+
+            # Call the function with the fixed arguments
+            return func(*args, **kwargs)
+        return fixed_func
 
 
 class deprecated(object):
@@ -151,7 +197,14 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def assert_nD(array, ndim, arg_name='image'):
+def check_shape_equality(im1, im2):
+    """Raise an error if the shape do not match."""
+    if not im1.shape == im2.shape:
+        raise ValueError('Input images must have the same dimensions.')
+    return
+
+
+def check_nD(array, ndim, arg_name='image'):
     """
     Verify an array meets the desired ndims and array isn't empty.
 
@@ -174,21 +227,6 @@ def assert_nD(array, ndim, arg_name='image'):
         raise ValueError(msg_empty_array % (arg_name))
     if not array.ndim in ndim:
         raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
-
-
-def copy_func(f, name=None):
-    """Create a copy of a function.
-
-    Parameters
-    ----------
-    f : function
-        Function to copy.
-    name : str, optional
-        Name of new function.
-
-    """
-    return types.FunctionType(f.__code__, f.__globals__, name or f.__name__,
-                              f.__defaults__, f.__closure__)
 
 
 def check_random_state(seed):
@@ -219,7 +257,7 @@ def check_random_state(seed):
 
 
 def convert_to_float(image, preserve_range):
-    """Convert input image to double image with the appropriate range.
+    """Convert input image to float image with the appropriate range.
 
     Parameters
     ----------
@@ -230,13 +268,21 @@ def convert_to_float(image, preserve_range):
         using img_as_float. Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
+    Notes:
+    ------
+    * Input images with `float32` data type are not upcast.
+
     Returns
     -------
     image : ndarray
         Transformed version of the input.
+
     """
     if preserve_range:
-        image = image.astype(np.double)
+        # Convert image to double only if it is not single or double
+        # precision float
+        if image.dtype.char not in 'df':
+            image = image.astype(float)
     else:
         image = img_as_float(image)
     return image

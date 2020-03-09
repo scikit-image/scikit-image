@@ -21,7 +21,8 @@ See Wikipedia_ for more details on the algorithm.
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
-from skimage.morphology import watershed, disk
+from skimage.morphology import disk
+from skimage.segmentation import watershed
 from skimage import data
 from skimage.filters import rank
 from skimage.util import img_as_ubyte
@@ -49,17 +50,17 @@ fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 8),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title("Original")
 
-ax[1].imshow(gradient, cmap=plt.cm.nipy_spectral, interpolation='nearest')
+ax[1].imshow(gradient, cmap=plt.cm.nipy_spectral)
 ax[1].set_title("Local Gradient")
 
-ax[2].imshow(markers, cmap=plt.cm.nipy_spectral, interpolation='nearest')
+ax[2].imshow(markers, cmap=plt.cm.nipy_spectral)
 ax[2].set_title("Markers")
 
-ax[3].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, interpolation='nearest', alpha=.7)
+ax[3].imshow(image, cmap=plt.cm.gray)
+ax[3].imshow(labels, cmap=plt.cm.nipy_spectral, alpha=.7)
 ax[3].set_title("Segmented")
 
 for a in ax:

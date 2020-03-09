@@ -21,6 +21,7 @@ References
 
 
 import numpy as np
+from .._shared.fft import fftmodule as fft
 
 __keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
@@ -52,8 +53,8 @@ def ufftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.fftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.fftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uifftn(inarray, dim=None):
@@ -83,8 +84,8 @@ def uifftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.ifftn(inarray, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.ifftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def urfftn(inarray, dim=None):
@@ -123,8 +124,8 @@ def urfftn(inarray, dim=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.rfftn(inarray, axes=range(-dim, 0))
-    return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
+    outarray = fft.rfftn(inarray, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def uirfftn(inarray, dim=None, shape=None):
@@ -167,8 +168,8 @@ def uirfftn(inarray, dim=None, shape=None):
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.irfftn(inarray, shape, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(outarray.shape[-dim:]))
+    outarray = fft.irfftn(inarray, shape, axes=range(-dim, 0), norm='ortho')
+    return outarray
 
 
 def ufft2(inarray):
@@ -399,9 +400,9 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
                                shift=-int(np.floor(axis_size / 2)),
                                axis=axis)
     if is_real:
-        return np.fft.rfftn(irpadded, axes=range(-dim, 0))
+        return fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
-        return np.fft.fftn(irpadded, axes=range(-dim, 0))
+        return fft.fftn(irpadded, axes=range(-dim, 0))
 
 
 def laplacian(ndim, shape, is_real=True):

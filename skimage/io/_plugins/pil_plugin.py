@@ -1,7 +1,9 @@
 __all__ = ['imread', 'imsave']
 
+from distutils.version import LooseVersion
+import warnings
 import numpy as np
-from PIL import Image
+from PIL import Image, __version__ as pil_version
 
 from ...util import img_as_ubyte, img_as_uint
 
@@ -36,6 +38,11 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
             return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
     else:
         im = Image.open(fname)
+        if im.format == 'MPO' and LooseVersion(pil_version) < '6.0.0':
+            warnings.warn("You are trying to read a MPO image. "
+                          "To ensure a good support of this format, "
+                          "please upgrade pillow to 6.0.0 version or later.",
+                          stacklevel=2)
         return pil_to_ndarray(im, dtype=dtype, img_num=img_num)
 
 
@@ -139,7 +146,8 @@ def _palette_is_grayscale(pil_image):
     is_grayscale : bool
         True if all colors in image palette are gray.
     """
-    assert pil_image.mode == 'P'
+    if pil_image.mode != 'P':
+        raise ValueError('pil_image.mode must be equal to "P".')
     # get palette as an array with R, G, B columns
     palette = np.asarray(pil_image.getpalette()).reshape((256, 3))
     # Not all palette colors are used; unused colors have junk values.

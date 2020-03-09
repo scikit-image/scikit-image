@@ -3,33 +3,33 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 from libc.float cimport DBL_MAX
-from cpython cimport bool
 
 import numpy as np
 cimport numpy as cnp
 
 from ..util import regular_grid
+from .._shared.fused_numerics cimport np_floats
 
 
-def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 double[:, ::1] segments,
-                 float step,
+def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
+                 np_floats[:, ::1] segments,
+                 np_floats step,
                  Py_ssize_t max_iter,
-                 double[::1] spacing,
+                 np_floats[::1] spacing,
                  bint slic_zero):
     """Helper function for SLIC segmentation.
 
     Parameters
     ----------
-    image_zyx : 4D array of double, shape (Z, Y, X, C)
+    image_zyx : 4D array of np_floats, shape (Z, Y, X, C)
         The input image.
-    segments : 2D array of double, shape (N, 3 + C)
+    segments : 2D array of np_floats, shape (N, 3 + C)
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
-    step : double
+    step : np_floats
         The size of the step between two seeds in voxels.
     max_iter : int
         The maximum number of k-means iterations.
-    spacing : 1D array of double, shape (3,)
+    spacing : 1D array of np_floats, shape (3,)
         The voxel spacing along each image dimension. This parameter
         controls the weights of the distances along z, y, and x during
         k-means clustering.
@@ -63,6 +63,11 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     performance and for readability.
     """
 
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
+
     # initialize on grid
     cdef Py_ssize_t depth, height, width
     depth = image_zyx.shape[0]
@@ -81,26 +86,26 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     cdef Py_ssize_t[:, :, ::1] nearest_segments \
         = np.empty((depth, height, width), dtype=np.intp)
-    cdef double[:, :, ::1] distance \
-        = np.empty((depth, height, width), dtype=np.double)
+    cdef np_floats[:, :, ::1] distance \
+        = np.empty((depth, height, width), dtype=dtype)
     cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
     cdef char change
-    cdef double dist_center, cx, cy, cz, dx, dy, dz, t
+    cdef np_floats dist_center, cx, cy, cz, dx, dy, dz, t
 
-    cdef double sz, sy, sx
+    cdef np_floats sz, sy, sx
     sz = spacing[0]
     sy = spacing[1]
     sx = spacing[2]
 
     # The colors are scaled before being passed to _slic_cython so
     # max_color_sq can be initialised as all ones
-    cdef double[::1] max_dist_color = np.ones(n_segments, dtype=np.double)
-    cdef double dist_color
+    cdef np_floats[::1] max_dist_color = np.ones(n_segments, dtype=dtype)
+    cdef np_floats dist_color
 
     # The reference implementation (Achanta et al.) calls this invxywt
-    cdef double spatial_weight = float(1) / (step * step)
+    cdef np_floats spatial_weight = 1.0 / (step * step)
 
     with nogil:
         for i in range(max_iter):

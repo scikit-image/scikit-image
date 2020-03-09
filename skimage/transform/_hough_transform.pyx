@@ -5,7 +5,6 @@
 import numpy as np
 
 cimport numpy as cnp
-cimport cython
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.stdlib cimport abs

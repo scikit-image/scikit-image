@@ -197,7 +197,7 @@ class RAG(nx.Graph):
         """
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
-        neighbors = (src_nbrs | dst_nbrs) - set([src, dst])
+        neighbors = (src_nbrs | dst_nbrs) - {src, dst}
 
         if in_place:
             new = dst
@@ -210,8 +210,8 @@ class RAG(nx.Graph):
                                **extra_keywords)
             self.add_edge(neighbor, new, attr_dict=data)
 
-        self.node[new]['labels'] = (self.node[src]['labels'] +
-                                    self.node[dst]['labels'])
+        self.nodes[new]['labels'] = (self.nodes[src]['labels'] +
+                                     self.nodes[dst]['labels'])
         self.remove_node(src)
 
         if not in_place:
@@ -355,22 +355,22 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     graph = RAG(labels, connectivity=connectivity)
 
     for n in graph:
-        graph.node[n].update({'labels': [n],
-                              'pixel count': 0,
-                              'total color': np.array([0, 0, 0],
+        graph.nodes[n].update({'labels': [n],
+                               'pixel count': 0,
+                               'total color': np.array([0, 0, 0],
                                                       dtype=np.double)})
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
-        graph.node[current]['pixel count'] += 1
-        graph.node[current]['total color'] += image[index]
+        graph.nodes[current]['pixel count'] += 1
+        graph.nodes[current]['total color'] += image[index]
 
     for n in graph:
-        graph.node[n]['mean color'] = (graph.node[n]['total color'] /
-                                       graph.node[n]['pixel count'])
+        graph.nodes[n]['mean color'] = (graph.nodes[n]['total color'] /
+                                        graph.nodes[n]['pixel count'])
 
     for x, y, d in graph.edges(data=True):
-        diff = graph.node[x]['mean color'] - graph.node[y]['mean color']
+        diff = graph.nodes[x]['mean color'] - graph.nodes[y]['mean color']
         diff = np.linalg.norm(diff)
         if mode == 'similarity':
             d['weight'] = math.e ** (-(diff ** 2) / sigma)
@@ -441,7 +441,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
                                 weight='count')
 
     for n in rag.nodes():
-        rag.node[n].update({'labels': [n]})
+        rag.nodes[n].update({'labels': [n]})
 
     return rag
 
@@ -474,7 +474,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
         the image is drawn as it is.
     in_place : bool, optional
         If set, the RAG is modified in place. For each node `n` the function
-        will set a new attribute ``rag.node[n]['centroid']``.
+        will set a new attribute ``rag.nodes[n]['centroid']``.
     ax : :py:class:`matplotlib.axes.Axes`, optional
         The axes to draw on. If not specified, new axes are created and drawn
         on.
@@ -547,8 +547,8 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     # Defining the end points of the edges
     # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
     # convention while skimage uses (row, column)
-    lines = [[rag.node[n1]['centroid'][::-1], rag.node[n2]['centroid'][::-1]]
-             for (n1, n2) in rag.edges()]
+    lines = [[rag.nodes[n1]['centroid'][::-1], rag.nodes[n2]['centroid'][::-1]]
+              for (n1, n2) in rag.edges()]
 
     lc = LineCollection(lines, linewidths=edge_width, cmap=edge_cmap)
     edge_weights = [d['weight'] for x, y, d in rag.edges(data=True)]

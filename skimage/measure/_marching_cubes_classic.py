@@ -1,6 +1,6 @@
+import warnings
 import numpy as np
 import scipy.ndimage as ndi
-from .._shared.utils import warn
 from . import _marching_cubes_classic_cy
 
 
@@ -98,6 +98,22 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     skimage.measure.marching_cubes
     skimage.measure.mesh_surface_area
     """
+
+    # Deprecate the function in favor of marching_cubes
+    warnings.warn("marching_cubes_classic is deprecated in favor of "
+                  "marching_cubes with `method='_lorensen'` "
+                  "to apply Lorensen et al. algorithm. "
+                  "marching_cubes_classic will be removed in version 0.19",
+                  FutureWarning, stacklevel=2)
+
+    return _marching_cubes_classic(volume, level, spacing, gradient_direction)
+
+
+def _marching_cubes_classic(volume, level, spacing, gradient_direction):
+    """Lorensen et al. algorithm for marching cubes. See
+    marching_cubes_classic for documentation.
+
+    """
     # Check inputs and ensure `volume` is C-contiguous for memoryviews
     if volume.ndim != 3:
         raise ValueError("Input volume must have 3 dimensions.")
@@ -166,7 +182,6 @@ def mesh_surface_area(verts, faces):
     --------
     skimage.measure.marching_cubes
     skimage.measure.marching_cubes_classic
-    skimage.measure.correct_mesh_orientation
 
     """
     # Fancy indexing to define two vector arrays from triangle vertices
@@ -177,79 +192,6 @@ def mesh_surface_area(verts, faces):
 
     # Area of triangle in 3D = 1/2 * Euclidean norm of cross product
     return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.
-
-
-def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
-                             gradient_direction='descent'):
-    """
-    Correct orientations of mesh faces.
-
-    Parameters
-    ----------
-    volume : (M, N, P) array of doubles
-        Input data volume to find isosurfaces. Will be cast to `np.float64`.
-    verts : (V, 3) array of floats
-        Array containing (x, y, z) coordinates for V unique mesh vertices.
-    faces : (F, 3) array of ints
-        List of length-3 lists of integers, referencing vertex coordinates as
-        provided in `verts`.
-    spacing : length-3 tuple of floats
-        Voxel spacing in spatial dimensions corresponding to numpy array
-        indexing dimensions (M, N, P) as in `volume`.
-    gradient_direction : string
-        Controls if the mesh was generated from an isosurface with gradient
-        descent toward objects of interest (the default), or the opposite.
-        The two options are:
-        * descent : Object was greater than exterior
-        * ascent : Exterior was greater than object
-
-    Returns
-    -------
-    faces_corrected (F, 3) array of ints
-        Corrected list of faces referencing vertex coordinates in `verts`.
-
-    Notes
-    -----
-    Certain applications and mesh processing algorithms require all faces
-    to be oriented in a consistent way. Generally, this means a normal vector
-    points "out" of the meshed shapes. This algorithm corrects the output from
-    `skimage.measure.marching_cubes_classic` by flipping the orientation of
-    mis-oriented faces.
-
-    Because marching cubes could be used to find isosurfaces either on
-    gradient descent (where the desired object has greater values than the
-    exterior) or ascent (where the desired object has lower values than the
-    exterior), the ``gradient_direction`` kwarg allows the user to inform this
-    algorithm which is correct. If the resulting mesh appears to be oriented
-    completely incorrectly, try changing this option.
-
-    The arguments expected by this function are the exact outputs from
-    `skimage.measure.marching_cubes_classic`. Only `faces` is corrected and
-    returned, as the vertices do not change; only the order in which they are
-    referenced.
-
-    This algorithm assumes ``faces`` provided are all triangles.
-
-    See Also
-    --------
-    skimage.measure.marching_cubes_classic
-    skimage.measure.mesh_surface_area
-
-    """
-    warn(DeprecationWarning("`correct_mesh_orientation` is deprecated for "
-                            "removal as `marching_cubes_classic` now "
-                            "guarantees correct mesh orientation."))
-
-    verts = verts.copy()
-    verts[:, 0] /= spacing[0]
-    verts[:, 1] /= spacing[1]
-    verts[:, 2] /= spacing[2]
-
-    # Fancy indexing to define two vector arrays from triangle vertices
-    actual_verts = verts[faces]
-
-    return _correct_mesh_orientation(volume, actual_verts, faces, spacing,
-                                     gradient_direction)
 
 
 def _correct_mesh_orientation(volume, actual_verts, faces,

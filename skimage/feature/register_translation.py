@@ -4,7 +4,8 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import numpy as np
-import warnings
+from .._shared.fft import fftmodule as fft
+
 
 def _upsampled_dft(data, upsampled_region_size,
                    upsample_factor=1, axis_offsets=None):
@@ -27,7 +28,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Parameters
     ----------
-    data : 2D or 3D ndarray
+    data : array
         The input data array (DFT of original data) to upsample.
     upsampled_region_size : integer or tuple of integers, optional
         The size of the region to be sampled.  If one integer is provided, it
@@ -40,7 +41,7 @@ def _upsampled_dft(data, upsampled_region_size,
 
     Returns
     -------
-    output : 2D or 3D ndarray
+    output : ndarray
             The upsampled DFT of the specified region.
     """
     # if people pass in an integer, expand it to a list of equal-sized sections
@@ -58,52 +59,19 @@ def _upsampled_dft(data, upsampled_region_size,
             raise ValueError("number of axis offsets must be equal to input "
                              "data's number of dimensions.")
 
-    # For the 2D case, it is more efficient to use the well-optimized
-    # dot product instead of einsum
-    if data.ndim == 2:
-        col_kernel = np.exp(
-            (-1j * 2 * np.pi / (data.shape[1] * upsample_factor)) *
-            (np.fft.ifftshift(np.arange(data.shape[1]))[:, None] -
-             np.floor(data.shape[1] / 2)).dot(
-                np.arange(upsampled_region_size[1])[None, :] - axis_offsets[1])
-        )
-        row_kernel = np.exp(
-            (-1j * 2 * np.pi / (data.shape[0] * upsample_factor)) *
-            (np.arange(upsampled_region_size[0])[:, None] -
-             axis_offsets[0]).dot(
-                np.fft.ifftshift(np.arange(data.shape[0]))[None, :] -
-                np.floor(data.shape[0] / 2))
-        )
+    im2pi = 1j * 2 * np.pi
 
-        return row_kernel.dot(data).dot(col_kernel)
+    dim_properties = list(zip(data.shape, upsampled_region_size, axis_offsets))
 
-    elif data.ndim == 3:
-        im2pi = 1j * 2 * np.pi
+    for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
+        kernel = ((np.arange(ups_size) - ax_offset)[:, None]
+                  * fft.fftfreq(n_items, upsample_factor))
+        kernel = np.exp(-im2pi * kernel)
 
-        dim_kernels = []
-        for (n_items, ups_size, ax_offset) in zip(data.shape,
-                                                  upsampled_region_size,
-                                                  axis_offsets):
-            dim_kernels.append(
-                np.exp(np.dot(
-                    (-im2pi / (n_items * upsample_factor)) *
-                    (np.arange(upsampled_region_size[0])[:, None] - ax_offset),
-                    (np.fft.ifftshift(np.arange(n_items))[None, :]
-                     - n_items // 2))))
-
-            # To compute the upsampled DFT across all spatial dimensions,
-            # a tensor product is computed with einsum
-        try:
-            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels,
-                         optimize=True)
-        except TypeError:
-            warnings.warn("Subpixel registration of 3D images will be very slow"
-                          " if your numpy version is earlier than 1.12")
-            return np.einsum('ijk, li, mj, nk -> lmn', data, *dim_kernels)
-
-    else:
-        raise NotImplementedError("Upsampled registration for images of more"
-                                  " than 3 dimensions is not implemented")
+        # Equivalent to:
+        #   data[i, j, k] = kernel[i, :] @ data[j, k].T
+        data = np.tensordot(kernel, data, axes=(1, -1))
+    return data
 
 
 def _compute_phasediff(cross_correlation_max):
@@ -150,9 +118,9 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     Parameters
     ----------
-    src_image : ndarray
+    src_image : array
         Reference image.
-    target_image : ndarray
+    target_image : array
         Image to register.  Must be same dimensionality as ``src_image``.
     upsample_factor : int, optional
         Upsampling factor. Images will be registered to within
@@ -192,19 +160,14 @@ def register_translation(src_image, target_image, upsample_factor=1,
         raise ValueError("Error: images must be same size for "
                          "register_translation")
 
-    # only 2D data makes sense right now
-    if src_image.ndim > 3 and upsample_factor > 1:
-        raise NotImplementedError("Error: register_translation only supports "
-                                  "subpixel registration for 2D and 3D images")
-
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
         src_freq = src_image
         target_freq = target_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = np.fft.fftn(src_image)
-        target_freq = np.fft.fftn(target_image)
+        src_freq = fft.fftn(src_image)
+        target_freq = fft.fftn(target_image)
     else:
         raise ValueError("Error: register_translation only knows the \"real\" "
                          "and \"fourier\" values for the ``space`` argument.")
@@ -212,7 +175,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
     image_product = src_freq * target_freq.conj()
-    cross_correlation = np.fft.ifftn(image_product)
+    cross_correlation = fft.ifftn(image_product)
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
@@ -226,7 +189,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
         if return_error:
             src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
             target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
-            CCmax = cross_correlation.max()
+            CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
@@ -244,16 +207,15 @@ def register_translation(src_image, target_image, upsample_factor=1,
                                            sample_region_offset).conj()
         cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
-        maxima = np.array(np.unravel_index(
-                              np.argmax(np.abs(cross_correlation)),
-                              cross_correlation.shape),
-                          dtype=np.float64)
-        maxima -= dftshift
+        maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
+                                  cross_correlation.shape)
+        CCmax = cross_correlation[maxima]
+
+        maxima = np.array(maxima, dtype=np.float64) - dftshift
 
         shifts = shifts + maxima / upsample_factor
 
         if return_error:
-            CCmax = cross_correlation.max()
             src_amp = _upsampled_dft(src_freq * src_freq.conj(),
                                      1, upsample_factor)[0, 0]
             src_amp /= normalization
