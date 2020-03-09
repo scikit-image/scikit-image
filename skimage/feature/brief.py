@@ -85,8 +85,10 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
-    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
-    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
+    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1,
+    ...                           threshold_rel=0.1)
+    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1,
+    ...                           threshold_rel=0.1)
     >>> extractor = BRIEF(patch_size=5)
     >>> extractor.extract(square1, keypoints1)
     >>> descriptors1 = extractor.descriptors
@@ -99,15 +101,15 @@ class BRIEF(DescriptorExtractor):
            [2, 2],
            [3, 3]])
     >>> keypoints1[matches[:, 0]]
-    array([[2, 2],
-           [2, 5],
+    array([[5, 5],
            [5, 2],
-           [5, 5]])
+           [2, 5],
+           [2, 2]])
     >>> keypoints2[matches[:, 1]]
-    array([[2, 2],
-           [2, 6],
+    array([[6, 6],
            [6, 2],
-           [6, 6]])
+           [2, 6],
+           [2, 2]])
 
     """
 

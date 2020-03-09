@@ -503,10 +503,10 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corner_peaks(corner_harris(square), min_distance=1)
-    array([[2, 2],
-           [2, 7],
+    array([[7, 7],
            [7, 2],
-           [7, 7]])
+           [2, 7],
+           [2, 2]])
 
     """
 
@@ -572,10 +572,10 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
-    array([[2, 2],
-           [2, 7],
+    array([[7, 7],
            [7, 2],
-           [7, 7]])
+           [2, 7],
+           [2, 2]])
 
     """
 
@@ -646,10 +646,10 @@ def corner_foerstner(image, sigma=1):
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
     >>> corner_peaks(foerstner, min_distance=1)
-    array([[2, 2],
-           [2, 7],
+    array([[7, 7],
            [7, 2],
-           [7, 7]])
+           [2, 7],
+           [2, 2]])
 
     """
 
@@ -723,10 +723,10 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corner_peaks(corner_fast(square, 9), min_distance=1)
-    array([[3, 3],
-           [3, 8],
+    array([[8, 8],
            [8, 3],
-           [8, 8]])
+           [3, 8],
+           [3, 3]])
 
     """
     image = _prepare_grayscale_input_2D(image)
@@ -1120,13 +1120,13 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
     >>> corners
-    array([[3, 3],
-           [3, 8],
+    array([[8, 8],
            [8, 3],
-           [8, 8]])
+           [3, 8],
+           [3, 3]])
     >>> orientations = corner_orientations(square, corners, octagon(3, 2))
     >>> np.rad2deg(orientations)
-    array([  45.,  135.,  -45., -135.])
+    array([-135.,  -45.,  135.,   45.])
 
     """
     return _corner_orientations(image, corners, mask)
