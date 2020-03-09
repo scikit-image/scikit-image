@@ -236,38 +236,46 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : (N, M[,P]) ndarray (integer or float)
         Input image.
-    selem : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    selem : ndarray
+        The neighborhood expressed as an ndarray of 1's and 0's.
+    out : (N, M[,P]) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y, shift_z : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
-
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : (N, M[,P]) ndarray (same dtype as input image)
         Output image.
-
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.morphology import disk
+    >>> from skimage.morphology import disk, ball
     >>> from skimage.filters.rank import autolevel
+    >>> import numpy as np
     >>> img = data.camera()
     >>> auto = autolevel(img, disk(5))
+    >>> volume = np.random.randint(0, 255, size=(10,10,10), dtype=np.uint8)
+    >>> equ_vol = autolevel(volume, ball(5))
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y)
+    np_image = np.asanyarray(image)
+    if np_image.ndim == 2:
+        return _apply_scalar_per_pixel(generic_cy._autolevel, image, selem,
+                                       out=out, mask=mask,
+                                       shift_x=shift_x, shift_y=shift_y)
+    else:
+        return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
+                                          selem, out=out, mask=mask,
+                                          shift_x=shift_x, shift_y=shift_y,
+                                          shift_z=shift_z)
 
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
