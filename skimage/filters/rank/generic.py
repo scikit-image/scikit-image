@@ -228,7 +228,8 @@ def _default_selem(func):
     return func_out
 
 
-def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def autolevel(image, selem, out=None, mask=None,
+         shift_x=False, shift_y=False, shift_z=False):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of greyvalues to cover the
