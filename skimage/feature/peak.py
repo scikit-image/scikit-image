@@ -95,8 +95,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         from the border.
     indices : bool, optional
         If True, the output will be an array representing peak
-        coordinates.  If False, the output will be a boolean array shaped as
-        `image.shape` with peaks present at True elements.
+        coordinates. The coordinates are sorted according to peaks
+        values (Larger first). If False, the output will be a boolean
+        array shaped as `image.shape` with peaks present at True
+        elements.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
