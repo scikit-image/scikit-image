@@ -1,24 +1,24 @@
 import numpy as np
 import pytest
 
-from ..._shared import testing
-from ..._shared.testing import (assert_array_equal, test_parallel,
-                                assert_almost_equal)
-from ..._shared._warnings import expected_warnings
-from ...data import astronaut
-from ...util.dtype import img_as_float
-from ...draw import ellipsoid, circle_perimeter
-from ...color.colorconv import rgb2gray
-from ...morphology import octagon
+from skimage._shared import testing
+from skimage._shared.testing import (assert_array_equal, test_parallel,
+                                     assert_almost_equal)
+from skimage._shared._warnings import expected_warnings
+from skimage.data import astronaut
+from skimage.util.dtype import img_as_float
+from skimage.draw import ellipsoid, circle_perimeter
+from skimage.color.colorconv import rgb2gray
+from skimage.morphology import octagon
 
-from ..corner import (corner_moravec, corner_harris,
-                      corner_shi_tomasi, corner_subpix,
-                      peak_local_max, corner_peaks,
-                      corner_kitchen_rosenfeld, corner_foerstner,
-                      corner_fast, corner_orientations,
-                      structure_tensor, structure_tensor_eigvals,
-                      hessian_matrix, hessian_matrix_eigvals,
-                      hessian_matrix_det, shape_index)
+from skimage.feature.corner import (corner_moravec, corner_harris,
+                                    corner_shi_tomasi, corner_subpix,
+                                    peak_local_max, corner_peaks,
+                                    corner_kitchen_rosenfeld, corner_foerstner,
+                                    corner_fast, corner_orientations,
+                                    structure_tensor, structure_tensor_eigvals,
+                                    hessian_matrix, hessian_matrix_eigvals,
+                                    hessian_matrix_det, shape_index)
 
 
 @pytest.fixture
