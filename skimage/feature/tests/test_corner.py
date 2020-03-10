@@ -369,8 +369,6 @@ def test_corner_peaks():
                            indices=False, threshold_rel=0.1)
     assert np.sum(corners) == 5
 
-    # Test Euclidean distance
-
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, p_norm=np.inf, threshold_rel=0.1)
     assert len(corners) == 2
@@ -379,6 +377,12 @@ def test_corner_peaks():
                            min_distance=2, p_norm=np.inf,
                            indices=False, threshold_rel=0.1)
     assert np.sum(corners) == 2
+
+
+def test_corner_peaks_euclidean_dist():
+    response = np.zeros((10, 10))
+    response[2:5, 2:5] = 1
+    response[8:10, 0:2] = 1
 
     corners = corner_peaks(response, exclude_border=False,
                            min_distance=2, p_norm=2, threshold_rel=0.1)
