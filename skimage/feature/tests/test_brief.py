@@ -3,7 +3,6 @@ from skimage._shared.testing import assert_array_equal
 from skimage import data
 from skimage.feature import BRIEF, corner_peaks, corner_harris
 from skimage._shared import testing
-from skimage._shared.testing import test_parallel
 
 
 def test_color_image_unsupported_error():
