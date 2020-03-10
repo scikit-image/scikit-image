@@ -1010,7 +1010,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         # Remove the peaks that are too close to each other
         coords = np.delete(coords, tuple(rejected_peaks), axis=0)
 
-    if indices is True:
+    if indices:
         return coords
 
     peaks = np.zeros_like(image, dtype=bool)
