@@ -10,15 +10,14 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     """
     # get coordinates of peaks
     coord = np.nonzero(mask)
-    # select num_peaks peaks
-    if len(coord[0]) > num_peaks:
-        intensities = image[coord]
-        idx_maxsort = np.argsort(intensities)
-        coord = np.transpose(coord)[idx_maxsort][-num_peaks:]
-    else:
-        coord = np.column_stack(coord)
+    intensities = image[coord]
     # Highest peak first
-    return coord[::-1]
+    idx_maxsort = np.argsort(intensities)[::-1]
+    coord = np.transpose(coord)[idx_maxsort]
+    # select num_peaks peaks
+    if len(coord) > num_peaks:
+        coord = coord[:num_peaks]
+    return coord
 
 
 def _get_peak_mask(image, min_distance, footprint, threshold_abs,
