@@ -5,7 +5,7 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_equal
 from skimage.data import camera
 from skimage.feature.register_translation import register_translation
-from skimage.feature.masked_register_translation import (
+from skimage.registration.masked_register_translation import (
     masked_register_translation, cross_correlate_masked)
 from skimage.io import imread
 from skimage._shared.fft import fftmodule as fft

@@ -15,12 +15,8 @@ from functools import partial
 from .._shared.fft import fftmodule, next_fast_len
 
 
-def masked_register_translation(
-        src_image,
-        target_image,
-        src_mask,
-        target_mask=None,
-        overlap_ratio=3 / 10):
+def masked_register_translation(src_image, target_image, src_mask,
+                                target_mask=None, overlap_ratio=0.3):
     """
     Masked image translation registration by masked normalized
     cross-correlation.
