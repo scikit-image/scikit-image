@@ -615,7 +615,7 @@ def test_log_warp_polar():
     profile = warped.mean(axis=0)
     peaks_coord = peak_local_max(profile)
     peaks_coord.sort(axis=0)
-    gaps = peaks_coord[1:]-peaks_coord[:-1]
+    gaps = peaks_coord[1:] - peaks_coord[:-1]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
 
 
