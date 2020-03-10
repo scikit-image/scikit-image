@@ -21,7 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.feature import register_translation
+from skimage.registration import register_translation
 from skimage.transform import warp_polar, rotate
 from skimage.util import img_as_float
 
