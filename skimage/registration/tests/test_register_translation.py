@@ -1,11 +1,11 @@
 import numpy as np
 from skimage._shared.testing import assert_allclose
 
-from skimage.feature.register_translation import (register_translation,
-                                                  _upsampled_dft)
+from skimage.registration.register_translation import (register_translation,
+                                                       _upsampled_dft)
 from skimage.data import camera, binary_blobs
 from scipy.ndimage import fourier_shift
-from skimage import img_as_float
+from skimage.util.dtype import img_as_float
 from skimage._shared import testing
 from skimage._shared.fft import fftmodule as fft
 

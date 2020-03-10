@@ -1,3 +1,5 @@
+from .._shared.utils import deprecated
+
 from ._canny import canny
 from ._cascade import Cascade
 from ._daisy import daisy
@@ -16,7 +18,6 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_moravec, corner_orientations,
                      shape_index)
 from .template import match_template
-from .register_translation import register_translation
 from .masked_register_translation import masked_register_translation
 from .brief import BRIEF
 from .censure import CENSURE
@@ -26,6 +27,17 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
+
+from ..registration.register_translation import (
+    register_translation as _register_translation)
+
+
+@deprecated(alt_func='skimage.registration.register_translation',
+            removed_version='0.19')
+def register_translation(src_image, target_image, upsample_factor=1,
+                         space="real", return_error=True):
+    return _register_translation(src_image, target_image, upsample_factor,
+                                 space, return_error)
 
 
 __all__ = ['canny',
