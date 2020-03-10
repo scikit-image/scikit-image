@@ -1,5 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
-from ._gaussian import gaussian, _guess_spatial_dimensions
+from ._gaussian import (gaussian, _guess_spatial_dimensions,
+                        difference_of_gaussians)
 from .edges import (sobel, sobel_h, sobel_v,
                     scharr, scharr_h, scharr_v,
                     prewitt, prewitt_h, prewitt_v,
@@ -25,6 +26,7 @@ __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
            'gaussian',
+           'difference_of_gaussians',
            'median',
            'sobel',
            'sobel_h',

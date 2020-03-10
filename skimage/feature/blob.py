@@ -267,6 +267,10 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         anisotropic gaussian is used (sigmas per dimension), the detected sigma
         is returned for each dimension.
 
+    See also
+    --------
+    skimage.filters.difference_of_gaussians
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
