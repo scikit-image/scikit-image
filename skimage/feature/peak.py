@@ -147,8 +147,8 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
            [0. , 0. , 0. , 0. , 0. , 0. , 0. ]])
 
     >>> peak_local_max(img1, min_distance=1)
-    array([[3, 4],
-           [3, 2]])
+    array([[3, 2],
+           [3, 4]])
 
     >>> peak_local_max(img1, min_distance=2)
     array([[3, 2]])
