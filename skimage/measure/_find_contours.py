@@ -175,8 +175,8 @@ def _assemble_contours(points_iterator):
                 # Add the end point, and remove the contour from the
                 # 'starts' and 'ends' dicts.
                 head.append(to_point)
-                del starts[to_point]
-                del ends[from_point]
+                starts.pop(to_point, None)
+                ends.pop(from_point, None)
             else:  # tail is not head
                 # We need to join two distinct contours.
                 # We want to keep the first contour segment created, so that
@@ -185,24 +185,21 @@ def _assemble_contours(points_iterator):
                     # tail was created second. Append tail to head.
                     head.extend(tail)
                     # remove all traces of tail:
-                    del starts[to_point]
-                    try:
-                        del ends[tail[-1]]
-                    except KeyError:
-                        pass
-                    del contours[tail_num]
+                    starts.pop(to_point, None)
+                    ends.pop(tail[-1], None)
+                    contours.pop(tail_num, None)
                     # remove the old end of head and add the new end.
-                    del ends[from_point]
+                    ends.pop(from_point, None)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
                     # remove all traces of head:
-                    del starts[head[0]]
-                    del ends[from_point]
-                    del contours[head_num]
+                    starts.pop(head[0], None)
+                    ends.pop(from_point, None)
+                    contours.pop(head_num, None)
                     # remove the old start of tail and add the new start.
-                    del starts[to_point]
+                    starts.pop(to_point, None)
                     starts[tail[0]] = (tail, tail_num)
         elif tail_data is None and head_data is None:
             # we need to add a new contour
@@ -217,14 +214,14 @@ def _assemble_contours(points_iterator):
             # We've found a single contour to which the new segment should be
             # prepended.
             tail.appendleft(from_point)
-            del starts[to_point]
+            starts.pop(to_point, None)
             starts[from_point] = (tail, tail_num)
         elif tail_data is None and head_data is not None:
             head, head_num = head_data
             # We've found a single contour to which the new segment should be
             # appended
             head.append(to_point)
-            del ends[from_point]
+            ends.pop(from_point, None)
             ends[to_point] = (head, head_num)
     # end iteration over from_ and to_ points
 
