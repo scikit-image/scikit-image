@@ -19,8 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.feature import register_translation
-from skimage.feature.register_translation import _upsampled_dft
+from skimage.registration import register_translation
+from skimage.registration.register_translation import _upsampled_dft
 from scipy.ndimage import fourier_shift
 
 image = data.camera()
