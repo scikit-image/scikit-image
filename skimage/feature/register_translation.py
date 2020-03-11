@@ -105,6 +105,32 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
+def _triangle(N):
+    """Return N samples from the triangle function."""
+    x = np.linspace(0, 1, N, endpoint=False) + 0.5 / N
+    return 1 - abs(x - 0.5)
+
+def _area_overlap(A):
+    """Return overlapping area of A with itself.
+
+    Create overlap arrays for higher dimensions using matrix multiplication.
+
+    >>> _area_overlap(np.empty(4))
+    array([0.625, 0.875, 0.875, 0.625])
+
+    >>> _area_overlap(np.empty((3, 5)))
+    array([[0.4       , 0.53333333, 0.66666667, 0.53333333, 0.4       ],
+           [0.6       , 0.8       , 1.        , 0.8       , 0.6       ],
+           [0.4       , 0.53333333, 0.66666667, 0.53333333, 0.4       ]])
+    """
+    for dim, shape in enumerate(A.shape):
+        if dim == 0:
+            w = _triangle(shape)
+        else:
+            w = w[..., None] @ _triangle(shape)[None, ]
+    return w
+
+
 def register_translation(src_image, target_image, upsample_factor=1,
                          space="real", return_error=True):
     """
@@ -177,8 +203,13 @@ def register_translation(src_image, target_image, upsample_factor=1,
     image_product = src_freq * target_freq.conj()
     cross_correlation = fft.ifftn(image_product)
 
+    # Add a small regularization term so that smaller shifts are preferred when
+    # the cross_correlation is the same for multiple shifts.
+    w = _area_overlap(cross_correlation)
+    w = fft.fftshift(w) * 1e-12
+
     # Locate maximum
-    maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
+    maxima = np.unravel_index(np.argmax(np.abs(cross_correlation) + w),
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
