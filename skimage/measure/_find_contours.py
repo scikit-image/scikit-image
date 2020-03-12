@@ -161,8 +161,7 @@ def _assemble_contours(point_list):
             # We need to connect these two contours.
             if tail is head:
                 # We need to closed a contour.
-                # Add the end point, and remove the contour from the
-                # 'starts' and 'ends' dicts.
+                # Add the end point
                 head.append(to_point)
             else:  # tail is not head
                 # We need to join two distinct contours.
@@ -172,18 +171,20 @@ def _assemble_contours(point_list):
                     # tail was created second. Append tail to head.
                     head.extend(tail)
                     # remove all traces of tail:
-                    ends.pop(tail[-1], None)
+                    ends.pop(tail[-1])
                     contours.pop(tail_num, None)
                     # add the new end.
+                    starts[head[0]] = (head, head_num)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
                     # remove all traces of head:
-                    starts.pop(head[0], None)
+                    starts.pop(head[0])
                     contours.pop(head_num, None)
                     # add the new start.
                     starts[tail[0]] = (tail, tail_num)
+                    ends[tail[-1]] = (tail, tail_num)
         elif tail is None and head is None:
             # we need to add a new contour
             new_contour = deque((from_point, to_point))
