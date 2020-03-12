@@ -60,15 +60,15 @@ def masked_register_translation(reference_image, moving_image, reference_mask,
            :DOI:`10.1109/CVPR.2010.5540032`
 
     """
+    if moving_mask is None:
+        moving_mask = np.array(reference_mask, dtype=np.bool, copy=True)
+
     # We need masks to be of the same size as their respective images
     for (im, mask) in [(reference_image, reference_mask),
                        (moving_image, moving_mask)]:
         if im.shape != mask.shape:
             raise ValueError(
                 "Image sizes must match their respective mask sizes.")
-
-    if moving_mask is None:
-        moving_mask = np.array(reference_mask, dtype=np.bool, copy=True)
 
     xcorr = cross_correlate_masked(moving_image, reference_image, moving_mask,
                                    reference_mask, axes=(0, 1), mode='full',
