@@ -28,8 +28,6 @@ def _get_contour_segments(double[:, :] array,
     Positions where the boolean array ``mask`` is ``False`` are considered
     as not containing data.
     """
-    if array.shape[0] < 2 or array.shape[1] < 2:
-        raise ValueError("Input array must be at least 2x2.")
 
     # The plan is to iterate a 2x2 square across the input array. This means
     # that the upper-left corner of the square needs to iterate across a

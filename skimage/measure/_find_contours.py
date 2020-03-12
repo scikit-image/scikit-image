@@ -120,6 +120,8 @@ def find_contours(array, level,
     if positive_orientation not in _param_options:
         raise ValueError('Parameters "positive_orientation" must be either '
                          '"high" or "low".')
+    if array.shape[0] < 2 or array.shape[1] < 2:
+        raise ValueError("Input array must be at least 2x2.")
     if array.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     if mask is not None:
