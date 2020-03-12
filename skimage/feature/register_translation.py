@@ -111,7 +111,8 @@ def _triangle(N):
     return 1 - abs(x - 0.5)
 
 def _area_overlap(A):
-    """Return overlapping area of A with itself.
+    """
+    Return overlapping area of A with itself.
 
     Create overlap arrays for higher dimensions using matrix multiplication.
 
@@ -132,7 +133,7 @@ def _area_overlap(A):
 
 
 def register_translation(src_image, target_image, upsample_factor=1,
-                         space="real", return_error=True):
+                         space="real", return_error=True, reg_weight=1e-12):
     """
     Efficient subpixel image translation registration by cross-correlation.
 
@@ -141,6 +142,10 @@ def register_translation(src_image, target_image, upsample_factor=1,
     It obtains an initial estimate of the cross-correlation peak by an FFT and
     then refines the shift estimation by upsampling the DFT only in a small
     neighborhood of that estimate by means of a matrix-multiply DFT.
+
+    When there are multiple cross-correlation peaks, ties are broken by a
+    regularizer which favors smaller shifts. This regularization may be
+    disabled by setting ``reg_weight`` to zero.
 
     Parameters
     ----------
@@ -152,14 +157,19 @@ def register_translation(src_image, target_image, upsample_factor=1,
         Upsampling factor. Images will be registered to within
         ``1 / upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
-        within 1/20th of a pixel.  Default is 1 (no upsampling)
+        within 1/20th of a pixel.  Default is 1 (no upsampling).
     space : string, one of "real" or "fourier", optional
         Defines how the algorithm interprets input data.  "real" means data
         will be FFT'd to compute the correlation, while "fourier" data will
         bypass FFT of input data.  Case insensitive.
     return_error : bool, optional
-        Returns error and phase difference if on,
-        otherwise only shifts are returned
+        Returns error and phase difference if when True, otherwise only shifts
+        are returned.
+    reg_weight : float, optional
+        Determines the strength of shift regularization.
+        .. versionadded:: 0.17
+           ``reg_weight`` was introduced to break ties between
+           cross-correlation peaks.
 
     Returns
     -------
@@ -205,8 +215,11 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     # Add a small regularization term so that smaller shifts are preferred when
     # the cross_correlation is the same for multiple shifts.
-    w = _area_overlap(cross_correlation)
-    w = fft.fftshift(w) * 1e-12
+    if reg_weight > 0:
+        w = _area_overlap(cross_correlation)
+        w = fft.fftshift(w) * reg_weight
+    else:
+        w = 0
 
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation) + w),
