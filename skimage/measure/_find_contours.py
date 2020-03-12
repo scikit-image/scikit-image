@@ -130,7 +130,7 @@ def find_contours(array, level,
                              ' must have same shape.')
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
-        mask = mask.astype(np.uint8)
+        mask = mask.astype(np.uint8, copy=False)
 
     segments = _get_contour_segments(array.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
