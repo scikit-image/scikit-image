@@ -65,6 +65,8 @@ matrix:
       python: 3.7
       dist: xenial # Required for Python 3.7+
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      services:
+        - xvfb
     - os: linux
       python: 3.7
       # Testing and installing from sdist will ensure that tests do not
