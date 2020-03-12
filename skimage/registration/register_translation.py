@@ -105,10 +105,9 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
-def register_translation(src_image, target_image, upsample_factor=1,
+def register_translation(reference_image, moving_image, upsample_factor=1,
                          space="real", return_error=True):
-    """
-    Efficient subpixel image translation registration by cross-correlation.
+    """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
     in a fraction of the computation time and with reduced memory requirements.
@@ -118,31 +117,33 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     Parameters
     ----------
-    src_image : array
+    reference_image : array
         Reference image.
-    target_image : array
-        Image to register.  Must be same dimensionality as ``src_image``.
+    moving_image : array
+        Image to register. Must be same dimensionality as
+        ``reference_image``.
     upsample_factor : int, optional
         Upsampling factor. Images will be registered to within
-        ``1 / upsample_factor`` of a pixel. For example
+        ``1 /upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
-        within 1/20th of a pixel.  Default is 1 (no upsampling)
+        within 1/20th of a pixel. Default is 1 (no upsampling)
     space : string, one of "real" or "fourier", optional
-        Defines how the algorithm interprets input data.  "real" means data
+        Defines how the algorithm interprets input data. "real" means data
         will be FFT'd to compute the correlation, while "fourier" data will
         bypass FFT of input data.  Case insensitive.
     return_error : bool, optional
-        Returns error and phase difference if on,
-        otherwise only shifts are returned
+        Returns error and phase difference if on, otherwise only
+        shifts are returned
 
     Returns
     -------
     shifts : ndarray
-        Shift vector (in pixels) required to register ``target_image`` with
-        ``src_image``.  Axis ordering is consistent with numpy (e.g. Z, Y, X)
+        Shift vector (in pixels) required to register ``moving_image``
+        with ``reference_image``. Axis ordering is consistent with
+        numpy (e.g. Z, Y, X)
     error : float
-        Translation invariant normalized RMS error between ``src_image`` and
-        ``target_image``.
+        Translation invariant normalized RMS error between
+        ``reference_image`` and ``moving_image``.
     phasediff : float
         Global phase difference between the two images (should be
         zero if images are non-negative).
@@ -154,20 +155,21 @@ def register_translation(src_image, target_image, upsample_factor=1,
            Optics Letters 33, 156-158 (2008). :DOI:`10.1364/OL.33.000156`
     .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
            Optics Letters 36, 8352-8357 (1997). :DOI:`10.1364/AO.36.008352`
+
     """
     # images must be the same shape
-    if src_image.shape != target_image.shape:
+    if reference_image.shape != moving_image.shape:
         raise ValueError("Error: images must be same size for "
                          "register_translation")
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
-        src_freq = src_image
-        target_freq = target_image
+        src_freq = reference_image
+        target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fft.fftn(src_image)
-        target_freq = fft.fftn(target_image)
+        src_freq = fft.fftn(reference_image)
+        target_freq = fft.fftn(moving_image)
     else:
         raise ValueError("Error: register_translation only knows the \"real\" "
                          "and \"fourier\" values for the ``space`` argument.")
