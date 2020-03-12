@@ -173,7 +173,7 @@ def _assemble_contours(point_list):
                     # remove all traces of tail:
                     ends.pop(tail[-1])
                     contours.pop(tail_num, None)
-                    # add the new end.
+                    # Update contour starts end ends
                     starts[head[0]] = (head, head_num)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
@@ -182,7 +182,7 @@ def _assemble_contours(point_list):
                     # remove all traces of head:
                     starts.pop(head[0])
                     contours.pop(head_num, None)
-                    # add the new start.
+                    # Update contour starts end ends
                     starts[tail[0]] = (tail, tail_num)
                     ends[tail[-1]] = (tail, tail_num)
         elif tail is None and head is None:
