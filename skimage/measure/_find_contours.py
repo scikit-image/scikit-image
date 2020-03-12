@@ -1,5 +1,5 @@
 import numpy as np
-from . import _find_contours_cy
+from ._find_contours_cy import _get_contour_segments
 
 from collections import deque
 
@@ -130,22 +130,20 @@ def find_contours(array, level,
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8)
 
-    point_list = _find_contours_cy.iterate_and_store(array.astype(np.double),
-                                                     float(level),
-                                                     fully_connected == 'high',
-                                                     mask=mask)
-    contours = _assemble_contours(point_list)
+    segments = _get_contour_segments(array.astype(np.double), float(level),
+                                     fully_connected == 'high', mask=mask)
+    contours = _assemble_contours(segments)
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]
     return contours
 
 
-def _assemble_contours(point_list):
+def _assemble_contours(segments):
     current_index = 0
     contours = {}
     starts = {}
     ends = {}
-    for from_point, to_point in zip(point_list[::2], point_list[1::2]):
+    for from_point, to_point in segments:
         # Ignore degenerate segments.
         # This happens when (and only when) one vertex of the square is
         # exactly the contour level, and the rest are above or below.

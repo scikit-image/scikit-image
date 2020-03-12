@@ -15,9 +15,9 @@ cdef inline double _get_fraction(double from_value, double to_value,
     return ((level - from_value) / (to_value - from_value))
 
 
-def iterate_and_store(double[:, :] array,
-                      double level, bint vertex_connect_high,
-                      cnp.uint8_t[:, :] mask):
+def _get_contour_segments(double[:, :] array,
+                          double level, bint vertex_connect_high,
+                          cnp.uint8_t[:, :] mask):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,
@@ -66,7 +66,7 @@ def iterate_and_store(double[:, :] array,
     # example, case 1 entails a line slanting from the middle of the top of
     # the square to the middle of the left side of the square.
 
-    cdef list arc_list = []
+    cdef list segments = []
 
     cdef bint use_mask = mask is not None
     cdef unsigned char square_case = 0
@@ -98,88 +98,65 @@ def iterate_and_store(double[:, :] array,
             if (ll > level): square_case += 4
             if (lr > level): square_case += 8
 
-            if (square_case > 0 and square_case < 15):
+            if square_case in [0, 15]:
                 # only do anything if there's a line passing through the
                 # square. Cases 0 and 15 are entirely below/above the contour.
+                continue
 
-                top = r0, c0 + _get_fraction(ul, ur, level)
-                bottom = r1, c0 + _get_fraction(ll, lr, level)
-                left = r0 + _get_fraction(ul, ll, level), c0
-                right = r0 + _get_fraction(ur, lr, level), c1
+            top = r0, c0 + _get_fraction(ul, ur, level)
+            bottom = r1, c0 + _get_fraction(ll, lr, level)
+            left = r0 + _get_fraction(ul, ll, level), c0
+            right = r0 + _get_fraction(ur, lr, level), c1
 
-                if (square_case == 1):
-                    # top to left
-                    arc_list.append(top)
-                    arc_list.append(left)
-                elif (square_case == 2):
-                    # right to top
-                    arc_list.append(right)
-                    arc_list.append(top)
-                elif (square_case == 3):
-                    # right to left
-                    arc_list.append(right)
-                    arc_list.append(left)
-                elif (square_case == 4):
-                    # left to bottom
-                    arc_list.append(left)
-                    arc_list.append(bottom)
-                elif (square_case == 5):
-                    # top to bottom
-                    arc_list.append(top)
-                    arc_list.append(bottom)
-                elif (square_case == 6):
-                    if vertex_connect_high:
-                        arc_list.append(left)
-                        arc_list.append(top)
+            if (square_case == 1):
+                # top to left
+                segments.append((top, left))
+            elif (square_case == 2):
+                # right to top
+                segments.append((right, top))
+            elif (square_case == 3):
+                # right to left
+                segments.append((right, left))
+            elif (square_case == 4):
+                # left to bottom
+                segments.append((left, bottom))
+            elif (square_case == 5):
+                # top to bottom
+                segments.append((top, bottom))
+            elif (square_case == 6):
+                if vertex_connect_high:
+                    segments.append((left, top))
+                    segments.append((right, bottom))
+                else:
+                    segments.append((right, top))
+                    segments.append((left, bottom))
+            elif (square_case == 7):
+                # right to bottom
+                segments.append((right, bottom))
+            elif (square_case == 8):
+                # bottom to right
+                segments.append((bottom, right))
+            elif (square_case == 9):
+                if vertex_connect_high:
+                    segments.append((top, right))
+                    segments.append((bottom, left))
+                else:
+                    segments.append((top, left))
+                    segments.append((bottom, right))
+            elif (square_case == 10):
+                # bottom to top
+                segments.append((bottom, top))
+            elif (square_case == 11):
+                # bottom to left
+                segments.append((bottom, left))
+            elif (square_case == 12):
+                # lef to right
+                segments.append((left, right))
+            elif (square_case == 13):
+                # top to right
+                segments.append((top, right))
+            elif (square_case == 14):
+                # left to top
+                segments.append((left, top))
 
-                        arc_list.append(right)
-                        arc_list.append(bottom)
-                    else:
-                        arc_list.append(right)
-                        arc_list.append(top)
-
-                        arc_list.append(left)
-                        arc_list.append(bottom)
-                elif (square_case == 7):
-                    # right to bottom
-                    arc_list.append(right)
-                    arc_list.append(bottom)
-                elif (square_case == 8):
-                    # bottom to right
-                    arc_list.append(bottom)
-                    arc_list.append(right)
-                elif (square_case == 9):
-                    if vertex_connect_high:
-                        arc_list.append(top)
-                        arc_list.append(right)
-
-                        arc_list.append(bottom)
-                        arc_list.append(left)
-                    else:
-                        arc_list.append(top)
-                        arc_list.append(left)
-
-                        arc_list.append(bottom)
-                        arc_list.append(right)
-                elif (square_case == 10):
-                    # bottom to top
-                    arc_list.append(bottom)
-                    arc_list.append(top)
-                elif (square_case == 11):
-                    # bottom to left
-                    arc_list.append(bottom)
-                    arc_list.append(left)
-                elif (square_case == 12):
-                    # lef to right
-                    arc_list.append(left)
-                    arc_list.append(right)
-                elif (square_case == 13):
-                    # top to right
-                    arc_list.append(top)
-                    arc_list.append(right)
-                elif (square_case == 14):
-                    # left to top
-                    arc_list.append(left)
-                    arc_list.append(top)
-
-    return arc_list
+    return segments
