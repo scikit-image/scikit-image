@@ -130,7 +130,10 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
         warn('%s is a low contrast image' % fname)
     if arr.dtype == bool:
         warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
-    return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
+    min_dtype = np.result_type(np.min_scalar_type(arr.max()),
+                               np.min_scalar_type(arr.min()))
+    return call_plugin('imsave', fname, arr.astype(min_dtype),
+                       plugin=plugin, **plugin_args)
 
 
 def imshow(arr, plugin=None, **plugin_args):
