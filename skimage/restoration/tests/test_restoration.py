@@ -1,8 +1,7 @@
-from os.path import abspath, dirname, join as pjoin
-
 import numpy as np
 from scipy.signal import convolve2d
 from scipy import ndimage as ndi
+from skimage._shared.testing import fetch
 
 import skimage
 from skimage.data import camera
@@ -19,7 +18,7 @@ def test_wiener():
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved = restoration.wiener(data, psf, 0.05)
 
-    path = pjoin(dirname(abspath(__file__)), 'camera_wiener.npy')
+    path = fetch('restoration/tests/camera_wiener.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
     _, laplacian = uft.laplacian(2, data.shape)
@@ -39,7 +38,7 @@ def test_unsupervised_wiener():
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf)
 
-    path = pjoin(dirname(abspath(__file__)), 'camera_unsup.npy')
+    path = fetch('restoration/tests/camera_unsup.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
     _, laplacian = uft.laplacian(2, data.shape)
@@ -48,7 +47,7 @@ def test_unsupervised_wiener():
     deconvolved = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
         user_params={"callback": lambda x: None})[0]
-    path = pjoin(dirname(abspath(__file__)), 'camera_unsup2.npy')
+    path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved),
                                np.load(path),
                                rtol=1e-3)
@@ -84,7 +83,7 @@ def test_richardson_lucy():
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolved = restoration.richardson_lucy(data, psf, 5)
 
-    path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
+    path = fetch('restoration/tests/camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 

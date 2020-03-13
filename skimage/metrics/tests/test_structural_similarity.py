@@ -1,13 +1,13 @@
 import os
 import numpy as np
 
-from skimage import data, data_dir
+from skimage import data
 from skimage.metrics import structural_similarity
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (assert_equal, assert_almost_equal,
-                                     assert_array_almost_equal)
+                                     assert_array_almost_equal, fetch)
 
 np.random.seed(5)
 cam = data.camera()
@@ -187,7 +187,7 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
     # https://ece.uwaterloo.ca/~nnikvand/Coderep/SHINE%20TOOLBOX/SHINEtoolbox/
     # Note: final line of ssim_sens.m was modified to discard image borders
 
-    ref = np.load(os.path.join(data_dir, 'mssim_matlab_output.npz'))
+    ref = np.load(fetch('data/mssim_matlab_output.npz'))
     grad_matlab = ref['grad_matlab']
     mssim_matlab = float(ref['mssim_matlab'])
 
