@@ -84,7 +84,7 @@ plt.show()
 
 # setting `upsample_factor` can increase precision
 tparams = register_translation(image_polar, rescaled_polar, upsample_factor=20)
-shifts, error, phasediff = tparams
+shifts = tparams[0]
 shiftr, shiftc = shifts[:2]
 
 # Calculate scale factor from translation
@@ -132,47 +132,64 @@ warped_rts = warp_polar(rts_image, scaling="log")
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
 ax[0].set_title("Original Image")
-ax[0].imshow(image)
+ax[0].imshow(image, cmap='gray')
 ax[1].set_title("Modified Image")
-ax[1].imshow(rts_image)
+ax[1].imshow(rts_image, cmap='gray')
 ax[2].set_title("Log-Polar-Transformed Original")
 ax[2].imshow(warped_image)
 ax[3].set_title("Log-Polar-Transformed Modified")
 ax[3].imshow(warped_rts)
+fig.suptitle('log-polar-based registration fails when no shared center')
 plt.show()
 
 # Use difference of gaussians to enhance image features
 image = difference_of_gaussians(image, 5, 20)
 rts_image = difference_of_gaussians(rts_image, 5, 20)
 
-
-# window images and perform FFTs
+# window images
 wimage = image * window('hann', image.shape)
 rts_wimage = rts_image * window('hann', image.shape)
 
+# work with shifted FFT magnitudes
 image_fs = np.abs(fftshift(fft2(wimage)))
 rts_fs = np.abs(fftshift(fft2(rts_wimage)))
 
-# Create log-polar transformed images to register
+# Create log-polar transformed FFT mag images and register
 shape = image_fs.shape
-radius = shape[0] / 8
+radius = shape[0] // 8  # only take lower frequencies
 warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
                              scaling='log', order=0)
 warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
                            scaling='log', order=0)
 
-warped_image_fs = warped_image_fs[:int(shape[0]/2), :]
-warped_rts_fs = warped_rts_fs[:int(shape[0]/2), :]
+warped_image_fs = warped_image_fs[:shape[0]//2, :]  # only use half of FFT
+warped_rts_fs = warped_rts_fs[:shape[0]//2, :]
 tparams = register_translation(warped_image_fs, warped_rts_fs,
                                upsample_factor=10)
 
 # Use translation parameters to calculate rotation and scaling parameters
-shifts, error, phasediff = tparams
+shifts = tparams[0]
 shiftr, shiftc = shifts[:2]
 recovered_angle = (360 / shape[0]) * shiftr
-
 klog = shape[1] / np.log(radius)
 shift_scale = np.exp(shiftc / klog)
+
+fig, axes = plt.subplots(2, 2, figsize=(8, 8))
+ax = axes.ravel()
+ax[0].set_title("Original Image FFT\n(magnitude; zoomed)")
+ax[0].imshow(image_fs[image_fs.shape[0]//2-radius:image_fs.shape[0]//2+radius,
+                      image_fs.shape[1]//2-radius:image_fs.shape[0]//2+radius],
+             cmap='magma')
+ax[1].set_title("Modified Image FFT\n(magnitude; zoomed)")
+ax[1].imshow(rts_fs[rts_fs.shape[0]//2-radius:rts_fs.shape[0]//2+radius,
+                    rts_fs.shape[1]//2-radius:rts_fs.shape[1]//2+radius],
+             cmap='magma')
+ax[2].set_title("Log-Polar-Transformed\nOriginal FFT")
+ax[2].imshow(warped_image_fs, cmap='magma')
+ax[3].set_title("Log-Polar-Transformed\nModified FFT")
+ax[3].imshow(warped_rts_fs, cmap='magma')
+fig.suptitle('Working in frequency domain can recover rotation and scaling')
+plt.show()
 
 print(f"Expected value for cc rotation in degrees: {angle}")
 print(f"Recovered value for cc rotation: {recovered_angle}")
