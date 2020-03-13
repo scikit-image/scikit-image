@@ -2,11 +2,12 @@
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from ..._shared.testing import (assert_allclose, assert_equal,
-                                assert_almost_equal)
-
-from ..delta_e import (deltaE_cie76, deltaE_ciede94, deltaE_ciede2000,
-                       deltaE_cmc)
+from skimage._shared.testing import (
+    assert_allclose, assert_equal, assert_almost_equal, fetch
+)
+from skimage.color.delta_e import (
+    deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, deltaE_cmc
+)
 
 
 def test_ciede2000_dE():
@@ -54,7 +55,7 @@ def load_ciede2000_data():
              ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = pjoin(dirname(abspath(__file__)), 'ciede2000_test_data.txt')
+    path = fetch('color/tests/ciede2000_test_data.txt')
     return np.loadtxt(path, dtype=dtype)
 
 
