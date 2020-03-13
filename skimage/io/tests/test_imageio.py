@@ -60,6 +60,12 @@ class TestSave(TestCase):
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
 
+    def test_low_contrast_roundtrip(self):
+        img = np.zeros((32, 32), dtype=np.uint64)
+        img[8:24, 8:24] = 1
+
+        yield self.roundtrip, img
+
 
 def test_return_class():
     testing.assert_equal(
