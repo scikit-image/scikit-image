@@ -986,12 +986,15 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
              "skimage.feature.peak_local_max.", category=FutureWarning,
              stacklevel=2)
 
+    if np.isinf(num_peaks):
+        num_peaks = None
+
     # Get the coordinates of the detected peaks
     coords = peak_local_max(image, min_distance=min_distance,
                             threshold_abs=threshold_abs,
                             threshold_rel=threshold_rel,
                             exclude_border=exclude_border,
-                            indices=True, num_peaks=num_peaks,
+                            indices=True, num_peaks=np.inf,
                             footprint=footprint, labels=labels,
                             num_peaks_per_label=num_peaks_per_label)
 
@@ -1008,7 +1011,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                 rejected_peaks.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks), axis=0)
+        coords = np.delete(coords, tuple(rejected_peaks), axis=0)[:num_peaks]
 
     if indices:
         return coords
