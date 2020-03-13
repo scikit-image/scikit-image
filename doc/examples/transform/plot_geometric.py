@@ -21,7 +21,7 @@ from skimage import transform as tf
 #
 # Several different geometric transformation types are supported: similarity,
 # affine, projective and polynomial. For a tutorial on the available types of
-# transformations, see :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`
+# transformations, see :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`.
 #
 # Geometric transformations can either be created using the explicit
 # parameters (e.g. scale, shear, rotation and translation) or the
@@ -119,4 +119,3 @@ plt.show()
 # For an estimation robust to outliers using the 
 # `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_, 
 # see the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial.
-
