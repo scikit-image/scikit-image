@@ -8,7 +8,7 @@ are transformations of a Euclidean space that preserve the alignment of points.
 Specific cases of homographies correspond to the conservation of more properties,
 such as parallelism (affine transformation), shape (similar transformation) or distances (Euclidean transformation). 
 
-Homographies on a 2D Euclidean space (i.e. for 2D grayscale or multichannel images) are defined by a 3x3 matrix. 
+Homographies on a 2D Euclidean space (i.e., for 2D grayscale or multichannel images) are defined by a 3x3 matrix. 
 All types of homographies can be defined either by passing the transformation matrix, or by passing the parameters
 of simpler transformations (rotation, scaling...) into which some transformations can be decomposed.
 
