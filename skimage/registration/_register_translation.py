@@ -130,7 +130,7 @@ def register_translation(reference_image, moving_image, upsample_factor=1,
     space : string, one of "real" or "fourier", optional
         Defines how the algorithm interprets input data. "real" means data
         will be FFT'd to compute the correlation, while "fourier" data will
-        bypass FFT of input data.  Case insensitive.
+        bypass FFT of input data. Case insensitive.
     return_error : bool, optional
         Returns error and phase difference if on, otherwise only
         shifts are returned
