@@ -10,7 +10,7 @@ such as parallelism (affine transformation), shape (similar transformation) or d
 
 Homographies on a 2D Euclidean space (i.e., for 2D grayscale or multichannel images) are defined by a 3x3 matrix. 
 All types of homographies can be defined either by passing the transformation matrix, or by passing the parameters
-of simpler transformations (rotation, scaling...) into which some transformations can be decomposed.
+of the simpler transformations (rotation, scaling, ...) which compose the full transformation.
 
 The different types of homographies available in scikit-image are
 shown here, by increasing order of complexity. While we focus here on the
