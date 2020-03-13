@@ -1,5 +1,5 @@
 from ._optical_flow import optical_flow_tvl1
-from .masked_register_translation import masked_register_translation
+from ._masked_register_translation import masked_register_translation
 
 
 __all__ = [

@@ -28,7 +28,7 @@ from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 
-from ..registration.masked_register_translation import (
+from ..registration._masked_register_translation import (
     masked_register_translation as _masked_register_translation)
 
 
