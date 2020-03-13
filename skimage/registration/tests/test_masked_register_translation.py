@@ -103,7 +103,7 @@ def test_masked_registration_padfield_data():
                                                        moving_image,
                                                        fixed_mask,
                                                        moving_mask,
-                                                       overlap_ratio = 1/10)
+                                                       overlap_ratio=0.1)
         # Note: by looking at the test code from Padfield's
         # MaskedFFTRegistrationCode repository, the
         # shifts were not xi and yi, but xi and -yi
@@ -230,14 +230,13 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     np.random.seed(23)
 
     arr1 = camera()
-    arr2 = camera()
 
     # Random masks with 75% of pixels being valid
     m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
-    m2 = np.random.choice([True, False], arr2.shape, p=[3 / 4, 1 / 4])
+    m2 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
 
-    xcorr = cross_correlate_masked(arr1, arr1, m1, m1, axes=(0, 1),
-                 mode='same', overlap_ratio=0).real
+    xcorr = cross_correlate_masked(arr1, arr1, m1, m2, axes=(0, 1),
+                                   mode='same', overlap_ratio=0).real
     max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
 
     # Autocorrelation should have maximum in center of array

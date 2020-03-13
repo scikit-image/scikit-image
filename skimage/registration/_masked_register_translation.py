@@ -61,7 +61,11 @@ def masked_register_translation(reference_image, moving_image, reference_mask,
 
     """
     if moving_mask is None:
-        moving_mask = np.array(reference_mask, dtype=np.bool, copy=True)
+        if reference_image.shape != moving_image.shape:
+            raise ValueError(
+                "Input images have different shapes, moving_mask must "
+                "be explicitely set.")
+        moving_mask = reference_mask.astype(bool)
 
     # We need masks to be of the same size as their respective images
     for (im, mask) in [(reference_image, reference_mask),
@@ -143,7 +147,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
-        raise ValueError("Correlation mode {} is not valid.".format(mode))
+        raise ValueError("Correlation mode '{}' is not valid.".format(mode))
 
     fixed_image = np.array(arr1, dtype=np.float)
     fixed_mask = np.array(m1, dtype=np.bool)
