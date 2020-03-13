@@ -39,25 +39,28 @@ def test_binary_descriptors_rotation_crosscheck_false():
     extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5,
-                              threshold_abs=0, threshold_rel=0.1)[::-1]
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5,
-                              threshold_abs=0, threshold_rel=0.1)[::-1]
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
     matches = match_descriptors(descriptors1, descriptors2, cross_check=False)
 
-    exp_matches1 = np.array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
-                             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                             24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-                             36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46])
-    exp_matches2 = np.array([ 0, 31,  2,  3,  1,  4,  6,  4, 38,  5, 27,  7,
-                             13, 10,  9, 27,  7, 11, 15,  8, 23, 14, 12, 16,
-                             10, 25, 18, 19, 21, 20, 41, 24, 25, 26, 28, 27,
-                             22, 23, 29, 30, 31, 32, 35, 33, 34, 30, 36])
+    exp_matches1 = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                             13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                             23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                             33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
+                             43, 44, 45, 46])
+    exp_matches2 = np.array([0, 2, 1, 3, 4, 5, 7, 8, 14, 9, 11, 13,
+                             23, 15, 16, 22, 17, 19, 34, 18, 24, 27,
+                             30, 25, 26, 32, 28, 35, 37, 42, 29, 38,
+                             33, 40, 36, 3, 10, 32, 43, 15, 29, 41,
+                             1, 18, 32, 24, 11])
+
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 
@@ -86,23 +89,25 @@ def test_binary_descriptors_rotation_crosscheck_true():
     extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5,
-                              threshold_abs=0, threshold_rel=0.1)[::-1]
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5,
-                              threshold_abs=0, threshold_rel=0.1)[::-1]
+                              threshold_abs=0, threshold_rel=0.1)
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
     matches = match_descriptors(descriptors1, descriptors2, cross_check=True)
 
-    exp_matches1 = np.array([ 0,  2,  3,  4,  5,  6,  9, 11, 12, 13, 14, 17,
-                             18, 19, 21, 22, 23, 26, 27, 28, 29, 31, 32, 33,
-                             34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46])
-    exp_matches2 = np.array([ 0,  2,  3,  1,  4,  6,  5,  7, 13, 10,  9, 11,
-                             15,  8, 14, 12, 16, 18, 19, 21, 20, 24, 25, 26,
-                             28, 27, 22, 23, 29, 30, 31, 32, 35, 33, 34, 36])
+    exp_matches1 = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                             13, 14, 15, 16, 17, 19, 20, 21, 22, 23,
+                             24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+                             34, 38, 41])
+    exp_matches2 = np.array([0, 2, 1, 3, 4, 5, 7, 8, 14, 9, 11, 13,
+                             23, 15, 16, 22, 17, 19, 18, 24, 27, 30,
+                             25, 26, 32, 28, 35, 37, 42, 29, 38, 33,
+                             40, 36, 43, 41])
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
 
@@ -113,23 +118,23 @@ def test_max_distance():
 
     descs1[0, :] = 1
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_distance=0.1, cross_check=False)
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_distance=0.1, cross_check=False)
     assert len(matches) == 9
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_distance=np.sqrt(128.1),
-                                 cross_check=False)
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_distance=np.sqrt(128.1),
+                                cross_check=False)
     assert len(matches) == 10
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_distance=0.1,
-                                 cross_check=True)
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_distance=0.1,
+                                cross_check=True)
     assert_equal(matches, [[1, 0]])
 
-    matches =  match_descriptors(descs1, descs2, metric='euclidean',
-                                 max_distance=np.sqrt(128.1),
-                                 cross_check=True)
+    matches = match_descriptors(descs1, descs2, metric='euclidean',
+                                max_distance=np.sqrt(128.1),
+                                cross_check=True)
     assert_equal(matches, [[1, 0]])
 
 

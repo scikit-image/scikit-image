@@ -18,20 +18,20 @@ def test_normal_mode():
     img = data.coins()
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
-                             threshold_abs=0, threshold_rel=0.1)[::-1]
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[0, 1, 0, 0, 1, 0, 1, 0],
-                         [1, 0, 1, 1, 0, 1, 0, 0],
-                         [1, 0, 0, 1, 0, 1, 0, 1],
-                         [1, 1, 1, 1, 0, 1, 0, 1],
-                         [1, 1, 1, 0, 0, 1, 1, 1],
-                         [0, 0, 0, 0, 1, 0, 0, 0],
+    expected = np.array([[1, 0, 1, 0, 0, 1, 0, 1],
+                         [1, 1, 1, 0, 1, 0, 1, 1],
+                         [1, 0, 1, 0, 0, 1, 0, 1],
                          [0, 1, 0, 0, 1, 0, 1, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+                         [1, 1, 1, 0, 0, 0, 1, 1],
+                         [1, 1, 1, 0, 1, 1, 1, 1],
+                         [1, 0, 1, 0, 0, 1, 0, 1],
+                         [0, 0, 0, 0, 0, 1, 0, 0]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
@@ -41,20 +41,20 @@ def test_uniform_mode():
     img = data.coins()
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
-                             threshold_abs=0, threshold_rel=0.1)[::-1]
+                             threshold_abs=0, threshold_rel=0.1)
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[0, 0, 0, 1, 1, 1, 0, 0],
-                         [1, 1, 1, 0, 1, 0, 0, 1],
-                         [1, 1, 1, 0, 1, 1, 0, 1],
-                         [1, 1, 1, 1, 0, 1, 0, 1],
-                         [1, 1, 1, 1, 1, 1, 0, 0],
-                         [1, 1, 1, 1, 1, 1, 1, 1],
+    expected = np.array([[1, 1, 0, 0, 0, 0, 0, 0],
+                         [1, 1, 1, 0, 0, 1, 0, 0],
+                         [1, 1, 0, 0, 1, 0, 0, 0],
                          [0, 0, 0, 1, 1, 1, 1, 1],
-                         [0, 1, 0, 1, 0, 1, 1, 1]], dtype=bool)
+                         [1, 1, 1, 0, 0, 1, 0, 0],
+                         [1, 1, 1, 1, 0, 1, 0, 0],
+                         [1, 1, 0, 0, 0, 1, 0, 0],
+                         [0, 1, 1, 1, 0, 1, 1, 1]], dtype=bool)
 
     assert_array_equal(extractor.descriptors, expected)
 
