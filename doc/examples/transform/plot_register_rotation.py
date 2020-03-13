@@ -96,3 +96,86 @@ print(f"Recovered value for cc rotation: {shiftr}")
 print()
 print(f"Expected value for scaling difference: {scale}")
 print(f"Recovered value for scaling difference: {shift_scale}")
+
+######################################################################
+# Register rotation and scaling on a translated image
+# =================================================================
+#
+# The above examples only work when the images to be registered share a
+# center. However, it is more often the case that there is also a translation
+# component to the difference between two images to be registered. One
+# approach to register rotation, scaling and translation is to first correct
+# for rotation and scaling, then solve for translation. It is possible to
+# resolve rotation and scaling differences for translated images by working on
+# the magnitude spectra of the fourier transformed images.
+
+from skimage.color import rgb2gray
+from skimage.filters import window, difference_of_gaussians
+from scipy.fftpack import fft2, fftshift
+
+angle = 24
+scale = 1.4
+shiftr = 30
+shiftc = 15
+
+image = rgb2gray(data.retina())
+translated = image[shiftr:, shiftc:]
+rotated = rotate(translated, angle)
+rescaled = rescale(rotated, scale)
+shaper, shapec = image.shape
+rts_image = rescaled[:shaper, :shapec]
+
+warped_image = warp_polar(image, scaling="log")
+warped_rts = warp_polar(rts_image, scaling="log")
+
+# When center is not shared, log-polar transform is not helpful!
+fig, axes = plt.subplots(2, 2, figsize=(8, 8))
+ax = axes.ravel()
+ax[0].set_title("Original Image")
+ax[0].imshow(image)
+ax[1].set_title("Modified Image")
+ax[1].imshow(rts_image)
+ax[2].set_title("Log-Polar-Transformed Original")
+ax[2].imshow(warped_image)
+ax[3].set_title("Log-Polar-Transformed Modified")
+ax[3].imshow(warped_rts)
+plt.show()
+
+# Use difference of gaussians to enhance image features
+image = difference_of_gaussians(image, 5, 20)
+rts_image = difference_of_gaussians(rts_image, 5, 20)
+
+
+# window images and perform FFTs
+wimage = image * window('hann', image.shape)
+rts_wimage = rts_image * window('hann', image.shape)
+
+image_fs = np.abs(fftshift(fft2(wimage)))
+rts_fs = np.abs(fftshift(fft2(rts_wimage)))
+
+# Create log-polar transformed images to register
+shape = image_fs.shape
+radius = shape[0] / 8
+warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
+                             scaling='log', order=0)
+warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
+                           scaling='log', order=0)
+
+warped_image_fs = warped_image_fs[:int(shape[0]/2), :]
+warped_rts_fs = warped_rts_fs[:int(shape[0]/2), :]
+tparams = register_translation(warped_image_fs, warped_rts_fs,
+                               upsample_factor=10)
+
+# Use translation parameters to calculate rotation and scaling parameters
+shifts, error, phasediff = tparams
+shiftr, shiftc = shifts[:2]
+recovered_angle = (360 / shape[0]) * shiftr
+
+klog = shape[1] / np.log(radius)
+shift_scale = np.exp(shiftc / klog)
+
+print(f"Expected value for cc rotation in degrees: {angle}")
+print(f"Recovered value for cc rotation: {recovered_angle}")
+print()
+print(f"Expected value for scaling difference: {scale}")
+print(f"Recovered value for scaling difference: {shift_scale}")
