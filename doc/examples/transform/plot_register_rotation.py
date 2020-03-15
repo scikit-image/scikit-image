@@ -125,8 +125,9 @@ rescaled = rescale(rotated, scale)
 shaper, shapec = image.shape
 rts_image = rescaled[:shaper, :shapec]
 
-warped_image = warp_polar(image, scaling="log")
-warped_rts = warp_polar(rts_image, scaling="log")
+radius = 705
+warped_image = warp_polar(image, radius=radius, scaling="log")
+warped_rts = warp_polar(rts_image, radius=radius, scaling="log")
 
 # When center is not shared, log-polar transform is not helpful!
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
@@ -141,6 +142,18 @@ ax[3].set_title("Log-Polar-Transformed Modified")
 ax[3].imshow(warped_rts)
 fig.suptitle('log-polar-based registration fails when no shared center')
 plt.show()
+
+tparams = register_translation(warped_image, warped_rts, upsample_factor=20)
+shifts = tparams[0]
+shiftr, shiftc = shifts[:2]
+klog = radius / np.log(radius)
+shift_scale = 1 / (np.exp(shiftc / klog))
+
+print(f"Expected value for cc rotation in degrees: {angle}")
+print(f"Recovered value for cc rotation: {shiftr}")
+print()
+print(f"Expected value for scaling difference: {scale}")
+print(f"Recovered value for scaling difference: {shift_scale}")
 
 # Use difference of gaussians to enhance image features
 image = difference_of_gaussians(image, 5, 20)
