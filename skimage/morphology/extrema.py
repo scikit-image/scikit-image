@@ -110,6 +110,33 @@ def h_maxima(image, h, selem=None):
 
     The resulting image will contain 3 local maxima.
     """
+
+    # Check for h value that is larger then range of the image. If this
+    # is True then there are no h-maxima in the image.
+    im_min = np.min(image)
+    im_max = np.max(image)
+    if (h > (im_max - im_min)):
+        return np.zeros(image.shape, dtype=np.uint8)
+
+    # Check for floating point h value. For this to work properly
+    # we need to explicitly convert image to float64.
+    #
+    # FIXME: This could give incorrect results if image is int64 and
+    #        has a very high dynamic range. The dtype of image is
+    #        changed to float64, and different integer values could
+    #        become the same float due to rounding.
+    #
+    #   >>> ii64 = np.iinfo(np.int64)
+    #   >>> a = np.array([ii64.max, ii64.max - 2])
+    #   >>> a[0] == a[1]
+    #   False
+    #   >>> b = a.astype(np.float64)
+    #   >>> b[0] == b[1]
+    #   True
+    #
+    if isinstance(h, float):
+        image = image.astype(np.float)
+
     if np.issubdtype(image.dtype, np.floating):
         if (h == 0.0):
             raise ValueError("h = 0.0 is ambiguous, use local_maxima() \
@@ -117,6 +144,9 @@ instead?")
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image - h - resolution
     else:
+        if (h == 0):
+            raise ValueError("h = 0 is ambiguous, use local_maxima() \
+instead?")
         shifted_img = _subtract_constant_clip(image, h)
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
