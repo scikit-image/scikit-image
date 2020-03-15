@@ -135,7 +135,6 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     if np.issubdtype(min_dtype, np.integer):
         min_dtype = np.result_type(np.min_scalar_type(arr.max()),
                                    np.min_scalar_type(arr.min()))
-    print("------------", arr.dtype, min_dtype, arr.min(), arr.max())
     return call_plugin('imsave', fname, arr.astype(min_dtype), plugin=plugin,
                        **plugin_args)
 

@@ -141,7 +141,7 @@ def color_check(plugin, fmt='png'):
         testing.assert_allclose(r4, img4)
     else:
         r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_ubyte(img4))
+        testing.assert_allclose(r4, img_as_ubyte(img4.astype(np.uint16)))
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
@@ -176,7 +176,7 @@ def mono_check(plugin, fmt='png'):
         testing.assert_allclose(r4, img4)
     else:
         r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_uint(img4))
+        testing.assert_allclose(r4, img4)
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
