@@ -210,20 +210,20 @@ class TestExtrema(unittest.TestCase):
 
     def test_h_maxima_large_h(self):
         """test that h-maxima works correctly for large h"""
-        data = np.array([[0, 0, 0, 0, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 3, 4, 3, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+        data = np.array([[10, 10, 10, 10, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 13, 14, 13, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 10, 10, 10, 10]], dtype=np.uint8)
 
         maxima = extrema.h_maxima(data, 5)
         assert (np.sum(maxima) == 0)
 
-        data = np.array([[0, 0, 0, 0, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 3, 4, 3, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 0, 0, 0, 0]], dtype=np.float32)
+        data = np.array([[10, 10, 10, 10, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 13, 14, 13, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 10, 10, 10, 10]], dtype=np.float32)
 
         maxima = extrema.h_maxima(data, 5.0)
         assert (np.sum(maxima) == 0)
