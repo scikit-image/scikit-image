@@ -1,10 +1,13 @@
 from tempfile import NamedTemporaryFile
 
+import pytest
 import numpy as np
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
+from skimage._shared.testing import (assert_array_almost_equal, TestCase, fetch,
+                                     mono_check, color_check)
+from skimage._shared._warnings import expected_warnings
 
 
 def setup():
@@ -35,6 +38,18 @@ def test_imageio_truncated_jpg():
     # Oddly, PIL explicitly raises a SyntaxError when the file read fails.
     with testing.raises(SyntaxError):
         imread(fetch('data/truncated.jpg'))
+
+
+@pytest.mark.parametrize('fmt', ['png', 'bmp', 'tif'])
+def test_all_color_roundtrip(fmt):
+    with expected_warnings(['.* is a boolean image']):
+        color_check('imageio', fmt)
+
+
+@pytest.mark.parametrize('fmt', ['png', 'bmp', 'tif'])
+def test_all_mono_roundtrip(fmt):
+    with expected_warnings(['.* is a boolean image']):
+        mono_check('imageio', fmt)
 
 
 class TestSave(TestCase):
