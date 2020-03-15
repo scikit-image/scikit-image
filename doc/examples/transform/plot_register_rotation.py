@@ -107,7 +107,7 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # approach to register rotation, scaling and translation is to first correct
 # for rotation and scaling, then solve for translation. It is possible to
 # resolve rotation and scaling differences for translated images by working on
-# the magnitude spectra of the fourier transformed images.
+# the magnitude spectra of the Fourier-transformed images.
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
@@ -125,11 +125,16 @@ rescaled = rescale(rotated, scale)
 shaper, shapec = image.shape
 rts_image = rescaled[:shaper, :shapec]
 
+# When center is not shared, log-polar transform is not helpful!
 radius = 705
 warped_image = warp_polar(image, radius=radius, scaling="log")
 warped_rts = warp_polar(rts_image, radius=radius, scaling="log")
+tparams = register_translation(warped_image, warped_rts, upsample_factor=20)
+shifts = tparams[0]
+shiftr, shiftc = shifts[:2]
+klog = radius / np.log(radius)
+shift_scale = 1 / (np.exp(shiftc / klog))
 
-# When center is not shared, log-polar transform is not helpful!
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
 ax[0].set_title("Original Image")
@@ -143,19 +148,14 @@ ax[3].imshow(warped_rts)
 fig.suptitle('log-polar-based registration fails when no shared center')
 plt.show()
 
-tparams = register_translation(warped_image, warped_rts, upsample_factor=20)
-shifts = tparams[0]
-shiftr, shiftc = shifts[:2]
-klog = radius / np.log(radius)
-shift_scale = 1 / (np.exp(shiftc / klog))
-
 print(f"Expected value for cc rotation in degrees: {angle}")
 print(f"Recovered value for cc rotation: {shiftr}")
 print()
 print(f"Expected value for scaling difference: {scale}")
 print(f"Recovered value for scaling difference: {shift_scale}")
 
-# Use difference of gaussians to enhance image features
+# Now trying working in frequnecy domain
+# First, band-pass filter both images
 image = difference_of_gaussians(image, 5, 20)
 rts_image = difference_of_gaussians(rts_image, 5, 20)
 
