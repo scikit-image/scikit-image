@@ -9,8 +9,8 @@ Cropping, resizing and rescaling images
 
 Images being NumPy arrays (as described in the :ref:`numpy` section), cropping
 an image can be done with simple slicing operations. Below we crop a 100x100
-square corresponding to the top left corner of the astronaut image. Note that
-this operation is done for all color channels (the color dimension is the last
+square corresponding to the top-left corner of the astronaut image. Note that
+this operation is done for all color channels (the color dimension is the last,
 third dimension):: 
 
    >>> from skimage import data
@@ -103,7 +103,7 @@ tutorial::
    :width: 80%
 
 
-The ``estimate`` method uses least-square optimization to minimize the distance
+The ``estimate`` method uses least-squares optimization to minimize the distance
 between source and optimization.
 Source and destination points can be determined manually, or using the
 different methods for feature detection available in :mod:`skimage.feature`, 
@@ -116,7 +116,7 @@ such as
 
 and matching points using :func:`skimage.feature.match_descriptors` before
 estimating transformation parameters. However, spurious matches are often made, 
-and it is possible to use the RANSAC algorithm (instead of simple least-square optimization)
+and it is advisable to use the RANSAC algorithm (instead of simple least-squares optimization)
 to improve the robustness to outliers, as explained in
 :ref:`sphx_glr_auto_examples_transform_plot_matching.py`.
 
