@@ -99,7 +99,7 @@ such as
 
 and matching points using :func:`skimage.feature.match_descriptors` before
 estimating transformation parameters. However, spurious matches are often made, 
-and it is possible to use the RANSAC algorithm (instead of simple least-square optimization)
+and it is advisable to use the RANSAC algorithm (instead of simple least-squares optimization)
 to improve the robustness to outliers, as explained in
 :ref:`sphx_glr_auto_examples_transform_plot_matching.py`.
 
