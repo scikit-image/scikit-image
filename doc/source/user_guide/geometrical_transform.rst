@@ -10,7 +10,7 @@ Cropping, resizing and rescaling images
 Images being NumPy arrays (as described in the :ref:`numpy` section), cropping
 an image can be done with simple slicing operations. Below we crop a 100x100
 square corresponding to the top-left corner of the astronaut image. Note that
-this operation is done for all color channels (the color dimension is the last
+this operation is done for all color channels (the color dimension is the last,
 third dimension):: 
 
    >>> from skimage import data
