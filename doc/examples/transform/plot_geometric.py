@@ -116,6 +116,9 @@ plt.tight_layout()
 plt.show()
 
 ######################################################################
-# For an estimation robust to outliers using the 
-# `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_, 
-# see the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial.
+# The above estimation relies on accurate selection of corresponding points.
+# An alternative approach called the
+# `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_
+# is useful when the correspondence points are not perfectly accurate.
+# See the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial
+# for an in-depth description of how to use this approach in scikit-image.

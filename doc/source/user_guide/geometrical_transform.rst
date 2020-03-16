@@ -43,8 +43,7 @@ The different types of homographies available in scikit-image are presented in
 :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`.
 
 Projective transformations can either be created using the explicit
-parameters (e.g. scale, shear, rotation and translation) or the full
-transformation matrix::
+parameters (e.g. scale, shear, rotation and translation)::
 
    from skimage import data
    from skimage import transform as tf
@@ -54,6 +53,24 @@ transformation matrix::
       rotation=np.pi / 12.,
       translation = (100, -20)
       )
+
+or the full transformation matrix::
+
+   from skimage import data
+   from skimage import transform as tf
+   from skimage import img_as_float
+   
+   matrix = np.array([[np.cos(np.pi/12), -np.sin(np.pi/12), 100],
+                      [np.sin(np.pi/12), np.cos(np.pi/12), -20],
+                      [0, 0, 1]])
+   tform = tf.EuclideanTransform(matrix)
+
+The transformation matrix of a transform is available as its ``tform.params``
+attribute. Transformations can be composed by multiplying matrices with the
+``@`` matrix multiplication operator.
+
+Transformation matrices use `Homogeneous coordinates <https://en.wikipedia.org/wiki/Homogeneous_coordinates>`_, which are the extension of Cartesian
+coordinates used in Euclidean geometry to the more general projective geometry. In particular, points at infinity can be represented with finite coordinates.
 
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
