@@ -86,7 +86,7 @@ tutorial::
    :width: 80%
 
 
-The ``estimate`` method uses least-square optimization to minimize the distance
+The ``estimate`` method uses least-squares optimization to minimize the distance
 between source and optimization.
 Source and destination points can be determined manually, or using the
 different methods for feature detection available in :mod:`skimage.feature`, 
