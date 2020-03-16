@@ -361,9 +361,10 @@ def test_corner_peaks():
                            threshold_rel=0)
     assert corners.shape == (2, 2)
 
-    corners = corner_peaks(response, exclude_border=False,
-                           min_distance=1, threshold_rel=0.1)
-    assert corners.shape == (5, 2)
+    with pytest.warns(FutureWarning,
+                      match="Until version 0.16, threshold_rel.*"):
+        corners = corner_peaks(response, exclude_border=False, min_distance=1)
+        assert corners.shape == (5, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1,
                            indices=False, threshold_rel=0.1)
