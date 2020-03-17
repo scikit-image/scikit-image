@@ -20,7 +20,8 @@ def _coords_inside_image(rr, cc, shape, val=None):
         Indices of pixels.
     shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates.  Must be at least length 2. Only the first two values
+        are used to determine the extent of the input image.
     val : (N, D) ndarray of float, optional
         Values of pixels at coordinates ``[rr, cc]``.
 
@@ -67,6 +68,9 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef Py_ssize_t dc = abs(c1 - c0)
     cdef Py_ssize_t sr, sc, d, i
 
+    cdef Py_ssize_t[::1] rr = np.zeros(max(dc, dr) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(max(dc, dr) + 1, dtype=np.intp)
+
     with nogil:
         if (c1 - c) > 0:
             sc = 1
@@ -83,10 +87,6 @@ def _line(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
             sc, sr = sr, sc
         d = (2 * dr) - dc
 
-    cdef Py_ssize_t[::1] rr = np.zeros(int(dc) + 1, dtype=np.intp)
-    cdef Py_ssize_t[::1] cc = np.zeros(int(dc) + 1, dtype=np.intp)
-
-    with nogil:
         for i in range(dc):
             if steep:
                 rr[i] = c
@@ -227,7 +227,7 @@ def _polygon(r, c, shape):
 
     cdef Py_ssize_t r_i, c_i
 
-    # make contigous arrays for r, c coordinates
+    # make contiguous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(r, dtype=np.double)
     contiguous_cdata = np.ascontiguousarray(c, dtype=np.double)
@@ -302,10 +302,10 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
-        cmethod = 'b'
+        cmethod = b'b'
     elif method == 'andres':
         d = radius - 1
-        cmethod = 'a'
+        cmethod = b'a'
     else:
         raise ValueError('Wrong method')
 
@@ -313,14 +313,14 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
         rr.extend([r, -r, r, -r, c, -c, c, -c])
         cc.extend([c, c, -c, -c, r, r, -r, -r])
 
-        if cmethod == 'b':
+        if cmethod == b'b':
             if d < 0:
                 d += 4 * c + 6
             else:
                 d += 4 * (c - r) + 10
                 r -= 1
             c += 1
-        elif cmethod == 'a':
+        elif cmethod == b'a':
             if d >= 2 * (c - 1):
                 d = d - 2 * c
                 c = c + 1

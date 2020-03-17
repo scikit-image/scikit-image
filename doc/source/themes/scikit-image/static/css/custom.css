@@ -1,7 +1,5 @@
 body {
     font-family: "Lato", sans-serif;
-    letter-spacing: 0.02em;
-    font-size: 102%;
     line-height: 23px;
 }
 a {
@@ -264,7 +262,7 @@ td.field-body p {
 }
 
 /*
-Overrride some default settings in sphinx-gallery's gallery.css.
+Override some default settings in sphinx-gallery's gallery.css.
 
 The !important property is necessary to ensure these settings take precedence
 over the ones bundled with sphinx-gallery.
@@ -297,4 +295,140 @@ div.sphx-glr-download a:hover {
 
 p.sphx-glr-signature a.reference.external {
   display: none !important;
+}
+
+
+span.togglebutton {
+    cursor: pointer;
+    position: absolute;
+    top: 6px;
+    right: 25px;
+    font-family: "monospace";
+    line-height: 100%;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    margin: 0.5px;
+    color: #777777;  /* Matches sphinx_copybutton */
+    opacity: 0.3;
+    transition: opacity 0.5s;
+}
+
+.highlight:hover .togglebutton {
+    opacity: 1;
+}
+
+
+a.copybtn {
+    background: transparent no-repeat none;
+    border: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.5px !important;
+    width: 1em;
+    height: 1.6em !important;
+    padding: 0 2px 0px !important;
+    text-shadow: none;
+  }
+
+
+  .o-tooltip--left:after {
+    opacity: 0;
+    font-family: monospace !important;
+    font-weight: bold;
+    font-size: 13px !important;
+    background: #3F556B !important;
+    z-index: 100 !important;
+}
+
+dl.glossary dt {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+
+dl.glossary dd {
+  margin-bottom: 0.5em;
+}
+
+
+.classifier:before {
+    content: " : ";
+}
+
+.classifier {
+    font-weight: normal;
+}
+
+dl .field-list > dt {
+    padding-top: 0.1em;
+    font-size: 19px;
+}
+
+.seealso .admonition-title {
+    font-size: 19px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.seealso > dl {
+    margin-bottom: 0;
+}
+
+/* No padding at bottom of See Also */
+
+.seealso > dl > dd {
+    padding-bottom: 0;
+}
+
+dl .field-list > dd {
+    border-left: solid 10px #eee;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-top: 0.5em;
+}
+
+.field-list p {
+    margin-bottom: 0;
+}
+
+dl.citation {
+    padding: 0em 1em 1em 1em;
+    margin: 0em;
+}
+
+.citation * {
+    display: inline;
+}
+
+.citation > dt {
+    background: none;
+    color: black;
+}
+
+.citation > dt:before {
+    display: block;
+    white-space: pre;
+    content: "\A";
+}
+
+.citation > dt:first-child:before {
+    display: inline;
+}
+
+/* Improved header fields formatting for SKIPs */
+h1 ~ dl dt {
+    float: left;
+    width: 3em;
+    padding-right: 2em;
+}
+
+/* Remove shadow rendering around reference numbers */
+.footnote dt {
+    background: none;
+    float: left;
+    text-shadow: none;
 }

@@ -14,13 +14,13 @@ The delta-E notation comes from the German word for "Sensation" (Empfindung).
 
 Reference
 ---------
-http://en.wikipedia.org/wiki/Color_difference
+https://en.wikipedia.org/wiki/Color_difference
 
 """
 
 import numpy as np
 
-from ..color.colorconv import lab2lch, _cart2polar_2pi
+from .colorconv import lab2lch, _cart2polar_2pi
 
 
 def deltaE_cie76(lab1, lab2):
@@ -40,7 +40,7 @@ def deltaE_cie76(lab1, lab2):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] A. R. Robertson, "The CIE 1976 color-difference formulae,"
            Color Res. Appl. 2, 7-11 (1977).
     """
@@ -99,7 +99,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
     L1, C1 = np.rollaxis(lab2lch(lab1), -1)[:2]
@@ -116,7 +116,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (kH * SH) ** 2
-    return np.sqrt(dE2)
+    return np.sqrt(np.maximum(dE2, 0))
 
 
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
@@ -151,9 +151,9 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
-           (doi:10.1364/AO.33.008069)
+           :DOI:`10.1364/AO.33.008069`
     .. [3] M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent
            color metrics tested with an accurate color-difference tolerance
            dataset," Appl. Opt. 33, 8069-8077 (1994).
@@ -238,7 +238,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     dE2 += C_term ** 2
     dE2 += H_term ** 2
     dE2 += R_term
-    ans = np.sqrt(dE2)
+    ans = np.sqrt(np.maximum(dE2, 0))
     if unroll:
         ans = ans[0]
     return ans
@@ -277,7 +277,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [1] https://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     .. [3] F. J. J. Clarke, R. McDonald, and B. Rigg, "Modification to the
            JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132
@@ -304,7 +304,8 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += dH2 / (SH ** 2)
-    return np.sqrt(dE2)
+
+    return np.sqrt(np.maximum(dE2, 0))
 
 
 def get_dH2(lab1, lab2):
@@ -327,6 +328,7 @@ def get_dH2(lab1, lab2):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
+
     a1, b1 = np.rollaxis(lab1, -1)[1:3]
     a2, b2 = np.rollaxis(lab2, -1)[1:3]
 

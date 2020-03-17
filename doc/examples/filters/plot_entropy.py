@@ -30,7 +30,7 @@ from skimage.morphology import disk
 
 # First example: object detection.
 
-noise_mask = 28 * np.ones((128, 128), dtype=np.uint8)
+noise_mask = np.full((128, 128), 28, dtype=np.uint8)
 noise_mask[32:-32, 32:-32] = 30
 
 noise = (noise_mask * np.random.random(noise_mask.shape) - 0.5 *

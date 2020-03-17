@@ -12,7 +12,7 @@ Most functions of ``skimage`` are found within submodules: ::
     >>> camera = data.camera()
 
 A list of submodules and functions is found on the `API reference
-<http://scikit-image.org/docs/stable/api/api.html>`_ webpage.
+<https://scikit-image.org/docs/stable/api/api.html>`_ webpage.
 
 Within scikit-image, images are represented as NumPy arrays, for
 example 2-D arrays for grayscale 2-D images ::

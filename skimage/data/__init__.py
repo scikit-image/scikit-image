@@ -6,41 +6,226 @@ For more images, see
 
 """
 
-import os as _os
+import warnings
+from warnings import warn
+import numpy as np
+import shutil
 
-import numpy as _np
+from distutils.version import LooseVersion as Version
 
-from ..io import imread, use_plugin
-from .._shared._warnings import expected_warnings, warn
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
+from ._registry import registry, legacy_registry, registry_urls
+
+from .. import __version__
 
 import os.path as osp
-data_dir = osp.abspath(osp.dirname(__file__))
+import os
 
 __all__ = ['data_dir',
            'load',
+           'download_all',
            'astronaut',
            'binary_blobs',
+           'brick',
            'camera',
+           'cell',
            'checkerboard',
            'chelsea',
            'clock',
            'coffee',
            'coins',
+           'colorwheel',
+           'grass',
+           'gravel',
            'horse',
            'hubble_deep_field',
            'immunohistochemistry',
+           'lbp_frontal_face_cascade_filename',
            'lfw_subset',
            'logo',
+           'microaneurysms',
            'moon',
            'page',
            'text',
+           'retina',
            'rocket',
+           'rough_wall',
+           'shepp_logan_phantom',
            'stereo_motorcycle']
 
+legacy_data_dir = osp.abspath(osp.dirname(__file__))
+skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
-def load(f, as_gray=False, as_grey=None):
+
+import pooch
+from pooch.utils import file_hash
+
+
+# Pooch expects a `+` to exist in development versions.
+# Since scikit-image doesn't follow that convention, we have to manually
+# remove `.dev` with a `+` if it exists.
+# This helps pooch understand that it should look in master
+# to find the required files
+pooch_version = __version__.replace('.dev', '+')
+url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+
+# Create a new friend to manage your sample data storage
+image_fetcher = pooch.create(
+    # Pooch uses appdirs to select an appropriate directory for the cache
+    # on each platform.
+    # https://github.com/ActiveState/appdirs
+    # On linux this converges to
+    # '$HOME/.cache/scikit-image'
+    # With a version qualifier
+    path=pooch.os_cache("scikit-image"),
+    base_url=url,
+    version=pooch_version,
+    env="SKIMAGE_DATADIR",
+    registry=registry,
+    urls=registry_urls,
+)
+
+data_dir = osp.join(str(image_fetcher.abspath), 'data')
+
+os.makedirs(data_dir, exist_ok=True)
+shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+             osp.join(data_dir, 'README.txt'))
+
+
+def _has_hash(path, expected_hash):
+    """Check if the provided path has the expected hash."""
+    if not osp.exists(path):
+        return False
+    return file_hash(path) == expected_hash
+
+
+def _fetch(data_filename):
+    """Fetch a given data file from either the local cache or the repository.
+
+    This function provides the path location of the data file given
+    its name in the scikit-image repository.
+
+    Parameters
+    ----------
+    data_filename:
+        Name of the file in the scikit-image repository. e.g.
+        'restoration/tess/camera_rl.npy'.
+
+    Returns
+    -------
+    Path of the local file as a python string.
+
+    Raises
+    ------
+    ValueError:
+        If the filename is not known to the scikit-image distribution.
+
+    ConnectionError:
+        If scikit-image is unable to connect to the internet but the dataset
+        has not been downloaded yet.
+    """
+    resolved_path = osp.join(data_dir, '..', data_filename)
+    expected_hash = registry[data_filename]
+
+    # Case 1:
+    # The file may already be in the data_dir. We may have decided to ship it
+    # in the scikit-image distribution.
+    if _has_hash(resolved_path, expected_hash):
+        # Nothing to be done, file is where it is expected to be
+        return resolved_path
+
+
+    # Case 2:
+    # The user is using a cloned version of the github repo, which
+    # contains both the publicly shipped data, and test data.
+    # In this case, the file would be located relative to the
+    # skimage_distribution_dir
+    gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
+    if _has_hash(gh_repository_path, expected_hash):
+        parent = osp.dirname(resolved_path)
+        os.makedirs(parent, exist_ok=True)
+        shutil.copy2(gh_repository_path, resolved_path)
+        return resolved_path
+
+    # Case 3:
+    # Pooch needs to download the data. Let the image fetcher to search for our
+    # data. A ConnectionError is raised if no internet connection is available.
+    try:
+        resolved_path = image_fetcher.fetch(data_filename)
+    except ConnectionError as err:
+        # If we decide in the future to suppress the underlying 'requests'
+        # error, change this to `raise ... from None`. See PEP 3134.
+        raise ConnectionError(
+            'Tried to download a scikit-image dataset, but no internet '
+            'connection is available. To avoid this message in the '
+            'future, try `skimage.data.download_all()` when you are '
+            'connected to the internet.'
+        ) from err
+    return resolved_path
+
+
+# Fetch all legacy data so that it is available by default
+for filename in legacy_registry:
+    _fetch(filename)
+
+else:
+    # Without pooch, fallback on the standard data directory
+    # which for now, includes a few limited data samples
+    data_dir = legacy_data_dir
+
+
+def download_all(directory=None):
+    """Download all datasets for use with scikit-image offline.
+
+    Scikit-image datasets are no longer shipped with the library by default.
+    This allows us to use higher quality datasets, while keeping the
+    library download size small.
+
+    Call this function to download all sample images making them available
+    offline on your machine.
+
+    Parameters
+    ----------
+    directory: path-like, optional
+        The directory where the dataset should be stored.
+
+    Notes
+    -----
+    scikit-image will only search for images stored in the default directory.
+    Only specify the directory if you wish to download the images to your own
+    folder for a particular reason. You can access the location of the default
+    data directory by inspecting the variable `skimage.data.data_dir`.
+    """
+
+    # Consider moving this kind of logic to Pooch
+    old_dir = image_fetcher.path
+    try:
+        if directory is not None:
+            image_fetcher.path = directory
+
+        for filename in image_fetcher.registry:
+            _fetch(filename)
+    finally:
+        image_fetcher.path = old_dir
+
+
+def lbp_frontal_face_cascade_filename():
+    """Return the path to the XML file containing the weak classifier cascade.
+
+    These classifiers were trained using LBP features. The file is part
+    of the OpenCV repository [1]_.
+
+    References
+    ----------
+    .. [1] OpenCV lbpcascade trained files
+           https://github.com/Itseez/opencv/tree/master/data/lbpcascades
+    """
+
+    return _fetch('data/lbpcascade_frontalface_opencv.xml')
+
+
+def load(f, as_gray=False):
     """Load an image file located in the data directory.
 
     Parameters
@@ -48,24 +233,42 @@ def load(f, as_gray=False, as_grey=None):
     f : string
         File name.
     as_gray : bool, optional
-        Convert to grayscale.
-    as_grey : bool or None, optional
-        Deprecated keyword argument. Use `as_gray` instead.
-        If None, `as_gray` is used.
-        Convert to grayscale.
+        Whether to convert the image to grayscale.
+
+    Returns
+    -------
+    img : ndarray
+        Image loaded from ``skimage.data_dir``.
+
+    Notes
+    -----
+    This functions is deprecated and will be removed in 0.18.
+    """
+    warn('This function is deprecated and will be removed in 0.18. '
+         'Use `skimage.io.load` or `imageio.imread` directly.',
+         stacklevel=2)
+    return _load(f, as_gray=as_gray)
+
+
+def _load(f, as_gray=False):
+    """Load an image file located in the data directory.
+
+    Parameters
+    ----------
+    f : string
+        File name.
+    as_gray : bool, optional
+        Whether to convert the image to grayscale.
 
     Returns
     -------
     img : ndarray
         Image loaded from ``skimage.data_dir``.
     """
-    if as_grey is not None:
-        as_gray = as_grey
-        warn('`as_grey` has been deprecated in favor of `as_gray`'
-             ' and will be removed in v0.16.')
-
-    use_plugin('pil')
-    return imread(_os.path.join(data_dir, f), as_gray=as_gray)
+    # importing io is quite slow since it scans all the backends
+    # we lazy import it here
+    from ..io import imread
+    return imread(_fetch(f), plugin='pil', as_gray=as_gray)
 
 
 def camera():
@@ -78,7 +281,7 @@ def camera():
     camera : (512, 512) uint8 ndarray
         Camera image.
     """
-    return load("camera.png")
+    return _load("data/camera.png")
 
 
 def astronaut():
@@ -100,7 +303,191 @@ def astronaut():
         Astronaut image.
     """
 
-    return load("astronaut.png")
+    return _load("data/astronaut.png")
+
+
+def brick():
+    """Brick wall.
+
+    Returns
+    -------
+    brick : (512, 512) uint8 image
+        A small section of a brick wall.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Bricks25>`_ and licensed
+    under the Creative Commons CC0 License.
+
+    A perspective transform was then applied to the image, prior to
+    rotating it by 90 degrees, cropping and scaling it to obtain the final
+    image.
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Bricks25/%5B2K%5DBricks25.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Bricks25.zip', 'bw') as f:
+    ...     f.write(r.content)
+    >>> with zipfile.ZipFile('[2K]Bricks25.zip') as z:
+    ... z.extract('Bricks25_col.jpg')
+
+    >>> from numpy.linalg import inv
+    >>> from skimage.transform import rescale, warp, rotate
+    >>> from skimage.color import rgb2gray
+    >>> from imageio import imread, imwrite
+    >>> from skimage import img_as_ubyte
+    >>> import numpy as np
+
+
+    >>> # Obtained playing around with GIMP 2.10 with their perspective tool
+    >>> H = inv(np.asarray([[ 0.54764, -0.00219, 0],
+    ...                     [-0.12822,  0.54688, 0],
+    ...                     [-0.00022,        0, 1]]))
+
+
+    >>> brick_orig = imread('Bricks25_col.jpg')
+    >>> brick = warp(brick_orig, H)
+    >>> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
+    >>> brick = rotate(brick, -90)
+    >>> imwrite('brick.png', img_as_ubyte(rgb2gray(brick)))
+    """
+    return _load("data/brick.png", as_gray=True)
+
+
+def grass():
+    """Grass.
+
+    Returns
+    -------
+    grass : (512, 512) uint8 image
+        Some grass.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `DeviantArt <https://www.deviantart.com/linolafett/art/Grass-01-434853879>`__
+    and licensed underthe Creative Commons CC0 License.
+
+    The downloaded image was cropped to include a region of ``(512, 512)``
+    pixels around the top left corner, converted to grayscale, then to uint8
+    prior to saving the result in PNG format.
+
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+    >>> url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a407467e-4ff0-49f1-923f-c9e388e84612/d76wfef-2878b78d-5dce-43f9-be36->>     26ec9bc0df3b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2E0MDc0NjdlLTRmZjAtNDlmMS05MjNmLWM5ZTM4OGU4NDYxMlwvZDc2d2ZlZi0yODc4Yjc4ZC01ZGNlLTQzZjktYmUzNi0yNmVjOWJjMGRmM2IuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.98hIcOTCqXWQ67Ec5bM5eovKEn2p91mWB3uedH61ynI'
+    >>> r = requests.get(url)
+    >>> with open('grass_orig.jpg', 'bw') as f:
+    ...     f.write(r.content)
+    >>> grass_orig = imageio.imread('grass_orig.jpg')
+    >>> grass = skimage.img_as_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> imageio.imwrite('grass.png', grass)
+    """
+    return _load("data/grass.png", as_gray=True)
+
+
+def rough_wall():
+    """Rough wall.
+
+    Returns
+    -------
+    rough_wall : (512, 512) uint8 image
+        Some rough wall.
+
+    """
+    warn("The rough_wall dataset has been removed due to licensing concerns."
+         "It has been replaced with the gravel dataset. This warning message"
+         "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
+    return gravel()
+
+
+def gravel():
+    """Gravel
+
+    Returns
+    -------
+    gravel : (512, 512) uint8 image
+        Grayscale gravel sample.
+
+    Notes
+    -----
+    The original image was downloaded from
+    `CC0Textures <https://cc0textures.com/view.php?tex=Gravel04>`__ and
+    licensed under the Creative Commons CC0 License.
+
+    The downloaded image was then rescaled to ``(1024, 1024)``, then the
+    top left ``(512, 512)`` pixel region  was cropped prior to converting the
+    image to grayscale and uint8 data type. The result was saved using the
+    PNG format.
+    """
+
+    """
+    The following code was used to obtain the final image.
+
+    >>> import sys; print(sys.version)
+    >>> import platform; print(platform.platform())
+    >>> import skimage; print(f"scikit-image version: {skimage.__version__}")
+    >>> import numpy; print(f"numpy version: {numpy.__version__}")
+    >>> import imageio; print(f"imageio version {imageio.__version__}")
+    3.7.3 | packaged by conda-forge | (default, Jul  1 2019, 21:52:21)
+    [GCC 7.3.0]
+    Linux-5.0.0-20-generic-x86_64-with-debian-buster-sid
+    scikit-image version: 0.16.dev0
+    numpy version: 1.16.4
+    imageio version 2.4.1
+
+    >>> import requests
+    >>> import zipfile
+
+    >>> url = 'https://cdn.struffelproductions.com/file/cc0textures/Gravel04/%5B2K%5DGravel04.zip'
+    >>> r = requests.get(url)
+    >>> with open('[2K]Gravel04.zip', 'bw') as f:
+    ...     f.write(r.content)
+
+    >>> with zipfile.ZipFile('[2K]Gravel04.zip') as z:
+    ...     z.extract('Gravel04_col.jpg')
+
+    >>> from skimage.transform import resize
+    >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
+    >>> gravel = resize(gravel_orig, (1024, 1024))
+    >>> gravel = skimage.img_as_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> imageio.imwrite('gravel.png', gravel)
+    """
+    return _load("data/gravel.png", as_gray=True)
 
 
 def text():
@@ -109,7 +496,7 @@ def text():
     Notes
     -----
     This image was downloaded from Wikipedia
-    <http://en.wikipedia.org/wiki/File:Corner.png>`__.
+    <https://en.wikipedia.org/wiki/File:Corner.png>`__.
 
     No known copyright restrictions, released into the public domain.
 
@@ -119,7 +506,7 @@ def text():
         Text image.
     """
 
-    return load("text.png")
+    return _load("data/text.png")
 
 
 def checkerboard():
@@ -134,7 +521,38 @@ def checkerboard():
     checkerboard : (200, 200) uint8 ndarray
         Checkerboard image.
     """
-    return load("chessboard_GRAY.png")
+    return _load("data/chessboard_GRAY.png")
+
+
+def cell():
+    """Cell floating in saline.
+
+    This is a quantitative phase image retrieved from a digital hologram using
+    the Python library ``qpformat``. The image shows a cell with high phase
+    value, above the background phase.
+
+    Because of a banding pattern artifact in the background, this image is a
+    good test of thresholding algorithms. The pixel spacing is 0.107 µm.
+
+    These data were part of a comparison between several refractive index
+    retrieval techniques for spherical objects as part of [1]_.
+
+    This image is CC0, dedicated to the public domain. You may copy, modify, or
+    distribute it without asking permission.
+
+    Returns
+    -------
+    cell : (660, 550) uint8 array
+        Image of a cell.
+
+    References
+    ----------
+    .. [1] Paul Müller, Mirjam Schürmann, Salvatore Girardo, Gheorghe Cojoc,
+           and Jochen Guck. "Accurate evaluation of size and refractive index
+           for spherical objects in quantitative phase imaging." Optics Express
+           26(8): 10729-10743 (2018). :DOI:`10.1364/OE.26.010729`
+    """
+    return _load('data/cell.png')
 
 
 def coins():
@@ -159,7 +577,7 @@ def coins():
     coins : (303, 384) uint8 ndarray
         Coins image.
     """
-    return load("coins.png")
+    return _load("data/coins.png")
 
 
 def logo():
@@ -170,7 +588,35 @@ def logo():
     logo : (500, 500, 4) uint8 ndarray
         Logo image.
     """
-    return load("logo.png")
+    return _load("data/logo.png")
+
+
+def microaneurysms():
+    """Gray-level "microaneurysms" image.
+
+    Detail from an image of the retina (green channel).
+    The image is a crop of image 07_dr.JPG from the
+    High-Resolution Fundus (HRF) Image Database:
+    https://www5.cs.fau.de/research/data/fundus-images/
+
+    Notes
+    -----
+    No copyright restrictions. CC0 given by owner (Andreas Maier).
+
+    Returns
+    -------
+    microaneurysms : (102, 102) uint8 ndarray
+        Retina image with lesions.
+
+    References
+    ----------
+    .. [1] Budai, A., Bock, R, Maier, A., Hornegger, J.,
+           Michelson, G. (2013).  Robust Vessel Segmentation in Fundus
+           Images. International Journal of Biomedical Imaging, vol. 2013,
+           2013.
+           :DOI:`10.1155/2013/154860`
+    """
+    return _load("data/microaneurysms.png")
 
 
 def moon():
@@ -184,7 +630,7 @@ def moon():
     moon : (512, 512) uint8 ndarray
         Moon image.
     """
-    return load("moon.png")
+    return _load("data/moon.png")
 
 
 def page():
@@ -198,7 +644,7 @@ def page():
     page : (191, 384) uint8 ndarray
         Page image.
     """
-    return load("page.png")
+    return _load("data/page.png")
 
 
 def horse():
@@ -207,16 +653,14 @@ def horse():
     This image was downloaded from
     `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
 
-    Released into public domain and drawn and uploaded by Andreas Preuss
-    (marauder).
+    No copyright restrictions. CC0 given by owner (Andreas Preuss (marauder)).
 
     Returns
     -------
     horse : (328, 400) bool ndarray
         Horse image.
     """
-    with expected_warnings(['Possible precision loss', 'Possible sign loss']):
-        return img_as_bool(load("horse.png", as_gray=True))
+    return img_as_bool(_load("data/horse.png", as_gray=True))
 
 
 def clock():
@@ -233,7 +677,7 @@ def clock():
     clock : (300, 400) uint8 ndarray
         Clock image.
     """
-    return load("clock_motion.png")
+    return _load("data/clock_motion.png")
 
 
 def immunohistochemistry():
@@ -253,7 +697,7 @@ def immunohistochemistry():
     immunohistochemistry : (512, 512, 3) uint8 ndarray
         Immunohistochemistry image.
     """
-    return load("ihc.png")
+    return _load("data/ihc.png")
 
 
 def chelsea():
@@ -271,7 +715,7 @@ def chelsea():
     chelsea : (300, 451, 3) uint8 ndarray
         Chelsea image.
     """
-    return load("chelsea.png")
+    return _load("data/chelsea.png")
 
 
 def coffee():
@@ -290,7 +734,7 @@ def coffee():
     coffee : (400, 600, 3) uint8 ndarray
         Coffee image.
     """
-    return load("coffee.png")
+    return _load("data/coffee.png")
 
 
 def hubble_deep_field():
@@ -314,7 +758,62 @@ def hubble_deep_field():
     hubble_deep_field : (872, 1000, 3) uint8 ndarray
         Hubble deep field image.
     """
-    return load("hubble_deep_field.jpg")
+    return _load("data/hubble_deep_field.jpg")
+
+
+def retina():
+    """Human retina.
+
+    This image of a retina is useful for demonstrations requiring circular
+    images.
+
+    Notes
+    -----
+    This image was downloaded from
+    `wikimedia <https://commons.wikimedia.org/wiki/File:Fundus_photograph_of_normal_left_eye.jpg>`.
+    This file is made available under the Creative Commons CC0 1.0 Universal
+    Public Domain Dedication.
+
+    References
+    ----------
+    .. [1] Häggström, Mikael (2014). "Medical gallery of Mikael Häggström 2014".
+           WikiJournal of Medicine 1 (2). :DOI:`10.15347/wjm/2014.008`.
+           ISSN 2002-4436. Public Domain
+
+    Returns
+    -------
+    retina : (1411, 1411, 3) uint8 ndarray
+        Retina image in RGB.
+    """
+    return _load("data/retina.jpg")
+
+
+def shepp_logan_phantom():
+    """Shepp Logan Phantom.
+
+    References
+    ----------
+    .. [1] L. A. Shepp and B. F. Logan, "The Fourier reconstruction of a head
+           section," in IEEE Transactions on Nuclear Science, vol. 21,
+           no. 3, pp. 21-43, June 1974. :DOI:`10.1109/TNS.1974.6499235`
+
+    Returns
+    -------
+    phantom : (400, 400) float64 image
+        Image of the Shepp-Logan phantom in grayscale.
+    """
+    return _load("data/phantom.png", as_gray=True)
+
+
+def colorwheel():
+    """Color Wheel.
+
+    Returns
+    -------
+    colorwheel : (370, 371, 3) uint8 image
+        A colorwheel.
+    """
+    return _load("data/color.png")
 
 
 def rocket():
@@ -337,7 +836,7 @@ def rocket():
     rocket : (427, 640, 3) uint8 ndarray
         Rocket image.
     """
-    return load("rocket.jpg")
+    return _load("data/rocket.jpg")
 
 
 def stereo_motorcycle():
@@ -394,9 +893,11 @@ def stereo_motorcycle():
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 
     """
-    return (load("motorcycle_left.png"),
-            load("motorcycle_right.png"),
-            _np.load(_os.path.join(data_dir, "motorcycle_disp.npz"))["arr_0"])
+    filename = _fetch("data/motorcycle_disp.npz")
+    disp = np.load(filename)['arr_0']
+    return (_load("data/motorcycle_left.png"),
+            _load("data/motorcycle_right.png"),
+            disp)
 
 
 def lfw_subset():
@@ -428,4 +929,4 @@ def lfw_subset():
     .. [2] http://vis-www.cs.umass.edu/lfw/
 
     """
-    return _np.load(_os.path.join(data_dir, 'lfw_subset.npy'))
+    return np.load(_fetch('data/lfw_subset.npy'))

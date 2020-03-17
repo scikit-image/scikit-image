@@ -90,7 +90,7 @@ def diamond(radius, dtype=np.uint8):
 def disk(radius, dtype=np.uint8):
     """Generates a flat, disk-shaped structuring element.
 
-    A pixel is within the neighborhood if the euclidean distance between
+    A pixel is within the neighborhood if the Euclidean distance between
     it and the origin is no greater than radius.
 
     Parameters
@@ -222,7 +222,7 @@ def ball(radius, dtype=np.uint8):
     """Generates a ball-shaped structuring element.
 
     This is the 3D equivalent of a disk.
-    A pixel is within the neighborhood if the euclidean distance between
+    A pixel is within the neighborhood if the Euclidean distance between
     it and the origin is no greater than radius.
 
     Parameters

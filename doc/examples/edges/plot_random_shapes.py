@@ -13,13 +13,13 @@ from skimage.draw import random_shapes
 # Let's start simple and generate a 128x128 image
 # with a single grayscale rectangle.
 result = random_shapes((128, 128), max_shapes=1, shape='rectangle',
-                       multichannel=False)
+                       multichannel=False, random_seed=0)
 
 # We get back a tuple consisting of (1) the image with the generated shapes
 # and (2) a list of label tuples with the kind of shape (e.g. circle,
 # rectangle) and ((r0, r1), (c0, c1)) coordinates.
 image, labels = result
-print('Image shape: {}\nLabels: {}'.format(image.shape, labels))
+print(f"Image shape: {image.shape}\nLabels: {labels}")
 
 # We can visualize the images.
 fig, axes = plt.subplots(nrows=2, ncols=3)
@@ -43,7 +43,7 @@ image4, _ = random_shapes((128, 128), max_shapes=10,
 
 for i, image in enumerate([image1, image2, image3, image4], 1):
     ax[i].imshow(image)
-    ax[i].set_title('Colored shapes, #{}'.format(i-1))
+    ax[i].set_title(f"Colored shapes, #{i-1}")
 
 # These shapes are well suited to test segmentation algorithms. Often, we
 # want shapes to overlap to test the algorithm. This is also possible:

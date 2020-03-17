@@ -9,7 +9,7 @@ from .util import ColorMixer
 
 class IntelligentSlider(QWidget):
     ''' A slider that adds a 'name' attribute and calls a callback
-    with 'name' as an argument to the registerd callback.
+    with 'name' as an argument to the registered callback.
 
     This allows you to create large groups of sliders in a loop,
     but still keep track of the individual events

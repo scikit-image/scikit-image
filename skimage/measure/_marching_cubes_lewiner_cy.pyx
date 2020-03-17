@@ -25,10 +25,7 @@ cimport numpy as np
 import cython
 
 # Enable low level memory management
-# from libc.stdlib cimport malloc, free
-cdef extern from "stdlib.h": # The cimport does not work on my Linux Laptop
-   void free(void* ptr)
-   void* malloc(size_t size)
+from libc.stdlib cimport malloc, free
 
 # Define tiny winy number
 cdef double FLT_EPSILON = np.spacing(1.0) #0.0000001
@@ -190,6 +187,13 @@ cdef class Cell:
         # Allocate face layers
         self.faceLayer1 = <int *>malloc(self.nx*self.ny*4 * sizeof(int))
         self.faceLayer2 = <int *>malloc(self.nx*self.ny*4 * sizeof(int))
+
+        if (self.faceLayer1 is NULL or self.faceLayer2 is NULL or
+            self.vv is NULL or self.vg is NULL or self._vertices is NULL or
+            self._normals is NULL or self._values is NULL or
+            self._faces is NULL):
+            raise MemoryError()
+
         cdef int i
         for i in range(self.nx*self.ny*4):
             self.faceLayer1[i] = -1
@@ -215,10 +219,11 @@ cdef class Cell:
         self._values = <float *>malloc(self._vertexMaxCount * sizeof(float))
         # Clear normals and values
         cdef int i, j
-        for i in range(self._vertexMaxCount):
-            self._values[i] = 0.0
-            for j in range(3):
-                self._normals[i*3+j] = 0.0
+        if self._values is not NULL and self._normals is not NULL:
+            for i in range(self._vertexMaxCount):
+                self._values[i] = 0.0
+                for j in range(3):
+                    self._normals[i*3+j] = 0.0
 
         # Init faces
         self._faceCount = 0
@@ -227,22 +232,14 @@ cdef class Cell:
 
 
     def __dealloc__(self):
-        if self.vv is not NULL:
-            free(self.vv)
-        if self.vg is not NULL:
-            free(self.vg)
-        if self.faceLayer1 is not NULL:
-            free(self.faceLayer1)
-        if self.faceLayer2 is not NULL:
-            free(self.faceLayer2)
-        if self._vertices is not NULL:
-            free(self._vertices)
-        if self._normals is not NULL:
-            free(self._normals)
-        if self._values is not NULL:
-            free(self._values)
-        if self._faces is not NULL:
-            free(self._faces)
+        free(self.vv)
+        free(self.vg)
+        free(self.faceLayer1)
+        free(self.faceLayer2)
+        free(self._vertices)
+        free(self._normals)
+        free(self._values)
+        free(self._faces)
 
 
     cdef void _increase_size_vertices(self):
@@ -253,6 +250,11 @@ cdef class Cell:
         cdef float *newVertices = <float *>malloc(newMaxCount*3 * sizeof(float))
         cdef float *newNormals = <float *>malloc(newMaxCount*3 * sizeof(float))
         cdef float *newValues = <float *>malloc(newMaxCount * sizeof(float))
+        if newVertices is NULL or newNormals is NULL or newValues is NULL:
+            free(newVertices)
+            free(newNormals)
+            free(newValues)
+            raise MemoryError()
         # Clear
         cdef int i, j
         for i in range(self._vertexCount, newMaxCount):
@@ -278,6 +280,8 @@ cdef class Cell:
         # Allocate new array
         cdef int newMaxCount = self._faceMaxCount * 2
         cdef int *newFaces = <int *>malloc(newMaxCount * sizeof(int))
+        if newFaces is NULL:
+            raise MemoryError()
         # Copy
         cdef int i
         for i in range(self._faceCount):
@@ -746,7 +750,7 @@ cdef class Lut:
     This class defines functions to look up values using 1, 2 or 3 indices.
     """
 
-    cdef char* VALUES
+    cdef signed char* VALUES
     cdef int L0 # Length
     cdef int L1 # size of tuple
     cdef int L2 # size of tuple in tuple (if any)
@@ -767,7 +771,9 @@ cdef class Lut:
         array = array.ravel()
         cdef int n, N
         N = self.L0 * self.L1 * self.L2
-        self.VALUES = <char *> malloc(N * sizeof(char))
+        self.VALUES = <signed char *> malloc(N * sizeof(signed char))
+        if self.VALUES is NULL:
+            raise MemoryError()
         for n in range(N):
             self.VALUES[n] = array[n]
 
@@ -923,13 +929,18 @@ cdef class LutProvider:
 
         self.SUBCONFIG13 = Lut(SUBCONFIG13)
 
-
-def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider luts, int st=1, int classic=0):
+def marching_cubes(float[:, :, :] im not None, double isovalue,
+                   LutProvider luts, int st=1, int classic=0,
+                   np.ndarray[np.npy_bool, ndim=3, cast=True] mask=None):
     """ marching_cubes(im, double isovalue, LutProvider luts, int st=1, int classic=0)
-    This is the main entry to apply marching cubes.
+    Main entry to apply marching cubes.
+
+    Masked version of marching cubes. This function will check a
+    masking array (same size as im) to decide if the algorithm must be
+    computed for a given voxel. This adds a small overhead that
+    rapidly gets compensated by the fewer computed cubes
     Returns (vertices, faces, normals, values)
     """
-
     # Get dimemsnions
     cdef int Nx, Ny, Nz
     Nx, Ny, Nz = im.shape[2], im.shape[1], im.shape[0]
@@ -941,8 +952,8 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
     cdef int case, config, subconfig
-
-    # Unfortunately specifying a step in range() siginificantly degrades
+    cdef bint no_mask = mask is None
+    # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
     # we have:  max_x = Nx_bound + st + st - 1
     #       ->  Nx_bound = max_allowable_x + 1 - 2 * st
@@ -957,7 +968,6 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
         z_st = z + st
 
         cell.new_z_value()  # Indicate that we enter a new layer
-
         y = -st
         while y < Ny_bound:
             y += st
@@ -967,27 +977,27 @@ def marching_cubes(float [:, :, :] im not None, double isovalue, LutProvider lut
             while x < Nx_bound:
                 x += st
                 x_st = x + st
+                if no_mask or mask[z_st, y_st, x_st]:
+                    # Initialize cell
+                    cell.set_cube(isovalue, x, y, z, st,
+                        im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
+                        im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
 
-                # Initialize cell
-                cell.set_cube(isovalue, x, y, z, st,
-                    im[z   ,y, x], im[z   ,y, x_st], im[z   ,y_st, x_st], im[z   ,y_st, x],
-                    im[z_st,y, x], im[z_st,y, x_st], im[z_st,y_st, x_st], im[z_st,y_st, x] )
-
-                # Do classic!
-                if classic:
-                    # Determine number of vertices
-                    nt = 0
-                    while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
-                        nt += 1
-                    # Add triangles
-                    if nt > 0:
-                        cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
-                else:
-                    # Get case, if non-nul, enter the big switch
-                    case = luts.CASES.get2(cell.index, 0)
-                    if case > 0:
-                        config = luts.CASES.get2(cell.index, 1)
-                        the_big_switch(luts, cell, case, config)
+                    # Do classic!
+                    if classic:
+                        # Determine number of vertices
+                        nt = 0
+                        while luts.CASESCLASSIC.get2(cell.index, 3*nt) != -1:
+                            nt += 1
+                        # Add triangles
+                        if nt > 0:
+                            cell.add_triangles(luts.CASESCLASSIC, cell.index, nt)
+                    else:
+                        # Get case, if non-nul, enter the big switch
+                        case = luts.CASES.get2(cell.index, 0)
+                        if case > 0:
+                            config = luts.CASES.get2(cell.index, 1)
+                            the_big_switch(luts, cell, case, config)
 
     # Done
     return cell.get_vertices(), cell.get_faces(), cell.get_normals(), cell.get_values()
@@ -1400,7 +1410,7 @@ cdef int test_internal(Cell cell, LutProvider luts, int case, int config, int su
             Ct = cell.v1 + ( cell.v5 - cell.v1 ) * t
             Dt = cell.v0 + ( cell.v4 - cell.v0 ) * t
         else:
-             print( "Invalid edge %i." % edge )
+            print( "Invalid edge %i." % edge )
     else:
         print( "Invalid ambiguous case %i." % case )
 

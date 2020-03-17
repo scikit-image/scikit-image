@@ -25,7 +25,7 @@ from skimage import data
 from skimage.color import rgb2hed
 from matplotlib.colors import LinearSegmentedColormap
 
-# Create an artificial color close to the orginal one
+# Create an artificial color close to the original one
 cmap_hema = LinearSegmentedColormap.from_list('mycmap', ['white', 'navy'])
 cmap_dab = LinearSegmentedColormap.from_list('mycmap', ['white',
                                              'saddlebrown'])

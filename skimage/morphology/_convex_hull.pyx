@@ -38,35 +38,36 @@ def possible_hull(cnp.uint8_t[:, ::1] img):
     cdef Py_ssize_t rows_2_cols = 2 * rows + cols
     cdef Py_ssize_t rows_cols_r, rows_c
 
-    for r in range(rows):
+    with nogil:
+        for r in range(rows):
 
-        rows_cols_r = rows_cols + r
+            rows_cols_r = rows_cols + r
 
-        for c in range(cols):
+            for c in range(cols):
 
-            if img[r, c] != 0:
+                if img[r, c] != 0:
 
-                rows_c = rows + c
-                rows_2_cols_c = rows_2_cols + c
+                    rows_c = rows + c
+                    rows_2_cols_c = rows_2_cols + c
 
-                # Left check
-                if nonzero[r, 1] == -1:
-                    nonzero[r, 0] = r
-                    nonzero[r, 1] = c
+                    # Left check
+                    if nonzero[r, 1] == -1:
+                        nonzero[r, 0] = r
+                        nonzero[r, 1] = c
 
-                # Right check
-                elif nonzero[rows_cols_r, 1] < c:
-                    nonzero[rows_cols_r, 0] = r
-                    nonzero[rows_cols_r, 1] = c
+                    # Right check
+                    elif nonzero[rows_cols_r, 1] < c:
+                        nonzero[rows_cols_r, 0] = r
+                        nonzero[rows_cols_r, 1] = c
 
-                # Top check
-                if nonzero[rows_c, 1] == -1:
-                    nonzero[rows_c, 0] = r
-                    nonzero[rows_c, 1] = c
-
-                # Bottom check
-                elif nonzero[rows_2_cols_c, 0] < r:
-                    nonzero[rows_2_cols_c, 0] = r
-                    nonzero[rows_2_cols_c, 1] = c
+                    # Top check
+                    if nonzero[rows_c, 1] == -1:
+                        nonzero[rows_c, 0] = r
+                        nonzero[rows_c, 1] = c
+  
+                    # Bottom check
+                    elif nonzero[rows_2_cols_c, 0] < r:
+                        nonzero[rows_2_cols_c, 0] = r
+                        nonzero[rows_2_cols_c, 1] = c
 
     return coords[coords[:, 0] != -1]

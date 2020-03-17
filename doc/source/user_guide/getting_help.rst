@@ -28,6 +28,25 @@ The ``quick search`` field located in the navigation bar of the html
 documentation can be used to search for specific keywords (segmentation,
 rescaling, denoising, etc.).
 
+API Discovery
+-------------
+
+NumPy provides a ``lookfor`` function to search API functions. 
+By default ``lookfor`` will search the NumPy API.
+NumPy lookfor example:
+```np.lookfor('eigenvector') ```
+
+But it can be used to search in modules, by passing in the module
+name as a string:
+
+``` np.lookfor('boundaries', 'skimage') ```
+
+or the module itself.
+```
+> import skimage
+> np.lookfor('boundaries', skimage)
+```
+
 Docstrings
 ----------
 

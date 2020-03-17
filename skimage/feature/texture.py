@@ -3,7 +3,8 @@ Methods to characterize image textures.
 """
 
 import numpy as np
-from .._shared.utils import assert_nD
+import warnings
+from .._shared.utils import check_nD
 from ..util import img_as_float
 from ..color import gray2rgb
 from ._texture import (_glcm_loop,
@@ -60,9 +61,13 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
+    .. [2] Haralick, RM.; Shanmugam, K.,
+           "Textural features for image classification"
+           IEEE Transactions on systems, man, and cybernetics 6 (1973): 610-621.
+           :DOI:`10.1109/TSMC.1973.4309314`
+    .. [3] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
-    .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
+    .. [4] Wikipedia, https://en.wikipedia.org/wiki/Co-occurrence_matrix
 
 
     Examples
@@ -98,9 +103,9 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    assert_nD(image, 2)
-    assert_nD(distances, 1, 'distances')
-    assert_nD(angles, 1, 'angles')
+    check_nD(image, 2)
+    check_nD(distances, 1, 'distances')
+    check_nD(angles, 1, 'angles')
 
     image = np.ascontiguousarray(image)
 
@@ -140,7 +145,7 @@ def greycomatrix(image, distances, angles, levels=None, symmetric=False,
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
 
-    # normalize each GLMC
+    # normalize each GLCM
     if normed:
         P = P.astype(np.float64)
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
@@ -166,6 +171,8 @@ def greycoprops(P, prop='contrast'):
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
+    Each GLCM is normalized to have a sum of 1 before the computation of texture
+    properties.
 
     Parameters
     ----------
@@ -203,16 +210,25 @@ def greycoprops(P, prop='contrast'):
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
-    array([[ 0.58333333,  1.        ],
-           [ 1.25      ,  2.75      ]])
+    array([[0.58333333, 1.        ],
+           [1.25      , 2.75      ]])
 
     """
-    assert_nD(P, 4, 'P')
+    check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
-    assert num_level == num_level2
-    assert num_dist > 0
-    assert num_angle > 0
+    if num_level != num_level2:
+        raise ValueError('num_level and num_level2 must be equal.')
+    if num_dist <= 0:
+        raise ValueError('num_dist must be positive.')
+    if num_angle <= 0:
+        raise ValueError('num_angle must be positive.')
+
+    # normalize each GLCM
+    P = P.astype(np.float64)
+    glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+    glcm_sums[glcm_sums == 0] = 1
+    P /= glcm_sums
 
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
@@ -307,7 +323,7 @@ def local_binary_pattern(image, P, R, method='default'):
            http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
-    assert_nD(image, 2)
+    check_nD(image, 2)
 
     methods = {
         'default': ord('D'),

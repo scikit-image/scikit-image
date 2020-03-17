@@ -1,6 +1,7 @@
-PySide; python_version <= '3.4'
-imread
 SimpleITK
-astropy
-tifffile
+astropy>=1.2.0
 qtpy
+pyamg
+dask[array]>=0.15.0
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1

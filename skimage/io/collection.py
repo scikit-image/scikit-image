@@ -4,12 +4,13 @@
 import os
 from glob import glob
 import re
+from collections.abc import Sequence
 from copy import copy
 
 import numpy as np
 from PIL import Image
 
-from ..external.tifffile import TiffFile
+from tifffile import TiffFile
 
 
 __all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
@@ -21,12 +22,12 @@ def concatenate_images(ic):
 
     Parameters
     ----------
-    ic: an iterable of images (including ImageCollection and MultiImage)
+    ic : an iterable of images
         The images to be concatenated.
 
     Returns
     -------
-    ar : np.ndarray
+    array_cat : ndarray
         An array having one more dimension than the images in `ic`.
 
     See Also
@@ -37,13 +38,18 @@ def concatenate_images(ic):
     ------
     ValueError
         If images in `ic` don't have identical shapes.
+
+    Notes
+    -----
+    ``concatenate_images`` receives any iterable object containing images,
+    including ImageCollection and MultiImage, and returns a NumPy array.
     """
-    all_images = [img[np.newaxis, ...] for img in ic]
+    all_images = [image[np.newaxis, ...] for image in ic]
     try:
-        ar = np.concatenate(all_images)
+        array_cat = np.concatenate(all_images)
     except ValueError:
         raise ValueError('Image dimensions must agree.')
-    return ar
+    return array_cat
 
 
 def alphanumeric_key(s):
@@ -51,11 +57,11 @@ def alphanumeric_key(s):
 
     Parameters
     ----------
-    s: string
+    s : string
 
     Returns
     -------
-    k: a list of strings and ints
+    k : a list of strings and ints
 
     Examples
     --------
@@ -72,38 +78,52 @@ def alphanumeric_key(s):
     return k
 
 
+def _is_multipattern(input_pattern):
+    """Helping function. Returns True if pattern contains a tuple, list, or a
+    string separated with os.pathsep."""
+    # Conditions to be accepted by ImageCollection:
+    has_str_ospathsep = (isinstance(input_pattern, str)
+                         and os.pathsep in input_pattern)
+    not_a_string = not isinstance(input_pattern, str)
+    has_iterable = isinstance(input_pattern, Sequence)
+    has_strings = all(isinstance(pat, str) for pat in input_pattern)
+
+    is_multipattern = (has_str_ospathsep or
+                       (not_a_string
+                        and has_iterable
+                        and has_strings))
+    return is_multipattern
+
+
 class ImageCollection(object):
-
     """Load and manage a collection of image files.
-
-    Note that files are always stored in alphabetical order. Also note that
-    slicing returns a new ImageCollection, *not* a view into the data.
 
     Parameters
     ----------
-    load_pattern : str or list
-        Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by os.pathsep,
-        e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
-        implementation notes below.
+    load_pattern : str or list of str
+        Pattern string or list of strings to load. The filename path can be
+        absolute or relative.
     conserve_memory : bool, optional
-        If True, never keep more than one in memory at a specific
-        time.  Otherwise, images will be cached once they are loaded.
+        If True, `ImageCollection` does not keep more than one in memory at a
+        specific time. Otherwise, images will be cached once they are loaded.
 
     Other parameters
     ----------------
     load_func : callable
-        ``imread`` by default.  See notes below.
+        ``imread`` by default. See notes below.
 
     Attributes
     ----------
     files : list of str
-        If a glob string is given for `load_pattern`, this attribute
-        stores the expanded file list.  Otherwise, this is simply
-        equal to `load_pattern`.
+        If a pattern string is given for `load_pattern`, this attribute
+        stores the expanded file list. Otherwise, this is equal to
+        `load_pattern`.
 
     Notes
     -----
+    Note that files are always returned in alphanumerical order. Also note
+    that slicing returns a new ImageCollection, *not* a view into the data.
+
     ImageCollection can be modified to load images from an arbitrary
     source by specifying a combination of `load_pattern` and
     `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
@@ -147,24 +167,25 @@ class ImageCollection(object):
     >>> coll[0].shape
     (200, 200)
 
-    >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
-
+    >>> ic = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
     """
-
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, str):
-            load_pattern = load_pattern.split(os.pathsep)
-            self._files = []
+        self._files = []
+        if _is_multipattern(load_pattern):
+            if isinstance(load_pattern, str):
+                load_pattern = load_pattern.split(os.pathsep)
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files = sorted(self._files, key=alphanumeric_key)
             self._numframes = self._find_images()
+        elif isinstance(load_pattern, str):
+            self._files.extend(glob(load_pattern))
+            self._files = sorted(self._files, key=alphanumeric_key)
+            self._numframes = self._find_images()
         else:
-            self._files = load_pattern
-            self._numframes = len(self._files)
-            self._frame_index = None
+            raise TypeError('Invalid pattern as input.')
 
         if conserve_memory:
             memory_slots = 1
@@ -181,7 +202,6 @@ class ImageCollection(object):
             self.load_func = load_func
 
         self.load_func_kwargs = load_func_kwargs
-
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
@@ -234,7 +254,6 @@ class ImageCollection(object):
         img : ndarray or ImageCollection.
             The `n`-th image in the collection, or a new ImageCollection with
             the selected images.
-
         """
         if hasattr(n, '__index__'):
             n = n.__index__()
@@ -374,7 +393,6 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-
     """A class containing a single multi-frame image.
 
     Parameters
@@ -417,7 +435,8 @@ class MultiImage(ImageCollection):
         from ._io import imread
 
         def load_func(fname, **kwargs):
-            kwargs.setdefault('dtype', dtype)
+            if dtype is not None:
+                kwargs.setdefault('dtype', dtype)
             return imread(fname, **kwargs)
 
         self._filename = filename

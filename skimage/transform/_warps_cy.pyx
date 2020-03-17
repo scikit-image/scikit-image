@@ -8,19 +8,20 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bilinear_interpolation,
                                       biquadratic_interpolation,
                                       bicubic_interpolation)
+from .._shared.fused_numerics cimport np_floats
 
 
-cdef inline void _transform_metric(double x, double y, double* H,
-                                   double *x_, double *y_) nogil:
+cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
+                                   np_floats *x_, np_floats *y_) nogil:
     """Apply a metric transformation to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : np_floats
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *np_floats
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *np_floats
         Output coordinate.
 
     """
@@ -28,17 +29,17 @@ cdef inline void _transform_metric(double x, double y, double* H,
     y_[0] = H[4] * y + H[5]
 
 
-cdef inline void _transform_affine(double x, double y, double* H,
-                                   double *x_, double *y_) nogil:
+cdef inline void _transform_affine(np_floats x, np_floats y, np_floats* H,
+                                   np_floats *x_, np_floats *y_) nogil:
     """Apply an affine transformation to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : np_floats
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *np_floats
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *np_floats
         Output coordinate.
 
     """
@@ -46,32 +47,32 @@ cdef inline void _transform_affine(double x, double y, double* H,
     y_[0] = H[3] * x + H[4] * y + H[5]
 
 
-cdef inline void _transform_projective(double x, double y, double* H,
-                                       double *x_, double *y_) nogil:
+cdef inline void _transform_projective(np_floats x, np_floats y, np_floats* H,
+                                       np_floats *x_, np_floats *y_) nogil:
     """Apply a homography to a coordinate.
 
     Parameters
     ----------
-    x, y : double
+    x, y : np_floats
         Input coordinate.
-    H : (3,3) *double
+    H : (3,3) *np_floats
         Transformation matrix.
-    x_, y_ : *double
+    x_, y_ : *np_floats
         Output coordinate.
 
     """
-    cdef double z_
+    cdef np_floats z_
     z_ = H[6] * x + H[7] * y + H[8]
     x_[0] = (H[0] * x + H[1] * y + H[2]) / z_
     y_[0] = (H[3] * x + H[4] * y + H[5]) / z_
 
 
-def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
-               int order=1, mode='constant', double cval=0):
+def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
+               int order=1, mode='constant', np_floats cval=0):
     """Projective transformation (homography).
 
-    Perform a projective transformation (homography) of a
-    floating point image, using interpolation.
+    Perform a projective transformation (homography) of a floating
+    point image (single or double precision), using interpolation.
 
     For each pixel, given its homogeneous coordinate :math:`\mathbf{x}
     = [x, y, 1]^T`, its target position is calculated by multiplying
@@ -119,8 +120,13 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     """
 
-    cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
-    cdef double[:, ::1] M = np.ascontiguousarray(H)
+    cdef np_floats[:, ::1] img = np.ascontiguousarray(image)
+    cdef np_floats[:, ::1] M = np.ascontiguousarray(H)
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
     if mode not in ('constant', 'wrap', 'symmetric', 'reflect', 'edge'):
         raise ValueError("Invalid mode specified.  Please use `constant`, "
@@ -135,14 +141,15 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         out_r = int(output_shape[0])
         out_c = int(output_shape[1])
 
-    cdef double[:, ::1] out = np.zeros((out_r, out_c), dtype=np.double)
+    cdef np_floats[:, ::1] out = np.zeros((out_r, out_c), dtype=dtype)
 
     cdef Py_ssize_t tfr, tfc
-    cdef double r, c
+    cdef np_floats r, c
     cdef Py_ssize_t rows = img.shape[0]
     cdef Py_ssize_t cols = img.shape[1]
 
-    cdef void (*transform_func)(double, double, double*, double*, double*) nogil
+    cdef void (*transform_func)(np_floats, np_floats, np_floats*,
+                                np_floats*, np_floats*) nogil
     if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
         if M[0, 1] == 0 and M[1, 0] == 0:
             transform_func = _transform_metric
@@ -151,16 +158,18 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     else:
         transform_func = _transform_projective
 
-    cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
-                               char, double) nogil
+    cdef void (*interp_func)(np_floats*, Py_ssize_t , Py_ssize_t ,
+                             np_floats, np_floats, char, np_floats,
+                             np_floats*) nogil
     if order == 0:
-        interp_func = nearest_neighbour_interpolation
+        interp_func = nearest_neighbour_interpolation[np_floats, np_floats,
+                                                      np_floats]
     elif order == 1:
-        interp_func = bilinear_interpolation
+        interp_func = bilinear_interpolation[np_floats, np_floats, np_floats]
     elif order == 2:
-        interp_func = biquadratic_interpolation
+        interp_func = biquadratic_interpolation[np_floats, np_floats, np_floats]
     elif order == 3:
-        interp_func = bicubic_interpolation
+        interp_func = bicubic_interpolation[np_floats, np_floats, np_floats]
     else:
         raise ValueError("Unsupported interpolation order", order)
 
@@ -168,7 +177,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         for tfr in range(out_r):
             for tfc in range(out_c):
                 transform_func(tfc, tfr, &M[0, 0], &c, &r)
-                out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
-                                            mode_c, cval)
+                interp_func(&img[0, 0], rows, cols, r, c,
+                            mode_c, cval, &out[tfr, tfc])
 
     return np.asarray(out)

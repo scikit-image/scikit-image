@@ -56,39 +56,39 @@ def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
     cdef cnp.int32_t *next = <cnp.int32_t *>(anext.data)
     cdef cnp.int32_t *strides = <cnp.int32_t *>(astrides.data)
 
-    while current_idx != -1:
-        if current_idx < image_stride:
-            current_rank = ranks[current_idx]
-            if current_rank == 0:
-                break
-            for i in range(nstrides):
-                neighbor_idx = current_idx + strides[i]
-                neighbor_rank = ranks[neighbor_idx]
-                # Only propagate neighbors ranked below the current rank
-                if neighbor_rank < current_rank:
-                    mask_rank = ranks[neighbor_idx + image_stride]
-                    # Only propagate neighbors ranked below the mask rank
-                    if neighbor_rank < mask_rank:
-                        # Raise the neighbor to the mask rank if
-                        # the mask ranked below the current rank
-                        if mask_rank < current_rank:
-                            current_link = neighbor_idx + image_stride
-                            ranks[neighbor_idx] = mask_rank
-                        else:
-                            current_link = current_idx
-                            ranks[neighbor_idx] = current_rank
-                        # unlink the neighbor
-                        nprev = prev[neighbor_idx]
-                        nnext = next[neighbor_idx]
-                        next[nprev] = nnext
-                        if nnext != -1:
-                            prev[nnext] = nprev
-                        # link to the neighbor after the current link
-                        nnext = next[current_link]
-                        next[neighbor_idx] = nnext
-                        prev[neighbor_idx] = current_link
-                        if nnext >= 0:
-                            prev[nnext] = neighbor_idx
-                            next[current_link] = neighbor_idx
-        current_idx = next[current_idx]
-
+    with nogil:
+        while current_idx != -1:
+            if current_idx < image_stride:
+                current_rank = ranks[current_idx]
+                if current_rank == 0:
+                    break
+                for i in range(nstrides):
+                    neighbor_idx = current_idx + strides[i]
+                    neighbor_rank = ranks[neighbor_idx]
+                    # Only propagate neighbors ranked below the current rank
+                    if neighbor_rank < current_rank:
+                        mask_rank = ranks[neighbor_idx + image_stride]
+                        # Only propagate neighbors ranked below the mask rank
+                        if neighbor_rank < mask_rank:
+                            # Raise the neighbor to the mask rank if
+                            # the mask ranked below the current rank
+                            if mask_rank < current_rank:
+                                current_link = neighbor_idx + image_stride
+                                ranks[neighbor_idx] = mask_rank
+                            else:
+                                current_link = current_idx
+                                ranks[neighbor_idx] = current_rank
+                            # unlink the neighbor
+                            nprev = prev[neighbor_idx]
+                            nnext = next[neighbor_idx]
+                            next[nprev] = nnext
+                            if nnext != -1:
+                                prev[nnext] = nprev
+                            # link to the neighbor after the current link
+                            nnext = next[current_link]
+                            next[neighbor_idx] = nnext
+                            prev[neighbor_idx] = current_link
+                            if nnext >= 0:
+                                prev[nnext] = neighbor_idx
+                                next[current_link] = neighbor_idx
+            current_idx = next[current_idx]

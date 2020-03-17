@@ -1,6 +1,7 @@
 import numpy as np
 import skimage.data as data
-from skimage._shared.testing import assert_equal, assert_almost_equal
+from skimage import io
+from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
 
 
 def test_astronaut():
@@ -99,3 +100,15 @@ def test_binary_blobs():
 def test_lfw_subset():
     """ Test that "lfw_subset" can be loaded."""
     data.lfw_subset()
+
+
+def test_cell():
+    """ Test that "cell" image can be loaded."""
+    data.cell()
+
+
+def test_cells_3d():
+    """Needs internet connection."""
+    path = fetch('data/cells.tif')
+    image = io.imread(path)
+    assert image.shape == (60, 256, 256)

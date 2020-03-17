@@ -56,7 +56,7 @@ class ColorHistogram(QWidget):
         nbars = len(self.counts)
 
         # calculate the bar widths, this compilcation is
-        # necessary because integer trunction severly cripples
+        # necessary because integer trunction severely cripples
         # the layout.
         remainder = width % nbars
         bar_width = [int(width / nbars)] * nbars
@@ -70,7 +70,7 @@ class ColorHistogram(QWidget):
         max_val = np.max(self.counts)
         scale = 1. * height / max_val
 
-        # determine if we have a colormap and drop into the appopriate
+        # determine if we have a colormap and drop into the appropriate
         # loop.
         if hasattr(self.colormap[0], '__iter__'):
             # assume we have a colormap

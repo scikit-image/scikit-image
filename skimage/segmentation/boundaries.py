@@ -53,14 +53,14 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     label_img : array of int or bool
         An array in which different regions are labeled with either different
         integers or boolean values.
-    connectivity: int in {1, ..., `label_img.ndim`}, optional
+    connectivity : int in {1, ..., `label_img.ndim`}, optional
         A pixel is considered a boundary pixel if any of its neighbors
         has a different label. `connectivity` controls which pixels are
         considered neighbors. A connectivity of 1 (default) means
         pixels sharing an edge (in 2D) or a face (in 3D) will be
         considered neighbors. A connectivity of `label_img.ndim` means
         pixels sharing a corner will be considered neighbors.
-    mode: string in {'thick', 'inner', 'outer', 'subpixel'}
+    mode : string in {'thick', 'inner', 'outer', 'subpixel'}
         How to mark the boundaries:
 
         - thick: any pixel not completely surrounded by pixels of the
@@ -73,7 +73,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
           marked.
         - subpixel: return a doubled image, with pixels *between* the
           original pixels marked as boundary where appropriate.
-    background: int, optional
+    background : int, optional
         For modes 'inner' and 'outer', a definition of a background
         label is required. See `mode` for descriptions of these two.
 
@@ -153,7 +153,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
            [False, False,  True,  True,  True],
            [False,  True,  True,  True,  True],
            [False,  True,  True, False, False],
-           [False,  True,  True, False, False]], dtype=bool)
+           [False,  True,  True, False, False]])
     """
     if label_img.dtype == 'bool':
         label_img = label_img.astype(np.uint8)

@@ -1,4 +1,5 @@
 from ._canny import canny
+from ._cascade import Cascade
 from ._daisy import daisy
 from ._hog import hog
 from .texture import (greycomatrix, greycoprops,
@@ -16,6 +17,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      shape_index)
 from .template import match_template
 from .register_translation import register_translation
+from .masked_register_translation import masked_register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -27,6 +29,7 @@ from .haar import (haar_like_feature, haar_like_feature_coord,
 
 
 __all__ = ['canny',
+           'Cascade',
            'daisy',
            'hog',
            'greycomatrix',
@@ -52,6 +55,7 @@ __all__ = ['canny',
            'corner_orientations',
            'match_template',
            'register_translation',
+           'masked_register_translation',
            'BRIEF',
            'CENSURE',
            'ORB',

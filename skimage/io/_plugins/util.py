@@ -6,11 +6,8 @@ from ...util import img_as_ubyte
 
 # utilities to make life easier for plugin writers.
 
-try:
-    import multiprocessing
-    CPU_COUNT = multiprocessing.cpu_count()
-except:
-    CPU_COUNT = 2
+import multiprocessing
+CPU_COUNT = multiprocessing.cpu_count()
 
 
 class GuiLockError(Exception):
@@ -46,7 +43,7 @@ class WindowManager(object):
         if self._gui_lock:
             raise GuiLockError(\
             'The gui lock can only be acquired by one toolkit per session. \
-            The lock is already aquired by %s' % self._guikit)
+            The lock is already acquired by %s' % self._guikit)
         else:
             self._gui_lock = True
             self._guikit = str(kit)
@@ -211,7 +208,7 @@ class ThreadDispatch(object):
             self.chunks.append((img[(3 * height // 4):, :, :],
                                 stateimg[(3 * height // 4):, :, :]))
 
-        # if they dont have 1, or 4 or more, 2 is good.
+        # if they don't have 1, or 4 or more, 2 is good.
         else:
             self.chunks.append((img[:(height // 2), :, :],
                                 stateimg[:(height // 2), :, :]))
@@ -299,7 +296,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.add, channel, ammount)
         pool.run()
@@ -317,7 +315,8 @@ class ColorMixer(object):
             can be positive or negative.
 
         '''
-        assert channel in self.valid_channels
+        if channel not in self.valid_channels:
+            raise ValueError('assert_channel is not a valid channel.')
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.multiply, channel, ammount)
         pool.run()

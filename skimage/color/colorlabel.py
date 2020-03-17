@@ -109,8 +109,10 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha)
-    else:
+    elif kind == 'avg':
         return _label2rgb_avg(label, image, bg_label, bg_color)
+    else:
+        raise ValueError("`kind` must be either 'overlay' or 'avg'.")
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,

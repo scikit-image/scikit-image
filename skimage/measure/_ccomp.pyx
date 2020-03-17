@@ -4,18 +4,18 @@
 #cython: wraparound=False
 
 import numpy as np
-from .._shared.utils import warn
+from warnings import warn
 
 cimport numpy as cnp
 
 
 DTYPE = np.intp
-BG_NODE_NULL = -999
+cdef DTYPE_t BG_NODE_NULL = -999
 
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef long (* fun_ravel)(long, long, long, shape_info *)
+ctypedef long (* fun_ravel)(long, long, long, shape_info *) nogil
 
 
 # For having stuff concerning background in one place
@@ -35,7 +35,7 @@ cdef void get_bginfo(background_val, bginfo *ret) except *:
         ret.background_val = background_val
 
     # The node -999 doesn't exist, it will get subsituted by a meaningful value
-    # upon the first background pixel occurence
+    # upon the first background pixel occurrence
     ret.background_node = BG_NODE_NULL
     ret.background_label = 0
 
@@ -162,19 +162,19 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
 
 
 cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
-                                    DTYPE_t rindex, DTYPE_t idxdiff):
+                                    DTYPE_t rindex, DTYPE_t idxdiff) nogil:
     if data_p[rindex] == data_p[rindex + idxdiff]:
         join_trees(forest_p, rindex, rindex + idxdiff)
 
 
-cdef long ravel_index1D(long x, long y, long z, shape_info *shapeinfo):
+cdef long ravel_index1D(long x, long y, long z, shape_info *shapeinfo) nogil:
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
     return x
 
 
-cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo):
+cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo) nogil:
     """
     Ravel index of a 2D array. z is ignored
     """
@@ -182,7 +182,7 @@ cdef long ravel_index2D(long x, long y, long z, shape_info *shapeinfo):
     return ret
 
 
-cdef long ravel_index3D(long x, long y, long z, shape_info *shapeinfo):
+cdef long ravel_index3D(long x, long y, long z, shape_info *shapeinfo) nogil:
     """
     Ravel index of a 3D array
     """
@@ -371,8 +371,6 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
         # use the full connectivity by default
         connectivity = ndim
     elif neighbors is not None:
-        DeprecationWarning("The argument 'neighbors' is deprecated, use "
-                           "'connectivity' instead")
         # backwards-compatible neighbors recalc to connectivity,
         if neighbors == 4:
             connectivity = 1
@@ -381,20 +379,28 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
         else:
             raise ValueError("Neighbors must be either 4 or 8, got '%d'.\n"
                              % neighbors)
+        # not sure why stacklevel should only be 2 not 3. Maybe cython
+        # is stripping away a stacklevel????
+        warn("The argument 'neighbors' is deprecated and will be removed in "
+             "scikit-image 0.18, use 'connectivity' instead. "
+             "For neighbors={neighbors}, use connectivity={connectivity}"
+             "".format(neighbors=neighbors, connectivity=connectivity),
+             stacklevel=2)
 
     if not 1 <= connectivity <= ndim:
         raise ValueError(
             "Connectivity below 1 or above %d is illegal."
             % ndim)
 
-    scanBG(data_p, forest_p, &shapeinfo, &bg)
-    # the data are treated as degenerated 3D arrays if needed
-    # witout any performance sacrifice
-    scan3D(data_p, forest_p, &shapeinfo, &bg, connectivity)
-
+    cdef DTYPE_t conn = connectivity
     # Label output
     cdef DTYPE_t ctr
-    ctr = resolve_labels(data_p, forest_p, &shapeinfo, &bg)
+    with nogil:
+        scanBG(data_p, forest_p, &shapeinfo, &bg)
+        # the data are treated as degenerated 3D arrays if needed
+        # without any performance sacrifice
+        scan3D(data_p, forest_p, &shapeinfo, &bg, conn)
+        ctr = resolve_labels(data_p, forest_p, &shapeinfo, &bg)
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
     if data.dtype == np.int32:
@@ -410,7 +416,7 @@ def label_cython(input_, neighbors=None, background=None, return_num=False,
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
-                            shape_info *shapeinfo, bginfo *bg):
+                            shape_info *shapeinfo, bginfo *bg) nogil:
     """
     We iterate through the provisional labels and assign final labels based on
     our knowledge of prov. labels relationship.
@@ -441,7 +447,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
 
 
 cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg):
+                 bginfo *bg) nogil:
     """
     Settle all background pixels now and don't bother with them later.
     Since this only requires one linar sweep through the array, it is fast
@@ -485,7 +491,7 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z) nogil:
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
@@ -505,7 +511,7 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z):
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z) nogil:
     """
     Perform forward scan on a 2D array.
     """
@@ -556,7 +562,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity):
+                 bginfo *bg, DTYPE_t connectivity) nogil:
     """
     Perform forward scan on a 3D array.
 

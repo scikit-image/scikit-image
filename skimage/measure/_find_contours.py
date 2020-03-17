@@ -1,5 +1,5 @@
 import numpy as np
-from . import _find_contours_cy
+from ._find_contours_cy import _get_contour_segments
 
 from collections import deque
 
@@ -7,7 +7,9 @@ _param_options = ('high', 'low')
 
 
 def find_contours(array, level,
-                  fully_connected='low', positive_orientation='low'):
+                  fully_connected='low', positive_orientation='low',
+                  *,
+                  mask=None):
     """Find iso-valued contours in a 2D array for a given level value.
 
     Uses the "marching squares" method to compute a the iso-valued contours of
@@ -30,6 +32,10 @@ def find_contours(array, level,
          contours will wind counter- clockwise around elements below the
          iso-value. Alternately, this means that low-valued elements are always
          on the left of the contour. (See below for details.)
+    mask : 2D ndarray of bool, or None
+        A boolean mask, True where we want to draw contours.
+        Note that NaN values are always excluded from the considered region
+        (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
@@ -58,7 +64,8 @@ def find_contours(array, level,
     with the 'fully_connected' parameter.
 
     Output contours are not guaranteed to be closed: contours which intersect
-    the array edge will be left open. All other contours will be closed. (The
+    the array edge or a masked-off region (either where mask is False or where
+    array is NaN) will be left open. All other contours will be closed. (The
     closed-ness of a contours can be tested by checking whether the beginning
     point is the same as the end point.)
 
@@ -100,67 +107,62 @@ def find_contours(array, level,
     >>> a = np.zeros((3, 3))
     >>> a[0, 0] = 1
     >>> a
-    array([[ 1.,  0.,  0.],
-           [ 0.,  0.,  0.],
-           [ 0.,  0.,  0.]])
+    array([[1., 0., 0.],
+           [0., 0., 0.],
+           [0., 0., 0.]])
     >>> find_contours(a, 0.5)
-    [array([[ 0. ,  0.5],
-           [ 0.5,  0. ]])]
+    [array([[0. , 0.5],
+           [0.5, 0. ]])]
     """
-    array = np.asarray(array, dtype=np.double)
+    if fully_connected not in _param_options:
+        raise ValueError('Parameters "fully_connected" must be either '
+                         '"high" or "low".')
+    if positive_orientation not in _param_options:
+        raise ValueError('Parameters "positive_orientation" must be either '
+                         '"high" or "low".')
+    if array.shape[0] < 2 or array.shape[1] < 2:
+        raise ValueError("Input array must be at least 2x2.")
     if array.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
-    level = float(level)
-    if (fully_connected not in _param_options or
-       positive_orientation not in _param_options):
-        raise ValueError('Parameters "fully_connected" and'
-        ' "positive_orientation" must be either "high" or "low".')
-    point_list = _find_contours_cy.iterate_and_store(array, level,
-                                                     fully_connected == 'high')
-    contours = _assemble_contours(_take_2(point_list))
+    if mask is not None:
+        if mask.shape != array.shape:
+            raise ValueError('Parameters "array" and "mask"'
+                             ' must have same shape.')
+        if not np.can_cast(mask.dtype, bool, casting='safe'):
+            raise TypeError('Parameter "mask" must be a binary array.')
+        mask = mask.astype(np.uint8, copy=False)
+
+    segments = _get_contour_segments(array.astype(np.double), float(level),
+                                     fully_connected == 'high', mask=mask)
+    contours = _assemble_contours(segments)
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]
     return contours
 
 
-def _take_2(seq):
-    iterator = iter(seq)
-    while True:
-        try:
-            n1 = next(iterator)
-            n2 = next(iterator)
-            yield (n1, n2)
-        except StopIteration:
-            return
-
-
-def _assemble_contours(points_iterator):
+def _assemble_contours(segments):
     current_index = 0
     contours = {}
     starts = {}
     ends = {}
-    for from_point, to_point in points_iterator:
+    for from_point, to_point in segments:
         # Ignore degenerate segments.
         # This happens when (and only when) one vertex of the square is
         # exactly the contour level, and the rest are above or below.
-        # This degnerate vertex will be picked up later by neighboring squares.
+        # This degenerate vertex will be picked up later by neighboring
+        # squares.
         if from_point == to_point:
             continue
 
-        tail_data = starts.get(to_point)
-        head_data = ends.get(from_point)
+        tail, tail_num = starts.pop(to_point, (None, None))
+        head, head_num = ends.pop(from_point, (None, None))
 
-        if tail_data is not None and head_data is not None:
-            tail, tail_num = tail_data
-            head, head_num = head_data
+        if tail is not None and head is not None:
             # We need to connect these two contours.
             if tail is head:
                 # We need to closed a contour.
-                # Add the end point, and remove the contour from the
-                # 'starts' and 'ends' dicts.
+                # Add the end point
                 head.append(to_point)
-                del starts[to_point]
-                del ends[from_point]
             else:  # tail is not head
                 # We need to join two distinct contours.
                 # We want to keep the first contour segment created, so that
@@ -169,47 +171,36 @@ def _assemble_contours(points_iterator):
                     # tail was created second. Append tail to head.
                     head.extend(tail)
                     # remove all traces of tail:
-                    del starts[to_point]
-                    try:
-                        del ends[tail[-1]]
-                    except KeyError:
-                        pass
-                    del contours[tail_num]
-                    # remove the old end of head and add the new end.
-                    del ends[from_point]
+                    ends.pop(tail[-1])
+                    contours.pop(tail_num, None)
+                    # Update contour starts end ends
+                    starts[head[0]] = (head, head_num)
                     ends[head[-1]] = (head, head_num)
                 else:  # tail_num <= head_num
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
                     # remove all traces of head:
-                    del starts[head[0]]
-                    del ends[from_point]
-                    del contours[head_num]
-                    # remove the old start of tail and add the new start.
-                    del starts[to_point]
+                    starts.pop(head[0])
+                    contours.pop(head_num, None)
+                    # Update contour starts end ends
                     starts[tail[0]] = (tail, tail_num)
-        elif tail_data is None and head_data is None:
+                    ends[tail[-1]] = (tail, tail_num)
+        elif tail is None and head is None:
             # we need to add a new contour
-            current_index += 1
-            new_num = current_index
             new_contour = deque((from_point, to_point))
-            contours[new_num] = new_contour
-            starts[from_point] = (new_contour, new_num)
-            ends[to_point] = (new_contour, new_num)
-        elif tail_data is not None and head_data is None:
-            tail, tail_num = tail_data
+            contours[current_index] = new_contour
+            starts[from_point] = (new_contour, current_index)
+            ends[to_point] = (new_contour, current_index)
+            current_index += 1
+        elif head is None:  # tail is not None
             # We've found a single contour to which the new segment should be
             # prepended.
             tail.appendleft(from_point)
-            del starts[to_point]
             starts[from_point] = (tail, tail_num)
-        elif tail_data is None and head_data is not None:
-            head, head_num = head_data
+        else:  # tail is None and head is not None:
             # We've found a single contour to which the new segment should be
             # appended
             head.append(to_point)
-            del ends[from_point]
             ends[to_point] = (head, head_num)
-    # end iteration over from_ and to_ points
 
-    return [np.array(contour) for (num, contour) in sorted(contours.items())]
+    return [np.array(contour) for _, contour in sorted(contours.items())]

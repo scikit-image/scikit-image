@@ -17,11 +17,11 @@ inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
         https://en.wikipedia.org/wiki/Biharmonic_equation
 .. [3]  N.S.Hoang, S.B.Damelin, "On surface completion and image
         inpainting by biharmonic functions: numerical aspects",
-        https://arxiv.org/abs/1707.06567
+        :arXiv:`1707.06567`
 .. [4]  C. K. Chui and H. N. Mhaskar, MRA Contextual-Recovery Extension of
         Smooth Functions on Manifolds, Appl. and Comp. Harmonic Anal.,
         28 (2010), 104-113,
-        DOI: 10.1016/j.acha.2009.04.004
+        :DOI:`10.1016/j.acha.2009.04.004`
 """
 
 import numpy as np

@@ -114,9 +114,21 @@ outliers = inliers == False
 
 
 # compare "true" and estimated transform parameters
-print(tform.scale, tform.translation, tform.rotation)
-print(model.scale, model.translation, model.rotation)
-print(model_robust.scale, model_robust.translation, model_robust.rotation)
+print("Ground truth:")
+print(f"Scale: ({tform.scale[1]:.4f}, {tform.scale[0]:.4f}), "
+      f"Translation: ({tform.translation[1]:.4f}, "
+      f"{tform.translation[0]:.4f}), "
+      f"Rotation: {-tform.rotation:.4f}")
+print("Affine transform:")
+print(f"Scale: ({model.scale[0]:.4f}, {model.scale[1]:.4f}), "
+      f"Translation: ({model.translation[0]:.4f}, "
+      f"{model.translation[1]:.4f}), "
+      f"Rotation: {model.rotation:.4f}")
+print("RANSAC:")
+print(f"Scale: ({model_robust.scale[0]:.4f}, {model_robust.scale[1]:.4f}), "
+      f"Translation: ({model_robust.translation[0]:.4f}, "
+      f"{model_robust.translation[1]:.4f}), "
+      f"Rotation: {model_robust.rotation:.4f}")
 
 # visualize correspondence
 fig, ax = plt.subplots(nrows=2, ncols=1)

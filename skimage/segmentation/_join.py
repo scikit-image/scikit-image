@@ -62,7 +62,7 @@ def relabel_sequential(label_field, offset=1):
     Parameters
     ----------
     label_field : numpy array of int, arbitrary shape
-        An array of labels.
+        An array of labels, which must be non-negative integers.
     offset : int, optional
         The return labels will start at `offset`, which should be
         strictly positive.
@@ -72,14 +72,16 @@ def relabel_sequential(label_field, offset=1):
     relabeled : numpy array of int, same shape as `label_field`
         The input label field with labels mapped to
         {offset, ..., number_of_labels + offset - 1}.
+        The data type will be the same as `label_field`, except when
+        offset + number_of_labels causes overflow of the current data type.
     forward_map : numpy array of int, shape ``(label_field.max() + 1,)``
         The map from the original label space to the returned label
         space. Can be used to re-apply the same mapping. See examples
-        for usage.
+        for usage. The data type will be the same as `relabeled`.
     inverse_map : 1D numpy array of int, of length offset + number of labels
         The map from the new label space to the original space. This
         can be used to reconstruct the original label field from the
-        relabeled one.
+        relabeled one. The data type will be the same as `relabeled`.
 
     Notes
     -----
@@ -99,11 +101,11 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
     >>> fw
-    array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 5])
+    array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5])
     >>> inv
     array([ 0,  1,  5,  8, 42, 99])
     >>> (fw[label_field] == relab).all()
@@ -114,20 +116,26 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
     """
-    m = label_field.max()
-    if not np.issubdtype(label_field.dtype, np.signedinteger):
-        new_type = np.min_scalar_type(int(m))
+    offset = int(offset)
+    if offset <= 0:
+        raise ValueError("Offset must be strictly positive.")
+    if np.min(label_field) < 0:
+        raise ValueError("Cannot relabel array that contains negative values.")
+    max_label = int(label_field.max()) # Ensure max_label is an integer
+    if not np.issubdtype(label_field.dtype, np.integer):
+        new_type = np.min_scalar_type(max_label)
         label_field = label_field.astype(new_type)
-        m = m.astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
-    if m == len(labels0):  # nothing to do, already 1...n labels
-        return label_field, labels, labels
-    forward_map = np.zeros(m + 1, int)
-    forward_map[labels0] = np.arange(offset, offset + len(labels0))
-    if not (labels == 0).any():
-        labels = np.concatenate(([0], labels))
-    inverse_map = np.zeros(offset - 1 + len(labels), dtype=np.intp)
-    inverse_map[(offset - 1):] = labels
+    new_max_label = offset - 1 + len(labels0)
+    new_labels0 = np.arange(offset, new_max_label + 1)
+    output_type = label_field.dtype
+    required_type = np.min_scalar_type(new_max_label)
+    if np.dtype(required_type).itemsize > np.dtype(label_field.dtype).itemsize:
+        output_type = required_type
+    forward_map = np.zeros(max_label + 1, dtype=output_type)
+    forward_map[labels0] = new_labels0
+    inverse_map = np.zeros(new_max_label + 1, dtype=output_type)
+    inverse_map[offset:] = labels0
     relabeled = forward_map[label_field]
     return relabeled, forward_map, inverse_map

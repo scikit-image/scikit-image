@@ -13,12 +13,12 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     ----------
     image : ndarray
         Input image data. Will be converted to float.
-    mode : str
+    mode : str, optional
         One of the following strings, selecting the type of noise to add:
 
         - 'gaussian'  Gaussian-distributed additive noise.
         - 'localvar'  Gaussian-distributed additive noise, with specified
-                      local variance at each point of `image`
+                      local variance at each point of `image`.
         - 'poisson'   Poisson-distributed noise generated from the data.
         - 'salt'      Replaces random pixels with 1.
         - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
@@ -28,27 +28,27 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
                       images.
         - 'speckle'   Multiplicative noise using out = image + n*image, where
                       n is uniform noise with specified mean & variance.
-    seed : int
+    seed : int, optional
         If provided, this will set the random seed before generating noise,
         for valid pseudo-random comparisons.
-    clip : bool
+    clip : bool, optional
         If True (default), the output will be clipped after noise applied
         for modes `'speckle'`, `'poisson'`, and `'gaussian'`. This is
         needed to maintain the proper image data range. If False, clipping
         is not applied, and the output may extend beyond the range [-1, 1].
-    mean : float
+    mean : float, optional
         Mean of random distribution. Used in 'gaussian' and 'speckle'.
         Default : 0.
-    var : float
+    var : float, optional
         Variance of random distribution. Used in 'gaussian' and 'speckle'.
         Note: variance = (standard deviation) ** 2. Default : 0.01
-    local_vars : ndarray
+    local_vars : ndarray, optional
         Array of positive floats, same shape as `image`, defining the local
         variance at every image point. Used in 'localvar'.
-    amount : float
+    amount : float, optional
         Proportion of image pixels to replace with noise on range [0, 1].
         Used in 'salt', 'pepper', and 'salt & pepper'. Default : 0.05
-    salt_vs_pepper : float
+    salt_vs_pepper : float, optional
         Proportion of salt vs. pepper noise for 's&p' on range [0, 1].
         Higher values represent more salt. Default : 0.5 (equal amounts)
 
@@ -68,7 +68,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     Because of the prevalence of exclusively positive floating-point images in
     intermediate calculations, it is not possible to intuit if an input is
-    signed based on dtype alone. Instead, negative values are explicity
+    signed based on dtype alone. Instead, negative values are explicitly
     searched for. Only if found does this function assume signed input.
     Unexpected results only occur in rare, poorly exposes cases (e.g. if all
     values are above 50 percent gray in a signed `image`). In this event,

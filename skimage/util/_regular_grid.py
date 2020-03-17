@@ -65,7 +65,8 @@ def regular_grid(ar_shape, n_points):
     space_size = float(np.prod(ar_shape))
     if space_size <= n_points:
         return (slice(None), ) * ndim
-    stepsizes = (space_size / n_points) ** (1.0 / ndim) * np.ones(ndim)
+    stepsizes = np.full(ndim, (space_size / n_points) ** (1.0 / ndim),
+                        dtype='float64')
     if (sorted_dims < stepsizes).any():
         for dim in range(ndim):
             stepsizes[dim] = sorted_dims[dim]

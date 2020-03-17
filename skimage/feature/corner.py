@@ -5,9 +5,9 @@ from scipy import ndimage as ndi
 from scipy import stats
 
 from ..util import img_as_float
-from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D
-from ..feature.corner_cy import _corner_fast
+from .peak import peak_local_max
+from .util import _prepare_grayscale_input_2D
+from .corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
@@ -83,11 +83,11 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> Axx
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  1.,  0.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 1., 0., 1., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
@@ -103,7 +103,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     return Axx, Axy, Ayy
 
 
-def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
+def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute Hessian matrix.
 
     The Hessian matrix is defined as::
@@ -112,7 +112,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
             [Hrc Hcc]
 
     which is computed by convolving the image with the second derivatives
-    of the Gaussian kernel in the respective x- and y-directions.
+    of the Gaussian kernel in the respective r- and c-directions.
 
     Parameters
     ----------
@@ -126,11 +126,11 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    order : {'xy', 'rc'}, optional
+    order : {'rc', 'xy'}, optional
         This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'xy' indicates the usage
-        of the last axis initially (Hxx, Hxy, Hyy), whilst 'rc' indicates
-        the use of the first axis initially (Hrr, Hrc, Hcc).
+        the image axes in gradient computation. 'rc' indicates the use of
+        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
+        usage of the last axis initially (Hxx, Hxy, Hyy)
 
     Returns
     -------
@@ -146,7 +146,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
     >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 4
-    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order = 'rc')
+    >>> Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
     >>> Hrc
     array([[ 0.,  0.,  0.,  0.,  0.],
            [ 0.,  1.,  0., -1.,  0.],
@@ -159,18 +159,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order=None):
 
     gaussian_filtered = ndi.gaussian_filter(image, sigma=sigma,
                                             mode=mode, cval=cval)
-
-    if order is None:
-        if image.ndim == 2:
-            # The legacy 2D code followed (x, y) convention, so we swap the axis
-            # order to maintain compatibility with old code
-            warn('deprecation warning: the default order of the hessian matrix values '
-                 'will be "row-column" instead of "xy" starting in skimage version 0.15. '
-                 'Use order="rc" or order="xy" to set this explicitly')
-            order = 'xy'
-        else:
-            order = 'rc'
-
 
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
@@ -285,18 +273,18 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> square[2, 2] = 1
     >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
     >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  4.,  0.,  4.,  0.],
-           [ 0.,  2.,  4.,  2.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
 
     """
 
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
 
-def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
+def hessian_matrix_eigvals(H_elems):
     """Compute Eigenvalues of Hessian matrix.
 
     Parameters
@@ -304,12 +292,6 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
     H_elems : list of ndarray
         The upper-diagonal elements of the Hessian matrix, as returned
         by `hessian_matrix`.
-    Hxy : ndarray, deprecated
-        Element of the Hessian matrix for each pixel in the input image.
-    Hyy : ndarray, deprecated
-        Element of the Hessian matrix for each pixel in the input image.
-    Hxx : ndarray, deprecated
-        Element of the Hessian matrix for each pixel in the input image.
 
     Returns
     -------
@@ -331,13 +313,6 @@ def hessian_matrix_eigvals(H_elems, Hxy=None, Hyy=None, Hxx=None):
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
     """
-    if Hxy is not None:
-        if Hxx is None:
-            Hxx = H_elems
-        H_elems = [Hxx, Hxy, Hyy]
-        warn('The API of `hessian_matrix_eigvals` has changed. Use a list of '
-             'elements instead of separate arguments. The old version of the '
-             'API will be removed in version 0.16.')
     if len(H_elems) == 3:  # Use fast Cython code for 2D
         eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
     else:
@@ -399,7 +374,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
     .. [1] Koenderink, J. J. & van Doorn, A. J.,
            "Surface shape and curvature scales",
            Image and Vision Computing, 1992, 10, 557-564.
-           DOI:10.1016/0262-8856(92)90076-F
+           :DOI:`10.1016/0262-8856(92)90076-F`
 
     Examples
     --------
@@ -447,6 +422,11 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     response : ndarray
         Kitchen and Rosenfeld response image.
 
+    References
+    ----------
+    .. [1] Kitchen, L., & Rosenfeld, A. (1982). Gray-level corner detection.
+           Pattern recognition letters, 1(2), 95-102.
+           :DOI:`10.1016/0167-8655(82)90020-4`
     """
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
@@ -503,8 +483,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -522,7 +501,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> corner_peaks(corner_harris(square), min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -573,8 +552,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -592,7 +570,8 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1,
+    ...              threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -639,8 +618,12 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -662,7 +645,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> corner_peaks(foerstner, min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -695,13 +678,13 @@ def corner_fast(image, n=12, threshold=0.15):
     ----------
     image : 2D ndarray
         Input image.
-    n : int
+    n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
         that should all be either brighter or darker w.r.t testpixel.
         A point c on the circle is darker w.r.t test pixel p if
         `Ic < Ip - threshold` and brighter if `Ic > Ip + threshold`. Also
         stands for the n in `FAST-n` corner detector.
-    threshold : float
+    threshold : float, optional
         Threshold used in deciding whether the pixels on the circle are
         brighter, darker or similar w.r.t. the test pixel. Decrease the
         threshold when more corners are desired and vice-versa.
@@ -713,8 +696,10 @@ def corner_fast(image, n=12, threshold=0.15):
 
     References
     ----------
-    .. [1] Edward Rosten and Tom Drummond
-           "Machine Learning for high-speed corner detection",
+    .. [1] Rosten, E., & Drummond, T. (2006, May). Machine learning for high-speed
+           corner detection. In European conference on computer vision (pp. 430-443).
+           Springer, Berlin, Heidelberg.
+           :DOI:`10.1007/11744023_34`
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
     .. [2] Wikipedia, "Features from accelerated segment test",
            https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
@@ -737,7 +722,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -779,9 +764,12 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-           foerstner87.fast.pdf
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] Förstner, W., & Gülch, E. (1987, June). A fast operator for detection and
+           precise location of distinct points, corners and centres of circular
+           features. In Proc. ISPRS intercommission conference on fast processing of
+           photogrammetric data (pp. 281-305).
+           https://cseweb.ucsd.edu/classes/sp02/cse252/foerstner/foerstner.pdf
+    .. [2] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -800,10 +788,11 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2,
+    ...                       threshold_rel=0)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
-    array([[ 4.5,  4.5]])
+    array([[4.5, 4.5]])
 
     """
 
@@ -926,9 +915,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
+def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None):
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
     """Find corners in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
@@ -939,39 +928,60 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=0.1,
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
 
+    See also
+    --------
+    skimage.feature.peak_local_max
+
+    Notes
+    -----
+    The `num_peaks` limit is applied before suppression of
+    connected peaks. If you want to limit the number of peaks
+    after suppression, you should set `num_peaks=np.inf` and
+    post-process the output of this function.
+
     Examples
     --------
     >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
-    array([[ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.]])
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 1., 1., 0.],
+           [0., 0., 0., 0., 0.]])
     >>> peak_local_max(response)
     array([[3, 3],
            [3, 2],
            [2, 3],
            [2, 2]])
-    >>> corner_peaks(response)
+    >>> corner_peaks(response, threshold_rel=0)
     array([[2, 2]])
 
     """
+    if threshold_rel is None:
+        threshold_rel = 0.1
+        warn("Until version 0.16, threshold_rel was set to 0.1 by default. "
+             "Starting from version 0.16, the default value is set to None. "
+             "Until version 0.18, a None value corresponds to a threshold "
+             "value of 0.1. "
+             "The default behavior will match skimage.feature.peak_local_max. "
+             "To avoid this warning, set threshold_rel=0.",
+             category=FutureWarning, stacklevel=2)
 
     peaks = peak_local_max(image, min_distance=min_distance,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
                            indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels)
+                           footprint=footprint, labels=labels,
+                           num_peaks_per_label=num_peaks_per_label)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())
         for r, c in coords:
             if peaks[r, c]:
-                peaks[r - min_distance:r + min_distance + 1,
-                      c - min_distance:c + min_distance + 1] = False
+                peaks[max((r - min_distance), 0):r + min_distance + 1,
+                      max((c - min_distance), 0):c + min_distance + 1] = False
                 peaks[r, c] = True
 
     if indices is True:
@@ -1000,8 +1010,7 @@ def corner_moravec(image, window_size=1):
 
     References
     ----------
-    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    .. [2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] https://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -1080,7 +1089,8 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1,
+    ...                        threshold_rel=0)
     >>> corners
     array([[3, 3],
            [3, 8],
