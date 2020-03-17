@@ -113,9 +113,7 @@ def h_maxima(image, h, selem=None):
 
     # Check for h value that is larger then range of the image. If this
     # is True then there are no h-maxima in the image.
-    im_min = np.min(image)
-    im_max = np.max(image)
-    if (h > (im_max - im_min)):
+    if (h > np.ptp(image)):
         return np.zeros(image.shape, dtype=np.uint8)
 
     # Check for floating point h value. For this to work properly
@@ -134,27 +132,44 @@ def h_maxima(image, h, selem=None):
     #   >>> b[0] == b[1]
     #   True
     #
-    if isinstance(h, float):
-        image = image.astype(np.float)
+    if np.issubdtype(type(h), np.floating) and \
+       np.issubdtype(image.dtype, np.integer):
+        if ((h % 1) != 0):
+            warn('possible precision loss converting image to '
+                 'floating point. To silence this warning, '
+                 'ensure image and h have same data type.',
+                 stacklevel=2)
+            image = image.astype(np.float_)
+        else:
+            h = image.dtype.type(h)
+
+    if (h == 0):
+        raise ValueError("h = 0.0 is ambiguous, use local_maxima() \
+        instead?")
 
     if np.issubdtype(image.dtype, np.floating):
-        if (h == 0.0):
-            raise ValueError("h = 0.0 is ambiguous, use local_maxima() \
-instead?")
+        # The purpose of the resolution variable is to allow for the
+        # small rounding errors that inevitably occur when doing
+        # floating point arithmetic. We want shifted_img to be
+        # gauranteed to be h less than image. If we only subtract h
+        # there may be pixels were shifted_img ends up being
+        # slightly greater than image - h.
+        #
+        # The resolution is scaled based on the pixel values in the
+        # image because floating point precision is relative. A
+        # very large value of 1.0e10 will have a large precision,
+        # say +-1.0e4, and a very small value of 1.0e-10 will have
+        # a very small precision, say +-1.0e-16.
+        #
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image - h - resolution
     else:
-        if (h == 0):
-            raise ValueError("h = 0 is ambiguous, use local_maxima() \
-instead?")
         shifted_img = _subtract_constant_clip(image, h)
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='dilation', selem=selem)
     residue_img = image - rec_img
-    h_max = np.zeros(image.shape, dtype=np.uint8)
-    h_max[residue_img >= h] = 1
-    return h_max
+    return (residue_img >= h).astype(np.uint8)
 
 
 def h_minima(image, h, selem=None):
