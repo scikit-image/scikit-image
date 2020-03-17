@@ -374,6 +374,12 @@ def test_adapthist_borders():
     assert norm_brightness_err(adapted[-width, :], img[-width, :]) > 1e-3
 
 
+def test_adapthist_clip_limit():
+    img = data.moon()
+    img_clahe = exposure.equalize_adapthist(img, clip_limit=1)
+    assert_array_equal(img, img_clahe)
+
+
 def peak_snr(img1, img2):
     """Peak signal to noise ratio of two images
 

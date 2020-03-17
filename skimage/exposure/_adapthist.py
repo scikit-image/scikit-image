@@ -70,6 +70,10 @@ def equalize_adapthist(image, kernel_size=None,
     .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
+
+    if clip_limit == 1.0:
+        return image  # is OK, immediately returns original image.
+
     image = img_as_uint(image)
     image = rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
 
@@ -82,7 +86,7 @@ def equalize_adapthist(image, kernel_size=None,
 
     kernel_size = [int(k) for k in kernel_size]
 
-    image = _clahe(image, kernel_size, clip_limit * nbins, nbins)
+    image = _clahe(image, kernel_size, clip_limit, nbins)
     image = img_as_float(image)
     return rescale_intensity(image)
 
@@ -112,12 +116,6 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     minimum and maximum value as the input image. A clip limit smaller than 1
     results in standard (non-contrast limited) AHE.
     """
-
-    if clip_limit == 1.0:
-        return image  # is OK, immediately returns original image.
-
-    clip_limit /= nbins
-
     row_step = int(image.shape[0] // np.ceil(image.shape[0] / kernel_size[0]))
     col_step = int(image.shape[1] // np.ceil(image.shape[1] / kernel_size[1]))
 
