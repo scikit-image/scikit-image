@@ -247,6 +247,44 @@ class TestExtrema(unittest.TestCase):
             error = diff(expected_result, out)
             assert error < eps
 
+    def test_h_minima_float_h(self):
+        """specific tests for h-minima float h parameter"""
+        data = np.array([[4, 4, 4, 4, 4],
+                         [4, 1, 1, 1, 4],
+                         [4, 1, 0, 1, 4],
+                         [4, 1, 1, 1, 4],
+                         [4, 4, 4, 4, 4]], dtype=np.uint8)
+
+        h_vals = np.linspace(1.0, 2.0, 100)
+        failures = 0
+        for i in range(h_vals.size):
+            minima = extrema.h_minima(data, h_vals[i])
+
+            if (minima[2, 2] == 0):
+                failures += 1
+
+        assert (failures == 0)
+
+    def test_h_minima_large_h(self):
+        """test that h-minima works correctly for large h"""
+        data = np.array([[14, 14, 14, 14, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 11, 10, 11, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 14, 14, 14, 14]], dtype=np.uint8)
+
+        maxima = extrema.h_minima(data, 5)
+        assert (np.sum(maxima) == 0)
+
+        data = np.array([[14, 14, 14, 14, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 11, 10, 11, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 14, 14, 14, 14]], dtype=np.float32)
+
+        maxima = extrema.h_minima(data, 5.0)
+        assert (np.sum(maxima) == 0)
+
 
 class TestLocalMaxima(unittest.TestCase):
     """Some tests for local_minima are included as well."""

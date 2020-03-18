@@ -113,7 +113,7 @@ def h_maxima(image, h, selem=None):
 
     # Check for h value that is larger then range of the image. If this
     # is True then there are no h-maxima in the image.
-    if (h > np.ptp(image)):
+    if h > np.ptp(image):
         return np.zeros(image.shape, dtype=np.uint8)
 
     # Check for floating point h value. For this to work properly
@@ -144,8 +144,8 @@ def h_maxima(image, h, selem=None):
             h = image.dtype.type(h)
 
     if (h == 0):
-        raise ValueError("h = 0.0 is ambiguous, use local_maxima() \
-        instead?")
+        raise ValueError("h = 0 is ambiguous, use local_maxima() "
+                         "instead?")
 
     if np.issubdtype(image.dtype, np.floating):
         # The purpose of the resolution variable is to allow for the
@@ -235,10 +235,25 @@ def h_minima(image, h, selem=None):
 
     The resulting image will contain 3 local minima.
     """
+    if h > np.ptp(image):
+        return np.zeros(image.shape, dtype=np.uint8)
+
+    if np.issubdtype(type(h), np.floating) and \
+       np.issubdtype(image.dtype, np.integer):
+        if ((h % 1) != 0):
+            warn('possible precision loss converting image to '
+                 'floating point. To silence this warning, '
+                 'ensure image and h have same data type.',
+                 stacklevel=2)
+            image = image.astype(np.float_)
+        else:
+            h = image.dtype.type(h)
+
+    if (h == 0):
+        raise ValueError("h = 0 is ambiguous, use local_minima() "
+                         "instead?")
+
     if np.issubdtype(image.dtype, np.floating):
-        if (h == 0.0):
-            raise ValueError("h = 0.0 is ambiguous, use local_minima() \
-instead?")
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
         shifted_img = image + h + resolution
     else:
@@ -247,9 +262,7 @@ instead?")
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='erosion', selem=selem)
     residue_img = rec_img - image
-    h_min = np.zeros(image.shape, dtype=np.uint8)
-    h_min[residue_img >= h] = 1
-    return h_min
+    return (residue_img >= h).astype(np.uint8)
 
 
 def _set_edge_values_inplace(image, value):
