@@ -375,9 +375,16 @@ def test_adapthist_borders():
 
 
 def test_adapthist_clip_limit():
-    img = data.moon()
-    img_clahe = exposure.equalize_adapthist(img, clip_limit=1)
-    assert_array_equal(img, img_clahe)
+    img_u = data.moon()
+    img_f = util.img_as_float(img_u)
+
+    # uint8 input
+    img_clahe = exposure.equalize_adapthist(img_u, clip_limit=1)
+    assert_array_equal(img_f, img_clahe)
+
+    # float64 input
+    img_clahe = exposure.equalize_adapthist(img_f, clip_limit=1)
+    assert_array_equal(img_f, img_clahe)
 
 
 def peak_snr(img1, img2):
