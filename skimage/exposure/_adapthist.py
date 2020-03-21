@@ -51,7 +51,7 @@ def equalize_adapthist(image, kernel_size=None,
     Returns
     -------
     out : (M, N[, C]) ndarray
-        Equalized image.
+        Equalized image with float64 dtype.
 
     See Also
     --------
