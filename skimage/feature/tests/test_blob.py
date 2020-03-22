@@ -335,12 +335,12 @@ def test_blob_doh_log_scale():
     assert abs(b[1] - 130) <= thresh
     assert abs(radius(b) - 20) <= thresh
 
-    b = s[1]
+    b = s[2]
     assert abs(b[0] - 460) <= thresh
     assert abs(b[1] - 50) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    b = s[2]
+    b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b) - 40) <= thresh

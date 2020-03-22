@@ -318,14 +318,14 @@ def test_denoise_nl_means_2d(fast_mode):
     for s in [sigma, 0]:
         denoised = restoration.denoise_nl_means(img, 7, 5, 0.2,
                                                 fast_mode=fast_mode,
-                                                multichannel=True,
+                                                multichannel=False,
                                                 sigma=s)
         # make sure noise is reduced
         assert_(img.std() > denoised.std())
 
         denoised_f32 = restoration.denoise_nl_means(img_f32, 7, 5, 0.2,
                                                     fast_mode=fast_mode,
-                                                    multichannel=True,
+                                                    multichannel=False,
                                                     sigma=s)
         # make sure noise is reduced
         assert_(img.std() > denoised_f32.std())
@@ -415,11 +415,11 @@ def test_no_denoising_for_small_h(fast_mode, dtype):
     # very small h should result in no averaging with other patches
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,
                                             fast_mode=fast_mode,
-                                            multichannel=True)
+                                            multichannel=False)
     assert_(np.allclose(denoised, img))
     denoised = restoration.denoise_nl_means(img, 7, 5, 0.01,
                                             fast_mode=fast_mode,
-                                            multichannel=True)
+                                            multichannel=False)
     assert_(np.allclose(denoised, img))
 
 
@@ -448,13 +448,13 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
 
     with expected_warnings(['Image dtype is not float']):
         assert restoration.denoise_nl_means(
-            img, fast_mode=fast_mode).dtype == 'float64'
+            img, patch_distance=2, fast_mode=fast_mode).dtype == 'float64'
 
     assert restoration.denoise_nl_means(
-        img_f32, fast_mode=fast_mode).dtype == img_f32.dtype
+        img_f32, patch_distance=2, fast_mode=fast_mode).dtype == img_f32.dtype
 
     assert restoration.denoise_nl_means(
-        img_f64, fast_mode=fast_mode).dtype == img_f64.dtype
+        img_f64, patch_distance=2, fast_mode=fast_mode).dtype == img_f64.dtype
 
 
 @pytest.mark.parametrize(
