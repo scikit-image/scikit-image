@@ -32,69 +32,85 @@ class _Lddmm:
 
     def __init__(
         self,
+        # Images.
         template,
         target,
-        template_resolution=1,
-        target_resolution=1,
-        check_artifacts=False,
-        num_iterations=200,
-        num_affine_only_iterations=50,
-        num_timesteps=5,
+        # Image resolutions.
+        template_resolution=None,
+        target_resolution=None,
+        # Iterations.
+        num_iterations=None,
+        num_affine_only_iterations=None,
+        # Stepsizes.
+        affine_stepsize=None,
+        deformative_stepsize=None,
+        # Velocity field specifiers.
+        sigma_regularization=None,
+        smooth_length=None,
+        num_timesteps=None,
+        # Contrast map specifiers.
+        contrast_order=None,
+        spatially_varying_contrast_map=None,
+        contrast_maxiter=None,
+        contrast_tolerance=None,
+        sigma_contrast=None,
+        # Artifact specifiers.
+        check_artifacts=None,
+        sigma_artifact=None,
+        # Smoothness vs. accuracy tradeoff.
+        sigma_matching=None,
+        # Initial values.
         initial_affine=None,
         initial_velocity_fields=None,
         initial_contrast_coefficients=None,
-        smooth_length=None,
-        contrast_order=1,
-        contrast_tolerance=1e-5,
-        contrast_maxiter=100,
-        sigma_contrast=1e-2,
-        sigma_matching=None,
-        sigma_artifact=None,
-        sigma_regularization=None,
-        translational_stepsize=None,
-        linear_stepsize=None,
-        deformative_stepsize=None,
-        spatially_varying_contrast_map=False,
-        calibrate=False,
-        track_progress_every_n=0,
+        # Diagnostic outputs.
+        calibrate=None,
+        track_progress_every_n=None,
     ):    
-        # Inputs.
+
+        # Constant inputs.
 
         # Images.
         self.template = _validate_ndarray(template)
         self.target = _validate_ndarray(target, required_ndim=self.template.ndim)
 
-        # Resolution, axes, & coords.
-        self.template_resolution = _validate_scalar_to_multi(template_resolution, self.template.ndim)
-        self.template_axes = _compute_axes(self.template.shape, self.template_resolution)
-        self.template_coords = _compute_coords(self.template.shape, self.template_resolution)
-        self.target_resolution = _validate_scalar_to_multi(target_resolution, self.target.ndim)
-        self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
-        self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
+        # Resolution.
+        self.template_resolution = _validate_scalar_to_multi(template_resolution if template_resolution is not None else 1, self.template.ndim)
+        self.target_resolution = _validate_scalar_to_multi(target_resolution if target_resolution is not None else 1, self.target.ndim)
 
-        # Constants.
-        self.translational_stepsize = float(translational_stepsize)
-        self.linear_stepsize = float(linear_stepsize)
-        self.deformative_stepsize = float(deformative_stepsize)
-        self.contrast_order = int(contrast_order)
+        # Iterations.
+        self.num_iterations = int(num_iterations) if num_iterations is not None else 200
+        self.num_affine_only_iterations = int(num_affine_only_iterations) if num_affine_only_iterations is not None else 50
+        # Stepsizes.
+        self.affine_stepsize = float(affine_stepsize) if affine_stepsize is not None else 0.2
+        self.deformative_stepsize = float(deformative_stepsize) if deformative_stepsize is not None else 0
+        # Velocity field specifiers.
+        self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
+        self.smooth_length = float(smooth_length) if smooth_length is not None else 2 * np.max(self.template_resolution)
+        self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
+        # Contrast map specifiers.
+        self.contrast_order = int(contrast_order) if contrast_order else 1
         if self.contrast_order < 1: raise ValueError(f"contrast_order must be at least 1.\ncontrast_order: {self.contrast_order}")
-        self.contrast_tolerance = contrast_tolerance
-        self.contrast_maxiter = contrast_maxiter
-        self.sigma_contrast = sigma_contrast
-        self.sigma_regularization = sigma_regularization or 10 * np.max(self.template_resolution)
-        self.sigma_matching = sigma_matching or np.std(self.target)
-        self.sigma_artifact = sigma_artifact or 5 * self.sigma_matching
-        self.smooth_length = smooth_length or 2 * np.max(self.template_resolution)
-        self.spatially_varying_contrast_map = spatially_varying_contrast_map
-        self.calibrate = calibrate
-        self.track_progress_every_n = int(track_progress_every_n)
-
-        # Flags.
-        self.check_artifacts = check_artifacts
+        self.spatially_varying_contrast_map = bool(spatially_varying_contrast_map) if spatially_varying_contrast_map is not None else False
+        self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
+        self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
+        self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
+        # Artifact specifiers.
+        self.check_artifacts = bool(check_artifacts) if check_artifacts is not None else False
+        self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * float(sigma_matching) if sigma_matching else np.std(self.target) # Default: 5 * self.sigma_matching.
+        # Smoothness vs. accuracy tradeoff.
+        self.sigma_matching = float(sigma_matching) if sigma_matching else np.std(self.target)
+        # Diagnostic outputs.
+        self.calibrate = bool(calibrate) if calibrate is not None else False
+        self.track_progress_every_n = int(track_progress_every_n) if track_progress_every_n is not None else 0
 
         # Constructions.
 
         # Constants.
+        self.template_axes = _compute_axes(self.template.shape, self.template_resolution)
+        self.template_coords = _compute_coords(self.template.shape, self.template_resolution)
+        self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
+        self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
         self.artifact_mean_value = np.max(self.target) if self.sigma_artifact is not None else 0 # TODO: verify this is right.
         self.fourier_high_pass_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
@@ -102,16 +118,13 @@ class _Lddmm:
             1 - self.smooth_length**2 
             * np.sum((-2  + 2 * np.cos(2 * np.pi * fourier_velocity_fields_coords * self.template_resolution)) / self.template_resolution**2, axis=-1)
         )**self.fourier_high_pass_filter_power
-        self.num_iterations = num_iterations
-        self.num_affine_only_iterations = num_affine_only_iterations
-        self.num_timesteps = num_timesteps
         self.delta_t = 1 / self.num_timesteps
 
         # Dynamics.
         if initial_affine is None:
             initial_affine = np.eye(template.ndim + 1)
         self.affine = _validate_ndarray(initial_affine, required_ndim=2, reshape_to_shape=(self.template.ndim + 1, self.template.ndim + 1))
-        self.velocity_fields = initial_velocity_fields or np.zeros((*self.template.shape, self.num_timesteps, self.template.ndim))
+        self.velocity_fields = initial_velocity_fields if initial_velocity_fields is not None else np.zeros((*self.template.shape, self.num_timesteps, self.template.ndim))
         self.phi = np.copy(self.template_coords)
         self.affine_phi = np.copy(self.template_coords)
         self.phi_inv = np.copy(self.template_coords)
@@ -130,12 +143,12 @@ class _Lddmm:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros((*self.target.shape, self.contrast_order + 1))
             else:
-                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, broadcast_to_shape=(*self.target.shape, self.contrast_order + 1))
+                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, reshape_to_shape=(*self.target.shape, self.contrast_order + 1))
         else:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros(self.contrast_order + 1)
             else:
-                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, broadcast_to_shape=(self.contrast_order + 1))
+                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, reshape_to_shape=(self.contrast_order + 1))
         self.contrast_coefficients[..., 0] = np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template)
         if self.contrast_order > 1: self.contrast_coefficients[..., 1] = np.std(self.target) / np.std(self.template)
         self.contrast_polynomial_basis = np.empty((*self.target.shape, self.contrast_order + 1))
@@ -448,21 +461,17 @@ class _Lddmm:
         # Reshape and broadcast deformed_template_gradient from shape (x,y,z,3) to (x,y,z,3,1) to (x,y,z,3,4) - for a 3D example.
         deformed_template_gradient_broadcast = np.repeat(np.expand_dims(deformed_template_gradient, -1), repeats=self.target.ndim + 1, axis=-1)
 
-        # Concatenate a 4th row of 0's to the 2nd-last dimension of deformed_template_gradient_broadcast - for a 3D example.
-        zeros = np.zeros((*self.target.shape, 1, self.target.ndim + 1))
-        deformed_template_gradient_broadcast = np.concatenate((deformed_template_gradient_broadcast, zeros), -2)
-
         # Construct homogenous_target_coords by appending 1's at the end of the last dimension throughout self.target_coords.
         ones = np.ones((*self.target.shape, 1))
         homogenous_target_coords = np.concatenate((self.target_coords, ones), -1)
         
         # For a 3D example:
 
-        # deformed_template_gradient_broadcast  has shape (x,y,z,4,4).
+        # deformed_template_gradient_broadcast  has shape (x,y,z,3,4).
         # homogenous_target_coords              has shape (x,y,z,4).
 
         # To repeat homogenous_target_coords along the 2nd-last dimension of deformed_template_gradient_broadcast, 
-        # we reshape homogenous_target_coords from shape (x,y,z,4) to shape (x,y,z,1,4) and let that broadcast to shape (x,y,z,4,4).
+        # we reshape homogenous_target_coords from shape (x,y,z,4) to shape (x,y,z,1,4) and let that broadcast to shape (x,y,z,3,4).
 
         matching_affine_inv_gradient = deformed_template_gradient_broadcast * np.expand_dims(homogenous_target_coords, -2)
 
@@ -475,7 +484,28 @@ class _Lddmm:
 
         affine_inv_gradient = matching_affine_inv_gradient * d_matching_d_deformed_template[...,None,None]
 
-        return np.sum(affine_inv_gradient, tuple(range(self.target.ndim)))
+        # Note: before implementing Gauss Newton below, affine_inv_gradient_reduction as defined below was the previous returned value for the affine_inv_gradient.
+        # For 3D case, this has shape (3,4).
+        affine_inv_gradient_reduction = np.sum(affine_inv_gradient, tuple(range(self.target.ndim)))
+
+        # Reshape to a single vector. For a 3D case this becomes shape (12,).
+        affine_inv_gradient_reduction = affine_inv_gradient_reduction.ravel()
+
+        # For a 3D case, matching_affine_inv_gradient has shape (x,y,z,3,4).
+        # For a 3D case, affine_inv_hessian_approx is matching_affine_inv_gradient reshaped to shape (x,y,z,12,1), 
+        # then matrix multiplied by itself transposed on the last two dimensions, then summed over the spatial dimensions
+        # to resultant shape (12,12).
+        affine_inv_hessian_approx = matching_affine_inv_gradient.reshape(*matching_affine_inv_gradient.shape[:-2], -1, 1)
+        affine_inv_hessian_approx = affine_inv_hessian_approx @ affine_inv_hessian_approx.reshape(*affine_inv_hessian_approx.shape[:-2], 1, -1)
+        affine_inv_hessian_approx = np.sum(affine_inv_hessian_approx, tuple(range(self.target.ndim)))
+
+        # Solve for affine_inv_gradient.
+        affine_inv_gradient = solve(affine_inv_hessian_approx, affine_inv_gradient_reduction, assume_a='pos').reshape(matching_affine_inv_gradient.shape[-2:])
+        # Append a row of zeros at the end of the 0th dimension.
+        zeros = np.zeros((1, self.target.ndim + 1))
+        affine_inv_gradient = np.concatenate((affine_inv_gradient, zeros), 0)
+
+        return affine_inv_gradient
 
 
     def _update_affine(self, affine_inv_gradient):
@@ -489,14 +519,9 @@ class _Lddmm:
             affines
         """
         
-
-        linear_and_translational_stepsize_matrix = np.zeros_like(self.affine)
-        linear_and_translational_stepsize_matrix[:-1, :-1] = self.linear_stepsize
-        linear_and_translational_stepsize_matrix[:-1, -1] = self.translational_stepsize
-        
         affine_inv = inv(self.affine)
 
-        affine_inv -= affine_inv_gradient * linear_and_translational_stepsize_matrix
+        affine_inv -= affine_inv_gradient * self.affine_stepsize
 
         self.affine = inv(affine_inv)
 
@@ -670,30 +695,42 @@ r'''
                                                                                             
 '''
 
+#TODO: fix docstring example re affine_stepsize
 def lddmm_register(
+    # Images.
     template,
     target,
-    template_resolution=1,
-    target_resolution=1,
-    translational_stepsize=0,
-    linear_stepsize=0,
-    deformative_stepsize=0,
-    sigma_regularization=0,
-    num_iterations=200,
-    num_affine_only_iterations=50,
+    # Image resolutions.
+    template_resolution=None,
+    target_resolution=None,
+    # Iterations.
+    num_iterations=None,
+    num_affine_only_iterations=None,
+    # Stepsizes.
+    affine_stepsize=None,
+    deformative_stepsize=None,
+    # Velocity field specifiers.
+    sigma_regularization=None,
+    smooth_length=None,
+    num_timesteps=None,
+    # Contrast map specifiers.
+    contrast_order=None,
+    spatially_varying_contrast_map=None,
+    contrast_maxiter=None,
+    contrast_tolerance=None,
+    sigma_contrast=None,
+    # Artifact specifiers.
+    check_artifacts=None,
+    sigma_artifact=None,
+    # Smoothness vs. accuracy tradeoff.
+    sigma_matching=None,
+    # Initial values.
     initial_affine=None,
     initial_velocity_fields=None,
     initial_contrast_coefficients=None,
-    num_timesteps=5,
-    smooth_length=None,
-    contrast_order=1,
-    contrast_tolerance=1e-5,
-    contrast_maxiter=100,
-    sigma_contrast=1e-2,
-    sigma_matching=None,
-    spatially_varying_contrast_map=False,
-    calibrate=False,
-    track_progress_every_n=0,
+    # Diagnostic outputs.
+    calibrate=None,
+    track_progress_every_n=None,
 ):
     """
     Compute a registration between template and target, to be applied with apply_lddmm.
@@ -701,28 +738,31 @@ def lddmm_register(
     Args:
         template (np.ndarray): The ideally clean template image being registered to the target.
         target (np.ndarray): The potentially messier target image being registered to.
-        template_resolution (float, list, optional): A scalar or list of scalars indicating the resolution of the template. Defaults to 1.
-        target_resolution (float, optional): A scalar or list of scalars indicating the resolution of the target. Defaults to 1.
-        translational_stepsize (float, optional): The stepsize for translational adjustments. Defaults to 0.
-        linear_stepsize (float, optional): The stepsize for linear adjustments. Defaults to 0.
-        deformative_stepsize (float, optional): The stepsize for deformative adjustments. Defaults to 0.
-        sigma_regularization (float, optional): A scalar indicating the freedom to deform. Defaults to 0.
+        template_resolution (float, list, optional): A scalar or list of scalars indicating the resolution of the template. Overrides 0 input. Defaults to 1.
+        target_resolution (float, optional): A scalar or list of scalars indicating the resolution of the target. Overrides 0 input. Defaults to 1.
         num_iterations (int, optional): The total number of iterations. Defaults to 200.
         num_affine_only_iterations (int, optional): The number of iterations at the start of the process without deformative adjustments. Defaults to 50.
+        affine_stepsize (float, optional): The stepsize for affine adjustments. Should be between 0 and 1. Defaults to 0.2.
+        deformative_stepsize (float, optional): The stepsize for deformative adjustments. Defaults to 0.
+        sigma_regularization (float, optional): A scalar indicating the freedom to deform. Overrides 0 input. Defaults to 10 * np.max(self.template_resolution).
+        smooth_length (float, optional): The length scale of smoothing. Overrides 0 input. Defaults to 2 * np.max(self.template_resolution).
+        num_timesteps (int, optional): The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. Defaults to 5.
+        contrast_order (int, optional): The order of the polynomial fit between the contrasts of the template and target. Overrides 0 input. Defaults to 1.
+        spatially_varying_contrast_map (bool, optional): If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. Defaults to False.
+        contrast_maxiter (int, optional): The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. Defaults to 100.
+        contrast_tolerance (float, optional): The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 1e-5.
+        sigma_contrast (float, optional): The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. Defaults to 1e-2.
+        check_artifacts (bool, optional): If True, artifacts are jointly classified with registration using sigma_artifact. Defaults to False.
+        sigma_artifact (float, optional): The level of expected variation between artifact and non-artifact intensities. Overrides 0 input. Defaults to 5 * sigma_matching.
+        sigma_matching (float, optional): An estimate of the spread of the noise in the target, 
+            representing the tradeoff between the regularity and accuracy of the registration, where a smaller value should result in a less smooth, more accurate result. 
+            Typically it should be set to an estimate of the standard deviation of the noise in the image, particularly with artifacts. Overrides 0 input. Defaults to the standard deviation of the target.
         initial_affine (np.ndarray, optional): The affine array that the registration will begin with. Defaults to np.eye(template.ndim + 1).
-        initial_velocity_fields (np.ndarray, optional): The velocity fields that the registration will begin with. Defaults to None.
+        initial_velocity_fields (np.ndarray, optional): The velocity fields that the registration will begin with. Defaults to all zeros.
         initial_contrast_coefficients (np.ndarray, optional): The contrast coefficients that the registration will begin with. 
             If None, the 0th order coefficient(s) are set to np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template), 
             if self.contrast_order > 1, the 1st order coefficient(s) are set to np.std(self.target) / np.std(self.template), 
             and all others are set to zero. Defaults to None.
-        num_timesteps (int, optional): The number of composed sub-transformations in the diffeomorphism. Defaults to 5.
-        smooth_length (float, optional): The length scale of smoothing. Defaults to None.
-        contrast_order (int, optional): The order of the polynomial fit between the contrasts of the template and target. Defaults to 3.
-        contrast_tolerance (float, optional): The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 1e-5.
-        contrast_maxiter (int, optional): The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 100.
-        sigma_contrast (float, optional): The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Defaults to 1e-2.
-        sigma_matching (float, optional): A measure of spread. Defaults to None.
-        spatially_varying_contrast_map (bool, optional): If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. Defaults to False.
         calibrate (bool, optional): A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. Defaults to False.
         track_progress_every_n (int, optional): If positive, a progress update will be printed every track_progress_every_n iterations of registration. Defaults to 0.
     
@@ -748,29 +788,42 @@ def lddmm_register(
         dict: A dictionary containing all important saved quantities computed during the registration.
     """
 
+
+
     # Set up Lddmm instance.
     lddmm = _Lddmm(
+        # Images.
         template=template,
         target=target,
+        # Image resolutions.
         template_resolution=template_resolution,
         target_resolution=target_resolution,
+        # Iterations.
         num_iterations=num_iterations,
         num_affine_only_iterations=num_affine_only_iterations,
+        # Stepsizes.
+        affine_stepsize=affine_stepsize,
+        deformative_stepsize=deformative_stepsize,
+        # Velocity field specifiers.
+        sigma_regularization=sigma_regularization,
+        smooth_length=smooth_length,
         num_timesteps=num_timesteps,
+        # Contrast map specifiers.
+        contrast_order=contrast_order,
+        spatially_varying_contrast_map=spatially_varying_contrast_map,
+        contrast_maxiter=contrast_maxiter,
+        contrast_tolerance=contrast_tolerance,
+        sigma_contrast=sigma_contrast,
+        # Artifact specifiers.
+        check_artifacts=check_artifacts,
+        sigma_artifact=sigma_artifact,
+        # # vs. accuracy tradeoff.
+        sigma_matching=sigma_matching,
+        # Initial values.
         initial_affine=initial_affine,
         initial_velocity_fields=initial_velocity_fields,
         initial_contrast_coefficients=initial_contrast_coefficients,
-        smooth_length=smooth_length,
-        contrast_order=contrast_order,
-        contrast_tolerance=contrast_tolerance,
-        contrast_maxiter=contrast_maxiter,
-        sigma_matching=sigma_matching,
-        sigma_contrast=sigma_contrast,
-        sigma_regularization=sigma_regularization,
-        translational_stepsize=translational_stepsize,
-        linear_stepsize=linear_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        spatially_varying_contrast_map=spatially_varying_contrast_map,
+        # Diagnostic outputs.
         calibrate=calibrate,
         track_progress_every_n=track_progress_every_n,
     )
