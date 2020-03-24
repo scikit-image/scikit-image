@@ -331,7 +331,7 @@ def test__multiply_coords_by_affine():
         _multiply_coords_by_affine(affine, array)
  
 """
-Test _multiply_coords_by_affine.
+Test resample.
 """
 
 def test_resample():
