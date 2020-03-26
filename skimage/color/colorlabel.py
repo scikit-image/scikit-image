@@ -145,9 +145,18 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    # number of unique labels
+    nlabel = len(np.unique(label))
+
     if colors is None:
-        colors = DEFAULT_COLORS
-    colors = [_rgb_vector(c) for c in colors]
+        if nlabel <= len(DEFAULT_COLORS):
+            colors = DEFAULT_COLORS
+            colors = [_rgb_vector(c) for c in colors]
+        else:
+            colors = np.random.random((nlabel, 3))
+    else:
+        colors = [_rgb_vector(c) for c in colors]
+
 
     if image is None:
         image = np.zeros(label.shape + (3,), dtype=np.float64)
