@@ -182,9 +182,9 @@ def test_auto_generating_colors():
 
     # rgb image
     rgb = label2rgb(label, image=image)
-    
-    # number of unique colors in the rgb image 
+
+    # number of unique colors in the rgb image
     n_colors = len(np.unique(rgb[0], return_counts=True, axis=0)[1])
-    
+
     # test if unique colors generated equal the expected number of colors
     assert_array_equal(n_colors, [exp_colors])
