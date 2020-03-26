@@ -37,6 +37,9 @@ API Changes
   ``'reflect'``, which allows meaningful values at the borders for these
   filters. To retain the old behavior, pass
   ``mask=np.ones(image.shape, dtype=bool)`` (#4347)
+- A regularization term was added to ``register_translation`` so that when
+  multiple translations have the same cross-correlation value, the smallest
+  translation is chosen.
 
 
 Bugfixes
