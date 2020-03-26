@@ -167,9 +167,11 @@ def register_translation(src_image, target_image, upsample_factor=1,
         are returned.
     reg_weight : float, optional
         Determines the strength of shift regularization.
+
         .. versionadded:: 0.17
-           ``reg_weight`` was introduced to break ties between
-           cross-correlation peaks.
+
+          ``reg_weight`` was introduced to break ties between
+          cross-correlation peaks.
 
     Returns
     -------
