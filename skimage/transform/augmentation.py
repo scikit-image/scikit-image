@@ -12,7 +12,6 @@ from skimage.util import random_noise
 from skimage import img_as_ubyte, exposure, filters
 from skimage.transform import rotate, AffineTransform, warp
 
-
 class augmentation:
     def __init__(self, input_path, output_path):
         self.input_path = input_path
