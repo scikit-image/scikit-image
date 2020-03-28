@@ -37,9 +37,10 @@ Projective transforms (homographies)
 
 `Homographies <https://en.wikipedia.org/wiki/Homography>`_
 are transformations of a Euclidean space that preserve the alignment of points.
-Specific cases of homographies correspond to the conservation of more properties,
-such as parallelism (affine transformation), shape (similar transformation) or distances (Euclidean transformation).
-The different types of homographies available in scikit-image are presented in 
+Specific cases of homographies correspond to the conservation of more
+properties, such as parallelism (affine transformation), shape (similar
+transformation) or distances (Euclidean transformation). The different types
+of homographies available in scikit-image are presented in
 :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`.
 
 Projective transformations can either be created using the explicit
@@ -69,8 +70,11 @@ The transformation matrix of a transform is available as its ``tform.params``
 attribute. Transformations can be composed by multiplying matrices with the
 ``@`` matrix multiplication operator.
 
-Transformation matrices use `Homogeneous coordinates <https://en.wikipedia.org/wiki/Homogeneous_coordinates>`_, which are the extension of Cartesian
-coordinates used in Euclidean geometry to the more general projective geometry. In particular, points at infinity can be represented with finite coordinates.
+Transformation matrices use
+`Homogeneous coordinates <https://en.wikipedia.org/wiki/Homogeneous_coordinates>`_,
+which are the extension of Cartesian coordinates used in Euclidean geometry to
+the more general projective geometry. In particular, points at infinity can be
+represented with finite coordinates.
 
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
@@ -82,10 +86,10 @@ Transformations can be applied to images using :func:`skimage.transform.warp`::
    :align: center
    :width: 80%
 
-The different transformations in :mod:`skimage.transform` have a ``estimate`` method in
-order to estimate the parameters of the transformation from two sets of points
-(the source and the destination), as explained in the :ref:`sphx_glr_auto_examples_transform_plot_geometric.py`
-tutorial::
+The different transformations in :mod:`skimage.transform` have a ``estimate``
+method in order to estimate the parameters of the transformation from two sets
+of points (the source and the destination), as explained in the
+:ref:`sphx_glr_auto_examples_transform_plot_geometric.py` tutorial::
 
    text = data.text()
 
@@ -115,10 +119,10 @@ such as
  * etc.
 
 and matching points using :func:`skimage.feature.match_descriptors` before
-estimating transformation parameters. However, spurious matches are often made, 
-and it is advisable to use the RANSAC algorithm (instead of simple least-squares optimization)
-to improve the robustness to outliers, as explained in
-:ref:`sphx_glr_auto_examples_transform_plot_matching.py`.
+estimating transformation parameters. However, spurious matches are often made,
+and it is advisable to use the RANSAC algorithm (instead of simple
+least-squares optimization) to improve the robustness to outliers, as explained
+in :ref:`sphx_glr_auto_examples_transform_plot_matching.py`.
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_matching_001.png
    :target: ../auto_examples/transform/plot_matching.html
@@ -144,6 +148,6 @@ Fourier-space cross-correlation. This method is implemented by
    :width: 80%
 
 
-The :ref:`sphx_glr_auto_examples_transform_plot_register_rotation.py` tutorial explains a variant
-of this full-field method for estimating a rotation, by using first a log-polar
-transformation.
+The :ref:`sphx_glr_auto_examples_transform_plot_register_rotation.py` tutorial
+explains a variant of this full-field method for estimating a rotation, by
+using first a log-polar transformation.

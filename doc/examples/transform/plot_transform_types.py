@@ -6,7 +6,8 @@ Types of homographies
 `Homographies <https://en.wikipedia.org/wiki/Homography>`_
 are transformations of a Euclidean space that preserve the alignment of points.
 Specific cases of homographies correspond to the conservation of more properties,
-such as parallelism (affine transformation), shape (similar transformation) or distances (Euclidean transformation).
+such as parallelism (affine transformation), shape (similar transformation) or
+distances (Euclidean transformation).
 
 Homographies on a 2D Euclidean space (i.e., for 2D grayscale or multichannel
 images) are defined by a 3x3 matrix. All types of homographies can be defined
@@ -15,8 +16,10 @@ transformations (rotation, scaling, ...) which compose the full transformation.
 
 The different types of homographies available in scikit-image are
 shown here, by increasing order of complexity. While we focus here on the
-mathematical properties of transformations, tutorial :ref:`sphx_glr_auto_examples_transform_plot_geometric.py`
-explains how to use such transformations for various tasks such as image warping or parameter estimation.
+mathematical properties of transformations, tutorial
+:ref:`sphx_glr_auto_examples_transform_plot_geometric.py` explains how to use
+such transformations for various tasks such as image warping or parameter
+estimation.
 """
 import math
 import numpy as np
@@ -52,8 +55,9 @@ print(tform.params)
 
 img = img_as_float(data.chelsea())
 tf_img = tf.warp(img, tform.inverse)
-_ = plt.imshow(tf_img)
-plt.title('Euclidean transformation')
+fig, ax = plt.subplots()
+ax.imshow(tf_img)
+ax.set_title('Euclidean transformation')
 
 
 ######################################################################
@@ -69,8 +73,8 @@ shift = tf.EuclideanTransform(translation=-np.array(img.shape[:2]) / 2)
 matrix = np.linalg.inv(shift.params) @ rotation.params @ shift.params
 tform = tf.EuclideanTransform(matrix)
 tf_img = tf.warp(img, tform.inverse)
-plt.figure()
-_ = plt.imshow(tf_img)
+fig, ax = plt.subplots()
+ax.imshow(tf_img)
 
 ######################################################################
 # Similarity transformation
@@ -85,9 +89,9 @@ tform = tf.SimilarityTransform(
     translation=(100, 50))
 print(tform.params)
 tf_img = tf.warp(img, tform.inverse)
-plt.figure()
-plt.title('Similarity transformation')
-_ = plt.imshow(tf_img)
+fig, ax = plt.subplots()
+ax.imshow(tf_img)
+ax.set_title('Similarity transformation')
 
 ######################################################################
 # Affine transformation
@@ -103,9 +107,9 @@ tform = tf.AffineTransform(
         )
 print(tform.params)
 tf_img = tf.warp(img, tform.inverse)
-plt.figure()
-plt.title('Affine transformation')
-_ = plt.imshow(tf_img)
+fig, ax = plt.subplots()
+ax.imshow(tf_img)
+ax.set_title('Affine transformation')
 
 
 ######################################################################
@@ -121,9 +125,9 @@ matrix = np.array([[1, -0.5, 100],
                    [0.0015, 0.0015, 1]])
 tform = tf.ProjectiveTransform(matrix=matrix)
 tf_img = tf.warp(img, tform.inverse)
-plt.figure()
-_ = plt.imshow(tf_img)
-plt.title('Projective transformation')
+fig, ax = plt.subplots()
+ax.imshow(tf_img)
+ax.set_title('Projective transformation')
 
 plt.show()
 
@@ -133,9 +137,9 @@ plt.show()
 # See also
 # ========================================
 #
-# * :ref:`sphx_glr_auto_examples_transform_plot_geometric.py` for composing 
+# * :ref:`sphx_glr_auto_examples_transform_plot_geometric.py` for composing
 #   transformations or estimating their parameters
-# * :ref:`sphx_glr_auto_examples_transform_plot_rescale.py` for simple 
+# * :ref:`sphx_glr_auto_examples_transform_plot_rescale.py` for simple
 #   rescaling and resizing operations
 # * :func:`skimage.transform.rotate` for rotating an image around its center
 
