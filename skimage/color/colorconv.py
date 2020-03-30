@@ -821,7 +821,7 @@ def gray2rgba(image, alpha=None):
     alpha : array_like, optional
         Alpha channel of the output image. It may be a scalar or an
         array that can be broadcast to ``image``. If not specified it is
-        set to the maximum limit correspondin to ``image`` data type.
+        set to the maximum limit corresponding to the ``image`` dtype.
 
     Returns
     -------
