@@ -196,6 +196,7 @@ def normalized_mutual_information(im_true, im_test, *, bins=100):
     The normalized mutual information is given by::
 
     ..math::
+
         Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 
     where :math:`H(X)` is the entropy, :math:`- \sum_{x \in X}{x \log x}.`
