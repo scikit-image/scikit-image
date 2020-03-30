@@ -838,8 +838,9 @@ def gray2rgba(image, alpha=None):
         alpha = alpha_max
     elif np.isscalar(alpha):
         if alpha_min > alpha or alpha > alpha_max:
-            warn("alpha = {} is not in image data type limits."
-                 .format(alpha))
+            warn(f'alpha={alpha} is not in image dtype '
+                 f'{arr.dtype.name} limits [{alpha_min}, {alpha_max}]',
+                 stacklevel=2)
 
     if not np.can_cast(alpha, image.dtype):
         warn("alpha can't be safely cast to image dtype {}"
