@@ -165,7 +165,8 @@ def rigid_transform(params):
 
 
 t2 = time.time()
-rigid_matrix = registration.affine(image, target, initial_vector=np.zeros(3),
+rigid_matrix = registration.affine(image, target,
+                                   initial_parameters=np.zeros(3),
                                    vector_to_matrix=rigid_transform,
                                    pyramid_minimum_size=64,
                                    translation_indices=slice(1, None))

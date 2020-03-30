@@ -71,7 +71,7 @@ def _param_cost(reference_image, moving_image, parameter_vector, *,
 
 
 def affine(reference_image, moving_image, *,
-           cost=cost_nmi, initial_vector=None,
+           cost=cost_nmi, initial_parameters=None,
            translation_indices=None, vector_to_matrix=None,
            pyramid_scale=2, pyramid_minimum_size=8, multichannel=False,
            inverse=True, level_callback=None, method='Powell',
@@ -89,7 +89,7 @@ def affine(reference_image, moving_image, *,
         A cost function which takes two images and returns a score which is
         at a minimum when images are aligned. Uses the normalized mutual
         information by default.
-    initial_vector : array of float, optional
+    initial_parameters : array of float, optional
         The initial vector to optimize. This vector should have the same
         dimensionality as the transform being optimized. For example, a 2D
         affine transform has 6 parameters. A 2D rigid transform, on the other
@@ -168,9 +168,9 @@ def affine(reference_image, moving_image, *,
                                    multichannel=multichannel)
     image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
 
-    if initial_vector is None:
-        initial_vector = np.eye(ndim, ndim + 1).ravel()
-    parameter_vector = initial_vector
+    if initial_parameters is None:
+        initial_parameters = np.eye(ndim, ndim + 1).ravel()
+    parameter_vector = initial_parameters
 
     if vector_to_matrix is None:
         vector_to_matrix = _parameter_vector_to_matrix
