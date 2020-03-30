@@ -4,8 +4,8 @@
 A crash course on NumPy for images
 ==================================
 
-Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many 
-common operations can be achieved using standard NumPy methods for 
+Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many
+common operations can be achieved using standard NumPy methods for
 manipulating arrays::
 
     >>> from skimage import data
@@ -117,10 +117,10 @@ This shows that ``cat`` is a 300-by-451 pixel image with three channels
     >>> # set the pixel at (50th row, 61st column) to "green"
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
-We can also use 2D boolean masks for 2D multichannel images, as we did with
-the grayscale image above::
+    We can also use 2D boolean masks for 2D multichannel images, as we did with
+    the grayscale image above:
 
-.. plot::
+    >>> from matplotlib import pyplot as plt 
 
     Using a 2D mask on a 2D color image
 
@@ -190,7 +190,7 @@ syntax can be used::
     >>> from skimage import filters
     >>> edges = np.empty_like(im3d)
     >>> for pln, image in enumerate(im3d):
-    ...     # Iterate over the leading dimension 
+    ...     # Iterate over the leading dimension
     ...     edges[pln] = filters.sobel(image)
 
 
