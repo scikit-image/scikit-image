@@ -663,10 +663,10 @@ def test_gray2rgb_alpha():
                             'alpha argument is deprecated']):
         assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
-    with expected_warnings(["alpha argument is deprecated"]):
+    with expected_warnings(['alpha argument is deprecated']):
         assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
                               alpha=True)[0, 0, 3], 1)
-    with expected_warnings(["alpha argument is deprecated"]):
+    with expected_warnings(['alpha argument is deprecated']):
         assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
                               alpha=True)[0, 0, 3], 255)
 
@@ -727,12 +727,6 @@ def test_gray2rgba_alpha():
     alpha = 0.5
     with expected_warnings(["alpha can't be safely cast to image dtype"]):
         rgba = gray2rgba(img_u8, alpha)
-
-    # Invalid scalar value
-    alpha = 255
-
-    with expected_warnings(["alpha = 255 is not in image data type limits."]):
-        rgba = gray2rgba(img, alpha)
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))

@@ -836,15 +836,10 @@ def gray2rgba(image, alpha=None):
 
     if alpha is None:
         alpha = alpha_max
-    elif np.isscalar(alpha):
-        if alpha_min > alpha or alpha > alpha_max:
-            warn(f'alpha={alpha} is not in image dtype '
-                 f'{arr.dtype.name} limits [{alpha_min}, {alpha_max}]',
-                 stacklevel=2)
 
-    if not np.can_cast(alpha, image.dtype):
+    if not np.can_cast(alpha, arr.dtype):
         warn("alpha can't be safely cast to image dtype {}"
-             .format(arr.dtype.name))
+             .format(arr.dtype.name), stacklevel=2)
 
     rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
     rgba[..., :3] = arr[..., np.newaxis]
