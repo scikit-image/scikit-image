@@ -163,7 +163,7 @@ def register_translation(src_image, target_image, upsample_factor=1,
         will be FFT'd to compute the correlation, while "fourier" data will
         bypass FFT of input data.  Case insensitive.
     return_error : bool, optional
-        Returns error and phase difference if when True, otherwise only shifts
+        Returns error and phase difference if True, otherwise only shifts
         are returned.
     reg_weight : float, optional
         Determines the strength of shift regularization.
