@@ -198,8 +198,7 @@ def normalized_mutual_information(im_true, im_test, *, bins=100):
     ..math::
         Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 
-    where :math:`H(X)` is the entropy,
-    :math:`- \sum_{x \in X}{x \log x}.`
+    where :math:`H(X)` is the entropy, :math:`- \sum_{x \in X}{x \log x}.`
 
     It was proposed to be useful in registering images by Colin Studholme and
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
