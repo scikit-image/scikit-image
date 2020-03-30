@@ -777,10 +777,21 @@ class AffineTransform(ProjectiveTransform):
          [b0  b1  b2]
          [0   0    1]]
 
+    In 2D, the transformation parameters can be given as the homogeneous
+    transformation matrix, above, or as the implicit parameters, scale,
+    rotation, shear, and translation in x (a2) and y (b2). For 3D and higher,
+    only the matrix form is allowed.
+
+    In narrower transforms, such as the Euclidean (only rotation and
+    translation) or Similarity (rotation, translation, and a global scale
+    factor) transforms, it is possible to specify 3D transforms using implicit
+    parameters also.
+
     Parameters
     ----------
     matrix : (D+1, D+1) array, optional
-        Homogeneous transformation matrix.
+        Homogeneous transformation matrix. If this matrix is provided, it is an
+        error to provide any of scale, rotation, shear, or translation.
     scale : (sx, sy) as array, list or tuple, optional
         Scale factors. Only available for 2D.
     rotation : float, optional
@@ -796,6 +807,11 @@ class AffineTransform(ProjectiveTransform):
     ----------
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
+
+    Raises
+    ------
+    ValueError
+        If both ``matrix`` and any of the other parameters are provided.
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
