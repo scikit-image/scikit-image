@@ -1,5 +1,4 @@
 from warnings import warn
-import numpy as np
 from ..metrics.simple_metrics import (mean_squared_error,
                                        peak_signal_noise_ratio,
                                        normalized_root_mse)

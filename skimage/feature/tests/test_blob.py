@@ -110,7 +110,7 @@ def test_blob_dog_excl_border():
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
@@ -246,11 +246,11 @@ def test_blob_log_exclude_border():
     b = blobs[0]
     assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
 
-    blobs = blob_dog(
+    blobs = blob_log(
         img,
         min_sigma=1.5,
         max_sigma=5,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
@@ -335,12 +335,12 @@ def test_blob_doh_log_scale():
     assert abs(b[1] - 130) <= thresh
     assert abs(radius(b) - 20) <= thresh
 
-    b = s[1]
+    b = s[2]
     assert abs(b[0] - 460) <= thresh
     assert abs(b[1] - 50) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    b = s[2]
+    b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b) - 40) <= thresh

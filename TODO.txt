@@ -37,32 +37,51 @@ Version 0.18
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
+    * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
+        * ``skimage/feature/brief.py::BRIEF``
+        * `` skimage/feature/corner.py::corner_harris``
+        * `` skimage/feature/corner.py::corner_shi_tomasi``
+        * `` skimage/feature/corner.py::corner_foerstner``
+        * `` skimage/feature/corner.py::corner_fast``
+        * `` skimage/feature/corner.py::corner_subpix``
+        * `` skimage/feature/corner.py::corner_peaks``
+        * `` skimage/feature/corner.py::corner_orientations``
+    * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
+      ``threshold_rel=0``.
 * In ``skimage/transform`` remove histogram_matching.py.
+* In ``skimage/restoration/_denoise.py`` remove warning regarding
+  ``rescale_sigma``.
+    * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
+      now that the denoise warning is gone.
 
 Version 0.19
 ------------
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py`` remove
+  ``circle_level_set'' and related tests.
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
+* In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
 * Remove the definition of `skimage.util.pad` and
   skimage/util/tests/test_arraypad.py.
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
+* In ``skimage/color/colorconv.py``, remove the deprecation warning
+  from `rgb2gray`.
+* In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
+  decoration from ``iradon``.
+* In ``skimage/measure/profile.py``, raise a ValueError instead of the
+  warning when order > 0 and input array is bool in profile_line.
 
 Other
 -----
 * Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
   for ``scipy`` and ``pywl`` (``pywavelet``) in ``test_lpi_filter.py`` and
   ``test_denoise.py`` regarding multidimensional indexing.
-* Remove the conditional warning logic when ``numpy`` is set to >= 1.15.0
-  for sparse matricies (``np.matrix``) used by scipy.sparse in
-  ``test_random_walker.py``. Note that there is also a chance ``scipy.sparse``
-  moves away from using ``np.matrix`` in a future version too.
 * Remove the conditional import and function call when ``numpy`` is set
-  to > 1.15.x in ``skimage/util/arraycrop.py``.
+  to >= 1.16.0 in ``skimage/util/arraycrop.py``.
 * Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
   #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
@@ -86,4 +105,4 @@ Other
   ``skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning``
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
-  when ``scipy`` upgrades to 1.1. 
+  when ``scipy`` upgrades to 1.1.

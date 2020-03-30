@@ -232,7 +232,8 @@ def denoise_bilateral(image, win_size=None, sigma_color=None, sigma_spatial=1,
                               range_lut, empty_dims, out)
 
 
-def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True,
+                       *, multichannel=False):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -258,6 +259,10 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
         Maximal number of iterations used for the optimization.
     isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
+    multichannel : bool, optional
+        Apply total-variation denoising separately for each channel. This
+        option should be true for color images, otherwise the denoising is
+        also applied in the channels dimension.
 
     Returns
     -------
@@ -277,7 +282,6 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
 
     """
     image = np.atleast_3d(img_as_float(image))
-    image = np.ascontiguousarray(image)
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -286,8 +290,25 @@ def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
     shape_ext = (rows + 2, cols + 2, dims)
 
     out = np.zeros(shape_ext, image.dtype)
-    _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
-                        isotropic, out)
+
+    if multichannel:
+        channel_out = np.zeros(shape_ext[:2] + (1,), dtype=out.dtype)
+        for c in range(image.shape[-1]):
+            # the algorithm below expects 3 dimensions to always be present.
+            # slicing the array in this fashion preserves the channel dimension for us
+            channel_in = np.ascontiguousarray(image[..., c:c+1])
+
+            _denoise_tv_bregman(channel_in, image.dtype.type(weight),
+                                max_iter, eps, isotropic, channel_out)
+
+            out[..., c] = channel_out[..., 0]
+
+    else:
+        image = np.ascontiguousarray(image)
+
+        _denoise_tv_bregman(image, image.dtype.type(weight), max_iter, eps,
+                            isotropic, out)
+
     return np.squeeze(out[1:-1, 1:-1])
 
 
@@ -802,7 +823,7 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
             "avoid this warning the user should explicitly set rescale_sigma "
             "to True or False."
         )
-        warn(msg, DeprecationWarning)
+        warn(msg, FutureWarning, stacklevel=2)
         rescale_sigma = True
     image, sigma = _scale_sigma_and_image_consistently(image,
                                                        sigma,

@@ -73,10 +73,6 @@ jobs:
   - bash: |
       set -x
 
-      # Get stdint headers needed by tifffile.c
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h
-      curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h
-
       # Compile the package and build the wheel
       python setup.py bdist_wheel 
 
