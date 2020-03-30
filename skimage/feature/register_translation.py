@@ -110,6 +110,7 @@ def _triangle(N):
     x = np.linspace(0, 1, N, endpoint=False) + 0.5 / N
     return 1 - abs(x - 0.5)
 
+
 def _area_overlap(A):
     """
     Return overlapping area of A with itself.
