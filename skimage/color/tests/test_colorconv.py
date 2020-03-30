@@ -709,24 +709,28 @@ def test_gray2rgba_alpha():
     alpha = None
     rgba = gray2rgba(img, alpha)
 
+    assert_equal(rgba[..., :3], gray2rgb(img))
     assert_equal(rgba[..., 3], 1.0)
 
     # Scalar
     alpha = 0.5
     rgba = gray2rgba(img, alpha)
 
+    assert_equal(rgba[..., :3], gray2rgb(img))
     assert_equal(rgba[..., 3], alpha)
 
     # Array
     alpha = np.random.random((5, 5))
     rgba = gray2rgba(img, alpha)
 
+    assert_equal(rgba[..., :3], gray2rgb(img))
     assert_equal(rgba[..., 3], alpha)
 
     # Warning about alpha cast
     alpha = 0.5
     with expected_warnings(["alpha can't be safely cast to image dtype"]):
         rgba = gray2rgba(img_u8, alpha)
+        assert_equal(rgba[..., :3], gray2rgb(img_u8))
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))
