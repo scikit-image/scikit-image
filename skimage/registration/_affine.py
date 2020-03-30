@@ -109,7 +109,10 @@ def affine(reference_image, moving_image, *,
         `scipy.optimize.minimize`, to an affine transformation matrix in
         homogeneous coordinates.
     pyramid_scale : float, optional
-        Scaling factor to generate the image pyramid.
+        Scaling factor to generate the image pyramid. The affine transformation
+        is estimated first for a downscaled version of the image, then
+        progressively refined with higher resolutions. This parameter controls
+        the increase in resolution at each level.
     pyramid_minimum_size : integer, optional
         The smallest size for an image along any dimension. This value
         determines the size of the image pyramid used. Choosing a smaller value
@@ -123,7 +126,7 @@ def affine(reference_image, moving_image, *,
         in the reference space to coordinates in the target space. For
         technical reasons, this is the transform expected by
         ``scipy.ndimage.affine_transform`` to map the target image to the
-        reference space.
+        reference space. Defaults to True.
     level_callback : callable, optional
         If given, this function is called once per pyramid level with a tuple
         containing the current downsampled image, transformation matrix, and
