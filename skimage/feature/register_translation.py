@@ -128,7 +128,7 @@ def _area_overlap(A):
         if dim == 0:
             w = _triangle(shape)
         else:
-            w = w[..., None] @ _triangle(shape)[None, ]
+            w = w[..., np.newaxis] @ _triangle(shape)[np.newaxis, ...]
     return w
 
 
