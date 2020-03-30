@@ -802,6 +802,9 @@ class AffineTransform(ProjectiveTransform):
         for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
+    dimensionality : int, optional
+        The dimensionality of the transform. This is not used if any other
+        parameters are provided.
 
     Attributes
     ----------
