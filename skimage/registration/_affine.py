@@ -101,6 +101,9 @@ def affine(reference_image, moving_image, *,
         example, in a 2D transform, the translation parameters are in the
         top two positions of the third column of the 3 x 3 matrix, which
         corresponds to the linear indices [2, 5].
+        The translation parameters are special in this class of transforms
+        because they are the only ones not scale-invariant. This means that
+        they need to be adjusted for each level of the image pyramid.
     vector_to_matrix : callable, array (M,) -> array-like (N+1, N+1), optional
         A function to convert a linear vector of parameters, as used by
         `scipy.optimize.minimize`, to an affine transformation matrix in
