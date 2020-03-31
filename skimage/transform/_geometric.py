@@ -28,6 +28,8 @@ def _center_and_normalize_points(points):
     Normalize the image points, such that the mean distance from the points
     to the origin of the coordinate system is sqrt(D).
 
+    If the points are all identical, the returned values will contain nan.
+
     Parameters
     ----------
     points : (N, D) array
@@ -54,7 +56,7 @@ def _center_and_normalize_points(points):
     rms = np.sqrt(np.sum(centered ** 2) / n)
 
     if rms == 0:
-        return np.full((d, d), np.nan), points
+        return np.full((d + 1, d + 1), np.nan), np.full_like(points, np.nan)
 
     norm_factor = np.sqrt(d) / rms
 
