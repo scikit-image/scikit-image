@@ -34,7 +34,9 @@ NON_NOTEBOOKS=$(find $GENERATED_NOTEBOOKS_DIR -type f | grep -v '\.ipynb')
 rm -f $NON_NOTEBOOKS
 
 # Modify path to be consistent by the path given by sphinx-gallery
-mv $GENERATED_NOTEBOOKS_DIR/notebooks $GENERATED_NOTEBOOKS_DIR/auto_examples
+pwd
+mkdir $GENERATED_NOTEBOOKS_DIR/auto_examples
+mv $GENERATED_NOTEBOOKS_DIR/* $GENERATED_NOTEBOOKS_DIR/auto_examples
 
 
 # Put the .binder folder back (may be useful for debugging purposes)
