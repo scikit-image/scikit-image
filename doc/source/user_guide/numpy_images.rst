@@ -38,10 +38,10 @@ NumPy indexing
 NumPy indexing can be used both for looking at the pixel values and to
 modify them::
 
-    >>> # Get the value of the pixel at the 10th row and 20th column
+    Get the value of the pixel at the 10th row and 20th column
     >>> camera[10, 20]
     153
-    >>> # Set to black the pixel at the 3rd row and 10th column
+    Set to black the pixel at the 3rd row and 10th column
     >>> camera[3, 10] = 0
 
 Be careful! In NumPy indexing, the first dimension (``camera.shape[0]``)
@@ -56,13 +56,13 @@ whole sets of pixels using the different indexing capabilities of NumPy.
 
 Slicing::
 
-    >>> # Set the first ten lines to "black" (0)
+    Set the first ten lines to "black" (0)
     >>> camera[:10] = 0
 
 Masking (indexing with masks of booleans)::
 
     >>> mask = camera < 87
-    >>> # Set to "white" (255) the pixels where mask is True
+    Set to "white" (255) the pixels where mask is True
     >>> camera[mask] = 255
 
 Fancy indexing (indexing with sets of indices)::
@@ -112,15 +112,15 @@ This shows that ``cat`` is a 300-by-451 pixel image with three channels
 
     >>> cat[10, 20]
     array([151, 129, 115], dtype=uint8)
-    >>> # Set the pixel at (50th row, 60th column) to "black"
+    Set the pixel at (50th row, 60th column) to "black"
     >>> cat[50, 60] = 0
-    >>> # set the pixel at (50th row, 61st column) to "green"
+    Set the pixel at (50th row, 61st column) to "green"
     >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
 
     We can also use 2D boolean masks for 2D multichannel images, as we did with
     the grayscale image above:
 
-    >>> from matplotlib import pyplot as plt 
+    >>> from matplotlib import pyplot as plt
 
     Using a 2D mask on a 2D color image
 
