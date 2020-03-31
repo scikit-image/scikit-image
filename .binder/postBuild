@@ -26,7 +26,7 @@ cp -r doc/examples .binder $TMP_CONTENT_DIR
 find . -delete
 
 # Generate notebooks and remove other files from examples folder
-GENERATED_NOTEBOOKS_DIR=notebooks
+GENERATED_NOTEBOOKS_DIR=auto_examples
 cp -r $TMP_CONTENT_DIR/examples $GENERATED_NOTEBOOKS_DIR
 
 find $GENERATED_NOTEBOOKS_DIR -name '*.py' -exec sphx_glr_python_to_jupyter.py '{}' +
@@ -35,8 +35,8 @@ rm -f $NON_NOTEBOOKS
 
 # Modify path to be consistent by the path given by sphinx-gallery
 pwd
-mkdir $GENERATED_NOTEBOOKS_DIR/auto_examples
-mv $GENERATED_NOTEBOOKS_DIR/* $GENERATED_NOTEBOOKS_DIR/auto_examples
+mkdir notebooks
+mv $GENERATED_NOTEBOOKS_DIR notebooks/
 
 
 # Put the .binder folder back (may be useful for debugging purposes)
