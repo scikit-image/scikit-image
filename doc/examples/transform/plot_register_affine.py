@@ -11,7 +11,8 @@ a cost function, and an optimization function to find the affine transformation
 that best converts a reference space to a target space. This transformation
 (which is expressed as an (ndim+1, ndim+1) matrix) can be used by
 :func:`scipy.ndimage.affine_transform` to convert the target image to the
-reference space.
+reference space. This approach is explained in detail in Chapter 7 of Elegant
+SciPy [1]_.
 
 .. [1] Juan Nunez-Iglesias, Stefan van der Walt, and Harriet Dashnow. Elegant
         SciPy: The Art of Scientific Python. 1st. O'Reilly Media, Inc.,
