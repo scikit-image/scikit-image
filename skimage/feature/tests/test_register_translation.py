@@ -137,3 +137,27 @@ def test_mismatch_offsets_size():
     with testing.raises(ValueError):
         _upsampled_dft(np.ones((4, 4)), 3,
                        axis_offsets=[3, 2, 1, 4])
+
+
+def test_reg_weight():
+    """Test whether the reg_weight parameter correctly breaks ties."""
+    N = 32
+    A = np.zeros((N, N))
+    A[N // 2, N // 2] = 1
+    B = np.zeros((N, N))
+    B[N // 2, N // 2 - 1], B[N // 2, N // 2 + 3] = 1, 1
+
+    d0, c0, _ = register_translation(src_image=A, target_image=B, reg_weight=0)
+    np.testing.assert_equal(d0, [0, 1])
+
+    # Without reg, the longer shift is returned.
+    d1, c1, _ = register_translation(src_image=B, target_image=A, reg_weight=0)
+    np.testing.assert_equal(d1, [0, 3])
+    assert c0 == c1
+
+    # With reg, the shorter shift is returned. Note that the cost function
+    # values are all equal.
+    d2, c2, _ = register_translation(src_image=B, target_image=A,
+                                     reg_weight=1e-12)
+    np.testing.assert_equal(d2, [0, -1])
+    assert c0 == c2
