@@ -148,6 +148,24 @@ def register_translation(src_image, target_image, upsample_factor=1,
     regularizer which favors smaller shifts. This regularization may be
     disabled by setting ``reg_weight`` to zero.
 
+    Define two arrays to be registered which have two possible alignments
+    with the same error.
+    >>> A = np.zeros((8, 8))
+    >>> A[4, 4] = 1
+    >>> B = np.zeros((8, 8))
+    >>> B[3, 3], B[5, 7] = 1, 1
+    >>> register_translation(src_image=A, target_image=B)[:2]
+    (array([1., 1.]), 0.7071067811865476)
+
+    Switch the order of the input arrays. Without regularization, the larger
+    shift is returned.
+    >>> register_translation(src_image=B, target_image=A, reg_weight=0)[:2]
+    (array([1., 3.]), 0.7071067811865476)
+
+    With regularization, the shorter shift is returned.
+    >>> register_translation(src_image=B, target_image=A, reg_weight=1e-12)[:2]
+    (array([-1., -1.]), 0.7071067811865476)
+
     Parameters
     ----------
     src_image : array
