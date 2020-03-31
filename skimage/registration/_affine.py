@@ -70,11 +70,18 @@ def _param_cost(reference_image, moving_image, parameter_vector, *,
     return cost(reference_image, transformed)
 
 
-def affine(reference_image, moving_image, *,
-           cost=cost_nmi, initial_parameters=None,
-           translation_indices=None, vector_to_matrix=None,
-           pyramid_scale=2, pyramid_minimum_size=8, multichannel=False,
-           inverse=True, level_callback=None, method='Powell',
+def affine(reference_image, moving_image,
+           *,
+           cost=cost_nmi,
+           initial_parameters=None,
+           vector_to_matrix=None,
+           translation_indices=None,
+           inverse=True,
+           pyramid_scale=2,
+           pyramid_minimum_size=8,
+           multichannel=False,
+           level_callback=None,
+           method='Powell',
            **kwargs):
     """Find a transformation matrix to register a moving image to a reference.
 
@@ -94,6 +101,10 @@ def affine(reference_image, moving_image, *,
         dimensionality as the transform being optimized. For example, a 2D
         affine transform has 6 parameters. A 2D rigid transform, on the other
         hand, only has 3 parameters.
+    vector_to_matrix : callable, array (M,) -> array-like (N+1, N+1), optional
+        A function to convert a linear vector of parameters, as used by
+        `scipy.optimize.minimize`, to an affine transformation matrix in
+        homogeneous coordinates.
     translation_indices : array of int, optional
         The location of the translation parameters in the parameter vector. If
         None, the positions of the translation parameters in the raveled
@@ -104,10 +115,12 @@ def affine(reference_image, moving_image, *,
         The translation parameters are special in this class of transforms
         because they are the only ones not scale-invariant. This means that
         they need to be adjusted for each level of the image pyramid.
-    vector_to_matrix : callable, array (M,) -> array-like (N+1, N+1), optional
-        A function to convert a linear vector of parameters, as used by
-        `scipy.optimize.minimize`, to an affine transformation matrix in
-        homogeneous coordinates.
+    inverse : bool, optional
+        Whether to return the inverse transform, which converts coordinates
+        in the reference space to coordinates in the target space. For
+        technical reasons, this is the transform expected by
+        ``scipy.ndimage.affine_transform`` to map the target image to the
+        reference space. Defaults to True.
     pyramid_scale : float, optional
         Scaling factor to generate the image pyramid. The affine transformation
         is estimated first for a downscaled version of the image, then
@@ -121,18 +134,12 @@ def affine(reference_image, moving_image, *,
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension. By default, this is False.
-    inverse : bool, optional
-        Whether to return the inverse transform, which converts coordinates
-        in the reference space to coordinates in the target space. For
-        technical reasons, this is the transform expected by
-        ``scipy.ndimage.affine_transform`` to map the target image to the
-        reference space. Defaults to True.
     level_callback : callable, optional
         If given, this function is called once per pyramid level with a tuple
         containing the current downsampled image, transformation matrix, and
         cost as the argument. This is useful for debugging or for plotting
         intermediate results during the iterative process.
-    method : string
+    method : string or callable
         Method of minimization.  See ``scipy.optimize.minimize`` for available
         options.
     **kwargs : keyword arguments
@@ -140,7 +147,7 @@ def affine(reference_image, moving_image, *,
 
     Returns
     -------
-    matrix : array
+    matrix : array, or object coercible to array
         A transformation matrix used to obtain a new image.
         ndi.affine_transform(target, matrix) will align your target image.
 
