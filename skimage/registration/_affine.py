@@ -149,7 +149,8 @@ def affine(reference_image, moving_image,
     -------
     matrix : array, or object coercible to array
         A transformation matrix used to obtain a new image.
-        ndi.affine_transform(target, matrix) will align your target image.
+        ``ndi.affine_transform(moving, matrix)`` will align the moving image to
+        the reference.
 
     Example
     -------
