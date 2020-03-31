@@ -68,6 +68,17 @@ sphinx_gallery_conf = {
         '../examples/applications',
         '../examples/developers',
     ]),
+    'binder': {
+        # Required keys
+        'org': 'emmanuelle',
+        'repo': 'scikit-image',
+        'branch': 'binder-from-tim',  # Can be any branch, tag, or commit hash
+        'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
+        'dependencies': '../../.binder/requirements.txt',
+        # Optional keys
+        #'filepath_prefix': 'dev/', # A prefix to prepend to filepaths in links.
+        'use_jupyter_lab': False
+     }
 }
 
 # Determine if the matplotlib has a recent enough version of the

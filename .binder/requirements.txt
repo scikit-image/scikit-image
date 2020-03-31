@@ -1,0 +1,25 @@
+Cython>=0.29.13
+wheel
+# numpy 1.18.0 breaks builds on MacOSX
+# https://github.com/numpy/numpy/pull/15194
+numpy>=1.15.1,!=1.18.0
+scikit-learn
+matplotlib>=3.0.1
+dask[array]>=0.15.0
+# cloudpickle is necessary to provide the 'processes' scheduler for dask
+cloudpickle>=0.2.1
+pandas>=0.23.0
+seaborn>=0.7.1
+scipy>=1.0.1
+networkx>=2.0
+pillow>=4.3.0
+imageio>=2.3.0
+tifffile>=2019.7.26
+PyWavelets>=0.5.2
+pooch>=0.5.2
+SimpleITK
+astropy>=1.2.0
+qtpy
+pyamg
+
+
