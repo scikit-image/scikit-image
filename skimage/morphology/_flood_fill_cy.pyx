@@ -41,7 +41,7 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
                                     unsigned char[::1] flags,
                                     Py_ssize_t[::1] neighbor_offsets,
                                     Py_ssize_t start_index,
-                                    dtype_t seed_value) :
+                                    dtype_t seed_value):
     """Find connected areas to fill, requiring strict equality.
 
     Parameters
