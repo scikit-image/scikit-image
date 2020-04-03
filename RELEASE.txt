@@ -80,10 +80,10 @@ access), specifically to:
   - On the release branch, build a clean version of the docs. In the
     root directory, run ``pip install .``.
   - In the ``doc/`` directory:
-    - Modify `source/conf.py` so that `sphinx_gallery_conf['binder']['branch']`
-      points to the name of the release branch, e.g. `0.16.x`.
     - Build using
       ``make clean; make html; make gh-pages``.
+    - Check (since this a new feature) that binder links in gallery examples
+      point to the release branch, e.g. `0.16.x`.
     - In the ``gh-pages/`` directory:
       - Update the symlink to ``stable`` and commit.
       - Upload the docs: ``git push origin gh-pages``.
