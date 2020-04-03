@@ -57,7 +57,7 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
     start_index : int
         Start position for the flood-fill.
     seed_value :
-        Value of `image[start_index]`.
+        Value of ``image[start_index]``.
     """
     cdef:
         QueueWithHistory queue
@@ -108,7 +108,7 @@ cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
     start_index : int
         Start position for the flood-fill.
     seed_value :
-        Value of `image[start_index]`.
+        Value of ``image[start_index]``.
     low_tol :
         Lower limit for tolerance comparison.
     high_tol :
