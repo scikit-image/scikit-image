@@ -3,7 +3,7 @@ PYTHON=python
 PYTESTS=pytest
 
 all:
-	$(PYTHON) setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace 
 
 clean:
 	find . -name "*.so" -o -name "*.pyc" -o -name "*.md5" -o -name "*.pyd" | xargs rm -f
