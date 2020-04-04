@@ -1,5 +1,6 @@
 -r ../requirements/default.txt
--r ../requirements/build.txt
+Cython>=0.29.13
+wheel
 scikit-learn
 dask[array]>=0.15.0
 cloudpickle>=0.2.1
