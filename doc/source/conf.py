@@ -87,6 +87,9 @@ if use_matplotlib_plot_directive:
 else:
     extensions.append('plot_directive')
 
+print("plot directive")
+print(use_matplotlib_plot_directive)
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
