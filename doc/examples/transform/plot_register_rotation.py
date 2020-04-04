@@ -122,8 +122,8 @@ image = rgb2gray(data.retina())
 translated = image[shiftr:, shiftc:]
 rotated = rotate(translated, angle)
 rescaled = rescale(rotated, scale)
-shaper, shapec = image.shape
-rts_image = rescaled[:shaper, :shapec]
+sizer, sizec = image.shape
+rts_image = rescaled[:sizer, :sizec]
 
 # When center is not shared, log-polar transform is not helpful!
 radius = 705
@@ -175,8 +175,8 @@ warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
 warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
                            scaling='log', order=0)
 
-warped_image_fs = warped_image_fs[:shape[0]//2, :]  # only use half of FFT
-warped_rts_fs = warped_rts_fs[:shape[0]//2, :]
+warped_image_fs = warped_image_fs[:shape[0] // 2, :]  # only use half of FFT
+warped_rts_fs = warped_rts_fs[:shape[0] // 2, :]
 tparams = register_translation(warped_image_fs, warped_rts_fs,
                                upsample_factor=10)
 
@@ -190,12 +190,13 @@ shift_scale = np.exp(shiftc / klog)
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
 ax[0].set_title("Original Image FFT\n(magnitude; zoomed)")
-ax[0].imshow(image_fs[image_fs.shape[0]//2-radius:image_fs.shape[0]//2+radius,
-                      image_fs.shape[1]//2-radius:image_fs.shape[0]//2+radius],
+center = np.array(shape) // 2
+ax[0].imshow(image_fs[center[0] - radius:center[0] + radius,
+                      center[1] - radius:center[1] + radius],
              cmap='magma')
 ax[1].set_title("Modified Image FFT\n(magnitude; zoomed)")
-ax[1].imshow(rts_fs[rts_fs.shape[0]//2-radius:rts_fs.shape[0]//2+radius,
-                    rts_fs.shape[1]//2-radius:rts_fs.shape[1]//2+radius],
+ax[1].imshow(rts_fs[center[0] - radius:center[0] + radius,
+                    center[1] - radius:center[1] + radius],
              cmap='magma')
 ax[2].set_title("Log-Polar-Transformed\nOriginal FFT")
 ax[2].imshow(warped_image_fs, cmap='magma')
