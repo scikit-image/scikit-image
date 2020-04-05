@@ -15,7 +15,7 @@ by passing either the transformation matrix, or the parameters of the simpler
 transformations (rotation, scaling, ...) which compose the full transformation.
 
 The different types of homographies available in scikit-image are
-shown here, by increasing order of complexity. While we focus here on the
+shown here, by increasing order of complexity (i.e. by reducing the number of constraints). While we focus here on the
 mathematical properties of transformations, tutorial
 :ref:`sphx_glr_auto_examples_transform_plot_geometric.py` explains how to use
 such transformations for various tasks such as image warping or parameter
