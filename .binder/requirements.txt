@@ -1,5 +1,9 @@
 -r ../requirements/default.txt
--r ../requirements/build.txt
+# numpy is present both in default.txt and build.txt
+# with pinning instructions which are slightly different, 
+# therefore pip gives up and errors
+Cython>=0.29.13
+wheel
 scikit-learn
 dask[array]>=0.15.0
 cloudpickle>=0.2.1
