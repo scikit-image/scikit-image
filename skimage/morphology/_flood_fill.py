@@ -240,7 +240,7 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
 
     # Must annotate borders
-    working_image = _fast_pad(image, image.min(), order)
+    working_image = _fast_pad(image, image.min(), order=order)
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],

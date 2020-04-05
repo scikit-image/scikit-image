@@ -239,7 +239,7 @@ def _set_edge_values_inplace(image, value):
         image[tuple(sl)] = value
 
 
-def _fast_pad(image, value, order="C"):
+def _fast_pad(image, value, *, order="C"):
     """Pad an array on all axes with one constant value.
 
     Parameters
@@ -249,7 +249,7 @@ def _fast_pad(image, value, order="C"):
     value : scalar
          The value to use. Should be compatible with `image`'s dtype.
     order : "C" or "F"
-        Specify the memory layout of the padded image.
+        Specify the memory layout of the padded image (C or Fortran style).
 
     Returns
     -------
