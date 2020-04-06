@@ -150,11 +150,11 @@ class _Lddmm:
             else:
                 self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, reshape_to_shape=(self.contrast_order + 1))
         self.contrast_coefficients[..., 0] = np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template)
-        if self.contrast_order > 1: self.contrast_coefficients[..., 1] = np.std(self.target) / np.std(self.template)
+        if self.contrast_order > 0: self.contrast_coefficients[..., 1] = np.std(self.target) / np.std(self.template)
         self.contrast_polynomial_basis = np.empty((*self.target.shape, self.contrast_order + 1))
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = self.deformed_template**power
-        self.contrast_deformed_template = None
+        self.contrast_deformed_template = np.sum(self.contrast_polynomial_basis * self.contrast_coefficients, axis=-1) # Initialized value not used.
         fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.low_pass_filter = 1 / (
             (1 - self.smooth_length**2 * (
@@ -172,6 +172,21 @@ class _Lddmm:
             self.affines = []
             self.maximum_velocities = [0] * self.num_affine_only_iterations
 
+        # Preempt known error.
+        if np.any(np.array(self.template.shape) == 1) or np.any(np.array(self.target.shape) == 1):
+            raise RuntimeError(f"Known issue:\n"
+                               f"Images with a 1 in their shape produce an error owing to the behavior of interpn.\n"
+                               f"The source of this error can be recreated thusly:\n"
+                               f"points = [np.array([0]), np.arange(5)]\n"
+                               f"values = (np.arange(5)**2).reshape(1, 5)\n"
+                               f"xi = np.array(\[\n"
+                                   f"\t[0, 0.5], \n"
+                                   f"\t[0, 1.5], \n"
+                                   f"\t[0, 2.5], \n"
+                                   f"\t[0, 3.5], \n"
+                                 f"\])\n"
+                               f"print(scipy.interpolate.interpn(points, values, xi))\n"
+                               f"--> np.array([nan, nan, nan, nan])")
 
     def register(self):
         """
@@ -213,7 +228,7 @@ class _Lddmm:
             self._update_affine(affine_inv_gradient)
             # Update velocity_fields.
             if iteration >= self.num_affine_only_iterations: self._update_velocity_fields(velocity_fields_gradients)
-        
+
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
 
@@ -500,7 +515,11 @@ class _Lddmm:
         affine_inv_hessian_approx = np.sum(affine_inv_hessian_approx, tuple(range(self.target.ndim)))
 
         # Solve for affine_inv_gradient.
-        affine_inv_gradient = solve(affine_inv_hessian_approx, affine_inv_gradient_reduction, assume_a='pos').reshape(matching_affine_inv_gradient.shape[-2:])
+        try:
+            affine_inv_gradient = solve(affine_inv_hessian_approx, affine_inv_gradient_reduction, assume_a='pos').reshape(matching_affine_inv_gradient.shape[-2:])
+        except np.linalg.LinAlgError:
+            print('Singular Matrix Error\n')
+            affine_inv_gradient = np.zeros(matching_affine_inv_gradient.shape[-2:])
         # Append a row of zeros at the end of the 0th dimension.
         zeros = np.zeros((1, self.target.ndim + 1))
         affine_inv_gradient = np.concatenate((affine_inv_gradient, zeros), 0)
@@ -855,7 +874,7 @@ def _generate_position_field(
     # Validate velocity_field_resolution.
     velocity_field_resolution = _validate_resolution(velocity_fields.ndim - 2, velocity_field_resolution)
     # Validate affine.
-    affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(len(template_shape), len(template_shape)))
+    affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1))
     # Verify deform_to.
     if not isinstance(deform_to, str):
         raise TypeError(f"deform_to must be of type str.\n"
@@ -942,17 +961,19 @@ def _apply_position_field(
     # Validate subject_resolution.
     subject_resolution = _validate_resolution(subject.ndim, subject_resolution)
     # Validate output_resolution.
-    output_resolution = _validate_resolution(subject.ndim, output_resolution)
+    if output_resolution is not None:
+        output_resolution = _validate_resolution(subject.ndim, output_resolution)
 
-    # Resample position_field.
-    position_field = resample(
-        image=position_field, 
-        new_resolution=output_resolution, 
-        old_resolution=position_field_resolution, 
-        err_to_larger=True, 
-        extrapolation_fill_value=None, 
-        image_is_coords=True, 
-    )
+    # Resample position_field if necessary.
+    if output_resolution is not None:
+        position_field = resample(
+            image=position_field, 
+            new_resolution=output_resolution, 
+            old_resolution=position_field_resolution, 
+            err_to_larger=True, 
+            extrapolation_fill_value=None, 
+            image_is_coords=True, 
+        )
 
     # Interpolate subject at position field.
     deformed_subject = interpn(
@@ -1026,11 +1047,7 @@ def apply_lddmm(
     elif deform_to not in ["template", "target"]:
         raise ValueError(f"deform_to must be either 'template' or 'target'.")
     # Validate output_resolution.
-    if output_resolution is None and deform_to == "template" or output_resolution == "template":
-        output_resolution = np.copy(template_resolution)
-    elif output_resolution is None and deform_to == "target" or output_resolution == "target":
-        output_resolution = np.copy(target_resolution)
-    else:
+    if output_resolution is not None:
         output_resolution = _validate_resolution(subject.ndim, output_resolution)
     # Validate extrapolation_fill_value.
     if extrapolation_fill_value is None:
