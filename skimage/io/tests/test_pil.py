@@ -232,7 +232,7 @@ def test_imsave_boolean_input():
     s.seek(0)
     out = imread(s)
     assert_equal(out.shape, shape)
-    assert_allclose(out, image)
+    assert_allclose(out.astype(bool), image)
 
 
 def test_imexport_imimport():
