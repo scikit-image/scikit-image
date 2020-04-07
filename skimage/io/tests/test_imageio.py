@@ -4,9 +4,11 @@ import pytest
 import numpy as np
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
+from skimage import data
+from skimage.util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from skimage._shared import testing
-from skimage._shared.testing import (assert_array_almost_equal, TestCase, fetch,
-                                     mono_check, color_check)
+from skimage._shared.testing import (assert_array_almost_equal,
+                                     TestCase, fetch, roundtrip)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -40,18 +42,6 @@ def test_imageio_truncated_jpg():
         imread(fetch('data/truncated.jpg'))
 
 
-@pytest.mark.parametrize('fmt', ['png', 'bmp', 'tif'])
-def test_all_color_roundtrip(fmt):
-    with expected_warnings(['.* is a boolean image']):
-        color_check('imageio', fmt)
-
-
-@pytest.mark.parametrize('fmt', ['png', 'bmp', 'tif'])
-def test_all_mono_roundtrip(fmt):
-    with expected_warnings(['.* is a boolean image']):
-        mono_check('imageio', fmt)
-
-
 class TestSave(TestCase):
 
     def roundtrip(self, x, scaling=1):
@@ -74,6 +64,15 @@ class TestSave(TestCase):
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
+
+    def test_bool_array_save(self):
+        f = NamedTemporaryFile(suffix='.png')
+        fname = f.name
+        f.close()
+        with expected_warnings(['.* is a boolean image',
+                                '.* is a low contrast image']):
+            a = np.ones((5, 5), bool)
+            imsave(fname, a)
 
 
 def test_return_class():
