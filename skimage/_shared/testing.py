@@ -122,8 +122,30 @@ def color_check(plugin, fmt='png'):
     All major input types should be handled as ubytes and read
     back correctly.
     """
-    img = data.chelsea()
-    _all_roundtrip(img, plugin, fmt)
+    img = img_as_ubyte(data.chelsea())
+    r1 = roundtrip(img, plugin, fmt)
+    testing.assert_allclose(img, r1)
+
+    img2 = img > 128
+    r2 = roundtrip(img2, plugin, fmt)
+    testing.assert_allclose(img2.astype(np.uint8), r2)
+
+    img3 = img_as_float(img)
+    r3 = roundtrip(img3, plugin, fmt)
+    testing.assert_allclose(r3, img)
+
+    img4 = img_as_int(img)
+    if fmt.lower() in (('tif', 'tiff')):
+        img4 -= 100
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img4)
+    else:
+        r4 = roundtrip(img4, plugin, fmt)
+        testing.assert_allclose(r4, img_as_ubyte(img4))
+
+    img5 = img_as_uint(img)
+    r5 = roundtrip(img5, plugin, fmt)
+    testing.assert_allclose(r5, img)
 
 
 def mono_check(plugin, fmt='png'):
@@ -132,12 +154,7 @@ def mono_check(plugin, fmt='png'):
     All major input types should be handled.
     """
 
-    img = data.moon()
-    _all_roundtrip(img, plugin, fmt)
-
-
-def _all_roundtrip(img, plugin, fmt):
-    img = img_as_ubyte(img)
+    img = img_as_ubyte(data.moon())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 
@@ -149,31 +166,21 @@ def _all_roundtrip(img, plugin, fmt):
     r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
-    elif r3.dtype == "uint16":
-        testing.assert_allclose(r3, img_as_uint(img3))
-    elif r3.dtype == "uint8":
-        testing.assert_allclose(r3, img)
+    else:
+        testing.assert_allclose(r3, img_as_uint(img))
 
     img4 = img_as_int(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
         r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
-
-    r4 = roundtrip(img4, plugin, fmt)
-    if r4.dtype == "uint16":
+    else:
+        r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img_as_uint(img4))
-    elif r4.dtype == "uint8" and plugin != 'imageio':
-        testing.assert_allclose(r4, img)
 
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
-    if r5.dtype.kind == 'f':
-        testing.assert_allclose(r5, img_as_float(img5))
-    elif r5.dtype == "uint16":
-        testing.assert_allclose(r5, img_as_uint(img5))
-    elif r5.dtype == "uint8":
-        testing.assert_allclose(r5, img)
+    testing.assert_allclose(r5, img5)
 
 
 def setup_test():
