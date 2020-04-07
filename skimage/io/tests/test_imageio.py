@@ -4,11 +4,8 @@ import pytest
 import numpy as np
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
-from skimage import data
-from skimage.util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from skimage._shared import testing
-from skimage._shared.testing import (assert_array_almost_equal,
-                                     TestCase, fetch, roundtrip)
+from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
 from skimage._shared._warnings import expected_warnings
 
 
@@ -69,9 +66,9 @@ class TestSave(TestCase):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name
         f.close()
-        with expected_warnings(['.* is a boolean image',
-                                '.* is a low contrast image']):
-            a = np.ones((5, 5), bool)
+        with expected_warnings(['.* is a boolean image']):
+            a = np.zeros((5, 5), bool)
+            a[2, 2] = True
             imsave(fname, a)
 
 
