@@ -129,7 +129,9 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     if check_contrast and is_low_contrast(arr):
         warn('%s is a low contrast image' % fname)
     if arr.dtype == bool:
-        warn('%s is a boolean image: setting True to 1 and False to 0' % fname)
+        warn('%s is a boolean image: setting True to 1 and False to 0. ' % fname
+             'To silence this warning, please convert the image to uint8 '
+             'manually', stacklevel=2)
         arr = arr.astype('uint8')
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
