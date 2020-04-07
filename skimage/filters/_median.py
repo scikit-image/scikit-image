@@ -54,7 +54,7 @@ def median(image, selem=None, out=None, mask=None, shift_x=False,
         Either to use the old behavior (i.e., < 0.15) or the new behavior.
         The old behavior will call the :func:`skimage.filters.rank.median`.
         The new behavior will call the :func:`scipy.ndimage.median_filter`.
-        Default is 'rank'.
+        Default is 'ndimage'.
 
         .. versionadded:: 0.15
            ``behavior`` is introduced in 0.15
