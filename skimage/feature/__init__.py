@@ -28,16 +28,16 @@ from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 
-from ..registration._masked_register_translation import (
-    masked_register_translation as _masked_register_translation)
-
 
 @deprecated(alt_func='skimage.registration.masked_register_translation',
             removed_version='0.19')
 def masked_register_translation(src_image, target_image, src_mask,
                                 target_mask=None, overlap_ratio=0.3):
-    return _masked_register_translation(src_image, target_image, src_mask,
-                                        target_mask, overlap_ratio)
+
+    from ..registration._masked_register_translation import (
+        masked_register_translation as _func)
+    return _func(src_image, target_image, reference_mask=src_mask,
+                 moving_mask=target_mask, overlap_ratio=overlap_ratio)
 
 
 __all__ = ['canny',
