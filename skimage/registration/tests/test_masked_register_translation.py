@@ -20,8 +20,10 @@ def test_masked_registration_vs_register_translation():
     trivial_mask = np.ones_like(reference_image)
 
     nonmasked_result, *_ = register_translation(reference_image, shifted)
-    masked_result = masked_register_translation(
-        reference_image, shifted, trivial_mask, overlap_ratio=1 / 10)
+    masked_result = masked_register_translation(reference_image,
+                                                shifted,
+                                                reference_mask=trivial_mask,
+                                                overlap_ratio=1 / 10)
 
     assert_equal(nonmasked_result, masked_result)
 
@@ -43,8 +45,10 @@ def test_masked_registration_random_masks():
     shifted_mask = np.random.choice(
         [True, False], shifted.shape, p=[3 / 4, 1 / 4])
 
-    measured_shift = masked_register_translation(
-        reference_image, shifted, ref_mask, shifted_mask)
+    measured_shift = masked_register_translation(reference_image,
+                                                 shifted,
+                                                 reference_mask=ref_mask,
+                                                 moving_mask=shifted_mask)
     assert_equal(measured_shift, -np.array(shift))
 
 
@@ -72,8 +76,8 @@ def test_masked_registration_random_masks_non_equal_sizes():
     measured_shift = masked_register_translation(
         reference_image,
         shifted,
-        np.ones_like(ref_mask),
-        np.ones_like(shifted_mask))
+        reference_mask=np.ones_like(ref_mask),
+        moving_mask=np.ones_like(shifted_mask))
     assert_equal(measured_shift, -np.array(shift))
 
 
@@ -99,11 +103,12 @@ def test_masked_registration_padfield_data():
         moving_mask = (moving_image != 0)
 
         # Note that shifts in x and y and shifts in cols and rows
-        shift_y, shift_x = masked_register_translation(fixed_image,
-                                                       moving_image,
-                                                       fixed_mask,
-                                                       moving_mask,
-                                                       overlap_ratio=0.1)
+        shift_y, shift_x = masked_register_translation(
+            fixed_image,
+            moving_image,
+            reference_mask=fixed_mask,
+            moving_mask=moving_mask,
+            overlap_ratio=0.1)
         # Note: by looking at the test code from Padfield's
         # MaskedFFTRegistrationCode repository, the
         # shifts were not xi and yi, but xi and -yi

@@ -50,7 +50,8 @@ print(f"Known offset (row, col): {shift}")
 # the pixels ourselves
 mask = corrupted_pixels
 
-detected_shift = masked_register_translation(image, offset_image, mask)
+detected_shift = masked_register_translation(image, offset_image,
+                                             reference_mask=mask)
 
 print(f"Detected pixel offset (row, col): {-detected_shift}")
 
@@ -98,7 +99,9 @@ offset_image *= mask2
 
 print(f"Known offset (row, col): {shift}")
 
-detected_shift = masked_register_translation(image, offset_image, mask1, mask2)
+detected_shift = masked_register_translation(image, offset_image,
+                                             reference_mask=mask1,
+                                             moving_mask=mask2)
 
 print(f"Detected pixel offset (row, col): {-detected_shift}")
 
