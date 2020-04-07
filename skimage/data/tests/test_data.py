@@ -112,9 +112,3 @@ def test_cells_3d():
     path = fetch('data/cells.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
-
-
-def test_brain():
-    """ Test that "neuron" image can be loaded. """
-    brain = data.brain()
-    assert_equal(brain.ndim, 3)
