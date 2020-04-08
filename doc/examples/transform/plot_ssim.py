@@ -37,6 +37,7 @@ noise[np.random.random(size=noise.shape) > 0.5] *= -1
 def mse(x, y):
     return np.linalg.norm(x - y)
 
+
 img_noise = img + noise
 img_const = img + abs(noise)
 
