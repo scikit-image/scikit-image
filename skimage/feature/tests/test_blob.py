@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.draw import circle
+from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_log, blob_doh
 from skimage.feature.blob import _blob_overlap
@@ -11,13 +11,13 @@ def test_blob_dog():
     r2 = math.sqrt(2)
     img = np.ones((512, 512))
 
-    xs, ys = circle(400, 130, 5)
+    xs, ys = disk((400, 130), 5)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 25)
+    xs, ys = disk((100, 300), 25)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 45)
+    xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
     blobs = blob_dog(img, min_sigma=5, max_sigma=50)
@@ -87,13 +87,13 @@ def test_blob_dog():
 
     # image where blob is 5 px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
+    xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
 
 
 def test_blob_dog_excl_border():
     img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
+    xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
     blobs = blob_dog(
         img,
@@ -110,7 +110,7 @@ def test_blob_dog_excl_border():
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
@@ -120,16 +120,16 @@ def test_blob_log():
     r2 = math.sqrt(2)
     img = np.ones((256, 256))
 
-    xs, ys = circle(200, 65, 5)
+    xs, ys = disk((200, 65), 5)
     img[xs, ys] = 255
 
-    xs, ys = circle(80, 25, 15)
+    xs, ys = disk((80, 25), 15)
     img[xs, ys] = 255
 
-    xs, ys = circle(50, 150, 25)
+    xs, ys = disk((50, 150), 25)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 175, 30)
+    xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
     blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=1)
@@ -234,7 +234,7 @@ def test_blob_log_3d_anisotropic():
 def test_blob_log_exclude_border():
     # image where blob is 5 px from borders, radius 5
     img = np.ones((512, 512))
-    xs, ys = circle(5, 5, 5)
+    xs, ys = disk((5, 5), 5)
     img[xs, ys] = 255
 
     blobs = blob_log(
@@ -246,11 +246,11 @@ def test_blob_log_exclude_border():
     b = blobs[0]
     assert b[0] == b[1] == 5, "blob should be 5 px from x and y borders"
 
-    blobs = blob_dog(
+    blobs = blob_log(
         img,
         min_sigma=1.5,
         max_sigma=5,
-        exclude_border=5
+        exclude_border=6,
     )
     msg = "zero blobs should be detected, as only blob is 5 px from border"
     assert blobs.shape[0] == 0, msg
@@ -259,16 +259,16 @@ def test_blob_log_exclude_border():
 def test_blob_doh():
     img = np.ones((512, 512), dtype=np.uint8)
 
-    xs, ys = circle(400, 130, 20)
+    xs, ys = disk((400, 130), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(460, 50, 30)
+    xs, ys = disk((460, 50), 30)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 40)
+    xs, ys = disk((100, 300), 40)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 50)
+    xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
     blobs = blob_doh(
@@ -306,16 +306,16 @@ def test_blob_doh():
 def test_blob_doh_log_scale():
     img = np.ones((512, 512), dtype=np.uint8)
 
-    xs, ys = circle(400, 130, 20)
+    xs, ys = disk((400, 130), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(460, 50, 30)
+    xs, ys = disk((460, 50), 30)
     img[xs, ys] = 255
 
-    xs, ys = circle(100, 300, 40)
+    xs, ys = disk((100, 300), 40)
     img[xs, ys] = 255
 
-    xs, ys = circle(200, 350, 50)
+    xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
     blobs = blob_doh(
@@ -335,12 +335,12 @@ def test_blob_doh_log_scale():
     assert abs(b[1] - 130) <= thresh
     assert abs(radius(b) - 20) <= thresh
 
-    b = s[1]
+    b = s[2]
     assert abs(b[0] - 460) <= thresh
     assert abs(b[1] - 50) <= thresh
     assert abs(radius(b) - 30) <= thresh
 
-    b = s[2]
+    b = s[1]
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b) - 40) <= thresh
@@ -360,10 +360,10 @@ def test_blob_doh_no_peaks():
 def test_blob_doh_overlap():
     img = np.ones((256, 256), dtype=np.uint8)
 
-    xs, ys = circle(100, 100, 20)
+    xs, ys = disk((100, 100), 20)
     img[xs, ys] = 255
 
-    xs, ys = circle(120, 100, 30)
+    xs, ys = disk((120, 100), 30)
     img[xs, ys] = 255
 
     blobs = blob_doh(

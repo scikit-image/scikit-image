@@ -192,7 +192,7 @@ def test_reproducibility():
     img = data.coffee()
     labels1 = segmentation.slic(img, compactness=30, n_segments=400)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
-    results = [None] * 10
+    results = [None] * 4
     for i in range(len(results)):
         results[i] = graph.cut_normalized(
             labels1, g, in_place=False, thresh=1e-3, random_state=1234)

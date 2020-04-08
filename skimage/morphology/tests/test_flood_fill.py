@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from pytest import raises
 
 from skimage.morphology import flood, flood_fill
@@ -252,6 +253,26 @@ def test_basic_nd():
         # Test that the entire array is as expected
         np.testing.assert_equal(
             filled, np.pad(np.ones((3,)*dimension) * 2, 1, 'constant'))
+
+
+@pytest.mark.parametrize("tolerance", [None, 0])
+def test_f_order(tolerance):
+    image = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ], order="F")
+    expected = np.array([
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ], dtype=bool)
+
+    mask = flood(image, seed_point=(1, 0), tolerance=tolerance)
+    np.testing.assert_array_equal(expected, mask)
+
+    mask = flood(image, seed_point=(2, 1), tolerance=tolerance)
+    np.testing.assert_array_equal(expected, mask)
 
 
 if __name__ == "__main__":

@@ -239,16 +239,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
     selem = _resolve_neighborhood(selem, connectivity, image.ndim)
 
     # Must annotate borders
-    working_image = _fast_pad(image, image.min())
+    working_image = _fast_pad(image, image.min(), order=order)
 
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index([i+1 for i in seed_point],
                                              working_image.shape, order=order)
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, selem, center=((1,) * image.ndim))
+        working_image.shape, selem, center=((1,) * image.ndim), order=order)
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
-    flags = np.zeros(working_image.shape, dtype=np.uint8)
+    flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)
     _set_border_values(flags, value=2)
 
     try:
@@ -264,16 +264,16 @@ def flood(image, seed_point, *, selem=None, connectivity=None, tolerance=None):
             high_tol = min(max_value, seed_value + tolerance)
             low_tol = max(min_value, seed_value - tolerance)
 
-            _flood_fill_tolerance(working_image.ravel(),
-                                  flags.ravel(),
+            _flood_fill_tolerance(working_image.ravel(order),
+                                  flags.ravel(order),
                                   neighbor_offsets,
                                   ravelled_seed_idx,
                                   seed_value,
                                   low_tol,
                                   high_tol)
         else:
-            _flood_fill_equal(working_image.ravel(),
-                              flags.ravel(),
+            _flood_fill_equal(working_image.ravel(order),
+                              flags.ravel(order),
                               neighbor_offsets,
                               ravelled_seed_idx,
                               seed_value)

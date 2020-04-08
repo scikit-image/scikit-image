@@ -1,7 +1,7 @@
 .. _howto_contribute:
 
-How to contribute to ``skimage``
-================================
+How to contribute to scikit-image
+=================================
 
 Developing Open Source is great fun!  Join us on the `scikit-image mailing
 list <https://mail.python.org/mailman/listinfo/scikit-image>`_ and tell us
@@ -186,7 +186,7 @@ When using ``venv``, you may find the following bash commands useful::
   # Create a virtualenv named ``skimage-dev`` that lives in the directory of
   # the same name
   python -m venv skimage-dev
-  # Activate it
+  # Activate it. On Linux and MacOS:
   source skimage-dev/bin/activate
   # Install all development and runtime dependencies of scikit-image
   pip install -r <(cat requirements/*.txt)
@@ -194,6 +194,8 @@ When using ``venv``, you may find the following bash commands useful::
   pip install -e .
   # Test your installation
   pytest skimage
+
+On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
 
 conda
 =====

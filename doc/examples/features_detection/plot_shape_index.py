@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import ndimage as ndi
 from skimage.feature import shape_index
-from skimage.draw import circle
+from skimage.draw import disk
 
 
 def create_test_image(
@@ -62,9 +62,9 @@ def create_test_image(
     )
 
     for _ in range(spot_count):
-        rr, cc = circle(
-            np.random.randint(image.shape[0]),
-            np.random.randint(image.shape[1]),
+        rr, cc = disk(
+            (np.random.randint(image.shape[0]),
+             np.random.randint(image.shape[1])),
             spot_radius,
             shape=image.shape
         )

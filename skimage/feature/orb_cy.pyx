@@ -3,20 +3,13 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-import os
 import numpy as np
 
-from .. import data_dir
-
-cimport numpy as cnp
 from libc.math cimport sin, cos
 
 from .._shared.interpolation cimport round
 
-POS = np.loadtxt(os.path.join(data_dir, "orb_descriptor_positions.txt"),
-                 dtype=np.int8)
-POS0 = np.ascontiguousarray(POS[:, :2])
-POS1 = np.ascontiguousarray(POS[:, 2:])
+from ._orb_descriptor_positions import POS, POS0, POS1
 
 
 def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,

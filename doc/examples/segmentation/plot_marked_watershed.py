@@ -21,7 +21,8 @@ See Wikipedia_ for more details on the algorithm.
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
 
-from skimage.morphology import watershed, disk
+from skimage.morphology import disk
+from skimage.segmentation import watershed
 from skimage import data
 from skimage.filters import rank
 from skimage.util import img_as_ubyte

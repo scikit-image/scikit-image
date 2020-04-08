@@ -29,12 +29,12 @@ def all_warnings():
 
     >>> with warnings.catch_warnings():
     ...     warnings.simplefilter('once')
-    ...     foo()
+    ...     foo()                         # doctest: +SKIP
 
     We can now run ``foo()`` without a warning being raised:
 
     >>> from numpy.testing import assert_warns
-    >>> foo()
+    >>> foo()                             # doctest: +SKIP
 
     To catch the warning, we call in the help of ``all_warnings``:
 
