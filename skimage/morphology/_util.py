@@ -210,7 +210,7 @@ def _set_border_values(image, value):
         image[sl] = value
 
 
-def _fast_pad(image, value):
+def _fast_pad(image, value, *, order="C"):
     """Pad an array on all axes by one with a value.
 
     Parameters
@@ -219,6 +219,8 @@ def _fast_pad(image, value):
         Image to pad.
     value : scalar
          The value to use. Should be compatible with `image`'s dtype.
+    order : "C" or "F"
+        Specify the memory layout of the padded image (C or Fortran style).
 
     Returns
     -------
@@ -248,7 +250,7 @@ def _fast_pad(image, value):
     """
     # Allocate padded image
     new_shape = np.array(image.shape) + 2
-    new_image = np.empty(new_shape, dtype=image.dtype, order="C")
+    new_image = np.empty(new_shape, dtype=image.dtype, order=order)
 
     # Copy old image into new space
     sl = (slice(1, -1),) * image.ndim
