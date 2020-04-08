@@ -5,5 +5,5 @@ networkx>=2.0
 pillow>=4.3.0,!=7.1.0,!=7.1.1
 imageio>=2.3.0
 tifffile>=2019.7.26
-PyWavelets>=0.5.2
+PyWavelets>=1.0.0
 pooch>=0.5.2
