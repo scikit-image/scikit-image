@@ -9,6 +9,7 @@ Authors
 """
 
 import numpy as np
+import pytest
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage._shared.testing import assert_array_almost_equal, fetch
 from skimage._shared.testing import TestCase
@@ -32,7 +33,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2ypbpr, ypbpr2rgb,
                            rgb2ycbcr, ycbcr2rgb,
                            rgb2ydbdr, ydbdr2rgb,
-                           rgba2rgb)
+                           rgba2rgb, gray2rgba)
 
 from skimage._shared._warnings import expected_warnings
 from skimage import data
@@ -634,20 +635,97 @@ def test_gray2rgb_alpha():
     x = np.random.random((5, 5, 4))
     with expected_warnings(['Pass-through of possibly RGB images']):
         assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 4))
-    with expected_warnings(['Pass-through of possibly RGB images']):
+    with expected_warnings(['Pass-through of possibly RGB images',
+                            'alpha argument is deprecated']):
         assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
+    with expected_warnings(['Pass-through of possibly RGB images',
+                            'alpha argument is deprecated']):
         assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
     x = np.random.random((5, 5, 3))
     with expected_warnings(['Pass-through of possibly RGB images']):
         assert_equal(gray2rgb(x, alpha=None).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
+    with expected_warnings(['Pass-through of possibly RGB images',
+                            'alpha argument is deprecated']):
         assert_equal(gray2rgb(x, alpha=False).shape, (5, 5, 3))
-    with expected_warnings(['Pass-through of possibly RGB images']):
+    with expected_warnings(['Pass-through of possibly RGB images',
+                            'alpha argument is deprecated']):
         assert_equal(gray2rgb(x, alpha=True).shape, (5, 5, 4))
 
-    assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
-                          alpha=True)[0, 0, 3], 1)
-    assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
-                          alpha=True)[0, 0, 3], 255)
+    with expected_warnings(['alpha argument is deprecated']):
+        assert_equal(gray2rgb(np.array([[1, 2], [3, 4.]]),
+                              alpha=True)[0, 0, 3], 1)
+    with expected_warnings(['alpha argument is deprecated']):
+        assert_equal(gray2rgb(np.array([[1, 2], [3, 4]], dtype=np.uint8),
+                              alpha=True)[0, 0, 3], 255)
+
+
+@pytest.mark.parametrize("shape", [(5, 5), (5, 5, 4), (5, 4, 5, 4)])
+def test_gray2rgba(shape):
+    # nD case
+    img = np.random.random(shape)
+    rgba = gray2rgba(img)
+
+    # Shape check
+    assert_equal(rgba.shape, shape + (4, ))
+
+    # dtype check
+    assert rgba.dtype == img.dtype
+
+    # RGB channels check
+    for channel in range(3):
+        assert_equal(rgba[..., channel], img)
+
+    # Alpha channel check
+    assert_equal(rgba[..., 3], 1.0)
+
+
+def test_gray2rgba_dtype():
+    img_f64 = np.random.random((5, 5))
+    img_f32 = img_f64.astype('float32')
+    img_u8 = img_as_ubyte(img_f64)
+    img_int = img_u8.astype(int)
+
+    for img in [img_f64, img_f32, img_u8, img_int]:
+        assert gray2rgba(img).dtype == img.dtype
+
+
+def test_gray2rgba_alpha():
+    img = np.random.random((5, 5))
+    img_u8 = img_as_ubyte(img)
+
+    # Default
+    alpha = None
+    rgba = gray2rgba(img, alpha)
+
+    assert_equal(rgba[..., :3], gray2rgb(img))
+    assert_equal(rgba[..., 3], 1.0)
+
+    # Scalar
+    alpha = 0.5
+    rgba = gray2rgba(img, alpha)
+
+    assert_equal(rgba[..., :3], gray2rgb(img))
+    assert_equal(rgba[..., 3], alpha)
+
+    # Array
+    alpha = np.random.random((5, 5))
+    rgba = gray2rgba(img, alpha)
+
+    assert_equal(rgba[..., :3], gray2rgb(img))
+    assert_equal(rgba[..., 3], alpha)
+
+    # Warning about alpha cast
+    alpha = 0.5
+    with expected_warnings(["alpha can't be safely cast to image dtype"]):
+        rgba = gray2rgba(img_u8, alpha)
+        assert_equal(rgba[..., :3], gray2rgb(img_u8))
+
+    # Invalid shape
+    alpha = np.random.random((5, 5, 1))
+    expected_err_msg = ("could not broadcast input array from shape (5,5,1) "
+                        "into shape (5,5)")
+
+    with pytest.raises(ValueError) as err:
+        rgba = gray2rgba(img, alpha)
+    assert expected_err_msg == str(err.value)
