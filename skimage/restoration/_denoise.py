@@ -857,13 +857,13 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                 out[..., i] += _min
             out = color.ycbcr2rgb(out)
         else:
-            dwt_axes = tuple(range(image.ndim - 1))
-	    out = _wavelet_threshold(image,
-		                     wavelet=wavelet,
-		                     method=method,
-		                     sigma=sigma, mode=mode,
-		                     wavelet_levels=wavelet_levels,
-		                     dwt_axes=dwt_axes)
+            out = np.empty_like(image)
+            for c in range(image.shape[-1]):
+                out[..., c] = _wavelet_threshold(image[..., c],
+                                                 wavelet=wavelet,
+                                                 method=method,
+                                                 sigma=sigma[c], mode=mode,
+                                                 wavelet_levels=wavelet_levels)
     else:
         out = _wavelet_threshold(image, wavelet=wavelet, method=method,
                                  sigma=sigma, mode=mode,
