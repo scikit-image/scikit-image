@@ -613,8 +613,9 @@ def test_log_warp_polar():
         image[rr, cc] = val
     warped = warp_polar(image, radius=200, scaling='log')
     profile = warped.mean(axis=0)
-    peaks = peak_local_max(profile)
-    gaps = peaks[:-1]-peaks[1:]
+    peaks_coord = peak_local_max(profile)
+    peaks_coord.sort(axis=0)
+    gaps = peaks_coord[1:] - peaks_coord[:-1]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
 
 

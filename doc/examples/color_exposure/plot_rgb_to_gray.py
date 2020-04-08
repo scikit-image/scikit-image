@@ -19,7 +19,6 @@ References
 .. [1] http://www.poynton.com/PDFs/ColorFAQ.pdf
 
 """
-import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data

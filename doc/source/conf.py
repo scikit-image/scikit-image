@@ -44,32 +44,6 @@ extensions = ['sphinx_copybutton',
 
 autosummary_generate = True
 
-#------------------------------------------------------------------------
-# Sphinx-gallery configuration
-#------------------------------------------------------------------------
-
-sphinx_gallery_conf = {
-    'doc_module': ('skimage',),
-    # path to your examples scripts
-    'examples_dirs': '../examples',
-    # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples',
-    'backreferences_dir': 'api',
-    'reference_url': {'skimage': None},
-    'subsection_order': ExplicitOrder([
-        '../examples/data',
-        '../examples/numpy_operations',
-        '../examples/color_exposure',
-        '../examples/edges',
-        '../examples/transform',
-        '../examples/filters',
-        '../examples/features_detection',
-        '../examples/segmentation',
-        '../examples/applications',
-        '../examples/developers',
-    ]),
-}
-
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
 try:
@@ -156,6 +130,57 @@ pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+from packaging.version import parse
+v = parse(release)
+if v.release is None:
+    raise ValueError(
+        'Ill-formed version: {!r}. Version should follow '
+        'PEP440'.format(version))
+
+if v.is_devrelease:
+    binder_branch = 'master'
+else:
+    major, minor = v.release[:2]
+    binder_branch = 'v{}.{}.x'.format(major, minor)
+
+
+sphinx_gallery_conf = {
+    'doc_module': ('skimage',),
+    # path to your examples scripts
+    'examples_dirs': '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'auto_examples',
+    'backreferences_dir': 'api',
+    'reference_url': {'skimage': None},
+    'subsection_order': ExplicitOrder([
+        '../examples/data',
+        '../examples/numpy_operations',
+        '../examples/color_exposure',
+        '../examples/edges',
+        '../examples/transform',
+        '../examples/filters',
+        '../examples/features_detection',
+        '../examples/segmentation',
+        '../examples/applications',
+        '../examples/developers',
+    ]),
+    'binder': {
+        # Required keys
+        'org': 'scikit-image',
+        'repo': 'scikit-image',
+        'branch': binder_branch,  # Can be any branch, tag, or commit hash
+        'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
+        'dependencies': '../../.binder/requirements.txt',
+        # Optional keys
+        'use_jupyter_lab': False
+     }
+}
+
 
 
 # -- Options for HTML output ---------------------------------------------------
