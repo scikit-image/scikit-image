@@ -108,3 +108,5 @@ Other
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
   when ``scipy`` upgrades to 1.1.
+* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
+  when texlive 2020 is available.
