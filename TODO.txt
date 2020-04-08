@@ -74,6 +74,8 @@ Version 0.19
   decoration from ``iradon``.
 * In ``skimage/measure/profile.py``, raise a ValueError instead of the
   warning when order > 0 and input array is bool in profile_line.
+* In ``skimage/measure/profile.py``, set default mode to 'reflect' in
+  `profile_line` and remove the deprecation warning.
 
 Other
 -----
