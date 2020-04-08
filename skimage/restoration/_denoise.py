@@ -591,8 +591,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for image
         dlen = wavelet.dec_len
-        wavelet_levels = np.min(
-            [pywt.dwt_max_level(s, dlen) for s in image.shape])
+        wavelet_levels = pywt.dwtn_max_level(image.shape, wavelet)
 
         # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)
@@ -858,13 +857,13 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
                 out[..., i] += _min
             out = color.ycbcr2rgb(out)
         else:
-            out = np.empty_like(image)
-            for c in range(image.shape[-1]):
-                out[..., c] = _wavelet_threshold(image[..., c],
-                                                 wavelet=wavelet,
-                                                 method=method,
-                                                 sigma=sigma[c], mode=mode,
-                                                 wavelet_levels=wavelet_levels)
+            dwt_axes = tuple(range(image.ndim - 1))
+	    out = _wavelet_threshold(image,
+		                     wavelet=wavelet,
+		                     method=method,
+		                     sigma=sigma, mode=mode,
+		                     wavelet_levels=wavelet_levels,
+		                     dwt_axes=dwt_axes)
     else:
         out = _wavelet_threshold(image, wavelet=wavelet, method=method,
                                  sigma=sigma, mode=mode,
