@@ -37,6 +37,17 @@ Version 0.18
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
+    * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
+        * ``skimage/feature/brief.py::BRIEF``
+        * `` skimage/feature/corner.py::corner_harris``
+        * `` skimage/feature/corner.py::corner_shi_tomasi``
+        * `` skimage/feature/corner.py::corner_foerstner``
+        * `` skimage/feature/corner.py::corner_fast``
+        * `` skimage/feature/corner.py::corner_subpix``
+        * `` skimage/feature/corner.py::corner_peaks``
+        * `` skimage/feature/corner.py::corner_orientations``
+    * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
+      ``threshold_rel=0``.
 * In ``skimage/transform`` remove histogram_matching.py.
 * In ``skimage/restoration/_denoise.py`` remove warning regarding
   ``rescale_sigma``.
@@ -61,6 +72,10 @@ Version 0.19
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
+* In ``skimage/measure/profile.py``, raise a ValueError instead of the
+  warning when order > 0 and input array is bool in profile_line.
+* In ``skimage/measure/profile.py``, set default mode to 'reflect' in
+  `profile_line` and remove the deprecation warning.
 * In ``skimage/_shared/utils.py``, raise a ValueError instead of the
   warning when order > 0 and input array is bool in _set_order.
 * In ``skimage/transform/_warps.py``, raise a ValueError instead of the
@@ -97,3 +112,5 @@ Other
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
   when ``scipy`` upgrades to 1.1.
+* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
+  when texlive 2020 is available.

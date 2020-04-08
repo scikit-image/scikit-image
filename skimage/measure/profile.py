@@ -6,21 +6,22 @@ from .._shared.utils import _set_order
 
 
 def profile_line(image, src, dst, linewidth=1,
-                 order=None, mode='constant', cval=0.0,
+                 order=None, mode=None, cval=0.0,
                  *, reduce_func=np.mean):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    image : numeric array, shape (M, N[, C])
+    image : ndarray, shape (M, N[, C])
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
-    src : 2-tuple of numeric scalar (float or int)
-        The start point of the scan line.
-    dst : 2-tuple of numeric scalar (float or int)
-        The end point of the scan line. The destination point is *included*
-        in the profile, in contrast to standard numpy indexing.
+    src : array_like, shape (2, )
+        The coordinates of the start point of the scan line.
+    dst : array_like, shape (2, )
+        The coordinates of the end point of the scan
+        line. The destination point is *included* in the profile, in
+        contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     order : int in {0, 1, 2, 3, 4, 5}, optional
@@ -92,6 +93,13 @@ def profile_line(image, src, dst, linewidth=1,
     """
 
     order = _set_order(image.dtype, order)
+
+    if mode is None:
+        warn("Default out of bounds interpolation mode 'constant' is "
+             "deprecated. In version 0.19 it will be set to 'reflect'. "
+             "To avoid this warning, set `mode=` explicitly.",
+             FutureWarning, stacklevel=2)
+        mode = 'constant'
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:

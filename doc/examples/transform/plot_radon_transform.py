@@ -62,7 +62,6 @@ original image and its Radon transform, often known as its *sinogram*:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.io import imread
 from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, rescale
 
