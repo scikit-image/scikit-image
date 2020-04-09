@@ -638,7 +638,7 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
 
 
-def test_boolimg_rescale():
+def test_bool_img_rescale():
     img = np.ones((12, 18), dtype=bool)
     img[2:-2, 4:-4] = False
     res = rescale(img, 0.5)
