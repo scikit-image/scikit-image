@@ -91,8 +91,8 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     """
     if not selem.ndim == len(image_shape) == len(center):
         raise ValueError(
-            "number of dimensions in image_shape, selem and center "
-            "does not match"
+            "number of dimensions in image shape, structuring element and its"
+            "center index does not match"
         )
 
     selem_indices = np.array(np.nonzero(selem)).T
@@ -102,7 +102,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
         offsets = offsets[:, ::-1]
         image_shape = image_shape[::-1]
     elif order != 'C':
-        raise ValueError("order was not 'C' or 'F'")
+        raise ValueError("order must be 'C' or 'F'")
 
     # Scale offsets in each dimension and sum
     ravel_factors = image_shape[1:] + (1,)
@@ -174,8 +174,8 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(
-                "structuring element and image must have the same number of "
-                "dimensions"
+                "number of dimensions in image and structuring element do not"
+                "match"
             )
         # Must only specify direct neighbors
         if any(s != 3 for s in selem.shape):

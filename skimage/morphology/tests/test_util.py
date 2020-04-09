@@ -105,23 +105,23 @@ def test_offsets_to_raveled_neighbors_explicit_0():
 
 
 def test_offsets_to_raveled_neighbors_explicit_1():
-        """Check reviewed example where selem is larger in last dimension."""
-        image_shape = (10, 9, 8, 3)
-        selem = np.ones((3, 3, 3, 4), dtype=bool)
-        center = (1, 1, 1, 1)
-        offsets = _util._offsets_to_raveled_neighbors(
-            image_shape, selem, center
-        )
+    """Check reviewed example where selem is larger in last dimension."""
+    image_shape = (10, 9, 8, 3)
+    selem = np.ones((3, 3, 3, 4), dtype=bool)
+    center = (1, 1, 1, 1)
+    offsets = _util._offsets_to_raveled_neighbors(
+        image_shape, selem, center
+    )
 
-        desired = np.array([
-              24,    3,    1,   -1,   -3,  -24, -216,  216, -192,  215,   -2,
-             -21,  -23,    2,  -25,  -27,    4,  217,   21,  219,   -4,   23,
-              25, -240,  240,  192,   27, -213, -219,  213, -215, -217, -243,
-             191, -241,  195,  189,  212,   26,    5,   20,   28,   22,  214,
-             243, -237,  -22,  241, -214, -212,  237, -218, -195,  -20,  220,
-            -193, -191,  218, -189,  -28,  -26,  193, -239, -220,  239,  196,
-             221,  242,  236,  238,  194, -244, -188, -238, -211, -196, -194,
-            -190, -236,  -19,  244,   29,  188, -242,  190, -187,  197, -235,
-             245
-        ])
-        assert_array_equal(offsets, desired)
+    desired = np.array([
+          24,    3,    1,   -1,   -3,  -24, -216,  216, -192,  215,   -2,
+         -21,  -23,    2,  -25,  -27,    4,  217,   21,  219,   -4,   23,
+          25, -240,  240,  192,   27, -213, -219,  213, -215, -217, -243,
+         191, -241,  195,  189,  212,   26,    5,   20,   28,   22,  214,
+         243, -237,  -22,  241, -214, -212,  237, -218, -195,  -20,  220,
+        -193, -191,  218, -189,  -28,  -26,  193, -239, -220,  239,  196,
+         221,  242,  236,  238,  194, -244, -188, -238, -211, -196, -194,
+        -190, -236,  -19,  244,   29,  188, -242,  190, -187,  197, -235,
+         245
+    ])
+    assert_array_equal(offsets, desired)
