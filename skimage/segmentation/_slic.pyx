@@ -219,7 +219,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                                 if nearest_segments[z, y, x] == mask_label:
                                     continue
 
-                            k = nearest_segments[z, y, x]-start_label
+                            k = nearest_segments[z, y, x] - start_label
                             dist_color = 0
 
                             for c in range(3, n_features):
