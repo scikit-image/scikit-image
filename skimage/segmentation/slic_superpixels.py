@@ -165,7 +165,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     start_label: int, optional
         The labels' index start. Should be 0 or 1.
     mask : 2D ndarray, optional
-        if provided, superpixels are computed only where mask is True,
+        If provided, superpixels are computed only where mask is True,
         and seed points are iteratively placed over the masked area to
         ensure their homogeneous spacial distribution over the mask
         (see [3]_ for more details).
