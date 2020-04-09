@@ -16,7 +16,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
     Parameters
     ----------
     mask : 3D ndarray
-        The mask where the centroids must be positioned.
+        The mask within which the centroids must be positioned.
     n_centroids : int
         The number of centroids to be returned.
     spacing : sequence of same, optional,
@@ -165,7 +165,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     start_label: int, optional
         The labels' index start. Should be 0 or 1.
     mask : 2D ndarray, optional
-        if provided, superpixels are computed only where mask is True,
+        If provided, superpixels are computed only where mask is True,
         and seed points are iteratively placed over the masked area to
         ensure their homogeneous spacial distribution over the mask
         (see [3]_ for more details).
@@ -258,10 +258,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         if use_mask:
             start_label = 1
         else:
-            warnings.warn("Labels' indexing start from 0. " +
+            warnings.warn("skimage.measure.label's indexing starts from 0. " +
                           "In future version it will start from 1. " +
                           "To disable this warning, explicitely " +
-                          "specify the start_label parameter.",
+                          "set the `start_label` parameter to 1.",
                           FutureWarning, stacklevel=2)
             start_label = 0
 
