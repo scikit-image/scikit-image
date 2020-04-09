@@ -57,15 +57,12 @@ img = img_as_float(data.chelsea())
 tf_img = tf.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
-ax.set_title('Euclidean transformation')
-
+_ = ax.set_title('Euclidean transformation')
 
 ######################################################################
 # For a rotation around the center of the image, one can 
 # compose a translation to change the origin, a rotation, and finally
 # the inverse of the first translation.
-# in degrees, while it is given in radians for the different kinds of
-# affine transformations):
 
 rotation = tf.EuclideanTransform(rotation=np.pi/3)
 shift = tf.EuclideanTransform(translation=-np.array(img.shape[:2]) / 2)
@@ -74,7 +71,7 @@ matrix = np.linalg.inv(shift.params) @ rotation.params @ shift.params
 tform = tf.EuclideanTransform(matrix)
 tf_img = tf.warp(img, tform.inverse)
 fig, ax = plt.subplots()
-ax.imshow(tf_img)
+_ = ax.imshow(tf_img)
 
 ######################################################################
 # Similarity transformation
@@ -91,7 +88,7 @@ print(tform.params)
 tf_img = tf.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
-ax.set_title('Similarity transformation')
+_ = ax.set_title('Similarity transformation')
 
 ######################################################################
 # Affine transformation
@@ -109,7 +106,7 @@ print(tform.params)
 tf_img = tf.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
-ax.set_title('Affine transformation')
+_ = ax.set_title('Affine transformation')
 
 
 ######################################################################
@@ -130,9 +127,6 @@ ax.imshow(tf_img)
 ax.set_title('Projective transformation')
 
 plt.show()
-
-
-
 ######################################################################
 # See also
 # ========================================
@@ -142,5 +136,4 @@ plt.show()
 # * :ref:`sphx_glr_auto_examples_transform_plot_rescale.py` for simple
 #   rescaling and resizing operations
 # * :func:`skimage.transform.rotate` for rotating an image around its center
-
 # sphinx_gallery_thumbnail_number = 5
