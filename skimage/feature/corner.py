@@ -1004,16 +1004,17 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         # Use KDtree to find the peaks that are too close to each other
         tree = spatial.cKDTree(coords)
 
-        rejected_peaks = set()
+        rejected_peaks_indices = set()
         for idx, point in enumerate(coords):
-            if idx not in rejected_peaks:
+            if idx not in rejected_peaks_indices:
                 candidates = tree.query_ball_point(point, r=min_distance,
                                                    p=p_norm)
                 candidates.remove(idx)
-                rejected_peaks.update(candidates)
+                rejected_peaks_indices.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coords = np.delete(coords, tuple(rejected_peaks), axis=0)[:num_peaks]
+        coords = np.delete(coords, tuple(rejected_peaks_indices),
+                           axis=0)[:num_peaks]
 
     if indices:
         return coords
