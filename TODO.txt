@@ -74,6 +74,8 @@ Version 0.19
   decoration from ``iradon``.
 * In ``skimage/measure/profile.py``, raise a ValueError instead of the
   warning when order > 0 and input array is bool in profile_line.
+* In ``skimage/measure/profile.py``, set default mode to 'reflect' in
+  `profile_line` and remove the deprecation warning.
 
 Other
 -----
@@ -106,3 +108,5 @@ Other
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
   when ``scipy`` upgrades to 1.1.
+* Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
+  when texlive 2020 is available.
