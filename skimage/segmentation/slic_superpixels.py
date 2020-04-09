@@ -16,7 +16,7 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
     Parameters
     ----------
     mask : 3D ndarray
-        The mask where the centroids must be positioned.
+        The mask within which the centroids must be positioned.
     n_centroids : int
         The number of centroids to be returned.
     spacing : sequence of same, optional,
