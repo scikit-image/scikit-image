@@ -2,9 +2,9 @@ import sys
 import pytest
 import numpy as np
 import numpy.testing as npt
-from ..utils import check_nD, deprecate_kwarg, _set_order
-from .. import testing
-from .._warnings import expected_warnings
+from skimage._shared.utils import check_nD, deprecate_kwarg, _set_order
+from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
 
 
 def test_deprecated_kwarg():
