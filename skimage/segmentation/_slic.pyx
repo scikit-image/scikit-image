@@ -41,7 +41,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
     slic_zero : bool
         True to run SLIC-zero, False to run original SLIC.
     start_label: int
-        label indexing start value.
+        The label indexing start value.
     ignore_color : bool
         True to update centroid positions without considering pixels
         color.
@@ -242,15 +242,16 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     Parameters
     ----------
-    segments: 3D array of int, shape (Z, Y, X)
+    segments : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
-    min_size: int
-        Minimum size of the segment
-    max_size: int
-        Maximum size of the segment. This is done for performance reasons,
+    min_size : int
+        The minimum size of the segment
+    max_size : int
+        The maximum size of the segment. This is done for performance reasons,
         to pre-allocate a sufficiently large array for the breadth first search
-    start_label: int
-        label indexing start value.
+    start_label : int
+        The label indexing start value.
+
     Returns
     -------
     connected_segments : 3D array of int, shape (Z, Y, X)
