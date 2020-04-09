@@ -63,7 +63,18 @@ matrix:
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.7
+      dist: xenial # Required for Python 3.7+
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      services:
+        - xvfb
+    - os: linux
+      python: 3.7
+      # Testing and installing from sdist will ensure that tests do not
+      # depend on pooch to pass
+      # pooch is used as an optional dependency to download datasets on the fly
+      # users installing scikit-image in development mode do not require
+      # pooch to run the tests
+      env: INSTALL_FROM_SDIST=1
       dist: xenial # Required for Python 3.7
       services:
         - xvfb
@@ -137,8 +148,14 @@ install:
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
-        pip install --no-build-isolation .;
+        pip install -vv --no-build-isolation -e .;
       fi
+    # ^^^^ installing in editable mode avoids redownloading the test datasets
+    # using pooch as our code automatically checks for the data being
+    # stored in directories adjacent to the source.
+    #
+    # installing from SDIST will force the use of pooch as a downloading
+    # backend to test the pooch functionality
     # Install testing requirements
     - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples

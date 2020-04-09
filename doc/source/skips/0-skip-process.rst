@@ -15,7 +15,7 @@ SKIP 0 — Purpose and Process
 What is a SKIP?
 ---------------
 
-SKIP stands for SciKit-Image Proposal. A SKIP is a design document providing
+SKIP stands for **s**\ ci\ **k**\ it-\ **i**\ mage **p**\ roposal. A SKIP is a design document providing
 information to the community, or describing a new feature for
 scikit-image or its processes or environment. The SKIP should provide a
 rationale for the proposed change as well as a concise technical

@@ -82,6 +82,8 @@ access), specifically to:
   - In the ``doc/`` directory:
     - Build using
       ``make clean; make html; make gh-pages``.
+    - Check (since this a new feature) that binder links in gallery examples
+      point to the release branch, e.g. `0.16.x`.
     - In the ``gh-pages/`` directory:
       - Update the symlink to ``stable`` and commit.
       - Upload the docs: ``git push origin gh-pages``.

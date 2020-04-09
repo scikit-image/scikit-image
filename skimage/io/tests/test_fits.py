@@ -1,7 +1,6 @@
 import os.path
 import numpy as np
 import skimage.io as io
-from skimage import data_dir
 from skimage._shared import testing
 
 testing.pytest.importorskip('astropy')
