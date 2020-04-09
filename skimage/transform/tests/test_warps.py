@@ -638,12 +638,26 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
 
 
-def test_boll_array_rescaling():
-    img = np.zeros((100, 120), dtype=bool)
-    img[20:80, 30:90] = True
-    res = rescale(img, 0.305)
+def test_boll_array_rescale():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = rescale(img, 0.5)
 
-    assert_equal(res[6:24, 9:27], np.ones((18, 18)))
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_boll_array_resize():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = resize(img, (6, 9))
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
 
 
 def test_boll_array_warnings():
