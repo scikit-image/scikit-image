@@ -51,6 +51,10 @@ Deprecations
 ------------
 - Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
   in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
+- ``skimage.segmentation.circle_level_set`` has been deprecated and will be
+  removed in 0.19. Use ``skimage.segmentation.disk_level_set`` instead.
+- ``skimage.draw.circle`` has been deprecated and will be removed in 0.19.
+  Use ``skimage.draw.disk`` instead.
 
 
 Contributors to this release

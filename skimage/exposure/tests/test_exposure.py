@@ -281,6 +281,37 @@ def test_rescale_same_values():
     assert_array_almost_equal(out, image)
 
 
+@pytest.mark.parametrize(
+    "in_range,out_range", [("image", "dtype"),
+                           ("dtype", "image")]
+)
+def test_rescale_nan_warning(in_range, out_range):
+    image = np.arange(12, dtype=float).reshape(3, 4)
+    image[1, 1] = np.nan
+
+    msg = (
+        r"One or more intensity levels are NaN\."
+        r" Rescaling will broadcast NaN to the full image\."
+    )
+
+    # 2019/11/10 Passing NaN to np.clip raises a DeprecationWarning for
+    # versions above 1.17
+    # TODO: Remove once NumPy removes this DeprecationWarning
+    numpy_warning_1_17_plus = (
+        r"Passing `np.nan` to mean no clipping in np.clip "
+        r"has always been unreliable|\A\Z"
+    )
+    # 2019/12/06 Passing NaN to np.min and np.max raises a RuntimeWarning for
+    # NumPy < 1.16
+    # TODO: Remove once minimal required NumPy version is 1.16
+    numpy_warning_smaller_1_16 = r"invalid value encountered in reduce|\A\Z"
+
+    with expected_warnings(
+            [msg, numpy_warning_1_17_plus, numpy_warning_smaller_1_16]
+    ):
+        exposure.rescale_intensity(image, in_range, out_range)
+
+
 # Test adaptive histogram equalization
 # ====================================
 
@@ -329,6 +360,31 @@ def test_adapthist_alpha():
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 2)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
+
+
+def test_adapthist_borders():
+    """Test border processing
+    """
+    img = rgb2gray(util.img_as_float(data.astronaut()))
+    adapted = exposure.equalize_adapthist(img, 11)
+    width = 42
+    # Check last columns are procesed
+    assert norm_brightness_err(adapted[:, -width], img[:, -width]) > 1e-3
+    # Check last rows are procesed
+    assert norm_brightness_err(adapted[-width, :], img[-width, :]) > 1e-3
+
+
+def test_adapthist_clip_limit():
+    img_u = data.moon()
+    img_f = util.img_as_float(img_u)
+
+    # uint8 input
+    img_clahe = exposure.equalize_adapthist(img_u, clip_limit=1)
+    assert_array_equal(img_f, img_clahe)
+
+    # float64 input
+    img_clahe = exposure.equalize_adapthist(img_f, clip_limit=1)
+    assert_array_equal(img_f, img_clahe)
 
 
 def peak_snr(img1, img2):

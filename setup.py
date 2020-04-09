@@ -1,17 +1,20 @@
 #! /usr/bin/env python
 
-descr = """Image Processing SciKit
+import os
+import sys
+import tempfile
+import shutil
+import builtins
+import textwrap
 
-Image processing algorithms for SciPy, including IO, morphology, filtering,
-warping, color manipulation, object detection, etc.
+import setuptools
+from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
+from distutils.errors import CompileError, LinkError
 
-Please refer to the online documentation at
-https://scikit-image.org/
-"""
 
 DISTNAME = 'scikit-image'
-DESCRIPTION = 'Image processing routines for SciPy'
-LONG_DESCRIPTION = descr
+DESCRIPTION = 'Image processing in Python'
 MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
 URL = 'https://scikit-image.org'
@@ -23,16 +26,8 @@ PROJECT_URLS = {
     "Source Code": 'https://github.com/scikit-image/scikit-image'
 }
 
-import os
-import sys
-import tempfile
-import shutil
-
-import setuptools
-from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist
-from distutils.errors import CompileError, LinkError
-
+with open('README.md') as f:
+    LONG_DESCRIPTION = f.read()
 
 if sys.version_info < (3, 6):
 
@@ -40,15 +35,13 @@ if sys.version_info < (3, 6):
 
 scikit-image 0.16+ supports only Python 3.6 and above.
 
-For Python 2.7, please install the 0.14.x Long Term Support using:
+For Python 2.7, please install the 0.14.x Long Term Support release using:
 
  $ pip install 'scikit-image<0.15'
 """.format(py='.'.join([str(v) for v in sys.version_info[:3]]))
 
     sys.stderr.write(error + "\n")
     sys.exit(1)
-
-import builtins
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
@@ -58,17 +51,17 @@ import builtins
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
 
+
 # Support for openmp
-
-compile_flags = ['-fopenmp']
-link_flags = ['-fopenmp']
-
-code = """#include <omp.h>
-int main(int argc, char** argv) { return(0); }"""
-
 
 def openmp_build_ext():
     from numpy.distutils.command.build_ext import build_ext
+
+    compile_flags = ['-fopenmp']
+    link_flags = ['-fopenmp']
+
+    code = """#include <omp.h>
+    int main(int argc, char** argv) { return(0); }"""
 
     class ConditionalOpenMP(build_ext):
 
@@ -133,7 +126,7 @@ INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 # it contains requirements that do not have wheels uploaded to pip
 # for the platforms we wish to support.
 extras_require = {
-    dep : parse_requirements_file('requirements/' + dep + '.txt')
+    dep: parse_requirements_file('requirements/' + dep + '.txt')
     for dep in ['docs', 'optional', 'test']
 }
 
@@ -157,7 +150,6 @@ def configuration(parent_package='', top_path=None):
         quiet=True)
 
     config.add_subpackage('skimage')
-    config.add_data_dir('skimage/data')
 
     return config
 
@@ -182,11 +174,17 @@ if __name__ == "__main__":
             from setuptools import setup
             extra = {}
         else:
-            print('To install scikit-image from source, you will need numpy.\n' +
-                  'Install numpy with pip:\n' +
-                  'pip install numpy\n'
-                  'Or use your operating system package manager. For more\n' +
-                  'details, see https://scikit-image.org/docs/stable/install.html')
+            print(textwrap.dedent("""
+                To install scikit-image from source, you will need NumPy.
+                Install NumPy with pip using:
+
+                  pip install numpy
+
+                Or use your operating system package manager. For more
+                details, see:
+
+                   https://scikit-image.org/docs/stable/install.html
+            """))
             sys.exit(1)
 
     setup(

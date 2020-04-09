@@ -10,7 +10,7 @@ from ._marching_cubes_classic import _marching_cubes_classic
 
 def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                    gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, method='lewiner'):
+                   allow_degenerate=True, method='lewiner', mask=None):
     """Marching cubes algorithm to find surfaces in 3d volumetric data.
 
     In contrast with Lorensen et al. approach [2], Lewiner et
@@ -49,6 +49,13 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         Lewiner et al. or Lorensen et al. method will be used. The
         '_lorensen' flag correspond to an old implementation that will
         be deprecated in version 0.19.
+    mask : (M, N, P) array
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
+
 
     Returns
     -------
@@ -119,12 +126,17 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     if method == 'lewiner':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=False)
+                                       allow_degenerate, use_classic=False, mask=mask)
     elif method == 'lorensen':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=True)
+                                       allow_degenerate, use_classic=True, mask=mask)
     elif method == '_lorensen':
+        if mask is not None:
+            raise NotImplementedError(
+                'Parameter `mask` is not implemented for method "_lorensen" '
+                'and will be ignored.'
+            )
         return _marching_cubes_classic(volume, level, spacing,
                                        gradient_direction)
     else:
@@ -134,7 +146,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
 
 def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
                            gradient_direction='descent', step_size=1,
-                           allow_degenerate=True, use_classic=False):
+                           allow_degenerate=True, use_classic=False, mask=None):
     """
     Lewiner marching cubes algorithm to find surfaces in 3d volumetric data.
 
@@ -176,6 +188,12 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
         produce a topologically correct result. The results with using
         this option are *not* generally the same as the
         ``marching_cubes_classic()`` function.
+    mask : (M, N, P) array
+        Boolean array. The marching cube algorithm will be computed only on
+        True elements. This will save computational time when interfaces
+        are located within certain region of the volume M, N, P-e.g. the top
+        half of the cube-and also allow to compute finite surfaces-i.e. open
+        surfaces that do not end at the border of the cube.
 
     Returns
     -------
@@ -242,14 +260,14 @@ def marching_cubes_lewiner(volume, level=None, spacing=(1., 1., 1.),
     warnings.warn("marching_cubes_lewiner is deprecated in favor of "
                   "marching_cubes. marching_cubes_lewiner will "
                   "be removed in version 0.19",
-                  FutureWarning)
+                  FutureWarning, stacklevel=2)
 
     return _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                                   step_size, allow_degenerate, use_classic)
+                                   step_size, allow_degenerate, use_classic, mask)
 
 
 def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                            step_size, allow_degenerate, use_classic):
+                            step_size, allow_degenerate, use_classic, mask):
     """Lewiner et al. algorithm for marching cubes. See
     marching_cubes_lewiner for documentation.
 
@@ -284,10 +302,15 @@ def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
     # Get LutProvider class (reuse if possible)
     L = _get_mc_luts()
 
+    # Check if a mask array is passed
+    if mask is not None:
+        if not mask.shape == volume.shape:
+            raise ValueError('volume and mask must have the same shape.')
+
     # Apply algorithm
     func = _marching_cubes_lewiner_cy.marching_cubes
     vertices, faces, normals, values = func(volume, level, L,
-                                            step_size, use_classic)
+                                            step_size, use_classic, mask)
 
     if not len(vertices):
         raise RuntimeError('No surface found at the given iso value.')

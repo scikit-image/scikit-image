@@ -55,7 +55,7 @@ project in concrete ways, such as:
 - discussing the design of the library, website, or tutorials on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_,
   in the
-  `project chat room <skimage.zulipchat.com/>`_, or in existing issues and pull
+  `project chat room <https://skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
 - reviewing
   `open pull requests <https://github.com/scikit-image/scikit-image/pulls>`_,
@@ -107,7 +107,7 @@ van der Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
 Zachary Pincus. The SC membership is revisited every January. SC members who do
 not actively engage with the SC duties are expected to resign. New members are
 added by nomination by a core developer. Nominees should have demonstrated
-long-term, continued commitment to the project and its :ref:`values`. A
+long-term, continued commitment to the project and its :ref:`values <values>`. A
 nomination will result in discussion that cannot take more than a month and
 then admission to the SC by consensus.
 

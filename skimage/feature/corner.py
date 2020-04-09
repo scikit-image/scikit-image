@@ -5,9 +5,9 @@ from scipy import ndimage as ndi
 from scipy import stats
 
 from ..util import img_as_float
-from ..feature import peak_local_max
-from ..feature.util import _prepare_grayscale_input_2D
-from ..feature.corner_cy import _corner_fast
+from .peak import peak_local_max
+from .util import _prepare_grayscale_input_2D
+from .corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
 from .._shared.utils import safe_as_int
@@ -501,7 +501,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_harris(square), min_distance=1)
+    >>> corner_peaks(corner_harris(square), min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -570,7 +570,8 @@ def corner_shi_tomasi(image, sigma=1):
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1,
+    ...              threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -644,7 +645,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> corner_peaks(foerstner, min_distance=1)
+    >>> corner_peaks(foerstner, min_distance=1, threshold_rel=0)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -721,7 +722,7 @@ def corner_fast(image, n=12, threshold=0.15):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
     array([[3, 3],
            [3, 8],
            [8, 3],
@@ -787,7 +788,8 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
-    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2,
+    ...                       threshold_rel=0)
     >>> coords_subpix = corner_subpix(img, coords, window_size=7)
     >>> coords_subpix
     array([[4.5, 4.5]])
@@ -953,16 +955,18 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
            [3, 2],
            [2, 3],
            [2, 2]])
-    >>> corner_peaks(response)
+    >>> corner_peaks(response, threshold_rel=0)
     array([[2, 2]])
 
     """
     if threshold_rel is None:
         threshold_rel = 0.1
-        warn("Until the version 0.16, threshold_rel was set to 0.1 by default."
-             "Starting from version 0.16, the default value is set to None."
-             "Until version 0.18, a None value corresponds to a threshold value of 0.1."
-             "The default behavior will match skimage.feature.peak_local_max.",
+        warn("Until version 0.16, threshold_rel was set to 0.1 by default. "
+             "Starting from version 0.16, the default value is set to None. "
+             "Until version 0.18, a None value corresponds to a threshold "
+             "value of 0.1. "
+             "The default behavior will match skimage.feature.peak_local_max. "
+             "To avoid this warning, set threshold_rel=0.",
              category=FutureWarning, stacklevel=2)
 
     peaks = peak_local_max(image, min_distance=min_distance,
@@ -1085,7 +1089,8 @@ def corner_orientations(image, corners, mask):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1,
+    ...                        threshold_rel=0)
     >>> corners
     array([[3, 3],
            [3, 8],
