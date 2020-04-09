@@ -68,7 +68,7 @@ Version 0.19
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-* In ``skimage/color/colorconv.py``, remove the deprecation warning
+* In ``skimage/color/colorconv.py``, remove the deprecation warnings
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
