@@ -1,22 +1,25 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from ...data import checkerboard, astronaut
-from ...util.dtype import img_as_float
-from ...color.colorconv import rgb2gray
-from ...draw.draw import circle_perimeter_aa
-from ...feature.peak import peak_local_max
-from ..._shared import testing
-from ..._shared.testing import (assert_almost_equal, assert_equal,
-                                test_parallel)
-from ..._shared._warnings import expected_warnings
+from skimage.data import checkerboard, astronaut
+from skimage.util.dtype import img_as_float
+from skimage.color.colorconv import rgb2gray
+from skimage.draw.draw import circle_perimeter_aa
+from skimage.feature.peak import peak_local_max
+from skimage._shared import testing
+from skimage._shared.testing import (assert_almost_equal, assert_equal,
+                                     test_parallel)
+from skimage._shared._warnings import expected_warnings
 
-from .._warps import (_stackcopy, _linear_polar_mapping,
-                      _log_polar_mapping, warp, warp_coords, rotate,
-                      resize, rescale, warp_polar, swirl,
-                      downscale_local_mean)
-from .._geometric import (AffineTransform, ProjectiveTransform,
-                          SimilarityTransform)
+from skimage.transform._warps import (_stackcopy,
+                                      _linear_polar_mapping,
+                                      _log_polar_mapping, warp,
+                                      warp_coords, rotate, resize,
+                                      rescale, warp_polar, swirl,
+                                      downscale_local_mean)
+from skimage.transform._geometric import (AffineTransform,
+                                          ProjectiveTransform,
+                                          SimilarityTransform)
 
 
 np.random.seed(0)
