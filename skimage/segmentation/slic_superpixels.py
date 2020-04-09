@@ -258,7 +258,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         if use_mask:
             start_label = 1
         else:
-            warnings.warn("Labels' indexing start from 0. " +
+            warnings.warn("skimage.measure.label's indexing starts from 0. " +
                           "In future version it will start from 1. " +
                           "To disable this warning, explicitely " +
                           "set the `start_label` parameter to 1.",
