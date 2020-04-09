@@ -34,7 +34,9 @@ cleared = clear_border(bw)
 
 # label image regions
 label_image = label(cleared)
-image_label_overlay = label2rgb(label_image, image=image)
+# to make the background transparent, pass the value of `bg_label`,
+# and leave `bg_color` as `None` and `kind` as `overlay`
+image_label_overlay = label2rgb(label_image, image=image, bg_label=0)
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.imshow(image_label_overlay)
