@@ -13,9 +13,9 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
     Parameters
     ----------
     descriptors1 : (M, P) array
-        Binary descriptors of size P about M keypoints in the first image.
+        Descriptors of size P about M keypoints in the first image.
     descriptors2 : (N, P) array
-        Binary descriptors of size P about N keypoints in the second image.
+        Descriptors of size P about N keypoints in the second image.
     metric : {'euclidean', 'cityblock', 'minkowski', 'hamming', ...} , optional
         The metric to compute the distance between two descriptors. See
         `scipy.spatial.distance.cdist` for all possible types. The hamming
