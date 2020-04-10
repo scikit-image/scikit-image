@@ -288,7 +288,7 @@ def convert_to_float(image, preserve_range):
     return image
 
 
-def _set_order(image_dtype, order):
+def _validate_interpolation_order(image_dtype, order):
     """Validate and return spline interpolation's order.
 
     Parameters

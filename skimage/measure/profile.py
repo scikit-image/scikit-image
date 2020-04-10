@@ -2,7 +2,7 @@ from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _set_order
+from .._shared.utils import _validate_interpolation_order
 
 
 def profile_line(image, src, dst, linewidth=1,
@@ -92,7 +92,7 @@ def profile_line(image, src, dst, linewidth=1,
            [1.41421356, 1.41421356, 0.        ]])
     """
 
-    order = _set_order(image.dtype, order)
+    order = _validate_interpolation_order(image.dtype, order)
 
     if mode is None:
         warn("Default out of bounds interpolation mode 'constant' is "

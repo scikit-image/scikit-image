@@ -7,7 +7,7 @@ from ._warps_cy import _warp_fast
 from ..measure import block_reduce
 
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
-                             convert_to_float, _set_order)
+                             convert_to_float, _validate_interpolation_order)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -178,7 +178,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
                    preserve_range=preserve_range)
 
     else:  # n-dimensional interpolation
-        order = _set_order(image.dtype, order)
+        order = _validate_interpolation_order(image.dtype, order)
 
         coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
                         for i, d in enumerate(output_shape)]
@@ -827,7 +827,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
         raise ValueError("Cannot warp empty image with dimensions",
                          image.shape)
 
-    order = _set_order(image.dtype, order)
+    order = _validate_interpolation_order(image.dtype, order)
 
     image = convert_to_float(image, preserve_range)
 
