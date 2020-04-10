@@ -90,6 +90,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     out : ndarray, same shape and type as input `ar`
         The input array with small connected components removed.
 
+    See Also
+    --------
+    skimage.morphology.remove_near_objects
+
     Examples
     --------
     >>> from skimage import morphology
