@@ -1,4 +1,5 @@
 import os
+import skimage
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
