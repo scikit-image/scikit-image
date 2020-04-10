@@ -59,13 +59,13 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
 
     Parameters
     ----------
-    image_shape : sequence
+    image_shape : tuple
         The shape of the image for which the offsets are computed.
     selem : ndarray
         A structuring element determining the neighborhood expressed as an
         n-D array of 1's and 0's.
-    center : sequence
-        Indices specifying the center of `selem`.
+    center : tuple
+        Tuple of indices to the center of `selem`.
     order : {"C", "F"}, optional
         Whether the image described by `image_shape` is in row-major (C-style)
         or column-major (Fortran-style) order.
@@ -85,15 +85,24 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     --------
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
+    >>> _offsets_to_raveled_neighbors((2, 3, 2), np.ones((3, 3, 3)), (1, 1, 1))
+    array([ 2, -6,  1, -1,  6, -2,  3,  8, -3, -4,  7, -5, -7, -8,  5,  4, -9,
+            9])
     """
+    if not selem.ndim == len(image_shape) == len(center):
+        raise ValueError(
+            "number of dimensions in image shape, structuring element and its"
+            "center index does not match"
+        )
+
     selem_indices = np.array(np.nonzero(selem)).T
     offsets = selem_indices - center
 
     if order == 'F':
         offsets = offsets[:, ::-1]
         image_shape = image_shape[::-1]
-    elif not order == 'C':
-        raise ValueError("order was not 'C' or 'F'")
+    elif order != 'C':
+        raise ValueError("order must be 'C' or 'F'")
 
     # Scale offsets in each dimension and sum
     ravel_factors = image_shape[1:] + (1,)
@@ -104,7 +113,7 @@ def _offsets_to_raveled_neighbors(image_shape, selem, center, order='C'):
     distances = np.abs(offsets).sum(axis=1)
     raveled_offsets = raveled_offsets[np.argsort(distances)]
 
-    # In case any dimension in image_shape is smaller than selem.shape
+    # If any dimension in image_shape is smaller than selem.shape
     # duplicates might occur, remove them
     if any(x < y for x, y in zip(image_shape, selem.shape)):
         # np.unique reorders, which we don't want
@@ -127,12 +136,17 @@ def _resolve_neighborhood(selem, connectivity, ndim):
 
     Parameters
     ----------
-    selem : array-like or None
-        The structuring element to validate. See same argument in
-        `local_maxima`.
-    connectivity : int or None
+    selem : ndarray
+        A structuring element used to determine the neighborhood of each
+        evaluated pixel (``True`` denotes a connected pixel). It must be a
+        boolean array and have the same number of dimensions as `image`. If
+        neither `selem` nor `connectivity` are given, all adjacent pixels are
+        considered as part of the neighborhood.
+    connectivity : int
         A number used to determine the neighborhood of each evaluated pixel.
-        Defaults to `ndim` if `None` is given.
+        Adjacent pixels whose squared distance from the center is less than or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `selem` is not None.
     ndim : int
         Number of dimensions `selem` ought to have.
 
@@ -140,6 +154,15 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     -------
     selem : ndarray
         Validated or new structuring element specifying the neighborhood.
+
+    Examples
+    --------
+    >>> _resolve_neighborhood(None, 1, 2)
+    array([[False,  True, False],
+           [ True,  True,  True],
+           [False,  True, False]])
+    >>> _resolve_neighborhood(None, None, 3).shape
+    (3, 3, 3)
     """
     if selem is None:
         if connectivity is None:
@@ -151,8 +174,8 @@ def _resolve_neighborhood(selem, connectivity, ndim):
         # Must specify neighbors for all dimensions
         if selem.ndim != ndim:
             raise ValueError(
-                "structuring element and image must have the same number of "
-                "dimensions"
+                "number of dimensions in image and structuring element do not"
+                "match"
             )
         # Must only specify direct neighbors
         if any(s != 3 for s in selem.shape):
@@ -161,7 +184,7 @@ def _resolve_neighborhood(selem, connectivity, ndim):
     return selem
 
 
-def _set_edge_values_inplace(image, value):
+def _set_border_values(image, value):
     """Set edge values along all axes to a constant value.
 
     Parameters
@@ -174,7 +197,7 @@ def _set_edge_values_inplace(image, value):
     Examples
     --------
     >>> image = np.zeros((4, 5), dtype=int)
-    >>> _set_edge_values_inplace(image, 1)
+    >>> _set_border_values(image, 1)
     >>> image
     array([[1, 1, 1, 1, 1],
            [1, 0, 0, 0, 1],
@@ -187,7 +210,7 @@ def _set_edge_values_inplace(image, value):
         image[sl] = value
 
 
-def _fast_pad(image, value):
+def _fast_pad(image, value, *, order="C"):
     """Pad an array on all axes by one with a value.
 
     Parameters
@@ -196,6 +219,8 @@ def _fast_pad(image, value):
         Image to pad.
     value : scalar
          The value to use. Should be compatible with `image`'s dtype.
+    order : "C" or "F"
+        Specify the memory layout of the padded image (C or Fortran style).
 
     Returns
     -------
@@ -208,9 +233,10 @@ def _fast_pad(image, value):
 
         np.pad(image, 1, mode="constant", constant_values=value)
 
-    Up to version 1.17 `numpy.pad` uses concatenation to create padded arrays
-    while this method needs to only allocate and copy once. This can result
-    in significant speed gains if `image` has a large number of dimensions.
+    Up to versions < 1.17 `numpy.pad` uses concatenation to create padded
+    arrays while this method needs to only allocate and copy once.
+    This can result in significant speed gains if `image` has a large number of
+    dimensions.
     Thus this function may be safely removed once that version is the minimum
     required by scikit-image.
 
@@ -224,12 +250,12 @@ def _fast_pad(image, value):
     """
     # Allocate padded image
     new_shape = np.array(image.shape) + 2
-    new_image = np.empty(new_shape, dtype=image.dtype, order="C")
+    new_image = np.empty(new_shape, dtype=image.dtype, order=order)
 
     # Copy old image into new space
     sl = (slice(1, -1),) * image.ndim
     new_image[sl] = image
     # and set the edge values
-    _set_edge_values_inplace(new_image, value)
+    _set_border_values(new_image, value)
 
     return new_image

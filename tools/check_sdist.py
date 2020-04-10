@@ -24,6 +24,7 @@ ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
 ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
                './downloads', './scikit_image.egg-info', './benchmarks']
 ignore_files = ['./TODO.md', './README.md', './MANIFEST',
+                './CODE_OF_CONDUCT.md',
                 './.gitignore', './.travis.yml', './.gitmodules',
                 './.mailmap', './.coveragerc', './azure-pipelines.yml',
                 './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',

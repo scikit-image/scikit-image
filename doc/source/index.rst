@@ -27,6 +27,7 @@ Sections
    core_developer
    skips/index
    values
+   conduct/code_of_conduct
 
 .. list-table::
    :class: contentstable
@@ -73,6 +74,14 @@ Sections
 
        Conditions on the use and redistribution of this package.
 
+   * - `SKIPs <skips/index.html>`_
+
+       **s**\ ci\ **k**\ it-\ **i**\ mage **p**\ roposals, documents describing major changes to the
+       library.
+
+     - `Code of Conduct <conduct/code_of_conduct.html>`_
+
+       Community interaction guidelines.
 
 
 Indices

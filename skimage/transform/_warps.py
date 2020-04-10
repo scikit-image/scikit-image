@@ -236,7 +236,7 @@ def rescale(image, scale, order=1, mode='reflect', cval=0, clip=True,
         avoid aliasing artifacts.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
-        By default, this value is chosen as (1 - s) / 2 where s is the
+        By default, this value is chosen as (s - 1) / 2 where s is the
         down-scaling factor.
 
     Notes
@@ -427,8 +427,8 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
     >>> downscale_local_mean(a, (2, 3))
-    array([[ 3.5,  4. ],
-           [ 5.5,  4.5]])
+    array([[3.5, 4. ],
+           [5.5, 4.5]])
 
     """
     return block_reduce(image, factors, np.mean, cval)
@@ -910,7 +910,7 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=1,
 
 
 def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
-    """Inverse mapping function to convert from cartesion to polar coordinates
+    """Inverse mapping function to convert from cartesian to polar coordinates
 
     Parameters
     ----------
@@ -941,7 +941,7 @@ def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
 
 
 def _log_polar_mapping(output_coords, k_angle, k_radius, center):
-    """Inverse mapping function to convert from cartesion to polar coordinates
+    """Inverse mapping function to convert from cartesian to polar coordinates
 
     Parameters
     ----------
@@ -973,7 +973,7 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
                scaling='linear', multichannel=False, **kwargs):
-    """Remap image to polor or log-polar coordinates space.
+    """Remap image to polar or log-polar coordinates space.
 
     Parameters
     ----------

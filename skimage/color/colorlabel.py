@@ -88,7 +88,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
     bg_label : int, optional
-        Label that's treated as the background.
+        Label that's treated as the background. If `bg_label` is specified,
+        `bg_color` is `None`, and `kind` is `overlay`,
+        background is not painted by any colors.
     bg_color : str or array, optional
         Background color. Must be a name in `color_dict` or RGB float values
         between [0, 1].
@@ -132,7 +134,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
     bg_label : int, optional
-        Label that's treated as the background.
+        Label that's treated as the background. If `bg_label` is specified and
+        `bg_color` is `None`, background is not painted by any colors.
     bg_color : str or array, optional
         Background color. Must be a name in `color_dict` or RGB float values
         between [0, 1].

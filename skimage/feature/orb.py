@@ -100,17 +100,17 @@ class ORB(FeatureDetector, DescriptorExtractor):
            [3, 3],
            [4, 4]])
     >>> detector_extractor1.keypoints[matches[:, 0]]
-    array([[ 42.,  40.],
-           [ 47.,  58.],
-           [ 44.,  40.],
-           [ 59.,  42.],
-           [ 45.,  44.]])
+    array([[42., 40.],
+           [47., 58.],
+           [44., 40.],
+           [59., 42.],
+           [45., 44.]])
     >>> detector_extractor2.keypoints[matches[:, 1]]
-    array([[ 55.,  53.],
-           [ 60.,  71.],
-           [ 57.,  53.],
-           [ 72.,  55.],
-           [ 58.,  57.]])
+    array([[55., 53.],
+           [60., 71.],
+           [57., 53.],
+           [72., 55.],
+           [58., 57.]])
 
     """
 
@@ -139,7 +139,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
         # Extract keypoints for current octave
         fast_response = corner_fast(octave_image, self.fast_n,
                                     self.fast_threshold)
-        keypoints = corner_peaks(fast_response, min_distance=1)
+        keypoints = corner_peaks(fast_response, min_distance=1,
+                                 threshold_rel=0)
 
         if len(keypoints) == 0:
             return (np.zeros((0, 2), dtype=np.double),

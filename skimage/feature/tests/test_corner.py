@@ -1,6 +1,5 @@
 import numpy as np
-from skimage._shared.testing import assert_array_equal
-from skimage._shared.testing import assert_almost_equal, assert_warns
+from skimage._shared.testing import assert_array_equal, assert_almost_equal
 from skimage import data
 from skimage import img_as_float
 from skimage import draw
@@ -351,17 +350,24 @@ def test_num_peaks():
 def test_corner_peaks():
     response = np.zeros((10, 10))
     response[2:5, 2:5] = 1
+    response[8:10, 0:2] = 1
 
     corners = corner_peaks(response, exclude_border=False, min_distance=10,
                            threshold_rel=0)
-    assert len(corners) == 1
+    assert corners.shape == (1, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1)
-    assert len(corners) == 4
+    corners = corner_peaks(response, exclude_border=False, min_distance=5,
+                           threshold_rel=0)
+    assert corners.shape == (2, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                           indices=False)
-    assert np.sum(corners) == 4
+    with pytest.warns(FutureWarning,
+                      match="Until version 0.16, threshold_rel.*"):
+        corners = corner_peaks(response, exclude_border=False, min_distance=1)
+        assert corners.shape == (5, 2)
+
+        corners = corner_peaks(response, exclude_border=False, min_distance=1,
+                               indices=False)
+        assert np.sum(corners) == 5
 
 
 def test_blank_image_nans():

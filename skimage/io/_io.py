@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..io.manage_plugins import call_plugin
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from .util import file_or_url_context
 from ..exposure import is_low_contrast
 from .._shared.utils import warn
@@ -56,6 +56,8 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
             img = np.swapaxes(img, -2, -3)
 
         if as_gray:
+            if img.shape[2] == 4:
+                img = rgba2rgb(img)
             img = rgb2gray(img)
 
     return img

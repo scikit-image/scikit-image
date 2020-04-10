@@ -1,4 +1,4 @@
-"""Image Processing SciKit (Toolbox for SciPy)
+"""Image Processing for Python
 
 ``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
@@ -69,7 +69,7 @@ dtype_limits
 import sys
 
 
-__version__ = '0.16.dev0'
+__version__ = '0.17.dev0'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 5))

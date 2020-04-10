@@ -150,6 +150,19 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
+    # test special case for scale where the rotation isn't exactly 90deg,
+    # but very close
+    scale = 1.0
+    rotation = np.pi / 2
+    translation = (0, 0)
+    params = np.array([[0, -1, 1.33226763e-15],
+                       [1, 2.22044605e-16, -1.33226763e-15],
+                       [0, 0, 1]])
+    tform = SimilarityTransform(params)
+    assert_almost_equal(tform.scale, scale)
+    assert_almost_equal(tform.rotation, rotation)
+    assert_almost_equal(tform.translation, translation)
+
 
 def test_affine_estimation():
     # exact solution

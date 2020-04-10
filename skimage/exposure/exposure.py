@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..color import rgb2gray
+from ..color.colorconv import rgb2gray, rgba2rgb
 from ..util.dtype import dtype_range, dtype_limits
 from .._shared.utils import warn
 
@@ -115,9 +115,9 @@ def histogram(image, nbins=256, source_range='image', normalize=False):
     >>> from skimage import data, exposure, img_as_float
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
-    (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
+    (array([107432, 154712]), array([0. , 0.5, 1. ]))
     >>> exposure.histogram(image, nbins=2)
-    (array([107432, 154712]), array([ 0.25,  0.75]))
+    (array([107432, 154712]), array([0.25, 0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
@@ -314,24 +314,24 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     It's easy to accidentally convert an image dtype from uint8 to float:
 
     >>> 1.0 * image
-    array([  51.,  102.,  153.])
+    array([ 51., 102., 153.])
 
     Use `rescale_intensity` to rescale to the proper range for float dtypes:
 
     >>> image_float = 1.0 * image
     >>> rescale_intensity(image_float)
-    array([ 0. ,  0.5,  1. ])
+    array([0. , 0.5, 1. ])
 
     To maintain the low contrast of the original, use the `in_range` parameter:
 
     >>> rescale_intensity(image_float, in_range=(0, 255))
-    array([ 0.2,  0.4,  0.6])
+    array([0.2, 0.4, 0.6])
 
     If the min/max value of `in_range` is more/less than the min/max image
     intensity, then the intensity levels are clipped:
 
     >>> rescale_intensity(image_float, in_range=(0, 102))
-    array([ 0.5,  1. ,  1. ])
+    array([0.5, 1. , 1. ])
 
     If you have an image with signed integers but want to rescale the image to
     just the positive range, use the `out_range` parameter:
@@ -345,6 +345,15 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     imin, imax = intensity_range(image, in_range)
     omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
+
+    # Fast test for multiple values, operations with at least 1 NaN return NaN
+    if np.isnan(imin + imax + omin + omax):
+        warn(
+            "One or more intensity levels are NaN. Rescaling will broadcast "
+            "NaN to the full image. Provide intensity levels yourself to "
+            "avoid this. E.g. with np.nanmin(image), np.nanmax(image).",
+            stacklevel=2
+        )
 
     image = np.clip(image, imin, imax)
 
@@ -552,8 +561,11 @@ def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
     False
     """
     image = np.asanyarray(image)
-    if image.ndim == 3 and image.shape[2] in [3, 4]:
-        image = rgb2gray(image)
+    if image.ndim == 3:
+        if image.shape[2] == 4:
+            image = rgba2rgb(image)
+        if image.shape[2] == 3:
+            image = rgb2gray(image)
 
     dlimits = dtype_limits(image, clip_negative=False)
     limits = np.percentile(image, [lower_percentile, upper_percentile])

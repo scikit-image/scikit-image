@@ -294,7 +294,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_maxima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -304,7 +304,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude maxima that border the image edge:
 
@@ -312,7 +312,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     image = np.asarray(image, order="C")
     if image.size == 0:
@@ -331,7 +331,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
     # Array of flags used to store the state of each pixel during evaluation.
     # See _extrema_cy.pyx for their meaning
     flags = np.zeros(image.shape, dtype=np.uint8)
-    _util._set_edge_values_inplace(flags, value=3)
+    _util._set_border_values(flags, value=3)
 
     if any(s < 3 for s in image.shape):
         # Warn and skip if any dimension is smaller than 3
@@ -362,7 +362,7 @@ def local_maxima(image, selem=None, connectivity=None, indices=False,
         flags = crop(flags, 1)
     else:
         # No padding was performed but set edge values back to 0
-        _util._set_edge_values_inplace(flags, value=0)
+        _util._set_border_values(flags, value=0)
 
     if indices:
         return np.nonzero(flags)
@@ -451,7 +451,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False, False, False, False],
            [False,  True,  True, False, False, False, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
     >>> local_minima(image, indices=True)
     (array([1, 1, 2, 2, 3, 3]), array([1, 2, 1, 2, 0, 6]))
 
@@ -461,7 +461,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [ True, False, False, False, False, False,  True]], dtype=bool)
+           [ True, False, False, False, False, False,  True]])
 
     and exclude minima that border the image edge:
 
@@ -469,7 +469,7 @@ def local_minima(image, selem=None, connectivity=None, indices=False,
     array([[False, False, False, False, False, False, False],
            [False,  True,  True, False,  True,  True, False],
            [False,  True,  True, False,  True,  True, False],
-           [False, False, False, False, False, False, False]], dtype=bool)
+           [False, False, False, False, False, False, False]])
     """
     return local_maxima(
         image=invert(image),
