@@ -20,11 +20,12 @@ from skimage import transform as tf
 # ======
 #
 # Several different geometric transformation types are supported: similarity,
-# affine, projective and polynomial.
+# affine, projective and polynomial. For a tutorial on the available types of
+# transformations, see :ref:`sphx_glr_auto_examples_transform_plot_transform_types.py`.
 #
 # Geometric transformations can either be created using the explicit
 # parameters (e.g. scale, shear, rotation and translation) or the
-# transformation matrix:
+# transformation matrix.
 #
 # First we create a transformation using explicit parameters:
 
@@ -112,5 +113,12 @@ for a in ax:
     a.axis('off')
 
 plt.tight_layout()
-
 plt.show()
+
+######################################################################
+# The above estimation relies on accurate selection of corresponding points.
+# An alternative approach called the
+# `RANSAC algorithm <https://en.wikipedia.org/wiki/Random_sample_consensus>`_
+# is useful when the correspondence points are not perfectly accurate.
+# See the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial
+# for an in-depth description of how to use this approach in scikit-image.
