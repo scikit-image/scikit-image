@@ -313,7 +313,7 @@ def remove_near_objects(
     --------
     >>> from skimage.morphology import remove_near_objects
     >>> remove_near_objects(np.array([True, False, True]), 2)
-    array([False, False,  True], dtype=bool)
+    array([False, False,  True])
     >>> image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
