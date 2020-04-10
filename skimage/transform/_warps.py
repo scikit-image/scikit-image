@@ -64,7 +64,7 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
         the image to avoid aliasing artifacts. If input image data
-        type is bool, no anti-aliasing is applyed.
+        type is bool, no anti-aliasing is applied.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering to avoid aliasing artifacts.
         By default, this value is chosen as (s - 1) / 2 where s is the
