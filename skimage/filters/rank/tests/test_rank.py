@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
@@ -92,7 +93,9 @@ class TestRank():
         self.selem = morphology.disk(1)
         self.selem_3d = morphology.ball(1)
         self.refs = np.load(fetch('data/rank_filter_tests.npz'))
-        self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
+        self.refs_3d = np.load(os.path.join(skimage.data_dir,
+                                            "rank_filters_tests_3d.npz"))
+        # self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
 
     @parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter):
