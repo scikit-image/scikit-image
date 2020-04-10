@@ -392,3 +392,10 @@ def test_near_p_norm():
             image, 1, p_norm=np.inf, connectivity=1, priority=image
         )
         assert_array_equal(result, removed)
+
+
+def test_near_wrong_priority_shape():
+    image = np.zeros((10, 10))
+    priority = np.ones((10, 9))
+    with pytest.raises(ValueError, match="priority.*shape"):
+        remove_near_objects(image, 3, priority=priority)
