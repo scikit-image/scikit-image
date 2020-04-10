@@ -324,7 +324,7 @@ def test_near_in_place():
 
 
 @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
-def test_near_negative_minimal_distance( minimal_distance):
+def test_near_negative_minimal_distance(minimal_distance):
     image = np.array([True, False, True])
     with pytest.raises(ValueError, match="must be >= 0"):
         remove_near_objects(image, minimal_distance)
@@ -360,38 +360,38 @@ def test_near_nan():
 
 
 def test_near_p_norm():
-        image = np.array([[2, 0], [0, 1]])
-        removed = np.array([[2, 0], [0, 0]])
+    image = np.array([[2, 0], [0, 1]])
+    removed = np.array([[2, 0], [0, 0]])
 
-        # p_norm=2, default (Euclidean distance)
-        result = remove_near_objects(
-            image, 1.4, connectivity=1, priority=image
-        )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, np.sqrt(2), connectivity=1, priority=image
-        )
-        assert_array_equal(result, removed)
+    # p_norm=2, default (Euclidean distance)
+    result = remove_near_objects(
+        image, 1.4, connectivity=1, priority=image
+    )
+    assert_array_equal(result, image)
+    result = remove_near_objects(
+        image, np.sqrt(2), connectivity=1, priority=image
+    )
+    assert_array_equal(result, removed)
 
-        # p_norm=1 (Manhatten distance)
-        result = remove_near_objects(
-            image, 1.9, p_norm=1, connectivity=1, priority=image
-        )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, 2, p_norm=1, connectivity=1, priority=image
-        )
-        assert_array_equal(result, removed)
+    # p_norm=1 (Manhatten distance)
+    result = remove_near_objects(
+        image, 1.9, p_norm=1, connectivity=1, priority=image
+    )
+    assert_array_equal(result, image)
+    result = remove_near_objects(
+        image, 2, p_norm=1, connectivity=1, priority=image
+    )
+    assert_array_equal(result, removed)
 
-        # p_norm=np.inf (Chebyshev distance)
-        result = remove_near_objects(
-            image, 0.9, p_norm=np.inf, connectivity=1, priority=image
-        )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, 1, p_norm=np.inf, connectivity=1, priority=image
-        )
-        assert_array_equal(result, removed)
+    # p_norm=np.inf (Chebyshev distance)
+    result = remove_near_objects(
+        image, 0.9, p_norm=np.inf, connectivity=1, priority=image
+    )
+    assert_array_equal(result, image)
+    result = remove_near_objects(
+        image, 1, p_norm=np.inf, connectivity=1, priority=image
+    )
+    assert_array_equal(result, removed)
 
 
 def test_near_wrong_priority_shape():
