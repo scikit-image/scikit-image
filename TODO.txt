@@ -68,7 +68,7 @@ Version 0.19
 * Remove the warnings in ``skimage/filters/ridges.py`` from sato and hessian
   functions.
 * In ``skimage/color/colorconv.py``, remove  `rgb2grey` and `grey2rgb`.
-* In ``skimage/color/colorconv.py``, remove the deprecation warning
+* In ``skimage/color/colorconv.py``, remove the deprecation warnings
   from `rgb2gray`.
 * In ``skimage/transform/radon_transform.py``, remove ``deprate_kwarg``
   decoration from ``iradon``.
@@ -110,3 +110,5 @@ Other
   when ``scipy`` upgrades to 1.1.
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
+* Once NumPy is set to >= 1.17, consider removing
+  ``skimage.morphology._util._fast_pad``.
