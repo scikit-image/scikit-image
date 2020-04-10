@@ -1,10 +1,10 @@
 import os
-import skimage
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
 from skimage._shared import testing
 
+import skimage
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk, ball
