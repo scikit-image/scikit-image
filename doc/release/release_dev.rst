@@ -20,6 +20,8 @@ This release of scikit-image officially supports Python 3.6 and 3.7.
 New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
+- Added ``skimage.morphology.remove_near_objects`` to remove objects until a
+  minimal distance between remaining ones is ensured.
 
 
 Improvements
