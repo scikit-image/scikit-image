@@ -869,8 +869,8 @@ def test_cycle_spinning_num_workers():
 
     # same results are expected whether using 1 worker or multiple workers
     dn_cc1 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
-                                        func_kw=func_kw, multichannel=False,
-                                        num_workers=1)
+                                    func_kw=func_kw, multichannel=False,
+                                    num_workers=1)
     with expected_warnings([DASK_NOT_INSTALLED_WARNING,]):
         dn_cc2 = restoration.cycle_spin(noisy, denoise_func, max_shifts=1,
                                         func_kw=func_kw, multichannel=False,
