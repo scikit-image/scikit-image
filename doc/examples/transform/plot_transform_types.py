@@ -27,7 +27,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage import transform as tf
+from skimage import transform
 from skimage import img_as_float
 
 ######################################################################
@@ -39,7 +39,7 @@ from skimage import img_as_float
 # pairs of points. It can be described as a rotation about the origin
 # followed by a translation.
 
-tform = tf.EuclideanTransform(
+tform = transform.EuclideanTransform(
     rotation=np.pi / 12.,
     translation = (100, -20)
     )
@@ -55,7 +55,7 @@ print(tform.params)
 # directly.
 
 img = img_as_float(data.chelsea())
-tf_img = tf.warp(img, tform.inverse)
+tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
 _ = ax.set_title('Euclidean transformation')
@@ -65,12 +65,12 @@ _ = ax.set_title('Euclidean transformation')
 # compose a translation to change the origin, a rotation, and finally
 # the inverse of the first translation.
 
-rotation = tf.EuclideanTransform(rotation=np.pi/3)
-shift = tf.EuclideanTransform(translation=-np.array(img.shape[:2]) / 2)
+rotation = transform.EuclideanTransform(rotation=np.pi/3)
+shift = transform.EuclideanTransform(translation=-np.array(img.shape[:2]) / 2)
 # Compose transforms by multiplying their matrices
 matrix = np.linalg.inv(shift.params) @ rotation.params @ shift.params
-tform = tf.EuclideanTransform(matrix)
-tf_img = tf.warp(img, tform.inverse)
+tform = transform.EuclideanTransform(matrix)
+tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 _ = ax.imshow(tf_img)
 
@@ -81,12 +81,12 @@ _ = ax.imshow(tf_img)
 # A `similarity transformation <https://en.wikipedia.org/wiki/Similarity_(geometry)>`_
 # preserves the shape of objects. It combines scaling, translation and rotation.
 
-tform = tf.SimilarityTransform(
+tform = transform.SimilarityTransform(
     scale=0.5,
     rotation=np.pi/12,
     translation=(100, 50))
 print(tform.params)
-tf_img = tf.warp(img, tform.inverse)
+tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
 _ = ax.set_title('Similarity transformation')
@@ -100,11 +100,11 @@ _ = ax.set_title('Similarity transformation')
 # between lines. It can be decomposed into a similarity transform and a
 # `shear transformation <https://en.wikipedia.org/wiki/Shear_mapping>`_.
 
-tform = tf.AffineTransform(
+tform = transform.AffineTransform(
         shear=np.pi/6,
         )
 print(tform.params)
-tf_img = tf.warp(img, tform.inverse)
+tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
 _ = ax.set_title('Affine transformation')
@@ -115,17 +115,18 @@ _ = ax.set_title('Affine transformation')
 # ========================================
 #
 # A `homography <https://en.wikipedia.org/wiki/Homography>`_, also called
-# projective transformation, preserves lines but not necessarily 
+# projective transformation, preserves lines but not necessarily
 # parallelism.
 
 matrix = np.array([[1, -0.5, 100],
                    [0.1, 0.9, 50],
                    [0.0015, 0.0015, 1]])
-tform = tf.ProjectiveTransform(matrix=matrix)
-tf_img = tf.warp(img, tform.inverse)
+tform = transform.ProjectiveTransform(matrix=matrix)
+tf_img = transform.warp(img, tform.inverse)
 fig, ax = plt.subplots()
 ax.imshow(tf_img)
 ax.set_title('Projective transformation')
+# sphinx_gallery_thumbnail_number = 5
 
 plt.show()
 ######################################################################
@@ -137,4 +138,4 @@ plt.show()
 # * :ref:`sphx_glr_auto_examples_transform_plot_rescale.py` for simple
 #   rescaling and resizing operations
 # * :func:`skimage.transform.rotate` for rotating an image around its center
-# sphinx_gallery_thumbnail_number = 5
+#
