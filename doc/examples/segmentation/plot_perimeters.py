@@ -3,8 +3,8 @@
 Different perimeters
 =========================
 
-In this example we show the uncertainty on calculating perimeters, comparing 
-classic and Crofton ones. For that, we evaluate the perimeters of a square and 
+In this example we show the uncertainty on calculating perimeters, comparing
+classic and Crofton ones. For that, we evaluate the perimeters of a square and
 its rotated version.
 
 """

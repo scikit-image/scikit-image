@@ -14,7 +14,7 @@ difference between the two numbers.
 
 For 3D objects, the Euler number is obtained as the difference
 between the number of objects and the number of tunnels, or loops. If an
-object is 26-connected, its complementary set is 6-connected, and conversely.    
+object is 26-connected, its complementary set is 6-connected, and conversely.
 The voxels are actually represented with blue transparent surfaces.
 Inner porosities are represented in red.
 
@@ -54,9 +54,9 @@ plt.show()
 
 """
 3D objects. In order to visualize things, a cube is generated, then holes and
-tunnels are added. Euler number is evaluated with 6 and 26 neighborhood 
+tunnels are added. Euler number is evaluated with 6 and 26 neighborhood
 configuration.
-This code is inpired by 
+This code is inpired by
 https://matplotlib.org/devdocs/gallery/mplot3d/voxels_numpy_logo.html
 """
 
@@ -95,20 +95,20 @@ def expand_coordinates(indices):
 def display_voxels(volume):
     """
     volume: (N,M,P) array
-            Represents a binary set of pixels: objects are marked with 1, 
+            Represents a binary set of pixels: objects are marked with 1,
             complementary (porosities) with 0.
-            
+
     The voxels are actually represented with blue transparent surfaces.
     Inner porosities are represented in red.
     """
-    
+
     # define colors
     red = '#ff0000ff'
-    blue ='#1f77b410'
-    
+    blue = '#1f77b410'
+
     # upscale the above voxel image, leaving gaps
     filled = explode(np.ones(volume.shape))
-    
+
     fcolors = explode(np.where(volume, blue, red))
 
     # Shrink the gaps
@@ -118,10 +118,10 @@ def display_voxels(volume):
     ax = make_ax()
     ax.voxels(x, y, z, filled, facecolors=fcolors)
 
-    # Compute Euler number in 6 and 26 neighbourhood configuration, that 
+    # Compute Euler number in 6 and 26 neighbourhood configuration, that
     # correspond to 1 and 3 connectivity, respectively
     e26 = euler_number(volume, connectivity=3)
-    e6  = euler_number(volume, connectivity=1)
+    e6 = euler_number(volume, connectivity=1)
     plt.title('Euler number for N26: {}, for N6: {}'.format(e26, e6))
     plt.show()
 
@@ -129,24 +129,19 @@ def display_voxels(volume):
 # Define a volume of 7x7x7 voxels
 n = 7
 cube = np.ones((n, n, n), dtype=bool)
-#display_voxels(cube)
 
 # Add a hole
 c = int(n/2)
 cube[c, c, c] = False
-#display_voxels(cube)
 
 # Add a concavity that connects previous hole
 cube[c, :, c] = False
-#display_voxels(cube)
 
 # Add a new hole
 cube[int(3*n/4), c-1, c-1] = False
-#display_voxels(cube)
 
 # Add a hole in neighbourhood of previous one
 cube[int(3*n/4), c, c] = False
-#display_voxels(cube)
 
 # Add a tunnel
 cube[:, c, int(3*n/4)] = False
