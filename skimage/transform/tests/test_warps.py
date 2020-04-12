@@ -9,7 +9,7 @@ from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                SimilarityTransform,
                                downscale_local_mean,
                                warp_polar)
-from skimage import transform as tf, data, img_as_float
+from skimage import transform, data, img_as_float
 from skimage.color import rgb2gray
 from skimage.draw import circle_perimeter_aa
 from skimage.feature import peak_local_max
@@ -358,16 +358,16 @@ def test_swirl():
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = transform.swirl(image, strength=10, **swirl_params)
+        unswirled = transform.swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
     swirl_params.pop('mode')
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = transform.swirl(image, strength=10, **swirl_params)
+        unswirled = transform.swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
