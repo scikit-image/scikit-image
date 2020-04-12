@@ -979,10 +979,6 @@ def euler_number(image, connectivity=None):
     if connectivity is None:
         connectivity = image.ndim
 
-    if image.ndim == 3 and connectivity == 2:
-        raise NotImplementedError('For 3D images, Euler number is implemented '
-                                  'for connectivities 1 and 3 only')
-
     # config variable is an adjacency configuration. A coefficient given by
     # variable coefs is attributed to each configuration in order to get
     # the Euler characteristic.
@@ -997,6 +993,10 @@ def euler_number(image, connectivity=None):
                      0, 1, 0, 0, 0, 0, 0, -1, 0]
         bins = 16
     else:  # 3D images
+        if connectivity == 2:
+            raise NotImplementedError('For 3D images, Euler number is implemented '
+                                      'for connectivities 1 and 3 only')
+
         config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                            [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
                            [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
