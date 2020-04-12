@@ -4,6 +4,8 @@ import collections as coll
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist, squareform
+from scipy.cluster.vq import kmeans2
+from numpy import random
 
 from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
 from ..util import img_as_float, regular_grid
@@ -32,38 +34,14 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
     """
 
     # Get tight ROI around the mask to optimize
-    coord = np.asarray(np.nonzero(mask))
-    bbox = coord.min(-1), coord.max(-1) + 1
-    roi = mask[bbox[0][0]: bbox[1][0],
-               bbox[0][1]: bbox[1][1],
-               bbox[0][2]: bbox[1][2]].copy()
-
-    if spacing is None:
-        # Chamfer distance transform (faster then euclidean distance).
-        dist_map = np.empty_like(roi, dtype=np.int32)
-        update_dist_map = functools.partial(ndi.distance_transform_cdt,
-                                            distances=dist_map)
-    else:
-        # Exact euclidean distance transform.
-        dist_map = np.empty_like(roi, dtype=np.float64)
-        spacing = np.ascontiguousarray(spacing, dtype=np.float64)
-        update_dist_map = functools.partial(ndi.distance_transform_edt,
-                                            distances=dist_map,
-                                            sampling=spacing)
-
-    centroids = np.repeat([bbox[0]], n_centroids, axis=0)
-
-    # Iteratively place centroids in the mask
-    for idx in range(n_centroids):
-        # Compute distance map
-        update_dist_map(roi)
-
-        # Set the point of furthest distance to be a centroid
-        coord = dist_map.argmax()
-        centroids[idx, :] += np.unravel_index(coord, roi.shape)
-
-        # Remove the detected centroid from the mask
-        roi.ravel()[coord] = 0
+    coord = np.array(np.nonzero(mask), dtype=float).T
+    if spacing is not None:
+        coord *= np.ravel(spacing)
+    # Fix random seed to ensure repeatability
+    random.seed(0)
+    idx = random.choice(np.arange(len(coord), dtype=int), n_centroids,
+                        replace=False)
+    centroids, _ = kmeans2(coord, coord[idx])
 
     # Compute the minimum distance of each centroid to the others
     dist = squareform(pdist(centroids))
