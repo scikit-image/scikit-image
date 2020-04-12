@@ -902,8 +902,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
 def euler_number(image, connectivity=None):
     """Calculate the Euler characteristic in binary image.
 
-    A neighbourhood configuration is constructed, and a LUT is applied for
-    each configuration.
 
     Parameters
     ----------
@@ -931,6 +929,16 @@ def euler_number(image, connectivity=None):
     The Euler characteristic is an integer number that describes the
     topology of the set of all objects in the input image. If object is
     4-connected, then background is 8-connected, and conversely.
+
+    The computation of the Euler characteristic is based on an integral
+    geometry formula in discretized space. In practice, a neighbourhood
+    configuration is constructed, and a LUT is applied for each
+    configuration. The coefficients used are the ones of Ohser et al.
+
+    It can be useful to compute the Euler characteristic for several
+    connectivities. A large relative difference between results
+    for different connectivities suggests that the image resolution
+    (with respect to the size of objects and holes) is too low.
 
     References
     ----------
@@ -1115,7 +1123,7 @@ def perimeter(image, neighbourhood=4):
 
 
 def perimeter_crofton(image, directions=4):
-    """Calculate total perimeter of all objects in binary image.
+    """Calculate total Crofton perimeter of all objects in binary image.
 
     Parameters
     ----------
@@ -1134,11 +1142,11 @@ def perimeter_crofton(image, directions=4):
 
     Notes
     -----
-    This measure is based on Crofton formula [1], which is an interesting
-    measure coming from the integral geometry. It is defined for general curve
-    length evaluation via a double integral along all directions. In a discrete
+    This measure is based on Crofton formula [1], which is a measure from
+    integral geometry. It is defined for general curve length evaluation via
+    a double integral along all directions. In a discrete
     space, 2 or 4 directions give a quite good approximation, 4 being more
-    precise than 2 because it can investigate more complex shapes.
+    accurate than 2 for more complex shapes.
 
     As measure.perimeter, this function returns an approximation of the
     perimeter in continuous space.
@@ -1187,7 +1195,7 @@ def perimeter_crofton(image, directions=4):
                  np.pi/(4*np.sqrt(2)), np.pi/(4*np.sqrt(2)),
                  np.pi/4, np.pi/2, 0, 0]
 
-    total_perimeter = coefs@h
+    total_perimeter = coefs @ h
     return total_perimeter
 
 
