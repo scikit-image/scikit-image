@@ -1,10 +1,12 @@
 from tempfile import NamedTemporaryFile
 
+import pytest
 import numpy as np
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
+from skimage._shared._warnings import expected_warnings
 
 
 def setup():
@@ -59,6 +61,15 @@ class TestSave(TestCase):
             else:
                 x = (x * 255).astype(dtype)
                 yield self.roundtrip, x
+
+    def test_bool_array_save(self):
+        f = NamedTemporaryFile(suffix='.png')
+        fname = f.name
+        f.close()
+        with expected_warnings(['.* is a boolean image']):
+            a = np.zeros((5, 5), bool)
+            a[2, 2] = True
+            imsave(fname, a)
 
 
 def test_return_class():
