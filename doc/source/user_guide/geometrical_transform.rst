@@ -47,10 +47,10 @@ Projective transformations can either be created using the explicit
 parameters (e.g. scale, shear, rotation and translation)::
 
    from skimage import data
-   from skimage import transform as tf
+   from skimage import transform
    from skimage import img_as_float
    
-   tform = tf.EuclideanTransform(
+   tform = transform.EuclideanTransform(
       rotation=np.pi / 12.,
       translation = (100, -20)
       )
@@ -58,13 +58,13 @@ parameters (e.g. scale, shear, rotation and translation)::
 or the full transformation matrix::
 
    from skimage import data
-   from skimage import transform as tf
+   from skimage import transform
    from skimage import img_as_float
    
    matrix = np.array([[np.cos(np.pi/12), -np.sin(np.pi/12), 100],
                       [np.sin(np.pi/12), np.cos(np.pi/12), -20],
                       [0, 0, 1]])
-   tform = tf.EuclideanTransform(matrix)
+   tform = transform.EuclideanTransform(matrix)
 
 The transformation matrix of a transform is available as its ``tform.params``
 attribute. Transformations can be composed by multiplying matrices with the
@@ -79,7 +79,7 @@ represented with finite coordinates.
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
    img = img_as_float(data.chelsea())
-   tf_img = tf.warp(img, tform.inverse)
+   tf_img = transform.warp(img, tform.inverse)
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_transform_types_001.png
    :target: ../auto_examples/transform/plot_transform_types.html
@@ -96,9 +96,9 @@ of points (the source and the destination), as explained in the
    src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
    dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
-   tform3 = tf.ProjectiveTransform()
+   tform3 = transform.ProjectiveTransform()
    tform3.estimate(src, dst)
-   warped = tf.warp(text, tform3, output_shape=(50, 300))
+   warped = transform.warp(text, tform3, output_shape=(50, 300))
 
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_geometric_002.png
