@@ -2,7 +2,6 @@ from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
-from skimage.util import pad
 
 from ._label import label
 from . import _moments
@@ -221,7 +220,7 @@ class RegionProperties:
 
     @property
     def euler_number(self):
-        if self._ndim < 2 or self._ndim > 3:
+        if not self._ndim in [2, 3]:
             raise NotImplementedError('Euler number is implemented for '
                                       '2D or 3D images only')
         return euler_number(self.image, self._ndim)
@@ -973,7 +972,7 @@ def euler_number(image, connectivity=None):
 
     # as image can be a label image, transform it to binary
     image = (image > 0).astype(np.int)
-    image = pad(image, ((1, 1),), mode='constant')
+    image = np.pad(image, ((1, 1),), mode='constant')
 
     # check connectivity
     if connectivity is None:
@@ -1043,9 +1042,9 @@ def euler_number(image, connectivity=None):
     h = np.bincount(XF.ravel(), minlength=bins)
 
     if image.ndim == 2:
-        return coefs@h
+        return coefs @ h
     else:
-        return np.int(1./8 * coefs@h)
+        return np.int(0.125 * coefs @ h)
 
 
 def perimeter(image, neighbourhood=4):
@@ -1170,7 +1169,7 @@ def perimeter_crofton(image, directions=4):
 
     # as image could be a label image, transform it to binary image
     image = (image > 0).astype(np.uint8)
-    image = pad(image, ((1, 1),), mode='constant')
+    image = np.pad(image, ((1, 1),), mode='constant')
     XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
                       mode='constant', cval=0)
 
