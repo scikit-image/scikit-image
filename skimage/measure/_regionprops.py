@@ -722,8 +722,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **euler_number** : int
         Euler characteristic of the set of non-zero pixels.
         Computed as number of connected components subtracted by number of
-        holes (input.ndim connectivity). In 3D, it also involves the number of
-        tunnels.
+        holes (input.ndim connectivity). In 3D, number of connected
+        components plus number of holes subtracted by number of tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
@@ -902,6 +902,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
 def euler_number(image, connectivity=None):
     """Calculate the Euler characteristic in binary image.
 
+    For 2D objects, the Euler number is the number of objects minus the number
+    of holes. For 3D objects, the Euler number is obtained as the number of
+    objects plus the number of holes, minus the number of tunnels, or loops.
 
     Parameters
     ----------
