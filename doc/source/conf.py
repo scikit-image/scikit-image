@@ -166,6 +166,7 @@ sphinx_gallery_conf = {
         '../examples/color_exposure',
         '../examples/edges',
         '../examples/transform',
+        '../examples/registration',
         '../examples/filters',
         '../examples/features_detection',
         '../examples/segmentation',
