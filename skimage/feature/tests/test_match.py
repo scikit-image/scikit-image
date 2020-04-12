@@ -80,8 +80,8 @@ def test_binary_descriptors_rotation_crosscheck_true():
     cross_check enabled."""
     img = data.astronaut()
     img = rgb2gray(img)
-    tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
-    rotated_img = tf.warp(img, tform, clip=False)
+    tform = transform.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
+    rotated_img = transform.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 
