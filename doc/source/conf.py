@@ -30,6 +30,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # -- General configuration -----------------------------------------------------
 
 # Strip backslahes in function's signature
+# To be removed when numpydoc > 0.9.x
 strip_signature_backslash = True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
