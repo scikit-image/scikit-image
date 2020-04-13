@@ -732,11 +732,23 @@ def test_gray2rgba_alpha():
     assert expected_err_msg == str(err.value)
 
 
+@pytest.mark.parametrize("func", [rgb2gray, gray2rgb, gray2rgba])
+@pytest.mark.parametrize("shape", ([(4, 5, 3), (5, 4, 5, 3),
+                                    (4, 5, 4, 5, 3)]))
+def test_nD_gray_conversion(func, shape):
+    img = np.random.rand(*shape)
+    out = func(img)
+
+    common_ndim = min(out.ndim, len(shape))
+
+    assert out.shape[:common_ndim] == shape[:common_ndim]
+
+
+
 @pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,
                                   rgb2xyz, xyz2rgb,
                                   rgb2hed, hed2rgb,
                                   rgb2rgbcie, rgbcie2rgb,
-                                  rgb2gray, gray2rgb,
                                   xyz2lab, lab2xyz,
                                   lab2rgb, rgb2lab,
                                   xyz2luv, luv2xyz,
@@ -746,17 +758,14 @@ def test_gray2rgba_alpha():
                                   rgb2yiq, yiq2rgb,
                                   rgb2ypbpr, ypbpr2rgb,
                                   rgb2ycbcr, ycbcr2rgb,
-                                  rgb2ydbdr, ydbdr2rgb,
-                                  gray2rgba])
+                                  rgb2ydbdr, ydbdr2rgb])
 @pytest.mark.parametrize("shape", ([(4, 5, 3), (5, 4, 5, 3),
                                     (4, 5, 4, 5, 3)]))
-def test_nD_color_array(func, shape):
+def test_nD_color_conversion(func, shape):
     img = np.random.rand(*shape)
     out = func(img)
 
-    common_ndim = min(out.ndim, len(shape))
-
-    assert out.shape[:common_ndim] == shape[:common_ndim]
+    assert out.shape == img.shape
 
 
 @pytest.mark.parametrize("shape", ([(4, 5, 4), (5, 4, 5, 4),
