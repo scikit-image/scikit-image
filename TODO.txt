@@ -79,10 +79,10 @@ Version 0.19
 
 Other
 -----
+* Remove custom fused type in ``skimage/morphology/_max_tree.pyx`` once
+  #3486 fused types is merged.
 * Remove the conditional import and function call when ``numpy`` is set
   to >= 1.16.0 in ``skimage/util/arraycrop.py``.
-* Remove custom fused type in ``skimage/filters/_max_tree.pyx`` once
-  #3486 fused types is merged.
 * Check whether imread wheels are available, then re-enable testing imread
   on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
 * When ``numpy`` is set to > 1.16, one may simplify the implementation of
