@@ -12,7 +12,7 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def _get_mask_centroids(mask, n_centroids, spacing=None):
+def _get_mask_centroids(mask, n_centroids):
     """Find regularly spaced centroids on a mask.
 
     Parameters
@@ -21,8 +21,6 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
         The mask within which the centroids must be positioned.
     n_centroids : int
         The number of centroids to be returned.
-    spacing : sequence of same, optional,
-        Spacing of elements along each dimension.
 
     Returns
     -------
@@ -35,12 +33,11 @@ def _get_mask_centroids(mask, n_centroids, spacing=None):
 
     # Get tight ROI around the mask to optimize
     coord = np.array(np.nonzero(mask), dtype=float).T
-    if spacing is not None:
-        coord *= np.ravel(spacing)
     # Fix random seed to ensure repeatability
-    random.seed(0)
-    idx = random.choice(np.arange(len(coord), dtype=int), n_centroids,
-                        replace=False)
+    rnd = random.RandomState(123)
+    idx = np.sort(rnd.choice(np.arange(len(coord), dtype=int),
+                             min(n_centroids, len(coord)),
+                             replace=False))
     centroids, _ = kmeans2(coord, coord[idx])
 
     # Compute the minimum distance of each centroid to the others
@@ -255,7 +252,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         if mask.shape != image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
         # Step 1 of the algorithm [3]_
-        centroids, steps = _get_mask_centroids(mask, n_segments, spacing)
+        centroids, steps = _get_mask_centroids(mask, n_segments)
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
