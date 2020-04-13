@@ -930,8 +930,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
     image : ndarray
         Input image.
     min_distance : int, optional
-        The minimum distance seperating peaks. Use the ``p`` argument
-        to set the Minkowski p-norm defining the distance.
+        The minimal allowed distance separating peaks. 
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
     p_norm : float
