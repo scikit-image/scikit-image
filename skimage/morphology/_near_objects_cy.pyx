@@ -45,7 +45,7 @@ def _remove_near_objects(
 
     Iterates over all objects (connected pixels that are True) inside an image
     and removes neighboring objects until all remaining ones are at least a
-    minimal euclidean distance from each other.
+    minimal distance from each other.
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ def _remove_near_objects(
     kdtree : scipy.spatial.cKDTree
         A KDTree containing the coordinates of all objects in `image`.
     minimal_distance :
-        The minimal allowed euclidean distance between objects.
+        The minimal allowed distance between objects.
     p_norm :
         Which Minkowski p-norm to use to calculate the distance between
         objects. Defaults to 2 which corresponds to the Euclidean distance
