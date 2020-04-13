@@ -127,10 +127,13 @@ registry = {
     "feature/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
     "feature/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
+    "data/brain.tiff": "667efb73cad96ee8ee2b97f12198ce3c84a42abb62fd7dbd7e111c11d186d1a0",
 }
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
+    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/blob/patch-1/rank_filters_tests_3d.npz",
+    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/blob/patch-1/brain.tiff",
 }
 
 legacy_registry = {
