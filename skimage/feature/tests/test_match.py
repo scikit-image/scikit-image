@@ -50,11 +50,7 @@ def test_binary_descriptors_rotation_crosscheck_false():
 
     matches = match_descriptors(descriptors1, descriptors2, cross_check=False)
 
-    exp_matches1 = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-                             13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-                             23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-                             33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
-                             43, 44, 45, 46])
+    exp_matches1 = np.arange(47)
     exp_matches2 = np.array([0, 2, 1, 3, 4, 5, 7, 8, 14, 9, 11, 13,
                              23, 15, 16, 22, 17, 19, 34, 18, 24, 27,
                              30, 25, 26, 32, 28, 35, 37, 42, 29, 38,
