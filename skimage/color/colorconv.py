@@ -197,7 +197,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
         raise ValueError('background must be an iterable containing 3 RGB '
-                         'values. Got {0} items'.format(len(background)))
+                         f'values. Got {len(background)} items')
     if np.any(background < 0) or np.any(background > 1):
         raise ValueError('background RGB values must be floats between '
                          '0 and 1.')
