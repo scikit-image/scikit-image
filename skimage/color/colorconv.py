@@ -1043,9 +1043,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
              stacklevel=2)
         z[invalid] = 0
 
-    out = np.concatenate([x[..., np.newaxis],
-                          y[..., np.newaxis],
-                          z[..., np.newaxis]], axis=-1)
+    out = np.stack([x, y, z], axis=-1)
 
     mask = out > 0.2068966
     out[mask] = np.power(out[mask], 3.)
