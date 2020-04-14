@@ -1,31 +1,29 @@
 import numpy as np
+from skimage._shared.testing import assert_array_equal, assert_almost_equal
+from skimage import data
+from skimage import img_as_float
+from skimage import draw
+from skimage.color import rgb2gray
+from skimage.morphology import octagon
+from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
 import pytest
 
-from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal, test_parallel,
-                                     assert_almost_equal)
-from skimage._shared._warnings import expected_warnings
-from skimage.data import astronaut
-from skimage.util.dtype import img_as_float
-from skimage.draw import ellipsoid, circle_perimeter
-from skimage.color.colorconv import rgb2gray
-from skimage.morphology import octagon
-
-from skimage.feature.corner import (corner_moravec, corner_harris,
-                                    corner_shi_tomasi, corner_subpix,
-                                    peak_local_max, corner_peaks,
-                                    corner_kitchen_rosenfeld, corner_foerstner,
-                                    corner_fast, corner_orientations,
-                                    structure_tensor, structure_tensor_eigvals,
-                                    hessian_matrix, hessian_matrix_eigvals,
-                                    hessian_matrix_det, shape_index)
+from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
+                             corner_subpix, peak_local_max, corner_peaks,
+                             corner_kitchen_rosenfeld, corner_foerstner,
+                             corner_fast, corner_orientations,
+                             structure_tensor, structure_tensor_eigvals,
+                             hessian_matrix, hessian_matrix_eigvals,
+                             hessian_matrix_det, shape_index)
 
 
 @pytest.fixture
 def im3d():
     r = 10
     pad = 10
-    im3 = ellipsoid(r, r, r)
+    im3 = draw.ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant').astype(np.uint8)
     return im3
 
@@ -34,21 +32,21 @@ def test_structure_tensor():
     square = np.zeros((5, 5))
     square[2, 2] = 1
     Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    assert_array_equal(Axx, np.array([[0,  0,  0,  0, 0],
-                                      [0,  1,  0,  1, 0],
-                                      [0,  4,  0,  4, 0],
-                                      [0,  1,  0,  1, 0],
-                                      [0,  0,  0,  0, 0]]))
-    assert_array_equal(Axy, np.array([[0,  0,  0,  0, 0],
-                                      [0,  1,  0, -1, 0],
-                                      [0,  0,  0, -0, 0],
-                                      [0, -1, -0,  1, 0],
-                                      [0,  0,  0,  0, 0]]))
-    assert_array_equal(Ayy, np.array([[0,  0,  0,  0, 0],
-                                      [0,  1,  4,  1, 0],
-                                      [0,  0,  0,  0, 0],
-                                      [0,  1,  4,  1, 0],
-                                      [0,  0,  0,  0, 0]]))
+    assert_array_equal(Axx, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  0,  1,  0],
+                                      [ 0,  4,  0,  4,  0],
+                                      [ 0,  1,  0,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
+    assert_array_equal(Axy, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  0, -1,  0],
+                                      [ 0,  0,  0, -0,  0],
+                                      [ 0, -1, -0,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
+    assert_array_equal(Ayy, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  4,  1,  0],
+                                      [ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  4,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
 
 
 def test_hessian_matrix():
@@ -80,11 +78,11 @@ def test_hessian_matrix_3d():
     Hs = hessian_matrix(cube, sigma=0.1, order='rc')
     assert len(Hs) == 6, ("incorrect number of Hessian images (%i) for 3D" %
                           len(Hs))
-    assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0, 0,  0, 0],
-                                                  [0,  1, 0, -1, 0],
-                                                  [0,  0, 0,  0, 0],
-                                                  [0, -1, 0,  1, 0],
-                                                  [0,  0, 0,  0, 0]]))
+    assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
+                                                  [0,  1,  0, -1,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0, -1,  0,  1,  0],
+                                                  [0,  0,  0,  0,  0]]))
 
 
 def test_structure_tensor_eigvals():
@@ -130,7 +128,8 @@ def test_hessian_matrix_eigvals_3d(im3d):
 
     E0, E1, E2 = E[:, E.shape[1] // 2]  # cross section
     row_center, col_center = np.array(E0.shape) // 2
-    circles = [circle_perimeter(row_center, col_center, radius, shape=E0.shape)
+    circles = [draw.circle_perimeter(row_center, col_center, radius,
+                                     shape=E0.shape)
                for radius in range(1, E0.shape[1] // 2 - 1)]
     response0 = np.array([np.mean(E0[c]) for c in circles])
     response2 = np.array([np.mean(E2[c]) for c in circles])
@@ -155,7 +154,7 @@ def test_hessian_matrix_det_3d(im3d):
     # testing in 3D is hard. We test this by showing that you get the
     # expected flat-then-low-then-high 2nd derivative response in a circle
     # around the midplane of the sphere.
-    circles = [circle_perimeter(row_center, col_center, r, shape=D0.shape)
+    circles = [draw.circle_perimeter(row_center, col_center, r, shape=D0.shape)
                for r in range(1, D0.shape[1] // 2 - 1)]
     response = np.array([np.mean(D0[c]) for c in circles])
     lowest = np.argmin(response)
@@ -173,11 +172,11 @@ def test_shape_index():
     with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
         s = shape_index(square, sigma=0.1)
     assert_almost_equal(
-        s, np.array([[np.nan, np.nan,   -0.5, np.nan, np.nan],
-                     [np.nan,      0, np.nan,      0, np.nan],
-                     [  -0.5, np.nan,     -1, np.nan,   -0.5],
-                     [np.nan,      0, np.nan,      0, np.nan],
-                     [np.nan, np.nan,   -0.5, np.nan, np.nan]])
+        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
+                     [ np.nan,      0, np.nan,      0, np.nan],
+                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
     )
 
 
@@ -259,7 +258,7 @@ def test_rotated_img():
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = img_as_float(astronaut().mean(axis=2))
+    im = img_as_float(data.astronaut().mean(axis=2))
     im_rotated = im.T
 
     # Moravec
@@ -324,13 +323,13 @@ def test_subpix_border():
     img[25:-1, 25:-1] = 255
     corner = corner_peaks(corner_harris(img), threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
-    ref = np.array([[24.5       , 24.5       ],
+    ref = np.array([[24.5, 24.5],
                     [48.47959184, 48.47959184],
                     [48.47959184, 24.52040816],
                     [24.52040816, 48.47959184],
-                    [24.47959184,  0.52040816],
-                    [ 0.52040816, 24.47959184],
-                    [ 0.52040816,  0.52040816]])
+                    [24.47959184, 0.52040816],
+                    [0.52040816, 24.47959184],
+                    [0.52040816, 0.52040816]])
     assert_almost_equal(subpix, ref)
 
 
@@ -339,7 +338,7 @@ def test_num_peaks():
     peak_local_max returns exactly the right amount of peaks. Test
     is run on the astronaut image in order to produce a sufficient number of corners"""
 
-    img_corners = corner_harris(rgb2gray(astronaut()))
+    img_corners = corner_harris(rgb2gray(data.astronaut()))
 
     for i in range(20):
         n = np.random.randint(1, 21)
@@ -366,32 +365,9 @@ def test_corner_peaks():
         corners = corner_peaks(response, exclude_border=False, min_distance=1)
         assert corners.shape == (5, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                           indices=False, threshold_rel=0.1)
-    assert np.sum(corners) == 5
-
-    corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, p_norm=np.inf, threshold_rel=0.1)
-    assert len(corners) == 2
-
-    corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, p_norm=np.inf,
-                           indices=False, threshold_rel=0.1)
-    assert np.sum(corners) == 2
-
-
-def test_corner_peaks_euclidean_dist():
-    response = np.zeros((10, 10))
-    response[2:5, 2:5] = 1
-    response[8:10, 0:2] = 1
-
-    corners = corner_peaks(response, exclude_border=False,
-                           min_distance=2, p_norm=2, threshold_rel=0.1)
-    assert len(corners) == 3
-
-    corners = corner_peaks(response, exclude_border=False, threshold_rel=0.1,
-                           min_distance=2, p_norm=2, indices=False)
-    assert np.sum(corners) == 3
+        corners = corner_peaks(response, exclude_border=False, min_distance=1,
+                               indices=False)
+        assert np.sum(corners) == 5
 
 
 def test_blank_image_nans():
@@ -417,7 +393,7 @@ def test_corner_fast_image_unsupported_error():
 
 @test_parallel()
 def test_corner_fast_astronaut():
-    img = rgb2gray(astronaut())
+    img = rgb2gray(data.astronaut())
     expected = np.array([[444, 310],
                          [374, 171],
                          [249, 171],
@@ -478,7 +454,7 @@ def test_corner_orientations_even_shape_error():
 
 @test_parallel()
 def test_corner_orientations_astronaut():
-    img = rgb2gray(astronaut())
+    img = rgb2gray(data.astronaut())
     corners = corner_peaks(corner_fast(img, 11, 0.35),
                            min_distance=10, threshold_abs=0, threshold_rel=0.1)
     expected = np.array([-4.40598471e-01, -1.46554357e+00,
@@ -499,6 +475,7 @@ def test_corner_orientations_astronaut():
                          -3.09279990e-01, -2.81524886e+00,
                          -1.75220190e+00, -1.69230287e+00,
                          -7.52950306e-04])
+
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
@@ -510,6 +487,6 @@ def test_corner_orientations_square():
                            min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     actual_orientations_degrees = np.rad2deg(actual_orientations)
-    expected_orientations_degree = np.array([45., 135., -45., -135.])[::-1]
+    expected_orientations_degree = np.array([-135, -45, 135, 45])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
