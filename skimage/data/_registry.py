@@ -132,8 +132,8 @@ registry = {
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
-    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/blob/patch-1/rank_filters_tests_3d.npz",
-    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/blob/patch-1/brain.tiff",
+    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/patch-1/rank_filters_tests_3d.npz",
+    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/patch-1/brain.tiff",
 }
 
 legacy_registry = {
