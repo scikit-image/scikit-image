@@ -189,7 +189,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
 
     if arr.ndim < 2 or arr.shape[-1] != 4:
         msg = ("the input array must have a shape == (.., 4)), "
-               "got {0}".format(arr.shape))
+               f"got {array.shape}")
         raise ValueError(msg)
 
     arr = dtype.img_as_float(arr)
