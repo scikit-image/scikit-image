@@ -188,7 +188,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     arr = np.asanyarray(rgba)
 
     if arr.ndim < 2 or arr.shape[-1] != 4:
-        msg = ("the input array must have a shape == (.., 4)), "
+        msg = ("the input array must have shape == (.., 4)), "
                f"got {array.shape}")
         raise ValueError(msg)
 
