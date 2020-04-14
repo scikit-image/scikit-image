@@ -920,7 +920,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
                  footprint=None, labels=None, *, num_peaks_per_label=np.inf,
                  p_norm=np.inf):
-    """Find corners in corner measure response image.
+    """Find peaks in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
     multiple connected peaks with the same accumulator value.
@@ -930,7 +930,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
     image : ndarray
         Input image.
     min_distance : int, optional
-        The minimal allowed distance separating peaks. 
+        The minimal allowed distance separating peaks.
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
     p_norm : float
