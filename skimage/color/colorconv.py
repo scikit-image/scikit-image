@@ -90,7 +90,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Parameters
     ----------
-    arr : (.., 3) array_like
+    arr : (..., 3) array_like
         The image to convert. Final dimension denotes channels.
     fromspace : str
         The color space to convert from. Can be specified in lower case.
@@ -99,7 +99,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The converted image. Same dimensions as input.
 
     Raises
@@ -146,8 +146,8 @@ def _prepare_colorarray(arr, force_copy=False):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim < 2 or arr.shape[-1] != 3:
-        raise ValueError("Input array must have a shape == (.., 3)), "
+    if arr.shape[-1] != 3:
+        raise ValueError("Input array must have a shape == (..., 3)), "
                          f"got {arr.shape}")
 
     return dtype.img_as_float(arr, force_copy=force_copy)
@@ -158,7 +158,7 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
 
     Parameters
     ----------
-    rgba : (.., 4) array_like
+    rgba : (..., 4) array_like
         The image in RGBA format. Final dimension denotes channels.
     background : array_like
         The color of the background to blend the image with (3 floats
@@ -166,13 +166,13 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgba` is not at least 2-D with shape (.., 4).
+        If `rgba` is not at least 2-D with shape (..., 4).
 
     References
     ----------
@@ -187,9 +187,9 @@ def rgba2rgb(rgba, background=(1, 1, 1)):
     """
     arr = np.asanyarray(rgba)
 
-    if arr.ndim < 2 or arr.shape[-1] != 4:
-        msg = ("the input array must have shape == (.., 4)), "
-               f"got {array.shape}")
+    if arr.shape[-1] != 4:
+        msg = ("the input array must have shape == (..., 4)), "
+               f"got {arr.shape}")
         raise ValueError(msg)
 
     arr = dtype.img_as_float(arr)
@@ -217,18 +217,18 @@ def rgb2hsv(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in HSV format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -246,6 +246,10 @@ def rgb2hsv(rgb):
     >>> img = data.astronaut()
     >>> img_hsv = color.rgb2hsv(img)
     """
+    input_is_one_pixel = rgb.ndim == 1
+    if input_is_one_pixel:
+        rgb = rgb[np.newaxis, ...]
+
     arr = _prepare_colorarray(rgb)
     out = np.empty_like(arr)
 
@@ -281,8 +285,11 @@ def rgb2hsv(rgb):
     out[..., 1] = out_s
     out[..., 2] = out_v
 
-    # remove NaN
+    # # remove NaN
     out[np.isnan(out)] = 0
+
+    if input_is_one_pixel:
+        out = np.squeeze(out, axis=0)
 
     return out
 
@@ -292,18 +299,18 @@ def hsv2rgb(hsv):
 
     Parameters
     ----------
-    hsv : (.., 3) array_like
+    hsv : (..., 3) array_like
         The image in HSV format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `hsv` is not at least 2-D with shape (.., 3).
+        If `hsv` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -330,19 +337,13 @@ def hsv2rgb(hsv):
     t = arr[..., 2] * (1 - (1 - f) * arr[..., 1])
     v = arr[..., 2]
 
-    hi = hi[..., np.newaxis]
-    f = f[..., np.newaxis]
-    p = p[..., np.newaxis]
-    q = q[..., np.newaxis]
-    t = t[..., np.newaxis]
-    v = v[..., np.newaxis]
-    hi = np.concatenate([hi, hi, hi], axis=-1).astype(np.uint8) % 6
-    out = np.choose(hi, [np.concatenate((v, t, p), axis=-1),
-                         np.concatenate((q, v, p), axis=-1),
-                         np.concatenate((p, v, t), axis=-1),
-                         np.concatenate((p, q, v), axis=-1),
-                         np.concatenate((t, p, v), axis=-1),
-                         np.concatenate((v, p, q), axis=-1)])
+    hi = np.stack([hi, hi, hi], axis=-1).astype(np.uint8) % 6
+    out = np.choose(hi, [np.stack((v, t, p), axis=-1),
+                         np.stack((q, v, p), axis=-1),
+                         np.stack((p, v, t), axis=-1),
+                         np.stack((p, q, v), axis=-1),
+                         np.stack((t, p, v), axis=-1),
+                         np.stack((v, p, q), axis=-1)])
 
     return out
 
@@ -584,12 +585,12 @@ def _convert(matrix, arr):
     ----------
     matrix : array_like
         The 3x3 matrix to use.
-    arr : (.., 3) array_like
+    arr : (..., 3) array_like
         The input array. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The converted array. Same dimensions as input.
     """
     arr = _prepare_colorarray(arr)
@@ -602,18 +603,18 @@ def xyz2rgb(xyz):
 
     Parameters
     ----------
-    xyz : (.., 3) array_like
+    xyz : (..., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with shape (.., 3).
+        If `xyz` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -647,18 +648,18 @@ def rgb2xyz(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -689,18 +690,18 @@ def rgb2rgbcie(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB CIE format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -721,18 +722,18 @@ def rgbcie2rgb(rgbcie):
 
     Parameters
     ----------
-    rgbcie : (.., 3) array_like
+    rgbcie : (..., 3) array_like
         The image in RGB CIE format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgbcie` is not at least 2-D with shape (.., 3).
+        If `rgbcie` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -754,7 +755,7 @@ def rgb2gray(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
@@ -766,7 +767,7 @@ def rgb2gray(rgb):
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -867,7 +868,7 @@ def gray2rgb(image, alpha=None):
 
     Returns
     -------
-    rgb : (.., 3) ndarray
+    rgb : (..., 3) ndarray
         RGB image. A new dimension of length 3 is added to input image.
 
     Notes
@@ -931,7 +932,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    xyz : (.., 3) array_like
+    xyz : (..., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -940,13 +941,13 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in CIE-LAB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with shape (.., 3).
+        If `xyz` is not at least 2-D with shape (..., 3).
     ValueError
         If either the illuminant or the observer angle is unsupported or
         unknown.
@@ -997,7 +998,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    lab : (.., 3) array_like
+    lab : (..., 3) array_like
         The image in Lab format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1006,13 +1007,13 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `lab` is not at least 2-D with shape (.., 3).
+        If `lab` is not at least 2-D with shape (..., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1060,7 +1061,7 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1069,13 +1070,13 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in Lab format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1096,7 +1097,7 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    lab : (.., 3) array_like
+    lab : (..., 3) array_like
         The image in Lab format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1105,13 +1106,13 @@ def lab2rgb(lab, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `lab` is not at least 2-D with shape (.., 3).
+        If `lab` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1132,7 +1133,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    xyz : (.., 3) array_like
+    xyz : (..., 3) array_like
         The image in XYZ format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1141,13 +1142,13 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in CIE-Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `xyz` is not at least 2-D with shape (.., 3).
+        If `xyz` is not at least 2-D with shape (..., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1172,6 +1173,10 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     >>> img_xyz = rgb2xyz(img)
     >>> img_luv = xyz2luv(img_xyz)
     """
+    input_is_one_pixel = xyz.ndim == 1
+    if input_is_one_pixel:
+        xyz = xyz[np.newaxis, ...]
+
     arr = _prepare_colorarray(xyz)
 
     # extract channels
@@ -1200,7 +1205,12 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     u = 13. * L * (fu(x, y, z) - u0)
     v = 13. * L * (fv(x, y, z) - v0)
 
-    return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
+    out = np.stack([L, u, v], axis=-1)
+
+    if input_is_one_pixel:
+        out = np.squeeze(out, axis=0)
+
+    return out
 
 
 def luv2xyz(luv, illuminant="D65", observer="2"):
@@ -1208,7 +1218,7 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Parameters
     ----------
-    luv : (.., 3) array_like
+    luv : (..., 3) array_like
         The image in CIE-Luv format. Final dimension denotes channels.
     illuminant : {"A", "D50", "D55", "D65", "D75", "E"}, optional
         The name of the illuminant (the function is NOT case sensitive).
@@ -1217,13 +1227,13 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in XYZ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `luv` is not at least 2-D with shape (.., 3).
+        If `luv` is not at least 2-D with shape (..., 3).
     ValueError
         If either the illuminant or the observer angle are not supported or
         unknown.
@@ -1275,18 +1285,18 @@ def rgb2luv(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in CIE Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1306,18 +1316,18 @@ def luv2rgb(luv):
 
     Parameters
     ----------
-    luv : (.., 3) array_like
+    luv : (..., 3) array_like
         The image in CIE Luv format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `luv` is not at least 2-D with shape (.., 3).
+        If `luv` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1331,18 +1341,18 @@ def rgb2hed(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in HED format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -1366,18 +1376,18 @@ def hed2rgb(hed):
 
     Parameters
     ----------
-    hed : (.., 3) array_like
+    hed : (..., 3) array_like
         The image in the HED color space. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `hed` is not at least 2-D with shape (.., 3).
+        If `hed` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -1402,20 +1412,20 @@ def separate_stains(rgb, conv_matrix):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in stain color space. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1457,20 +1467,20 @@ def combine_stains(stains, conv_matrix):
 
     Parameters
     ----------
-    stains : (.., 3) array_like
+    stains : (..., 3) array_like
         The image in stain color space. Final dimension denotes channels.
     conv_matrix: ndarray
         The stain separation matrix as described by G. Landini [1]_.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `stains` is not at least 2-D with shape (.., 3).
+        If `stains` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1519,14 +1529,14 @@ def lab2lch(lab):
 
     Parameters
     ----------
-    lab : (.., 3) array_like
+    lab : (..., 3) array_like
         The N-D image in CIE-LAB format. The last (``N+1``-th) dimension must
         have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
         color channels. Subsequent elements are copied.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in LCH format, in a N-D array with same shape as input `lab`.
 
     Raises
@@ -1570,14 +1580,14 @@ def lch2lab(lch):
 
     Parameters
     ----------
-    lch : (.., 3) array_like
+    lch : (..., 3) array_like
         The N-D image in CIE-LCH format. The last (``N+1``-th) dimension must
         have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
         color channels.  Subsequent elements are copied.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in LAB format, with same shape as input `lch`.
 
     Raises
@@ -1619,18 +1629,18 @@ def rgb2yuv(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in YUV format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1649,18 +1659,18 @@ def rgb2yiq(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in YIQ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
     """
     return _convert(yiq_from_rgb, rgb)
 
@@ -1670,18 +1680,18 @@ def rgb2ypbpr(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in YPbPr format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -1695,18 +1705,18 @@ def rgb2ycbcr(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in YCbCr format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1729,18 +1739,18 @@ def rgb2ydbdr(rgb):
 
     Parameters
     ----------
-    rgb : (.., 3) array_like
+    rgb : (..., 3) array_like
         The image in RGB format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in YDbDr format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not at least 2-D with shape (.., 3).
+        If `rgb` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1760,18 +1770,18 @@ def yuv2rgb(yuv):
 
     Parameters
     ----------
-    yuv : (.., 3) array_like
+    yuv : (..., 3) array_like
         The image in YUV format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `yuv` is not at least 2-D with shape (.., 3).
+        If `yuv` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -1785,18 +1795,18 @@ def yiq2rgb(yiq):
 
     Parameters
     ----------
-    yiq : (.., 3) array_like
+    yiq : (..., 3) array_like
         The image in YIQ format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `yiq` is not at least 2-D with shape (.., 3).
+        If `yiq` is not at least 2-D with shape (..., 3).
     """
     return _convert(rgb_from_yiq, yiq)
 
@@ -1806,18 +1816,18 @@ def ypbpr2rgb(ypbpr):
 
     Parameters
     ----------
-    ypbpr : (.., 3) array_like
+    ypbpr : (..., 3) array_like
         The image in YPbPr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `ypbpr` is not at least 2-D with shape (.., 3).
+        If `ypbpr` is not at least 2-D with shape (..., 3).
 
     References
     ----------
@@ -1831,18 +1841,18 @@ def ycbcr2rgb(ycbcr):
 
     Parameters
     ----------
-    ycbcr : (.., 3) array_like
+    ycbcr : (..., 3) array_like
         The image in YCbCr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `ycbcr` is not at least 2-D with shape (.., 3).
+        If `ycbcr` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
@@ -1865,18 +1875,18 @@ def ydbdr2rgb(ydbdr):
 
     Parameters
     ----------
-    ydbdr : (.., 3) array_like
+    ydbdr : (..., 3) array_like
         The image in YDbDr format. Final dimension denotes channels.
 
     Returns
     -------
-    out : (.., 3) ndarray
+    out : (..., 3) ndarray
         The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `ydbdr` is not at least 2-D with shape (.., 3).
+        If `ydbdr` is not at least 2-D with shape (..., 3).
 
     Notes
     -----
