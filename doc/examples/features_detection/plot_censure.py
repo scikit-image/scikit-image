@@ -9,7 +9,7 @@ implementation.
 """
 
 from skimage import data
-from skimage import transform as tf
+from skimage import transform
 from skimage.feature import CENSURE
 from skimage.color import rgb2gray
 
@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt
 
 
 img_orig = rgb2gray(data.astronaut())
-tform = tf.AffineTransform(scale=(1.5, 1.5), rotation=0.5,
-                           translation=(150, -200))
-img_warp = tf.warp(img_orig, tform)
+tform = transform.AffineTransform(scale=(1.5, 1.5), rotation=0.5,
+                                  translation=(150, -200))
+img_warp = transform.warp(img_orig, tform)
 
 detector = CENSURE()
 

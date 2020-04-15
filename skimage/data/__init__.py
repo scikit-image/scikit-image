@@ -269,7 +269,7 @@ def _load(f, as_gray=False):
     # importing io is quite slow since it scans all the backends
     # we lazy import it here
     from ..io import imread
-    return imread(_fetch(f), plugin='pil', as_gray=as_gray)
+    return imread(_fetch(f), as_gray=as_gray)
 
 
 def camera():

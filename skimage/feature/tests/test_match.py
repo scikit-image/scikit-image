@@ -1,7 +1,7 @@
 import numpy as np
 from skimage._shared.testing import assert_equal
 from skimage import data
-from skimage import transform as tf
+from skimage import transform
 from skimage.color import rgb2gray
 from skimage.feature import (BRIEF, match_descriptors,
                              corner_peaks, corner_harris)
@@ -33,8 +33,8 @@ def test_binary_descriptors_rotation_crosscheck_false():
     cross_check disabled."""
     img = data.astronaut()
     img = rgb2gray(img)
-    tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
-    rotated_img = tf.warp(img, tform, clip=False)
+    tform = transform.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
+    rotated_img = transform.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 
@@ -80,8 +80,8 @@ def test_binary_descriptors_rotation_crosscheck_true():
     cross_check enabled."""
     img = data.astronaut()
     img = rgb2gray(img)
-    tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
-    rotated_img = tf.warp(img, tform, clip=False)
+    tform = transform.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
+    rotated_img = transform.warp(img, tform, clip=False)
 
     extractor = BRIEF(descriptor_size=512)
 

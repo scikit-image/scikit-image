@@ -786,6 +786,12 @@ def rgb2gray(rgb):
     """
 
     if rgb.ndim == 2:
+        warn('The behavior of rgb2gray will change in scikit-image 0.19. '
+             'Currently, rgb2gray allows 2D grayscale image to be passed '
+             'as inputs and leaves them unmodified as outputs. '
+             'Starting from version 0.19, 2D arrays will '
+             'be treated as 1D images with 3 channels.',
+             FutureWarning, stacklevel=2)
         return np.ascontiguousarray(rgb)
 
     if rgb.shape[-1] > 3:
@@ -805,6 +811,43 @@ def rgb2grey(rgb):
     warn('rgb2grey is deprecated. It will be removed in version 0.19.'
          'Please use rgb2gray instead.', FutureWarning, stacklevel=2)
     return rgb2gray(rgb)
+
+
+def gray2rgba(image, alpha=None):
+    """Create a RGBA representation of a gray-level image.
+
+    Parameters
+    ----------
+    image : array_like
+        Input image.
+    alpha : array_like, optional
+        Alpha channel of the output image. It may be a scalar or an
+        array that can be broadcast to ``image``. If not specified it is
+        set to the maximum limit corresponding to the ``image`` dtype.
+
+    Returns
+    -------
+    rgba : ndarray
+        RGBA image. A new dimension of length 4 is added to input
+        image shape.
+    """
+
+    arr = np.asarray(image)
+
+    alpha_min, alpha_max = dtype_limits(arr, clip_negative=False)
+
+    if alpha is None:
+        alpha = alpha_max
+
+    if not np.can_cast(alpha, arr.dtype):
+        warn("alpha can't be safely cast to image dtype {}"
+             .format(arr.dtype.name), stacklevel=2)
+
+    rgba = np.empty(arr.shape + (4, ), dtype=arr.dtype)
+    rgba[..., :3] = arr[..., np.newaxis]
+    rgba[..., 3] = alpha
+
+    return rgba
 
 
 def gray2rgb(image, alpha=None):
@@ -833,6 +876,11 @@ def gray2rgb(image, alpha=None):
     If the input is a 1-dimensional image of shape ``(M, )``, the output
     will be shape ``(M, 3)``.
     """
+
+    if alpha is not None:
+        warn("alpha argument is deprecated and will be removed in "
+             "version 0.19. Please use the gray2rgba function instead"
+             "to obtain an RGBA image.", FutureWarning, stacklevel=2)
     is_rgb = False
     is_alpha = False
     dims = np.squeeze(image).ndim
