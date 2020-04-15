@@ -774,4 +774,6 @@ def test_rgba2rgb_nD(shape):
     img = np.random.rand(*shape)
     out = rgba2rgb(img)
 
-    assert out.shape[:-1] == shape[:-1]
+    expected_shape = shape[:-1] + (3, )
+
+    assert out.shape == expected_shape
