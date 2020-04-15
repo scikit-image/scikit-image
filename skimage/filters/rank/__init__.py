@@ -45,4 +45,5 @@ __all__ = ['autolevel',
            'majority']
 
 __3Dfilters__ = ['equalize',
-                 'otsu']
+                 'otsu',
+                 'autolevel']

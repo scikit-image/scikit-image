@@ -129,7 +129,7 @@ class TestRank():
 
         check()
 
-    @parametrize('filter', ['equalize', 'otsu'])
+    @parametrize('filter', ['equalize', 'otsu', 'autolevel'])
     def test_rank_filters_3D(self, filter):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
@@ -342,7 +342,7 @@ class TestRank():
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
-        methods_3d = ['equalize', 'otsu']
+        methods_3d = ['equalize', 'otsu', 'autolevel']
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -380,7 +380,7 @@ class TestRank():
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
-        methods_3d = ['equalize', 'otsu']
+        methods_3d = ['equalize', 'otsu', 'autolevel']
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -407,7 +407,7 @@ class TestRank():
         volume16 = volume8.astype(np.uint16)
         assert_equal(volume8, volume16)
 
-        methods_3d = ['equalize', 'otsu']
+        methods_3d = ['equalize', 'otsu', 'autolevel']
 
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
