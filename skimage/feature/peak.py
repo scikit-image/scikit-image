@@ -12,7 +12,7 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     coord = np.nonzero(mask)
     intensities = image[coord]
     # Highest peak first
-    idx_maxsort = np.argsort(intensities)[::-1]
+    idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
     # select num_peaks peaks
     if len(coord) > num_peaks:
