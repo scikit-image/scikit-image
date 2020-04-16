@@ -109,10 +109,16 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     r = point.r
                     c = point.c
                     get_neighborhood(img, p, r, c, neighb)
+                    no_single_change = True
+
                     if is_simple_point(neighb):
                         img[p, r, c] = 0
+                        no_single_change = False
+                    if is_Euler_invariant(neighb, LUT):
+                        img[p, r, c] = 0
+                        no_single_change = False
+                    if no_single_change:
                         no_change = False
-
                 if no_change:
                     unchanged_borders += 1
 
