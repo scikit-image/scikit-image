@@ -324,12 +324,13 @@ def test_subpix_border():
     corner = corner_peaks(corner_harris(img), threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
     ref = np.array([[24.5, 24.5],
-                    [48.47959184, 48.47959184],
-                    [48.47959184, 24.52040816],
-                    [24.52040816, 48.47959184],
-                    [24.47959184, 0.52040816],
+                    [0.52040816, 0.52040816],
                     [0.52040816, 24.47959184],
-                    [0.52040816, 0.52040816]])
+                    [24.47959184, 0.52040816],
+                    [24.52040816, 48.47959184],
+                    [48.47959184, 24.52040816],
+                    [48.47959184, 48.47959184]])
+
     assert_almost_equal(subpix, ref)
 
 
@@ -487,6 +488,6 @@ def test_corner_orientations_square():
                            min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     actual_orientations_degrees = np.rad2deg(actual_orientations)
-    expected_orientations_degree = np.array([-135, -45, 135, 45])
+    expected_orientations_degree = np.array([45, 135, -45, -135])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
