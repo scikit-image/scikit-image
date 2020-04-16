@@ -142,6 +142,8 @@ def test_skeletonize_num_neighbours():
 
 def test_two_hole_image():
     # test a simple 2D image against FIJI
+    # The expectation has been modified after the issue #3757
+    # has been discovered. FIJI has not been patched yet.
     img_o = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
