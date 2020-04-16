@@ -266,6 +266,39 @@ def intensity_range(image, range_values='image', clip_negative=False):
     return i_min, i_max
 
 
+def _output_dtype(out_range):
+    """Determine the output dtype for rescale_intensity.
+
+    The dtype is determined according to the following rules:
+    - if ``out_range`` is a dtype, that is the output dtype.
+    - if ``out_range`` is a dtype string, that is the dtype used, unless it
+      is not a NumPy data type (e.g. 'uint12' for 12-bit unsigned integers),
+      in which case the data type that can contain it will be used
+      (e.g. uint16 in this case).
+    - if ``out_range`` is a pair of values, the output data type will be
+      float.
+
+    Parameters
+    ----------
+    out_dtype : type
+        The data type appropriate for the desired output.
+    """
+    if type(out_range) in [list, tuple, np.ndarray]:
+        # pair of values: always return float.
+        return np.float_
+    if type(out_range) == type:
+        # already a type: return it
+        return out_range
+    if out_range in DTYPE_RANGE:
+        # string key in DTYPE_RANGE dictionary
+        try:
+            # if it's a canonical numpy dtype, convert
+            return np.dtype(out_range).type
+        except TypeError:  # uint10, uint12, uint14
+            # otherwise, return uint16
+            return np.uint16
+
+
 def rescale_intensity(image, in_range='image', out_range='dtype'):
     """Return image after stretching or shrinking its intensity levels.
 
