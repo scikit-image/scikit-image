@@ -318,6 +318,34 @@ def test_rescale_nan_warning(in_range, out_range):
         exposure.rescale_intensity(image, in_range, out_range)
 
 
+@pytest.mark.parametrize(
+    "out_range, out_dtype", [
+        ('uint8', np.uint8),
+        ('uint10', np.uint16),
+        ('uint12', np.uint16),
+        ('uint16', np.uint16),
+        ('float', np.float_),
+    ]
+)
+def test_rescale_output_dtype(out_range, out_dtype):
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=out_range)
+    assert output_image.dtype == out_dtype
+
+
+def test_rescale_no_overflow():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=np.uint8)
+    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert output_image.dtype == np.uint8
+
+
+def test_rescale_float_output():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=(0, 255))
+    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert output_image.dtype == np.float_
+
 # Test adaptive histogram equalization
 # ====================================
 
