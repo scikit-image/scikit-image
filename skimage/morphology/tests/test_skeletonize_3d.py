@@ -186,3 +186,15 @@ def test_3d_vs_fiji():
     img_s = skeletonize(img)
     img_f = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)
+
+
+def test_issue_3757():
+    image = np.zeros((100,100,100), np.uint8)
+    image[50:55,50:54, :] = 1
+    skeleton = skeletonize_3d(image)
+    assert skeleton.sum() == 96
+
+    image = np.zeros((100,100,100), np.uint8)
+    image[50:54,50:54, :] = 1
+    skeleton = skeletonize_3d(image)
+    assert skeleton.sum() > 0
