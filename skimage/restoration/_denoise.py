@@ -591,8 +591,7 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
     if wavelet_levels is None:
         # Determine the maximum number of possible levels for image
         dlen = wavelet.dec_len
-        wavelet_levels = np.min(
-            [pywt.dwt_max_level(s, dlen) for s in image.shape])
+        wavelet_levels = pywt.dwtn_max_level(image.shape, wavelet)
 
         # Skip coarsest wavelet scales (see Notes in docstring).
         wavelet_levels = max(wavelet_levels - 3, 1)

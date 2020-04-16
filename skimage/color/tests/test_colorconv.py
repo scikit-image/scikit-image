@@ -297,7 +297,8 @@ class TestColorconv(TestCase):
             assert rgb2gray(x).ndim == 2
 
     def test_rgb2gray_on_gray(self):
-        rgb2gray(np.random.rand(5, 5))
+        with expected_warnings(['The behavior of rgb2gray will change']):
+            rgb2gray(np.random.rand(5, 5))
 
     def test_rgb2gray_dtype(self):
         img = np.random.rand(10, 10, 3).astype('float64')

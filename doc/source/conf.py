@@ -166,6 +166,7 @@ sphinx_gallery_conf = {
         '../examples/color_exposure',
         '../examples/edges',
         '../examples/transform',
+        '../examples/registration',
         '../examples/filters',
         '../examples/features_detection',
         '../examples/segmentation',
@@ -181,7 +182,9 @@ sphinx_gallery_conf = {
         'dependencies': '../../.binder/requirements.txt',
         # Optional keys
         'use_jupyter_lab': False
-     }
+     },
+    # Remove sphinx_gallery_thumbnail_number from generated files
+    'remove_config_comments':True,
 }
 
 
