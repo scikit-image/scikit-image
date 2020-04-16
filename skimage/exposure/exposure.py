@@ -374,10 +374,15 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     array([  0,  63, 127], dtype=int8)
 
     """
-    dtype = image.dtype.type
+    input_dtype = image.dtype.type
+    if out_range in ['dtype', 'image']:
+        out_dtype = _output_dtype(input_dtype)
+    else:
+        out_dtype = _output_dtype(out_range)
 
-    imin, imax = intensity_range(image, in_range)
-    omin, omax = intensity_range(image, out_range, clip_negative=(imin >= 0))
+    imin, imax = map(float, intensity_range(image, in_range))
+    omin, omax = map(float, intensity_range(image, out_range,
+                                            clip_negative=(imin >= 0)))
 
     # Fast test for multiple values, operations with at least 1 NaN return NaN
     if np.isnan(imin + imax + omin + omax):
@@ -391,8 +396,8 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     image = np.clip(image, imin, imax)
 
     if imin != imax:
-        image = (image - imin) / float(imax - imin)
-    return np.asarray(image * (omax - omin) + omin, dtype=dtype)
+        image = (image - imin) / (imax - imin)
+    return np.asarray(image * (omax - omin) + omin, dtype=out_dtype)
 
 
 def _assert_non_negative(image):
