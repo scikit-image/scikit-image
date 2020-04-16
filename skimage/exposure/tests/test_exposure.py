@@ -237,10 +237,16 @@ def test_rescale_in_range_clip():
 
 
 def test_rescale_out_range():
+    """Check that output range is correct.
+
+    .. versionchanged:: 0.17
+        This function used to return dtype matching the input dtype. It now
+        matches the output.
+    """
     image = np.array([-10, 0, 10], dtype=np.int8)
     out = exposure.rescale_intensity(image, out_range=(0, 127))
-    assert out.dtype == np.int8
-    assert_array_almost_equal(out, [0, 63, 127])
+    assert out.dtype == np.float_
+    assert_array_almost_equal(out, [0, 63.5, 127])
 
 
 def test_rescale_named_in_range():
