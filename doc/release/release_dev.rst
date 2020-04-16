@@ -37,6 +37,9 @@ API Changes
   ``'reflect'``, which allows meaningful values at the borders for these
   filters. To retain the old behavior, pass
   ``mask=np.ones(image.shape, dtype=bool)`` (#4347)
+- When ``out_range`` is a range of numbers and not a dtype in
+  :func:`skimage.exposure.rescale_intensity`, the output data type will always
+  be float.
 
 
 Bugfixes
