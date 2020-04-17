@@ -13,6 +13,7 @@ from .._shared.utils import warn
 
 cnp.import_array()
 
+
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):
     """Felzenszwalb's efficient graph based segmentation for

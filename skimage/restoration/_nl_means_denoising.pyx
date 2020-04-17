@@ -9,6 +9,7 @@ cimport numpy as cnp
 from .._shared.fused_numerics cimport np_floats
 from .._shared.fast_exp cimport _fast_exp
 
+cnp.import_array()
 
 cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
                                         np_floats [:, :, :] p2,

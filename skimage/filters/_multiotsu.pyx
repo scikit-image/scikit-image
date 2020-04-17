@@ -6,7 +6,7 @@ import numpy as np
 
 cimport numpy as cnp
 cimport cython
-
+cnp.import_array()
 
 def _get_multiotsu_thresh_indices_lut(float [::1] prob,
                                       Py_ssize_t thresh_count):

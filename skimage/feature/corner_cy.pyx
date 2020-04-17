@@ -11,6 +11,7 @@ from ..util import img_as_float64
 
 from .util import _prepare_grayscale_input_2D
 
+cnp.import_array()
 
 def _corner_moravec(image, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.

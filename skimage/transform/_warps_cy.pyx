@@ -10,6 +10,7 @@ from .._shared.interpolation cimport (nearest_neighbour_interpolation,
                                       bicubic_interpolation)
 from .._shared.fused_numerics cimport np_floats
 
+cnp.import_array()
 
 cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
                                    np_floats *x_, np_floats *y_) nogil:
