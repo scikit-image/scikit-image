@@ -17,7 +17,7 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
-cnp.import_array()
+np.import_array()
 
 ctypedef np.float64_t DTYPE_FLOAT64_t
 ctypedef np.int32_t DTYPE_INT32_t
