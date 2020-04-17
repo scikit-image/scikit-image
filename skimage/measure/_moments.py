@@ -445,11 +445,9 @@ def inertia_tensor_eigvals(image, mu=None, T=None):
     if T is None:
         T = inertia_tensor(image, mu)
     eigvals = np.linalg.eigvalsh(T)
-    """
-    Floating point precision problems could make a positive
-    semidefinite matrix have an eigenvalue that is very slightly
-    negative.  This can cause problems down the line, so set values
-    very near zero to zero.
-    """
-    eigvals = np.where(abs(eigvals) < 1e-12, 0, eigvals)
+    # Floating point precision problems could make a positive
+    # semidefinite matrix have an eigenvalue that is very slightly
+    # negative. This can cause problems down the line, so set values
+    # very near zero to zero.
+    eigvals = np.clip(eigvals, 0, None, out=eigvals)
     return sorted(eigvals, reverse=True)
