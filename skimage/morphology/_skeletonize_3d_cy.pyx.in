@@ -110,16 +110,12 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     c = point.c
                     get_neighborhood(img, p, r, c, neighb)
 
-                    no_single_change = True
                     # Check both single point and Euler conditions
-                    # See #3757
-                    if is_simple_point(neighb):
+                    # See #3757 and
+                    # https://github.com/phi-max/skeleton3d-matlab/issues/4
+                    if is_simple_point(neighb) or is_Euler_invariant(neighb, LUT):
                         img[p, r, c] = 0
-                        no_single_change = False
-                    if is_Euler_invariant(neighb, LUT):
-                        img[p, r, c] = 0
-                        no_single_change = False
-                    if no_single_change:
+                    else:
                         no_change = False
                 if no_change:
                     unchanged_borders += 1
