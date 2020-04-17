@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
 
-cnp.import_array()
+np.import_array()
 
 def _dilate(np.uint8_t[:, :] image,
             np.uint8_t[:, :] selem,
