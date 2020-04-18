@@ -225,14 +225,14 @@ def test_imsave_boolean_input():
 
     # save to file-like object
     with expected_warnings(
-            ['is a boolean image: setting True to 1 and False to 0']):
+            ['is a boolean image: setting True to 255 and False to 0']):
         imsave(s, image)
 
     # read from file-like object
     s.seek(0)
     out = imread(s)
     assert_equal(out.shape, shape)
-    assert_allclose(out, image)
+    assert_allclose(out.astype(bool), image)
 
 
 def test_imexport_imimport():

@@ -5,7 +5,7 @@
 
 cimport numpy as cnp
 from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
-
+cnp.import_array()
 
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    Py_ssize_t* histo,

@@ -23,6 +23,7 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 import numpy as np
 cimport numpy as np
 import cython
+np.import_array()
 
 # Enable low level memory management
 from libc.stdlib cimport malloc, free

@@ -30,6 +30,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # -- General configuration -----------------------------------------------------
 
 # Strip backslahes in function's signature
+# To be removed when numpydoc > 0.9.x
 strip_signature_backslash = True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -166,6 +167,7 @@ sphinx_gallery_conf = {
         '../examples/color_exposure',
         '../examples/edges',
         '../examples/transform',
+        '../examples/registration',
         '../examples/filters',
         '../examples/features_detection',
         '../examples/segmentation',
@@ -181,7 +183,9 @@ sphinx_gallery_conf = {
         'dependencies': '../../.binder/requirements.txt',
         # Optional keys
         'use_jupyter_lab': False
-     }
+     },
+    # Remove sphinx_gallery_thumbnail_number from generated files
+    'remove_config_comments':True,
 }
 
 

@@ -32,7 +32,7 @@ class ColorMixerTest(object):
 
 
 class TestColorMixerAdd(ColorMixerTest):
-    op = cm.add
+    op = staticmethod(cm.add)
     py_op = np.add
     positive = 50
     positive_clip = 56
@@ -41,7 +41,7 @@ class TestColorMixerAdd(ColorMixerTest):
 
 
 class TestColorMixerMul(ColorMixerTest):
-    op = cm.multiply
+    op = staticmethod(cm.multiply)
     py_op = np.multiply
     positive = 1.2
     positive_clip = 2
