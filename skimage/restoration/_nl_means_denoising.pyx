@@ -484,8 +484,8 @@ cdef inline void _integral_image_3d(double [:, :, ::] padded,
 
 
 def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
-                                Py_ssize_t s=7, Py_ssize_t d=13,
-                                double h=0.1, double var=0.):
+                                Py_ssize_t s, Py_ssize_t d,
+                                double h, double var):
     """
     Perform fast non-local means denoising on 2-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
@@ -608,8 +608,8 @@ def _fast_nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image,
 
 
 def _fast_nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
-                                Py_ssize_t s=5, Py_ssize_t d=7, double h=0.1,
-                                double var=0.):
+                                Py_ssize_t s, Py_ssize_t d, double h,
+                                double var):
     """
     Perform fast non-local means denoising on 3-D array, with the outer
     loop on patch shifts in order to reduce the number of operations.
