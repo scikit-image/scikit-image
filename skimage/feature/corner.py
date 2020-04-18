@@ -975,7 +975,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
            [3, 2],
            [3, 3]])
     >>> corner_peaks(response, threshold_rel=0)
-    array([[3, 3]])
+    array([[2, 2]])
 
     """
     if threshold_rel is None:
@@ -1132,7 +1132,7 @@ def corner_orientations(image, corners, mask):
            [8, 8]])
     >>> orientations = corner_orientations(square, corners, octagon(3, 2))
     >>> np.rad2deg(orientations)
-    array([-135.,  -45.,  135.,   45.])
+    array([  45.,  135.,  -45., -135.])
 
     """
     return _corner_orientations(image, corners, mask)

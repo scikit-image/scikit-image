@@ -101,15 +101,15 @@ class BRIEF(DescriptorExtractor):
            [2, 2],
            [3, 3]])
     >>> keypoints1[matches[:, 0]]
-    array([[5, 5],
-           [5, 2],
+    array([[2, 2],
            [2, 5],
-           [2, 2]])
+           [5, 2],
+           [5, 5]])
     >>> keypoints2[matches[:, 1]]
-    array([[6, 6],
-           [6, 2],
+    array([[2, 2],
            [2, 6],
-           [2, 2]])
+           [6, 2],
+           [6, 6]])
 
     """
 
