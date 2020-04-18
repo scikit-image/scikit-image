@@ -5,6 +5,8 @@
 
 import numpy as np
 cimport numpy as cnp
+cnp.import_array()
+
 
 def _fast_skeletonize(image):
     """Optimized parts of the Zhang-Suen [1]_ skeletonization.
