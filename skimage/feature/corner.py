@@ -984,8 +984,8 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
              "Starting from version 0.16, the default value is set to None. "
              "Until version 0.18, a None value corresponds to a threshold "
              "value of 0.1. The default behavior will match "
-             "skimage.feature.peak_local_max.", category=FutureWarning,
-             stacklevel=2)
+             "skimage.feature.peak_local_max. To avoid this warning, set "
+             "threshold_rel=0.", category=FutureWarning, stacklevel=2)
 
     if np.isinf(num_peaks):
         num_peaks = None
