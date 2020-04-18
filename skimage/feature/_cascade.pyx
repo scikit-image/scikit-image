@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 from ._texture cimport _multiblock_lbp
 import math
 
+cnp.import_array()
 
 # Struct for storing a single detection.
 cdef struct Detection:
