@@ -109,8 +109,8 @@ cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
     return _fast_exp(-max(0.0, distance))
 
 
-def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
-                           Py_ssize_t d=13, double h=0.1, double var=0.):
+def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
+                           Py_ssize_t d, double h, double var):
     """
     Perform non-local means denoising on 2-D RGB image
 
@@ -213,8 +213,8 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s=7,
 
 
 def _nl_means_denoising_3d(cnp.ndarray[np_floats, ndim=3] image,
-                           Py_ssize_t s=7, Py_ssize_t d=13,
-                           double h=0.1, double var=0.0):
+                           Py_ssize_t s, Py_ssize_t d,
+                           double h, double var):
     """
     Perform non-local means denoising on 3-D array
 
