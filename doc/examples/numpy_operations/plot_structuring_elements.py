@@ -27,17 +27,18 @@ struc_2d = {
     "star(6)": star(6)
 }
 
-struc_3d = [
-    ("cube(5)", cube(5)),
-    ("octahedron(5)", octahedron(5)),
-    ("ball(5)", ball(5)),
-]
+struc_3d = {
+    "cube(5)": cube(5),
+    "octahedron(5)": octahedron(5),
+    "ball(5)": ball(5)
+}
 
 # Visualize the elements.
 fig = plt.figure(figsize=(8, 8))
 
 idx = 1
-for title, struc in struc_2d:
+for title in struc_2d:
+    struc = struc_2d[title]
     ax = fig.add_subplot(3, 3, idx)
     ax.imshow(struc, cmap="Paired", vmin=0, vmax=12)
     for i in range(struc.shape[0]):
@@ -47,7 +48,8 @@ for title, struc in struc_2d:
     ax.set_title(title)
     idx += 1
 
-for title, struc in struc_3d:
+for title in struc_3d:
+    struc = struc_3d[title]
     ax = fig.add_subplot(3, 3, idx, projection=Axes3D.name)
     x, y, z = np.where(struc == 1)
     ax.scatter(x, y, z)
