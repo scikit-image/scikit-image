@@ -346,6 +346,12 @@ def test_rescale_float_output():
     testing.assert_array_equal(output_image, [0, 128, 255])
     assert output_image.dtype == np.float_
 
+
+def test_rescale_raises_on_incorrect_out_range():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    with testing.raises(ValueError):
+        _ = exposure.rescale_intensity(image, out_range='flat')
+
 # Test adaptive histogram equalization
 # ====================================
 
