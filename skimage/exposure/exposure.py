@@ -378,12 +378,17 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     array([0.5, 1. , 1. ])
 
     If you have an image with signed integers but want to rescale the image to
-    just the positive range, use the `out_range` parameter:
+    just the positive range, use the `out_range` parameter. In that case, the
+    output dtype will be float:
 
     >>> image = np.array([-10, 0, 10], dtype=np.int8)
     >>> rescale_intensity(image, out_range=(0, 127))
-    array([  0,  63, 127], dtype=int8)
+    array([  0. ,  63.5, 127. ])
 
+    To get the desired range with a specific dtype, use ``.astype()``:
+
+    >>> rescale_intensity(image, out_range=(0, 127)).astype(np.int8)
+    array([  0,  63, 127], dtype=int8)
     """
     if out_range in ['dtype', 'image']:
         out_dtype = _output_dtype(image.dtype.type)
