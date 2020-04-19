@@ -436,12 +436,19 @@ def test_adapthist_borders():
     """Test border processing
     """
     img = rgb2gray(util.img_as_float(data.astronaut()))
-    adapted = exposure.equalize_adapthist(img, 11)
-    width = 42
-    # Check last columns are procesed
-    assert norm_brightness_err(adapted[:, -width], img[:, -width]) > 1e-3
-    # Check last rows are procesed
-    assert norm_brightness_err(adapted[-width, :], img[-width, :]) > 1e-3
+
+    # maximize difference between orig and processed img
+    img /= 100.
+    img[img.shape[0]//2, img.shape[1]//2] = 1.
+
+    # check borders are processed for different kernel sizes
+    border_index = -1
+    for kernel_size in range(51,71,2):
+        adapted = exposure.equalize_adapthist(img, kernel_size, clip_limit=0.5)
+        # Check last columns are procesed
+        assert norm_brightness_err(adapted[:, border_index], img[:, -border_index]) > 0.1
+        # Check last rows are procesed
+        assert norm_brightness_err(adapted[border_index, :], img[-border_index, :]) > 0.1
 
 
 def test_adapthist_clip_limit():
