@@ -364,7 +364,7 @@ def test_adapthist_grayscale():
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                           clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 102.019, 3)
+    assert_almost_equal(peak_snr(img, adapted), 100.158, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
@@ -400,6 +400,36 @@ def test_adapthist_alpha():
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(full_scale, adapted), 109.393, 2)
     assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0248, 3)
+
+
+def test_adapthist_grayscale_Nd():
+    """
+    Test for n-dimensional consistency with float images
+    Note: Currently if img.ndim == 3, img.shape[2] > 4 must hold for the image
+    not to be interpreted as a color image by @adapt_rgb
+    """
+    # take 2d image, subsample and stack it
+    img = util.img_as_float(data.astronaut())
+    img = rgb2gray(img)
+    a = 15
+    img2d = util.img_as_float(img[0:-1:a,0:-1:a])
+    img3d = np.array([img2d] * (img.shape[0]//a))
+
+    # apply CLAHE
+    adapted2d = exposure.equalize_adapthist(img2d,
+                                            kernel_size=5,
+                                            clip_limit=0.05)
+    adapted3d = exposure.equalize_adapthist(img3d,
+                                            kernel_size=5,
+                                            clip_limit=0.05)
+
+    # check that dimensions of input and output match
+    assert img2d.shape == adapted2d.shape
+    assert img3d.shape == adapted3d.shape
+
+    # check that the result from the stack of 2d images is similar
+    # to the underlying 2d image
+    assert np.mean(np.abs(adapted2d - adapted3d[adapted3d.shape[0]//2])) < 0.02
 
 
 def test_adapthist_borders():
