@@ -271,8 +271,8 @@ def _output_dtype(dtype_or_range):
 
     The dtype is determined according to the following rules:
     - if ``dtype_or_range`` is a dtype, that is the output dtype.
-    - if ``dtype_or_range`` is a dtype string, that is the dtype used, unless it
-      is not a NumPy data type (e.g. 'uint12' for 12-bit unsigned integers),
+    - if ``dtype_or_range`` is a dtype string, that is the dtype used, unless
+      it is not a NumPy data type (e.g. 'uint12' for 12-bit unsigned integers),
       in which case the data type that can contain it will be used
       (e.g. uint16 in this case).
     - if ``dtype_or_range`` is a pair of values, the output data type will be
