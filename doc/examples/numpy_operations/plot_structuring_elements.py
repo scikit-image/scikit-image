@@ -34,7 +34,7 @@ struc_3d = [
 ]
 
 # Visualize the elements.
-fig = plt.figure(figsize=(10, 10))
+fig = plt.figure(figsize=(8, 8))
 
 idx = 1
 for title, struc in struc_2d:
