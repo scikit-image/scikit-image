@@ -2,6 +2,8 @@ from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
+from .._shared.utils import _validate_interpolation_order
+
 
 def profile_line(image, src, dst, linewidth=1,
                  order=None, mode=None, cval=0.0,
@@ -89,15 +91,9 @@ def profile_line(image, src, dst, linewidth=1,
            [1.        , 1.        , 0.        ],
            [1.41421356, 1.41421356, 0.        ]])
     """
-    if order is None:
-        order = 0 if image.dtype == bool else 1
 
-    if image.dtype == bool and order != 0:
-        warn("Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitely "
-             "cast input image to another data type. Starting from version "
-             "0.19 a ValueError will be raised instead of this warning.",
-             FutureWarning, stacklevel=2)
+    order = _validate_interpolation_order(image.dtype, order)
+
     if mode is None:
         warn("Default out of bounds interpolation mode 'constant' is "
              "deprecated. In version 0.19 it will be set to 'reflect'. "
