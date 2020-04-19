@@ -18,14 +18,14 @@ from skimage.morphology import (square, rectangle, diamond, disk, cube,
 
 # Generate 2D and 3D structuring elements.
 # [(title, data)]
-struc_2d = [
-    ("square(5)", square(5)),
-    ("rectangle(5, 3)", rectangle(5, 3)),
-    ("diamond(5)", diamond(5)),
-    ("disk(7)", disk(7)),
-    ("octagon(4, 7)", octagon(4, 7)),
-    ("star(6)", star(6))
-]
+struc_2d = {
+    "square(5)": square(5),
+    "rectangle(5, 3)": rectangle(5, 3),
+    "diamond(5)": diamond(5),
+    "disk(7)": disk(7),
+    "octagon(4, 7)": octagon(4, 7),
+    "star(6)": star(6)
+}
 
 struc_3d = [
     ("cube(5)", cube(5)),
