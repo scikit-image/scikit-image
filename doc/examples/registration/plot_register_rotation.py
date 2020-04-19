@@ -8,7 +8,8 @@ differences along the angular coordinate (:math:`\theta`) axis of the
 polar-transformed images. Scaling differences can be converted to translation
 differences along the radial coordinate (:math:`\rho`) axis if it
 is first log transformed (i.e., :math:`\rho = \ln\sqrt{x^2 + y^2}`). Thus,
-in this example, we use phase correlation (``feature.register_translation``)
+in this example, we use phase correlation
+ (``registration.phase_cross_correlation``)
 to recover rotation and scaling differences between two images that share a
 center point.
 """
@@ -21,7 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.registration import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage.transform import warp_polar, rotate
 from skimage.util import img_as_float
 
@@ -45,7 +46,7 @@ ax[3].set_title("Polar-Transformed Rotated")
 ax[3].imshow(rotated_polar)
 plt.show()
 
-shifts, error, phasediff = register_translation(image_polar, rotated_polar)
+shifts, error, phasediff = phase_cross_correlation(image_polar, rotated_polar)
 print("Expected value for counterclockwise rotation in degrees: "
       f"{angle}")
 print("Recovered value for counterclockwise rotation: "
@@ -83,7 +84,8 @@ ax[3].imshow(rescaled_polar)
 plt.show()
 
 # setting `upsample_factor` can increase precision
-tparams = register_translation(image_polar, rescaled_polar, upsample_factor=20)
+tparams = phase_cross_correlation(image_polar, rescaled_polar,
+                                  upsample_factor=20)
 shifts, error, phasediff = tparams
 shiftr, shiftc = shifts[:2]
 
