@@ -28,16 +28,15 @@ from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 
-from ..registration._register_translation import (
-    register_translation as _register_translation)
-
 
 @deprecated(alt_func='skimage.registration.register_translation',
             removed_version='0.19')
 def register_translation(src_image, target_image, upsample_factor=1,
                          space="real", return_error=True):
-    return _register_translation(src_image, target_image, upsample_factor,
-                                 space, return_error)
+    from ..registration._phase_cross_correlation import (
+        phase_cross_correlation as func)
+
+    return func(src_image, target_image, upsample_factor, space, return_error)
 
 
 __all__ = ['canny',

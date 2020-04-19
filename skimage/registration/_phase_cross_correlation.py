@@ -105,8 +105,8 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
-def register_translation(reference_image, moving_image, upsample_factor=1,
-                         space="real", return_error=True):
+def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
+                            space="real", return_error=True):
     """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
