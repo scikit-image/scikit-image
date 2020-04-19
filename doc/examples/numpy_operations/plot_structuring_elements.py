@@ -13,8 +13,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from skimage.morphology import square, rectangle, diamond, disk, cube, \
-    octahedron, ball, octagon, star
+from skimage.morphology import (square, rectangle, diamond, disk, cube,
+                                octahedron, ball, octagon, star)
 
 # Generate 2D and 3D structuring elements.
 # [(title, data)]
