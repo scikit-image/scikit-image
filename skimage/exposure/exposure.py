@@ -303,6 +303,11 @@ def _output_dtype(dtype_or_range):
         except TypeError:  # uint10, uint12, uint14
             # otherwise, return uint16
             return np.uint16
+    else:
+        raise ValueError(
+            'Incorrect value for out_range, should be a valid image data '
+            f'type or a pair of values, got {dtype_or_range}.'
+        )
 
 
 def rescale_intensity(image, in_range='image', out_range='dtype'):
