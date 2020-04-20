@@ -159,8 +159,7 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
     """
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
-        raise ValueError("Error: images must be same size for "
-                         "register_translation")
+        raise ValueError("images must be same shape")
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
@@ -171,8 +170,7 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
         src_freq = fft.fftn(reference_image)
         target_freq = fft.fftn(moving_image)
     else:
-        raise ValueError("Error: register_translation only knows the \"real\" "
-                         "and \"fourier\" values for the ``space`` argument.")
+        raise ValueError('space argument must be "real" of "fourier"')
 
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape
