@@ -41,7 +41,7 @@ from image files, using :func:`skimage.io.imread`: ::
     >>> from skimage import io
     >>> moon = io.imread(filename)
 
-Use natsort to load multiple images: ::
+Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
 
     >>> import os
     >>> from natsort import natsorted, ns
@@ -55,4 +55,3 @@ Use natsort to load multiple images: ::
     >>> image_list = []
     >>> for filename in list_files:
     ...   image_list.append(io.imread(filename))
-
