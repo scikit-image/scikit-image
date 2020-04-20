@@ -247,7 +247,7 @@ Stylistic Guidelines
 
    # only in Cython code
    cimport numpy as cnp
-   cnp.import_arrays()
+   cnp.import_array()
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
