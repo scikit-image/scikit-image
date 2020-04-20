@@ -49,7 +49,7 @@ Use natsort to load multiple images: ::
     >>> list_files = os.listdir('.')
     >>> list_files
     ['01.png', '010.png', '0101.png', '0190.png', '02.png']
-    >>> list_files = natsorted(list_files, alg=ns.PATH)
+    >>> list_files = natsorted(list_files)
     >>> list_files
     ['01.png', '02.png', '010.png', '0101.png', '0190.png']
     >>> image_list = []
