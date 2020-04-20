@@ -58,8 +58,8 @@ Version 0.19
 ------------
 
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
-* In ``skimage/segmentation/morphsnakes.py`` remove
-  ``circle_level_set'' and related tests.
+* In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
+  * Also make sure to look in the function ``_init_level_set``
 * In ``skimage/morphology/_flood_fill.py`` replace the deprecated parameter
   in flood_fill() ``inplace`` with ``in_place`` and update the tests.
 * In ``skimage/filters/rank/generic.py'' remove tophat and bottomhat (See #3614)
@@ -114,4 +114,3 @@ Other
 * Once numpydoc > 0.9.x (ie https://github.com/numpy/numpydoc/pull/256) is
   released, remove `strip_signature_backslash = True` in
   ``doc/source/conf.py``.
-
