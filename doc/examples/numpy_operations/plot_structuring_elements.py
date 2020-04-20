@@ -3,7 +3,7 @@
 Generate structuring elements
 =============================
 
-This example shows how to use functions in :py:module:`skimage.morphology`
+This example shows how to use functions in :py:mod:`skimage.morphology`
 to generate structuring elements.
 The title of each plot indicates the call of the function.
 
