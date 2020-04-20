@@ -43,16 +43,16 @@ from image files, using :func:`skimage.io.imread`: ::
 
 Use natsort to load multiple images: ::
 
->>> import os
->>> from natsort import natsorted, ns
->>> from skimage import io
->>> list_files = os.listdir('.')
->>> list_files
-['01.png', '010.png', '0101.png', '0190.png', '02.png']
->>> list_files = natsorted(list_files, alg=ns.PATH)
->>> list_files
-['01.png', '02.png', '010.png', '0101.png', '0190.png']
->>> image_list = []
->>> for filename in list_files:
-...   image_list.append(io.imread(filename))
+    >>> import os
+    >>> from natsort import natsorted, ns
+    >>> from skimage import io
+    >>> list_files = os.listdir('.')
+    >>> list_files
+    ['01.png', '010.png', '0101.png', '0190.png', '02.png']
+    >>> list_files = natsorted(list_files, alg=ns.PATH)
+    >>> list_files
+    ['01.png', '02.png', '010.png', '0101.png', '0190.png']
+    >>> image_list = []
+    >>> for filename in list_files:
+    ...   image_list.append(io.imread(filename))
 
