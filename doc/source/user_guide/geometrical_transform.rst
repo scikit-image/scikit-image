@@ -139,15 +139,17 @@ The ``estimate`` method is point-based, that is, it uses only a set of points
 from the source and destination images. For estimating translations (shifts),
 it is also possible to use a *full-field* method using all pixels, based on
 Fourier-space cross-correlation. This method is implemented by
-:func:`skimage.feature.register_translation` and explained in the 
-:ref:`sphx_glr_auto_examples_transform_plot_register_translation.py` tutorial. 
+:func:`skimage.registration.register_translation` and explained in the
+:ref:`sphx_glr_auto_examples_registration_plot_register_translation.py`
+tutorial.
 
 .. image:: ../auto_examples/registration/images/sphx_glr_plot_register_translation_001.png
-   :target: ../auto_examples/transform/plot_register_translation.html
+   :target: ../auto_examples/registration/plot_register_translation.html
    :align: center
    :width: 80%
 
 
-The :ref:`sphx_glr_auto_examples_transform_plot_register_rotation.py` tutorial
+The
+:ref:`sphx_glr_auto_examples_registration_plot_register_rotation.py` tutorial
 explains a variant of this full-field method for estimating a rotation, by
 using first a log-polar transformation.
