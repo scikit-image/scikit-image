@@ -1,4 +1,5 @@
-"""=====================================
+"""
+=====================================
 Image Registration
 =====================================
 
@@ -53,8 +54,6 @@ ax3.imshow(cc_image.real)
 ax3.set_axis_off()
 ax3.set_title("Cross-correlation")
 
-plt.show()
-
 print(f"Detected pixel offset (y, x): {shift}")
 
 # subpixel precision
@@ -80,8 +79,5 @@ cc_image = _upsampled_dft(image_product, 150, 100, (shift*100)+75).conj()
 ax3.imshow(cc_image.real)
 ax3.set_axis_off()
 ax3.set_title("Supersampled XC sub-area")
-
-
-plt.show()
 
 print(f"Detected subpixel offset (y, x): {shift}")
