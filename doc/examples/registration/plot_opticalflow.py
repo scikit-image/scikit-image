@@ -1,6 +1,6 @@
 # coding: utf-8
-"""Image registration
-==================
+"""Registration using optical flow
+==================================
 
 Demonstration of image registration using optical flow.
 

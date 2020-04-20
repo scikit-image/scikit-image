@@ -10,6 +10,8 @@ cimport numpy as cnp
 from ..util import regular_grid
 from .._shared.fused_numerics cimport np_floats
 
+cnp.import_array()
+
 
 def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                  np_floats[:, ::1] segments,

@@ -14,6 +14,7 @@ from ..draw import circle_perimeter
 
 from .._shared.interpolation cimport round
 
+cnp.import_array()
 
 def _hough_circle(cnp.ndarray img,
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
