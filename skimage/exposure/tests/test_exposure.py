@@ -429,7 +429,8 @@ def test_adapthist_grayscale_Nd():
 
     # check that the result from the stack of 2d images is similar
     # to the underlying 2d image
-    assert np.mean(np.abs(adapted2d - adapted3d[adapted3d.shape[0] // 2])) < 0.02
+    assert np.mean(np.abs(adapted2d
+                          - adapted3d[adapted3d.shape[0] // 2])) < 0.02
 
 
 def test_adapthist_borders():
