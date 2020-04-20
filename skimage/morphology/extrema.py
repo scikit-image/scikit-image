@@ -151,7 +151,7 @@ def h_maxima(image, h, selem=None):
         # The purpose of the resolution variable is to allow for the
         # small rounding errors that inevitably occur when doing
         # floating point arithmetic. We want shifted_img to be
-        # gauranteed to be h less than image. If we only subtract h
+        # guaranteed to be h less than image. If we only subtract h
         # there may be pixels were shifted_img ends up being
         # slightly greater than image - h.
         #
