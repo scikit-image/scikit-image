@@ -44,6 +44,7 @@ ax[2].set_title("Polar-Transformed Original")
 ax[2].imshow(image_polar)
 ax[3].set_title("Polar-Transformed Rotated")
 ax[3].imshow(rotated_polar)
+plt.show()
 
 shifts, error, phasediff = phase_cross_correlation(image_polar, rotated_polar)
 print("Expected value for counterclockwise rotation in degrees: "
