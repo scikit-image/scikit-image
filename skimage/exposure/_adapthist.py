@@ -150,12 +150,12 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     # Calculate graylevel mappings for each contextual region
     for inds in np.ndindex(*ns):
 
-        region = tuple([slice(inds[dim] * steps[dim], (inds[dim] + 1) *
-                              steps[dim])
+        region = tuple([slice(inds[dim] * steps[dim], (inds[dim] + 1)
+                              * steps[dim])
                         for dim in range(image.ndim)])
         sub_img = image[region]
 
-        if clip_limit > 0.0:  # Calculate actual cliplimit
+        if clip_limit > 0.0:  # Calculate actual clip limit
             clim = int(clip_limit * sub_img.size / nbins)
             if clim < 1:
                 clim = 1
@@ -169,9 +169,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         hist = map_histogram(hist, 0, NR_OF_GRAY - 1, sub_img.size)
         map_array[inds] = hist
 
-
     # Interpolate greylevel mappings to get CLAHE image
-
     offsets = [0] * image.ndim
     lowers = [0] * image.ndim
     uppers = [0] * image.ndim

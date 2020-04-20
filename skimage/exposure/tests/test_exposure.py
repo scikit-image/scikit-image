@@ -412,8 +412,8 @@ def test_adapthist_grayscale_Nd():
     img = util.img_as_float(data.astronaut())
     img = rgb2gray(img)
     a = 15
-    img2d = util.img_as_float(img[0:-1:a,0:-1:a])
-    img3d = np.array([img2d] * (img.shape[0]//a))
+    img2d = util.img_as_float(img[0:-1:a, 0:-1:a])
+    img3d = np.array([img2d] * (img.shape[0] // a))
 
     # apply CLAHE
     adapted2d = exposure.equalize_adapthist(img2d,
@@ -429,7 +429,7 @@ def test_adapthist_grayscale_Nd():
 
     # check that the result from the stack of 2d images is similar
     # to the underlying 2d image
-    assert np.mean(np.abs(adapted2d - adapted3d[adapted3d.shape[0]//2])) < 0.02
+    assert np.mean(np.abs(adapted2d - adapted3d[adapted3d.shape[0] // 2])) < 0.02
 
 
 def test_adapthist_borders():
@@ -439,16 +439,18 @@ def test_adapthist_borders():
 
     # maximize difference between orig and processed img
     img /= 100.
-    img[img.shape[0]//2, img.shape[1]//2] = 1.
+    img[img.shape[0] // 2, img.shape[1] // 2] = 1.
 
     # check borders are processed for different kernel sizes
     border_index = -1
-    for kernel_size in range(51,71,2):
+    for kernel_size in range(51, 71, 2):
         adapted = exposure.equalize_adapthist(img, kernel_size, clip_limit=0.5)
-        # Check last columns are procesed
-        assert norm_brightness_err(adapted[:, border_index], img[:, -border_index]) > 0.1
-        # Check last rows are procesed
-        assert norm_brightness_err(adapted[border_index, :], img[-border_index, :]) > 0.1
+        # Check last columns are processed
+        assert norm_brightness_err(adapted[:, border_index],
+                                   img[:, -border_index]) > 0.1
+        # Check last rows are processed
+        assert norm_brightness_err(adapted[border_index, :],
+                                   img[-border_index, :]) > 0.1
 
 
 def test_adapthist_clip_limit():
