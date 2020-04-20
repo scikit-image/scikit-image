@@ -238,4 +238,4 @@ References
 
 .. _numpy: https://docs.scipy.org/doc/numpy/user/
 .. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
-.. _OpenCV: http://opencv.org/
+.. _OpenCV: https://opencv.org/

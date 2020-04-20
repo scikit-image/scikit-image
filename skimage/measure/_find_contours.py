@@ -48,7 +48,7 @@ def find_contours(array, level,
     The marching squares algorithm is a special case of the marching cubes
     algorithm [1]_.  A simple explanation is available here::
 
-      http://www.essi.fr/~lingrand/MarchingCubes/algo.html
+      http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
 
     There is a single ambiguous case in the marching squares algorithm: when
     a given ``2 x 2``-element square has two high-valued and two low-valued

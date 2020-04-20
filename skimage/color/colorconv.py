@@ -775,7 +775,7 @@ def rgb2gray(rgb):
 
     References
     ----------
-    .. [1] http://www.poynton.com/PDFs/ColorFAQ.pdf
+    .. [1] http://poynton.ca/PDFs/ColorFAQ.pdf
 
     Examples
     --------
@@ -964,7 +964,7 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
     .. [2] https://en.wikipedia.org/wiki/Lab_color_space
 
     Examples
@@ -1032,7 +1032,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
     .. [2] https://en.wikipedia.org/wiki/Lab_color_space
     """
     arr = _prepare_colorarray(lab).copy()

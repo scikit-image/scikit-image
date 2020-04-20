@@ -5,7 +5,7 @@ scikit-image |version| docs
 scikit-image is an image processing toolbox for SciPy_.  View the latest
 `release notes here <release_notes_and_installation.html>`_.
 
-.. _SciPy: http://www.scipy.org
+.. _SciPy: https://www.scipy.org
 
 
 Sections

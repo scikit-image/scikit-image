@@ -22,7 +22,7 @@ plot2rst_paths : length-2 tuple, or list of tuples
 
 plot2rst_rcparams : dict
     Matplotlib configuration parameters. See
-    http://matplotlib.sourceforge.net/users/customizing.html for details.
+    https://matplotlib.org/tutorials/introductory/customizing.html for details.
 
 plot2rst_default_thumb : str
     Path (relative to doc root) of default thumbnail image.

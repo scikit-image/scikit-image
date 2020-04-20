@@ -80,7 +80,7 @@ more regularly shaped. [5]_
 .. [5] Peer Neubert & Peter Protzel (2014). Compact Watershed and
        Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
        Algorithms. ICPR 2014, pp 996-1001. :DOI:`10.1109/ICPR.2014.181`
-       https://www.tu-chemnitz.de/etit/proaut/forschung/rsrc/cws_pSLIC_ICPR.pdf
+       https://www.tu-chemnitz.de/etit/proaut/publications/cws_pSLIC_ICPR.pdf
 """
 
 import matplotlib.pyplot as plt
