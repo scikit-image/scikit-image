@@ -142,7 +142,7 @@ Fourier-space cross-correlation. This method is implemented by
 :func:`skimage.feature.register_translation` and explained in the 
 :ref:`sphx_glr_auto_examples_transform_plot_register_translation.py` tutorial. 
 
-.. image:: ../auto_examples/transform/images/sphx_glr_plot_register_translation_001.png
+.. image:: ../auto_examples/registration/images/sphx_glr_plot_register_translation_001.png
    :target: ../auto_examples/transform/plot_register_translation.html
    :align: center
    :width: 80%

@@ -82,6 +82,7 @@ ax3.imshow(cc_image.real)
 ax3.set_axis_off()
 ax3.set_title("Supersampled XC sub-area")
 
+
 plt.show()
 
 print(f"Detected subpixel offset (y, x): {shift}")
