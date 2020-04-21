@@ -124,7 +124,7 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
         ``reference_image``.
     upsample_factor : int, optional
         Upsampling factor. Images will be registered to within
-        ``1 /upsample_factor`` of a pixel. For example
+        ``1 / upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
         within 1/20th of a pixel. Default is 1 (no upsampling)
     space : string, one of "real" or "fourier", optional
