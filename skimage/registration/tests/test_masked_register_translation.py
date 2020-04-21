@@ -3,23 +3,24 @@ from scipy.ndimage import fourier_shift
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, fetch
 from skimage.data import camera
-from skimage.feature.register_translation import register_translation
+from skimage.registration import phase_cross_correlation
 from skimage.registration._masked_register_translation import (
     masked_register_translation, cross_correlate_masked)
 from skimage.io import imread
 from skimage._shared.fft import fftmodule as fft
 
 
-def test_masked_registration_vs_register_translation():
+
+def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as
-    register_translation in the case of trivial masks."""
+    phase_cross_correlation in the case of trivial masks."""
     reference_image = camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(
         fft.fft2(reference_image), shift)))
     trivial_mask = np.ones_like(reference_image)
 
-    nonmasked_result, *_ = register_translation(reference_image, shifted)
+    nonmasked_result, *_ = phase_cross_correlation(reference_image, shifted)
     masked_result = masked_register_translation(reference_image,
                                                 shifted,
                                                 reference_mask=trivial_mask,
@@ -104,15 +105,13 @@ def test_masked_registration_padfield_data():
 
         # Note that shifts in x and y and shifts in cols and rows
         shift_y, shift_x = masked_register_translation(
-            fixed_image,
-            moving_image,
-            reference_mask=fixed_mask,
-            moving_mask=moving_mask,
-            overlap_ratio=0.1)
+            fixed_image, moving_image, reference_mask=fixed_mask,
+            moving_mask=moving_mask, overlap_ratio=0.1)
         # Note: by looking at the test code from Padfield's
         # MaskedFFTRegistrationCode repository, the
         # shifts were not xi and yi, but xi and -yi
         assert_equal((shift_x, shift_y), (-xi, yi))
+
 
 def test_cross_correlate_masked_output_shape():
     """Masked normalized cross-correlation should return a shape

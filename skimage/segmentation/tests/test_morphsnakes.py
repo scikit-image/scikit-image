@@ -115,16 +115,16 @@ def test_init_level_sets():
                                  [0, 0, 0, 0, 0, 1],
                                  [1, 1, 1, 1, 1, 0]], dtype=np.int8)
 
-    circle_ls = morphological_geodesic_active_contour(image, 0, 'circle')
-    circle_ref = np.array([[0, 0, 0, 0, 0, 0],
-                           [0, 0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 1, 1, 1, 1, 1],
-                           [0, 0, 1, 1, 1, 0]], dtype=np.int8)
+    disk_ls = morphological_geodesic_active_contour(image, 0, 'disk')
+    disk_ref = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 1, 1, 1, 1, 1],
+                         [0, 0, 1, 1, 1, 0]], dtype=np.int8)
 
     assert_array_equal(checkerboard_ls, checkerboard_ref)
-    assert_array_equal(circle_ls, circle_ref)
+    assert_array_equal(disk_ls, disk_ref)
 
 
 def test_morphsnakes_3d():
@@ -135,10 +135,10 @@ def test_morphsnakes_3d():
     def callback(x):
         evolution.append(x.sum())
 
-    ls = morphological_chan_vese(image, 5, 'circle',
+    ls = morphological_chan_vese(image, 5, 'disk',
                                  iter_callback=callback)
 
-    # Check that the initial circle level set is correct
+    # Check that the initial disk level set is correct
     assert evolution[0] == 81
 
     # Check that the final level set is correct

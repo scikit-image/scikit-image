@@ -219,7 +219,7 @@ def lbp_frontal_face_cascade_filename():
     References
     ----------
     .. [1] OpenCV lbpcascade trained files
-           https://github.com/Itseez/opencv/tree/master/data/lbpcascades
+           https://github.com/opencv/opencv/tree/master/data/lbpcascades
     """
 
     return _fetch('data/lbpcascade_frontalface_opencv.xml')
@@ -268,7 +268,7 @@ def _load(f, as_gray=False):
     # importing io is quite slow since it scans all the backends
     # we lazy import it here
     from ..io import imread
-    return imread(_fetch(f), plugin='pil', as_gray=as_gray)
+    return imread(_fetch(f), as_gray=as_gray)
 
 
 def camera():

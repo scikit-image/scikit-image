@@ -18,7 +18,6 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_moravec, corner_orientations,
                      shape_index)
 from .template import match_template
-from .register_translation import register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -38,6 +37,16 @@ def masked_register_translation(src_image, target_image, src_mask,
         masked_register_translation as _func)
     return _func(src_image, target_image, reference_mask=src_mask,
                  moving_mask=target_mask, overlap_ratio=overlap_ratio)
+
+
+@deprecated(alt_func='skimage.registration.phase_cross_correlation',
+            removed_version='0.19')
+def register_translation(src_image, target_image, upsample_factor=1,
+                         space="real", return_error=True):
+    from ..registration._phase_cross_correlation import (
+        phase_cross_correlation as _func)
+
+    return _func(src_image, target_image, upsample_factor, space, return_error)
 
 
 __all__ = ['canny',

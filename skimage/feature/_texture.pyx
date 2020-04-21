@@ -14,6 +14,7 @@ cdef extern from "numpy/npy_math.h":
 from .._shared.fused_numerics cimport np_anyint as any_int
 from .._shared.fused_numerics cimport np_real_numeric
 
+cnp.import_array()
 
 def _glcm_loop(any_int[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
