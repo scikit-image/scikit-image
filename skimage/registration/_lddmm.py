@@ -14,6 +14,9 @@ from ._lddmm_utilities import _multiply_coords_by_affine
 from ._lddmm_utilities import _compute_tail_determinant
 from ._lddmm_utilities import resample
 
+# TODO: add multiscale functionality.
+# TODO: incorporate rigid affine phase.
+
 r'''
   _            _       _                         
  | |          | |     | |                        
@@ -174,19 +177,8 @@ class _Lddmm:
 
         # Preempt known error.
         if np.any(np.array(self.template.shape) == 1) or np.any(np.array(self.target.shape) == 1):
-            raise RuntimeError(f"Known issue:\n"
-                               f"Images with a 1 in their shape produce an error owing to the behavior of interpn.\n"
-                               f"The source of this error can be recreated thusly:\n"
-                               f"points = [np.array([0]), np.arange(5)]\n"
-                               f"values = (np.arange(5)**2).reshape(1, 5)\n"
-                               f"xi = np.array(\[\n"
-                                   f"\t[0, 0.5], \n"
-                                   f"\t[0, 1.5], \n"
-                                   f"\t[0, 2.5], \n"
-                                   f"\t[0, 3.5], \n"
-                                 f"\])\n"
-                               f"print(scipy.interpolate.interpn(points, values, xi))\n"
-                               f"--> np.array([nan, nan, nan, nan])")
+            raise RuntimeError(f"Known issue: Images with a 1 in their shape are not supported by scipy.interpolate.interpn.\n"
+                               f"self.template.shape: {self.template.shape}, self.target.shape: {self.target.shape}.\n")
 
     def register(self):
         """
@@ -510,7 +502,8 @@ class _Lddmm:
         # For a 3D case, affine_inv_hessian_approx is matching_affine_inv_gradient reshaped to shape (x,y,z,12,1), 
         # then matrix multiplied by itself transposed on the last two dimensions, then summed over the spatial dimensions
         # to resultant shape (12,12).
-        affine_inv_hessian_approx = matching_affine_inv_gradient.reshape(*matching_affine_inv_gradient.shape[:-2], -1, 1)
+        affine_inv_hessian_approx = matching_affine_inv_gradient * ((contrast_map_prime * np.sqrt(self.matching_weights) / self.sigma_matching)[...,None,None])
+        affine_inv_hessian_approx = affine_inv_hessian_approx.reshape(*matching_affine_inv_gradient.shape[:-2], -1, 1)
         affine_inv_hessian_approx = affine_inv_hessian_approx @ affine_inv_hessian_approx.reshape(*affine_inv_hessian_approx.shape[:-2], 1, -1)
         affine_inv_hessian_approx = np.sum(affine_inv_hessian_approx, tuple(range(self.target.ndim)))
 
@@ -518,6 +511,10 @@ class _Lddmm:
         try:
             affine_inv_gradient = solve(affine_inv_hessian_approx, affine_inv_gradient_reduction, assume_a='pos').reshape(matching_affine_inv_gradient.shape[-2:])
         except np.linalg.LinAlgError:
+            warnings.warn(
+                f"Singular Matrix Error in _compute_affine_inv_gradient. Proceeding with the trivial (zero) gradient.", 
+                RuntimeWarning
+            )
             print('Singular Matrix Error\n')
             affine_inv_gradient = np.zeros(matching_affine_inv_gradient.shape[-2:])
         # Append a row of zeros at the end of the 0th dimension.

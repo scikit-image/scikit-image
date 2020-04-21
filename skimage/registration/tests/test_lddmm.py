@@ -354,6 +354,10 @@ def _test_lddmm_register(rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
         **reg_output,
     )
 
+    print('template', template[template.shape[0]//2], 'target', target[target.shape[0]//2], 'deformed_template', deformed_template[deformed_template.shape[0]//2].astype(int), sep='\n\n\n')
+    print('deformed_template unique\n', np.unique(deformed_template, return_counts=True))
+    print(target.shape, deformed_template.shape, template.shape, target.sum(), deformed_template.sum())
+
     assert np.allclose(deformed_template, target, rtol=rtol, atol=atol)
     assert np.allclose(deformed_target, template, rtol=rtol, atol=atol)
 
@@ -415,70 +419,39 @@ def test_lddmm_register():
     lddmm_register_kwargs = dict(
         template=template,
         target=target,
-        # affine_stepsize=0.1,
-        track_progress_every_n=1,
     )
 
-    _test_lddmm_register(**lddmm_register_kwargs);return
+    # _test_lddmm_register(**lddmm_register_kwargs)#debugsuspend
     
     # Test identity quasi-two-dimensional sphere to sphere registration.
 
-    template = np.array([[[(col-6)**2 + (row-6)**2 <= 4**2 for col in range(13)] for row in range(13)]]*2, int)
-    target   = np.array([[[(col-6)**2 + (row-6)**2 <= 4**2 for col in range(13)] for row in range(13)]]*2, int)
+    template = np.array([[[(col-4)**2 + (row-4)**2 <= 4**2 for col in range(9)] for row in range(9)]]*2, int)
+    template = np.pad(template, 2, mode='constant', constant_values=0)
+    target = np.copy(template)
 
     lddmm_register_kwargs = dict(
         template=template,
         target=target,
-        affine_stepsize=0.01,
-        deformative_stepsize=1e-3,
-        sigma_regularization=2,
-        contrast_order=1,
-        track_progress_every_n=1,
     )
 
-    _test_lddmm_register(**lddmm_register_kwargs);return # still working on the above tests.
+    # _test_lddmm_register(**lddmm_register_kwargs)#debugsuspend
     
     # Test affine-only quasi-two-dimensional affine-only ellipse to ellipse registration.
 
     # template has shape (3, 9, 17) and semi-radii 2 and 6.
     template = np.array([[[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)]]*2, int)
+    template = np.pad(template, 2, mode='constant', constant_values=0)
     # target is a rotation of template.
     target = rotate(template, 90, (1,2))
-    template_resolution = 1
-    target_resolution = 1
-    num_iterations = 200
-    num_affine_only_iterations = 200
-    translational_stepsize = 0.00001
-    linear_stepsize = 0.00001
-    deformative_stepsize = 0
-    sigmaR = 1e10
-    smooth_length = None
-    num_timesteps = 5
-    contrast_order = 1
-    sigmaM=None
-    initial_affine = np.eye(4)
-    initial_velocity_fields = None
 
     lddmm_register_kwargs = dict(
         template=template, 
         target=target, 
-        template_resolution=template_resolution, 
-        target_resolution=target_resolution, 
-        num_iterations=num_iterations, 
-        num_affine_only_iterations=num_affine_only_iterations, 
-        translational_stepsize=translational_stepsize, 
-        linear_stepsize=linear_stepsize, 
-        deformative_stepsize=deformative_stepsize, 
-        sigmaR=sigmaR, 
-        smooth_length=smooth_length, 
-        num_timesteps=num_timesteps, 
-        contrast_order=contrast_order, 
-        sigmaM=sigmaM, 
-        initial_affine=initial_affine, 
-        initial_velocity_fields=initial_velocity_fields, 
+        num_iterations=200, 
+        num_affine_only_iterations=200, 
     )
 
-    _test_lddmm_register(**lddmm_register_kwargs)
+    _test_lddmm_register(**lddmm_register_kwargs)#debugsuspend
 
     # Test deformative-only quasi-two-dimensional sphere to ellipsoid registration.
 
