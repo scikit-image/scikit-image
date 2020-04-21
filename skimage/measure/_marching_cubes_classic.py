@@ -44,7 +44,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
     The marching cubes algorithm is implemented as described in [1]_.
     A simple explanation is available here::
 
-      http://www.essi.fr/~lingrand/MarchingCubes/algo.html
+      http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
 
     There are several known ambiguous cases in the marching cubes algorithm.
     Using point labeling as in [1]_, Figure 4, as shown::

@@ -24,7 +24,7 @@ https://forum.image.sc/tags/scikit-image
 
 Developer Mailing List
 ----------------------
-https://mail.python.org/mailman/listinfo/scikit-image
+https://mail.python.org/mailman3/lists/scikit-image.python.org/
 
 Source, bugs, and patches
 -------------------------
