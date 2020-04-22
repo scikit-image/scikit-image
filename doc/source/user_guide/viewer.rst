@@ -94,5 +94,5 @@ filtered image for the last used setting of ``weight``.
 .. image:: data/denoise_plugin_window.png
 
 
-.. _matplotlib: http://matplotlib.sourceforge.net/
+.. _matplotlib: https://matplotlib.org/
 

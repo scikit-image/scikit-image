@@ -14,7 +14,7 @@ from libc.math cimport sqrt
 
 cimport numpy as cnp
 cimport cython
-
+cnp.import_array()
 
 ctypedef cnp.int32_t DTYPE_INT32_t
 ctypedef cnp.int8_t DTYPE_BOOL_t

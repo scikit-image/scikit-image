@@ -8,6 +8,7 @@ from libc.math cimport log
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
+cnp.import_array()
 
 cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t* histo,

@@ -32,7 +32,7 @@ is a shared power: you must merge *only after* another core has
 approved the pull request, *and* after you yourself have carefully
 reviewed it.  (See `Reviewing`_ and especially `Merge Only Changes You
 Understand`_ below.) To ensure a clean git history, use GitHub's
-`Squash and Merge <https://help.github.com/articles/merging-a-pull-request/#merging-a-pull-request-on-github>`__
+`Squash and Merge <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/merging-a-pull-request#merging-a-pull-request-on-github>`__
 feature to merge, unless you have a good reason not to do so.
 
 Reviewing
@@ -83,11 +83,11 @@ When reviewing, focus on the following:
 Other changes may be *nitpicky*: spelling mistakes, formatting,
 etc. Do not ask contributors to make these changes, and instead
 make the changes by `pushing to their branch
-<https://help.github.com/articles/committing-changes-to-a-pull-request-branch-created-from-a-fork/>`__,
+<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/committing-changes-to-a-pull-request-branch-created-from-a-fork>`__,
 or using GitHub’s `suggestion
-<https://help.github.com/articles/commenting-on-a-pull-request/>`__
+<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request>`__
 `feature
-<https://help.github.com/articles/incorporating-feedback-in-your-pull-request/>`__.
+<https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request>`__.
 (The latter is preferred because it gives the contributor a choice in
 whether to accept the changes.)
 
@@ -186,7 +186,7 @@ resources such as:
 -  The scikit-image `tag on
    forum.image.sc <https://forum.image.sc/tags/scikit-image>`__
 -  Our `mailing
-   list <https://mail.python.org/mailman/listinfo/scikit-image>`__
+   list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`__
 -  Our `chat room <https://skimage.zulipchat.com/>`__
 
 You are not required to monitor all of the social resources.
