@@ -29,7 +29,7 @@ from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 
 
-@deprecated(alt_func='skimage.registration.register_translation',
+@deprecated(alt_func='skimage.registration.phase_cross_correlation',
             removed_version='0.19')
 def register_translation(src_image, target_image, upsample_factor=1,
                          space="real", return_error=True):
