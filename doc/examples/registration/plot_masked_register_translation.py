@@ -25,7 +25,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, draw
-from skimage.registration import masked_register_translation
+from skimage.registration import phase_cross_correlation
 from scipy import ndimage as ndi
 
 #############################################
@@ -50,8 +50,8 @@ print(f"Known offset (row, col): {shift}")
 # the pixels ourselves
 mask = corrupted_pixels
 
-detected_shift = masked_register_translation(image, offset_image,
-                                             reference_mask=mask)
+detected_shift = phase_cross_correlation(image, offset_image,
+                                         reference_mask=mask)
 
 print(f"Detected pixel offset (row, col): {-detected_shift}")
 
@@ -76,7 +76,7 @@ plt.show()
 ##################################################
 # Solid masks are another illustrating example. In this case, we have
 # a limited view of an image and an offset image. The masks for these
-# images need not be the same. The `masked_register_translation`
+# images need not be the same. The `phase_cross_correlation`
 # function will correctly identify which part of the images should be
 # compared.
 image = data.camera()
@@ -99,9 +99,9 @@ offset_image *= mask2
 
 print(f"Known offset (row, col): {shift}")
 
-detected_shift = masked_register_translation(image, offset_image,
-                                             reference_mask=mask1,
-                                             moving_mask=mask2)
+detected_shift = phase_cross_correlation(image, offset_image,
+                                         reference_mask=mask1,
+                                         moving_mask=mask2)
 
 print(f"Detected pixel offset (row, col): {-detected_shift}")
 
