@@ -329,6 +329,7 @@ def autolevel(image, selem, out=None, mask=None,
     -------
     out : ([P,] M, N) ndarray (same dtype as input image)
         Output image.
+
     Examples
     --------
     >>> from skimage import data
@@ -389,6 +390,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False,
 
         This function is deprecated and will be removed in scikit-image 0.19.
         This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
