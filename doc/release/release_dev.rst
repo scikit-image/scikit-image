@@ -20,9 +20,37 @@ This release of scikit-image officially supports Python 3.6, 3.7, and
 New Features
 ------------
 - Added majority rank filter - ``filters.rank.majority``.
-- Added 3D implementation of rank equalization filter - ``filters.rank.equalize``.
-- Added 3D implementation of rank otsu filter - ``filters.rank.otsu``.
 - Added 3D implementation of rank autolevel filter - ``filters.rank.autolevel``.
+# - Added 3D implementation of rank autolevel_percentile filter - ``filters.rank.autolevel_percentile``.
+- Added 3D implementation of rank equalize filter - ``filters.rank.equalize``.
+- Added 3D implementation of rank gradient filter - ``filters.rank.gradient``.
+# - Added 3D implementation of rank gradient_percentile filter - ``filters.rank.gradient_percentile``.
+- Added 3D implementation of rank majority filter - ``filters.rank.majority``.
+- Added 3D implementation of rank maximum filter - ``filters.rank.maximum``.
+- Added 3D implementation of rank mean filter - ``filters.rank.mean``.
+- Added 3D implementation of rank geometric_mean filter - ``filters.rank.geometric_mean``.
+# - Added 3D implementation of rank mean_percentile filter - ``filters.rank.mean_percentile``.
+# - Added 3D implementation of rank mean_bilateral filter - ``filters.rank.mean_bilateral``.
+- Added 3D implementation of rank subtract_mean filter - ``filters.rank.subtract_mean``.
+# - Added 3D implementation of rank subtract_mean_percentile filter - ``filters.rank.subtract_mean_percentile``.
+- Added 3D implementation of rank median filter - ``filters.rank.median``.
+- Added 3D implementation of rank minimum filter - ``filters.rank.minimum``.
+- Added 3D implementation of rank modal filter - ``filters.rank.modal``.
+- Added 3D implementation of rank enhance_contrast filter - ``filters.rank.enhance_contrast``.
+# - Added 3D implementation of rank enhance_contrast_percentile filter - ``filters.rank.enhance_contrast_percentile``.
+- Added 3D implementation of rank pop filter - ``filters.rank.pop``.
+# - Added 3D implementation of rank pop_percentile filter - ``filters.rank.pop_percentile``.
+# - Added 3D implementation of rank pop_bilateral filter - ``filters.rank.pop_bilateral``.
+- Added 3D implementation of rank sum filter - ``filters.rank.sum``.
+# - Added 3D implementation of rank sum_bilateral filter - ``filters.rank.sum_bilateral``.
+# - Added 3D implementation of rank sum_percentile filter - ``filters.rank.sum_percentile``.
+- Added 3D implementation of rank threshold filter - ``filters.rank.threshold``.
+# - Added 3D implementation of rank threshold_percentile filter - ``filters.rank.threshold_percentile``.
+- Added 3D implementation of rank noise_filter filter - ``filters.rank.noise_filter``.
+- Added 3D implementation of rank entropy filter - ``filters.rank.entropy``.
+- Added 3D implementation of rank otsu filter - ``filters.rank.otsu``.
+# - Added 3D implementation of rank percentile filter - ``filters.rank.percentile``.
+# - Added 3D implementation of rank windowed_histogram filter - ``filters.rank.windowed_histogram``.
 
 Improvements
 ------------

@@ -60,7 +60,7 @@ def test_median_preserve_dtype(image, dtype):
 
 
 def test_median_error_ndim():
-    img = np.random.randint(0, 10, size=(5, 5, 5), dtype=np.uint8)
+    img = np.random.randint(0, 10, size=(5, 5, 5, 5), dtype=np.uint8)
     with pytest.raises(ValueError):
         median(img, behavior='rank')
 

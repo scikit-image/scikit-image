@@ -94,8 +94,6 @@ class TestRank():
         self.selem = morphology.disk(1)
         self.selem_3d = morphology.ball(1)
         self.refs = np.load(fetch('data/rank_filter_tests.npz'))
-        # self.refs_3d = np.load(os.path.join(skimage.data_dir,
-        #                                     "rank_filters_tests_3d.npz"))
         self.refs_3d = np.load(fetch('data/rank_filters_tests_3d.npz'))
 
     @parametrize('filter', all_rank_filters)
@@ -129,7 +127,11 @@ class TestRank():
 
         check()
 
-    @parametrize('filter', ['equalize', 'otsu', 'autolevel'])
+    @parametrize('filter', ['equalize', 'otsu', 'autolevel', 'gradient',
+                            'majority', 'maximum', 'mean', 'geometric_mean',
+                            'subtract_mean', 'median', 'minimum', 'modal',
+                            'enhance_contrast', 'pop', 'sum', 'threshold',
+                            'noise_filter', 'entropy'])
     def test_rank_filters_3D(self, filter):
         @test_parallel(warnings_matching=['Possible precision loss'])
         def check():
@@ -342,7 +344,11 @@ class TestRank():
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
-        methods_3d = ['equalize', 'otsu', 'autolevel']
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -380,7 +386,11 @@ class TestRank():
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
-        methods_3d = ['equalize', 'otsu', 'autolevel']
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -407,7 +417,11 @@ class TestRank():
         volume16 = volume8.astype(np.uint16)
         assert_equal(volume8, volume16)
 
-        methods_3d = ['equalize', 'otsu', 'autolevel']
+        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
+                     'majority', 'maximum', 'mean', 'geometric_mean',
+                     'subtract_mean', 'median', 'minimum', 'modal',
+                     'enhance_contrast', 'pop', 'sum', 'threshold',
+                     'noise_filter', 'entropy']
 
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
