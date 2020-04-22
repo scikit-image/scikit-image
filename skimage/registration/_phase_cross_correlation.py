@@ -186,10 +186,10 @@ def phase_cross_correlation(reference_image, moving_image, *,
            :DOI:`10.1109/CVPR.2010.5540032`
 
     """
-    if not(reference_mask is None or moving_mask is None):
-        return masked_register_translation(reference_image,
-                                           moving_image, reference_mask,
-                                           moving_mask, overlap_ratio)
+    if (reference_mask is not None) or (moving_mask is not None):
+        return masked_register_translation(reference_image, moving_image,
+                                           reference_mask, moving_mask,
+                                           overlap_ratio)
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
