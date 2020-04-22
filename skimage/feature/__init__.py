@@ -28,13 +28,13 @@ from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 
 
-@deprecated(alt_func='skimage.registration.masked_register_translation',
+@deprecated(alt_func='skimage.registration.phase_cross_correlation',
             removed_version='0.19')
 def masked_register_translation(src_image, target_image, src_mask,
                                 target_mask=None, overlap_ratio=0.3):
 
     from ..registration._masked_register_translation import (
-        masked_register_translation as _func)
+        phase_cross_correlation as _func)
     return _func(src_image, target_image, reference_mask=src_mask,
                  moving_mask=target_mask, overlap_ratio=overlap_ratio)
 
