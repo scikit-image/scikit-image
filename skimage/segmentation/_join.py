@@ -149,25 +149,19 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
-        out_arr = np.empty_like(input_arr, dtype=output_vals.dtype)
-    out_arr = out_arr.reshape(-1)
+        out= np.empty_like(input_arr, dtype=output_vals.dtype)
+    out = out.reshape(-1)
 
-    _map_array(input_arr, out_arr, input_vals, output_vals)
-    return out_arr.reshape(orig_shape)
-
+    _map_array(input_arr, out, input_vals, output_vals)
+    return out.reshape(orig_shape)
 
 
 class ArrayMap:
-
     def __init__(self, inval, outval):
         self.inval = inval
         self.outval = outval
 
-    def inverse -> returns ArrayMap 
-        check bijunctive
-
     def __getitem__(self, arr):
-        output = np.empty(arr.shape, self.outval.dtype)
-        map_array(arr, output, self.inval, self.outval)
-        return output
+        return map_array(arr, self.inval, self.outval)
+
         
