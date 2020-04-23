@@ -1,5 +1,6 @@
 import numpy as np
 from .._shared.utils import deprecated
+from ._remap import _map_array
 
 
 def join_segmentations(s1, s2):
@@ -117,25 +118,56 @@ def relabel_sequential(label_field, offset=1):
     array([5, 5, 6, 6, 7, 9, 8])
     """
     offset = int(offset)
-    if offset <= 0:
-        raise ValueError("Offset must be strictly positive.")
-    if np.min(label_field) < 0:
-        raise ValueError("Cannot relabel array that contains negative values.")
-    max_label = int(label_field.max()) # Ensure max_label is an integer
-    if not np.issubdtype(label_field.dtype, np.integer):
-        new_type = np.min_scalar_type(max_label)
-        label_field = label_field.astype(new_type)
-    labels = np.unique(label_field)
-    labels0 = labels[labels != 0]
-    new_max_label = offset - 1 + len(labels0)
-    new_labels0 = np.arange(offset, new_max_label + 1)
-    output_type = label_field.dtype
-    required_type = np.min_scalar_type(new_max_label)
-    if np.dtype(required_type).itemsize > np.dtype(label_field.dtype).itemsize:
-        output_type = required_type
-    forward_map = np.zeros(max_label + 1, dtype=output_type)
-    forward_map[labels0] = new_labels0
-    inverse_map = np.zeros(new_max_label + 1, dtype=output_type)
-    inverse_map[offset:] = labels0
-    relabeled = forward_map[label_field]
-    return relabeled, forward_map, inverse_map
+    # current version can return signed (if it fits in input dtype and that one is signed)
+    # but will return unsigned if a dtype change is necessary
+    in_vals = np.unique(label_field)
+    out_vals = np.arange(offset, offset+len(in_vals))
+    input_type = label_field.dtype
+    required_type = np.min_scalar_type(out_vals[-1]) # what happens to signed/unsigned ?
+    output_type = (input_type if input_type.itemsize > required_type.itemsize
+                   else required_type)
+    out_array = np.empty(label_field.shape, dtype=output_type)
+    map_array(label_field, in_vals, out_vals, out=out_array)
+    fw_map = ArrayMap(in_vals, out_vals)
+    inv_map = ArrayMap(out_vals, in_vals)
+    return out_array, fw_map, inv_map
+
+
+def map_array(input_arr, input_vals, output_vals, out=None):
+    """
+    input_arr: input array (np.ndarray)
+    input_vals: 1d array of input values (integer)
+    output_vals: 1d array of output values
+    out: the output array. Created if not provided
+    """
+
+    # We want to reshape to 1D to make the numba loop as simple
+    # as possible
+    orig_shape = input_arr.shape
+    # numpy doc for ravel says 
+    # "When a view is desired in as many cases as possible, 
+    # arr.reshape(-1) may be preferable."
+    input_arr = input_arr.reshape(-1)
+    if out is None:
+        out_arr = np.empty_like(input_arr, dtype=output_vals.dtype)
+    out_arr = out_arr.reshape(-1)
+
+    _map_array(input_arr, out_arr, input_vals, output_vals)
+    return out_arr.reshape(orig_shape)
+
+
+
+class ArrayMap:
+
+    def __init__(self, inval, outval):
+        self.inval = inval
+        self.outval = outval
+
+    def inverse -> returns ArrayMap 
+        check bijunctive
+
+    def __getitem__(self, arr):
+        output = np.empty(arr.shape, self.outval.dtype)
+        map_array(arr, output, self.inval, self.outval)
+        return output
+        
