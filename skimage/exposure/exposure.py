@@ -341,6 +341,12 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         Image array after rescaling its intensity. This image is the same dtype
         as the input image.
 
+    Notes
+    -----
+    .. versionchanged:: 0.17
+        The dtype of the output array has changed to match the output dtype, or
+        float if the output range is specified by a pair of floats.
+
     See Also
     --------
     equalize_hist

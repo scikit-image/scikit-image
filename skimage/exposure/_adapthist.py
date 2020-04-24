@@ -65,6 +65,10 @@ def equalize_adapthist(image, kernel_size=None,
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
 
+    .. versionchanged:: 0.17
+        The values returned by this function are slightly shifted upwards
+        because of an internal change in rounding behavior.
+
     References
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/
