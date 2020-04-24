@@ -87,7 +87,7 @@ def test_relabel_sequential_offset5_with0():
 
 
 def test_relabel_sequential_dtype():
-    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=float)
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.uint8)
     ar_relab, fw, inv = relabel_sequential(ar, offset=5)
     _check_maps(ar.astype(int), ar_relab, fw, inv)
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
