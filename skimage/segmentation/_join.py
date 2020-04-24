@@ -123,7 +123,13 @@ def relabel_sequential(label_field, offset=1):
         raise ValueError("Cannot relabel array that contains negative values.")
     offset = int(offset)
     in_vals = np.unique(label_field)
-    out_vals = np.arange(offset, offset+len(in_vals))
+    if in_vals[0] == 0:
+        # always map 0 to 0
+        out_vals = np.concatenate(
+            [[0], np.arange(offset, offset+len(in_vals)-1)]
+        )
+    else:
+        out_vals = np.arange(offset, offset+len(in_vals))
     input_type = label_field.dtype
     # current version can return signed (if it fits in input dtype and that one
     # is signed) but will return unsigned if a dtype change is necessary
