@@ -101,13 +101,13 @@ def relabel_sequential(label_field, offset=1):
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
-    >>> fw
+    >>> np.array(fw)
     array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5])
-    >>> inv
+    >>> np.array(inv)
     array([ 0,  1,  5,  8, 42, 99])
     >>> (fw[label_field] == relab).all()
     True
