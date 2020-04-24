@@ -122,12 +122,12 @@ def relabel_sequential(label_field, offset=1):
     if np.min(label_field) < 0:
         raise ValueError("Cannot relabel array that contains negative values.")
     offset = int(offset)
-    # current version can return signed (if it fits in input dtype and that one is signed)
-    # but will return unsigned if a dtype change is necessary
     in_vals = np.unique(label_field)
     out_vals = np.arange(offset, offset+len(in_vals))
     input_type = label_field.dtype
-    required_type = np.min_scalar_type(out_vals[-1]) # what happens to signed/unsigned ?
+    # current version can return signed (if it fits in input dtype and that one
+    # is signed) but will return unsigned if a dtype change is necessary
+    required_type = np.min_scalar_type(out_vals[-1])
     output_type = (input_type if input_type.itemsize > required_type.itemsize
                    else required_type)
     out_array = np.empty(label_field.shape, dtype=output_type)
