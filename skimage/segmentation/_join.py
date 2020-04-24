@@ -183,6 +183,9 @@ class ArrayMap:
             )
         return string
 
+    def __call__(self, arr):
+        return self.__getitem__(arr)
+
     def __getitem__(self, arr):
         return map_array(arr, self.inval, self.outval)
 
