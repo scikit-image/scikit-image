@@ -160,8 +160,29 @@ class ArrayMap:
     def __init__(self, inval, outval):
         self.inval = inval
         self.outval = outval
+        self._max_lines = 4
+
+    def __repr__(self):
+        return f'ArrayMap({repr(self.inval)}, {repr(self.outval)})'
+
+    def __str__(self):
+        if len(self.inval) <= self._max_lines
+            rows = range(len(self.inval))
+            string = '\n'.join(
+                ['ArrayMap:'] +
+                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows]
+            )
+        else:
+            rows0 = list(range(0, self._max_lines // 2))
+            rows1 = list(range(-self.max_lines // 2, None))
+            string = '\n'.join(
+                ['ArrayMap:'] +
+                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows0] +
+                ['  ...'] +
+                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows1]
+            )
+        return string
 
     def __getitem__(self, arr):
         return map_array(arr, self.inval, self.outval)
 
-        
