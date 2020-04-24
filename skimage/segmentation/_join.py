@@ -137,6 +137,7 @@ def relabel_sequential(label_field, offset=1):
     output_type = (input_type if input_type.itemsize > required_type.itemsize
                    else required_type)
     out_array = np.empty(label_field.shape, dtype=output_type)
+    out_vals = out_vals.astype(output_type)
     map_array(label_field, in_vals, out_vals, out=out_array)
     fw_map = ArrayMap(in_vals, out_vals)
     inv_map = ArrayMap(out_vals, in_vals)
@@ -185,6 +186,10 @@ class ArrayMap:
         output = np.zeros(np.max(self.inval) + 1, dtype=dtype)
         output[self.inval] = self.outval
         return output
+
+    @property
+    def dtype(self):
+        return self.outval.dtype
 
     def __repr__(self):
         return f'ArrayMap({repr(self.inval)}, {repr(self.outval)})'
