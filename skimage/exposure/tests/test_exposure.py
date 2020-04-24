@@ -364,7 +364,7 @@ def test_adapthist_grayscale():
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                           clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 100.158, 3)
+    assert_almost_equal(peak_snr(img, adapted), 100.140, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
@@ -448,10 +448,10 @@ def test_adapthist_borders():
         adapted = exposure.equalize_adapthist(img, kernel_size, clip_limit=0.5)
         # Check last columns are processed
         assert norm_brightness_err(adapted[:, border_index],
-                                   img[:, -border_index]) > 0.1
+                                   img[:, border_index]) > 0.1
         # Check last rows are processed
         assert norm_brightness_err(adapted[border_index, :],
-                                   img[-border_index, :]) > 0.1
+                                   img[border_index, :]) > 0.1
 
 
 def test_adapthist_clip_limit():

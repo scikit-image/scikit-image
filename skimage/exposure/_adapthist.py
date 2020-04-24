@@ -93,7 +93,7 @@ def equalize_adapthist(image, kernel_size=None,
 
     kernel_size = [int(k) for k in kernel_size]
 
-    image = _clahe(image, kernel_size, clip_limit * nbins, nbins)
+    image = _clahe(image, kernel_size, clip_limit, nbins)
     image = img_as_float(image)
     return rescale_intensity(image)
 
@@ -127,8 +127,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     # is a multiple of the relevant kernel_size
     pad_end_per_dim = [0] * image.ndim
     for dim in range(image.ndim):
-        while (image.shape[dim] + pad_end_per_dim[dim]) % kernel_size[dim]:
-            pad_end_per_dim[dim] += 1
+        pad_end_per_dim[dim] = (kernel_size[dim] - image.shape[dim] % kernel_size[dim]) % kernel_size[dim]
 
     image = np.pad(image,
                    [[0, pad_end_per_dim[dim]] for dim in range(image.ndim)],
@@ -156,7 +155,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
         sub_img = image[region]
 
         if clip_limit > 0.0:  # Calculate actual clip limit
-            clim = int(clip_limit * sub_img.size / nbins)
+            clim = int(clip_limit * sub_img.size)
             if clim < 1:
                 clim = 1
         else:
