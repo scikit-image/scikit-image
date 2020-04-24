@@ -134,8 +134,14 @@ def relabel_sequential(label_field, offset=1):
 
 
 def map_array(input_arr, input_vals, output_vals, out=None):
-    """
-    input_arr: input array (np.ndarray)
+    """Map values from input array from input_vals to output_vals.
+
+    Parameters
+    ----------
+    input_arr : array of int
+        The input label image.
+    input_vals : array of int
+        The values to map from.
     input_vals: 1d array of input values (integer)
     output_vals: 1d array of output values
     out: the output array. Created if not provided
@@ -166,7 +172,7 @@ class ArrayMap:
         return f'ArrayMap({repr(self.inval)}, {repr(self.outval)})'
 
     def __str__(self):
-        if len(self.inval) <= self._max_lines
+        if len(self.inval) <= self._max_lines:
             rows = range(len(self.inval))
             string = '\n'.join(
                 ['ArrayMap:'] +
