@@ -1,3 +1,4 @@
+import inspect
 import warnings
 import functools
 import sys
@@ -39,27 +40,30 @@ class change_default_value:
     def __init__(self, arg_name, *, old_value, warning_msg=None,
                  changed_version=None):
         self.arg_name = arg_name
-        if warning_msg is None:
-            if changed_version is not None:
-                self.warning_msg = f"Starting from version {changed_version}, "
-            self.warning_msg += (f"Default {arg_name} value changed from "
-                                 f"{old_value} to {{new_value}}. To remove "
-                                 "this warning, please explicitely set "
-                                 f"{arg_name} value.")
-        else:
-            self.warning_msg = warning_msg
+        self.old_value = old_value
+        self.warning_msg = warning_msg
+        self.changed_version = changed_version
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
-        arg_index = list(parameters.keys()).index(self.arg_name)
+        arg_idx = list(parameters.keys()).index(self.arg_name)
         new_value = parameters[self.arg_name].default
+
+        if self.warning_msg is None:
+            self.warning_msg = ""
+            if self.changed_version is not None:
+                self.warning_msg = ("Starting from version "
+                                    f"{self.changed_version}, ")
+            self.warning_msg += (f"Default {self.arg_name} value changed from "
+                                 f"{self.old_value} to {new_value}. To remove "
+                                 "this warning, please explicitely set "
+                                 f"{self.arg_name} value.")
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
-                warnings.warn(self.warning_msg.format(new_value),
-                              FutureWarning, stacklevel=2)
+                warnings.warn(self.warning_msg, FutureWarning, stacklevel=2)
 
             return func(*args, **kwargs)
         return fixed_func

@@ -3,9 +3,57 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
-                                   _validate_interpolation_order)
+                                   _validate_interpolation_order,
+                                   change_default_value)
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+
+
+def test_change_default_value():
+
+    @change_default_value('arg1', old_value=-1)
+    def foo(arg0, arg1=0, arg2=1):
+        """Expected docstring"""
+        return arg0, arg1, arg2
+
+    @change_default_value('arg1', old_value=-1,
+                          warning_msg="Custom warning message")
+    def bar(arg0, arg1=0, arg2=1):
+        """Expected docstring"""
+        return arg0, arg1, arg2
+
+    @change_default_value('arg1', old_value=-1, changed_version='0.12')
+    def baz(arg0, arg1=0, arg2=1):
+        """Expected docstring"""
+        return arg0, arg1, arg2
+
+    # Assert warning messages
+    with pytest.warns(FutureWarning) as record:
+        assert foo(0) == (0, 0, 1)
+        assert bar(0) == (0, 0, 1)
+        assert baz(0) == (0, 0, 1)
+
+    expected_msg = (f"Default arg1 value changed from -1 to 0. To remove this "
+                    "warning, please explicitely set arg1 value.")
+    assert str(record[0].message) == expected_msg
+    assert str(record[1].message) == "Custom warning message"
+    assert str(record[2].message) == ("Starting from version 0.12, "
+                                      + expected_msg)
+
+    # Assert that nothing happens if arg1 is set
+    with pytest.warns(None) as record:
+        # No kwargs
+        assert foo(0, 2) == (0, 2, 1)
+        assert foo(0, arg1=0) == (0, 0, 1)
+
+        # Function name and doc is preserved
+        assert foo.__name__ == 'foo'
+        if sys.flags.optimize < 2:
+            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
+            assert foo.__doc__ == 'Expected docstring'
+
+    # Assert no warning was raised
+    assert not record.list
 
 
 def test_deprecated_kwarg():
