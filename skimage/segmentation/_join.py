@@ -117,6 +117,10 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
     """
+    if offset <= 0:
+        raise ValueError("Offset must be strictly positive.")
+    if np.min(label_field) < 0:
+        raise ValueError("Cannot relabel array that contains negative values.")
     offset = int(offset)
     # current version can return signed (if it fits in input dtype and that one is signed)
     # but will return unsigned if a dtype change is necessary
