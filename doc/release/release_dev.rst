@@ -39,7 +39,10 @@ API Changes
   ``mask=np.ones(image.shape, dtype=bool)`` (#4347)
 - When ``out_range`` is a range of numbers and not a dtype in
   :func:`skimage.exposure.rescale_intensity`, the output data type will always
-  be float.
+  be float (#4585)
+- The values returned by :func:`skimage.exposure.equalize_adapthist` will be
+  slightly different from previous versions due to different rounding behavior
+  (#4585)
 
 
 Bugfixes
