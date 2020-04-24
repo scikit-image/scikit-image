@@ -1,4 +1,5 @@
 import itertools
+import pytest
 
 import numpy as np
 from skimage.color.colorlabel import label2rgb
@@ -6,6 +7,24 @@ from skimage.color.colorlabel import label2rgb
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal,
                                      assert_array_equal, assert_warns)
+
+
+def test_deprecation_warning():
+
+    image = np.ones((3, 3))
+    label = np.ones((3, 3))
+
+    with pytest.warns(FutureWarning) as record:
+        label2rgb(image, label)
+
+    expected_msg = ("New recommanded value for bg_label is 0. "
+                    "Until version 0.19, default bg_label "
+                    "value is -1. Starting from version "
+                    "0.19, bg_label default value will be "
+                    "set to 0. To avoid this warning, please "
+                    "explicitely set bg_label value.")
+
+    assert str(record[0].message) == expected_msg
 
 
 def test_shape_mismatch():
