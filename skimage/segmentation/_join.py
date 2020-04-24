@@ -188,9 +188,47 @@ def map_array(input_arr, input_vals, output_vals, out=None):
 
 
 class ArrayMap:
-    def __init__(self, inval, outval):
-        self.inval = inval
-        self.outval = outval
+    """Class designed to mimic mapping by NumPy array indexing.
+
+    This class is designed to replicate the use of NumPy arrays for mapping
+    values with indexing:
+
+    >>> values = np.array([0.25, 0.5, 1.0])
+    >>> indices = np.array([[0, 0, 1], [2, 2, 1]])
+    >>> values[indices]
+    array([[0.25, 0.25, 0.5 ],
+           [1.  , 1.  , 0.5 ]])
+
+    The issue with this indexing is that you need a very large ``values``
+    array if the values in the ``indices`` array are large.
+
+    >>> values = np.array([0.25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0])
+    >>> indices = np.array([[0, 0, 10], [0, 10, 10]]
+    >>> values[indices]
+    array([[0.25, 0.25, 1.  ],
+           [0.25, 1.  , 1.  ]])
+
+    Using this class, the approach is similar, but there is no need to
+    create a large values array:
+
+    >>> in_indices = np.array([0, 10])
+    >>> out_values = np.array([0.25, 1.0])
+    >>> values = ArrayMap(in_indices, out_values)
+    >>> indices = np.array([[0, 0, 10], [0, 10, 10]])
+    >>> values[indices]
+    array([[0.25, 0.25, 1.  ],
+           [0.25, 1.  , 1.  ]])
+
+    Parameters
+    ----------
+    in_values : array of int, shape (N,)
+        The source values from which to map.
+    out_values : array, shape (N,)
+        The destination values from which to map.
+    """
+    def __init__(self, in_values, out_values):
+        self.inval = in_values
+        self.outval = out_values
         self._max_lines = 4
 
     def __array__(self, dtype=None):
