@@ -391,17 +391,16 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     >>> rescale_intensity(image, out_range=(0, 127))
     array([  0. ,  63.5, 127. ])
 
-    If the input image is constant, the output will be clipped directly to the
-    output range:
-    >>> image = np.array([130, 130, 130], dtype=np.int8)
-    >>> rescale_intensity(image, out_range=(0, 127))
-    array([ 127, 127, 127], dtype=int8)
-
     To get the desired range with a specific dtype, use ``.astype()``:
 
     >>> rescale_intensity(image, out_range=(0, 127)).astype(np.int8)
     array([  0,  63, 127], dtype=int8)
 
+    If the input image is constant, the output will be clipped directly to the
+    output range:
+    >>> image = np.array([130, 130, 130], dtype=np.int32)
+    >>> rescale_intensity(image, out_range=(0, 127)).astype(np.int32)
+    array([127, 127, 127], dtype=int32)
     """
     if out_range in ['dtype', 'image']:
         out_dtype = _output_dtype(image.dtype.type)
