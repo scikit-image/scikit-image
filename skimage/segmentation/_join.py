@@ -149,25 +149,39 @@ def map_array(input_arr, input_vals, output_vals, out=None):
 
     Parameters
     ----------
-    input_arr : array of int
+    input_arr : array of int, shape (M[, N][, P][, ...])
         The input label image.
-    input_vals : array of int
+    input_vals : array of int, shape (N,)
         The values to map from.
-    input_vals: 1d array of input values (integer)
-    output_vals: 1d array of output values
-    out: the output array. Created if not provided
+    output_vals : array, shape (N,)
+        The values to map to.
+    out: array, same shape as `input_arr`
+        The output array. Will be created if not provided. It should
+        have the same dtype as `output_vals`.
+
+    Returns
+    -------
+    out : array, same shape as `input_arr`
+        The array of mapped values.
     """
 
-    # We want to reshape to 1D to make the numba loop as simple
-    # as possible
+    # We ravel the input array for simplicity of iteration in Cython:
     orig_shape = input_arr.shape
-    # numpy doc for ravel says 
+    # NumPy docs for `np.ravel()` says:
     # "When a view is desired in as many cases as possible, 
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
-        out= np.empty_like(input_arr, dtype=output_vals.dtype)
-    out = out.reshape(-1)
+        out = np.empty_like(input_arr, dtype=output_vals.dtype)
+    else:
+        out_original = out
+        out = out_original.reshape(-1)
+        if out.strides[0] != min(out_original.strides):
+            # reshaping forced a copy
+            raise ValueError(
+                'If out array is provided, it should be either contiguous '
+                'or 1-dimensional.'
+            )
 
     _map_array(input_arr, out, input_vals, output_vals)
     return out.reshape(orig_shape)
