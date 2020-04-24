@@ -19,6 +19,52 @@ class skimage_deprecation(Warning):
     pass
 
 
+class change_default_value:
+    """Decorator for changing the default value of an argument.
+
+    Parameters
+    ----------
+    arg_name: str
+        The name of the argument to be updated.
+    old_value: any
+        The argument old value.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
+    changed_version : str
+        The package version in which the change have been introduced.
+
+    """
+
+    def __init__(self, arg_name, *, old_value, warning_msg=None,
+                 changed_version=None):
+        self.arg_name = arg_name
+        if warning_msg is None:
+            if changed_version is not None:
+                self.warning_msg = f"Starting from version {changed_version}, "
+            self.warning_msg += (f"Default {arg_name} value changed from "
+                                 f"{old_value} to {{new_value}}. To remove "
+                                 "this warning, please explicitely set "
+                                 f"{arg_name} value.")
+        else:
+            self.warning_msg = warning_msg
+
+    def __call__(self, func):
+        parameters = inspect.signature(func).parameters
+        arg_index = list(parameters.keys()).index(self.arg_name)
+        new_value = parameters[self.arg_name].default
+
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
+                # warn that arg_name default value changed:
+                warnings.warn(self.warning_msg.format(new_value),
+                              FutureWarning, stacklevel=2)
+
+            return func(*args, **kwargs)
+        return fixed_func
+
+
 class deprecate_kwarg:
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.
