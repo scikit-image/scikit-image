@@ -134,7 +134,7 @@ def relabel_sequential(label_field, offset=1):
     # current version can return signed (if it fits in input dtype and that one
     # is signed) but will return unsigned if a dtype change is necessary
     required_type = np.min_scalar_type(out_vals[-1])
-    output_type = (input_type if input_type.itemsize > required_type.itemsize
+    output_type = (input_type if input_type.itemsize >= required_type.itemsize
                    else required_type)
     out_array = np.empty(label_field.shape, dtype=output_type)
     out_vals = out_vals.astype(output_type)
@@ -216,5 +216,7 @@ class ArrayMap:
         return self.__getitem__(arr)
 
     def __getitem__(self, arr):
-        return map_array(arr, self.inval, self.outval)
+        return map_array(
+            arr, self.inval.astype(arr.dtype, copy=False), self.outval
+        )
 
