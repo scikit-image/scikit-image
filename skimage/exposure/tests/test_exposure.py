@@ -237,10 +237,16 @@ def test_rescale_in_range_clip():
 
 
 def test_rescale_out_range():
+    """Check that output range is correct.
+
+    .. versionchanged:: 0.17
+        This function used to return dtype matching the input dtype. It now
+        matches the output.
+    """
     image = np.array([-10, 0, 10], dtype=np.int8)
     out = exposure.rescale_intensity(image, out_range=(0, 127))
-    assert out.dtype == np.int8
-    assert_array_almost_equal(out, [0, 63, 127])
+    assert out.dtype == np.float_
+    assert_array_almost_equal(out, [0, 63.5, 127])
 
 
 def test_rescale_named_in_range():
@@ -312,6 +318,40 @@ def test_rescale_nan_warning(in_range, out_range):
         exposure.rescale_intensity(image, in_range, out_range)
 
 
+@pytest.mark.parametrize(
+    "out_range, out_dtype", [
+        ('uint8', np.uint8),
+        ('uint10', np.uint16),
+        ('uint12', np.uint16),
+        ('uint16', np.uint16),
+        ('float', np.float_),
+    ]
+)
+def test_rescale_output_dtype(out_range, out_dtype):
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=out_range)
+    assert output_image.dtype == out_dtype
+
+
+def test_rescale_no_overflow():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=np.uint8)
+    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert output_image.dtype == np.uint8
+
+
+def test_rescale_float_output():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    output_image = exposure.rescale_intensity(image, out_range=(0, 255))
+    testing.assert_array_equal(output_image, [0, 128, 255])
+    assert output_image.dtype == np.float_
+
+
+def test_rescale_raises_on_incorrect_out_range():
+    image = np.array([-128, 0, 127], dtype=np.int8)
+    with testing.raises(ValueError):
+        _ = exposure.rescale_intensity(image, out_range='flat')
+
 # Test adaptive histogram equalization
 # ====================================
 
@@ -324,7 +364,7 @@ def test_adapthist_grayscale():
     adapted = exposure.equalize_adapthist(img, kernel_size=(57, 51),
                                           clip_limit=0.01, nbins=128)
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 102.078, 3)
+    assert_almost_equal(peak_snr(img, adapted), 102.019, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0529, 3)
 
 
