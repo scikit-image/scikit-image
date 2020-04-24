@@ -11,19 +11,14 @@ from skimage._shared._warnings import expected_warnings
 
 def test_change_default_value():
 
-    @change_default_value('arg1', old_value=-1)
+    @change_default_value('arg1', new_value=-1, changed_version='0.12')
     def foo(arg0, arg1=0, arg2=1):
         """Expected docstring"""
         return arg0, arg1, arg2
 
-    @change_default_value('arg1', old_value=-1,
+    @change_default_value('arg1', new_value=-1, changed_version='0.12',
                           warning_msg="Custom warning message")
     def bar(arg0, arg1=0, arg2=1):
-        """Expected docstring"""
-        return arg0, arg1, arg2
-
-    @change_default_value('arg1', old_value=-1, changed_version='0.12')
-    def baz(arg0, arg1=0, arg2=1):
         """Expected docstring"""
         return arg0, arg1, arg2
 
@@ -31,14 +26,16 @@ def test_change_default_value():
     with pytest.warns(FutureWarning) as record:
         assert foo(0) == (0, 0, 1)
         assert bar(0) == (0, 0, 1)
-        assert baz(0) == (0, 0, 1)
 
-    expected_msg = (f"Default arg1 value changed from -1 to 0. To remove this "
-                    "warning, please explicitely set arg1 value.")
+    expected_msg = ("New recommanded value for arg1 is -1. "
+                    "Until version 0.12, default arg1 "
+                    "value is 0. Starting from version "
+                    "0.12, arg1 default value will be "
+                    "set to -1. To avoid this warning, please "
+                    "explicitely set arg1 value.")
+
     assert str(record[0].message) == expected_msg
     assert str(record[1].message) == "Custom warning message"
-    assert str(record[2].message) == ("Starting from version 0.12, "
-                                      + expected_msg)
 
     # Assert that nothing happens if arg1 is set
     with pytest.warns(None) as record:

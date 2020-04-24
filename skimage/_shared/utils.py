@@ -37,35 +37,34 @@ class change_default_value:
 
     """
 
-    def __init__(self, arg_name, *, old_value, warning_msg=None,
-                 changed_version=None):
+    def __init__(self, arg_name, *, new_value, changed_version,
+                 warning_msg=None):
         self.arg_name = arg_name
-        self.old_value = old_value
+        self.new_value = new_value
         self.warning_msg = warning_msg
         self.changed_version = changed_version
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
         arg_idx = list(parameters.keys()).index(self.arg_name)
-        new_value = parameters[self.arg_name].default
+        old_value = parameters[self.arg_name].default
 
         if self.warning_msg is None:
-            self.warning_msg = ""
-            if self.changed_version is not None:
-                self.warning_msg = ("Starting from version "
-                                    f"{self.changed_version}, ")
-            self.warning_msg += (f"Default {self.arg_name} value changed from "
-                                 f"{self.old_value} to {new_value}. To remove "
-                                 "this warning, please explicitely set "
-                                 f"{self.arg_name} value.")
+            self.warning_msg = (
+                f"New recommanded value for {self.arg_name} is "
+                f"{self.new_value}. Until version {self.changed_version}, "
+                f"default {self.arg_name} value is {old_value}. Starting "
+                f"from version {self.changed_version}, {self.arg_name} "
+                f"default value will be set to {self.new_value}. To avoid "
+                f"this warning, please explicitely set {self.arg_name} value.")
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
                 warnings.warn(self.warning_msg, FutureWarning, stacklevel=2)
-
             return func(*args, **kwargs)
+
         return fixed_func
 
 
