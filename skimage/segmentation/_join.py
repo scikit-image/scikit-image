@@ -168,6 +168,14 @@ class ArrayMap:
         self.outval = outval
         self._max_lines = 4
 
+    def __array__(self, dtype=None):
+        """Return an array that behaves like the arraymap when indexed."""
+        if dtype is None:
+            dtype = self.outval.dtype
+        output = np.zeros(np.max(self.inval) + 1, dtype=dtype)
+        output[self.inval] = self.outval
+        return output
+
     def __repr__(self):
         return f'ArrayMap({repr(self.inval)}, {repr(self.outval)})'
 
