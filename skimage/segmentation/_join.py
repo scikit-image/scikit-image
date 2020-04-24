@@ -227,40 +227,42 @@ class ArrayMap:
         The destination values from which to map.
     """
     def __init__(self, in_values, out_values):
-        self.inval = in_values
-        self.outval = out_values
+        self.in_values = in_values
+        self.out_values = out_values
         self._max_lines = 4
 
     def __array__(self, dtype=None):
         """Return an array that behaves like the arraymap when indexed."""
         if dtype is None:
-            dtype = self.outval.dtype
-        output = np.zeros(np.max(self.inval) + 1, dtype=dtype)
-        output[self.inval] = self.outval
+            dtype = self.out_values.dtype
+        output = np.zeros(np.max(self.in_values) + 1, dtype=dtype)
+        output[self.in_values] = self.out_values
         return output
 
     @property
     def dtype(self):
-        return self.outval.dtype
+        return self.out_values.dtype
 
     def __repr__(self):
-        return f'ArrayMap({repr(self.inval)}, {repr(self.outval)})'
+        return f'ArrayMap({repr(self.in_values)}, {repr(self.out_values)})'
 
     def __str__(self):
-        if len(self.inval) <= self._max_lines:
-            rows = range(len(self.inval))
+        if len(self.in_values) <= self._max_lines:
+            rows = range(len(self.in_values))
             string = '\n'.join(
                 ['ArrayMap:'] +
-                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows]
+                [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows]
             )
         else:
             rows0 = list(range(0, self._max_lines // 2))
             rows1 = list(range(-self.max_lines // 2, None))
             string = '\n'.join(
                 ['ArrayMap:'] +
-                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows0] +
+                [f'  {self.in_values[i]} → {self.out_values[i]}'
+                 for i in rows0] +
                 ['  ...'] +
-                [f'  {self.inval[i]} → {self.outval[i]}' for i in rows1]
+                [f'  {self.in_values[i]} → {self.out_values[i]}'
+                 for i in rows1]
             )
         return string
 
@@ -269,6 +271,6 @@ class ArrayMap:
 
     def __getitem__(self, arr):
         return map_array(
-            arr, self.inval.astype(arr.dtype, copy=False), self.outval
+            arr, self.in_values.astype(arr.dtype, copy=False), self.out_values
         )
 
