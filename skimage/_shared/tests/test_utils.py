@@ -32,7 +32,7 @@ def test_change_default_value():
                     "value is 0. Starting from version "
                     "0.12, arg1 default value will be "
                     "set to -1. To avoid this warning, please "
-                    "explicitely set arg1 value.")
+                    "explicitly set arg1 value.")
 
     assert str(record[0].message) == expected_msg
     assert str(record[1].message) == "Custom warning message"

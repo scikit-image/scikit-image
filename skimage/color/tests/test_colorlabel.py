@@ -22,7 +22,7 @@ def test_deprecation_warning():
                     "value is -1. Starting from version "
                     "0.19, bg_label default value will be "
                     "set to 0. To avoid this warning, please "
-                    "explicitely set bg_label value.")
+                    "explicitly set bg_label value.")
 
     assert str(record[0].message) == expected_msg
 
