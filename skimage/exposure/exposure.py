@@ -411,7 +411,6 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     omin, omax = map(float, intensity_range(image, out_range,
                                             clip_negative=(imin >= 0)))
 
-    # Fast test for multiple values, operations with at least 1 NaN return NaN
     if np.any(np.isnan([imin, imax, omin, omax])):
         warn(
             "One or more intensity levels are NaN. Rescaling will broadcast "
