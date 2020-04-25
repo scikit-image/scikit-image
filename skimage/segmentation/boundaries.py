@@ -12,8 +12,8 @@ def _find_boundaries_subpixel(label_img):
     Notes
     -----
     This function puts in an empty row and column between each *actual*
-    row and column of the image, for a corresponding shape of $2s - 1$
-    for every image dimension of size $s$. These "interstitial" rows
+    row and column of the image, for a corresponding shape of ``2s - 1``
+    for every image dimension of size ``s``. These "interstitial" rows
     and columns are filled as ``True`` if they separate two labels in
     `label_img`, ``False`` otherwise.
 
