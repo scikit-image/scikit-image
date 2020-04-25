@@ -161,7 +161,10 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
-    'thumbnail_size': (280, 196),  # Default CSS does 0.4 scaling (160, 112)
+    # Default thumbnail size (400, 280)
+    # Default CSS rescales (160, 112)
+    # Size is decreased to reduce webpage loading time
+    'thumbnail_size': (280, 196),
     'subsection_order': ExplicitOrder([
         '../examples/data',
         '../examples/numpy_operations',
