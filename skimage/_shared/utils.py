@@ -56,7 +56,7 @@ class change_default_value:
                 f"default {self.arg_name} value is {old_value}. Starting "
                 f"from version {self.changed_version}, {self.arg_name} "
                 f"default value will be set to {self.new_value}. To avoid "
-                f"this warning, please explicitely set {self.arg_name} value.")
+                f"this warning, please explicitly set {self.arg_name} value.")
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
