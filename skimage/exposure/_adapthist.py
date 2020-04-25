@@ -127,7 +127,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     # is a multiple of the relevant kernel_size
     pad_end_per_dim = [0] * image.ndim
     for dim in range(image.ndim):
-        pad_end_per_dim[dim] = (kernel_size[dim] - image.shape[dim] % kernel_size[dim]) % kernel_size[dim]
+        pad_end_per_dim[dim] = (kernel_size[dim] - image.shape[dim]
+                                % kernel_size[dim]) % kernel_size[dim]
 
     image = np.pad(image,
                    [[0, pad_end_per_dim[dim]] for dim in range(image.ndim)],
