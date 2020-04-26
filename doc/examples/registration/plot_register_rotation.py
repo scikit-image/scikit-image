@@ -128,8 +128,8 @@ rts_image = rescaled[:sizer, :sizec]
 radius = 705
 warped_image = warp_polar(image, radius=radius, scaling="log")
 warped_rts = warp_polar(rts_image, radius=radius, scaling="log")
-tparams = register_translation(warped_image, warped_rts, upsample_factor=20)
-shifts = tparams[0]
+shifts, error, phasediff = phase_cross_correlation(warped_image, warped_rts,
+                                                   upsample_factor=20)
 shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
@@ -176,11 +176,11 @@ warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
 
 warped_image_fs = warped_image_fs[:shape[0] // 2, :]  # only use half of FFT
 warped_rts_fs = warped_rts_fs[:shape[0] // 2, :]
-tparams = register_translation(warped_image_fs, warped_rts_fs,
-                               upsample_factor=10)
+shifts, error, phasediff = phase_cross_correlation(warped_image_fs,
+                                                   warped_rts_fs,
+                                                   upsample_factor=10)
 
 # Use translation parameters to calculate rotation and scaling parameters
-shifts = tparams[0]
 shiftr, shiftc = shifts[:2]
 recovered_angle = (360 / shape[0]) * shiftr
 klog = shape[1] / np.log(radius)
