@@ -1,22 +1,40 @@
 r"""
-===================================
-Polar and Log-Polar Transformations
-===================================
+==========================================================
+Using Polar and Log-Polar Transformations for Registration
+==========================================================
 
-Rotation differences between two images can be converted to translation
-differences along the angular coordinate (:math:`\theta`) axis of the
-polar-transformed images. Scaling differences can be converted to translation
-differences along the radial coordinate (:math:`\rho`) axis if it
-is first log transformed (i.e., :math:`\rho = \ln\sqrt{x^2 + y^2}`). Thus,
-in this example, we use phase correlation
-(``registration.phase_cross_correlation``)
-to recover rotation and scaling differences between two images that share a
-center point.
+Phase correlation (``registration.phase_cross_correlation``) is an efficient
+method for determining translation offset between pairs of similar images.
+However this approach relies on a near absense of rotation/scaling differences
+between the images, which are typical in real-world examples.
+
+To recover rotation and scaling differences between two images, we can take
+advantage of the geometric properties of the log-polar transform and the
+translation invariance of the frequency domain. Namely:
+
+- Rotation in Cartesian space becomes translation along the angular
+coordinate (:math:`\theta`) axis of log-polar space.
+
+- Scaling in Cartesian space becomes translation along the radial coordinate
+(:math:`\rho = \ln\sqrt{x^2 + y^2}`) of log-polar space.
+
+- Differences in translation in the spatial domain do not impact magnitude
+spectrum in the frequency domain.
+
+In this series of examples, we build on these concepts to show how the
+log-polar transform ``transform.warp_polar`` can be used in conjunction with
+phase correlation to recover rotation and scaling differences between two
+images that also have a translation offset.
 """
 
 ######################################################################
 # Recover rotation difference with a polar transform
 # ==================================================
+#
+# In this first example, we consider the simple case of two images that only
+# differ with respect to rotation around a common center point. By remapping
+# these images into polar space, the rotation difference becomes a simple
+# translation difference that can be recovered by phase correlation.
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,6 +73,11 @@ print("Recovered value for counterclockwise rotation: "
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
 # =================================================================
+#
+# In this second example, the images differ by both rotation and scaling (note
+# the axis tick values). By remapping these images into log-polar space, we
+# we can recover rotation as before, and now also scaling, by phase
+# correlation.
 
 # radius must be large enough to capture useful info in larger image
 radius = 1500
@@ -107,6 +130,13 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # for rotation and scaling, then solve for translation. It is possible to
 # resolve rotation and scaling differences for translated images by working on
 # the magnitude spectra of the Fourier-transformed images.
+#
+# In this next example, we first show how the above approaches fail when two
+# images differ by rotation, scaling, and translation. We next show how
+# rotation and scaling differences, but not translation differences, are
+# apparent in the frequency magnitude spectra of the images. These differences
+# can be recovered by treating the magnitude spectra as images themselves, and
+# appplying the same log-polar + phase correlation approach taken above.
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
