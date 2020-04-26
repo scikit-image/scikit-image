@@ -9,17 +9,13 @@ However this approach relies on a near absense of rotation/scaling differences
 between the images, which are typical in real-world examples.
 
 To recover rotation and scaling differences between two images, we can take
-advantage of the geometric properties of the log-polar transform and the
-translation invariance of the frequency domain. Namely:
-
-- Rotation in Cartesian space becomes translation along the angular
-coordinate (:math:`\theta`) axis of log-polar space.
-
-- Scaling in Cartesian space becomes translation along the radial coordinate
-(:math:`\rho = \ln\sqrt{x^2 + y^2}`) of log-polar space.
-
-- Differences in translation in the spatial domain do not impact magnitude
-spectrum in the frequency domain.
+advantage of two geometric properties of the log-polar transform and the
+translation invariance of the frequency domain. First, rotation in Cartesian
+space becomes translation along the angular coordinate (:math:`\theta`) axis
+of log-polar space. Second, scaling in Cartesian space becomes translation
+along the radial coordinate (:math:`\rho = \ln\sqrt{x^2 + y^2}`) of log-polar
+space. Finally, differences in translation in the spatial domain do not impact
+magnitude spectrum in the frequency domain.
 
 In this series of examples, we build on these concepts to show how the
 log-polar transform ``transform.warp_polar`` can be used in conjunction with
