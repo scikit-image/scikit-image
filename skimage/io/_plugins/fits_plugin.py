@@ -8,7 +8,7 @@ try:
 except ImportError:
     raise ImportError(
         "Astropy could not be found. It is needed to read FITS files.\n"
-        "Please refer to http://www.astropy.org for installation\n"
+        "Please refer to https://www.astropy.org for installation\n"
         "instructions.")
 
 

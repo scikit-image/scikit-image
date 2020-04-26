@@ -7,7 +7,7 @@ import numpy as np
 from warnings import warn
 
 cimport numpy as cnp
-
+cnp.import_array()
 
 DTYPE = np.intp
 cdef DTYPE_t BG_NODE_NULL = -999

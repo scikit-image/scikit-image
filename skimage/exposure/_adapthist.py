@@ -51,7 +51,7 @@ def equalize_adapthist(image, kernel_size=None,
     Returns
     -------
     out : (M, N[, C]) ndarray
-        Equalized image.
+        Equalized image with float64 dtype.
 
     See Also
     --------
@@ -65,13 +65,23 @@ def equalize_adapthist(image, kernel_size=None,
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
 
+    .. versionchanged:: 0.17
+        The values returned by this function are slightly shifted upwards
+        because of an internal change in rounding behavior.
+
     References
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
+
+    if clip_limit == 1.0:
+        return img_as_float(image)  # convert to float for consistency
+
     image = img_as_uint(image)
-    image = rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
+    image = np.round(
+        rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
+    ).astype(np.uint16)
 
     if kernel_size is None:
         kernel_size = (image.shape[0] // 8, image.shape[1] // 8)
@@ -82,7 +92,7 @@ def equalize_adapthist(image, kernel_size=None,
 
     kernel_size = [int(k) for k in kernel_size]
 
-    image = _clahe(image, kernel_size, clip_limit * nbins, nbins)
+    image = _clahe(image, kernel_size, clip_limit, nbins)
     image = img_as_float(image)
     return rescale_intensity(image)
 
@@ -112,12 +122,6 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     minimum and maximum value as the input image. A clip limit smaller than 1
     results in standard (non-contrast limited) AHE.
     """
-
-    if clip_limit == 1.0:
-        return image  # is OK, immediately returns original image.
-
-    clip_limit /= nbins
-
     row_step = int(image.shape[0] // np.ceil(image.shape[0] / kernel_size[0]))
     col_step = int(image.shape[1] // np.ceil(image.shape[1] / kernel_size[1]))
 

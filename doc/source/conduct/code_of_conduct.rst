@@ -163,7 +163,7 @@ Endnotes
 We are thankful to the groups behind the following documents, from which we
 drew content and inspiration:
 
-- `The SciPy project <https://scipy.org>`__
+- `The SciPy project <https://www.scipy.org/>`__
 - `The Apache Foundation Code of Conduct <https://www.apache.org/foundation/policies/conduct.html>`__
 - `The Contributor Covenant <https://www.contributor-covenant.org/version/1/4/code-of-conduct/>`__
 - `Jupyter Code of Conduct <https://github.com/jupyter/governance/tree/master/conduct>`__

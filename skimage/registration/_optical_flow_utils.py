@@ -5,7 +5,7 @@
 
 import numpy as np
 from skimage.transform import pyramid_reduce
-from skimage.util.dtype import convert
+from skimage.util.dtype import _convert
 from scipy import ndimage as ndi
 
 
@@ -110,9 +110,9 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
         raise ValueError("Only floating point data type are valid"
                          " for optical flow")
 
-    pyramid = list(zip(get_pyramid(convert(I0, dtype),
+    pyramid = list(zip(get_pyramid(_convert(I0, dtype),
                                    downscale, nlevel, min_size),
-                       get_pyramid(convert(I1, dtype),
+                       get_pyramid(_convert(I1, dtype),
                                    downscale, nlevel, min_size)))
 
     # Initialization to 0 at coarsest level.

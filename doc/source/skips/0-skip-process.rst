@@ -275,22 +275,22 @@ References and Footnotes
    `GitHub <https://github.com/scikit-image/scikit-image/tree/master/doc/source/skips>`_.
 
 .. [2] The URL for viewing SKIPs on the web is
-   https://scikit-image.org/skips/index.html
+   https://scikit-image.org/docs/stable/skips/
 
 .. _repo: https://github.com/scikit-image/scikit-image
 
-.. _mailing list: https://mail.python.org/mailman/listinfo/scikit-image
+.. _mailing list: https://mail.python.org/mailman3/lists/scikit-image.python.org/
 
 .. _issue tracker: https://github.com/scikit-image/scikit-image/issues
 
 .. _scikit-image Steering Council:
-   https://scikit-image.org/skips/1-governance.html
+   https://scikit-image.org/docs/stable/skips/1-governance.html
 
 .. _`GitHub pull request`: https://github.com/scikit-image/scikit-image/pulls
 
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 
-.. _reStructuredTextPrimer: http://www.sphinx-doc.org/en/stable/rest.html
+.. _reStructuredTextPrimer: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 
 .. _Sphinx: http://www.sphinx-doc.org/en/stable/
 

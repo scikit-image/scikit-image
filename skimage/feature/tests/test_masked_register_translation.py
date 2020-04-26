@@ -1,30 +1,26 @@
 import numpy as np
-from pathlib import Path
 from scipy.ndimage import fourier_shift
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal
+from skimage._shared.testing import assert_equal, fetch
 from skimage.data import camera
-from skimage.feature.register_translation import register_translation
+from skimage.registration._phase_cross_correlation import phase_cross_correlation
 from skimage.feature.masked_register_translation import (
     masked_register_translation, cross_correlate_masked)
 from skimage.io import imread
 from skimage._shared.fft import fftmodule as fft
 
-# Location of test images
-# These images are taken from Dirk Padfields' MATLAB package
-# available on his website: www.dirkpadfield.com
-IMAGES_DIR = Path(__file__).parent / 'data'
 
-def test_masked_registration_vs_register_translation():
+
+def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as
-    register_translation in the case of trivial masks."""
+    phase_cross_correlation in the case of trivial masks."""
     reference_image = camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(
         fft.fft2(reference_image), shift)))
     trivial_mask = np.ones_like(reference_image)
 
-    nonmasked_result, *_ = register_translation(reference_image, shifted)
+    nonmasked_result, *_ = phase_cross_correlation(reference_image, shifted)
     masked_result = masked_register_translation(
         reference_image, shifted, trivial_mask, overlap_ratio=1 / 10)
 
@@ -93,9 +89,11 @@ def test_masked_registration_padfield_data():
     for xi, yi in shifts:
 
         fixed_image = imread(
-            IMAGES_DIR / 'OriginalX{:d}Y{:d}.png'.format(xi, yi))
+            fetch('feature/tests/data/OriginalX{:d}Y{:d}.png'
+                  ''.format(xi, yi)))
         moving_image = imread(
-            IMAGES_DIR / 'TransformedX{:d}Y{:d}.png'.format(xi, yi))
+            fetch('feature/tests/data/TransformedX{:d}Y{:d}.png'
+                  ''.format(xi, yi)))
 
         # Valid pixels are 1
         fixed_mask = (fixed_image != 0)
@@ -106,11 +104,12 @@ def test_masked_registration_padfield_data():
                                                        moving_image,
                                                        fixed_mask,
                                                        moving_mask,
-                                                       overlap_ratio = 1/10)
+                                                       overlap_ratio=0.1)
         # Note: by looking at the test code from Padfield's
         # MaskedFFTRegistrationCode repository, the
         # shifts were not xi and yi, but xi and -yi
         assert_equal((shift_x, shift_y), (-xi, yi))
+
 
 def test_cross_correlate_masked_output_shape():
     """Masked normalized cross-correlation should return a shape
@@ -233,14 +232,13 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     np.random.seed(23)
 
     arr1 = camera()
-    arr2 = camera()
 
     # Random masks with 75% of pixels being valid
     m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
-    m2 = np.random.choice([True, False], arr2.shape, p=[3 / 4, 1 / 4])
+    m2 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])
 
-    xcorr = cross_correlate_masked(arr1, arr1, m1, m1, axes=(0, 1),
-                 mode='same', overlap_ratio=0).real
+    xcorr = cross_correlate_masked(arr1, arr1, m1, m2, axes=(0, 1),
+                                   mode='same', overlap_ratio=0).real
     max_index = np.unravel_index(np.argmax(xcorr), xcorr.shape)
 
     # Autocorrelation should have maximum in center of array

@@ -101,11 +101,14 @@ def _init_level_set(init_level_set, image_shape):
     if isinstance(init_level_set, str):
         if init_level_set == 'checkerboard':
             res = checkerboard_level_set(image_shape)
+        # TODO: remove me in 0.19.0
         elif init_level_set == 'circle':
             res = circle_level_set(image_shape)
+        elif init_level_set == 'disk':
+            res = disk_level_set(image_shape)
         else:
             raise ValueError("`init_level_set` not in "
-                             "['checkerboard', 'circle']")
+                             "['checkerboard', 'circle', 'disk']")
     else:
         res = init_level_set
     return res
