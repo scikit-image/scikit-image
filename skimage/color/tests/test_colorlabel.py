@@ -169,3 +169,22 @@ def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
     image = np.full((10, 10), -1, dtype='float64')
     assert_warns(UserWarning, label2rgb, labels, image)
+
+
+def test_auto_generating_colors():
+    # expected number of unique colors in the image (must be more than
+    # the number of DEFAULT colors)
+    exp_colors = 15
+
+    # image and label field
+    image = np.ones((1, exp_colors))
+    label = np.arange(exp_colors).reshape(1, -1)
+
+    # rgb image
+    rgb = label2rgb(label, image=image)
+
+    # number of unique colors in the rgb image
+    n_colors = len(np.unique(rgb[0], return_counts=True, axis=0)[1])
+
+    # test if unique colors generated equal the expected number of colors
+    assert_array_equal(n_colors, [exp_colors])

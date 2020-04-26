@@ -1,6 +1,7 @@
 import itertools
 
 import numpy as np
+from matplotlib import cm
 
 from .._shared.utils import warn
 from ..util import img_as_float
@@ -34,6 +35,25 @@ def _rgb_vector(color):
         color = color_dict[color]
     # Slice to handle RGBA colors.
     return np.array(color[:3])
+
+
+def _generate_colors(n_colors=256):
+    """Return RGB color as (n, 3) array where n is the number of colors
+
+    Parameters
+    ----------
+    n_colors : int [0, 255]
+        Number of colors generated using matplotlib qualitative colormap.
+
+    Returns
+    -------
+    colors: array of float, shape (N, 3)
+        RGB array of colors generated using the colormap.
+    """
+    # tab20c qualitative colormap to generate the colors
+    # Transparency is the last item in the tuple object which is removed
+    colors = [np.asarray(cm.tab20c(x))[:-1] for x in range(n_colors)]
+    return colors
 
 
 def _match_label_with_color(label, colors, bg_label, bg_color):
@@ -148,9 +168,17 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         The result of blending a cycling colormap (`colors`) for each distinct
         value in `label` with the image, at a certain alpha value.
     """
+    # number of unique labels
+    nlabel = len(np.unique(label))
+
     if colors is None:
-        colors = DEFAULT_COLORS
-    colors = [_rgb_vector(c) for c in colors]
+        if nlabel <= len(DEFAULT_COLORS):
+            colors = DEFAULT_COLORS
+            colors = [_rgb_vector(c) for c in colors]
+        else:
+            colors = _generate_colors(nlabel)
+    else:
+        colors = [_rgb_vector(c) for c in colors]
 
     if image is None:
         image = np.zeros(label.shape + (3,), dtype=np.float64)
