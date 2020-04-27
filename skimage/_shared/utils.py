@@ -33,7 +33,7 @@ class change_default_value:
         Optional warning message. If None, a generic warning message
         is used.
     changed_version : str
-        The package version in which the change have been introduced.
+        The package version in which the change will be introduced.
 
     """
 
