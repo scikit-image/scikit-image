@@ -27,13 +27,13 @@ class change_default_value:
     ----------
     arg_name: str
         The name of the argument to be updated.
-    old_value: any
-        The argument old value.
+    new_value: any
+        The argument new value.
+    changed_version : str
+        The package version in which the change will be introduced.
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
-    changed_version : str
-        The package version in which the change will be introduced.
 
     """
 
