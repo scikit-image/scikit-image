@@ -51,11 +51,11 @@ class change_default_value:
 
         if self.warning_msg is None:
             self.warning_msg = (
-                f"New recommanded value for {self.arg_name} is "
+                f"The new recommended value for {self.arg_name} is "
                 f"{self.new_value}. Until version {self.changed_version}, "
-                f"default {self.arg_name} value is {old_value}. Starting "
-                f"from version {self.changed_version}, {self.arg_name} "
-                f"default value will be set to {self.new_value}. To avoid "
+                f"the default {self.arg_name} value is {old_value}. "
+                f"From version {self.changed_version}, the {self.arg_name} "
+                f"default value will be {self.new_value}. To avoid "
                 f"this warning, please explicitly set {self.arg_name} value.")
 
         @functools.wraps(func)
