@@ -71,7 +71,7 @@ print("Recovered value for counterclockwise rotation: "
 # =================================================================
 #
 # In this second example, the images differ by both rotation and scaling (note
-# the axis tick values). By remapping these images into log-polar space, we
+# the axis tick values). By remapping these images into log-polar space,
 # we can recover rotation as before, and now also scaling, by phase
 # correlation.
 
@@ -132,7 +132,7 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # rotation and scaling differences, but not translation differences, are
 # apparent in the frequency magnitude spectra of the images. These differences
 # can be recovered by treating the magnitude spectra as images themselves, and
-# appplying the same log-polar + phase correlation approach taken above.
+# applying the same log-polar + phase correlation approach taken above.
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
