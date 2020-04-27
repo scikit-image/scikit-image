@@ -280,6 +280,12 @@ def test_rescale_all_zeros():
     assert_array_almost_equal(out, image)
 
 
+def test_rescale_constant():
+    image = np.array([130, 130], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range=(0, 127))
+    assert_array_almost_equal(out, [127, 127])
+
+
 def test_rescale_same_values():
     image = np.ones((2, 2))
     out = exposure.rescale_intensity(image)
@@ -431,6 +437,22 @@ def test_adapthist_grayscale_Nd():
     # to the underlying 2d image
     assert np.mean(np.abs(adapted2d
                           - adapted3d[adapted3d.shape[0] // 2])) < 0.02
+
+    
+def test_adapthist_constant():
+    """Test constant image, float and uint
+    """
+    img = np.zeros((8, 8))
+    img += 2
+    img = img.astype(np.uint16)
+    adapted = exposure.equalize_adapthist(img, 3)
+    assert np.min(adapted) == np.max(adapted)
+
+    img = np.zeros((8, 8))
+    img += 0.1
+    img = img.astype(np.float64)
+    adapted = exposure.equalize_adapthist(img, 3)
+    assert np.min(adapted) == np.max(adapted)
 
 
 def test_adapthist_borders():
