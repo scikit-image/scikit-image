@@ -232,7 +232,11 @@ class ArrayMap:
         self._max_lines = 4
 
     def __array__(self, dtype=None):
-        """Return an array that behaves like the arraymap when indexed."""
+        """Return an array that behaves like the arraymap when indexed.
+        
+        This array can be very large: it is the size of the largest value
+        in the ``in_vals`` array, plus one.
+        """
         if dtype is None:
             dtype = self.out_values.dtype
         output = np.zeros(np.max(self.in_values) + 1, dtype=dtype)
