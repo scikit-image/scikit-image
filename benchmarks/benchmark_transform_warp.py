@@ -1,6 +1,6 @@
 import numpy as np
 from skimage.transform import SimilarityTransform, warp
-from skimage.util.dtype import convert
+from skimage.util.dtype import _convert as convert
 import warnings
 import functools
 import inspect

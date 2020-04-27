@@ -2,7 +2,6 @@ import warnings
 import functools
 import sys
 import numpy as np
-import types
 import numbers
 
 from ..util import img_as_float
@@ -18,6 +17,53 @@ class skimage_deprecation(Warning):
 
     """
     pass
+
+
+class deprecate_kwarg:
+    """Decorator ensuring backward compatibility when argument names are
+    modified in a function definition.
+
+    Parameters
+    ----------
+    arg_mapping: dict
+        Mapping between the function's old argument names and the new
+        ones.
+    warning_msg: str
+        Optional warning message. If None, a generic warning message
+        is used.
+    removed_version : str
+        The package version in which the deprecated argument will be
+        removed.
+
+    """
+
+    def __init__(self, kwarg_mapping, warning_msg=None, removed_version=None):
+        self.kwarg_mapping = kwarg_mapping
+        if warning_msg is None:
+            self.warning_msg = ("'{old_arg}' is a deprecated argument name "
+                                "for `{func_name}`. ")
+            if removed_version is not None:
+                self.warning_msg += ("It will be removed in version {}. "
+                                     .format(removed_version))
+            self.warning_msg += "Please use '{new_arg}' instead."
+        else:
+            self.warning_msg = warning_msg
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            for old_arg, new_arg in self.kwarg_mapping.items():
+                if old_arg in kwargs:
+                    #  warn that the function interface has changed:
+                    warnings.warn(self.warning_msg.format(
+                        old_arg=old_arg, func_name=func.__name__,
+                        new_arg=new_arg), FutureWarning, stacklevel=2)
+                    # Substitute new_arg to old_arg
+                    kwargs[new_arg] = kwargs.pop(old_arg)
+
+            # Call the function with the fixed arguments
+            return func(*args, **kwargs)
+        return fixed_func
 
 
 class deprecated(object):
@@ -183,21 +229,6 @@ def check_nD(array, ndim, arg_name='image'):
         raise ValueError(msg_incorrect_dim % (arg_name, '-or-'.join([str(n) for n in ndim])))
 
 
-def copy_func(f, name=None):
-    """Create a copy of a function.
-
-    Parameters
-    ----------
-    f : function
-        Function to copy.
-    name : str, optional
-        Name of new function.
-
-    """
-    return types.FunctionType(f.__code__, f.__globals__, name or f.__name__,
-                              f.__defaults__, f.__closure__)
-
-
 def check_random_state(seed):
     """Turn seed into a `np.random.RandomState` instance.
 
@@ -255,3 +286,41 @@ def convert_to_float(image, preserve_range):
     else:
         image = img_as_float(image)
     return image
+
+
+def _validate_interpolation_order(image_dtype, order):
+    """Validate and return spline interpolation's order.
+
+    Parameters
+    ----------
+    image_dtype : dtype
+        Image dtype.
+    order : int, optional
+        The order of the spline interpolation. The order has to be in
+        the range 0-5. See `skimage.transform.warp` for detail.
+
+    Returns
+    -------
+    order : int
+        if input order is None, returns 0 if image_dtype is bool and 1
+        otherwise. Otherwise, image_dtype is checked and input order
+        is validated accordingly (order > 0 is not supported for bool
+        image dtype)
+
+    """
+
+    if order is None:
+        return 0 if image_dtype == bool else 1
+
+    if order < 0 or order > 5:
+        raise ValueError("Spline interpolation order has to be in the "
+                         "range 0-5.")
+
+    if image_dtype == bool and order != 0:
+        warn("Input image dtype is bool. Interpolation is not defined "
+             "with bool data type. Please set order to 0 or explicitely "
+             "cast input image to another data type. Starting from version "
+             "0.19 a ValueError will be raised instead of this warning.",
+             FutureWarning, stacklevel=2)
+
+    return order

@@ -1,7 +1,57 @@
-from skimage._shared.utils import (copy_func, check_nD)
-import numpy.testing as npt
+import sys
+import pytest
 import numpy as np
+import numpy.testing as npt
+from skimage._shared.utils import (check_nD, deprecate_kwarg,
+                                   _validate_interpolation_order)
 from skimage._shared import testing
+from skimage._shared._warnings import expected_warnings
+
+
+def test_deprecated_kwarg():
+
+    @deprecate_kwarg({'old_arg1': 'new_arg1'})
+    def foo(arg0, new_arg1=1, arg2=None):
+        """Expected docstring"""
+        return arg0, new_arg1, arg2
+
+    @deprecate_kwarg({'old_arg1': 'new_arg1'},
+                     warning_msg="Custom warning message")
+    def bar(arg0, new_arg1=1, arg2=None):
+        """Expected docstring"""
+        return arg0, new_arg1, arg2
+
+    # Assert that the DeprecationWarning is raised when the deprecated
+    # argument name is used and that the reasult is valid
+    with pytest.warns(FutureWarning) as record:
+        assert foo(0, old_arg1=1) == (0, 1, None)
+        assert bar(0, old_arg1=1) == (0, 1, None)
+
+    msg = ("'old_arg1' is a deprecated argument name "
+           "for `foo`. Please use 'new_arg1' instead.")
+    assert str(record[0].message) == msg
+    assert str(record[1].message) == "Custom warning message"
+
+    # Assert that nothing happens when the function is called with the
+    # new API
+    with pytest.warns(None) as record:
+        # No kwargs
+        assert foo(0) == (0, 1, None)
+        assert foo(0, 2) == (0, 2, None)
+        assert foo(0, 1, 2) == (0, 1, 2)
+        # Kwargs without deprecated argument
+        assert foo(0, new_arg1=1, arg2=2) == (0, 1, 2)
+        assert foo(0, new_arg1=2) == (0, 2, None)
+        assert foo(0, arg2=2) == (0, 1, 2)
+        assert foo(0, 1, arg2=2) == (0, 1, 2)
+        # Function name and doc is preserved
+        assert foo.__name__ == 'foo'
+        if sys.flags.optimize < 2:
+            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
+            assert foo.__doc__ == 'Expected docstring'
+
+    # Assert no warning was raised
+    assert not record.list
 
 
 def test_check_nD():
@@ -11,19 +61,25 @@ def test_check_nD():
         check_nD(x, 2)
 
 
-def test_copyfunc():
-    def foo(a):
-        return a
-
-    bar = copy_func(foo, name='bar')
-    other = copy_func(foo)
-
-    npt.assert_equal(bar.__name__, 'bar')
-    npt.assert_equal(other.__name__, 'foo')
-
-    other.__name__ = 'other'
-
-    npt.assert_equal(foo.__name__, 'foo')
+@pytest.mark.parametrize('dtype', [bool, int, np.uint8, np.uint16,
+                                   float, np.float32, np.float64])
+@pytest.mark.parametrize('order', [None, -1, 0, 1, 2, 3, 4, 5, 6])
+def test_validate_interpolation_order(dtype, order):
+    if order is None:
+        # Default order
+        assert (_validate_interpolation_order(dtype, None) == 0
+                if dtype == bool else 1)
+    elif order < 0 or order > 5:
+        # Order not in valid range
+        with testing.raises(ValueError):
+            _validate_interpolation_order(dtype, order)
+    elif dtype == bool and order != 0:
+        # Deprecated order for bool array
+        with expected_warnings(["Input image dtype is bool"]):
+            assert _validate_interpolation_order(bool, order) == order
+    else:
+        # Valid use case
+        assert _validate_interpolation_order(dtype, order) == order
 
 
 if __name__ == "__main__":

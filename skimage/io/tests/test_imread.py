@@ -2,12 +2,12 @@ import os
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage import data_dir, io
+from skimage import data, io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
 from skimage._shared.testing import (TestCase, assert_array_equal,
-                                     assert_array_almost_equal)
+                                     assert_array_almost_equal, fetch)
 
 from pytest import importorskip
 
@@ -22,29 +22,29 @@ def teardown():
 
 
 def test_imread_as_gray():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    img = imread(fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
 def test_imread_palette():
-    img = imread(os.path.join(data_dir, 'palette_color.png'))
+    img = imread(fetch('data/palette_color.png'))
     assert img.ndim == 3
 
 
 def test_imread_truncated_jpg():
     with testing.raises(RuntimeError):
-        io.imread(os.path.join(data_dir, 'truncated.jpg'))
+        io.imread(fetch('data/truncated.jpg'))
 
 
 def test_bilevel():
     expected = np.zeros((10, 10), bool)
     expected[::2] = 1
 
-    img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
+    img = imread(fetch('data/checker_bilevel.png'))
     assert_array_equal(img.astype(bool), expected)
 
 

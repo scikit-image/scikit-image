@@ -121,24 +121,21 @@ def relabel_sequential(label_field, offset=1):
         raise ValueError("Offset must be strictly positive.")
     if np.min(label_field) < 0:
         raise ValueError("Cannot relabel array that contains negative values.")
-    m = label_field.max()
+    max_label = int(label_field.max()) # Ensure max_label is an integer
     if not np.issubdtype(label_field.dtype, np.integer):
-        new_type = np.min_scalar_type(int(m))
+        new_type = np.min_scalar_type(max_label)
         label_field = label_field.astype(new_type)
-        m = m.astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
-    required_type = np.min_scalar_type(offset + len(labels0))
+    new_max_label = offset - 1 + len(labels0)
+    new_labels0 = np.arange(offset, new_max_label + 1)
+    output_type = label_field.dtype
+    required_type = np.min_scalar_type(new_max_label)
     if np.dtype(required_type).itemsize > np.dtype(label_field.dtype).itemsize:
-        label_field = label_field.astype(required_type)
-    new_labels0 = np.arange(offset, offset + len(labels0))
-    if np.all(labels0 == new_labels0):
-        return label_field, labels, labels
-    forward_map = np.zeros(int(m + 1), dtype=label_field.dtype)
+        output_type = required_type
+    forward_map = np.zeros(max_label + 1, dtype=output_type)
     forward_map[labels0] = new_labels0
-    if not (labels == 0).any():
-        labels = np.concatenate(([0], labels))
-    inverse_map = np.zeros(offset - 1 + len(labels), dtype=label_field.dtype)
-    inverse_map[(offset - 1):] = labels
+    inverse_map = np.zeros(new_max_label + 1, dtype=output_type)
+    inverse_map[offset:] = labels0
     relabeled = forward_map[label_field]
     return relabeled, forward_map, inverse_map

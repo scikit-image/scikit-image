@@ -9,6 +9,8 @@ cimport numpy as cnp
 from libc.math cimport sqrt, sin, cos, floor, ceil, fabs
 from .._shared.geometry cimport point_in_polygon
 
+cnp.import_array()
+
 
 def _coords_inside_image(rr, cc, shape, val=None):
     """

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Fail on non-zero exit and echo the commands
 set -ev
-export PY=${TRAVIS_PYTHON_VERSION}
 
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
@@ -29,7 +28,7 @@ section_end "Flake8.test"
 section "Tests.examples"
 # Run example applications
 echo Build or run examples
-pip install --retries 3 -q -r ./requirements/docs.txt
+pip install $PIP_FLAGS --retries 3 -q -r ./requirements/docs.txt
 pip list
 tools/build_versions.py
 echo 'backend : Template' > $MPL_DIR/matplotlibrc

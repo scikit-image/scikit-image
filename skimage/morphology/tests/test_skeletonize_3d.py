@@ -4,13 +4,13 @@ import os
 import numpy as np
 import scipy.ndimage as ndi
 
-from skimage import io, draw, data_dir
+from skimage import io, draw, data
 from skimage.data import binary_blobs
 from skimage.util import img_as_ubyte
 from skimage.morphology import skeletonize, skeletonize_3d
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_, parametrize
+from skimage._shared.testing import assert_equal, assert_, parametrize, fetch
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
@@ -184,5 +184,5 @@ def test_3d_vs_fiji():
     img = img.astype(np.uint8)*255
 
     img_s = skeletonize(img)
-    img_f = io.imread(os.path.join(data_dir, "_blobs_3d_fiji_skeleton.tif"))
+    img_f = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)

@@ -379,7 +379,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    return_all: bool, optional
+    return_all : bool, optional
         If False (default), return only the lowest threshold that satisfies
         the above equality. If True, return all valid thresholds.
 
@@ -659,7 +659,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter: int, optional
+    max_iter : int, optional
         Maximum number of iterations to smooth the histogram.
 
     Returns
@@ -930,7 +930,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -995,7 +995,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1128,7 +1128,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:

@@ -129,7 +129,7 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     -----
     .. versionchanged:: 0.16
         This function was renamed from ``skimage.measure.compare_psnr`` to
-        ``skimage.metrics.peak_singal_noise_ratio``.
+        ``skimage.metrics.peak_signal_noise_ratio``.
 
     References
     ----------
