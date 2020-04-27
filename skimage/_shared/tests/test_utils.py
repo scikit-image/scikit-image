@@ -27,12 +27,10 @@ def test_change_default_value():
         assert foo(0) == (0, 0, 1)
         assert bar(0) == (0, 0, 1)
 
-    expected_msg = ("New recommanded value for arg1 is -1. "
-                    "Until version 0.12, default arg1 "
-                    "value is 0. Starting from version "
-                    "0.12, arg1 default value will be "
-                    "set to -1. To avoid this warning, please "
-                    "explicitly set arg1 value.")
+    expected_msg = ("The new recommended value for arg1 is -1. Until "
+                    "version 0.12, the default arg1 value is 0. From "
+                    "version 0.12, the arg1 default value will be -1. "
+                    "To avoid this warning, please explicitly set arg1 value.")
 
     assert str(record[0].message) == expected_msg
     assert str(record[1].message) == "Custom warning message"
