@@ -5,7 +5,7 @@ Using Polar and Log-Polar Transformations for Registration
 
 Phase correlation (``registration.phase_cross_correlation``) is an efficient
 method for determining translation offset between pairs of similar images.
-However this approach relies on a near absense of rotation/scaling differences
+However this approach relies on a near absence of rotation/scaling differences
 between the images, which are typical in real-world examples.
 
 To recover rotation and scaling differences between two images, we can take
