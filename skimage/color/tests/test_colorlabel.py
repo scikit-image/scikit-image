@@ -17,12 +17,7 @@ def test_deprecation_warning():
     with pytest.warns(FutureWarning) as record:
         label2rgb(image, label)
 
-    expected_msg = ("New recommanded value for bg_label is 0. "
-                    "Until version 0.19, default bg_label "
-                    "value is -1. Starting from version "
-                    "0.19, bg_label default value will be "
-                    "set to 0. To avoid this warning, please "
-                    "explicitly set bg_label value.")
+    expected_msg = "The new recommended value"
 
     assert str(record[0].message) == expected_msg
 
