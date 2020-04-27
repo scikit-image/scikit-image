@@ -113,6 +113,13 @@ def test_relabel_sequential_signed_overflow():
     assert output.dtype == reference.dtype
 
 
+def test_very_large_labels():
+    imax = np.iinfo(np.int64).max
+    labels = np.array([0, 1, imax, 42, 42], dtype=np.int64)
+    output, fw, inv = relabel_sequential(labels, offset=imax)
+    assert np.max(output) == imax + 2
+
+
 @pytest.mark.parametrize('dtype', (np.byte, np.short, np.intc, np.int_,
                                    np.longlong, np.ubyte, np.ushort,
                                    np.uintc, np.uint, np.ulonglong))
