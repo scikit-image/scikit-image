@@ -57,7 +57,7 @@ target = cleared_mouse_brain()
 # Note: with downsample_factor = 1, lddmm_register runs in approximately 40-50 minutes.
 # This runtime declines roughly as the cube of downsample_factor.
 # Optimization parameters may require adjustment for sufficiently large downsample_factor values.
-downsample_factor = 4
+downsample_factor = 2
 template = resample(template, downsample_factor)
 target   = resample(  target, downsample_factor)
 
@@ -65,23 +65,23 @@ target   = resample(  target, downsample_factor)
 # Learn registration from template to target.
 # The stepsizes for lddmm_register are calibrated for this data without any downsampling (downsample_factor = 1 above), hence the correction.
 print(
-    "Please allow approximately 3-4 minutes for lddmm_register to finish with these inputs,\n"
-    "or ~15-20 minutes if running with a single CPU."
+    "Please allow approximately 5 minutes for lddmm_register to finish with these inputs,\n"
+    "or ~10-15 minutes if running with a single CPU.\n"
 )
 lddmm_dict = lddmm_register(
-    template                   = template, 
-    target                     = target, 
-    translational_stepsize     = 1e-5 * downsample_factor, 
-    linear_stepsize            = 1e-8 * downsample_factor,
-    deformative_stepsize       = 5e-1 * downsample_factor,
-    sigma_regularization       = 2e1,
-    contrast_order             = 3, 
-    num_iterations             = 100, 
-    num_affine_only_iterations = 50, 
+    template                    = template,
+    target                      = target,
+    affine_stepsize             = 0.3,
+    deformative_stepsize        = 5e-1 * downsample_factor,
+    sigma_regularization        = 2e1,
+    contrast_order              = 3,
+    num_iterations              = 150,
+    num_affine_only_iterations  = 100,
+    num_rigid_affine_iterations = 50,
     # calibrate=True outputs a diagnostic plot at the end of lddmm_register that is useful for determining appropriate stepsizes.
-    calibrate                  = False,
+    calibrate                   = False,
     # track_progress_every_n=10 prints a progress update every 10 iterations of registration. 
-    track_progress_every_n     = 10, 
+    track_progress_every_n      = 10,
 )
 
 

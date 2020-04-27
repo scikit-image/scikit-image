@@ -419,10 +419,9 @@ def test_lddmm_register():
 
     _test_lddmm_register(**lddmm_register_kwargs)
     
-    # Test identity quasi-two-dimensional sphere to sphere registration.
+    # Test identity two-dimensional sphere to sphere registration.
 
-    template = np.array([[[(col-4)**2 + (row-4)**2 <= 4**2 for col in range(9)] for row in range(9)]]*2, int)
-    template = np.pad(template, 2, mode='constant', constant_values=0)
+    template = np.array([[(col-4)**2 + (row-4)**2 <= 4**2 for col in range(9)] for row in range(9)], int)
     target = np.copy(template)
 
     lddmm_register_kwargs = dict(
@@ -432,29 +431,64 @@ def test_lddmm_register():
 
     _test_lddmm_register(**lddmm_register_kwargs)
     
-    # Test affine-only quasi-two-dimensional affine-only ellipse to ellipse registration.
+    # Test rigid-affine affine-only two-dimensional ellipse to ellipse registration.
 
-    # template before padding has shape (2, 21, 29) and semi-radii 6 and 10.
-    template = np.array([[[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)]]*2, int)
-    template = np.pad(template, 2, mode='constant', constant_values=0)
-    # target is a rotation of template.
-    target = rotate(template, 90, (1,2))
+    # template (before padding) has shape (21, 29) and semi-radii 4 and 10.
+    template = np.array([[(col-14)**2/10**2 + (row-8)**2/4**2 <= 1 for col in range(29)] for row in range(17)], int)
+    # templata and target are opposite rotations of an unrotated ellipse for symmetry.
+    target = rotate(template, 45/2)
+    template = rotate(template, -45/2)
 
     lddmm_register_kwargs = dict(
         template=template,
         target=target,
-        num_iterations=200,
-        num_affine_only_iterations=200,
+        num_iterations=50,
+        num_affine_only_iterations=50,
+        num_rigid_affine_iterations=50,
+    )
+
+    _test_lddmm_register(**lddmm_register_kwargs)
+    
+    # Test all-non-rigid affine-only two-dimensional ellipse to ellipse registration.
+
+    # template (before padding) has shape (21, 29) and semi-radii 6 and 10.
+    template = np.array([[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)], int)
+    # target is a rotation of template.
+    target = rotate(template, 30)
+
+    lddmm_register_kwargs = dict(
+        template=template,
+        target=target,
+        num_iterations=50,
+        num_affine_only_iterations=50,
+        num_rigid_affine_iterations=0,
     )
 
     _test_lddmm_register(**lddmm_register_kwargs)
 
-    # Test deformative-only quasi-two-dimensional sphere to ellipsoid registration.
+    # Test joint rigid and non-rigid affine-only two-dimensional ellipse to ellipse registration.
 
-    # template has shape (2, 25, 25) and radius 8.
-    template = np.array([[[(col-12)**2 + (row-12)**2 <= 8**2 for col in range(25)] for row in range(25)]]*2, int)
-    # target has shape (2, 21, 29) and semi-radii 6 and 10.
-    target = np.array([[[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)]]*2, int)
+    # template (before padding) has shape (21, 29) and semi-radii 6 and 10.
+    template = np.array([[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)], int)
+    # target is a rotation of template.
+    target = rotate(template, 30)
+
+    lddmm_register_kwargs = dict(
+        template=template,
+        target=target,
+        num_iterations=100,
+        num_affine_only_iterations=100,
+        num_rigid_affine_iterations=50,
+    )
+
+    _test_lddmm_register(**lddmm_register_kwargs)
+
+    # Test deformative-only two-dimensional sphere to ellipsoid registration.
+
+    # template has shape (25, 25) and radius 8.
+    template = np.array([[(col-12)**2 + (row-12)**2 <= 8**2 for col in range(25)] for row in range(25)], int)
+    # target has shape (21, 29) and semi-radii 6 and 10.
+    target = np.array([[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)], int)
 
     lddmm_register_kwargs = dict(
         template=template,
@@ -464,15 +498,15 @@ def test_lddmm_register():
         affine_stepsize=0,
         deformative_stepsize=0.5,
     )
-
+    
     _test_lddmm_register(**lddmm_register_kwargs)
 
-    # Test deformative and affine quasi-two-dimensional ellipsoid to ellipsoid registration.
+    # Test general deformative and affine two-dimensional ellipsoid to ellipsoid registration.
 
-    # target has shape (2, 21, 29) and semi-radii 6 and 10.
-    template = np.array([[[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)]]*2, int)
-    # target has shape (2, 21, 29) and semi-radii 6 and 10.
-    target = rotate(template, 30, (1,2))
+    # target has shape (21, 29) and semi-radii 6 and 10.
+    template = np.array([[(col-14)**2/10**2 + (row-10)**2/6**2 <= 1 for col in range(29)] for row in range(21)], int)
+    # target has shape (21, 29) and semi-radii 6 and 10.
+    target = rotate(template, 30)
 
     lddmm_register_kwargs = dict(
         template=template,
