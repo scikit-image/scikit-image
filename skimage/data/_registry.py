@@ -126,6 +126,8 @@ registry = {
     "feature/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
     "feature/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
+    "data/allen_mouse_brain_atlas.npy": "d93e716aee066e3415fb5d5565501773424db471bef2c091ac6b021185e76614",
+    "data/cleared_mouse_brain.npy": "529ceda02030e2e1312acc865c22e6efb6040859e071f4abdefbbd6396af8327",
 }
 
 registry_urls = {
