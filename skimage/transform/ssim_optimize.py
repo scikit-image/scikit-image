@@ -1,10 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
 
-from skimage.metrics._structural_similarity import (
-    structural_similarity
-    as ssim
-)
+from ..metrics._structural_similarity import structural_similarity as ssim
+
 
 def E(X, Y):
     return (Y - X) / norm(Y - X)
@@ -42,7 +40,7 @@ def optimize_func(img, adv_x, op, _lambda, iters, sigma):
     Compute the image with the highest or lowest SSIM to a reference image
     on the L-2 ball of the reference image. Follows a two step iterative
     gradient descent procedure.
-    
+
     For actual use, the minimize_ssim or maximize_ssim wrapper functions
     should be used.
 
