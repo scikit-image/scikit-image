@@ -15,7 +15,6 @@ from ._lddmm_utilities import _compute_tail_determinant
 from ._lddmm_utilities import resample
 
 # TODO: add multiscale functionality.
-# TODO: incorporate rigid affine phase.
 
 r'''
   _            _       _                         
