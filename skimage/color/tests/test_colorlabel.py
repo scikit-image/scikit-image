@@ -19,7 +19,7 @@ def test_deprecation_warning():
 
     expected_msg = "The new recommended value"
 
-    assert str(record[0].message) == expected_msg
+    assert str(record[0].message).startswith(expected_msg)
 
 
 def test_shape_mismatch():
