@@ -158,7 +158,6 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
         hist = lut[sub_img.ravel()]
         hist = np.bincount(hist, minlength=nbins)
-        hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
         hist = clip_histogram(hist, clim)
         hist = map_histogram(hist, 0, NR_OF_GRAY - 1, sub_img.size)
         map_array[inds] = hist
@@ -177,18 +176,18 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     for inds in np.ndindex(*ns_proc):
 
         # define slices for each dim
-        starts = [int(i > 0) * np.ceil(s / 2.) + np.max([0, i - 1]) * s
+        starts = [np.ceil(s / 2.) + (i - 1) * s if i > 0 else 0
                   for i, s in zip(inds, steps)]
 
         offsets = [np.ceil(s / 2.) if not i else s
                    for i, s, n in zip(inds, steps, ns)]
 
-        slices = [slice(int(st), int(np.min([st + o, sh])))
+        slices = [slice(int(st), int(min([st + o, sh])))
                   for st, o, sh in zip(starts, offsets, image.shape)]
 
         # define neighboring contextual regions
-        lowers = [np.max([0, i - 1]) for i in inds]
-        uppers = [np.min([n - 1, i]) for i, n in zip(inds, ns)]
+        lowers = [max([0, i - 1]) for i in inds]
+        uppers = [min([n - 1, i]) for i, n in zip(inds, ns)]
 
         maps = [map_array[tuple([[lowers, uppers][e][dim]
                                  for dim, e in enumerate(edge)])]
@@ -286,7 +285,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
     return out.astype(int)
 
 
-def interpolate(image, slices, maps, lut):
+def interpolate(image, slices_list, maps, lut):
     """Find the new grayscale level for a region
     using multilinear interpolation.
 
@@ -294,7 +293,7 @@ def interpolate(image, slices, maps, lut):
     ----------
     image : ndarray
         Full image.
-    slices : list of slices
+    slices_list : list of slices
        Indices of the region.
     maps : list of ndarray
         Mappings of graylevels from histograms.
@@ -313,7 +312,7 @@ def interpolate(image, slices, maps, lut):
     interpolation between 2^image.ndim different adjacent mappings
     in order to eliminate boundary artifacts.
     """
-    region = tuple([s for s in slices])
+    region = tuple([s for s in slices_list])
     view = image[region]
 
     # interpolation weight matrices
@@ -321,7 +320,7 @@ def interpolate(image, slices, maps, lut):
                          indexing='ij')
     coeffs = [np.transpose(c) for c in coeffs]
 
-    inv_coeffs = [np.flip(c, axis=image.ndim - dim - 1) + 1
+    inv_coeffs = [np.flip(c, axis=-dim - 1) + 1
                   for dim, c in enumerate(coeffs)]
 
     im_slice = lut[view]
@@ -333,7 +332,7 @@ def interpolate(image, slices, maps, lut):
                    * maps[iedge][im_slice])
 
     # normalize
-    result = result / np.product(view.shape)
+    result = result / view.size
 
     view[::] = result.astype(view.dtype)
     return image
