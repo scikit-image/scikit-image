@@ -131,11 +131,24 @@ def relabel_sequential(label_field, offset=1):
     else:
         out_vals = np.arange(offset, offset+len(in_vals))
     input_type = label_field.dtype
-    # current version can return signed (if it fits in input dtype and that one
-    # is signed) but will return unsigned if a dtype change is necessary
+
+    # Some logic to determine the output type:
+    #  - we don't want to return a smaller output type than the input type,
+    #  ie if we get uint32 as labels input, don't return a uint8 array.
+    #  - but, in some cases, using the input type could result in overflow. The
+    #  input type could be a signed integer (e.g. int32) but
+    #  `np.min_scalar_type` will always return an unsigned type. We check for
+    #  that by casting the largest output value to the input type. If it is
+    #  unchanged, we use the input type, else we use the unsigned minimum
+    #  required type
     required_type = np.min_scalar_type(out_vals[-1])
-    output_type = (input_type if input_type.itemsize >= required_type.itemsize
-                   else required_type)
+    if input_type.itemsize < required_type.itemsize:
+        output_type = required_type
+    else:
+        if input_type.type(out_vals[-1]) == out_vals[-1]:
+            output_type = input_type
+        else:
+            output_type = required_type
     out_array = np.empty(label_field.shape, dtype=output_type)
     out_vals = out_vals.astype(output_type)
     map_array(label_field, in_vals, out_vals, out=out_array)

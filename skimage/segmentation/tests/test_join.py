@@ -103,6 +103,16 @@ def test_relabel_sequential_dtype():
     assert_array_equal(inv, inv_ref)
 
 
+def test_relabel_sequential_signed_overflow():
+    imax = np.iinfo(np.int32).max
+    labels = np.array([0, 1, 99, 42, 42], dtype=np.int32)
+    output, fw, inv = relabel_sequential(labels, offset=imax)
+    reference = np.array([0, imax, imax + 2, imax + 1, imax + 1],
+                         dtype=np.uint32)
+    assert_array_equal(output, reference)
+    assert output.dtype == reference.dtype
+
+
 @pytest.mark.parametrize('dtype', (np.byte, np.short, np.intc, np.int_,
                                    np.longlong, np.ubyte, np.ushort,
                                    np.uintc, np.uint, np.ulonglong))
