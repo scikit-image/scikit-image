@@ -191,6 +191,13 @@ def map_array(input_arr, input_vals, output_vals, out=None):
             'If out array is provided, it should be either contiguous '
             'or 1-dimensional.'
         )
+    elif out.shape != orig_shape:
+        raise ValueError(
+            'If out array is provided, it should have the same shape as '
+            'the input array.'
+        )
+    else:
+        out = out.reshape(-1)
 
     _map_array(input_arr, out, input_vals, output_vals)
     return out.reshape(orig_shape)
