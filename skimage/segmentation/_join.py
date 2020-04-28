@@ -186,15 +186,11 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     input_arr = input_arr.reshape(-1)
     if out is None:
         out = np.empty_like(input_arr, dtype=output_vals.dtype)
-    else:
-        out_original = out
-        out = out_original.reshape(-1)
-        if out.strides[0] != min(out_original.strides):
-            # reshaping forced a copy
-            raise ValueError(
-                'If out array is provided, it should be either contiguous '
-                'or 1-dimensional.'
-            )
+    elif not (out.flags['FORC'] or out.ndim == 1):
+        raise ValueError(
+            'If out array is provided, it should be either contiguous '
+            'or 1-dimensional.'
+        )
 
     _map_array(input_arr, out, input_vals, output_vals)
     return out.reshape(orig_shape)
@@ -290,4 +286,3 @@ class ArrayMap:
         return map_array(
             arr, self.in_values.astype(arr.dtype, copy=False), self.out_values
         )
-
