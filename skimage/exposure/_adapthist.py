@@ -180,7 +180,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
                   for i, s in zip(inds, steps)]
 
         offsets = [np.ceil(s / 2.) if not i else s
-                   for i, s, n in zip(inds, steps, ns)]
+                   for i, s in zip(inds, steps)]
 
         slices = [slice(int(st), int(min([st + o, sh])))
                   for st, o, sh in zip(starts, offsets, image.shape)]

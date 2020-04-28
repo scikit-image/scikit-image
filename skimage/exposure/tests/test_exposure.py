@@ -438,7 +438,7 @@ def test_adapthist_grayscale_Nd():
     assert np.mean(np.abs(adapted2d
                           - adapted3d[adapted3d.shape[0] // 2])) < 0.02
 
-    
+
 def test_adapthist_constant():
     """Test constant image, float and uint
     """
