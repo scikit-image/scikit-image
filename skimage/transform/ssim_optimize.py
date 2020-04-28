@@ -10,7 +10,7 @@ def E(X, Y):
 
 # Returns reference image with random noise at specified epsilon
 def add_noise(img, eps):
-    noise = np.random.random_sample(img.shape)
+    noise = np.random.randint(0, 255, img.shape) / 255.
     noise = noise * eps / norm(noise)
     with_noise = np.clip(img + noise, 0, 1)
     return with_noise
