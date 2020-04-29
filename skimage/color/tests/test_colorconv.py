@@ -744,7 +744,6 @@ def test_nD_gray_conversion(func, shape):
     assert out.shape[:common_ndim] == shape[:common_ndim]
 
 
-
 @pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,
                                   rgb2xyz, xyz2rgb,
                                   rgb2hed, hed2rgb,
