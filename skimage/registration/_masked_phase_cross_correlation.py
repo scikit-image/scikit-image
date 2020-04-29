@@ -15,9 +15,9 @@ from functools import partial
 from .._shared.fft import fftmodule, next_fast_len
 
 
-def masked_register_translation(reference_image, moving_image,
-                                reference_mask, moving_mask=None,
-                                overlap_ratio=0.3):
+def _masked_phase_cross_correlation(reference_image, moving_image,
+                                    reference_mask, moving_mask=None,
+                                    overlap_ratio=0.3):
     """Masked image translation registration by masked normalized
     cross-correlation.
 

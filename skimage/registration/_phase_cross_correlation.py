@@ -5,7 +5,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 
 import numpy as np
 from .._shared.fft import fftmodule as fft
-from ._masked_register_translation import masked_register_translation
+from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
 def _upsampled_dft(data, upsampled_region_size,
@@ -187,9 +187,9 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
     """
     if (reference_mask is not None) or (moving_mask is not None):
-        return masked_register_translation(reference_image, moving_image,
-                                           reference_mask, moving_mask,
-                                           overlap_ratio)
+        return _masked_phase_cross_correlation(reference_image, moving_image,
+                                               reference_mask, moving_mask,
+                                               overlap_ratio)
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:

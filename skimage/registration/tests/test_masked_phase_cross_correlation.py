@@ -4,8 +4,9 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_equal, fetch, expected_warnings
 from skimage.data import camera, stereo_motorcycle
 from skimage.registration import phase_cross_correlation
-from skimage.registration._masked_register_translation import (
-    masked_register_translation, cross_correlate_masked)
+from skimage.registration._masked_phase_cross_correlation import (
+    _masked_phase_cross_correlation as masked_register_translation,
+    cross_correlate_masked)
 from skimage.io import imread
 from skimage._shared.fft import fftmodule as fft
 from skimage.feature import masked_register_translation as _deprecated
