@@ -1,6 +1,6 @@
 """
 Defines:
-    Private functions:
+    Internal functions:
         _validate_scalar_to_multi(value, size=3, dtype=float)
         _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
             forbid_object_dtype=True, broadcast_to_shape=None)

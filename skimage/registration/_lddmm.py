@@ -47,6 +47,8 @@ class _Lddmm:
         # Stepsizes.
         affine_stepsize=None,
         deformative_stepsize=None,
+        # Affine specifiers.
+        fixed_affine_scale=None,
         # Velocity field specifiers.
         sigma_regularization=None,
         smooth_length=None,
@@ -88,6 +90,8 @@ class _Lddmm:
         # Stepsizes.
         self.affine_stepsize = float(affine_stepsize) if affine_stepsize is not None else 0.3
         self.deformative_stepsize = float(deformative_stepsize) if deformative_stepsize is not None else 0
+        # Affine specifiers.
+        self.fixed_affine_scale = _validate_scalar_to_multi(fixed_affine_scale, self.template.ndim) if fixed_affine_scale is not None else None
         # Velocity field specifiers.
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
         self.smooth_length = float(smooth_length) if smooth_length is not None else 2 * np.max(self.template_resolution)
@@ -536,6 +540,8 @@ class _Lddmm:
 
         If iteration < self.num_rigid_affine_iterations, project self.affine to a rigid affine.
 
+        If self.fixed_affine_scale is provided, it is imposed on self.affine.
+
         if self.calibrate, appends the current self.affine to self.affines.
 
         Updates attributes:
@@ -549,10 +555,15 @@ class _Lddmm:
 
         self.affine = inv(affine_inv)
 
-        # Project self.affine to a rigid affine
+        # Project self.affine to a rigid affine if appropriate.
         if iteration < self.num_rigid_affine_iterations:
             U, _, Vh = svd(self.affine[:-1, :-1])
             self.affine[:-1, :-1] = U @ Vh
+
+        # Set scale of self.affine if appropriate.
+        if self.fixed_affine_scale is not None:
+            U, _, Vh = svd(self.affine[:-1, :-1])
+            self.affine[:-1, :-1] = U @ np.diag(self.fixed_affine_scale) @ Vh
 
         # Save affine for calibration plotting.
         if self.calibrate:
@@ -739,6 +750,8 @@ def lddmm_register(
     # Stepsizes.
     affine_stepsize=None,
     deformative_stepsize=None,
+    # Affine specifiers.
+    fixed_affine_scale=None,
     # Velocity field specifiers.
     sigma_regularization=None,
     smooth_length=None,
@@ -768,13 +781,14 @@ def lddmm_register(
     Args:
         template (np.ndarray): The ideally clean template image being registered to the target.
         target (np.ndarray): The potentially messier target image being registered to.
-        template_resolution (float, list, optional): A scalar or list of scalars indicating the resolution of the template. Overrides 0 input. Defaults to 1.
-        target_resolution (float, optional): A scalar or list of scalars indicating the resolution of the target. Overrides 0 input. Defaults to 1.
+        template_resolution (float, seq, optional): A scalar or list of scalars indicating the resolution of the template. Overrides 0 input. Defaults to 1.
+        target_resolution (float, seq, optional): A scalar or list of scalars indicating the resolution of the target. Overrides 0 input. Defaults to 1.
         num_iterations (int, optional): The total number of iterations. Defaults to 300.
         num_affine_only_iterations (int, optional): The number of iterations at the start of the process without deformative adjustments. Defaults to 100.
         num_rigid_affine_iterations (int, optional): The number of iterations at the start of the process in which the affine is kept rigid. Defaults to 50.
         affine_stepsize (float, optional): The unitless stepsize for affine adjustments. Should be between 0 and 1. Defaults to 0.3.
         deformative_stepsize (float, optional): The stepsize for deformative adjustments. Optimal values are problem-specific. If equal to 0 then the result is affine-only registration. Defaults to 0.
+        fixed_affine_scale (float, seq, optional): The per-dimension scale to impose on the affine at every iteration. If None, no scale is imposed. Defaults to None.
         sigma_regularization (float, optional): A scalar indicating the freedom to deform. Overrides 0 input. Defaults to 10 * np.max(self.template_resolution).
         smooth_length (float, optional): The length scale of smoothing. Overrides 0 input. Defaults to 2 * np.max(self.template_resolution).
         num_timesteps (int, optional): The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. Defaults to 5.
@@ -836,6 +850,8 @@ def lddmm_register(
         # Stepsizes.
         affine_stepsize=affine_stepsize,
         deformative_stepsize=deformative_stepsize,
+        # Affine specifiers.
+        fixed_affine_scale=fixed_affine_scale,
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
         smooth_length=smooth_length,
