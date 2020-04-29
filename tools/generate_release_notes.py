@@ -199,7 +199,7 @@ analysis, filtering, morphology, feature detection, and more.
 print("""
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 """
 )

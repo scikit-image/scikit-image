@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-from . import (polygon as draw_polygon, circle as draw_circle,
+from . import (polygon as draw_polygon, disk as draw_disk,
     ellipse as draw_ellipse)
 from .._shared.utils import warn
 
@@ -105,11 +105,18 @@ def _generate_circle_mask(point, image, shape, random):
     if available_radius < min_radius:
         raise ArithmeticError('cannot fit shape to image')
     radius = random.randint(min_radius, available_radius + 1)
-    circle = draw_circle(point[0], point[1], radius)
+    # TODO: think about how to deprecate this
+    # while draw_circle was deprecated in favor of draw_disk
+    # switching to a label of 'disk' here
+    # would be a breaking change for downstream libraries
+    # See discussion on naming convention here
+    # https://github.com/scikit-image/scikit-image/pull/4428
+    disk = draw_disk((point[0], point[1]), radius)
+    # Until a deprecation path is decided, always return `'circle'`
     label = ('circle', ((point[0] - radius + 1, point[0] + radius),
                         (point[1] - radius + 1, point[1] + radius)))
 
-    return circle, label
+    return disk, label
 
 
 def _generate_triangle_mask(point, image, shape, random):

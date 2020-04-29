@@ -94,7 +94,7 @@ def h_maxima(image, h, selem=None):
 
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
-    The heights of the maxima are: 1, 21, 41, 61, 81, 101
+    The heights of the maxima are: 1, 21, 41, 61, 81
 
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
@@ -106,24 +106,68 @@ def h_maxima(image, h, selem=None):
 
     >>> maxima = extrema.h_maxima(f, 40)
 
-    The resulting image will contain 4 local maxima.
+    The resulting image will contain 3 local maxima.
     """
+
+    # Check for h value that is larger then range of the image. If this
+    # is True then there are no h-maxima in the image.
+    if h > np.ptp(image):
+        return np.zeros(image.shape, dtype=np.uint8)
+
+    # Check for floating point h value. For this to work properly
+    # we need to explicitly convert image to float64.
+    #
+    # FIXME: This could give incorrect results if image is int64 and
+    #        has a very high dynamic range. The dtype of image is
+    #        changed to float64, and different integer values could
+    #        become the same float due to rounding.
+    #
+    #   >>> ii64 = np.iinfo(np.int64)
+    #   >>> a = np.array([ii64.max, ii64.max - 2])
+    #   >>> a[0] == a[1]
+    #   False
+    #   >>> b = a.astype(np.float64)
+    #   >>> b[0] == b[1]
+    #   True
+    #
+    if np.issubdtype(type(h), np.floating) and \
+       np.issubdtype(image.dtype, np.integer):
+        if ((h % 1) != 0):
+            warn('possible precision loss converting image to '
+                 'floating point. To silence this warning, '
+                 'ensure image and h have same data type.',
+                 stacklevel=2)
+            image = image.astype(np.float_)
+        else:
+            h = image.dtype.type(h)
+
+    if (h == 0):
+        raise ValueError("h = 0 is ambiguous, use local_maxima() "
+                         "instead?")
+
     if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
-        if h < resolution:
-            h = resolution
-        h_corrected = h - resolution / 2.0
-        shifted_img = image - h
+        # The purpose of the resolution variable is to allow for the
+        # small rounding errors that inevitably occur when doing
+        # floating point arithmetic. We want shifted_img to be
+        # guaranteed to be h less than image. If we only subtract h
+        # there may be pixels were shifted_img ends up being
+        # slightly greater than image - h.
+        #
+        # The resolution is scaled based on the pixel values in the
+        # image because floating point precision is relative. A
+        # very large value of 1.0e10 will have a large precision,
+        # say +-1.0e4, and a very small value of 1.0e-10 will have
+        # a very small precision, say +-1.0e-16.
+        #
+        resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
+        shifted_img = image - h - resolution
     else:
         shifted_img = _subtract_constant_clip(image, h)
-        h_corrected = h
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='dilation', selem=selem)
     residue_img = image - rec_img
-    h_max = np.zeros(image.shape, dtype=np.uint8)
-    h_max[residue_img >= h_corrected] = 1
-    return h_max
+    return (residue_img >= h).astype(np.uint8)
 
 
 def h_minima(image, h, selem=None):
@@ -175,7 +219,7 @@ def h_minima(image, h, selem=None):
 
     We create an image (quadratic function with a minimum in the center and
     4 additional constant maxima.
-    The depth of the minima are: 1, 21, 41, 61, 81, 101
+    The depth of the minima are: 1, 21, 41, 61, 81
 
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
@@ -187,24 +231,36 @@ def h_minima(image, h, selem=None):
 
     >>> minima = extrema.h_minima(f, 40)
 
-    The resulting image will contain 4 local minima.
+    The resulting image will contain 3 local minima.
     """
+    if h > np.ptp(image):
+        return np.zeros(image.shape, dtype=np.uint8)
+
+    if np.issubdtype(type(h), np.floating) and \
+       np.issubdtype(image.dtype, np.integer):
+        if ((h % 1) != 0):
+            warn('possible precision loss converting image to '
+                 'floating point. To silence this warning, '
+                 'ensure image and h have same data type.',
+                 stacklevel=2)
+            image = image.astype(np.float_)
+        else:
+            h = image.dtype.type(h)
+
+    if (h == 0):
+        raise ValueError("h = 0 is ambiguous, use local_minima() "
+                         "instead?")
+
     if np.issubdtype(image.dtype, np.floating):
-        resolution = 2 * np.finfo(image.dtype).resolution
-        if h < resolution:
-            h = resolution
-        h_corrected = h - resolution / 2.0
-        shifted_img = image + h
+        resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
+        shifted_img = image + h + resolution
     else:
         shifted_img = _add_constant_clip(image, h)
-        h_corrected = h
 
     rec_img = greyreconstruct.reconstruction(shifted_img, image,
                                              method='erosion', selem=selem)
     residue_img = rec_img - image
-    h_min = np.zeros(image.shape, dtype=np.uint8)
-    h_min[residue_img >= h_corrected] = 1
-    return h_min
+    return (residue_img >= h).astype(np.uint8)
 
 
 def local_maxima(image, selem=None, connectivity=None, indices=False,

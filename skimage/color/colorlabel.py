@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import warn
+from .._shared.utils import warn, change_default_value
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
@@ -71,6 +71,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     return mapped_labels, color_cycle
 
 
+@change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
               bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
     """Return an RGB image where color-coded labels are painted over the image.

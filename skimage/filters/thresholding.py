@@ -1128,7 +1128,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:
