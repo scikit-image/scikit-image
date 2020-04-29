@@ -9,6 +9,7 @@ User Guide
    user_guide/data_types
    user_guide/plugins
    user_guide/video
+   user_guide/visualization
    user_guide/transforming_image_data
    user_guide/geometrical_transform
    user_guide/tutorials
