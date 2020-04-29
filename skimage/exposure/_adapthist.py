@@ -65,6 +65,10 @@ def equalize_adapthist(image, kernel_size=None,
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
 
+    .. versionchanged:: 0.17
+        The values returned by this function are slightly shifted upwards
+        because of an internal change in rounding behavior.
+
     References
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/
@@ -75,7 +79,9 @@ def equalize_adapthist(image, kernel_size=None,
         return img_as_float(image)  # convert to float for consistency
 
     image = img_as_uint(image)
-    image = rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
+    image = np.round(
+        rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
+    ).astype(np.uint16)
 
     if kernel_size is None:
         kernel_size = (image.shape[0] // 8, image.shape[1] // 8)

@@ -94,7 +94,8 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
         arr_in = np.asarray(arr_in)[..., np.newaxis]
 
     if arr_in.ndim != 4:
-        raise ValueError('Input array has to be either 3- or 4-dimensional')
+        raise ValueError('Input array has to be 3-dimensional '
+                         'or 4-dimensional, with `multichannel=True`')
 
     n_images, n_rows, n_cols, n_chan = arr_in.shape
 
