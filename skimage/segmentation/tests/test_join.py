@@ -180,3 +180,9 @@ def test_relabel_sequential_already_sequential(offset, with0,
     else:
         ar_relab_ref = np.where(ar > 0, ar + offset - 1, 0)
     assert_array_equal(ar_relab, ar_relab_ref)
+
+
+def test_incorrect_input_dtype():
+    labels = np.array([0, 2, 2, 1, 1, 8], dtype=float)
+    with testing.raises(TypeError):
+        _ = relabel_sequential(labels)
