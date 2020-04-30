@@ -205,3 +205,11 @@ def test_map_array_non_contiguous_output_array():
     out_values = np.random.random(in_values.shape).astype(out.dtype)
     with testing.raises(ValueError):
         map_array(labels, in_values, out_values, out=out)
+
+
+def test_arraymap_long_str():
+    labels = np.random.randint(0, 40, size=(24, 25))
+    in_values = np.unique(labels)
+    out_values = np.random.random(in_values.shape)
+    m = ArrayMap(in_values, out_values)
+    assert len(str(m).split('\n')) == m._max_str_lines + 2

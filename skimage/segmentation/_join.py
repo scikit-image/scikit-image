@@ -268,7 +268,7 @@ class ArrayMap:
     def __init__(self, in_values, out_values):
         self.in_values = in_values
         self.out_values = out_values
-        self._max_lines = 4
+        self._max_str_lines = 4
 
     def __array__(self, dtype=None):
         """Return an array that behaves like the arraymap when indexed.
@@ -290,15 +290,15 @@ class ArrayMap:
         return f'ArrayMap({repr(self.in_values)}, {repr(self.out_values)})'
 
     def __str__(self):
-        if len(self.in_values) <= self._max_lines + 1:
+        if len(self.in_values) <= self._max_str_lines + 1:
             rows = range(len(self.in_values))
             string = '\n'.join(
                 ['ArrayMap:'] +
                 [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows]
             )
         else:
-            rows0 = list(range(0, self._max_lines // 2))
-            rows1 = list(range(-self._max_lines // 2, 0))
+            rows0 = list(range(0, self._max_str_lines // 2))
+            rows1 = list(range(-self._max_str_lines // 2, 0))
             string = '\n'.join(
                 ['ArrayMap:'] +
                 [f'  {self.in_values[i]} → {self.out_values[i]}'
