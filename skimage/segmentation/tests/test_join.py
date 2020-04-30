@@ -213,3 +213,10 @@ def test_arraymap_long_str():
     out_values = np.random.random(in_values.shape)
     m = ArrayMap(in_values, out_values)
     assert len(str(m).split('\n')) == m._max_str_lines + 2
+
+
+def test_arraymap_call():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    testing.assert_array_equal(relabeled, fw(ar))
+    testing.assert_array_equal(ar, inv(relabeled))
