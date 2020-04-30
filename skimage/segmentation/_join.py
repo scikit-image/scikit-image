@@ -101,6 +101,13 @@ def relabel_sequential(label_field, offset=1):
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
+    >>> print(fw)
+    ArrayMap:
+      1 → 1
+      5 → 2
+      8 → 3
+      42 → 4
+      99 → 5
     >>> np.array(fw)
     array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
@@ -240,6 +247,12 @@ class ArrayMap:
     >>> in_indices = np.array([0, 10])
     >>> out_values = np.array([0.25, 1.0])
     >>> values = ArrayMap(in_indices, out_values)
+    >>> values
+    ArrayMap(array([ 0, 10]), array([0.25, 1.  ]))
+    >>> print(values)
+    ArrayMap:
+      0 → 0.25
+      10 → 1.0
     >>> indices = np.array([[0, 0, 10], [0, 10, 10]])
     >>> values[indices]
     array([[0.25, 0.25, 1.  ],
@@ -277,7 +290,7 @@ class ArrayMap:
         return f'ArrayMap({repr(self.in_values)}, {repr(self.out_values)})'
 
     def __str__(self):
-        if len(self.in_values) <= self._max_lines:
+        if len(self.in_values) <= self._max_lines + 1:
             rows = range(len(self.in_values))
             string = '\n'.join(
                 ['ArrayMap:'] +
@@ -285,7 +298,7 @@ class ArrayMap:
             )
         else:
             rows0 = list(range(0, self._max_lines // 2))
-            rows1 = list(range(-self.max_lines // 2, None))
+            rows1 = list(range(-self._max_lines // 2, 0))
             string = '\n'.join(
                 ['ArrayMap:'] +
                 [f'  {self.in_values[i]} → {self.out_values[i]}'
