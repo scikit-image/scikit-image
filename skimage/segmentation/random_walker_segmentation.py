@@ -191,6 +191,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
         else:
+            # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
             ml = ruge_stuben_solver(lap_sparse)
             M = ml.aspreconditioner(cycle='V')
