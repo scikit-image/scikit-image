@@ -75,14 +75,14 @@ def relabel_sequential(label_field, offset=1):
         {offset, ..., number_of_labels + offset - 1}.
         The data type will be the same as `label_field`, except when
         offset + number_of_labels causes overflow of the current data type.
-    forward_map : numpy array of int, shape ``(label_field.max() + 1,)``
+    forward_map : ArrayMap
         The map from the original label space to the returned label
         space. Can be used to re-apply the same mapping. See examples
-        for usage. The data type will be the same as `relabeled`.
-    inverse_map : 1D numpy array of int, of length offset + number of labels
+        for usage. The output data type will be the same as `relabeled`.
+    inverse_map : ArrayMap
         The map from the new label space to the original space. This
         can be used to reconstruct the original label field from the
-        relabeled one. The data type will be the same as `relabeled`.
+        relabeled one. The output data type will be the same as `label_field`.
 
     Notes
     -----
