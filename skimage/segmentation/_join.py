@@ -206,6 +206,9 @@ def map_array(input_arr, input_vals, output_vals, out=None):
                 f'strides {out.strides}.'
             )
 
+    # ensure all arrays have matching types before sending to Cython
+    input_vals = input_vals.astype(input_arr.dtype, copy=False)
+    output_vals = output_vals.astype(out.dtype, copy=False)
     _map_array(input_arr, out, input_vals, output_vals)
     return out.reshape(orig_shape)
 
