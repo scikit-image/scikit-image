@@ -189,7 +189,8 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     elif out.shape != orig_shape:
         raise ValueError(
             'If out array is provided, it should have the same shape as '
-            'the input array.'
+            f'the input array. Input array has shape {orig_shape}, provided '
+            f'output array has shape {out.shape}.'
         )
     else:
         try:
