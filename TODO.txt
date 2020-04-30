@@ -87,6 +87,7 @@ Version 0.19
   arguments and the associated deprecation warnings from `gray2rgb`.
 * In ``skimage/color/colorlabel.py``, remove the `change_default_value`
   decorator from `label2rgb` and set `bg_label` default value to 0.
+* In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
 
 Other
 -----
