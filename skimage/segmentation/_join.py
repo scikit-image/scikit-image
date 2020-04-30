@@ -196,28 +196,28 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
-        out = np.empty_like(input_arr, dtype=output_vals.dtype)
+        out = np.empty(orig_shape, dtype=output_vals.dtype)
     elif out.shape != orig_shape:
         raise ValueError(
             'If out array is provided, it should have the same shape as '
             f'the input array. Input array has shape {orig_shape}, provided '
             f'output array has shape {out.shape}.'
         )
-    else:
-        try:
-            out.shape = (-1,)  # no-copy reshape/ravel
-        except AttributeError:  # if out strides are not compatible with 0-copy
-            raise ValueError(
-                'If out array is provided, it should be either contiguous '
-                f'or 1-dimensional. Got array with shape {out.shape} and '
-                f'strides {out.strides}.'
-            )
+    try:
+        out_view = out.view()
+        out_view.shape = (-1,)  # no-copy reshape/ravel
+    except AttributeError:  # if out strides are not compatible with 0-copy
+        raise ValueError(
+            'If out array is provided, it should be either contiguous '
+            f'or 1-dimensional. Got array with shape {out.shape} and '
+            f'strides {out.strides}.'
+        )
 
     # ensure all arrays have matching types before sending to Cython
     input_vals = input_vals.astype(input_arr.dtype, copy=False)
     output_vals = output_vals.astype(out.dtype, copy=False)
-    _map_array(input_arr, out, input_vals, output_vals)
-    return out.reshape(orig_shape)
+    _map_array(input_arr, out_view, input_vals, output_vals)
+    return out
 
 
 class ArrayMap:
