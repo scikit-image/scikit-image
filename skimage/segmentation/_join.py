@@ -186,18 +186,20 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     input_arr = input_arr.reshape(-1)
     if out is None:
         out = np.empty_like(input_arr, dtype=output_vals.dtype)
-    elif not (out.flags['FORC'] or out.ndim == 1):
-        raise ValueError(
-            'If out array is provided, it should be either contiguous '
-            'or 1-dimensional.'
-        )
     elif out.shape != orig_shape:
         raise ValueError(
             'If out array is provided, it should have the same shape as '
             'the input array.'
         )
     else:
-        out = out.reshape(-1)
+        try:
+            out.shape = (-1,)  # no-copy reshape/ravel
+        except AttributeError:  # if out strides are not compatible with 0-copy
+            raise ValueError(
+                'If out array is provided, it should be either contiguous '
+                f'or 1-dimensional. Got array with shape {out.shape} and '
+                f'strides {out.strides}.'
+            )
 
     _map_array(input_arr, out, input_vals, output_vals)
     return out.reshape(orig_shape)
