@@ -178,6 +178,10 @@ def map_array(input_arr, input_vals, output_vals, out=None):
         The array of mapped values.
     """
 
+    if not np.issubdtype(input_arr.dtype, np.integer):
+        raise TypeError(
+            'The dtype of an array to be remapped should be integer.'
+        )
     # We ravel the input array for simplicity of iteration in Cython:
     orig_shape = input_arr.shape
     # NumPy docs for `np.ravel()` says:
