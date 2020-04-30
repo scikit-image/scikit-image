@@ -32,7 +32,7 @@ def _preprocess(image, mask, sigma, mode):
         Image to be smoothed.
     mask : array
         Mask with 1's for significant pixels, 0's for masked pixels.
-    sigma : scalar or sequence of scalars, optional
+    sigma : scalar or sequence of scalars
         Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
