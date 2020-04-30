@@ -21,7 +21,7 @@ from .._shared.utils import check_nD
 
 
 def _preprocess(image, mask, sigma, mode):
-    """Preprocess the image and mask before applying canny edge detection.
+    """Generate a smoothed image and an eroded mask.
 
     The image is smoothed using a gaussian filter ignoring masked
     pixels and the mask is eroded.
