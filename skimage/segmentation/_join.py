@@ -44,15 +44,6 @@ def join_segmentations(s1, s2):
     return j
 
 
-@deprecated('relabel_sequential')
-def relabel_from_one(label_field):
-    """Convert labels in an arbitrary label field to {1, ... number_of_labels}.
-
-    This function is deprecated, see ``relabel_sequential`` for more.
-    """
-    return relabel_sequential(label_field, offset=1)
-
-
 def relabel_sequential(label_field, offset=1):
     """Relabel arbitrary labels to {`offset`, ... `offset` + number_of_labels}.
 

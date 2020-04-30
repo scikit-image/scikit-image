@@ -5,7 +5,7 @@ from .slic_superpixels import slic
 from ._quickshift import quickshift
 from .boundaries import find_boundaries, mark_boundaries
 from ._clear_border import clear_border
-from ._join import join_segmentations, relabel_from_one, relabel_sequential
+from ._join import join_segmentations, relabel_sequential
 from ._watershed import watershed
 from ._chan_vese import chan_vese
 from .morphsnakes import (morphological_geodesic_active_contour,
@@ -24,7 +24,6 @@ __all__ = ['random_walker',
            'mark_boundaries',
            'clear_border',
            'join_segmentations',
-           'relabel_from_one',
            'relabel_sequential',
            'watershed',
            'chan_vese',
