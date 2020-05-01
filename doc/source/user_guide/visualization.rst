@@ -8,7 +8,7 @@ in space, timeslapse, multiple channels.
 Therefore, the visualization strategy will depend on the data complexity and
 a range of tools external to scikit-image can be used for this purpose.
 Historically, scikit-image provided viewer tools but new powerful softwares
-are now developed and must be preferred.
+are now available and must be preferred.
 
 
 Matplotlib
@@ -34,4 +34,3 @@ Napari
 
 `Napari <https://napari.org/>`__ is a multi-dimensional image viewer. It’s
 designed for browsing, annotating, and analyzing large multi-dimensional images.
-
