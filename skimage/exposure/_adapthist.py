@@ -219,14 +219,15 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     # rebuild result image from blocks
     result = result.reshape(blocks_flattened_shape)
     blocks_axis_rebuild_order =\
-        np.array([np.arange(0,    ndim),
+        np.array([np.arange(0, ndim),
                   np.arange(ndim, ndim * 2)]).T.flatten()
     result = np.transpose(result, axes=blocks_axis_rebuild_order)
     result = result.reshape(image.shape)
 
     # undo padding
     unpad_slices = tuple([slice(p_i, s - p_f) for p_i, p_f, s in
-                          zip(pad_start_per_dim, pad_end_per_dim, image.shape)])
+                          zip(pad_start_per_dim, pad_end_per_dim,
+                              image.shape)])
     result = result[unpad_slices]
 
     return result
