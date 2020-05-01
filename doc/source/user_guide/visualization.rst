@@ -1,7 +1,7 @@
 Data visualization
 ------------------
 
-Data visualization takes an important part in image processing. Data can be
+Data visualization takes an important place in image processing. Data can be
 a simple unique 2D image or a more complex with multidimensional aspects: 3D
 in space, timeslapse, multiple channels.
 
