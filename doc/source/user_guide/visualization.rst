@@ -7,7 +7,7 @@ in space, timeslapse, multiple channels.
 
 Therefore, the visualization strategy will depend on the data complexity and
 a range of tools external to scikit-image can be used for this purpose.
-Historically, scikit-image provided viewer tools but new powerful softwares
+Historically, scikit-image provided viewer tools but powerful packages
 are now available and must be preferred.
 
 
