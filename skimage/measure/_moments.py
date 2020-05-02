@@ -363,7 +363,7 @@ def centroid(image):
 
     Examples
     --------
-    image = np.zeros((20, 20), dtype=np.double)
+    >>> image = np.zeros((20, 20), dtype=np.double)
     >>> image[13:17, 13:17] = 0.5
     >>> image[10:12, 10:12] = 1
     >>> centroid(image)
