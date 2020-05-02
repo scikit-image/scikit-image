@@ -492,7 +492,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     if X.min() < -prob_tol or X.max() > 1 + prob_tol:
         warn('The probability range is outside [0, 1] given the tolerance '
              '`prob_tol`. Consider decreasing `beta` and/or decreasing '
-             '`tol`'.)
+             '`tol`.')
 
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds
