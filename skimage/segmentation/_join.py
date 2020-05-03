@@ -260,6 +260,7 @@ class ArrayMap:
         self.in_values = in_values
         self.out_values = out_values
         self._max_str_lines = 4
+        self._array = None
 
     def __len__(self):
         """Return one more than the maximum label value being remapped."""
@@ -308,6 +309,19 @@ class ArrayMap:
         return self.__getitem__(arr)
 
     def __getitem__(self, arr):
-        return map_array(
+        scalar = np.isscalar(arr)
+        if scalar:
+            arr = np.array([arr])
+        out = map_array(
             arr, self.in_values.astype(arr.dtype, copy=False), self.out_values
         )
+        if scalar:
+            out = out[0]
+        return out
+
+    def __setitem__(self, indices, values):
+        if self._array is None:
+            self._array = self.__array__()
+        self._array[indices] = values
+        self.in_values = np.flatnonzero(self._array)
+        self.out_values = self._array[self.in_values]

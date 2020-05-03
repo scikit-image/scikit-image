@@ -229,3 +229,10 @@ def test_arraymap_len():
     assert len(fw) == len(np.array(fw))
     assert len(inv) == 6
     assert len(inv) == len(np.array(inv))
+
+
+def test_arraymap_set():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    fw[72] = 6
+    assert fw[72] == 6
