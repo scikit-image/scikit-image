@@ -261,6 +261,10 @@ class ArrayMap:
         self.out_values = out_values
         self._max_str_lines = 4
 
+    def __len__(self):
+        """Return one more than the maximum label value being remapped."""
+        return np.max(self.in_values) + 1
+
     def __array__(self, dtype=None):
         """Return an array that behaves like the arraymap when indexed.
         

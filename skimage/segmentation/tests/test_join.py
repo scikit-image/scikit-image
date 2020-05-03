@@ -220,3 +220,12 @@ def test_arraymap_call():
     relabeled, fw, inv = relabel_sequential(ar)
     testing.assert_array_equal(relabeled, fw(ar))
     testing.assert_array_equal(ar, inv(relabeled))
+
+
+def test_arraymap_len():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    assert len(fw) == 100
+    assert len(fw) == len(np.array(fw))
+    assert len(inv) == 6
+    assert len(inv) == len(np.array(inv))
