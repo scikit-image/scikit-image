@@ -319,6 +319,8 @@ class ArrayMap:
                     else len(self))
             step = index.step
             index = np.arange(start, stop, step)
+        if index.dtype == bool:
+            index = np.flatnonzero(index)
 
         out = map_array(
             index,
