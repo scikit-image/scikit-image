@@ -164,7 +164,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
 
-        image = img_as_float(rgb2gray(image))
+        if image.ndim > label.ndim:
+            image = img_as_float(rgb2gray(image))
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
     # Ensure that all labels are non-negative so we can index into
