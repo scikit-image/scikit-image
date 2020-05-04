@@ -37,14 +37,10 @@ def _preprocess(image, mask, sigma, mode):
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
         'constant'. Default is 'nearest'.
-    preserve_range : bool, optional
-        Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
-        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -85,9 +81,11 @@ def _preprocess(image, mask, sigma, mode):
 
 def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
                       col_slices, out):
-    # Get the magnitudes shifted left to make a matrix of the points to the
-    # right of pts. Similarly, shift left and down to get the points to the
-    # top right of pts.
+    """Get the magnitudes shifted left to make a matrix of the points to
+    the right of pts. Similarly, shift left and down to get the points
+    to the top right of pts.
+
+    """
     r_0, r_1, r_2, r_3 = row_slices
     c_0, c_1, c_2, c_3 = col_slices
     c1 = magnitude[r_0, c_0][pts[r_1, c_1]]
@@ -104,6 +102,9 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
 
 
 def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
+    """
+
+    """
     #
     # Find the normal to the edge at each point using the arctangent of the
     # ratio of the Y sobel over the X sobel - pragmatically, we can
@@ -279,6 +280,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     #   that's the closest to the normal.
     #
     # * Label all points above the high threshold as edges.
+    #
     # * Recursively label any point above the low threshold that is 8-connected
     #   to a labeled point as an edge.
     #
@@ -320,7 +322,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
     #
-    # ---- Create two masks at the two thresholds.
+    # Create two masks at the two thresholds.
     #
     local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
     high_mask = local_maxima & (magnitude >= high_threshold)
@@ -335,10 +337,8 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     if count == 0:
         return low_mask
 
-    sums = np.array(ndi.sum(high_mask, labels,
-                            np.arange(1, count + 1, dtype=np.int32)),
-                    copy=False, ndmin=1)
-    good_label = np.zeros((count + 1,), bool)
-    good_label[1:] = sums > 0
+    sums = ndi.sum(high_mask, labels,
+                   np.arange(1, count + 1, dtype=np.int32))
+    good_label = np.pad(sums > 0, (1, 0))
     output_mask = good_label[labels]
     return output_mask
