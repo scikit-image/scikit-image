@@ -308,13 +308,24 @@ class ArrayMap:
     def __call__(self, arr):
         return self.__getitem__(arr)
 
-    def __getitem__(self, arr):
-        scalar = np.isscalar(arr)
+    def __getitem__(self, index):
+        scalar = np.isscalar(index)
         if scalar:
-            arr = np.array([arr])
+            index = np.array([index])
+        elif isinstance(index, slice):
+            start = index.start or 0  # treat None or 0 the same way
+            stop = (index.stop
+                    if index.stop is not None
+                    else len(self))
+            step = index.step
+            index = np.arange(start, stop, step)
+
         out = map_array(
-            arr, self.in_values.astype(arr.dtype, copy=False), self.out_values
+            index,
+            self.in_values.astype(index.dtype, copy=False),
+            self.out_values,
         )
+
         if scalar:
             out = out[0]
         return out
