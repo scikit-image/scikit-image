@@ -183,7 +183,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     # We ravel the input array for simplicity of iteration in Cython:
     orig_shape = input_arr.shape
     # NumPy docs for `np.ravel()` says:
-    # "When a view is desired in as many cases as possible, 
+    # "When a view is desired in as many cases as possible,
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
@@ -260,7 +260,6 @@ class ArrayMap:
         self.in_values = in_values
         self.out_values = out_values
         self._max_str_lines = 4
-        self._array = None
 
     def __len__(self):
         """Return one more than the maximum label value being remapped."""
@@ -268,7 +267,7 @@ class ArrayMap:
 
     def __array__(self, dtype=None):
         """Return an array that behaves like the arraymap when indexed.
-        
+
         This array can be very large: it is the size of the largest value
         in the ``in_vals`` array, plus one.
         """
@@ -333,8 +332,9 @@ class ArrayMap:
         return out
 
     def __setitem__(self, indices, values):
-        if self._array is None:
-            self._array = self.__array__()
-        self._array[indices] = values
-        self.in_values = np.flatnonzero(self._array)
-        self.out_values = self._array[self.in_values]
+        for ind, val in zip(indices, values):
+            if ind in self.in_values:
+                self.out_values[self.in_values == ind] = val
+            else:
+                self.in_values = np.append(np.in_values, ind)
+                self.out_values = np.append(np.out_values, val)
