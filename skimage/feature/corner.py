@@ -3,6 +3,7 @@ from itertools import combinations_with_replacement
 import numpy as np
 from scipy import ndimage as ndi
 from scipy import stats
+from scipy import spatial
 
 from ..util import img_as_float
 from .peak import peak_local_max
@@ -917,16 +918,34 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
 def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                  exclude_border=True, indices=True, num_peaks=np.inf,
-                 footprint=None, labels=None, *, num_peaks_per_label=np.inf):
-    """Find corners in corner measure response image.
+                 footprint=None, labels=None, *, num_peaks_per_label=np.inf,
+                 p_norm=np.inf):
+    """Find peaks in corner measure response image.
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
     multiple connected peaks with the same accumulator value.
 
     Parameters
     ----------
+    image : ndarray
+        Input image.
+    min_distance : int, optional
+        The minimal allowed distance separating peaks.
     * : *
         See :py:meth:`skimage.feature.peak_local_max`.
+    p_norm : float
+        Which Minkowski p-norm to use. Should be in the range [1, inf].
+        A finite large p may cause a ValueError if overflow can occur.
+        ``inf`` corresponds to the Chebyshev distance and 2 to the
+        Euclidean distance.
+
+    Returns
+    -------
+    output : ndarray or ndarray of bools
+
+        * If `indices = True`  : (row, column, ...) coordinates of peaks.
+        * If `indices = False` : Boolean array shaped like `image`, with peaks
+          represented by True values.
 
     See also
     --------
@@ -964,30 +983,45 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
         warn("Until version 0.16, threshold_rel was set to 0.1 by default. "
              "Starting from version 0.16, the default value is set to None. "
              "Until version 0.18, a None value corresponds to a threshold "
-             "value of 0.1. "
-             "The default behavior will match skimage.feature.peak_local_max. "
-             "To avoid this warning, set threshold_rel=0.",
-             category=FutureWarning, stacklevel=2)
+             "value of 0.1. The default behavior will match "
+             "skimage.feature.peak_local_max. To avoid this warning, set "
+             "threshold_rel=0.", category=FutureWarning, stacklevel=2)
 
-    peaks = peak_local_max(image, min_distance=min_distance,
-                           threshold_abs=threshold_abs,
-                           threshold_rel=threshold_rel,
-                           exclude_border=exclude_border,
-                           indices=False, num_peaks=num_peaks,
-                           footprint=footprint, labels=labels,
-                           num_peaks_per_label=num_peaks_per_label)
-    if min_distance > 0:
-        coords = np.transpose(peaks.nonzero())
-        for r, c in coords:
-            if peaks[r, c]:
-                peaks[max((r - min_distance), 0):r + min_distance + 1,
-                      max((c - min_distance), 0):c + min_distance + 1] = False
-                peaks[r, c] = True
+    if np.isinf(num_peaks):
+        num_peaks = None
 
-    if indices is True:
-        return np.transpose(peaks.nonzero())
-    else:
-        return peaks
+    # Get the coordinates of the detected peaks
+    coords = peak_local_max(image, min_distance=min_distance,
+                            threshold_abs=threshold_abs,
+                            threshold_rel=threshold_rel,
+                            exclude_border=exclude_border,
+                            indices=True, num_peaks=np.inf,
+                            footprint=footprint, labels=labels,
+                            num_peaks_per_label=num_peaks_per_label)
+
+    if len(coords):
+        # Use KDtree to find the peaks that are too close to each other
+        tree = spatial.cKDTree(coords)
+
+        rejected_peaks_indices = set()
+        for idx, point in enumerate(coords):
+            if idx not in rejected_peaks_indices:
+                candidates = tree.query_ball_point(point, r=min_distance,
+                                                   p=p_norm)
+                candidates.remove(idx)
+                rejected_peaks_indices.update(candidates)
+
+        # Remove the peaks that are too close to each other
+        coords = np.delete(coords, tuple(rejected_peaks_indices),
+                           axis=0)[:num_peaks]
+
+    if indices:
+        return coords
+
+    peaks = np.zeros_like(image, dtype=bool)
+    peaks[tuple(coords.T)] = True
+
+    return peaks
 
 
 def corner_moravec(image, window_size=1):
