@@ -123,7 +123,7 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     else:
         multichannel = False
     interp = _interpolate_image(image, multichannel=multichannel)
-    output = np.zeros(image.shape)
+    output = np.zeros_like(image)
 
     if masks is None:
         spatialdims = image.ndim if not multichannel else image.ndim - 1
