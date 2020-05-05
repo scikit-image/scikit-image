@@ -73,7 +73,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         near each vertex. This can be used by visualization tools to apply
         a colormap to the mesh.
 
-    See also
+    See Also
     --------
     skimage.measure.mesh_surface_area
     skimage.measure.find_contours
