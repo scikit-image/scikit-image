@@ -80,7 +80,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
 
     Notes
     -----
-    The algorithm [1] is an improved version of Chernyaev's Marching
+    The algorithm [1]_ is an improved version of Chernyaev's Marching
     Cubes 33 algorithm. It is an efficient algorithm that relies on
     heavy use of lookup tables to handle the many different cases,
     keeping the algorithm relatively easy. This implementation is
