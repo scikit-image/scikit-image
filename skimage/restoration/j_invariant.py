@@ -134,7 +134,6 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
 
     for mask in masks:
         input_image = image.copy()
-        #input_image = image
         input_image[mask] = interp[mask]
         output[mask] = denoise_function(input_image, **denoiser_kwargs)[mask]
     return output
