@@ -200,7 +200,7 @@ ax2.hlines([0], xmin=thresholds2[0], xmax=thresholds2[-1],
            colors='gray', linestyles='dashed')
 ax2.vlines(np.mean(cell), ymin=np.min(gradients), ymax=np.max(gradients),
            colors='gray', linestyles='dashed')
-ax2.set_ylabel('$\Delta$(threshold)', color='C3')
+ax2.set_ylabel(r'$\Delta$(threshold)', color='C3')
 ax2.tick_params(axis='y', labelcolor='C3')
 
 fig.tight_layout()

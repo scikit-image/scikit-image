@@ -11,6 +11,8 @@ from ..measure._ccomp cimport find_root, join_trees
 from ..util import img_as_float64
 from .._shared.utils import warn
 
+cnp.import_array()
+
 
 def _felzenszwalb_cython(image, double scale=1, sigma=0.8,
                          Py_ssize_t min_size=20):

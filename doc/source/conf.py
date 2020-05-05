@@ -29,6 +29,10 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # -- General configuration -----------------------------------------------------
 
+# Strip backslahes in function's signature
+# To be removed when numpydoc > 0.9.x
+strip_signature_backslash = True
+
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx_copybutton',
@@ -43,32 +47,6 @@ extensions = ['sphinx_copybutton',
               ]
 
 autosummary_generate = True
-
-#------------------------------------------------------------------------
-# Sphinx-gallery configuration
-#------------------------------------------------------------------------
-
-sphinx_gallery_conf = {
-    'doc_module': ('skimage',),
-    # path to your examples scripts
-    'examples_dirs': '../examples',
-    # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples',
-    'backreferences_dir': 'api',
-    'reference_url': {'skimage': None},
-    'subsection_order': ExplicitOrder([
-        '../examples/data',
-        '../examples/numpy_operations',
-        '../examples/color_exposure',
-        '../examples/edges',
-        '../examples/transform',
-        '../examples/filters',
-        '../examples/features_detection',
-        '../examples/segmentation',
-        '../examples/applications',
-        '../examples/developers',
-    ]),
-}
 
 # Determine if the matplotlib has a recent enough version of the
 # plot_directive, otherwise use the local fork.
@@ -138,7 +116,7 @@ release = version
 exclude_trees = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
-#default_role = None
+default_role = "autolink"
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
@@ -156,6 +134,64 @@ pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
+
+#------------------------------------------------------------------------
+# Sphinx-gallery configuration
+#------------------------------------------------------------------------
+
+from packaging.version import parse
+v = parse(release)
+if v.release is None:
+    raise ValueError(
+        'Ill-formed version: {!r}. Version should follow '
+        'PEP440'.format(version))
+
+if v.is_devrelease:
+    binder_branch = 'master'
+else:
+    major, minor = v.release[:2]
+    binder_branch = 'v{}.{}.x'.format(major, minor)
+
+
+sphinx_gallery_conf = {
+    'doc_module': ('skimage',),
+    # path to your examples scripts
+    'examples_dirs': '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'auto_examples',
+    'backreferences_dir': 'api',
+    'reference_url': {'skimage': None},
+    # Default thumbnail size (400, 280)
+    # Default CSS rescales (160, 112)
+    # Size is decreased to reduce webpage loading time
+    'thumbnail_size': (280, 196),
+    'subsection_order': ExplicitOrder([
+        '../examples/data',
+        '../examples/numpy_operations',
+        '../examples/color_exposure',
+        '../examples/edges',
+        '../examples/transform',
+        '../examples/registration',
+        '../examples/filters',
+        '../examples/features_detection',
+        '../examples/segmentation',
+        '../examples/applications',
+        '../examples/developers',
+    ]),
+    'binder': {
+        # Required keys
+        'org': 'scikit-image',
+        'repo': 'scikit-image',
+        'branch': binder_branch,  # Can be any branch, tag, or commit hash
+        'binderhub_url': 'https://mybinder.org',  # Any URL of a binderhub.
+        'dependencies': '../../.binder/requirements.txt',
+        # Optional keys
+        'use_jupyter_lab': False
+     },
+    # Remove sphinx_gallery_thumbnail_number from generated files
+    'remove_config_comments':True,
+}
+
 
 
 # -- Options for HTML output ---------------------------------------------------

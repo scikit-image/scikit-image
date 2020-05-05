@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 from skimage import (img_as_float, img_as_float32, img_as_float64,
                      img_as_int, img_as_uint, img_as_ubyte)
-from skimage.util.dtype import convert
+from skimage.util.dtype import _convert
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
@@ -51,7 +51,7 @@ def test_range(dtype, f_and_dt):
                   y, omin, omax, np.dtype(dt))
 
 
-# Add non-standard data types that are allowed by the `convert` function.
+# Add non-standard data types that are allowed by the `_convert` function.
 dtype_range_extra = dtype_range.copy()
 dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
                           np.uint32: (0, 4294967295)})
@@ -71,7 +71,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    y = convert(x, dt)
+    y = _convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
     _verify_range("From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
@@ -132,16 +132,46 @@ def test_clobber():
 
             img_in = func_input_type(img)
             img_in_before = img_in.copy()
-            img_out = func_output_type(img_in)
+            func_output_type(img_in)
 
             assert_equal(img_in, img_in_before)
+
 
 def test_signed_scaling_float32():
     x = np.array([-128,  127], dtype=np.int8)
     y = img_as_float32(x)
     assert_equal(y.max(), 1)
 
+
 def test_float32_passthrough():
     x = np.array([-1, 1], dtype=np.float32)
     y = img_as_float(x)
     assert_equal(y.dtype, x.dtype)
+
+
+float_dtype_list = [float, np.float, np.double, np.single, np.float32,
+                    np.float64, 'float32', 'float64']
+
+
+def test_float_conversion_dtype():
+    """Test any convertion from a float dtype to an other."""
+    x = np.array([-1, 1])
+
+    # Test all combinations of dtypes convertions
+    dtype_combin = np.array(np.meshgrid(float_dtype_list,
+                                        float_dtype_list)).T.reshape(-1, 2)
+
+    for dtype_in, dtype_out in dtype_combin:
+        x = x.astype(dtype_in)
+        y = _convert(x, dtype_out)
+        assert y.dtype == np.dtype(dtype_out)
+
+
+def test_subclass_conversion():
+    """Check subclass conversion behavior"""
+    x = np.array([-1, 1])
+
+    for dtype in float_dtype_list:
+        x = x.astype(dtype)
+        y = _convert(x, np.floating)
+        assert y.dtype == x.dtype

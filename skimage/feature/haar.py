@@ -188,7 +188,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     .. [3] Viola, Paul, and Michael J. Jones. "Robust real-time face
            detection." International journal of computer vision 57.2
            (2004): 137-154.
-           http://www.merl.com/publications/docs/TR2004-043.pdf
+           https://www.merl.com/publications/docs/TR2004-043.pdf
            :DOI:`10.1109/CVPR.2001.990517`
 
     """
@@ -280,11 +280,11 @@ def draw_haar_like_feature(image, r, c, width, height,
     ...                                feature_coord,
     ...                                max_n_features=1)
     >>> image
-    array([[[ 0. ,  0.5,  0. ],
-            [ 0.5,  0. ,  0. ]],
+    array([[[0. , 0.5, 0. ],
+            [0.5, 0. , 0. ]],
     <BLANKLINE>
-           [[ 0.5,  0. ,  0. ],
-            [ 0. ,  0.5,  0. ]]])
+           [[0.5, 0. , 0. ],
+            [0. , 0.5, 0. ]]])
 
     """
     random_state = check_random_state(random_state)

@@ -6,35 +6,33 @@ from .._shared.utils import check_shape_equality
 __all__ = ['variation_of_information']
 
 
-def variation_of_information(im_true=None, im_test=None, *, table=None,
-                             ignore_labels=[], normalize=False):
-    """
-    Return symmetric conditional entropies associated with the VI. [1]_
+def variation_of_information(image0=None, image1=None, *, table=None,
+                             ignore_labels=()):
+    """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
-    If Y is the ground-truth segmentation, then H(Y|X) can be interpreted
-    as the amount of under-segmentation of Y and H(X|Y) as the amount
+    If X is the ground-truth segmentation, then H(X|Y) can be interpreted
+    as the amount of under-segmentation and H(X|Y) as the amount
     of over-segmentation. In other words, a perfect over-segmentation
-    will have H(Y|X)=0 and a perfect under-segmentation will have H(X|Y)=0.
+    will have H(X|Y)=0 and a perfect under-segmentation will have H(Y|X)=0.
 
     Parameters
     ----------
-    im_true, im_test : ndarray of int
+    image0, image1 : ndarray of int
         Label images / segmentations, must have same shape.
-    table : scipy.sparse array in crs format, optional
+    table : scipy.sparse array in csr format, optional
         A contingency table built with skimage.evaluate.contingency_table.
         If None, it will be computed with skimage.evaluate.contingency_table.
-    ignore_labels : list of int, optional
+        If given, the entropies will be computed from this table and any images
+        will be ignored.
+    ignore_labels : sequence of int, optional
         Labels to ignore. Any part of the true image labeled with any of these
         values will not be counted in the score.
-    normalize : bool, optional
-        If True, normalizes contigency table by the number of pixels of
-        each value.
 
     Returns
     -------
     vi : ndarray of float, shape (2,)
-        The conditional entropies of im_test|im_true and im_true|im_test.
+        The conditional entropies of image1|image0 and image0|image1.
 
     References
     ----------
@@ -42,15 +40,15 @@ def variation_of_information(im_true=None, im_test=None, *, table=None,
         distance, Journal of Multivariate Analysis, Volume 98, Issue 5,
         Pages 873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
     """
-    hxgy, hygx = _vi_tables(im_true, im_test, table,
-                            ignore_labels, normalize=normalize)
+    h0g1, h1g0 = _vi_tables(image0, image1, table=table,
+                            ignore_labels=ignore_labels)
     # false splits, false merges
-    return np.array([hygx.sum(), hxgy.sum()])
+    return np.array([h1g0.sum(), h0g1.sum()])
 
 
 def _xlogx(x):
-    """
-    Compute x * log_2(x).
+    """Compute x * log_2(x).
+
     We define 0 * log_2(0) = 0
 
     Parameters
@@ -73,15 +71,17 @@ def _xlogx(x):
     return y
 
 
-def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
-               normalize=False):
-    """
-    Compute probability tables used for calculating VI.
+def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
+    """Compute probability tables used for calculating VI.
 
     Parameters
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
+    table : csr matrix, optional
+        Pre-computed contingency table.
+    ignore_labels : sequence of int, optional
+        Labels to ignore when computing scores.
 
     Returns
     -------
@@ -94,7 +94,9 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
     if table is None:
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
-            im_true, im_test, ignore_labels, normalize=normalize)
+            im_true, im_test,
+            ignore_labels=ignore_labels, normalize=True
+        )
 
     else:
         pxy = table
@@ -116,8 +118,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=[],
 
 
 def _invert_nonzero(arr):
-    """
-    Compute the inverse of the non-zero elements of arr, not changing 0.
+    """Compute the inverse of the non-zero elements of arr, not changing 0.
 
     Parameters
     ----------

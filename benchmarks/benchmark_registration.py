@@ -1,5 +1,5 @@
 from skimage.data import stereo_motorcycle
-from skimage import rgb2gray
+from skimage.color import rgb2gray
 from skimage import registration
 
 

@@ -7,7 +7,7 @@ import numpy as np
 from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, warn
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
 from ._skeletonize_3d_cy import _compute_thin_image
@@ -576,7 +576,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(img):
+def skeletonize_3d(image, *, img=None):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -584,9 +584,17 @@ def skeletonize_3d(img):
 
     Parameters
     ----------
-    img : ndarray, 2D or 3D
+    image : ndarray, 2D or 3D
         A binary image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
+
+    Other Parameters
+    ----------------
+    img : DEPRECATED
+        Synonym for `image`.
+
+        .. deprecated:: 0.16
+           Will be removed in 0.17.
 
     Returns
     -------
@@ -617,32 +625,35 @@ def skeletonize_3d(img):
            Computer Vision, Graphics, and Image Processing, 56(6):462-478, 1994.
 
     """
+    if img is not None:
+        image = img
+        warn('Using img as a keyword argument to skeletonize_3d is deprecated.'
+             ' Use image instead.')
     # make sure the image is 3D or 2D
-    if img.ndim < 2 or img.ndim > 3:
+    if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
-                         "got img.ndim = %s instead." % img.ndim)
-
-    img = np.ascontiguousarray(img)
-    img = img_as_ubyte(img, force_copy=False)
+                         "got image.ndim = %s instead." % image.ndim)
+    image = np.ascontiguousarray(image)
+    image = img_as_ubyte(image, force_copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
-    img_o = img
-    if img.ndim == 2:
-        img_o = img[np.newaxis, ...]
-    img_o = np.pad(img_o, pad_width=1, mode='constant')
+    image_o = image
+    if image.ndim == 2:
+        image_o = image[np.newaxis, ...]
+    image_o = np.pad(image_o, pad_width=1, mode='constant')
 
     # normalize to binary
-    maxval = img_o.max()
-    img_o[img_o != 0] = 1
+    maxval = image_o.max()
+    image_o[image_o != 0] = 1
 
     # do the computation
-    img_o = np.asarray(_compute_thin_image(img_o))
+    image_o = np.asarray(_compute_thin_image(image_o))
 
     # crop it back and restore the original intensity range
-    img_o = crop(img_o, crop_width=1)
-    if img.ndim == 2:
-        img_o = img_o[0]
-    img_o *= maxval
+    image_o = crop(image_o, crop_width=1)
+    if image.ndim == 2:
+        image_o = image_o[0]
+    image_o *= maxval
 
-    return img_o
+    return image_o

@@ -26,6 +26,14 @@ addons:
     # https://github.com/matplotlib/matplotlib/pull/13412
     - qtbase5-dev
 
+stage: Comprehensive tests
+
+stages:
+    # Do the style check and a single test job, don't proceed if it fails
+    - name: Initial tests
+    # Do the rest of the tests
+    - name: Comprehensive tests
+
 env:
   global:
     - GH_REF: github.com/scikit-image/docs.git
@@ -55,24 +63,34 @@ matrix:
       env: QT=PyQt5 OPTIONAL_DEPS=1 MINIMUM_REQUIREMENTS=1
     - os: linux
       python: 3.7
+      dist: xenial # Required for Python 3.7+
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1 DEPLOY_DOCS=1
+      services:
+        - xvfb
+    - os: linux
+      python: 3.7
+      # Testing and installing from sdist will ensure that tests do not
+      # depend on pooch to pass
+      # pooch is used as an optional dependency to download datasets on the fly
+      # users installing scikit-image in development mode do not require
+      # pooch to run the tests
+      env: INSTALL_FROM_SDIST=1
       dist: xenial # Required for Python 3.7
       services:
         - xvfb
     - os: linux
       python: 3.7
+      stage: Initial tests
       dist: xenial # Required for Python 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
       services:
         - xvfb
-    # When 3.8 gets released, and dependencies have built wheels, enable
-    # this build
-    # - os: linux
-    #   python: 3.8
-    #   env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
-    #   dist: xenial # Required for Python 3.7
-    #   services:
-    #     - xvfb
+    - os: linux
+      python: 3.8
+      env: QT=PyQt5 OPTIONAL_DEPS=1 BUILD_DOCS=1
+      dist: xenial # Required for Python 3.7+
+      services:
+        - xvfb
     - os: linux
       python: 3.7
       env: QT=PyQt5 OPTIONAL_DEPS=1 PIP_FLAGS="--pre"
@@ -86,19 +104,23 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.6
+      env: MB_PYTHON_VERSION=3.6
     - os: osx
       osx_image: xcode9.4
       language: objective-c
-      env: TRAVIS_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
-    # When 3.8 gets released, and dependencies have built wheels, enable
-    # this build
-    # - os: osx
-    #   osx_image: xcode9.4
-    #   language: objective-c
-    #   env: TRAVIS_PYTHON_VERSION=3.8
+      env: MB_PYTHON_VERSION=3.7 OPTIONAL_DEPS=1 EXTRA_DEPS=0
+    - os: osx
+      osx_image: xcode9.4
+      language: objective-c
+      # Require pre for scikit-learn 0.22 that has builds for 3.8
+      env: MB_PYTHON_VERSION=3.8
 
 before_install:
+    # Remove this line when the Ubuntu image is updated to Xenial
+    # https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728/15
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        apt-key adv --list-public-keys --with-colons | grep '^pub' | cut -d':' -f 5 | egrep -o '.{8}$' | grep -wo 762E3157 > /dev/null 2>&1 || sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157;
+      fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         source tools/travis/osx_install.sh;
       else
@@ -126,8 +148,14 @@ install:
         pip uninstall cython -y;
         pip install dist/scikit-image-*.tar.gz;
       else
-        pip install --no-build-isolation .;
+        pip install -vv --no-build-isolation -e .;
       fi
+    # ^^^^ installing in editable mode avoids redownloading the test datasets
+    # using pooch as our code automatically checks for the data being
+    # stored in directories adjacent to the source.
+    #
+    # installing from SDIST will force the use of pooch as a downloading
+    # backend to test the pooch functionality
     # Install testing requirements
     - pip install --retries 3 $PIP_FLAGS -r requirements/test.txt
     # Matplotlib settings - do not show figures during doc examples

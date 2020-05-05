@@ -44,11 +44,11 @@ ax1.set_title('noisy image', fontsize=20)
 
 ax2.imshow(edges1, cmap=plt.cm.gray)
 ax2.axis('off')
-ax2.set_title('Canny filter, $\sigma=1$', fontsize=20)
+ax2.set_title(r'Canny filter, $\sigma=1$', fontsize=20)
 
 ax3.imshow(edges2, cmap=plt.cm.gray)
 ax3.axis('off')
-ax3.set_title('Canny filter, $\sigma=3$', fontsize=20)
+ax3.set_title(r'Canny filter, $\sigma=3$', fontsize=20)
 
 fig.tight_layout()
 

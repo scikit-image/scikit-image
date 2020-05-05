@@ -7,7 +7,7 @@ The convex hull of a binary image is the set of pixels included in the
 smallest convex polygon that surround all white pixels in the input.
 
 A good overview of the algorithm is given on `Steve Eddin's blog
-<http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/>`__.
+<https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/>`__.
 
 """
 

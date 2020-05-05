@@ -1,17 +1,20 @@
 #! /usr/bin/env python
 
-descr = """Image Processing SciKit
+import os
+import sys
+import tempfile
+import shutil
+import builtins
+import textwrap
 
-Image processing algorithms for SciPy, including IO, morphology, filtering,
-warping, color manipulation, object detection, etc.
+import setuptools
+from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
+from distutils.errors import CompileError, LinkError
 
-Please refer to the online documentation at
-https://scikit-image.org/
-"""
 
 DISTNAME = 'scikit-image'
-DESCRIPTION = 'Image processing routines for SciPy'
-LONG_DESCRIPTION = descr
+DESCRIPTION = 'Image processing in Python'
 MAINTAINER = 'Stefan van der Walt'
 MAINTAINER_EMAIL = 'stefan@sun.ac.za'
 URL = 'https://scikit-image.org'
@@ -23,18 +26,8 @@ PROJECT_URLS = {
     "Source Code": 'https://github.com/scikit-image/scikit-image'
 }
 
-import os
-import sys
-import tempfile
-import shutil
-
-import setuptools
-from distutils.command.build_py import build_py
-from distutils.command.sdist import sdist
-from distutils.errors import CompileError, LinkError
-
-from numpy.distutils.command.build_ext import build_ext
-
+with open('README.md') as f:
+    LONG_DESCRIPTION = f.read()
 
 if sys.version_info < (3, 6):
 
@@ -42,15 +35,13 @@ if sys.version_info < (3, 6):
 
 scikit-image 0.16+ supports only Python 3.6 and above.
 
-For Python 2.7, please install the 0.14.x Long Term Support using:
+For Python 2.7, please install the 0.14.x Long Term Support release using:
 
  $ pip install 'scikit-image<0.15'
 """.format(py='.'.join([str(v) for v in sys.version_info[:3]]))
 
     sys.stderr.write(error + "\n")
     sys.exit(1)
-
-import builtins
 
 # This is a bit (!) hackish: we are setting a global variable so that the main
 # skimage __init__ can detect if it is being loaded by the setup routine, to
@@ -60,55 +51,60 @@ import builtins
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
 
+
 # Support for openmp
 
-compile_flags = ['-fopenmp']
-link_flags = ['-fopenmp']
+def openmp_build_ext():
+    from numpy.distutils.command.build_ext import build_ext
 
-code = """#include <omp.h>
-int main(int argc, char** argv) { return(0); }"""
+    compile_flags = ['-fopenmp']
+    link_flags = ['-fopenmp']
 
+    code = """#include <omp.h>
+    int main(int argc, char** argv) { return(0); }"""
 
-class ConditionalOpenMP(build_ext):
+    class ConditionalOpenMP(build_ext):
 
-    def can_compile_link(self):
+        def can_compile_link(self):
 
-        cc = self.compiler
-        fname = 'test.c'
-        cwd = os.getcwd()
-        tmpdir = tempfile.mkdtemp()
+            cc = self.compiler
+            fname = 'test.c'
+            cwd = os.getcwd()
+            tmpdir = tempfile.mkdtemp()
 
-        try:
-            os.chdir(tmpdir)
-            with open(fname, 'wt') as fobj:
-                fobj.write(code)
             try:
-                objects = cc.compile([fname],
-                                     extra_postargs=compile_flags)
-            except CompileError:
-                return False
-            try:
-                # Link shared lib rather then executable to avoid
-                # http://bugs.python.org/issue4431 with MSVC 10+
-                cc.link_shared_lib(objects, "testlib",
-                                   extra_postargs=link_flags)
-            except (LinkError, TypeError):
-                return False
-        finally:
-            os.chdir(cwd)
-            shutil.rmtree(tmpdir)
-        return True
+                os.chdir(tmpdir)
+                with open(fname, 'wt') as fobj:
+                    fobj.write(code)
+                try:
+                    objects = cc.compile([fname],
+                                         extra_postargs=compile_flags)
+                except CompileError:
+                    return False
+                try:
+                    # Link shared lib rather then executable to avoid
+                    # http://bugs.python.org/issue4431 with MSVC 10+
+                    cc.link_shared_lib(objects, "testlib",
+                                       extra_postargs=link_flags)
+                except (LinkError, TypeError):
+                    return False
+            finally:
+                os.chdir(cwd)
+                shutil.rmtree(tmpdir)
+            return True
 
-    def build_extensions(self):
-        """ Hook into extension building to check compiler flags """
+        def build_extensions(self):
+            """ Hook into extension building to check compiler flags """
 
-        if self.can_compile_link():
+            if self.can_compile_link():
 
-            for ext in self.extensions:
-                ext.extra_compile_args += compile_flags
-                ext.extra_link_args += link_flags
+                for ext in self.extensions:
+                    ext.extra_compile_args += compile_flags
+                    ext.extra_link_args += link_flags
 
-        build_ext.build_extensions(self)
+            build_ext.build_extensions(self)
+
+    return ConditionalOpenMP
 
 
 with open('skimage/__init__.py') as fid:
@@ -130,7 +126,7 @@ INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
 # it contains requirements that do not have wheels uploaded to pip
 # for the platforms we wish to support.
 extras_require = {
-    dep : parse_requirements_file('requirements/' + dep + '.txt')
+    dep: parse_requirements_file('requirements/' + dep + '.txt')
     for dep in ['docs', 'optional', 'test']
 }
 
@@ -154,7 +150,6 @@ def configuration(parent_package='', top_path=None):
         quiet=True)
 
     config.add_subpackage('skimage')
-    config.add_data_dir('skimage/data')
 
     return config
 
@@ -163,14 +158,6 @@ if __name__ == "__main__":
     try:
         from numpy.distutils.core import setup
         extra = {'configuration': configuration}
-        # Do not try and upgrade larger dependencies
-        for lib in ['scipy', 'numpy', 'matplotlib', 'pillow']:
-            try:
-                __import__(lib)
-                INSTALL_REQUIRES = [i for i in INSTALL_REQUIRES
-                                    if lib not in i]
-            except ImportError:
-                pass
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
@@ -187,11 +174,17 @@ if __name__ == "__main__":
             from setuptools import setup
             extra = {}
         else:
-            print('To install scikit-image from source, you will need numpy.\n' +
-                  'Install numpy with pip:\n' +
-                  'pip install numpy\n'
-                  'Or use your operating system package manager. For more\n' +
-                  'details, see https://scikit-image.org/docs/stable/install.html')
+            print(textwrap.dedent("""
+                To install scikit-image from source, you will need NumPy.
+                Install NumPy with pip using:
+
+                  pip install numpy
+
+                Or use your operating system package manager. For more
+                details, see:
+
+                   https://scikit-image.org/docs/stable/install.html
+            """))
             sys.exit(1)
 
     setup(
@@ -237,7 +230,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
-                  'build_ext': ConditionalOpenMP,
+                  'build_ext': openmp_build_ext(),
                   'sdist': sdist},
         **extra
     )

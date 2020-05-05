@@ -1,22 +1,25 @@
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform._warps import (_stackcopy, _linear_polar_mapping,
-                                      _log_polar_mapping)
-from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
-                               AffineTransform,
-                               ProjectiveTransform,
-                               SimilarityTransform,
-                               downscale_local_mean,
-                               warp_polar)
-from skimage import transform as tf, data, img_as_float
-from skimage.color import rgb2gray
-from skimage.draw import circle_perimeter_aa
-from skimage.feature import peak_local_max
+from skimage.data import checkerboard, astronaut
+from skimage.util.dtype import img_as_float
+from skimage.color.colorconv import rgb2gray
+from skimage.draw.draw import circle_perimeter_aa
+from skimage.feature.peak import peak_local_max
 from skimage._shared import testing
 from skimage._shared.testing import (assert_almost_equal, assert_equal,
                                      test_parallel)
 from skimage._shared._warnings import expected_warnings
+
+from skimage.transform._warps import (_stackcopy,
+                                      _linear_polar_mapping,
+                                      _log_polar_mapping, warp,
+                                      warp_coords, rotate, resize,
+                                      rescale, warp_polar, swirl,
+                                      downscale_local_mean)
+from skimage.transform._geometric import (AffineTransform,
+                                          ProjectiveTransform,
+                                          SimilarityTransform)
 
 
 np.random.seed(0)
@@ -161,6 +164,11 @@ def test_rotate_resize_center():
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)
     assert_equal(x45, ref_x45)
+
+
+def test_rotate_resize_90():
+    x90 = rotate(np.zeros((470, 230), dtype=np.double), 90, resize=True)
+    assert x90.shape == (230, 470)
 
 
 def test_rescale():
@@ -331,22 +339,38 @@ def test_resize3d_bilinear():
     assert_almost_equal(resized, ref)
 
 
+def test_resize_dtype():
+    x = np.zeros((5, 5))
+    x_f32 = x.astype(np.float32)
+    x_u8 = x.astype(np.uint8)
+    x_b = x.astype(bool)
+
+    assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
+    assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=False).dtype == np.double
+    assert resize(x_b, (10, 10), preserve_range=True).dtype == np.double
+    assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
+    assert resize(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
+
+
 def test_swirl():
-    image = img_as_float(data.checkerboard())
+    image = img_as_float(checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
 
     swirl_params.pop('mode')
 
     with expected_warnings(['Bi-quadratic.*bug']):
-        swirled = tf.swirl(image, strength=10, **swirl_params)
-        unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
+        swirled = swirl(image, strength=10, **swirl_params)
+        unswirled = swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image[1:-1, 1:-1] - unswirled[1:-1, 1:-1])) < 0.01
 
@@ -359,7 +383,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = img_as_float(rgb2gray(data.astronaut()))
+    img = img_as_float(rgb2gray(astronaut()))
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))
@@ -373,7 +397,7 @@ def test_warp_identity():
 
 
 def test_warp_coords_example():
-    image = data.astronaut().astype(np.float32)
+    image = astronaut().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
@@ -592,8 +616,9 @@ def test_log_warp_polar():
         image[rr, cc] = val
     warped = warp_polar(image, radius=200, scaling='log')
     profile = warped.mean(axis=0)
-    peaks = peak_local_max(profile)
-    gaps = peaks[:-1]-peaks[1:]
+    peaks_coord = peak_local_max(profile)
+    peaks_coord.sort(axis=0)
+    gaps = peaks_coord[1:] - peaks_coord[:-1]
     assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
 
 
@@ -611,3 +636,44 @@ def test_invalid_dimensions_polar():
         warp_polar(np.zeros((10, 10)), (5, 5), multichannel=True)
     with testing.raises(ValueError):
         warp_polar(np.zeros((10, 10, 10, 3)), (5, 5), multichannel=True)
+
+
+def test_bool_img_rescale():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = rescale(img, 0.5)
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_bool_img_resize():
+    img = np.ones((12, 18), dtype=bool)
+    img[2:-2, 4:-4] = False
+    res = resize(img, (6, 9))
+
+    expected = np.ones((6, 9))
+    expected[1:-1, 2:-2] = False
+
+    assert_equal(res, expected)
+
+
+def test_boll_array_warnings():
+    img = np.zeros((10, 10), dtype=bool)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), anti_aliasing=True)
+
+    with expected_warnings(['Input image dtype is bool']):
+        rescale(img, 0.5, order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        resize(img, (5, 5), order=1)
+
+    with expected_warnings(['Input image dtype is bool']):
+        warp(img, np.eye(3), order=1)

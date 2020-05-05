@@ -27,17 +27,15 @@ import numpy as np
 
 from ..._shared.utils import check_nD
 from . import bilateral_cy
-from .generic import _handle_input
-
+from .generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
-
     check_nD(image, 2)
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
