@@ -806,8 +806,7 @@ class AffineTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            scale = np.atleast_1d(scale)
-            if len(scale) == 1:
+            if np.isscalar(scale):
                 sx = sy = scale
             else:
                 sx, sy = scale
