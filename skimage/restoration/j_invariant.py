@@ -269,9 +269,6 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
     stride : int, optional
         Stride used in masking procedure that converts `denoise_function`
         to J-invariance.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
     approximate_loss : bool, optional
         Whether to approximate the self-supervised loss used to evaluate the
         denoiser by only computing it on one masked version of the image.
