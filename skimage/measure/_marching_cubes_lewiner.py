@@ -23,33 +23,33 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     volume : (M, N, P) array
         Input data volume to find isosurfaces. Will internally be
         converted to float32 if necessary.
-    level : float
+    level : float, optional
         Contour value to search for isosurfaces in `volume`. If not
         given or None, the average of the min and max of vol is used.
-    spacing : length-3 tuple of floats
+    spacing : length-3 tuple of floats, optional
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
-    gradient_direction : string
+    gradient_direction : string, optional
         Controls if the mesh was generated from an isosurface with gradient
         descent toward objects of interest (the default), or the opposite,
         considering the *left-hand* rule.
         The two options are:
         * descent : Object was greater than exterior
         * ascent : Exterior was greater than object
-    step_size : int
+    step_size : int, optional
         Step size in voxels. Default 1. Larger steps yield faster but
         coarser results. The result will always be topologically correct
         though.
-    allow_degenerate : bool
+    allow_degenerate : bool, optional
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    method: str
+    method: str, optional
         One of 'lewiner', 'lorensen' or '_lorensen'. Specify witch of
         Lewiner et al. or Lorensen et al. method will be used. The
         '_lorensen' flag correspond to an old implementation that will
         be deprecated in version 0.19.
-    mask : (M, N, P) array
+    mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on
         True elements. This will save computational time when interfaces
         are located within certain region of the volume M, N, P-e.g. the top
