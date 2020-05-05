@@ -56,7 +56,6 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         half of the cube-and also allow to compute finite surfaces-i.e. open
         surfaces that do not end at the border of the cube.
 
-
     Returns
     -------
     verts : (V, 3) array
@@ -73,6 +72,10 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         Gives a measure for the maximum value of the data in the local region
         near each vertex. This can be used by visualization tools to apply
         a colormap to the mesh.
+
+    See also
+    --------
+    find_contours
 
     Notes
     -----
