@@ -32,7 +32,9 @@ from skimage.restoration import (calibrate_denoiser,
                                  estimate_sigma)
 from skimage.util import img_as_float, random_noise
 from skimage.color import rgb2gray
+from functools import partial
 
+_denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
 sigma = 0.3
@@ -47,11 +49,11 @@ parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
                     'multichannel': [True]}
 
 # Denoised image using default parameters of `denoise_wavelet`
-default_output = denoise_wavelet(noisy, multichannel=True)
+default_output = denoise_wavelet(noisy, multichannel=True, rescale_sigma=True)
 
 # Calibrate denoiser
 calibrated_denoiser = calibrate_denoiser(noisy,
-                                         denoise_wavelet,
+                                         _denoise_wavelet,
                                          denoise_parameters=parameter_ranges
                                          )
 
@@ -103,7 +105,7 @@ parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
                       'multichannel': True}
                      for sigma in sigma_range]
 
-denoised_invariant = [_invariant_denoise(noisy, denoise_wavelet,
+denoised_invariant = [_invariant_denoise(noisy, _denoise_wavelet,
                                          denoiser_kwargs=params)
                       for params in parameters_tested]
 
@@ -173,7 +175,7 @@ parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
                       'wavelet': 'db2', 'multichannel': True}
                      for sigma in sigma_range]
 
-denoised_original = [denoise_wavelet(noisy, **params)
+denoised_original = [_denoise_wavelet(noisy, **params)
                      for params in parameters_tested]
 
 ground_truth_loss_invariant = [mse(img, image) for img in denoised_invariant]
@@ -234,16 +236,16 @@ psnr_default_tv = psnr(denoised_default_tv, image)
 parameter_ranges_wavelet = {'sigma': np.arange(0.01, 0.3, 0.03)}
 _, (parameters_tested_wavelet, losses_wavelet) = calibrate_denoiser(
                                                 noisy,
-                                                denoise_wavelet,
+                                                _denoise_wavelet,
                                                 parameter_ranges_wavelet,
                                                 full_output=True)
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
 denoised_calibrated_wavelet = _invariant_denoise(
-        noisy, denoise_wavelet,
+        noisy, _denoise_wavelet,
         denoiser_kwargs=best_parameters_wavelet)
-denoised_default_wavelet = denoise_wavelet(noisy, **best_parameters_wavelet)
+denoised_default_wavelet = _denoise_wavelet(noisy, **best_parameters_wavelet)
 
 psnr_calibrated_wavelet = psnr(denoised_calibrated_wavelet, image)
 psnr_default_wavelet = psnr(denoised_default_wavelet, image)

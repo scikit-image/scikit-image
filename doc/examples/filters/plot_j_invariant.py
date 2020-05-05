@@ -32,7 +32,9 @@ from skimage.restoration import (calibrate_denoiser,
                                  estimate_sigma)
 from skimage.util import img_as_float, random_noise
 from skimage.color import rgb2gray
+from functools import partial
 
+_denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
 sigma = 0.3
@@ -47,11 +49,11 @@ parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
                     'multichannel': [True]}
 
 # Denoised image using default parameters of `denoise_wavelet`
-default_output = denoise_wavelet(noisy, multichannel=True)
+default_output = denoise_wavelet(noisy, multichannel=True, rescale_sigma=True)
 
 # Calibrate denoiser
 calibrated_denoiser = calibrate_denoiser(noisy,
-                                         denoise_wavelet,
+                                         _denoise_wavelet,
                                          denoise_parameters=parameter_ranges)
 
 # Denoised image using calibrated denoiser
