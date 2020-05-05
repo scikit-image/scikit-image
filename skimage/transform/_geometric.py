@@ -765,8 +765,8 @@ class AffineTransform(ProjectiveTransform):
     ----------
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
-    scale : (sx, sy) as array, list or tuple, optional
-        Scale factors.
+    scale : {s as float or (sx, sy) as array, list or tuple}, optional
+        Scale factor(s). If a single value, it will be assigned to both sx and sy.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
@@ -805,7 +805,12 @@ class AffineTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            sx, sy = scale
+            scale = np.atleast_1d(scale)
+            if len(scale) == 1:
+                sx = sy = scale
+            else:
+                sx, sy = scale
+
             self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
