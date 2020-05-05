@@ -766,7 +766,8 @@ class AffineTransform(ProjectiveTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
     scale : {s as float or (sx, sy) as array, list or tuple}, optional
-        Scale factor(s). If a single value, it will be assigned to both sx and sy.
+        Scale factor(s). If a single value, it will be assigned to both
+        sx and sy.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
