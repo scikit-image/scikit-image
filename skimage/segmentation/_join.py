@@ -347,7 +347,7 @@ class ArrayMap:
         if np.isscalar(values) or len(values) == 1:
             values = np.repeat(values, len(indices))
 
-        for ind, val in zip(np.atleast_1d(indices), np.atleast_1d(values)):
+        for ind, val in zip(indices, values):
             if ind in self.in_values:
                 self.out_values[self.in_values == ind] = val
             else:
