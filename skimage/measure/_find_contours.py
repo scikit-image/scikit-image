@@ -43,10 +43,10 @@ def find_contours(array, level,
         Each contour is an ndarray of shape ``(n, 2)``,
         consisting of n ``(row, column)`` coordinates along the contour.
 
-    See also
+    See Also
     --------
-    marching_cubes
-    marching_cubes_classic
+    skimage.measure.marching_cubes
+    skimage.measure.marching_cubes_classic
 
     Notes
     -----
