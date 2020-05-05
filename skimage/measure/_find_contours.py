@@ -46,7 +46,6 @@ def find_contours(array, level,
     See Also
     --------
     skimage.measure.marching_cubes
-    skimage.measure.marching_cubes_classic
 
     Notes
     -----
