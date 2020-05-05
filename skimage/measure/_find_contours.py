@@ -26,7 +26,7 @@ def find_contours(array, level,
          Indicates whether array elements below the given level value are to be
          considered fully-connected (and hence elements above the value will
          only be face connected), or vice-versa. (See notes below for details.)
-    positive_orientation : either 'low' or 'high'
+    positive_orientation : str, {'low', 'high'}
          Indicates whether the output contours will produce positively-oriented
          polygons around islands of low- or high-valued elements. If 'low' then
          contours will wind counter- clockwise around elements below the
@@ -43,12 +43,17 @@ def find_contours(array, level,
         Each contour is an ndarray of shape ``(n, 2)``,
         consisting of n ``(row, column)`` coordinates along the contour.
 
+    See also
+    --------
+    marching_cubes
+    marching_cubes_classic
+
     Notes
     -----
     The marching squares algorithm is a special case of the marching cubes
-    algorithm [1]_.  A simple explanation is available here::
+    algorithm [1]_.  A simple explanation is available here:
 
-      http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
+    http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
 
     There is a single ambiguous case in the marching squares algorithm: when
     a given ``2 x 2``-element square has two high-valued and two low-valued
