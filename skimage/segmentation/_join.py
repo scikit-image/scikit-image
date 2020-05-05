@@ -332,9 +332,24 @@ class ArrayMap:
         return out
 
     def __setitem__(self, indices, values):
-        for ind, val in zip(indices, values):
+        if np.isscalar(indices):
+            indices = np.atleast_1d(indices)
+        elif isinstance(indices, slice):
+            start = indices.start or 0  # treat None or 0 the same way
+            stop = (indices.stop
+                    if indices.stop is not None
+                    else len(self))
+            step = indices.step
+            indices = np.arange(start, stop, step)
+        if indices.dtype == bool:
+            indices = np.flatnonzero(indices)
+
+        if np.isscalar(values) or len(values) == 1:
+            values = np.repeat(values, len(indices))
+
+        for ind, val in zip(np.atleast_1d(indices), np.atleast_1d(values)):
             if ind in self.in_values:
                 self.out_values[self.in_values == ind] = val
             else:
-                self.in_values = np.append(np.in_values, ind)
-                self.out_values = np.append(np.out_values, val)
+                self.in_values = np.append(self.in_values, ind)
+                self.out_values = np.append(self.out_values, val)
