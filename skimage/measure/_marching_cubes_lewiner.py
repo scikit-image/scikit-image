@@ -13,7 +13,7 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
                    allow_degenerate=True, method='lewiner', mask=None):
     """Marching cubes algorithm to find surfaces in 3d volumetric data.
 
-    In contrast with Lorensen et al. approach [2], Lewiner et
+    In contrast with Lorensen et al. approach [2]_, Lewiner et
     al. algorithm is faster, resolves ambiguities, and guarantees
     topologically correct results. Therefore, this algorithm generally
     a better choice.
