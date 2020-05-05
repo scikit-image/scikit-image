@@ -307,31 +307,7 @@ class ArrayMap:
     def __call__(self, arr):
         return self.__getitem__(arr)
 
-    def __getitem__(self, index):
-        scalar = np.isscalar(index)
-        if scalar:
-            index = np.array([index])
-        elif isinstance(index, slice):
-            start = index.start or 0  # treat None or 0 the same way
-            stop = (index.stop
-                    if index.stop is not None
-                    else len(self))
-            step = index.step
-            index = np.arange(start, stop, step)
-        if index.dtype == bool:
-            index = np.flatnonzero(index)
-
-        out = map_array(
-            index,
-            self.in_values.astype(index.dtype, copy=False),
-            self.out_values,
-        )
-
-        if scalar:
-            out = out[0]
-        return out
-
-    def __setitem__(self, indices, values):
+    def _normalize_indices(self, indices):
         if np.isscalar(indices):
             indices = np.atleast_1d(indices)
         elif isinstance(indices, slice):
@@ -343,6 +319,25 @@ class ArrayMap:
             indices = np.arange(start, stop, step)
         if indices.dtype == bool:
             indices = np.flatnonzero(indices)
+
+        return indices
+
+    def __getitem__(self, indices):
+        scalar = np.isscalar(indices)
+        indices = self._normalize_indices(indices)
+
+        out = map_array(
+            indices,
+            self.in_values.astype(indices.dtype, copy=False),
+            self.out_values,
+        )
+
+        if scalar:
+            out = out[0]
+        return out
+
+    def __setitem__(self, indices, values):
+        indices = self._normalize_indices(indices)
 
         if np.isscalar(values) or len(values) == 1:
             values = np.repeat(values, len(indices))
