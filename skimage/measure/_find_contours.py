@@ -106,6 +106,7 @@ def find_contours(array, level,
     .. [1] Lorensen, William and Harvey E. Cline. Marching Cubes: A High
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
+           :DOI:`10.1145/37401.37422`
 
     Examples
     --------
