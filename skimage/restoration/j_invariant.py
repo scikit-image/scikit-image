@@ -100,9 +100,6 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     stride : int, optional
         Stride used in masking procedure that converts `denoise_function`
         to J-invariance.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension.
     masks : list of ndarray, optional
         Set of masks to use for computing J-invariant output. If `None`,
         a full set of masks covering the image will be used.
