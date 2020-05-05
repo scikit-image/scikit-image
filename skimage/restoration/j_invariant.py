@@ -25,7 +25,7 @@ def _interpolate_image(image, *, multichannel=False):
         Interpolated version of `image`.
     """
     spatialdims = image.ndim if not multichannel else image.ndim - 1
-    conv_filter = ndi.generate_binary_structure(spatialdims, 1).astype(float)
+    conv_filter = ndi.generate_binary_structure(spatialdims, 1).astype(image.dtype)
     conv_filter.ravel()[conv_filter.size // 2] = 0
     conv_filter /= conv_filter.sum()
 
