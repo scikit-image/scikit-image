@@ -222,7 +222,7 @@ _, (parameters_tested_tv, losses_tv) = calibrate_denoiser(
                                     noisy,
                                     denoise_tv_chambolle,
                                     denoise_parameters=parameter_ranges_tv,
-                                    full_output=True)
+                                    extra_output=True)
 print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
@@ -238,7 +238,7 @@ _, (parameters_tested_wavelet, losses_wavelet) = calibrate_denoiser(
                                                 noisy,
                                                 _denoise_wavelet,
                                                 parameter_ranges_wavelet,
-                                                full_output=True)
+                                                extra_output=True)
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
@@ -259,7 +259,7 @@ parameter_ranges_nl = {'sigma': np.arange(0.01, 0.3, 0.03)}
 _, (parameters_tested_nl, losses_nl) = calibrate_denoiser(noisy,
                                                         denoise_nl_means,
                                                         parameter_ranges_nl,
-                                                        full_output=True)
+                                                        extra_output=True)
 print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
