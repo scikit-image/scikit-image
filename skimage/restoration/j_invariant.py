@@ -164,7 +164,7 @@ def _product_from_dict(dictionary):
 
 def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
                        stride=4, approximate_loss=True,
-                       full_output=False):
+                       extra_output=False):
     """Calibrate a denoising function and return optimal J-invariant version.
 
     The returned function is partially evaluated with optimal parameter values
@@ -188,7 +188,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
         Whether to approximate the self-supervised loss used to evaluate the
         denoiser by only computing it on one masked version of the image.
         If False, the runtime will be a factor of `stride**image.ndim` longer.
-    full_output : bool, optional
+    extra_output : bool, optional
         If True, return parameters and losses in addition to the calibrated
         denoising function
 
@@ -197,13 +197,12 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     best_denoise_function : function
         The optimal J-invariant version of `denoise_function`.
 
-    If `full_output` is True, the following tuple is also returned:
+    If `extra_output` is True, the following tuple is also returned:
 
     (parameters_tested, losses) : tuple (list of dict, list of int)
         List of parameters tested for `denoise_function`, as a dictionary of
         kwargs
         Self-supervised loss for each set of parameters in `parameters_tested`.
-
 
 
     Notes
@@ -256,7 +255,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
         denoiser_kwargs=best_parameters,
     )
 
-    if full_output:
+    if extra_output:
         return best_denoise_function, (parameters_tested, losses)
     else:
         return best_denoise_function

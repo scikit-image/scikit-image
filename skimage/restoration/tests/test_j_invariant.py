@@ -45,13 +45,13 @@ def test_invariant_denoise_3d():
     assert_(denoised_mse < original_mse)
 
 
-def test_calibrate_denoiser_full_output():
+def test_calibrate_denoiser_extra_output():
     parameter_ranges = {'sigma': np.linspace(0.1, 1, 5) / 2}
     _, (parameters_tested, losses) = calibrate_denoiser(
         noisy_img,
         _denoise_wavelet,
         denoise_parameters=parameter_ranges,
-        full_output=True
+        extra_output=True
     )
 
     all_denoised = [_invariant_denoise(noisy_img, _denoise_wavelet,
