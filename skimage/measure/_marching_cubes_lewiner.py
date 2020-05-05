@@ -126,11 +126,13 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
     if method == 'lewiner':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=False, mask=mask)
+                                       allow_degenerate, use_classic=False,
+                                       mask=mask)
     elif method == 'lorensen':
         return _marching_cubes_lewiner(volume, level, spacing,
                                        gradient_direction, step_size,
-                                       allow_degenerate, use_classic=True, mask=mask)
+                                       allow_degenerate, use_classic=True,
+                                       mask=mask)
     elif method == '_lorensen':
         if mask is not None:
             raise NotImplementedError(
