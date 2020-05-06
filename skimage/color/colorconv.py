@@ -503,7 +503,7 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
-# https://mecourse.com/landinig/software/cdeconv/cdeconv.html
+# https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
 
 # Hematoxylin + DAB
 rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
@@ -1447,7 +1447,7 @@ def separate_stains(rgb, conv_matrix):
 
     References
     ----------
-    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
@@ -1502,7 +1502,7 @@ def combine_stains(stains, conv_matrix):
 
     References
     ----------
-    .. [1] https://mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
 
     Examples
     --------
