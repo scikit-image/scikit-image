@@ -4,7 +4,8 @@ Segment human cells (in mitosis)
 ================================
 
 In this example, we analyze a microscopy image of human cells. We use data
-provided by Jason Moffat [1]_ through [CellProfiler](https://cellprofiler.org/examples/#human-cells).
+provided by Jason Moffat [1]_ through
+[CellProfiler](https://cellprofiler.org/examples/#human-cells).
 
 .. [1] Moffat J, Grueneberg DA, Yang X, Kim SY, Kloepfer AM, Hinkle G, Piqani B, Eisenhaure TM, Luo B, Grenier JK, Carpenter AE, Foo SY, Stewart SA, Stockwell BR, Hacohen N, Hahn WC, Lander ES, Sabatini DM, Root DE (2006) "A lentiviral RNAi library for human and mouse genes applied to an arrayed viral high-content screen" Cell, 124(6):1283-98. DOI: [10.1016/j.cell.2006.01.040](https://doi.org/10.1016/j.cell.2006.01.040). PMID: 16564017
 
@@ -64,7 +65,7 @@ plt.show()
 # sample:
 
 cells = image > thresholds[0]
-dividing =  image > thresholds[1]
+dividing = image > thresholds[1]
 labeled_cells = morphology.label(cells)
 labeled_dividing = morphology.label(dividing)
 naive_mi = labeled_dividing.max() / labeled_cells.max()
@@ -113,7 +114,7 @@ plt.show()
 # by dichotomy, visually and manually.
 
 higher_threshold = 125
-dividing =  image > higher_threshold
+dividing = image > higher_threshold
 
 smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
                                       morphology.disk(4))
