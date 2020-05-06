@@ -49,7 +49,7 @@ plt.show()
 thresholds = filters.threshold_multiotsu(image)
 regions = np.digitize(image, bins=thresholds)
 
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
 ax[0].axis('off')
@@ -71,9 +71,19 @@ naive_mi = labeled_dividing.max() / labeled_cells.max()
 print(naive_mi)
 
 #####################################################################
-# Whoa, this can't be!
+# Whoa, this can't be! The number of dividing nuclei
 
-fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
+print(labeled_dividing.max())
+
+#####################################################################
+# is overestimated, while the total number of cells
+
+print(labeled_cells.max())
+
+#####################################################################
+# is underestimated.
+
+fig, ax = plt.subplots(ncols=3, figsize=(15, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
 ax[0].axis('off')
@@ -92,9 +102,9 @@ plt.show()
 # On one hand, the second threshold (value of ``thresholds[1]``) appears to be
 # too low to separate those very bright areas corresponding to cell division
 # from relatively bright pixels otherwise present in many cells. On the other
-# hand, we want a smoother image, not only to get rid of small spurious
-# objects, but also to merge pairs of neighbouring objects which would
-# represent two emerging nuclei in one mother cell. In a way, the segmentation
+# hand, we want a smoother image, removing small spurious objects and,
+# possibly, merging clusters of neighbouring objects (some could correspond to
+# two emerging nuclei in one mother cell). In a way, the segmentation
 # challenge we are facing with dividing nuclei is the opposite of that with
 # (touching) cells.
 
@@ -104,8 +114,10 @@ plt.show()
 
 higher_threshold = 125
 dividing =  image > higher_threshold
+
 smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
                                       morphology.disk(4))
+
 binary_smoother_dividing = smoother_dividing > 20
 
 fig, ax = plt.subplots(figsize=(5, 5))
@@ -116,8 +128,8 @@ plt.show()
 
 #####################################################################
 # We are left with
-
-print(morphology.label(binary_smoother_dividing).max())
+cleaned_dividing = morphology.label(binary_smoother_dividing)
+print(cleaned_dividing.max())
 
 #####################################################################
 # dividing nuclei in this sample.
@@ -137,7 +149,7 @@ markers = morphology.label(local_maxi)
 
 segmented_cells = morphology.watershed(-distance, markers, mask=cells)
 
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='flag')
 ax[0].set_title('Touching cells')
 ax[0].axis('off')
@@ -152,4 +164,6 @@ plt.show()
 print(segmented_cells.max())
 
 #####################################################################
-# cells in this sample.
+# cells in this sample. Therefore, we estimate the mitotic index to be:
+
+print(cleaned_dividing.max() / segmented_cells.max())
