@@ -30,13 +30,12 @@ def test_shape_mismatch():
 
 
 def test_wrong_kind():
-    image = np.ones((3, 3))
-    label = image
+    label = np.ones((3, 3))
     # Must not raise an error.
-    label2rgb(image, label, bg_label=-1)
+    label2rgb(label, bg_label=-1)
     # kind='foo' is wrong.
     with testing.raises(ValueError):
-        label2rgb(image, label, kind='foo', bg_label=-1)
+        label2rgb(label, kind='foo', bg_label=-1)
 
 
 def test_rgb():

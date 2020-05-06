@@ -103,10 +103,10 @@ def test_masked_registration_padfield_data():
     for xi, yi in shifts:
 
         fixed_image = imread(
-            fetch('feature/tests/data/OriginalX{:d}Y{:d}.png'
+            fetch('registration/tests/data/OriginalX{:d}Y{:d}.png'
                   ''.format(xi, yi)))
         moving_image = imread(
-            fetch('feature/tests/data/TransformedX{:d}Y{:d}.png'
+            fetch('registration/tests/data/TransformedX{:d}Y{:d}.png'
                   ''.format(xi, yi)))
 
         # Valid pixels are 1
