@@ -297,7 +297,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
                 stride=stride,
                 denoiser_kwargs=denoiser_kwargs
             )
-            loss = mean_squared_error(denoised, image)
+            loss = mean_squared_error(image, denoised)
         else:
             spatialdims = image.ndim if not multichannel else image.ndim - 1
             n_masks = stride ** spatialdims
@@ -310,7 +310,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
                 denoiser_kwargs=denoiser_kwargs
             )
 
-            loss = mean_squared_error(masked_denoised[mask], image[mask])
+            loss = mean_squared_error(image[mask], masked_denoised[mask])
 
         losses.append(loss)
 

@@ -230,8 +230,8 @@ denoised_calibrated_tv = _invariant_denoise(noisy, denoise_tv_chambolle,
                                             denoiser_kwargs=best_parameters_tv)
 denoised_default_tv = denoise_tv_chambolle(noisy, **best_parameters_tv)
 
-psnr_calibrated_tv = psnr(denoised_calibrated_tv, image)
-psnr_default_tv = psnr(denoised_default_tv, image)
+psnr_calibrated_tv = psnr(image, denoised_calibrated_tv)
+psnr_default_tv = psnr(image, denoised_default_tv)
 
 parameter_ranges_wavelet = {'sigma': np.arange(0.01, 0.3, 0.03)}
 _, (parameters_tested_wavelet, losses_wavelet) = calibrate_denoiser(
@@ -247,8 +247,8 @@ denoised_calibrated_wavelet = _invariant_denoise(
         denoiser_kwargs=best_parameters_wavelet)
 denoised_default_wavelet = _denoise_wavelet(noisy, **best_parameters_wavelet)
 
-psnr_calibrated_wavelet = psnr(denoised_calibrated_wavelet, image)
-psnr_default_wavelet = psnr(denoised_default_wavelet, image)
+psnr_calibrated_wavelet = psnr(image, denoised_calibrated_wavelet)
+psnr_default_wavelet = psnr(image, denoised_default_wavelet)
 
 sigma_est = estimate_sigma(noisy)
 
@@ -267,8 +267,8 @@ denoised_calibrated_nl = _invariant_denoise(noisy, denoise_nl_means,
                                             denoiser_kwargs=best_parameters_nl)
 denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 
-psnr_calibrated_nl = psnr(denoised_calibrated_nl, image)
-psnr_default_nl = psnr(denoised_default_nl, image)
+psnr_calibrated_nl = psnr(image, denoised_calibrated_nl)
+psnr_default_nl = psnr(image, denoised_default_nl)
 
 print(f'                       PSNR')
 print(f'NL means (Default)   : {psnr_default_nl:.1f}')
