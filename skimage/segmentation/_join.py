@@ -1,7 +1,6 @@
 import numpy as np
 from .._shared.utils import deprecated
-from ..util import map_array
-from ..util._map_array import ArrayMap
+from ..util._map_array import map_array, ArrayMap
 
 
 def join_segmentations(s1, s2):

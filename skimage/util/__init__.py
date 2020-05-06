@@ -16,6 +16,7 @@ from ._invert import invert
 from ._montage import montage
 from ._map_array import map_array
 
+
 @functools.wraps(np.pad)
 def pad(*args, **kwargs):
     warnings.warn("skimage.util.pad is deprecated and will be removed in "
