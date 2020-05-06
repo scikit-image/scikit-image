@@ -242,7 +242,7 @@ def test_arraymap_update():
     in_values = np.unique(np.random.randint(0, 200, size=5))
     out_values = np.random.random(len(in_values))
     m = ArrayMap(in_values, out_values)
-    image = np.random.randint(1, len(in_values), size=(512, 512))
+    image = np.random.randint(1, len(m), size=(512, 512))
     assert np.all(m[image] < 1)  # missing values map to 0.
     m[1:] += 1
     assert np.all(m[image] >= 1)
