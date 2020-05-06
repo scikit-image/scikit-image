@@ -102,7 +102,7 @@ def _set_local_maxima(magnitude, pts, w_num, w_denum, row_slices,
 
 
 def _get_local_maxima(isobel, jsobel, magnitude, eroded_mask):
-    """
+    """Edge thinning by non-maximum suppression
 
     """
     #
@@ -296,7 +296,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         low_threshold = 0.1
     elif use_quantiles:
         if not(0.0 <= low_threshold <= 1.0):
-            raise ValueError("Quantile thresholds must be between 0 and 1.")
+            raise ValueError("quantile thresholds must be between 0 and 1.")
     else:
         low_threshold /= dtype_max
 
@@ -304,15 +304,17 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         high_threshold = 0.2
     elif use_quantiles:
         if not(0.0 <= high_threshold <= 1.0):
-            raise ValueError("Quantile thresholds must be between 0 and 1.")
+            raise ValueError("quantile thresholds must be between 0 and 1.")
     else:
         high_threshold /= dtype_max
 
     if high_threshold < low_threshold:
         raise ValueError("low_threshold should be lower then high_threshold")
 
+    # Image filtering
     smoothed, eroded_mask = _preprocess(image, mask, sigma, 'constant')
 
+    # Gradient magnitude estimation
     jsobel = ndi.sobel(smoothed, axis=1)
     isobel = ndi.sobel(smoothed, axis=0)
     magnitude = np.hypot(isobel, jsobel)
@@ -321,11 +323,10 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
         high_threshold = np.percentile(magnitude, 100.0 * high_threshold)
         low_threshold = np.percentile(magnitude, 100.0 * low_threshold)
 
-    #
-    # Create two masks at the two thresholds.
-    #
+    # Non-maximum suppression
     local_maxima = _get_local_maxima(isobel, jsobel, magnitude, eroded_mask)
-    high_mask = local_maxima & (magnitude >= high_threshold)
+
+    # Double thresholding and edge traking
     low_mask = local_maxima & (magnitude >= low_threshold)
 
     #
@@ -337,6 +338,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     if count == 0:
         return low_mask
 
+    high_mask = local_maxima & (magnitude >= high_threshold)
     sums = ndi.sum(high_mask, labels,
                    np.arange(1, count + 1, dtype=np.int32))
     good_label = np.pad(sums > 0, (1, 0))
