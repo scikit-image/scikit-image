@@ -14,7 +14,7 @@ from ._regular_grid import regular_grid, regular_seeds
 from .unique import unique_rows
 from ._invert import invert
 from ._montage import montage
-
+from ._map_array import map_array
 
 @functools.wraps(np.pad)
 def pad(*args, **kwargs):
@@ -37,6 +37,7 @@ __all__ = ['img_as_float32',
            'pad',
            'crop',
            'compare_images',
+           'map_array',
            'montage',
            'random_noise',
            'regular_grid',
