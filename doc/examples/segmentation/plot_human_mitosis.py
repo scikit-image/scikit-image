@@ -11,8 +11,10 @@ provided by Jason Moffat [1]_ through [CellProfiler](https://cellprofiler.org/ex
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from skimage import io
+from skimage.filters import threshold_multiotsu
 
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
@@ -24,4 +26,30 @@ image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleH
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
+plt.show()
+
+#####################################################################
+# We can see many cells on a dark background. They are fairly smooth and
+# elliptical. In addition, some of them present brighter spots: They are going
+# through the process of cell division
+# ([mitosis](https://en.wikipedia.org/wiki/Mitosis)).
+
+# Thresholding
+# ============
+# We are thus interested in two thresholds: one separating the cells from the
+# background, the other separating the dividing nuclei (brighter spots) from
+# the cytoplasm of their respective mother cells (and, intensity-wise, from
+# the other cells). To separate these three different classes of pixels, we
+# resort to :ref:`sphx-glr-auto-examples-segmentation-plot-multiotsu-py`.
+
+thresholds = threshold_multiotsu(image)
+regions = np.digitize(image, bins=thresholds)
+
+fig, ax = plt.subplots(nrows=1, ncols=2)
+ax[0].imshow(image)
+ax[0].set_title('Original')
+ax[0].axis('off')
+ax[1].imshow(regions)
+ax[1].set_title('Multi-Otsu thresholding')
+ax[1].axis('off')
 plt.show()
