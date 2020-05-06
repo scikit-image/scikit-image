@@ -12,8 +12,9 @@ provided by Jason Moffat [1]_ through [CellProfiler](https://cellprofiler.org/ex
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import ndimage as ndi
 
-from skimage import filters, io, morphology, util
+from skimage import feature, filters, io, morphology, util
 
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
@@ -67,6 +68,7 @@ dividing =  image > thresholds[1]
 labeled_cells = morphology.label(cells)
 labeled_dividing = morphology.label(dividing)
 naive_mi = labeled_dividing.max() / labeled_cells.max()
+print(naive_mi)
 
 #####################################################################
 # Whoa, this can't be!
@@ -108,6 +110,7 @@ binary_smoother_dividing = smoother_dividing > 20
 
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.imshow(binary_smoother_dividing)
+ax.set_title('Cells in mitosis')
 ax.axis('off')
 plt.show()
 
@@ -118,3 +121,35 @@ print(morphology.label(binary_smoother_dividing).max())
 
 #####################################################################
 # dividing nuclei in this sample.
+
+#####################################################################
+# Segment cells
+# =============
+# To separate touching and overlapping cells, we resort to
+# :ref:`sphx-glr-auto-examples-segmentation-plot-watershed-py`.
+
+distance = ndi.distance_transform_edt(cells)
+
+local_maxi = feature.peak_local_max(distance, indices=False,
+                                    footprint=morphology.disk(3))
+
+markers = morphology.label(local_maxi)
+
+segmented_cells = morphology.watershed(-distance, markers, mask=cells)
+
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
+ax[0].imshow(cells, cmap='flag')
+ax[0].set_title('Touching cells')
+ax[0].axis('off')
+ax[1].imshow(segmented_cells, cmap='flag')
+ax[1].set_title('Segmented cells')
+ax[1].axis('off')
+plt.show()
+
+#####################################################################
+# We find a total number of
+
+print(segmented_cells.max())
+
+#####################################################################
+# cells in this sample.
