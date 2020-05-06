@@ -4,7 +4,7 @@ import unittest
 
 from tempfile import NamedTemporaryFile
 
-from skimage import data_dir
+from skimage import data
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 from skimage._shared import testing
 
@@ -28,10 +28,10 @@ def setup_module(self):
 
 
 def test_imread_as_gray():
-    img = imread(os.path.join(data_dir, 'color.png'), as_gray=True)
+    img = imread(testing.fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
     assert img.dtype == np.float64
-    img = imread(os.path.join(data_dir, 'camera.png'), as_gray=True)
+    img = imread(testing.fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
@@ -40,7 +40,7 @@ def test_bilevel():
     expected = np.zeros((10, 10))
     expected[::2] = 255
 
-    img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
+    img = imread(testing.fetch('data/checker_bilevel.png'))
     np.testing.assert_array_equal(img, expected)
 
 """
@@ -48,20 +48,20 @@ def test_bilevel():
 def test_imread_truncated_jpg():
     assert_raises((RuntimeError, ValueError),
                   imread,
-                  os.path.join(data_dir, 'truncated.jpg'))
+                  testing.fetch('data/truncated.jpg'))
 """
 
 
 def test_imread_uint16():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
+    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
+    img = imread(testing.fetch('data/chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     np.testing.assert_array_almost_equal(img, expected)
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
+    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
+    img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'))
     np.testing.assert_array_almost_equal(img, expected)
 
 

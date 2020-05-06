@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
 
+cnp.import_array()
 
 cdef inline dtype_t _max(dtype_t a, dtype_t b) nogil:
     return a if a >= b else b

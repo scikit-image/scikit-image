@@ -5,6 +5,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 
 import numpy as np
 from .._shared.fft import fftmodule as fft
+from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
 def _upsampled_dft(data, upsampled_region_size,
@@ -105,10 +106,11 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
-def register_translation(src_image, target_image, upsample_factor=1,
-                         space="real", return_error=True):
-    """
-    Efficient subpixel image translation registration by cross-correlation.
+def phase_cross_correlation(reference_image, moving_image, *,
+                            upsample_factor=1, space="real",
+                            return_error=True, reference_mask=None,
+                            moving_mask=None, overlap_ratio=0.3):
+    """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
     in a fraction of the computation time and with reduced memory requirements.
@@ -118,31 +120,53 @@ def register_translation(src_image, target_image, upsample_factor=1,
 
     Parameters
     ----------
-    src_image : array
+    reference_image : array
         Reference image.
-    target_image : array
-        Image to register.  Must be same dimensionality as ``src_image``.
+    moving_image : array
+        Image to register. Must be same dimensionality as
+        ``reference_image``.
     upsample_factor : int, optional
         Upsampling factor. Images will be registered to within
         ``1 / upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
-        within 1/20th of a pixel.  Default is 1 (no upsampling)
+        within 1/20th of a pixel. Default is 1 (no upsampling).
+        Not used if any of ``reference_mask`` or ``moving_mask`` is not None.
     space : string, one of "real" or "fourier", optional
-        Defines how the algorithm interprets input data.  "real" means data
-        will be FFT'd to compute the correlation, while "fourier" data will
-        bypass FFT of input data.  Case insensitive.
+        Defines how the algorithm interprets input data. "real" means
+        data will be FFT'd to compute the correlation, while "fourier"
+        data will bypass FFT of input data. Case insensitive. Not
+        used if any of ``reference_mask`` or ``moving_mask`` is not
+        None.
     return_error : bool, optional
-        Returns error and phase difference if on,
-        otherwise only shifts are returned
+        Returns error and phase difference if on, otherwise only
+        shifts are returned. Has noeffect if any of ``reference_mask`` or
+        ``moving_mask`` is not None. In this case only shifts is returned.
+    reference_mask : ndarray
+        Boolean mask for ``reference_image``. The mask should evaluate
+        to ``True`` (or 1) on valid pixels. ``reference_mask`` should
+        have the same shape as ``reference_image``.
+    moving_mask : ndarray or None, optional
+        Boolean mask for ``moving_image``. The mask should evaluate to ``True``
+        (or 1) on valid pixels. ``moving_mask`` should have the same shape
+        as ``moving_image``. If ``None``, ``reference_mask`` will be used.
+    overlap_ratio : float, optional
+        Minimum allowed overlap ratio between images. The correlation for
+        translations corresponding with an overlap ratio lower than this
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller
+        maximum translation, while a higher `overlap_ratio` leads to greater
+        robustness against spurious matches due to small overlap between
+        masked images. Used only if one of ``reference_mask`` or
+        ``moving_mask`` is None.
 
     Returns
     -------
     shifts : ndarray
-        Shift vector (in pixels) required to register ``target_image`` with
-        ``src_image``.  Axis ordering is consistent with numpy (e.g. Z, Y, X)
+        Shift vector (in pixels) required to register ``moving_image``
+        with ``reference_image``. Axis ordering is consistent with
+        numpy (e.g. Z, Y, X)
     error : float
-        Translation invariant normalized RMS error between ``src_image`` and
-        ``target_image``.
+        Translation invariant normalized RMS error between
+        ``reference_image`` and ``moving_image``.
     phasediff : float
         Global phase difference between the two images (should be
         zero if images are non-negative).
@@ -154,23 +178,33 @@ def register_translation(src_image, target_image, upsample_factor=1,
            Optics Letters 33, 156-158 (2008). :DOI:`10.1364/OL.33.000156`
     .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
            Optics Letters 36, 8352-8357 (1997). :DOI:`10.1364/AO.36.008352`
+    .. [3] Dirk Padfield. Masked Object Registration in the Fourier Domain.
+           IEEE Transactions on Image Processing, vol. 21(5),
+           pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
+    .. [4] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+           Pattern Recognition, pp. 2918-2925 (2010).
+           :DOI:`10.1109/CVPR.2010.5540032`
+
     """
+    if (reference_mask is not None) or (moving_mask is not None):
+        return _masked_phase_cross_correlation(reference_image, moving_image,
+                                               reference_mask, moving_mask,
+                                               overlap_ratio)
+
     # images must be the same shape
-    if src_image.shape != target_image.shape:
-        raise ValueError("Error: images must be same size for "
-                         "register_translation")
+    if reference_image.shape != moving_image.shape:
+        raise ValueError("images must be same shape")
 
     # assume complex data is already in Fourier space
     if space.lower() == 'fourier':
-        src_freq = src_image
-        target_freq = target_image
+        src_freq = reference_image
+        target_freq = moving_image
     # real data needs to be fft'd.
     elif space.lower() == 'real':
-        src_freq = fft.fftn(src_image)
-        target_freq = fft.fftn(target_image)
+        src_freq = fft.fftn(reference_image)
+        target_freq = fft.fftn(moving_image)
     else:
-        raise ValueError("Error: register_translation only knows the \"real\" "
-                         "and \"fourier\" values for the ``space`` argument.")
+        raise ValueError('space argument must be "real" of "fourier"')
 
     # Whole-pixel shift - Compute cross-correlation by an IFFT
     shape = src_freq.shape

@@ -171,6 +171,120 @@ class TestExtrema(unittest.TestCase):
         error = diff(expected_result, out)
         assert error < eps
 
+    def test_h_maxima_float_image(self):
+        """specific tests for h-maxima float image type"""
+        w = 10
+        x, y = np.mgrid[0:w, 0:w]
+        data = 20 - 0.2 * ((x - w / 2) ** 2 + (y - w / 2) ** 2)
+        data[2:4, 2:4] = 40
+        data[2:4, 7:9] = 60
+        data[7:9, 2:4] = 80
+        data[7:9, 7:9] = 100
+        data = data.astype(np.float32)
+
+        expected_result = np.zeros_like(data)
+        expected_result[(data > 19.9)] = 1.0
+
+        for h in [1.0e-12, 1.0e-6, 1.0e-3, 1.0e-2, 1.0e-1, 0.1]:
+            out = extrema.h_maxima(data, h)
+            error = diff(expected_result, out)
+            assert error < eps
+
+    def test_h_maxima_float_h(self):
+        """specific tests for h-maxima float h parameter"""
+        data = np.array([[0, 0, 0, 0, 0],
+                         [0, 3, 3, 3, 0],
+                         [0, 3, 4, 3, 0],
+                         [0, 3, 3, 3, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+
+        h_vals = np.linspace(1.0, 2.0, 100)
+        failures = 0
+        for i in range(h_vals.size):
+            maxima = extrema.h_maxima(data, h_vals[i])
+
+            if (maxima[2, 2] == 0):
+                failures += 1
+
+        assert (failures == 0)
+
+    def test_h_maxima_large_h(self):
+        """test that h-maxima works correctly for large h"""
+        data = np.array([[10, 10, 10, 10, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 13, 14, 13, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 10, 10, 10, 10]], dtype=np.uint8)
+
+        maxima = extrema.h_maxima(data, 5)
+        assert (np.sum(maxima) == 0)
+
+        data = np.array([[10, 10, 10, 10, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 13, 14, 13, 10],
+                         [10, 13, 13, 13, 10],
+                         [10, 10, 10, 10, 10]], dtype=np.float32)
+
+        maxima = extrema.h_maxima(data, 5.0)
+        assert (np.sum(maxima) == 0)
+
+    def test_h_minima_float_image(self):
+        """specific tests for h-minima float image type"""
+        w = 10
+        x, y = np.mgrid[0:w, 0:w]
+        data = 180 + 0.2 * ((x - w / 2) ** 2 + (y - w / 2) ** 2)
+        data[2:4, 2:4] = 160
+        data[2:4, 7:9] = 140
+        data[7:9, 2:4] = 120
+        data[7:9, 7:9] = 100
+        data = data.astype(np.float32)
+
+        expected_result = np.zeros_like(data)
+        expected_result[(data < 180.1)] = 1.0
+
+        for h in [1.0e-12, 1.0e-6, 1.0e-3, 1.0e-2, 1.0e-1, 0.1]:
+            out = extrema.h_minima(data, h)
+            error = diff(expected_result, out)
+            assert error < eps
+
+    def test_h_minima_float_h(self):
+        """specific tests for h-minima float h parameter"""
+        data = np.array([[4, 4, 4, 4, 4],
+                         [4, 1, 1, 1, 4],
+                         [4, 1, 0, 1, 4],
+                         [4, 1, 1, 1, 4],
+                         [4, 4, 4, 4, 4]], dtype=np.uint8)
+
+        h_vals = np.linspace(1.0, 2.0, 100)
+        failures = 0
+        for i in range(h_vals.size):
+            minima = extrema.h_minima(data, h_vals[i])
+
+            if (minima[2, 2] == 0):
+                failures += 1
+
+        assert (failures == 0)
+
+    def test_h_minima_large_h(self):
+        """test that h-minima works correctly for large h"""
+        data = np.array([[14, 14, 14, 14, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 11, 10, 11, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 14, 14, 14, 14]], dtype=np.uint8)
+
+        maxima = extrema.h_minima(data, 5)
+        assert (np.sum(maxima) == 0)
+
+        data = np.array([[14, 14, 14, 14, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 11, 10, 11, 14],
+                         [14, 11, 11, 11, 14],
+                         [14, 14, 14, 14, 14]], dtype=np.float32)
+
+        maxima = extrema.h_minima(data, 5.0)
+        assert (np.sum(maxima) == 0)
+
 
 class TestLocalMaxima(unittest.TestCase):
     """Some tests for local_minima are included as well."""

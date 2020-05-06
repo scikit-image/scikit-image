@@ -3,12 +3,12 @@
 Image Registration
 =====================================
 
-In this example, we use cross-correlation to identify the relative shift
-between two similar-sized images.
+In this example, we use phase cross-correlation to identify the
+relative shift between two similar-sized images.
 
-The ``register_translation`` function uses cross-correlation in Fourier space,
-optionally employing an upsampled matrix-multiplication DFT to achieve
-arbitrary subpixel precision [1]_.
+The ``phase_cross_correlation`` function uses cross-correlation in
+Fourier space, optionally employing an upsampled matrix-multiplication
+DFT to achieve arbitrary subpixel precision [1]_.
 
 .. [1] Manuel Guizar-Sicairos, Samuel T. Thurman, and James R. Fienup,
        "Efficient subpixel image registration algorithms," Optics Letters 33,
@@ -19,8 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.feature import register_translation
-from skimage.feature.register_translation import _upsampled_dft
+from skimage.registration import phase_cross_correlation
+from skimage.registration._phase_cross_correlation import _upsampled_dft
 from scipy.ndimage import fourier_shift
 
 image = data.camera()
@@ -31,7 +31,7 @@ offset_image = np.fft.ifftn(offset_image)
 print(f"Known offset (y, x): {shift}")
 
 # pixel precision first
-shift, error, diffphase = register_translation(image, offset_image)
+shift, error, diffphase = phase_cross_correlation(image, offset_image)
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)
@@ -59,7 +59,8 @@ plt.show()
 print(f"Detected pixel offset (y, x): {shift}")
 
 # subpixel precision
-shift, error, diffphase = register_translation(image, offset_image, 100)
+shift, error, diffphase = phase_cross_correlation(image, offset_image,
+                                                  upsample_factor=100)
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)

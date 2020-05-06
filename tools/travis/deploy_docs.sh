@@ -2,7 +2,7 @@
 if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" &&
       $BUILD_DOCS == 1 && $DEPLOY_DOCS == 1 ]]
 then
-    # See https://help.github.com/articles/creating-an-access-token-for-command-line-use/ for how to generate a token
+    # See https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line for how to generate a token
     # See https://docs.travis-ci.com/user/encryption-keys/ for how to generate 
     # a secure variable on Travis
     echo "-- pushing docs --"

@@ -173,3 +173,15 @@ def test_inertia_tensor_3d():
     expected_vr = R @ v0
     assert (np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or
             np.allclose(-vr, expected_vr, atol=1e-3, rtol=0.01))
+
+
+def test_inertia_tensor_eigvals():
+    # Floating point precision problems could make a positive
+    # semidefinite matrix have an eigenvalue that is very slightly
+    # negative.  Check that we have caught and fixed this problem.
+    image = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+    # mu = np.array([[3, 0, 98], [0, 14, 0], [2, 0, 98]])
+    eigvals = inertia_tensor_eigvals(image=image)
+    assert (min(eigvals) >= 0)

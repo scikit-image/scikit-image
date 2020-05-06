@@ -15,31 +15,27 @@ from functools import partial
 from .._shared.fft import fftmodule, next_fast_len
 
 
-def masked_register_translation(
-        src_image,
-        target_image,
-        src_mask,
-        target_mask=None,
-        overlap_ratio=3 / 10):
-    """
-    Masked image translation registration by masked normalized
+def _masked_phase_cross_correlation(reference_image, moving_image,
+                                    reference_mask, moving_mask=None,
+                                    overlap_ratio=0.3):
+    """Masked image translation registration by masked normalized
     cross-correlation.
 
     Parameters
     ----------
-    src_image : ndarray
+    reference_image : ndarray
         Reference image.
-    target_image : ndarray
-        Image to register.  Must be same dimensionality as ``src_image``,
+    moving_image : ndarray
+        Image to register. Must be same dimensionality as ``reference_image``,
         but not necessarily the same size.
-    src_mask : ndarray
-        Boolean mask for ``src_image``. The mask should evaluate to ``True``
-        (or 1) on valid pixels. ``src_mask`` should have the same shape
-        as ``src_mask``.
-    target_mask : ndarray or None, optional
-        Boolean mask for ``target_image``. The mask should evaluate to ``True``
-        (or 1) on valid pixels. ``target_mask`` should have the same shape
-        as ``target_image``. If ``None``, ``src_mask`` will be used.
+    reference_mask : ndarray
+        Boolean mask for ``reference_image``. The mask should evaluate
+        to ``True`` (or 1) on valid pixels. ``reference_mask`` should
+        have the same shape as ``reference_image``.
+    moving_mask : ndarray or None, optional
+        Boolean mask for ``moving_image``. The mask should evaluate to ``True``
+        (or 1) on valid pixels. ``moving_mask`` should have the same shape
+        as ``moving_image``. If ``None``, ``reference_mask`` will be used.
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for
         translations corresponding with an overlap ratio lower than this
@@ -51,8 +47,9 @@ def masked_register_translation(
     Returns
     -------
     shifts : ndarray
-        Shift vector (in pixels) required to register ``target_image`` with
-        ``src_image``. Axis ordering is consistent with numpy (e.g. Z, Y, X)
+        Shift vector (in pixels) required to register ``moving_image``
+        with ``reference_image``. Axis ordering is consistent with
+        numpy (e.g. Z, Y, X)
 
     References
     ----------
@@ -62,33 +59,41 @@ def masked_register_translation(
     .. [2] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
+
     """
-    if target_mask is None:
-        target_mask = np.array(src_mask, dtype=np.bool, copy=True)
+    if moving_mask is None:
+        if reference_image.shape != moving_image.shape:
+            raise ValueError(
+                "Input images have different shapes, moving_mask must "
+                "be explicitely set.")
+        moving_mask = reference_mask.astype(bool)
 
     # We need masks to be of the same size as their respective images
-    for (im, mask) in [(src_image, src_mask), (target_image, target_mask)]:
+    for (im, mask) in [(reference_image, reference_mask),
+                       (moving_image, moving_mask)]:
         if im.shape != mask.shape:
             raise ValueError(
-                "Error: image sizes must match their respective mask sizes.")
+                "Image sizes must match their respective mask sizes.")
 
-    # The mismatch in size will impact the center location of the
-    # cross-correlation
-    size_mismatch = np.array(target_image.shape) - np.array(src_image.shape)
-
-    xcorr = cross_correlate_masked(target_image, src_image, target_mask,
-                                   src_mask, axes=(0, 1), mode='full',
+    xcorr = cross_correlate_masked(moving_image, reference_image, moving_mask,
+                                   reference_mask, axes=(0, 1), mode='full',
                                    overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
     maxima = np.transpose(np.nonzero(xcorr == xcorr.max()))
     center = np.mean(maxima, axis=0)
-    shifts = center - np.array(src_image.shape) + 1
+    shifts = center - np.array(reference_image.shape) + 1
+
+    # The mismatch in size will impact the center location of the
+    # cross-correlation
+    size_mismatch = (np.array(moving_image.shape)
+                     - np.array(reference_image.shape))
+
     return -shifts + (size_mismatch / 2)
 
 
 def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
-                           overlap_ratio=3 / 10):
+                           overlap_ratio=0.3):
     """
     Masked normalized cross-correlation between arrays.
 
@@ -143,7 +148,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
            :DOI:`10.1109/CVPR.2010.5540032`
     """
     if mode not in {'full', 'same'}:
-        raise ValueError("Correlation mode {} is not valid.".format(mode))
+        raise ValueError("Correlation mode '{}' is not valid.".format(mode))
 
     fixed_image = np.array(arr1, dtype=np.float)
     fixed_mask = np.array(m1, dtype=np.bool)

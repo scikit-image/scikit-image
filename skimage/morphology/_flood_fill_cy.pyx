@@ -6,7 +6,7 @@
 """Cython code used in _flood_fill.py."""
 
 cimport numpy as cnp
-
+cnp.import_array()
 
 # Must be defined to use QueueWithHistory
 ctypedef Py_ssize_t QueueItem
@@ -41,7 +41,7 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
                                     unsigned char[::1] flags,
                                     Py_ssize_t[::1] neighbor_offsets,
                                     Py_ssize_t start_index,
-                                    dtype_t seed_value) nogil:
+                                    dtype_t seed_value):
     """Find connected areas to fill, requiring strict equality.
 
     Parameters
@@ -57,7 +57,7 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
     start_index : int
         Start position for the flood-fill.
     seed_value :
-        Value of `image[start_index]`.
+        Value of ``image[start_index]``.
     """
     cdef:
         QueueWithHistory queue
@@ -92,7 +92,7 @@ cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
                                         Py_ssize_t start_index,
                                         dtype_t seed_value,
                                         dtype_t low_tol,
-                                        dtype_t high_tol) nogil:
+                                        dtype_t high_tol):
     """Find connected areas to fill, within a tolerance.
 
     Parameters
@@ -108,7 +108,7 @@ cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
     start_index : int
         Start position for the flood-fill.
     seed_value :
-        Value of `image[start_index]`.
+        Value of ``image[start_index]``.
     low_tol :
         Lower limit for tolerance comparison.
     high_tol :

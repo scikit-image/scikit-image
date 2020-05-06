@@ -183,7 +183,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn('"cg" mode may be slow because UMFPACK is not availabel. '
+                warn('"cg" mode may be slow because UMFPACK is not available. '
                      'Consider building Scipy with UMFPACK or use a '
                      'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
                      stacklevel=2)
@@ -191,6 +191,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
         else:
+            # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
             ml = ruge_stuben_solver(lap_sparse)
             M = ml.aspreconditioner(cycle='V')
@@ -416,10 +417,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', 'cg_j', None):
+    if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
             "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bicgstab', 'bf' and None".format(mode=mode))
+            " 'cg', 'cg_j', 'bf' and None".format(mode=mode))
 
     # Spacing kwarg checks
     if spacing is None:

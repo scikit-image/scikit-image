@@ -1,5 +1,6 @@
 import numpy as np
 from skimage.segmentation import join_segmentations, relabel_sequential
+from skimage.segmentation._join import map_array, ArrayMap
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
@@ -30,9 +31,15 @@ def test_join_segmentations():
         join_segmentations(s1, s3)
 
 
+def _check_maps(ar, ar_relab, fw, inv):
+    assert_array_equal(fw[ar], ar_relab)
+    assert_array_equal(inv[ar_relab], ar)
+
+
 def test_relabel_sequential_offset1():
     ar = np.array([1, 1, 5, 5, 8, 99, 42])
     ar_relab, fw, inv = relabel_sequential(ar)
+    _check_maps(ar, ar_relab, fw, inv)
     ar_relab_ref = np.array([1, 1, 2, 2, 3, 5, 4])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
@@ -49,6 +56,7 @@ def test_relabel_sequential_offset1():
 def test_relabel_sequential_offset5():
     ar = np.array([1, 1, 5, 5, 8, 99, 42])
     ar_relab, fw, inv = relabel_sequential(ar, offset=5)
+    _check_maps(ar, ar_relab, fw, inv)
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
@@ -65,6 +73,7 @@ def test_relabel_sequential_offset5():
 def test_relabel_sequential_offset5_with0():
     ar = np.array([1, 1, 5, 5, 8, 99, 42, 0])
     ar_relab, fw, inv = relabel_sequential(ar, offset=5)
+    _check_maps(ar, ar_relab, fw, inv)
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
@@ -79,8 +88,9 @@ def test_relabel_sequential_offset5_with0():
 
 
 def test_relabel_sequential_dtype():
-    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=float)
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.uint8)
     ar_relab, fw, inv = relabel_sequential(ar, offset=5)
+    _check_maps(ar.astype(int), ar_relab, fw, inv)
     ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
     assert_array_equal(ar_relab, ar_relab_ref)
     fw_ref = np.zeros(100, int)
@@ -92,6 +102,23 @@ def test_relabel_sequential_dtype():
     assert_array_equal(fw, fw_ref)
     inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
     assert_array_equal(inv, inv_ref)
+
+
+def test_relabel_sequential_signed_overflow():
+    imax = np.iinfo(np.int32).max
+    labels = np.array([0, 1, 99, 42, 42], dtype=np.int32)
+    output, fw, inv = relabel_sequential(labels, offset=imax)
+    reference = np.array([0, imax, imax + 2, imax + 1, imax + 1],
+                         dtype=np.uint32)
+    assert_array_equal(output, reference)
+    assert output.dtype == reference.dtype
+
+
+def test_very_large_labels():
+    imax = np.iinfo(np.int64).max
+    labels = np.array([0, 1, imax, 42, 42], dtype=np.int64)
+    output, fw, inv = relabel_sequential(labels, offset=imax)
+    assert np.max(output) == imax + 2
 
 
 @pytest.mark.parametrize('dtype', (np.byte, np.short, np.intc, np.int_,
@@ -111,7 +138,9 @@ def test_relabel_sequential_int_dtype_overflow():
     ar = np.array([1, 3, 0, 2, 5, 4], dtype=np.uint8)
     offset = 254
     ar_relab, fw, inv = relabel_sequential(ar, offset=offset)
-    assert all(a.dtype == np.uint16 for a in (ar_relab, fw, inv))
+    _check_maps(ar, ar_relab, fw, inv)
+    assert all(a.dtype == np.uint16 for a in (ar_relab, fw))
+    assert inv.dtype == ar.dtype
     ar_relab_ref = np.where(ar > 0, ar.astype(np.int) + offset - 1, 0)
     assert_array_equal(ar_relab, ar_relab_ref)
 
@@ -136,11 +165,97 @@ def test_relabel_sequential_nonpositive_offset(data_already_sequential,
 
 @pytest.mark.parametrize('offset', (1, 5))
 @pytest.mark.parametrize('with0', (False, True))
-def test_relabel_sequential_already_sequential(offset, with0):
+@pytest.mark.parametrize('input_starts_at_offset', (False, True))
+def test_relabel_sequential_already_sequential(offset, with0,
+                                               input_starts_at_offset):
     if with0:
         ar = np.array([1, 3, 0, 2, 5, 4])
     else:
         ar = np.array([1, 3, 2, 5, 4])
+    if input_starts_at_offset:
+        ar[ar > 0] += offset - 1
     ar_relab, fw, inv = relabel_sequential(ar, offset=offset)
-    ar_relab_ref = np.where(ar > 0, ar + offset - 1, 0)
+    _check_maps(ar, ar_relab, fw, inv)
+    if input_starts_at_offset:
+        ar_relab_ref = ar
+    else:
+        ar_relab_ref = np.where(ar > 0, ar + offset - 1, 0)
     assert_array_equal(ar_relab, ar_relab_ref)
+
+
+def test_incorrect_input_dtype():
+    labels = np.array([0, 2, 2, 1, 1, 8], dtype=float)
+    with testing.raises(TypeError):
+        _ = relabel_sequential(labels)
+
+
+def test_map_array_incorrect_output_shape():
+    labels = np.random.randint(0, 5, size=(24, 25))
+    out = np.empty((24, 24))
+    in_values = np.unique(labels)
+    out_values = np.random.random(in_values.shape).astype(out.dtype)
+    with testing.raises(ValueError):
+        map_array(labels, in_values, out_values, out=out)
+
+
+def test_map_array_non_contiguous_output_array():
+    labels = np.random.randint(0, 5, size=(24, 25))
+    out = np.empty((24 * 3, 25 * 2))[::3, ::2]
+    in_values = np.unique(labels)
+    out_values = np.random.random(in_values.shape).astype(out.dtype)
+    with testing.raises(ValueError):
+        map_array(labels, in_values, out_values, out=out)
+
+
+def test_arraymap_long_str():
+    labels = np.random.randint(0, 40, size=(24, 25))
+    in_values = np.unique(labels)
+    out_values = np.random.random(in_values.shape)
+    m = ArrayMap(in_values, out_values)
+    assert len(str(m).split('\n')) == m._max_str_lines + 2
+
+
+def test_arraymap_call():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    testing.assert_array_equal(relabeled, fw(ar))
+    testing.assert_array_equal(ar, inv(relabeled))
+
+
+def test_arraymap_len():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    assert len(fw) == 100
+    assert len(fw) == len(np.array(fw))
+    assert len(inv) == 6
+    assert len(inv) == len(np.array(inv))
+
+
+def test_arraymap_set():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=np.intp)
+    relabeled, fw, inv = relabel_sequential(ar)
+    fw[72] = 6
+    assert fw[72] == 6
+
+
+def test_arraymap_update():
+    in_values = np.unique(np.random.randint(0, 200, size=5))
+    out_values = np.random.random(len(in_values))
+    m = ArrayMap(in_values, out_values)
+    image = np.random.randint(1, len(m), size=(512, 512))
+    assert np.all(m[image] < 1)  # missing values map to 0.
+    m[1:] += 1
+    assert np.all(m[image] >= 1)
+
+
+def test_arraymap_bool_index():
+    in_values = np.unique(np.random.randint(0, 200, size=5))
+    out_values = np.random.random(len(in_values))
+    m = ArrayMap(in_values, out_values)
+    image = np.random.randint(1, len(in_values), size=(512, 512))
+    assert np.all(m[image] < 1)  # missing values map to 0.
+    positive = np.ones(len(m), dtype=bool)
+    positive[0] = False
+    m[positive] += 1
+    assert np.all(m[image] >= 1)
+
