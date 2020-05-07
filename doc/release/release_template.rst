@@ -35,8 +35,6 @@ Bugfixes
 Deprecations
 ------------
 
-- Python 2.x support has been dropped. The minimal required Python version
-  is 3.5
 
 
 Contributors to this release

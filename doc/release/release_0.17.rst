@@ -12,6 +12,10 @@ For more information, examples, and documentation, please visit our website:
 
 https://scikit-image.org
 
+Many thanks to the 54 authors who contributed the amazing number of 213 merged
+pull requests! scikit-image is a community-based project and we are happy that
+this number includes first-time contributors to scikit-image.
+
 Special thanks for the release to the Cython team, who helped us make our code
 compatible with their coming Cython 3.0 release. 
 
@@ -29,6 +33,7 @@ New Features
 - `util.map_array` was introduced to map a set of pixel values to another one
   (for example to map region labels to the size of regions in an image of
   labels) #4612 and #4646
+- Masked marching cubes (#3829)
 - Pooch -- on the fly download of datasets from github: we introduced the
   possibility to include larger datasets in the `data` submodule, thanks to the
   `pooch` library. `data.download_all` fetches all datasets. (#3945)
@@ -54,8 +59,6 @@ Improvements
 - Add border conditions to ridge filters (#4396)
 - `segmentation.random_walker` new Jacobi preconditioned conjugate gradient mode
   (#4359) and minor corrections #4630
-- Masked marching cubes (#3829)
-- Update rescale_intensity to prevent under/overflow and produce proper output dtype (#4585)
 - Warn when rescaling with NaN in exposure.intensity_range (#4265)
 
 We have also improved the consistency of several functions regarding the way
@@ -68,6 +71,7 @@ they handle data types
 
 API Changes
 -----------
+
 - When used with floating point inputs, ``denoise_wavelet`` no longer rescales
   the range of the data or clips the output to the range [0, 1] or [-1, 1].
   For non-float inputs, rescaling and clipping still occurs as in prior
@@ -96,6 +100,7 @@ API Changes
 
 Bugfixes
 --------
+
 - ``denoise_wavelet``: For user-supplied `sigma`, if the input image gets
   rescaled via ``img_as_float``, the same scaling will be applied to `sigma` to
   preserve the relative scale of the noise estimate. To restore the old,
@@ -107,32 +112,35 @@ Bugfixes
 - Fix peak_local_max coordinates ordering (#4501)
 - Sort naturally peaks coordinates of same amplitude in peak_local_max (#4582)
 - Fix denoise_nl_means data type management (#4322)
+- Update rescale_intensity to prevent under/overflow and produce proper output dtype (#4585)
 
 (other small bug fixes are part of the list of other pull requests at the end)
 
 Deprecations
 ------------
+The minimal supported Python version by this release is 3.6.
+
 - Parameter ``inplace`` in skimage.morphology.flood_fill has been deprecated
-  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0.
+  in favor of ``in_place`` and will be removed in version scikit-image 0.19.0
+  (#4250).
 - ``skimage.segmentation.circle_level_set`` has been deprecated and will be
   removed in 0.19. Use ``skimage.segmentation.disk_level_set`` instead.
 - ``skimage.draw.circle`` has been deprecated and will be removed in 0.19.
   Use ``skimage.draw.disk`` instead.
 - Deprecate filter argument in iradon due to clash with python keyword (#4158)
-- In flood_fill deprecate inplace and use in_place instead (#4250)
 - Deprecate marching_cubes_classic (#4287)
 - Change label2rgb default background value from -1 to 0 (#4614)
 - Deprecate rgb2grey and grey2rgb (#4420)
 - Complete deprecation of circle in morphsnakes (#4467)
-- Deprecate gray scale image support for rgb2gray (#4438)
-- Deprecate non RGB image conversion in rgb2gray (#4439)
-- Deprecate non gray scale image conversion in gray2rgb (#4440)
+- Deprecate non RGB image conversion in rgb2gray (#4838, #4439), and deprecate
+  non gray scale image conversion in gray2rgb (#4440)
 
 The list of other pull requests is given at the end of this document, after the
 list of authors and reviewers.
 
 54 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
+
 - aadideshpande (aadideshpande)
 - Alexandre de Siqueira
 - Asaf Kali
