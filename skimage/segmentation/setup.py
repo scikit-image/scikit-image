@@ -25,6 +25,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_slic', sources=['_slic.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
+    config.add_subpackage('graph')
+
     return config
 
 if __name__ == '__main__':
