@@ -1,10 +1,10 @@
 """
 Defines:
     Internal functions:
-        _validate_scalar_to_multi(value, size=3, dtype=float)
+        _validate_scalar_to_multi(value, size=None, dtype=float)
         _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
-            forbid_object_dtype=True, broadcast_to_shape=None)
-        _validate_resolution(ndim, resolution)
+            forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None, required_shape=None)
+        _validate_resolution(resolution, ndim)
         _compute_axes(shape, resolution=1, origin='center')
         _compute_coords(shape, resolution=1, origin='center')
         _multiply_coords_by_affine(array, affine)
@@ -22,24 +22,27 @@ from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
 
-def _validate_scalar_to_multi(value, size=3, dtype=float):
+def _validate_scalar_to_multi(value, size=None, dtype=float):
     """
     If value's length is 1, upcast it to match size. 
     Otherwise, if it does not match size, raise error.
 
+    If size is not provided, cast to a 1-dimensional np.ndarray.
+
     Return a numpy array.
     """
 
-    # Cast size to int.
-    try:
-        size = int(size)
-    except (TypeError, ValueError):
-        raise TypeError(
-            f"size must be interpretable as an integer.\n" f"type(size): {type(size)}."
-        )
+    # Cast size to int if appropriate.
+    if size is not None:
+        try:
+            size = int(size)
+        except (TypeError, ValueError):
+            raise TypeError(
+                f"size must be either None or interpretable as an integer.\n" f"type(size): {type(size)}."
+            )
 
-    if size < 0:
-        raise ValueError(f"size must be non-negative.\n" f"size: {size}.")
+        if size < 0:
+            raise ValueError(f"size must be non-negative.\n" f"size: {size}.")
 
     # Cast value to np.ndarray.
     try:
@@ -51,13 +54,13 @@ def _validate_scalar_to_multi(value, size=3, dtype=float):
     if value.ndim == 0:
         value = np.array([value])
     if value.ndim == 1:
-        if len(value) == 1:
+        if size is not None and len(value) == 1:
             # Upcast scalar to match size.
             value = np.full(size, value, dtype=dtype)
-        elif len(value) != size:
+        elif size is not None and len(value) != size:
             # value's length is incompatible with size.
             raise ValueError(
-                f"The length of value must either be 1 or it must match size.\n"
+                f"The length of value must either be 1 or it must match size if size is provided.\n"
                 f"len(value): {len(value)}, size: {size}."
             )
     else:
@@ -89,8 +92,10 @@ def _validate_ndarray(
     forbid_object_dtype=True,
     broadcast_to_shape=None,
     reshape_to_shape=None,
+    required_shape=None,
 ):
-    """Cast (a copy of) array to a np.ndarray if possible and return it 
+    """
+    Cast (a copy of) array to a np.ndarray if possible and return it 
     unless it is noncompliant with minimum_ndim, required_ndim, and dtype.
     
     Note:
@@ -106,7 +111,10 @@ def _validate_ndarray(
     If a shape is provided to broadcast_to_shape, unless noncompliance is found with 
     required_ndim, array is broadcasted to that shape.
     
-    if a shape is provided to reshape_to_shape, array is reshaped to that shape."""
+    If a shape is provided to reshape_to_shape, array is reshaped to that shape.
+
+    If a shape is provided to required_shape, if the shape does not match this shape then an exception is raised.
+    """
 
     # Verify arguments.
 
@@ -193,11 +201,17 @@ def _validate_ndarray(
     if reshape_to_shape is not None:
         array = np.copy(array.reshape(reshape_to_shape))
 
+    # Verify compliance with required_shape if appropriate.
+    if required_shape is not None:
+        if not np.array_equal(array.reshape(required_shape).shape, array.shape):
+            raise ValueError(f"array must match required_shape.\n"
+                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
+
     return array
 
 
 # TODO: reverse order of arguments and propagate change throughout ardent.
-def _validate_resolution(ndim, resolution):
+def _validate_resolution(resolution, ndim):
     """Validate resolution to assure its length matches the dimensionality of image."""
 
     resolution = _validate_scalar_to_multi(resolution, size=ndim)
@@ -221,7 +235,7 @@ def _compute_axes(shape, resolution=1, origin="center"):
     shape = _validate_ndarray(shape, dtype=int, required_ndim=1)
 
     # Validate resolution.
-    resolution = _validate_resolution(len(shape), resolution)
+    resolution = _validate_resolution(resolution, len(shape))
 
     # Create axes.
 
@@ -365,8 +379,8 @@ def resample(
     else:
         ndim = image.ndim
         old_shape = image.shape
-    new_resolution = _validate_resolution(ndim, new_resolution)
-    old_resolution = _validate_resolution(ndim, old_resolution)
+    new_resolution = _validate_resolution(new_resolution, ndim)
+    old_resolution = _validate_resolution(old_resolution, ndim)
 
     # Handle trivial case.
     if np.array_equal(new_resolution, old_resolution):

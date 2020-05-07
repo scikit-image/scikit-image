@@ -87,15 +87,19 @@ class _Lddmm:
         self.num_iterations = int(num_iterations) if num_iterations is not None else 300
         self.num_affine_only_iterations = int(num_affine_only_iterations) if num_affine_only_iterations is not None else 100
         self.num_rigid_affine_iterations = int(num_rigid_affine_iterations) if num_rigid_affine_iterations is not None else 50
+
         # Stepsizes.
         self.affine_stepsize = float(affine_stepsize) if affine_stepsize is not None else 0.3
         self.deformative_stepsize = float(deformative_stepsize) if deformative_stepsize is not None else 0
+
         # Affine specifiers.
-        self.fixed_affine_scale = _validate_scalar_to_multi(fixed_affine_scale, self.template.ndim) if fixed_affine_scale is not None else None
+        self.fixed_affine_scale = float(fixed_affine_scale) if fixed_affine_scale is not None else None
+
         # Velocity field specifiers.
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
         self.smooth_length = float(smooth_length) if smooth_length is not None else 2 * np.max(self.template_resolution)
         self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
+
         # Contrast map specifiers.
         self.contrast_order = int(contrast_order) if contrast_order else 1
         if self.contrast_order < 1: raise ValueError(f"contrast_order must be at least 1.\ncontrast_order: {self.contrast_order}")
@@ -103,11 +107,14 @@ class _Lddmm:
         self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
         self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
         self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
+
         # Artifact specifiers.
         self.check_artifacts = bool(check_artifacts) if check_artifacts is not None else False
         self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * float(sigma_matching) if sigma_matching else np.std(self.target) # Default: 5 * self.sigma_matching.
+
         # Smoothness vs. accuracy tradeoff.
         self.sigma_matching = float(sigma_matching) if sigma_matching else np.std(self.target)
+
         # Diagnostic outputs.
         self.calibrate = bool(calibrate) if calibrate is not None else False
         self.track_progress_every_n = int(track_progress_every_n) if track_progress_every_n is not None else 0
@@ -237,8 +244,8 @@ class _Lddmm:
         if self.calibrate:
             self._generate_calibration_plots()
         
-        # Note: the user-level apply_lddmm function relies on many of these specific outputs with these specific keys to function. 
-        # ----> Check the apply_lddmm function signature before adjusting these outputs.
+        # Note: the user-level lddmm_transform_image function relies on many of these specific outputs with these specific keys to function. 
+        # ----> Check the lddmm_transform_image function signature before adjusting these outputs.
         return dict(
             # Core.
             affine=self.affine,
@@ -524,7 +531,8 @@ class _Lddmm:
                 *exception.args, f"The Hessian was not invertible in the Gauss-Newton update of the affine transform. "
                                  f"This may be because the image was constant along one or more dimensions. "
                                  f"Consider removing any constant dimensions. "
-                                 f"Otherwise you may try using a smaller value for affine_stepsize."
+                                 f"Otherwise you may try using a smaller value for affine_stepsize, a smaller value for deformative_stepsize, or a larger value for sigma_regularization. "
+                                 f"The calibrate=True option may be of use in determining optimal parameter values."
             )
             raise exception
         # Append a row of zeros at the end of the 0th dimension.
@@ -540,7 +548,8 @@ class _Lddmm:
 
         If iteration < self.num_rigid_affine_iterations, project self.affine to a rigid affine.
 
-        If self.fixed_affine_scale is provided, it is imposed on self.affine.
+        If self.
+         is provided, it is imposed on self.affine.
 
         if self.calibrate, appends the current self.affine to self.affines.
 
@@ -555,15 +564,14 @@ class _Lddmm:
 
         self.affine = inv(affine_inv)
 
-        # Project self.affine to a rigid affine if appropriate.
-        if iteration < self.num_rigid_affine_iterations:
-            U, _, Vh = svd(self.affine[:-1, :-1])
-            self.affine[:-1, :-1] = U @ Vh
-
         # Set scale of self.affine if appropriate.
         if self.fixed_affine_scale is not None:
             U, _, Vh = svd(self.affine[:-1, :-1])
-            self.affine[:-1, :-1] = U @ np.diag(self.fixed_affine_scale) @ Vh
+            self.affine[:-1, :-1] = U @ np.diag([self.fixed_affine_scale] * len(self.affine) - 1) @ Vh
+        # If self.fixed_affine_scale was not provided (is None), project self.affine to a rigid affine if appropriate.
+        elif iteration < self.num_rigid_affine_iterations:
+            U, _, Vh = svd(self.affine[:-1, :-1])
+            self.affine[:-1, :-1] = U @ Vh
 
         # Save affine for calibration plotting.
         if self.calibrate:
@@ -735,7 +743,6 @@ r'''
                                                                                             
 '''
 
-#TODO: fix docstring example re affine_stepsize
 def lddmm_register(
     # Images.
     template,
@@ -743,6 +750,8 @@ def lddmm_register(
     # Image resolutions.
     template_resolution=None,
     target_resolution=None,
+    # Multiscale.
+    multiscales=None,
     # Iterations.
     num_iterations=None,
     num_affine_only_iterations=None,
@@ -776,19 +785,24 @@ def lddmm_register(
     track_progress_every_n=None,
 ):
     """
-    Compute a registration between template and target, to be applied with apply_lddmm.
+    Compute a registration between template and target, to be applied with lddmm_transform_image.
     
     Args:
         template (np.ndarray): The ideally clean template image being registered to the target.
         target (np.ndarray): The potentially messier target image being registered to.
         template_resolution (float, seq, optional): A scalar or list of scalars indicating the resolution of the template. Overrides 0 input. Defaults to 1.
         target_resolution (float, seq, optional): A scalar or list of scalars indicating the resolution of the target. Overrides 0 input. Defaults to 1.
+        multiscales (float, seq, optional): A scalar or list of scalars determining the levels of downsampling at which the registration should be performed before moving on to the next. 
+            All values must be at least 1. For example, multiscales=[5, 2, 1] will result in the template and target being downsampled by a factor of 5 and registered. 
+            This registration will be upsampled and used to initialize another registration of the template and target downsampled by 2, and then again on the undownsampled data. 
+            If provided with more than 1 value, all following arguments except for initial_affine, initial_velocity_fields, and initial_contrast_coefficients may optionally be provided as sequences 
+            with length equal to the number of values provided to multiscales. Each such value is used at the corresponding scale. Defaults to 1.
         num_iterations (int, optional): The total number of iterations. Defaults to 300.
         num_affine_only_iterations (int, optional): The number of iterations at the start of the process without deformative adjustments. Defaults to 100.
         num_rigid_affine_iterations (int, optional): The number of iterations at the start of the process in which the affine is kept rigid. Defaults to 50.
         affine_stepsize (float, optional): The unitless stepsize for affine adjustments. Should be between 0 and 1. Defaults to 0.3.
         deformative_stepsize (float, optional): The stepsize for deformative adjustments. Optimal values are problem-specific. If equal to 0 then the result is affine-only registration. Defaults to 0.
-        fixed_affine_scale (float, seq, optional): The per-dimension scale to impose on the affine at every iteration. If None, no scale is imposed. Defaults to None.
+        fixed_affine_scale (float, optional): The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. Defaults to None.
         sigma_regularization (float, optional): A scalar indicating the freedom to deform. Overrides 0 input. Defaults to 10 * np.max(self.template_resolution).
         smooth_length (float, optional): The length scale of smoothing. Overrides 0 input. Defaults to 2 * np.max(self.template_resolution).
         num_timesteps (int, optional): The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. Defaults to 5.
@@ -814,7 +828,7 @@ def lddmm_register(
     Example:
         >>> import numpy as np
         >>> from scipy.ndimage import rotate
-        >>> from skimage.registration import lddmm_register, apply_lddmm
+        >>> from skimage.registration import lddmm_register, lddmm_transform_image
         >>> # 
         >>> # Define images. The template is registered to the target image but both transformations are returned.
         >>> # template is a binary ellipse with semi-radii 5 and 8 in dimensions 0 and 1. The overall shape is (19, 25).
@@ -826,14 +840,60 @@ def lddmm_register(
         >>> # Register the template to the target, then deform the template and target to match the other.
         >>> # 
         >>> lddmm_dict = lddmm_register(template, target, deformative_stepsize = 0.5)
-        >>> deformed_target   = apply_lddmm(target,   deform_to='template', **lddmm_dict)
-        >>> deformed_template = apply_lddmm(template, deform_to='target',   **lddmm_dict)
+        >>> deformed_target   = lddmm_transform_image(target,   deform_to='template', **lddmm_dict)
+        >>> deformed_template = lddmm_transform_image(template, deform_to='target',   **lddmm_dict)
 
     Returns:
         dict: A dictionary containing all important saved quantities computed during the registration.
     """
 
+    # Validate multiscales.
+    # Note: this is the only argument not passed to _Lddmm.
+    multiscales = _validate_scalar_to_multi(multiscales, size=None, dtype=float) if multiscales is not None else np.array([1])
 
+    # Validate potential multiscale arguments.
+
+    # All multiscale_lddmm_kwargs should be used in _Lddmm as scalars, not sequences.
+    # Here, they are made into sequences corresponding to the length of multiscale.
+    multiscale_lddmm_kwargs = dict(
+        # # Images.
+        # template=template,
+        # target=target,
+        # # Image resolutions.
+        # template_resolution=template_resolution,
+        # target_resolution=target_resolution,
+        # Iterations.
+        num_iterations=num_iterations,
+        num_affine_only_iterations=num_affine_only_iterations,
+        num_rigid_affine_iterations=num_rigid_affine_iterations,
+        # Stepsizes.
+        affine_stepsize=affine_stepsize,
+        deformative_stepsize=deformative_stepsize,
+        # Affine specifiers.
+        fixed_affine_scale=fixed_affine_scale,
+        # Velocity field specifiers.
+        sigma_regularization=sigma_regularization,
+        smooth_length=smooth_length,
+        num_timesteps=num_timesteps,
+        # Contrast map specifiers.
+        contrast_order=contrast_order,
+        spatially_varying_contrast_map=spatially_varying_contrast_map,
+        contrast_maxiter=contrast_maxiter,
+        contrast_tolerance=contrast_tolerance,
+        sigma_contrast=sigma_contrast,
+        # Artifact specifiers.
+        check_artifacts=check_artifacts,
+        sigma_artifact=sigma_artifact,
+        # # vs. accuracy tradeoff.
+        sigma_matching=sigma_matching,
+        # # Initial values.
+        # initial_affine=initial_affine,
+        # initial_velocity_fields=initial_velocity_fields,
+        # initial_contrast_coefficients=initial_contrast_coefficients,
+        # Diagnostic outputs.
+        calibrate=calibrate,
+        track_progress_every_n=track_progress_every_n,
+    )
 
     # Set up Lddmm instance.
     lddmm = _Lddmm(
@@ -901,7 +961,7 @@ def _generate_position_field(
         raise ValueError(f"velocity_fields' initial dimensions must equal template_shape.\n"
             f"velocity_fields.shape: {velocity_fields.shape}, template_shape: {template_shape}.")
     # Validate velocity_field_resolution.
-    velocity_field_resolution = _validate_resolution(velocity_fields.ndim - 2, velocity_field_resolution)
+    velocity_field_resolution = _validate_resolution(velocity_field_resolution, velocity_fields.ndim - 2)
     # Validate affine.
     affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1))
     # Verify deform_to.
@@ -970,7 +1030,7 @@ def _generate_position_field(
         return phi_inv_affine_inv
 
 
-def _apply_position_field(
+def _transform_image(
     subject,
     subject_resolution,
     output_resolution,
@@ -984,14 +1044,14 @@ def _apply_position_field(
     # Validate position_field.
     position_field = _validate_ndarray(position_field)
     # Validate position_field_resolution.
-    position_field_resolution = _validate_resolution(position_field.ndim - 1, position_field_resolution)
+    position_field_resolution = _validate_resolution(position_field_resolution, position_field.ndim - 1)
     # Validate subject.
     subject = _validate_ndarray(subject, required_ndim=position_field.ndim - 1)
     # Validate subject_resolution.
-    subject_resolution = _validate_resolution(subject.ndim, subject_resolution)
+    subject_resolution = _validate_resolution(subject_resolution, subject.ndim)
     # Validate output_resolution.
     if output_resolution is not None:
-        output_resolution = _validate_resolution(subject.ndim, output_resolution)
+        output_resolution = _validate_resolution(output_resolution, subject.ndim)
 
     # Resample position_field if necessary.
     if output_resolution is not None:
@@ -1016,7 +1076,7 @@ def _apply_position_field(
     return deformed_subject
 
 
-def apply_lddmm(
+def lddmm_transform_image(
     subject,
     subject_resolution=1,
     output_resolution=None,
@@ -1038,7 +1098,7 @@ def apply_lddmm(
 
     Example use:
         register_output_dict = lddmm_register(\*args, \*\*kwargs)
-        deformed_subject = apply_lddmm(subject, subject_resolution, \*\*register_output_dict)
+        deformed_subject = lddmm_transform_image(subject, subject_resolution, \*\*register_output_dict)
 
     Args:
         subject (np.ndarray): The image to be deformed to the template or target from the results of the register function.
@@ -1068,7 +1128,7 @@ def apply_lddmm(
     # Validate subject.
     subject = _validate_ndarray(subject)
     # Validate subject_resolution.
-    subject_resolution = _validate_resolution(subject.ndim, subject_resolution)
+    subject_resolution = _validate_resolution(subject_resolution, subject.ndim)
     # Verify deform_to.
     if not isinstance(deform_to, str):
         raise TypeError(f"deform_to must be of type str.\n"
@@ -1077,7 +1137,7 @@ def apply_lddmm(
         raise ValueError(f"deform_to must be either 'template' or 'target'.")
     # Validate output_resolution.
     if output_resolution is not None:
-        output_resolution = _validate_resolution(subject.ndim, output_resolution)
+        output_resolution = _validate_resolution(output_resolution, subject.ndim)
     # Validate extrapolation_fill_value.
     if extrapolation_fill_value is None:
         extrapolation_fill_value = np.quantile(subject, 10**-subject.ndim)
@@ -1095,8 +1155,74 @@ def apply_lddmm(
         raise ValueError(f"If deform_to=='template', affine_phi must be provided. If deform_to=='target', phi_inv_affine_inv must be provided.\n"
             f"deform_to: {deform_to}, affine_phi is None: {affine_phi is None}, phi_inv_affine_inv is None: {phi_inv_affine_inv is None}.")
 
-    # Call _apply_position_field.
+    # Call _transform_image.
 
-    deformed_subject = _apply_position_field(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value)
+    deformed_subject = _transform_image(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value)
 
     return deformed_subject
+
+
+def _transform_points(
+    points,
+    position_field,
+    position_field_resolution,
+):
+
+    # Validate inputs.
+
+    # Validate position_field.
+    position_field = _validate_ndarray(position_field)
+    # Validate position_field_resolution.
+    position_field_resolution = _validate_resolution(position_field_resolution, position_field.ndim - 1)
+    # Validate points.
+    points = _validate_ndarray(points, required_shape=(-1, position_field.ndim - 1))
+
+    # Interpolate points at position_field.
+    transformed_points = interpn(
+        points=_compute_axes(shape=position_field.shape[:-1], resolution=position_field_resolution),
+        values=position_field,
+        xi=points,
+        bounds_error=False,
+        fill_value=None,
+    )
+
+    return transformed_points
+
+
+def lddmm_transform_points(
+    points,
+    deform_to="template",
+    # lddmm_register output (lddmm_dict).
+    affine_phi=None,
+    phi_inv_affine_inv=None,
+    template_resolution=1,
+    target_resolution=1,
+    **unused_kwargs,
+):
+    
+    # Verify deform_to.
+    if not isinstance(deform_to, str):
+        raise TypeError(f"deform_to must be of type str.\n"
+            f"type(deform_to): {type(deform_to)}.")
+    elif deform_to not in ["template", "target"]:
+        raise ValueError(f"deform_to must be either 'template' or 'target'.")
+
+    # Define position_field and position_field_resolution.
+
+    # Note: these are the reverse of what they are for lddmm_transform_image.
+    if deform_to == "template":
+        position_field = phi_inv_affine_inv
+        position_field_resolution = np.copy(target_resolution)
+    elif deform_to == "target":
+        position_field = affine_phi
+        position_field_resolution = np.copy(template_resolution)
+    # Verify position_field is not None.
+    if position_field is None:
+        raise ValueError(f"If deform_to=='template', phi_inv_affine_inv must be provided. If deform_to=='target', affine_phi must be provided.\n"
+            f"deform_to: {deform_to}, phi_inv_affine_inv is None: {phi_inv_affine_inv is None}, affine_phi is None: {affine_phi is None}.")
+
+    # Call _transform_points.
+
+    transformed_points = _transform_points(points, position_field, position_field_resolution)
+
+    return transformed_points

@@ -8,9 +8,11 @@ from scipy.ndimage import rotate
 from skimage.registration import _lddmm_utilities
 
 from skimage.registration._lddmm import _generate_position_field
-from skimage.registration._lddmm import _apply_position_field
-from skimage.registration._lddmm import apply_lddmm
+from skimage.registration._lddmm import _transform_image
+from skimage.registration._lddmm import lddmm_transform_image
 from skimage.registration._lddmm import lddmm_register
+from skimage.registration._lddmm import _transform_points
+from skimage.registration._lddmm import lddmm_transform_points
 
 """
 Test _generate_position_field.
@@ -118,10 +120,10 @@ def test__generate_position_field(deform_to):
     assert np.allclose(position_field, expected_output)
 
 """
-Test _apply_position_field.
+Test _transform_image.
 """
 
-def test__apply_position_field():
+def test__transform_image():
     
     # Test simplest identity position_field.
 
@@ -131,7 +133,7 @@ def test__apply_position_field():
     position_field_resolution = subject_resolution
     position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
 
-    deformed_subject = _apply_position_field(
+    deformed_subject = _transform_image(
         subject=subject,
         subject_resolution=subject_resolution,
         output_resolution=output_resolution,
@@ -158,7 +160,7 @@ def test__apply_position_field():
     position_field_resolution = subject_resolution
     position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
 
-    deformed_subject = _apply_position_field(
+    deformed_subject = _transform_image(
         subject=subject,
         subject_resolution=subject_resolution,
         output_resolution=output_resolution,
@@ -193,7 +195,7 @@ def test__apply_position_field():
     position_field_resolution = subject_resolution
     position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution) + [0, -1] # Shift to the left by 1.
 
-    deformed_subject = _apply_position_field(
+    deformed_subject = _transform_image(
         subject=subject,
         subject_resolution=subject_resolution,
         output_resolution=output_resolution,
@@ -226,7 +228,7 @@ def test__apply_position_field():
     position_field_resolution = subject_resolution
     position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution) + [0, -1] # Shift to the left by 1.
 
-    deformed_subject = _apply_position_field(
+    deformed_subject = _transform_image(
         subject=subject,
         subject_resolution=subject_resolution,
         output_resolution=output_resolution,
@@ -265,7 +267,7 @@ def test__apply_position_field():
     position_field = _lddmm_utilities._multiply_coords_by_affine(affine, 
         _lddmm_utilities._compute_coords(subject.shape, position_field_resolution))
 
-    deformed_subject = _apply_position_field(
+    deformed_subject = _transform_image(
         subject=subject,
         subject_resolution=subject_resolution,
         output_resolution=output_resolution,
@@ -282,11 +284,11 @@ def test__apply_position_field():
     assert np.allclose(deformed_subject, expected_output)
 
 """
-Test apply_lddmm.
+Test lddmm_transform_image.
 """
 
 @pytest.mark.parametrize('deform_to', ['template', 'target'])
-def test_apply_lddmm(deform_to):
+def test_lddmm_transform_image(deform_to):
 
     # Test identity position fields.
     
@@ -307,7 +309,7 @@ def test_apply_lddmm(deform_to):
     affine_phi = _lddmm_utilities._compute_coords(template_shape, template_resolution)
     phi_inv_affine_inv = _lddmm_utilities._compute_coords(target_shape, target_resolution)
 
-    expected_output = _apply_position_field(
+    expected_output = _transform_image(
         subject,
         subject_resolution,
         output_resolution,
@@ -316,7 +318,7 @@ def test_apply_lddmm(deform_to):
         extrapolation_fill_value=extrapolation_fill_value,
     )
 
-    deformed_subject = apply_lddmm(
+    deformed_subject = lddmm_transform_image(
         subject=subject,                         subject_resolution=subject_resolution, 
         output_resolution=output_resolution,     deform_to=deform_to, 
         extrapolation_fill_value=extrapolation_fill_value,
@@ -324,7 +326,6 @@ def test_apply_lddmm(deform_to):
         template_resolution=template_resolution, target_resolution=target_resolution, 
     )
 
-    assert np.allclose(deformed_subject, expected_output)
     assert np.array_equal(deformed_subject, expected_output)
 
 """
@@ -340,14 +341,14 @@ def _test_lddmm_register(rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
     template_resolution = lddmm_register_kwargs['template_resolution'] if 'template_resolution' in lddmm_register_kwargs.keys() else 1
     target_resolution   = lddmm_register_kwargs[  'target_resolution'] if   'target_resolution' in lddmm_register_kwargs.keys() else 1
 
-    deformed_target = apply_lddmm(
+    deformed_target = lddmm_transform_image(
         subject=target, 
         subject_resolution=target_resolution, 
         deform_to='template', 
         **reg_output,
     )
 
-    deformed_template = apply_lddmm(
+    deformed_template = lddmm_transform_image(
         subject=template, 
         subject_resolution=template_resolution, 
         deform_to='target', 
@@ -357,6 +358,7 @@ def _test_lddmm_register(rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
     assert np.allclose(deformed_template, target, rtol=rtol, atol=atol)
     assert np.allclose(deformed_target, template, rtol=rtol, atol=atol)
 
+@pytest.mark.skip
 def test_lddmm_register():
 
     # Test 2D identity registration.
@@ -516,10 +518,152 @@ def test_lddmm_register():
 
     _test_lddmm_register(**lddmm_register_kwargs)
 
+"""
+Test _transform_points.
+"""
+
+def test__transform_points():
+
+    # Test simplest identity position_field.
+
+    subject = np.arange(3*4).reshape(3,4)
+    subject_resolution = 1
+    position_field_resolution = subject_resolution
+    position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
+    points = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution).reshape(-1, subject.ndim)
+
+    transformed_points = _transform_points(
+        points=points,
+        position_field=position_field,
+        position_field_resolution=position_field_resolution,
+    )
+    expected_output = points
+    assert np.array_equal(transformed_points, expected_output)
+    
+    # Test constant shifting position_field.
+
+    # Note: applying a leftward shift to the position_field is done by subtracting 1 from the appropriate dimension.
+    # The corresponding effect on a deformed image is a shift to the right.
+
+    subject = np.array([
+        [0,1,3],
+        [4,5,6],
+        [7,8,9],
+    ])
+    subject_resolution = 1
+    position_field_resolution = subject_resolution
+    position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution) + [0, -1] # Shift to the left by 1.
+    # The right column.
+    points = np.array([
+        [-1, 1],
+        [ 0, 1],
+        [ 1, 1],
+    ])
+
+    transformed_points = _transform_points(
+        points=points,
+        position_field=position_field,
+        position_field_resolution=position_field_resolution,
+    )
+    # The middle column.
+    expected_output = np.array([
+        [-1, 0],
+        [ 0, 0],
+        [ 1, 0],
+    ])
+    assert np.array_equal(transformed_points, expected_output)
+
+    # Test rotational position_field.
+
+    # Note: applying an affine indicating a clockwise-rotation to a position_field produces a position _ield rotated counter-clockwise.
+    # The corresponding effect on a deformed image is a counter-clockwise rotation.
+
+    subject = np.array([
+        [0,1,0],
+        [0,1,0],
+        [0,1,1],
+    ])
+    subject_resolution = 1
+    position_field_resolution = subject_resolution
+    # Indicates a 90 degree rotation to the right.
+    affine = np.array([
+        [0,1,0],
+        [-1,0,0],
+        [0,0,1],
+    ])
+    position_field = _lddmm_utilities._multiply_coords_by_affine(affine, 
+        _lddmm_utilities._compute_coords(subject.shape, position_field_resolution))
+    # The middle column.
+    points = np.array([
+        [-1, 0],
+        [ 0, 0],
+        [ 1, 0],
+    ])
+
+    transformed_points = _transform_points(
+        points=points,
+        position_field=position_field,
+        position_field_resolution=position_field_resolution,
+    )
+    # The middle row.
+    expected_output = np.array([
+        [0,  1],
+        [0,  0],
+        [0, -1],
+    ])
+    assert np.array_equal(transformed_points, expected_output)
+
+"""
+Test lddmm_transform_points.
+"""
+
+@pytest.mark.parametrize('deform_to', ['template', 'target'])
+def test_lddmm_transform_points(deform_to):
+    
+    # Test identity position fields.
+    
+    template_shape = (3,4)
+    template_resolution = 1
+    target_shape = (2,5)
+    target_resolution = 1
+
+    affine_phi = _lddmm_utilities._compute_coords(template_shape, template_resolution)
+    phi_inv_affine_inv = _lddmm_utilities._compute_coords(target_shape, target_resolution)
+    
+    if deform_to == 'template':
+        points = _lddmm_utilities._compute_coords(target_shape, target_resolution).reshape(-1, len(target_shape))
+        position_field = phi_inv_affine_inv
+        position_field_resolution = target_resolution
+    else:
+        points = _lddmm_utilities._compute_coords(template_shape, template_resolution).reshape(-1, len(template_shape))
+        position_field = affine_phi
+        position_field_resolution = template_resolution
+
+    expected_output = _transform_points(
+        points=points,
+        position_field=position_field,
+        position_field_resolution=position_field_resolution,
+    )
+
+    transformed_points = lddmm_transform_points(
+        points=points,
+        deform_to=deform_to,
+        affine_phi=affine_phi,
+        phi_inv_affine_inv=phi_inv_affine_inv,
+        template_resolution=template_resolution,
+        target_resolution=target_resolution,
+    )
+
+    assert np.array_equal(transformed_points, expected_output)
+
+
 if __name__ == "__main__":
     test__generate_position_field(deform_to='template')
     test__generate_position_field(deform_to='target')
-    test__apply_position_field()
-    test_apply_lddmm(deform_to='template')
-    test_apply_lddmm(deform_to='target')
+    test__transform_image()
+    test_lddmm_transform_image(deform_to='template')
+    test_lddmm_transform_image(deform_to='target')
     test_lddmm_register()
+    test__transform_points()
+    test_lddmm_transform_points(deform_to='template')
+    test_lddmm_transform_points(deform_to='target')

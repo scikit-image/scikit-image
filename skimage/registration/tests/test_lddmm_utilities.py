@@ -46,11 +46,20 @@ def test__validate_scalar_to_multi():
     correct_output = np.array([1, 2, 3], int)
     assert np.array_equal(_validate_scalar_to_multi(**kwargs), correct_output)
 
+    kwargs = dict(value=np.array([1, 2, 3], float), size=None, dtype=float)
+    correct_output = np.array([1, 2, 3], float)
+    assert np.array_equal(_validate_scalar_to_multi(**kwargs), correct_output)
+
+
+    kwargs = dict(value=1, size=None, dtype=float)
+    correct_output = np.array([1], float)
+    assert np.array_equal(_validate_scalar_to_multi(**kwargs), correct_output)
+
     # Test improper use.
 
     kwargs = dict(value=[1, 2, 3, 4], size='size: not an int', dtype=float)
     expected_exception = TypeError
-    match = "size must be interpretable as an integer."
+    match = "size must be either None or interpretable as an integer."
     with pytest.raises(expected_exception, match=match):
         _validate_scalar_to_multi(**kwargs)
 
@@ -62,7 +71,7 @@ def test__validate_scalar_to_multi():
 
     kwargs = dict(value=[1, 2, 3, 4], size=3, dtype=int)
     expected_exception = ValueError
-    match = "The length of value must either be 1 or it must match size."
+    match = "The length of value must either be 1 or it must match size if size is provided."
     with pytest.raises(expected_exception, match=match):
         _validate_scalar_to_multi(**kwargs)
 
@@ -100,14 +109,21 @@ def test__validate_ndarray():
     correct_output = np.arange(2*3, dtype=float).reshape(2,3)
     assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
 
-    kwargs = dict(array=np.array([0,1,2]), broadcast_to_shape=(2,3))
-    correct_output = np.array([[0,1,2], [0,1,2]])
-    assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
-
     kwargs = dict(array=np.array(7), required_ndim=1)
     correct_output = np.array([7])
     assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
 
+    kwargs = dict(array=np.array([0,1,2]), broadcast_to_shape=(2,3))
+    correct_output = np.array([[0,1,2], [0,1,2]])
+    assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
+
+    kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), reshape_to_shape=(4, 3))
+    correct_output = np.araange(3 * 4).reshape(4, 3)
+    assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
+
+    kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(3, -1))
+    correct_output = np.araange(3 * 4).reshape(3, 4)
+    assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
     # Test improper use.
 
     # Validate arguments.
@@ -174,6 +190,12 @@ def test__validate_ndarray():
     with pytest.raises(expected_exception, match=match):
         _validate_ndarray(**kwargs)
 
+    kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(3, 5))
+    expected_exception = ValueError
+    match = "array must match required_shape."
+    with pytest.raises(expected_exception, match=match):
+        _validate_ndarray(**kwargs)
+
 """
 Test _validate_resolution.
 """
@@ -182,31 +204,31 @@ def test__validate_resolution():
 
     # Test proper use.
     
-    kwargs = dict(ndim=1, resolution=2)
+    kwargs = dict(resolution=2, ndim=1)
     correct_output = np.full(1, 2, float)
     assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=4, resolution=1.5)
+    kwargs = dict(resolution=1.5, ndim=4)
     correct_output = np.full(4, 1.5, float)
     assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=3, resolution=np.ones(3, int))
+    kwargs = dict(resolution=np.ones(3, int), ndim=3)
     correct_output = np.ones(3, float)
     assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
-    kwargs = dict(ndim=2, resolution=[3, 4])
+    kwargs = dict(resolution=[3, 4], ndim=2)
     correct_output = np.array([3, 4], float)
     assert np.array_equal(_validate_resolution(**kwargs), correct_output)
 
     # Test improper use.
 
-    kwargs = dict(ndim=2, resolution=[3, -4])
+    kwargs = dict(resolution=[3, -4], ndim=2)
     expected_exception = ValueError
     match = "All elements of resolution must be positive."
     with pytest.raises(expected_exception, match=match):
         _validate_resolution(**kwargs)
 
-    kwargs = dict(ndim=2, resolution=[3, 0])
+    kwargs = dict(resolution=[3, 0], ndim=2)
     expected_exception = ValueError
     match = "All elements of resolution must be positive."
     with pytest.raises(expected_exception, match=match):
