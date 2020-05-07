@@ -3,10 +3,10 @@
 3D adaptive histogram equalization
 ==================================
 
-Adaptive histogram equalization (AHE) can be used to improve the local contrast of an
-image [1]_. Specifically, AHE can be useful for normalizing intensities across images.
-This example compares the results of applying AHE to a 3D image and a degraded version
-of it.
+Adaptive histogram equalization (AHE) can be used to improve the local
+contrast of an image [1]_. Specifically, AHE can be useful for normalizing
+intensities across images. This example compares the results of applying AHE
+to a 3D image and a degraded version of it.
 
 .. [1] https://en.wikipedia.org/wiki/Histogram_equalization
 """
@@ -84,7 +84,7 @@ def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
     # does not accept arrays of alpha values
     for il in range(1, len(levels)):
         sel = (ref_vol_scaled >= levels[il - 1])\
-              * (ref_vol_scaled < levels[il])
+                * (ref_vol_scaled < levels[il])
         c = get_rgba(vol_scaled[sel], 'viridis',
                      vmin=0, vmax=1, alpha=alphas[il - 1])
         fig_ax.scatter(xs.flatten()[sel],
