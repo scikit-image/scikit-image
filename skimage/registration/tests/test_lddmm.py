@@ -530,7 +530,7 @@ def test__transform_points():
     subject_resolution = 1
     position_field_resolution = subject_resolution
     position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
-    points = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution).reshape(-1, subject.ndim)
+    points = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
 
     transformed_points = _transform_points(
         points=points,
@@ -631,11 +631,11 @@ def test_lddmm_transform_points(deform_to):
     phi_inv_affine_inv = _lddmm_utilities._compute_coords(target_shape, target_resolution)
     
     if deform_to == 'template':
-        points = _lddmm_utilities._compute_coords(target_shape, target_resolution).reshape(-1, len(target_shape))
+        points = _lddmm_utilities._compute_coords(target_shape, target_resolution)
         position_field = phi_inv_affine_inv
         position_field_resolution = target_resolution
     else:
-        points = _lddmm_utilities._compute_coords(template_shape, template_resolution).reshape(-1, len(template_shape))
+        points = _lddmm_utilities._compute_coords(template_shape, template_resolution)
         position_field = affine_phi
         position_field_resolution = template_resolution
 

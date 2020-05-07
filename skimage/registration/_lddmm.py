@@ -1175,7 +1175,10 @@ def _transform_points(
     # Validate position_field_resolution.
     position_field_resolution = _validate_resolution(position_field_resolution, position_field.ndim - 1)
     # Validate points.
-    points = _validate_ndarray(points, required_shape=(-1, position_field.ndim - 1))
+    points = _validate_ndarray(points, minimum_ndim=1)
+    if points.shape[-1] != position_field.ndim - 1:
+        raise ValueError(f"The length of the last dimension of points must match the spatial-dimensionality of position_field, i.e. position_field.ndim - 1.\n"
+                         f"points.shape[-1]: {points.shape[-1]}, position_field.ndim - 1: {position_field.ndim - 1}.")
 
     # Interpolate points at position_field.
     transformed_points = interpn(
