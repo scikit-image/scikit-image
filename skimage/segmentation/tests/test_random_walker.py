@@ -75,7 +75,7 @@ def test_2d_bf():
     assert data.shape == labels.shape
     with expected_warnings([NUMPY_MATRIX_WARNING]):
         full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
-                                 return_full_prob=True)
+                                     return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
@@ -83,7 +83,7 @@ def test_2d_bf():
     labels[55, 80] = 3
     with expected_warnings([NUMPY_MATRIX_WARNING]):
         full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
-                                 return_full_prob=True)
+                                     return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert len(full_prob_bf) == 3
