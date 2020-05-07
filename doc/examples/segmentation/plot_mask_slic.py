@@ -14,6 +14,7 @@ case of irregular mask.
 .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
     Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
     State-of-the-art Superpixel Methods, TPAMI, May 2012.
+    :DOI:`10.1109/TPAMI.2012.120`
 
 .. [2] Irving, Benjamin. "maskSLIC: regional superpixel generation
     with application to local pathology characterisation in medical
