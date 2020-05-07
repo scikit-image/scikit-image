@@ -1109,8 +1109,8 @@ def lddmm_transform_image(
         deform_to (str, optional): Either "template" or "target", indicating which position field to apply to subject. Defaults to "template".
         extrapolation_fill_value (float, optional): The fill_value kwarg passed to scipy.interpolate.interpn. 
             If None, this is set to a low quantile of the subject's 10**-subject.ndim quantile to estimate background. Defaults to None.
-        affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming to the template. Defaults to None.
-        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming to the target. Defaults to None.
+        affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming images to the template space. Defaults to None.
+        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming images to the target space. Defaults to None.
         template_resolution (float, seq, optional): The resolution of the template in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
         target_resolution (float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
 
@@ -1202,9 +1202,29 @@ def lddmm_transform_points(
     target_resolution=1,
     **unused_kwargs,
 ):
+    """
     
-    # Verify deform_to.
+    Apply the transform, or position_field, to an array of points to transform them between the template and target spaces, as determined by deform_to.
+
+    Args:
+        points (np.ndarray): The points in either the template space or the target space to be transformed into the other space. 
+            The last dimension of points must have length equal to the dimensionality of the template and target.
+        deform_to (str, optional): Either "template" or "target" indicating whether to transform points to the template space or the target space. Defaults to "template".
+        affine_phi (np.ndarray, optional): The position field in the shape of the template for deforming points to the target space. Defaults to None.
+        phi_inv_affine_inv (np.ndarray, optional): The position field in the shape of the target for deforming points to the template space. Defaults to None.
+        template_resolution (float, seq, optional): The resolution of the template in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
+        target_resolution (float, seq, optional): The resolution of the target in each dimension, or just one scalar to indicate isotropy. Defaults to 1.
+
+    Raises:
+        TypeError: Raised if deform_to is not of type str.
+        ValueError: Raised if deform_to is neither "template" nor "target".
+
+    Returns:
+        np.ndarray: A copy of points transformed into the space determined by deform_to.
+    """
+    
     if not isinstance(deform_to, str):
+    # Verify deform_to.
         raise TypeError(f"deform_to must be of type str.\n"
             f"type(deform_to): {type(deform_to)}.")
     elif deform_to not in ["template", "target"]:
@@ -1216,13 +1236,9 @@ def lddmm_transform_points(
     if deform_to == "template":
         position_field = phi_inv_affine_inv
         position_field_resolution = np.copy(target_resolution)
-    elif deform_to == "target":
+    else:
         position_field = affine_phi
         position_field_resolution = np.copy(template_resolution)
-    # Verify position_field is not None.
-    if position_field is None:
-        raise ValueError(f"If deform_to=='template', phi_inv_affine_inv must be provided. If deform_to=='target', affine_phi must be provided.\n"
-            f"deform_to: {deform_to}, phi_inv_affine_inv is None: {phi_inv_affine_inv is None}, affine_phi is None: {affine_phi is None}.")
 
     # Call _transform_points.
 
