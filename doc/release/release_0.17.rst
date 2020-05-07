@@ -35,7 +35,7 @@ New Features
 - Starting with this version, our gallery examples now have links to run the
   example notebook on a binder instance. (#4543)
 
-New doc tutorials and gallery examples have been added to the use of regionprops_table in (#4348)
+New doc tutorials and gallery examples have been added to the use of regionprops_table (#4348)
 geometrical transformations (#4385), and the registration of rotation and
 scaling with no shared center (#4515). A new section on registration has been
 added to the gallery (#4575).
@@ -88,6 +88,10 @@ API Changes
 - Move register_translation from skimage.feature to skimage.registration (#4502)
 - Move watershed from morphology to segmentation (#4443)
 - Rename draw.circle() to draw.disk() (#4428)
+- The forward and backward maps returned by :func:`skimage.segmentation.relabel_sequential`
+  are no longer NumPy arrays, but more memory-efficient `ArrayMap` objects that behave
+  the same way for mapping. See the ``relabel_sequential`` documentation for more details.
+  To get NumPy arrays back, cast it as a NumPy array: ``np.asarray(forward_map)`` (#4612)
 
 
 Bugfixes
@@ -252,7 +256,7 @@ Other Pull Requests
 - Add section on closing issues to core dev guide (#4328)
 - Use gaussian filter output array if provided (#4329)
 - Move cython pinning forward (#4330)
--  Add python 3.8 to the build matrix (#4331)
+- Add python 3.8 to the build matrix (#4331)
 - Avoid importing mathematical functions from scipy as told ;) (#4332)
 - Add dtype keyword argument to block reduce and small documentation changes (#4334)
 - Add explicit use of 32-bit int in fast_exp (#4338)
@@ -367,5 +371,4 @@ Other Pull Requests
 - Fix ArrayMap test (#4645)
 - Remove copy of tifffile; install from pip (#4235)
 - Refactor/move neighborhood utility functions in morphology (#4209)
-
 
