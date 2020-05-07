@@ -17,7 +17,7 @@ case of irregular mask.
 
 .. [2] Irving, Benjamin. "maskSLIC: regional superpixel generation
     with application to local pathology characterisation in medical
-    images." arXiv preprint arXiv:1606.09518 (2016).
+    images.", 2016, , :arXiv:`1606.09518`
 
 """
 
