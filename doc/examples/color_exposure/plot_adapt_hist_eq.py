@@ -83,8 +83,8 @@ def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
     # group pixels by intensity and plot separately, as 3D scatter
     # does not accept arrays of alpha values
     for il in range(1, len(levels)):
-        sel = (ref_vol_scaled >= levels[il - 1])\
-                * (ref_vol_scaled < levels[il])
+        sel = (ref_vol_scaled >= levels[il - 1])
+        sel *= (ref_vol_scaled < levels[il])
         c = get_rgba(vol_scaled[sel], 'viridis',
                      vmin=0, vmax=1, alpha=alphas[il - 1])
         fig_ax.scatter(xs.flatten()[sel],
