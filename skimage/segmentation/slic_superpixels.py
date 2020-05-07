@@ -188,6 +188,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
         Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
+        :DOI:`10.1109/TPAMI.2012.120`
     .. [2] http://ivrg.epfl.ch/research/superpixels#SLICO
     .. [3] https://arxiv.org/pdf/1606.09518.pdf
     .. [4] https://github.com/scikit-image/scikit-image/issues/3722
