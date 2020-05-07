@@ -58,7 +58,7 @@ To update the installation::
 
 Platform-specific notes follow below.
 
-a. Windows
+**a. Windows**
 
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means
 that your computer does not have recommended compilers for Python. You can
@@ -82,7 +82,7 @@ our `setup of Azure Pipelines`_ (a continuous integration service).
 .. _virtual environments: https://docs.python-guide.org/dev/virtualenvs/
 .. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
-b. Debian and Ubuntu
+**b. Debian and Ubuntu**
 
 Install all the required dependencies::
 
