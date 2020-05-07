@@ -171,7 +171,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                                 dist_center += dist_color
 
                             if distance[z, y, x] > dist_center:
-                                nearest_segments[z, y, x] = k+start_label
+                                nearest_segments[z, y, x] = k + start_label
                                 distance[z, y, x] = dist_center
                                 change = True
 
