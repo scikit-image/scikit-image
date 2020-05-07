@@ -127,6 +127,13 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     dtype = image.dtype
     input_shape = image.shape
 
+    # For block processing / padding use the convention illustrated
+    # in fig. 2 of this paper:
+    # V. Stimper, S. Bauer, R. Ernstorfer, B. Schölkopf and R. P. Xian,
+    # "Multidimensional Contrast Limited Adaptive Histogram
+    # Equalization," in IEEE Access, vol. 7, pp. 165437-165447, 2019,
+    # doi: 10.1109/ACCESS.2019.2952899.
+
     # pad the image symmetrically such that the shape in each dimension
     # - is a multiple of the kernel_size and
     # - is preceded by half a kernel size (for histograms)
@@ -172,9 +179,6 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     map_array = hist.reshape(hist_block_assembled_shape[:ndim] + (-1,))
 
     # Perform multilinear interpolation of graylevel mappings
-    # using the convention described here:
-    # https://en.wikipedia.org/w/index.php?title=Adaptive_histogram_
-    # equalization&oldid=936814673#Efficient_computation_by_interpolation
 
     # rearrange image into blocks for vectorized processing
     ns_proc = [int(s / k) - 1 for s, k in zip(image.shape, kernel_size)]
