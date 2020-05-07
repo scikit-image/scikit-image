@@ -341,6 +341,6 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     high_mask = local_maxima & (magnitude >= high_threshold)
     sums = ndi.sum(high_mask, labels,
                    np.arange(1, count + 1, dtype=np.int32))
-    good_label = np.pad(sums > 0, (1, 0))
+    good_label = np.pad(sums > 0, (1, 0), mode='constant')
     output_mask = good_label[labels]
     return output_mask
