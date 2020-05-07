@@ -68,7 +68,7 @@ from pooch.utils import file_hash
 # This helps pooch understand that it should look in master
 # to find the required files
 pooch_version = __version__.replace('.dev', '+')
-url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+url = "https://github.com/scikit-image/scikit-image/raw/v0.17.x/skimage/"
 
 # Create a new friend to manage your sample data storage
 image_fetcher = pooch.create(
