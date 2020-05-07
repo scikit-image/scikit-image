@@ -21,19 +21,14 @@ The calibration method is based on the `noise2self` algorithm of [1]_.
 
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import gridspec
 
-from skimage.data import chelsea, hubble_deep_field
-from skimage.metrics import mean_squared_error as mse
-from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.restoration import (calibrate_denoiser,
-                                 denoise_wavelet,
-                                 denoise_tv_chambolle, denoise_nl_means,
-                                 estimate_sigma)
+from skimage.data import chelsea
+from skimage.restoration import calibrate_denoiser, denoise_wavelet
+
 from skimage.util import img_as_float, random_noise
-from skimage.color import rgb2gray
 from functools import partial
 
+# rescale_sigma=True required to silence deprecation warnings
 _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
@@ -59,12 +54,13 @@ calibrated_denoiser = calibrate_denoiser(noisy,
 # Denoised image using calibrated denoiser
 calibrated_output = calibrated_denoiser(noisy)
 
-fig, axes = plt.subplots(1, 3, sharey=True, figsize=(15, 5))
+fig, axes = plt.subplots(1, 3, sharex=True, sharey=True, figsize=(15, 5))
 
-for ax, img, title in zip(axes,
-                          [noisy, default_output, calibrated_output],
-                          ['Noisy Image', 'Denoised (Default)',
-                           'Denoised (Calibrated)']):
+for ax, img, title in zip(
+        axes,
+        [noisy, default_output, calibrated_output],
+        ['Noisy Image', 'Denoised (Default)', 'Denoised (Calibrated)']
+):
     ax.imshow(img)
     ax.set_title(title)
     ax.set_yticks([])

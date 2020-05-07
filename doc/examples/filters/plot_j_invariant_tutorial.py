@@ -60,7 +60,7 @@ calibrated_denoiser = calibrate_denoiser(noisy,
 # Denoised image using calibrated denoiser
 calibrated_output = calibrated_denoiser(noisy)
 
-fig, axes = plt.subplots(1, 3, sharey=True, figsize=(15, 5))
+fig, axes = plt.subplots(1, 3, sharex=True, sharey=True, figsize=(15, 5))
 
 for ax, img, title in zip(axes,
                           [noisy, default_output, calibrated_output],
