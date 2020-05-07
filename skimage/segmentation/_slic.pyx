@@ -195,7 +195,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                             if nearest_segments[z, y, x] == mask_label:
                                 continue
 
-                        k = nearest_segments[z, y, x]-start_label
+                        k = nearest_segments[z, y, x] - start_label
                         n_segment_elems[k] += 1
                         segments[k, 0] += z
                         segments[k, 1] += y
