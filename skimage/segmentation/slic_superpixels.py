@@ -141,9 +141,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         The labels' index start. Should be 0 or 1.
     mask : 2D ndarray, optional
         If provided, superpixels are computed only where mask is True,
-        and seed points are iteratively placed over the masked area to
-        ensure their homogeneous spacial distribution over the mask
-        (see [3]_ for more details).
+        and seed points are homogeneously distributed over the mask
+        using a K-means clustering strategy.
 
     Returns
     -------
@@ -173,10 +172,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
       interpret them as 3D with the last dimension having length 3, use
       `multichannel=False`.
-
-    * If spacing is None and mask is provided, chamfer distance
-      transform is used to homogeneously place seed points over the
-      mask, otherwise, the exact euclidian distance transform is used.
 
     * `start_label` is introduced to handle the issue [4]_. The labels
       indexing starting at 0 will be deprecated in future versions. If
@@ -254,7 +249,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
-        # Step 1 of the algorithm [3]_
         centroids, steps = _get_mask_centroids(mask, n_segments)
         update_centroids = True
     else:
