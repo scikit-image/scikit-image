@@ -122,7 +122,7 @@ def test__validate_ndarray():
     assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
 
     kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(3, -1))
-    correct_output = np.araange(3 * 4).reshape(3, 4)
+    correct_output = np.arange(3 * 4).reshape(3, 4)
     assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
     # Test improper use.
 

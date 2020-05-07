@@ -358,7 +358,7 @@ def _test_lddmm_register(rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
     assert np.allclose(deformed_template, target, rtol=rtol, atol=atol)
     assert np.allclose(deformed_target, template, rtol=rtol, atol=atol)
 
-@pytest.mark.skip
+
 def test_lddmm_register():
 
     # Test 2D identity registration.

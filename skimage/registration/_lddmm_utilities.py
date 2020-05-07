@@ -203,14 +203,19 @@ def _validate_ndarray(
 
     # Verify compliance with required_shape if appropriate.
     if required_shape is not None:
-        if not np.array_equal(array.reshape(required_shape).shape, array.shape):
+        try:
+            required_shape_satisfied = np.array_equal(array.reshape(required_shape).shape, array.shape)
+        except ValueError:
+            # array could not be reshaped to required_shape.
+            required_shape_satisfied = False
+        if not required_shape_satisfied:
+            # array was unable to be reshaped to required_shape or had its shape changed in reshaping to required_shape.
             raise ValueError(f"array must match required_shape.\n"
-                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
+                            f"array.shape: {array.shape}, required_shape: {required_shape}.")
 
     return array
 
 
-# TODO: reverse order of arguments and propagate change throughout ardent.
 def _validate_resolution(resolution, ndim):
     """Validate resolution to assure its length matches the dimensionality of image."""
 
