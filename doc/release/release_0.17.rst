@@ -34,6 +34,9 @@ New Features
   (for example to map region labels to the size of regions in an image of
   labels) #4612 and #4646
 - Masked marching cubes (#3829)
+- The SLIC superpixel algorithm now accepts a mask to exclude some parts of the
+  image and force the superpixel boundaries to follow the boundary of the mask
+  (#3850)
 - Pooch -- on the fly download of datasets from github: we introduced the
   possibility to include larger datasets in the `data` submodule, thanks to the
   `pooch` library. `data.download_all` fetches all datasets. (#3945)
