@@ -159,15 +159,16 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                             dx = sx * (cx - x)
                             dx *= dx
                             dist_center = (dz + dy + dx) * spatial_weight
-                            dist_color = 0
-                            for c in range(3, n_features):
-                                t = image_zyx[z, y, x, c - 3] - segments[k, c]
-                                dist_color += t * t
-
-                            if slic_zero:
-                                dist_color /= max_dist_color[k]
 
                             if not ignore_color:
+                                dist_color = 0
+                                for c in range(3, n_features):
+                                    t = (image_zyx[z, y, x, c - 3]
+                                         - segments[k, c])
+                                    dist_color += t * t
+
+                                if slic_zero:
+                                    dist_color /= max_dist_color[k]
                                 dist_center += dist_color
 
                             if distance[z, y, x] > dist_center:
