@@ -1,9 +1,16 @@
 import os
+from urllib import request
 
 import numpy as np
 import skimage.data as data
 from skimage import io
-from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
+from skimage._shared.testing import (
+    assert_equal, assert_almost_equal, fetch, skipif
+)
+
+
+# check whether github is reachable.
+OFFLINE = request.urlopen('https://github.com').getcode() != 200
 
 
 def test_astronaut():
@@ -109,6 +116,7 @@ def test_cell():
     data.cell()
 
 
+@skipif(OFFLINE, reason='No internet connection')
 def test_cells_3d():
     """Needs internet connection."""
     path = fetch('data/cells.tif')
@@ -122,6 +130,7 @@ def test_data_dir():
     assert 'astronaut.png' in os.listdir(datadir)
 
 
+@skipif(OFFLINE, reason='No internet connection')
 def test_download_all():
     datadir = data.data_dir
     for filename in os.listdir(datadir):
