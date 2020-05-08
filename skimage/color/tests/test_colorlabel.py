@@ -38,6 +38,17 @@ def test_wrong_kind():
         label2rgb(label, kind='foo', bg_label=-1)
 
 
+def test_uint_image():
+    img = np.random.randint(0, 255, (10, 10), dtype=np.uint8)
+    labels = np.zeros((10, 10), dtype=np.int64)
+    labels[1:3, 1:3] = 1
+    labels[6:9, 6:9] = 2
+    output = label2rgb(labels, image=img, bg_label=0)
+    # Make sure that the output is made of floats and in the correct range
+    assert np.issubdtype(output.dtype, np.floating)
+    assert output.max() <= 1
+
+
 def test_rgb():
     image = np.ones((1, 3))
     label = np.arange(3).reshape(1, -1)
