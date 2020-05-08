@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import skimage.data as data
 from skimage import io
@@ -112,3 +114,17 @@ def test_cells_3d():
     path = fetch('data/cells.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
+
+
+def test_data_dir():
+    astro = data.astronaut()
+    datadir = data.data_dir
+    assert 'astronaut.png' in os.listdir(datadir)
+
+
+def test_download_all():
+    datadir = data.data_dir
+    for filename in os.listdir(datadir):
+        os.remove(os.path.join(datadir, filename))
+    data.download_all()
+    assert len(os.listdir(datadir)) > 50
