@@ -54,8 +54,7 @@ __all__ = ['data_dir',
            'shepp_logan_phantom',
            'stereo_motorcycle']
 
-legacy_data_dir = osp.abspath(osp.dirname(__file__))
-skimage_distribution_dir = osp.join(legacy_data_dir, '..')
+skimage_distribution_dir = osp.join(osp.abspath(osp.dirname(__file__)), '..')
 
 
 import pooch
@@ -168,11 +167,6 @@ def _fetch(data_filename):
 # Fetch all legacy data so that it is available by default
 for filename in legacy_registry:
     _fetch(filename)
-
-else:
-    # Without pooch, fallback on the standard data directory
-    # which for now, includes a few limited data samples
-    data_dir = legacy_data_dir
 
 
 def download_all(directory=None):
