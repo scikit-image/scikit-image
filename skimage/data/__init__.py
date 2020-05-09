@@ -129,6 +129,10 @@ def _fetch(data_filename):
     KeyError:
         If the filename is not known to the scikit-image distribution.
 
+    ModuleNotFoundError:
+        If the filename is known to the scikit-image distribution but pooch
+        is not installed.
+
     ConnectionError:
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
