@@ -108,6 +108,54 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
+def create_image_fetcher():
+    try:
+        import pooch
+    except ImportError:
+        # Without pooch, fallback on the standard data directory
+        # which for now, includes a few limited data samples
+        return None, legacy_data_dir
+
+    # Pooch expects a `+` to exist in development versions.
+    # Since scikit-image doesn't follow that convention, we have to manually
+    # remove `.dev` with a `+` if it exists.
+    # This helps pooch understand that it should look in master
+    # to find the required files
+    pooch_version = __version__.replace('.dev', '+')
+    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+
+    # Create a new friend to manage your sample data storage
+    image_fetcher = pooch.create(
+        # Pooch uses appdirs to select an appropriate directory for the cache
+        # on each platform.
+        # https://github.com/ActiveState/appdirs
+        # On linux this converges to
+        # '$HOME/.cache/scikit-image'
+        # With a version qualifier
+        path=pooch.os_cache("scikit-image"),
+        base_url=url,
+        version=pooch_version,
+        env="SKIMAGE_DATADIR",
+        registry=registry,
+        urls=registry_urls,
+    )
+
+    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+
+    os.makedirs(data_dir, exist_ok=True)
+    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                 osp.join(data_dir, 'README.txt'))
+
+    # Fetch all legacy data so that it is available by default
+    for filename in legacy_registry:
+        _fetch(filename)
+
+    return image_fetcher, data_dir
+
+
+image_fetcher, data_dir = create_image_fetcher()
+
+
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
@@ -186,54 +234,6 @@ def _fetch(data_filename):
             'connected to the internet.'
         ) from err
     return resolved_path
-
-
-def create_image_fetcher():
-    try:
-        import pooch
-    except ImportError:
-        # Without pooch, fallback on the standard data directory
-        # which for now, includes a few limited data samples
-        return None, legacy_data_dir
-
-    # Pooch expects a `+` to exist in development versions.
-    # Since scikit-image doesn't follow that convention, we have to manually
-    # remove `.dev` with a `+` if it exists.
-    # This helps pooch understand that it should look in master
-    # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
-
-    # Create a new friend to manage your sample data storage
-    image_fetcher = pooch.create(
-        # Pooch uses appdirs to select an appropriate directory for the cache
-        # on each platform.
-        # https://github.com/ActiveState/appdirs
-        # On linux this converges to
-        # '$HOME/.cache/scikit-image'
-        # With a version qualifier
-        path=pooch.os_cache("scikit-image"),
-        base_url=url,
-        version=pooch_version,
-        env="SKIMAGE_DATADIR",
-        registry=registry,
-        urls=registry_urls,
-    )
-
-    data_dir = osp.join(str(image_fetcher.abspath), 'data')
-
-    os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
-
-    # Fetch all legacy data so that it is available by default
-    for filename in legacy_registry:
-        _fetch(filename)
-
-    return image_fetcher, data_dir
-
-
-image_fetcher, data_dir = create_image_fetcher()
 
 
 def download_all(directory=None):
