@@ -146,17 +146,19 @@ def create_image_fetcher():
     shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                  osp.join(data_dir, 'README.txt'))
 
+    data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
     for filename in legacy_registry:
-        _fetch(filename)
+        _fetch(filename, data_base_dir=data_base_dir)
 
     return image_fetcher, data_dir
 
 
 image_fetcher, data_dir = create_image_fetcher()
+data_base_dir = osp.join(data_dir, '..')
 
 
-def _fetch(data_filename):
+def _fetch(data_filename, data_base_dir=data_base_dir):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
@@ -185,7 +187,7 @@ def _fetch(data_filename):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    resolved_path = osp.join(data_dir, '..', data_filename)
+    resolved_path = osp.join(data_base_dir, data_filename)
     expected_hash = registry[data_filename]
 
     # Case 1:
