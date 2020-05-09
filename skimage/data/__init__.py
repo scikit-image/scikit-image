@@ -57,40 +57,48 @@ __all__ = ['data_dir',
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
-
-import pooch
-from pooch.utils import file_hash
-
-
-# Pooch expects a `+` to exist in development versions.
-# Since scikit-image doesn't follow that convention, we have to manually
-# remove `.dev` with a `+` if it exists.
-# This helps pooch understand that it should look in master
-# to find the required files
-pooch_version = __version__.replace('.dev', '+')
-url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
-
-# Create a new friend to manage your sample data storage
-image_fetcher = pooch.create(
-    # Pooch uses appdirs to select an appropriate directory for the cache
-    # on each platform.
-    # https://github.com/ActiveState/appdirs
-    # On linux this converges to
-    # '$HOME/.cache/scikit-image'
-    # With a version qualifier
-    path=pooch.os_cache("scikit-image"),
-    base_url=url,
-    version=pooch_version,
-    env="SKIMAGE_DATADIR",
-    registry=registry,
-    urls=registry_urls,
-)
-
-data_dir = osp.join(str(image_fetcher.abspath), 'data')
-
-os.makedirs(data_dir, exist_ok=True)
-shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-             osp.join(data_dir, 'README.txt'))
+try:
+    from pooch.utils import file_hash
+except ModuleNotFoundError:
+    # Function taken from
+    # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
+    def file_hash(fname, alg="sha256"):
+        """
+        Calculate the hash of a given file.
+        Useful for checking if a file has changed or been corrupted.
+        Parameters
+        ----------
+        fname : str
+            The name of the file.
+        alg : str
+            The type of the hashing algorithm
+        Returns
+        -------
+        hash : str
+            The hash of the file.
+        Examples
+        --------
+        >>> fname = "test-file-for-hash.txt"
+        >>> with open(fname, "w") as f:
+        ...     __ = f.write("content of the file")
+        >>> print(file_hash(fname))
+        0fc74468e6a9a829f103d069aeb2bb4f8646bad58bf146bb0e3379b759ec4a00
+        >>> import os
+        >>> os.remove(fname)
+        """
+        import hashlib
+        if alg not in hashlib.algorithms_available:
+            raise ValueError(
+                "Algorithm '{}' not available in hashlib".format(alg))
+        # Calculate the hash in chunks to avoid overloading the memory
+        chunksize = 65536
+        hasher = hashlib.new(alg)
+        with open(fname, "rb") as fin:
+            buff = fin.read(chunksize)
+            while buff:
+                hasher.update(buff)
+                buff = fin.read(chunksize)
+        return hasher.hexdigest()
 
 
 def _has_hash(path, expected_hash):
@@ -118,23 +126,22 @@ def _fetch(data_filename):
 
     Raises
     ------
-    ValueError:
+    KeyError:
         If the filename is not known to the scikit-image distribution.
 
     ConnectionError:
-        If scikit-image is unable to connect to the internet but the dataset
-        has not been downloaded yet.
+        If scikit-image is unable to connect to the internet but the
+        dataset has not been downloaded yet.
     """
     resolved_path = osp.join(data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
 
     # Case 1:
-    # The file may already be in the data_dir. We may have decided to ship it
-    # in the scikit-image distribution.
+    # The file may already be in the data_dir.
+    # We may have decided to ship it in the scikit-image distribution.
     if _has_hash(resolved_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return resolved_path
-
 
     # Case 2:
     # The user is using a cloned version of the github repo, which
@@ -149,8 +156,20 @@ def _fetch(data_filename):
         return resolved_path
 
     # Case 3:
-    # Pooch needs to download the data. Let the image fetcher to search for our
-    # data. A ConnectionError is raised if no internet connection is available.
+    # Pooch not found.
+    if image_fetcher is None:
+        raise ModuleNotFoundError(
+            "The requested file is part of the scikit-image distribution, "
+            "but requries the installation of an optional dependency, pooch, "
+            "to be used. To install pooch, use your preffered python "
+            "package manager. Follow installation instruction found at "
+            "https://scikit-image.org/docs/stable/install.html"
+        )
+
+    # Case 4:
+    # Pooch needs to download the data. Let the image fetcher to search for
+    # our data. A ConnectionError is raised if no internet connection is
+    # available.
     try:
         resolved_path = image_fetcher.fetch(data_filename)
     except ConnectionError as err:
@@ -165,14 +184,52 @@ def _fetch(data_filename):
     return resolved_path
 
 
-# Fetch all legacy data so that it is available by default
-for filename in legacy_registry:
-    _fetch(filename)
+def create_image_fetcher():
+    try:
+        import pooch
+    except ImportError:
+        # Without pooch, fallback on the standard data directory
+        # which for now, includes a few limited data samples
+        return None, legacy_data_dir
 
-else:
-    # Without pooch, fallback on the standard data directory
-    # which for now, includes a few limited data samples
-    data_dir = legacy_data_dir
+    # Pooch expects a `+` to exist in development versions.
+    # Since scikit-image doesn't follow that convention, we have to manually
+    # remove `.dev` with a `+` if it exists.
+    # This helps pooch understand that it should look in master
+    # to find the required files
+    pooch_version = __version__.replace('.dev', '+')
+    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+
+    # Create a new friend to manage your sample data storage
+    image_fetcher = pooch.create(
+        # Pooch uses appdirs to select an appropriate directory for the cache
+        # on each platform.
+        # https://github.com/ActiveState/appdirs
+        # On linux this converges to
+        # '$HOME/.cache/scikit-image'
+        # With a version qualifier
+        path=pooch.os_cache("scikit-image"),
+        base_url=url,
+        version=pooch_version,
+        env="SKIMAGE_DATADIR",
+        registry=registry,
+        urls=registry_urls,
+    )
+
+    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+
+    os.makedirs(data_dir, exist_ok=True)
+    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                 osp.join(data_dir, 'README.txt'))
+
+    # Fetch all legacy data so that it is available by default
+    for filename in legacy_registry:
+        _fetch(filename)
+
+    return image_fetcher, data_dir
+
+
+image_fetcher, data_dir = create_image_fetcher()
 
 
 def download_all(directory=None):
