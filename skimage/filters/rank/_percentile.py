@@ -25,8 +25,7 @@ References
 from ..._shared.utils import check_nD
 
 from . import percentile_cy
-from .generic import _handle_input
-
+from .generic import _preprocess_input
 
 __all__ = ['autolevel_percentile', 'gradient_percentile',
            'mean_percentile', 'subtract_mean_percentile',
@@ -36,9 +35,8 @@ __all__ = ['autolevel_percentile', 'gradient_percentile',
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
            out_dtype=None):
-
     check_nD(image, 2)
-    image, selem, out, mask, n_bins = _handle_input(image, selem, out, mask,
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,

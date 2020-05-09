@@ -8,7 +8,7 @@ which are similar in color. We construct a RAG and define edges as the
 difference in mean color. We then join regions with similar mean color.
 """
 
-from skimage import data, io, segmentation, color
+from skimage import data, segmentation, color
 from skimage.future import graph
 from matplotlib import pyplot as plt
 

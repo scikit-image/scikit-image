@@ -1,15 +1,25 @@
 How to make a new release of ``skimage``
 ========================================
 
-While following this guide, note down all the times that you need to consult a
-previous release manager, or that you find an instruction unclear. You will
-make a PR to update these notes after you are done with the release. ;-)
+While following this guide, note down all the times that you need to
+consult a previous release manager, or that you find an instruction
+unclear. You will, of course, make a PR to update these notes after
+you are done with the release! ;-)
 
 Some of the instructions don't apply to patch releases. As a reminder, we use a
 variant of "semantic versioning", where version numbers are classified as
 v<major>.<minor>.<patch>. If you are making a patch release, skip the first
 three steps. Instead, make a PR to update ``release_<major>.<minor>.txt`` on
 the corresponding release branch.
+
+Before you start, make sure you have all the required write
+permissions (if not, you will need to ask an owner to grant you
+access), specifically to:
+
+  - https://github.com/scikit-image/scikit-image-wheels
+  - https://pypi.org/project/scikit-image/
+  - https://github.com/scikit-image/scikit-image-web
+
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
@@ -19,7 +29,7 @@ the corresponding release branch.
 
 - On the release branch, update the release notes:
 
-  1. Review and cleanup ``doc/release/release_dev.txt``.
+  1. Review and cleanup ``doc/release/release_dev.rst``.
 
   2. Make a list of merges, contributors, and reviewers by running
      ``tools/generate_release_notes.py -h`` and following that file's usage.
@@ -48,13 +58,19 @@ the corresponding release branch.
   - Create a PR from v<major>.<minor>.x branch to master (at this point,
     the difference should show the full contents of the release notes).
   - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
-  - Once the consensus is found, ask the project maintainers to merge the PR.
+  - Once the consensus is found, ask the project maintainers to merge
+    the PR.
+  - Cherry pick the change onto the release branch.
 
-- In the master branch, update the version number in ``skimage/__init__.py``
+- On the master branch, update the version number in ``skimage/__init__.py``
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
   ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``. 
+  ``0`` immediately after ``dev``.  
+  
+ - On the master branch, edit ``doc/source/_static/docversions.js``,
+  add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
+  change back to the release branch.
 
 - Make sure you have all the required write permissions (if not, you will
   need to ask Stéfan or Juan to grant you the access), specifically, to:
@@ -119,14 +135,24 @@ the corresponding release branch.
 - Open that URL and check for the wheels as
   ``scikit_image-<versiontag>-<platforminfo>.whl``
 
-- Update the docs:
+**Do not tag until the builds are all green.**
 
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs. In the root directory, run
-    ``python setup.py install``, then ``make cleandoc; make html``.
-  - In the ``doc/`` directory, build using ``make gh-pages``.
-  - Update the symlink to ``stable`` in ``gh-pages``.
-  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
+- Add the version number as a tag in git::
+
+   git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
+
+  (If you do not have a GPG key, follow the tutorial to set it up:
+   https://help.github.com/articles/signing-commits-with-gpg/)
+
+- Push the new tag to GitHub::
+
+   git push upstream v<major>.<minor>.0
+
+  (where ``upstream`` is the name of the
+   ``github.com:scikit-image/scikit-image`` repository.)
+
+- Build the package wheels again, but change BUILD_COMMIT in both
+  Travis-CI and AppVeyor to the release version, e.g., ``v0.16.0``.
 
 - Upload the wheels to PyPI:
 
@@ -147,6 +173,19 @@ the corresponding release branch.
 
    python setup.py sdist
    twine upload dist/scikit-image-<major>.<minor>.0.tar.gz
+
+- Update the release docs:
+   - Edit ``doc/source/_static/docversions.js`` and commit
+  - On the release branch, build a clean version of the docs. In the
+    root directory, run ``pip install .``.
+  - In the ``doc/`` directory:
+    - Build using
+      ``make clean; make html; make gh-pages``.
+    - Check (since this a new feature) that binder links in gallery examples
+      point to the release branch, e.g. `0.16.x`.
+    - In the ``gh-pages/`` directory:
+      - Update the symlink to ``stable`` and commit.
+      - Upload the docs: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Update the web frontpage:
   The webpage source is kept in a separate repo: scikit-image-web. The

@@ -5,7 +5,7 @@ scikit-image |version| docs
 scikit-image is an image processing toolbox for SciPy_.  View the latest
 `release notes here <release_notes_and_installation.html>`_.
 
-.. _SciPy: http://www.scipy.org
+.. _SciPy: https://www.scipy.org
 
 
 Sections
@@ -27,6 +27,7 @@ Sections
    core_developer
    skips/index
    values
+   conduct/code_of_conduct
 
 .. list-table::
    :class: contentstable
@@ -75,10 +76,13 @@ Sections
 
    * - `SKIPs <skips/index.html>`_
 
-       SciKit-Image Proposals, documents describing major changes to the
+       **s**\ ci\ **k**\ it-\ **i**\ mage **p**\ roposals, documents describing major changes to the
        library.
 
-     -
+     - `Code of Conduct <conduct/code_of_conduct.html>`_
+
+       Community interaction guidelines.
+
 
 Indices
 =======

@@ -1,5 +1,3 @@
-.. _values:
-
 Our mission
 -----------
 
@@ -18,6 +16,8 @@ Python. We accomplish this by:
   input arrays unless explicitly directed to do so.
 - promoting **education in image processing**, with extensive pedagogical
   documentation.
+
+.. _values:
 
 Our values
 ----------

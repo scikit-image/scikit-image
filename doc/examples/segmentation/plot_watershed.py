@@ -28,7 +28,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
-from skimage.morphology import watershed
+from skimage.segmentation import watershed
 from skimage.feature import peak_local_max
 
 

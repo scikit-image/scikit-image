@@ -7,6 +7,8 @@ import numpy as np
 cimport numpy as cnp
 from .._shared.geometry cimport point_in_polygon, points_in_polygon
 
+cnp.import_array()
+
 
 def _grid_points_in_poly(shape, verts):
     """Test whether points on a specified grid are inside a polygon.

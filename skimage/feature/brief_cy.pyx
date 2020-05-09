@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-
+cnp.import_array()
 
 def _brief_loop(double[:, ::1] image, unsigned char[:, ::1] descriptors,
                 Py_ssize_t[:, ::1] keypoints,
