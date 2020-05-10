@@ -2,6 +2,14 @@ import numpy as np
 import skimage.data as data
 from skimage import io
 from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
+import os
+
+
+def test_data_dir():
+    # data_dir should be a directory people can use as a standard directory
+    # https://github.com/scikit-image/scikit-image/pull/3945#issuecomment-498141893
+    datadir = data.data_dir
+    assert 'astronaut.png' in os.listdir(datadir)
 
 
 def test_astronaut():
@@ -112,3 +120,6 @@ def test_cells_3d():
     path = fetch('data/cells.tif')
     image = io.imread(path)
     assert image.shape == (60, 256, 256)
+
+
+
