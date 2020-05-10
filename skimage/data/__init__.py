@@ -209,10 +209,10 @@ def _fetch(data_filename):
     if image_fetcher is None:
         raise ModuleNotFoundError(
             "The requested file is part of the scikit-image distribution, "
-            "but requries the installation of an optional dependency, pooch, "
-            "to be used. To install pooch, use your preffered python "
-            "package manager. Follow installation instruction found at "
-            "https://scikit-image.org/docs/stable/install.html"
+            "but requires the installation of an optional dependency, pooch. "
+            "To install pooch, use your preferred python package manager. "
+            "For example: `conda install -c conda-forge pooch`, or "
+            "`pip install -m pooch`."
         )
 
     # Case 4:
