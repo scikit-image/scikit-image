@@ -51,7 +51,7 @@ plt.show()
 # background, the other separating the dividing nuclei (brighter spots) from
 # the cytoplasm of their respective mother cells (and, intensity-wise, from
 # the other cells). To separate these three different classes of pixels, we
-# resort to :ref:`sphx-glr-auto-examples-segmentation-plot-multiotsu-py`.
+# resort to :ref:`sphx_glr_auto_examples_segmentation_plot_multiotsu.py`.
 
 thresholds = filters.threshold_multiotsu(image)
 regions = np.digitize(image, bins=thresholds)
@@ -145,7 +145,7 @@ print(cleaned_dividing.max())
 # Segment cells
 # =============
 # To separate touching and overlapping cells, we resort to
-# :ref:`sphx-glr-auto-examples-segmentation-plot-watershed-py`.
+# :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
 
 distance = ndi.distance_transform_edt(cells)
 
