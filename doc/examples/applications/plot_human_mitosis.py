@@ -53,7 +53,7 @@ plt.show()
 # the other cells). To separate these three different classes of pixels, we
 # resort to :ref:`sphx_glr_auto_examples_segmentation_plot_multiotsu.py`.
 
-thresholds = filters.threshold_multiotsu(image)
+thresholds = filters.threshold_multiotsu(image, classes=3)
 regions = np.digitize(image, bins=thresholds)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
