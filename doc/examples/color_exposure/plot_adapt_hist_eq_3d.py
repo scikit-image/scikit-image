@@ -13,6 +13,7 @@ to a 3D image and a degraded version of it.
 
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
+from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from skimage import exposure
@@ -98,7 +99,8 @@ def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
 #############
 
 fig = plt.figure(figsize=(8, 7))
-axs = [fig.add_subplot(2, 2, i + 1, projection='3d') for i in range(4)]
+axs = [fig.add_subplot(2, 2, i + 1, projection=Axes3D.name)
+       for i in range(4)]
 
 ims = [im_orig, im_degraded, im_orig_ahe, im_degraded_ahe]
 titles = ['Original image\n(randomly generated)',
