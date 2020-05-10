@@ -284,7 +284,7 @@ def download_all(directory=None):
 
     if image_fetcher is None:
         raise ModuleNotFoundError(
-            "To download all package, scikit-image needs an optional "
+            "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
             "To install pooch, follow our installation instructions found at "
             "https://scikit-image.org/docs/stable/install.html"
