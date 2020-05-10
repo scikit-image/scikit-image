@@ -150,7 +150,7 @@ print(cleaned_dividing.max())
 distance = ndi.distance_transform_edt(cells)
 
 local_maxi = feature.peak_local_max(distance, indices=False,
-                                    footprint=morphology.disk(3))
+                                    min_distance=7)
 
 markers = morphology.label(local_maxi)
 
