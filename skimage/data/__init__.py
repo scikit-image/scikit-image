@@ -208,8 +208,8 @@ def _fetch(data_filename):
             "The requested file is part of the scikit-image distribution, "
             "but requires the installation of an optional dependency, pooch. "
             "To install pooch, use your preferred python package manager. "
-            "For example: `conda install -c conda-forge pooch`, or "
-            "`pip install -m pooch`."
+            "Follow installation instruction found at "
+            "https://scikit-image.org/docs/stable/install.html"
         )
 
     # Case 4:
@@ -256,8 +256,10 @@ def download_all(directory=None):
     This allows us to use higher quality datasets, while keeping the
     library download size small.
 
-    This function requires the installation of an optional dependency,
-    pooch, to download the full dataset.
+    This function requires the installation of an optional dependency, pooch,
+    to download the full dataset. Follow installation instruction found at
+
+        https://scikit-image.org/docs/stable/install.html
 
     Call this function to download all sample images making them available
     offline on your machine.
@@ -284,6 +286,8 @@ def download_all(directory=None):
         raise ModuleNotFoundError(
             "To download all package, scikit-image needs an optional "
             "dependency, pooch."
+            "To install pooch, follow our installation instructions found at "
+            "https://scikit-image.org/docs/stable/install.html"
         )
     # Consider moving this kind of logic to Pooch
     old_dir = image_fetcher.path
