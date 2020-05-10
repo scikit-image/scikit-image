@@ -51,12 +51,17 @@ __all__ = ['data_dir',
            'shepp_logan_phantom',
            'stereo_motorcycle']
 
+_IMAGE_FETCHER = None
 legacy_data_dir = osp.abspath(osp.dirname(__file__))
+_data_dir = legacy_data_dir
 skimage_distribution_dir = osp.join(legacy_data_dir, '..')
 
+has_pooch = True
 try:
+    import pooch
     from pooch.utils import file_hash
 except ModuleNotFoundError:
+    has_pooch = False
     # Function taken from
     # https://github.com/fatiando/pooch/blob/master/pooch/utils.py
     def file_hash(fname, alg="sha256"):
@@ -105,12 +110,10 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def create_image_fetcher():
-    try:
-        import pooch
-    except ImportError:
-        # Without pooch, fallback on the standard data directory
-        # which for now, includes a few limited data samples
+def _create_image_fetcher():
+    if not has_pooch:
+        # Without pooch, fall back on the standard data directory
+        # which includes a few limited data samples
         return None, legacy_data_dir
 
     # Pooch expects a `+` to exist in development versions.
@@ -139,16 +142,28 @@ def create_image_fetcher():
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
 
-
     return image_fetcher, data_dir
 
 
-image_fetcher, data_dir = create_image_fetcher()
+# This function creates directories, and has been the source of issues for
+# downstream users, see
+# https://github.com/scikit-image/scikit-image/issues/4660
+# https://github.com/scikit-image/scikit-image/issues/4664
+# It should be run with care and not at import time
+def _init_pooch():
+    global _IMAGE_FETCHER
+    global _data_dir
+    if _IMAGE_FETCHER is None:
+        _IMAGE_FETCHER, _data_dir = _create_image_fetcher()
+    if _IMAGE_FETCHER is not None:
+        os.makedirs(_data_dir, exist_ok=True)
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     osp.join(_data_dir, 'README.txt'))
 
-if image_fetcher is None:
-    has_pooch = False
-else:
-    has_pooch = True
+        # Fetch all legacy data so that it is available by default
+        for filename in legacy_registry:
+            _fetch(filename)
+
 
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
@@ -158,7 +173,7 @@ def _fetch(data_filename):
 
     Parameters
     ----------
-    data_filename:
+    data_filename : str
         Name of the file in the scikit-image repository. e.g.
         'restoration/tess/camera_rl.npy'.
 
@@ -179,7 +194,10 @@ def _fetch(data_filename):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    resolved_path = osp.join(data_dir, '..', data_filename)
+    if _IMAGE_FETCHER is None:
+        _init_pooch()
+    image_fetcher = _IMAGE_FETCHER
+    resolved_path = osp.join(_data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
 
     # Case 1:
@@ -230,25 +248,6 @@ def _fetch(data_filename):
     return resolved_path
 
 
-def _init_pooch():
-    os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
-
-    data_base_dir = osp.join(data_dir, '..')
-    # Fetch all legacy data so that it is available by default
-    for filename in legacy_registry:
-        _fetch(filename)
-
-
-# This function creates directories, and has been the source of issues for
-# downstream users, see
-# https://github.com/scikit-image/scikit-image/issues/4660
-# https://github.com/scikit-image/scikit-image/issues/4664
-if has_pooch:
-    _init_pooch()
-
-
 def download_all(directory=None):
     """Download all datasets for use with scikit-image offline.
 
@@ -281,6 +280,15 @@ def download_all(directory=None):
     folder for a particular reason. You can access the location of the default
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
+    if not has_pooch:
+        raise RuntimeError(
+            "module 'pooch' is required to run `download_all`. Please install "
+            "pooch before trying again."
+        )
+    global _IMAGE_FETCHER
+    if _IMAGE_FETCHER is None:
+        _init_pooch()
+        image_fetcher = _IMAGE_FETCHER
 
     if image_fetcher is None:
         raise ModuleNotFoundError(
@@ -1021,3 +1029,22 @@ def lfw_subset():
 
     """
     return np.load(_fetch('data/lfw_subset.npy'))
+
+
+if sys.version_info < (3, 7):
+    try:
+        _init_pooch()
+    except FileExistsError:
+        pass
+    if _IMAGE_FETCHER is not None:
+        data_dir = os.path.join(os.fspath(_IMAGE_FETCHER.abspath), 'data')
+    else:
+        data_dir = _data_dir
+
+
+def __getattr__(name):
+    if name == 'data_dir':
+        _init_pooch()
+        return _data_dir
+    else:
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
