@@ -130,7 +130,17 @@ else:
                              img_as_ubyte,
                              img_as_bool,
                              dtype_limits)
-    from .data import data_dir
     from .util.lookfor import lookfor
+
+    if sys.version_info < (3, 7):
+        from .data import data_dir
+
+def __getattr__(name):
+    if name == 'data_dir':
+        from .data import data_dir
+        return data_dir
+    else:
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 del sys
