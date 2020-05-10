@@ -256,6 +256,9 @@ def download_all(directory=None):
     This allows us to use higher quality datasets, while keeping the
     library download size small.
 
+    This function requires the installation of an optional dependency,
+    pooch, to download the full dataset.
+
     Call this function to download all sample images making them available
     offline on your machine.
 
@@ -263,6 +266,11 @@ def download_all(directory=None):
     ----------
     directory: path-like, optional
         The directory where the dataset should be stored.
+
+    Raises
+    ------
+    ModuleNotFoundError:
+        If pooch is not install, this error will be raised.
 
     Notes
     -----
@@ -272,6 +280,11 @@ def download_all(directory=None):
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
 
+    if image_fetcher is None:
+        raise ModuleNotFoundError(
+            "To download all package, scikit-image needs an optional "
+            "dependency, pooch."
+        )
     # Consider moving this kind of logic to Pooch
     old_dir = image_fetcher.path
     try:
