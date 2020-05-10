@@ -5,13 +5,10 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
-
-import warnings
+import sys
 from warnings import warn
 import numpy as np
 import shutil
-
-from distutils.version import LooseVersion as Version
 
 from ..util.dtype import img_as_bool
 from ._binary_blobs import binary_blobs
