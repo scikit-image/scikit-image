@@ -87,7 +87,7 @@ def plt_render_volume(vol, fig_ax, ref_vol=None,
     for il in range(1, len(levels)):
         sel = (ref_vol_scaled >= levels[il - 1])
         sel *= (ref_vol_scaled < levels[il])
-        if not len(sel):
+        if not np.max(sel):
             continue
         c = get_rgba(vol_scaled[sel], 'viridis',
                      vmin=0, vmax=1, alpha=alphas[il - 1])
