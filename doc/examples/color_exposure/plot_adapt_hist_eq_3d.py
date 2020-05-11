@@ -61,7 +61,8 @@ def get_rgba(scalars, cmap, vmin, vmax, alpha=0.2):
     return rgbas
 
 
-def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
+def plt_render_volume(vol, fig_ax, ref_vol=None,
+                      vmin=0, vmax=1, bin_width=10, n_levels=50):
     """
     Render a volume in a 3D matplotlib scatter plot.
     Better would be to use napari.
@@ -74,7 +75,7 @@ def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
     ref_vol_scaled = ref_vol[::bin_width, ::bin_width, ::bin_width].flatten()
 
     # define alpha transfer function
-    levels = np.linspace(vmin, vmax, 50)
+    levels = np.linspace(vmin, vmax, n_levels)
     alphas = np.mean([levels[1:], levels[:-1]], 0)
     alphas = alphas ** 3
     alphas = (alphas - alphas.min()) / (alphas.max() - alphas.min())
@@ -86,6 +87,8 @@ def plt_render_volume(vol, fig_ax, ref_vol=None, vmin=0, vmax=1, bin_width=10):
     for il in range(1, len(levels)):
         sel = (ref_vol_scaled >= levels[il - 1])
         sel *= (ref_vol_scaled < levels[il])
+        if not len(sel):
+            continue
         c = get_rgba(vol_scaled[sel], 'viridis',
                      vmin=0, vmax=1, alpha=alphas[il - 1])
         fig_ax.scatter(xs.flatten()[sel],
