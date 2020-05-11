@@ -4,7 +4,7 @@ from warnings import warn
 
 __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
            'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool', 'dtype_limits']
+           'img_as_bool', 'dtype_limits', 'convert']
 
 # For integers Numpy uses `_integer_types` basis internally, and builds a leaky
 # `np.XintYY` abstraction on top of it. This leads to situations when, for
@@ -347,6 +347,28 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     image = _scale(image, 8 * itemsize_in, 8 * itemsize_out, copy=False)
     image += imin_out
     return image.astype(dtype_out)
+
+
+def convert(image, dtype, force_copy=False, uniform=False):
+    warn("The use of this function is discouraged as its behavior may change "
+         "dramatically in scikit-image 1.0. This function will be removed"
+         "in scikit-image 1.0.", FutureWarning, stacklevel=2)
+    return _convert(image=image, dtype=dtype,
+                    force_copy=force_copy, uniform=uniform)
+
+
+if _convert.__doc__ is not None:
+    convert.__doc__ = _convert.__doc__ + """
+
+    Warns
+    -----
+    FutureWarning:
+        .. versionadded:: 0.17
+
+        The use of this function is discouraged as its behavior may change
+        dramatically in scikit-image 1.0. This function will be removed
+        in scikit-image 1.0.
+    """
 
 
 def img_as_float32(image, force_copy=False):
