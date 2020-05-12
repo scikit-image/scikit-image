@@ -106,7 +106,7 @@ def convex_hull_object(image, *, connectivity=2):
     connectivity : {1, 2}, int, optional
         Determines the neighbors of each pixel. Adjacent elements
         within a squared distance of ``connectivity`` from pixel center
-        are considered neighbors.
+        are considered neighbors.::
 
             1-connectivity      2-connectivity
                   [ ]           [ ]  [ ]  [ ]
