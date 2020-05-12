@@ -467,8 +467,12 @@ def test_prob_tol():
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
-    # Reduced prob_tol tolerance, no warning is expected.
+    # Being more prob_tol tolerant, no warning is expected.
     res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
+    # Reduced tol, no warning is expected.
+    res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
+    assert res[0, 1, 1] == 1
+    assert res[1, 1, 1] == 0
