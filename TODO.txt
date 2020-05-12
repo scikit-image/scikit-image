@@ -7,7 +7,6 @@ Version 0.17
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 
 Version 0.18
 ------------
