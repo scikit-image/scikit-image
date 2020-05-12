@@ -279,7 +279,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     step = max(steps)
     ratio = 1.0 / compactness
 
-    image = np.ascontiguousarray(image * ratio)
+    image = np.ascontiguousarray(image * ratio, dtype=dtype)
 
     if update_centroids:
         # Step 2 of the algorithm [3]_
