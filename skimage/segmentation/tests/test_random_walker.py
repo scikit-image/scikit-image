@@ -216,7 +216,7 @@ def test_multispectral_2d():
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
     with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
                             NUMPY_MATRIX_WARNING,
-                            'The probability range is outside [0, 1]']):
+                            'The probability range is outside']):
         multi_labels = random_walker(data, labels, mode='cg',
                                      multichannel=True)
     assert data[..., 0].shape == labels.shape
@@ -432,10 +432,11 @@ def test_isolated_seeds():
 
     # Test that no error is raised, and that labels of isolated seeds are OK
     with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside [0, 1]']):
+                            'The probability range is outside']):
         res = random_walker(a, mask)
     assert res[1, 1] == 1
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
+    with expected_warnings([NUMPY_MATRIX_WARNING,
+                            'The probability range is outside']):
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
