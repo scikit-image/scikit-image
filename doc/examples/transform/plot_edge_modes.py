@@ -10,8 +10,6 @@ and :py:func:`skimage.transform.resize`.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.util import pad
-
 
 img = np.zeros((16, 16))
 img[:8, :8] += 1
@@ -25,7 +23,7 @@ fig, axes = plt.subplots(2, 3)
 ax = axes.flatten()
 
 for n, mode in enumerate(modes):
-    img_padded = pad(img, pad_width=img.shape[0], mode=mode)
+    img_padded = np.pad(img, pad_width=img.shape[0], mode=mode)
     ax[n].imshow(img_padded, cmap=plt.cm.gray)
     ax[n].plot([15.5, 15.5, 31.5, 31.5, 15.5],
                [15.5, 31.5, 31.5, 15.5, 15.5], 'y--', linewidth=0.5)
