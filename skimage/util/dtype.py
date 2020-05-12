@@ -349,6 +349,28 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     return image.astype(dtype_out)
 
 
+def convert(image, dtype, force_copy=False, uniform=False):
+    warn("The use of this function is discouraged as its behavior may change "
+         "dramatically in scikit-image 1.0. This function will be removed"
+         "in scikit-image 1.0.", FutureWarning, stacklevel=2)
+    return _convert(image=image, dtype=dtype,
+                    force_copy=force_copy, uniform=uniform)
+
+
+if _convert.__doc__ is not None:
+    convert.__doc__ = _convert.__doc__ + """
+
+    Warns
+    -----
+    FutureWarning:
+        .. versionadded:: 0.17
+
+        The use of this function is discouraged as its behavior may change
+        dramatically in scikit-image 1.0. This function will be removed
+        in scikit-image 1.0.
+    """
+
+
 def img_as_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
