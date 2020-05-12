@@ -38,7 +38,6 @@ Version 0.18
         * `` skimage/feature/corner.py::corner_orientations``
     * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
       ``threshold_rel=0``.
-* In ``skimage/transform`` remove histogram_matching.py.
 * In ``skimage/restoration/_denoise.py`` remove warning regarding
   ``rescale_sigma``.
     * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
