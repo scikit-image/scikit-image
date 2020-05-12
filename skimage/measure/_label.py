@@ -1,8 +1,7 @@
 from ._ccomp import label_cython as clabel
 
 
-def label(input, neighbors=None, background=None, return_num=False,
-          connectivity=None):
+def label(input, background=None, return_num=False, connectivity=2):
     r"""Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -22,11 +21,6 @@ def label(input, neighbors=None, background=None, return_num=False,
     ----------
     input : ndarray of dtype int
         Image to label.
-    neighbors : {4, 8}, int, optional
-        Whether to use 4- or 8-"connectivity".
-        In 3D, 4-"connectivity" means connected pixels have to share face,
-        whereas with 8-"connectivity", they have to share only edge or vertex.
-        **Deprecated, use** ``connectivity`` **instead.**
     background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as 0. By default, 0-valued pixels are considered as background
@@ -36,8 +30,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     connectivity : int, optional
         Maximum number of orthogonal hops to consider a pixel/voxel
         as a neighbor.
-        Accepted values are ranging from  1 to input.ndim. If ``None``, a full
-        connectivity of ``input.ndim`` is used.
+        Accepted values are ranging from  1 to input.ndim.
 
     Returns
     -------
@@ -90,4 +83,4 @@ def label(input, neighbors=None, background=None, return_num=False,
      [1 1 2]
      [0 0 0]]
     """
-    return clabel(input, neighbors, background, return_num, connectivity)
+    return clabel(input, background, return_num, connectivity)
