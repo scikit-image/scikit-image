@@ -1,4 +1,3 @@
-from warnings import warn
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 from ..util import img_as_float
@@ -7,11 +6,11 @@ from ..filters import sobel
 
 def active_contour(image, snake, alpha=0.01, beta=0.1,
                    w_line=0, w_edge=1, gamma=0.01,
-                   bc=None, max_px_move=1.0,
+                   max_px_move=1.0,
                    max_iterations=2500, convergence=0.1,
                    *,
                    boundary_condition='periodic',
-                   coordinates=None):
+                   coordinates='rc'):
     """Active contour model.
 
     Active contours by fitting snakes to features of images. Supports single
@@ -41,8 +40,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         edges.
     gamma : float, optional
         Explicit time stepping parameter.
-    bc : deprecated; use ``boundary_condition``
-        DEPRECATED. See ``boundary_condition`` below.
     max_px_move : float, optional
         Maximum pixel distance to move per iteration.
     max_iterations : int, optional
@@ -97,22 +94,6 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    if bc is not None:
-        message = ('The keyword argument `bc` to `active_contour` has been '
-                   'renamed. Use `boundary_condition=` instead. `bc` will be '
-                   'removed in scikit-image v0.18.')
-        warn(message, stacklevel=2)
-        boundary_condition = bc
-    if coordinates is None:
-        message = ('The coordinates used by `active_contour` will change '
-                   'from xy coordinates (transposed from image dimensions) to '
-                   'rc coordinates in scikit-image 0.18. Set '
-                   "`coordinates='rc'` to silence this warning. "
-                   "`coordinates='xy'` will restore the old behavior until "
-                   '0.18, but will stop working thereafter.')
-        warn(message, category=FutureWarning, stacklevel=2)
-        coordinates = 'xy'
-        snake_xy = snake
     if coordinates == 'rc':
         snake_xy = snake[:, ::-1]
     max_iterations = int(max_iterations)
