@@ -1,4 +1,6 @@
+import pytest
 import numpy as np
+
 from skimage._shared.testing import assert_equal, assert_almost_equal
 from skimage.feature import ORB
 from skimage._shared import testing
@@ -120,3 +122,10 @@ def test_no_descriptors_extracted_orb():
     detector_extractor = ORB()
     with testing.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
+def test_dtype_support(dtype):
+    img = data.checkerboard().astype(dtype)
+    orb = ORB()
+    orb.detect(img)
