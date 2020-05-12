@@ -21,9 +21,6 @@ Version 0.18
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
     * In the following docstrings, remove the explicit setting of ``threshold_rel=0``
         * ``skimage/feature/brief.py::BRIEF``
