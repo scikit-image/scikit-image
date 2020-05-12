@@ -71,8 +71,7 @@ def median(image, selem=None, out=None, mode='nearest', cval=0.0,
             warn("Change 'behavior' to 'ndimage' if you want to use the "
                  "parameters 'mode' or 'cval'. They will be discarded "
                  "otherwise.")
-        return generic.median(image, selem=selem, out=out, mask=mask,
-                              shift_x=shift_x, shift_y=shift_y)
+        return generic.median(image, selem=selem, out=out)
     if selem is None:
         selem = ndi.generate_binary_structure(image.ndim, image.ndim)
     return ndi.median_filter(image, footprint=selem, output=out, mode=mode,
