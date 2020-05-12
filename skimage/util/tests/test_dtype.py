@@ -167,6 +167,22 @@ def test_float_conversion_dtype():
         assert y.dtype == np.dtype(dtype_out)
 
 
+def test_float_conversion_dtype_warns():
+    """Test that convert issues a warning when called"""
+    from skimage.util.dtype import convert
+    x = np.array([-1, 1])
+
+    # Test all combinations of dtypes convertions
+    dtype_combin = np.array(np.meshgrid(float_dtype_list,
+                                        float_dtype_list)).T.reshape(-1, 2)
+
+    for dtype_in, dtype_out in dtype_combin:
+        x = x.astype(dtype_in)
+        with expected_warnings(["The use of this function is discouraged"]):
+            y = convert(x, dtype_out)
+        assert y.dtype == np.dtype(dtype_out)
+
+
 def test_subclass_conversion():
     """Check subclass conversion behavior"""
     x = np.array([-1, 1])
