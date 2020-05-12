@@ -5,7 +5,6 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
-import sys
 from warnings import warn
 import numpy as np
 import shutil
@@ -137,8 +136,6 @@ def create_image_fetcher():
     )
 
     data_dir = osp.join(str(image_fetcher.abspath), 'data')
-
-
     return image_fetcher, data_dir
 
 
@@ -148,6 +145,7 @@ if image_fetcher is None:
     has_pooch = False
 else:
     has_pooch = True
+
 
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
@@ -234,7 +232,6 @@ def _init_pooch():
     shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                  osp.join(data_dir, 'README.txt'))
 
-    data_base_dir = osp.join(data_dir, '..')
     # Fetch all legacy data so that it is available by default
     for filename in legacy_registry:
         _fetch(filename)
