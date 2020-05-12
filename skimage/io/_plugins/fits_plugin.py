@@ -12,16 +12,13 @@ except ImportError:
         "instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from a FITS file.
 
     Parameters
     ----------
     fname : string
         Image file name, e.g. ``test.fits``.
-    dtype : dtype, optional
-        Was always silently ignored.
-        Will be removed from version 0.17.
 
     Returns
     -------
@@ -41,11 +38,6 @@ def imread(fname, dtype=None):
     lazy loading) to get all the extensions at once.
 
     """
-    if dtype is not None:
-        warn('The dtype argument was always silently ignored. It will be '
-             'removed from scikit-image version 0.17. To avoid this '
-             'warning, do not specify it in your function call.',
-             UserWarning, stacklevel=2)
 
     hdulist = fits.open(fname)
 

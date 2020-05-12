@@ -513,21 +513,6 @@ def grass():
     return _load("data/grass.png", as_gray=True)
 
 
-def rough_wall():
-    """Rough wall.
-
-    Returns
-    -------
-    rough_wall : (512, 512) uint8 image
-        Some rough wall.
-
-    """
-    warn("The rough_wall dataset has been removed due to licensing concerns."
-         "It has been replaced with the gravel dataset. This warning message"
-         "will be replaced with an error in scikit-image 0.17.", stacklevel=2)
-    return gravel()
-
-
 def gravel():
     """Gravel
 
