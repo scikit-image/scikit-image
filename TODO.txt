@@ -18,7 +18,6 @@ Version 0.17
 Version 0.18
 ------------
 
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.

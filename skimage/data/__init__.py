@@ -20,7 +20,6 @@ import os.path as osp
 import os
 
 __all__ = ['data_dir',
-           'load',
            'download_all',
            'astronaut',
            'binary_blobs',
@@ -314,31 +313,6 @@ def lbp_frontal_face_cascade_filename():
     """
 
     return _fetch('data/lbpcascade_frontalface_opencv.xml')
-
-
-def load(f, as_gray=False):
-    """Load an image file located in the data directory.
-
-    Parameters
-    ----------
-    f : string
-        File name.
-    as_gray : bool, optional
-        Whether to convert the image to grayscale.
-
-    Returns
-    -------
-    img : ndarray
-        Image loaded from ``skimage.data_dir``.
-
-    Notes
-    -----
-    This functions is deprecated and will be removed in 0.18.
-    """
-    warn('This function is deprecated and will be removed in 0.18. '
-         'Use `skimage.io.load` or `imageio.imread` directly.',
-         stacklevel=2)
-    return _load(f, as_gray=as_gray)
 
 
 def _load(f, as_gray=False):
