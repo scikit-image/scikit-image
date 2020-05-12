@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
@@ -440,3 +441,34 @@ def test_isolated_seeds():
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
+
+
+def test_prob_tol():
+    # Turn warnings into errors
+    warnings.simplefilter('error')
+
+    np.random.seed(0)
+    a = np.random.random((7, 7))
+    mask = - np.ones(a.shape)
+    # This pixel is an isolated seed
+    mask[1, 1] = 1
+    # Unlabeled pixels
+    mask[3:, 3:] = 0
+    # Seeds connected to unlabeled pixels
+    mask[4, 4] = 2
+    mask[6, 6] = 1
+
+    with expected_warnings([NUMPY_MATRIX_WARNING,
+                            'The probability range is outside']):
+        res = random_walker(a, mask, return_full_prob=True)
+
+    # Lower beta, no warning is expected.
+    res = random_walker(a, mask, return_full_prob=True, beta=10)
+    assert res[0, 1, 1] == 1
+    assert res[1, 1, 1] == 0
+
+    # Reduced prob_tol tolerance, no warning is expected.
+    res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
+    assert res[0, 1, 1] == 1
+    assert res[1, 1, 1] == 0
+
