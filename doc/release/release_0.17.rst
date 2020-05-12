@@ -1,7 +1,43 @@
-Announcement: scikit-image 0.17.0
+Announcement: scikit-image 0.17.2
 =================================
 
-We're happy to announce the release of scikit-image v0.17.0!
+We're happy to announce the release of scikit-image v0.17.2, which is a bug-fix
+release.
+
+Bug fixes
+---------
+- We made pooch an optional dependency, since it has been added as required
+  dependency by mistake (#4666), and we fixed a bug about the path used for pooch
+  to download data (#4662)
+- The support of float 32 images was corrected for slic segmentation,
+  ORB and BRIEF feature detectors (#4683, #4684, #4685, #4696, #4697)
+- We removed deprecated arguments (#4691)
+   * ``mask``, ``shift_x``, and ``shift_y`` from ``skimage.filters.median``
+   * ``beta1`` and ``beta2`` from ``skimage.filters.frangi``
+   * ``beta1`` and ``beta2`` from ``skimage.filters.hessian``
+   * ``dtype`` from ``skimage.io.imread``
+   * ``img`` from skimage.morphology.skeletonize_3d.
+- Gallery examples were updated to suppress warnings and take into account new
+  default values in some functions (#4692 and #4676)
+
+
+
+ authors added to this release [alphabetical by first name or login]
+---------------------------------------------------------------------
+- Alexandre de Siqueira
+- Emmanuelle Gouillart
+- François Boulogne
+- Juan Nunez-Iglesias
+- Mark Harfouche
+- Riadh Fezzani
+
+
+
+Announcement: scikit-image 0.17.1
+=================================
+
+We're happy to announce the release of scikit-image v0.17.1!
+
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
