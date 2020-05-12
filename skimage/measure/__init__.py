@@ -3,7 +3,6 @@ from ._marching_cubes_lewiner import marching_cubes_lewiner, marching_cubes
 from ._marching_cubes_classic import (marching_cubes_classic,
                                       mesh_surface_area)
 from ._regionprops import regionprops, perimeter, regionprops_table
-from ._structural_similarity import compare_ssim
 from ._polygon import approximate_polygon, subdivide_polygon
 from .pnpoly import points_in_poly, grid_points_in_poly
 from ._moments import (moments, moments_central, moments_coords,
@@ -43,6 +42,5 @@ __all__ = ['find_contours',
            'label',
            'points_in_poly',
            'grid_points_in_poly',
-           'compare_ssim',
            'shannon_entropy',
 ]

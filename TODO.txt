@@ -20,8 +20,6 @@ Version 0.18
 
 * Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
 * Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_ssim`
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
