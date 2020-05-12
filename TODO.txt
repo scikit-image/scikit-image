@@ -7,8 +7,6 @@ Version 0.17
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 * Remove ``rough_wall`` from ``skimage.data.__init__``.
 * Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
