@@ -9,8 +9,6 @@ Version 0.17
 * Finalize ``skimage.future.manual_segmentation`` API.
 * In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
   and ``shift_y``.
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 * Remove ``rough_wall`` from ``skimage.data.__init__``.
 * Remove parameter ``img`` from skimage.morphology.skeletonize_3d.

@@ -355,9 +355,8 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
 
 def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
-           scale_step=None, beta1=None, beta2=None, alpha=0.5,
-           beta=0.5, gamma=15, black_ridges=True, mode='reflect',
-           cval=0):
+           scale_step=None, alpha=0.5, beta=0.5, gamma=15,
+           black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -383,10 +382,10 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     alpha : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a plate-like structure.
-    beta = beta1 : float, optional
+    beta : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
-    gamma = beta2 : float, optional
+    gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
     black_ridges : boolean, optional
@@ -425,18 +424,6 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
-
-    # Check deprecated keyword parameters
-    if beta1 is not None:
-        warn('Use keyword parameter `beta` instead of `beta1` which '
-             'will be removed in version 0.17.', stacklevel=2)
-        beta = beta1
-
-    if beta2 is not None:
-        warn('Use keyword parameter `gamma` instead of `beta2` which '
-             'will be removed in version 0.17.', stacklevel=2)
-        gamma = beta2
-
     if scale_range is not None and scale_step is not None:
         warn('Use keyword parameter `sigmas` instead of `scale_range` and '
              '`scale_range` which will be removed in version 0.17.',
@@ -504,8 +491,8 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
 
 def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-            beta1=None, beta2=None, alpha=0.5, beta=0.5, gamma=15,
-            black_ridges=True, mode=None, cval=0):
+            alpha=0.5, beta=0.5, gamma=15, black_ridges=True, mode=None,
+            cval=0):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -527,10 +514,10 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         The range of sigmas used.
     scale_step : float, optional
         Step size between sigmas.
-    beta = beta1 : float, optional
+    beta : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to deviation from a blob-like structure.
-    gamma = beta2 : float, optional
+    gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
     black_ridges : boolean, optional
@@ -576,9 +563,9 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         mode = 'reflect'
 
     filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
-                      scale_step=scale_step, beta1=beta1, beta2=beta2,
-                      alpha=alpha, beta=beta, gamma=gamma,
-                      black_ridges=black_ridges, mode=mode, cval=cval)
+                      scale_step=scale_step, alpha=alpha, beta=beta,
+                      gamma=gamma, black_ridges=black_ridges, mode=mode,
+                      cval=cval)
 
     filtered[filtered <= 0] = 1
     return filtered
