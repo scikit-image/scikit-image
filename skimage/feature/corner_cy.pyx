@@ -7,11 +7,12 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
+from .._shared.fused_numerics cimport np_floats
 from ..util import img_as_float64
-
 from .util import _prepare_grayscale_input_2D
 
 cnp.import_array()
+
 
 def _corner_moravec(image, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
@@ -87,12 +88,12 @@ def _corner_moravec(image, Py_ssize_t window_size=1):
     return np.asarray(out)
 
 
-cdef inline double _corner_fast_response(double curr_pixel,
-                                         double* circle_intensities,
-                                         signed char* bins, signed char state,
-                                         char n) nogil:
+cdef inline np_floats _corner_fast_response(np_floats curr_pixel,
+                                            np_floats* circle_intensities,
+                                            signed char* bins, signed char
+                                            state, char n) nogil:
     cdef char consecutive_count = 0
-    cdef double curr_response
+    cdef np_floats curr_response
     cdef Py_ssize_t l, m
     for l in range(15 + n):
         if bins[l % 16] == state:
@@ -107,7 +108,12 @@ cdef inline double _corner_fast_response(double curr_pixel,
     return 0
 
 
-def _corner_fast(double[:, ::1] image, signed char n, double threshold):
+def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
+
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
@@ -115,15 +121,17 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
     cdef Py_ssize_t i, j, k
 
     cdef signed char speed_sum_b, speed_sum_d
-    cdef double curr_pixel
-    cdef double lower_threshold, upper_threshold
-    cdef double[:, ::1] corner_response = np.zeros((rows, cols),
-                                                   dtype=np.double)
+    cdef np_floats curr_pixel
+    cdef np_floats lower_threshold, upper_threshold
+    cdef np_floats[:, ::1] corner_response = np.zeros((rows, cols),
+                                                      dtype=dtype)
 
-    cdef signed char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
-    cdef signed char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1, 0, 1, 2, 3]
+    cdef signed char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3,
+                            -3, -2, -1]
+    cdef signed char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1,
+                            0, 1, 2, 3]
     cdef signed char bins[16]
-    cdef double circle_intensities[16]
+    cdef np_floats circle_intensities[16]
 
     cdef double curr_response
 
@@ -160,15 +168,15 @@ def _corner_fast(double[:, ::1] image, signed char n, double threshold):
                         continue
 
                 # Test for bright pixels
-                curr_response = \
-                    _corner_fast_response(curr_pixel, circle_intensities,
-                                          bins, b'b', n)
+                curr_response = _corner_fast_response[np_floats](curr_pixel,
+                                                      circle_intensities, bins,
+                                                      b'b', n)
 
                 # Test for dark pixels
                 if curr_response == 0:
-                    curr_response = \
-                        _corner_fast_response(curr_pixel, circle_intensities,
-                                              bins, b'd', n)
+                    curr_response = _corner_fast_response[np_floats](curr_pixel,
+                                                          circle_intensities,
+                                                          bins, b'd', n)
 
                 corner_response[i, j] = curr_response
 
