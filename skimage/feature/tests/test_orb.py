@@ -43,7 +43,8 @@ def test_keypoints_orb_desired_no_of_keypoints():
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
-def test_keypoints_orb_less_than_desired_no_of_keypoints():
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8'])
+def test_keypoints_orb_less_than_desired_no_of_keypoints(dtype):
     detector_extractor = ORB(n_keypoints=15, fast_n=12,
                              fast_threshold=0.33, downscale=2, n_scales=2)
     detector_extractor.detect(img)
@@ -124,8 +125,11 @@ def test_no_descriptors_extracted_orb():
         detector_extractor.detect_and_extract(img)
 
 
-@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8'])
 def test_dtype_support(dtype):
     img = data.checkerboard().astype(dtype)
-    orb = ORB()
-    orb.detect(img)
+    detector_extractor = ORB()
+    detector_extractor.detect(img)
+    detector_extractor.extract(img, detector_extractor.keypoints,
+                               detector_extractor.scales,
+                               detector_extractor.orientations)
