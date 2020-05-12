@@ -7,7 +7,7 @@ from .._shared.utils import convert_to_float
 
 def _smooth(image, sigma, mode, cval, multichannel=None):
     """Return image with each channel smoothed by the Gaussian filter."""
-    smoothed = np.empty(image.shape, dtype=np.double)
+    smoothed = np.empty_like(image)
 
     # apply Gaussian filter to all channels independently
     if multichannel:
