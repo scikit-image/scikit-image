@@ -6,15 +6,19 @@ from skimage.feature import ORB
 from skimage._shared import testing
 from skimage import data
 from skimage._shared.testing import test_parallel, xfail, arch32
+from skimage.util.dtype import _convert
 
 
 img = data.coins()
 
 
 @test_parallel()
-def test_keypoints_orb_desired_no_of_keypoints():
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8',
+                                   'uint16', 'int64'])
+def test_keypoints_orb_desired_no_of_keypoints(dtype):
+    _img = _convert(img, dtype)
     detector_extractor = ORB(n_keypoints=10, fast_n=12, fast_threshold=0.20)
-    detector_extractor.detect(img)
+    detector_extractor.detect(_img)
 
     exp_rows = np.array([141., 108., 214.56, 131., 214.272, 67.,
                          206., 177., 108., 141.])
@@ -34,19 +38,22 @@ def test_keypoints_orb_desired_no_of_keypoints():
     assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
     assert_almost_equal(exp_scales, detector_extractor.scales)
-    assert_almost_equal(exp_response, detector_extractor.responses)
+    assert_almost_equal(exp_response, detector_extractor.responses, 5)
     assert_almost_equal(exp_orientations,
-                        np.rad2deg(detector_extractor.orientations), 5)
+                        np.rad2deg(detector_extractor.orientations), 4)
 
     detector_extractor.detect_and_extract(img)
     assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
-def test_keypoints_orb_less_than_desired_no_of_keypoints():
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8',
+                                   'uint16', 'int64'])
+def test_keypoints_orb_less_than_desired_no_of_keypoints(dtype):
+    _img = _convert(img, dtype)
     detector_extractor = ORB(n_keypoints=15, fast_n=12,
                              fast_threshold=0.33, downscale=2, n_scales=2)
-    detector_extractor.detect(img)
+    detector_extractor.detect(_img)
 
     exp_rows = np.array([108., 203., 140.,  65.,  58.])
     exp_cols = np.array([293., 267., 202., 130., 291.])
@@ -64,7 +71,7 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
     assert_almost_equal(exp_scales, detector_extractor.scales)
     assert_almost_equal(exp_response, detector_extractor.responses)
     assert_almost_equal(exp_orientations,
-                        np.rad2deg(detector_extractor.orientations), 5)
+                        np.rad2deg(detector_extractor.orientations), 3)
 
     detector_extractor.detect_and_extract(img)
     assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
@@ -122,10 +129,3 @@ def test_no_descriptors_extracted_orb():
     detector_extractor = ORB()
     with testing.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
-
-
-@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
-def test_dtype_support(dtype):
-    img = data.checkerboard().astype(dtype)
-    orb = ORB()
-    orb.detect(img)
