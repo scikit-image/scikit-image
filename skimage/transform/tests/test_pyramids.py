@@ -1,4 +1,5 @@
 import math
+import pytest
 import numpy as np
 from skimage import data
 from skimage.transform import pyramids
@@ -6,7 +7,6 @@ from skimage.transform import pyramids
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_equal, assert_, assert_equal,
                                      assert_almost_equal)
-from skimage._shared._warnings import expected_warnings
 
 
 image = data.astronaut()
@@ -135,3 +135,13 @@ def test_check_factor():
         pyramids._check_factor(0.99)
     with testing.raises(ValueError):
         pyramids._check_factor(- 2)
+
+
+@pytest.mark.parametrize('dtype, expected',
+                         zip(['float32', 'float64', 'uint8', 'int64'],
+                             ['float32', 'float64', 'float64', 'float64']))
+def test_pyramid_gaussian_dtype_support(dtype, expected):
+    img = np.random.randn(32, 8).astype(dtype)
+    pyramid = pyramids.pyramid_gaussian(img)
+
+    assert np.all([im.dtype == expected for im in pyramid])
