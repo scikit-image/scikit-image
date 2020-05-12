@@ -9,7 +9,6 @@ Version 0.17
 * Finalize ``skimage.future.manual_segmentation`` API.
 * Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
 * Remove ``rough_wall`` from ``skimage.data.__init__``.
-* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
 
 Version 0.18
 ------------
