@@ -1,5 +1,6 @@
 from itertools import product
 
+import pytest
 import numpy as np
 from skimage.segmentation import slic
 
@@ -463,3 +464,11 @@ def test_gray_3d_mask():
     assert_equal(len(np.unique(seg)), 9)
     for s, c in zip(slices, range(1, 9)):
         assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
+
+
+@pytest.mark.parametrize("dtype", ['float32', 'float64', 'uint8', 'int'])
+def test_dtype_support(dtype):
+    img = np.random.rand(28, 28).astype(dtype)
+
+    # Simply run the function to assert that it runs without error
+    slic(img, start_label=1)
