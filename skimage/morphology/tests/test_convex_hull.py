@@ -139,7 +139,7 @@ def test_object():
     with testing.raises(ValueError):
         convex_hull_object(image, connectivity=3)
 
-    out = convex_hull_object(image, connectivity=2)
+    out = convex_hull_object(image, connectivity=1)
     assert_array_equal(out, expected_conn_1)
 
 
