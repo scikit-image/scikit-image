@@ -235,7 +235,8 @@ def _init_pooch():
     try:
         os.makedirs(data_dir, exist_ok=True)
     except PermissionError:
-        data_dir = tempfile.gettempdir()
+        data_dir = osp.join(tempfile.gettempdir(), 'skimage_data')
+        os.makedirs(data_dir, exist_ok=True)
     shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
                  osp.join(data_dir, 'README.txt'))
 
