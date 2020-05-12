@@ -463,16 +463,19 @@ def test_prob_tol():
         res = random_walker(a, mask, return_full_prob=True)
 
     # Lower beta, no warning is expected.
-    res = random_walker(a, mask, return_full_prob=True, beta=10)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask, return_full_prob=True, beta=10)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
     # Being more prob_tol tolerant, no warning is expected.
-    res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
     # Reduced tol, no warning is expected.
-    res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
+    with expected_warnings([NUMPY_MATRIX_WARNING]):
+        res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
