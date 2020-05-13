@@ -7,9 +7,7 @@ from scipy.signal import fftconvolve, convolve
 from scipy.signal import convolve
 import numpy as np
 import numpy.random as npr
-<< << << < HEAD
-== == == =
->>>>>> > 353ce53034de23e5c9ce13ec872473eb2e9e5fcb
+import operator
 
 
 __keywords__ = "restoration, image, deconvolution"
@@ -361,7 +359,7 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     ----------
     image : ndarray
        Input degraded image (can be N dimensional).
-    psf : ndarray
+    psf : ndarray, optional
        The point spread function.
     iterations : int, optional
        Number of iterations. This parameter plays the role of
