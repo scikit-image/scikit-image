@@ -6,6 +6,7 @@ release.
 
 Bug fixes
 ---------
+
 - We made pooch an optional dependency, since it has been added as required
   dependency by mistake (#4666), and we fixed a bug about the path used for pooch
   to download data (#4662)
@@ -22,7 +23,7 @@ Bug fixes
 
 
 
- authors added to this release [alphabetical by first name or login]
+6 authors added to this release [alphabetical by first name or login]
 ---------------------------------------------------------------------
 - Alexandre de Siqueira
 - Emmanuelle Gouillart
