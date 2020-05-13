@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import feature, filters, io, morphology, util
+from skimage import feature, filters, io, measure, morphology, util
 
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
@@ -73,8 +73,8 @@ plt.show()
 
 cells = image > thresholds[0]
 dividing = image > thresholds[1]
-labeled_cells = morphology.label(cells)
-labeled_dividing = morphology.label(dividing)
+labeled_cells = measure.label(cells)
+labeled_dividing = measure.label(dividing)
 naive_mi = labeled_dividing.max() / labeled_cells.max()
 print(naive_mi)
 
@@ -136,7 +136,7 @@ plt.show()
 
 #####################################################################
 # We are left with
-cleaned_dividing = morphology.label(binary_smoother_dividing)
+cleaned_dividing = measure.label(binary_smoother_dividing)
 print(cleaned_dividing.max())
 
 #####################################################################
@@ -153,7 +153,7 @@ distance = ndi.distance_transform_edt(cells)
 local_maxi = feature.peak_local_max(distance, indices=False,
                                     min_distance=7)
 
-markers = morphology.label(local_maxi)
+markers = measure.label(local_maxi)
 
 segmented_cells = morphology.watershed(-distance, markers, mask=cells)
 
