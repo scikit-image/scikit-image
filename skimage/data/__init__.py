@@ -105,148 +105,149 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def create_image_fetcher():
-    try:
-        import pooch
-    except ImportError:
-        # Without pooch, fallback on the standard data directory
-        # which for now, includes a few limited data samples
-        return None, legacy_data_dir
+class ImageFetcher:
+    def __init__(self):
+        try:
+            import pooch
+        except ImportError:
+            # Without pooch, fallback on the standard data directory
+            # which for now, includes a few limited data samples
+            self.pooch = None
+            self.data_dir = legacy_data_dir
 
-    # Pooch expects a `+` to exist in development versions.
-    # Since scikit-image doesn't follow that convention, we have to manually
-    # remove `.dev` with a `+` if it exists.
-    # This helps pooch understand that it should look in master
-    # to find the required files
-    pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
+        # Pooch expects a `+` to exist in development versions.
+        # Since scikit-image doesn't follow that convention, we have to manually
+        # remove `.dev` with a `+` if it exists.
+        # This helps pooch understand that it should look in master
+        # to find the required files
+        pooch_version = __version__.replace('.dev', '+')
+        url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
 
-    # Create a new friend to manage your sample data storage
-    image_fetcher = pooch.create(
-        # Pooch uses appdirs to select an appropriate directory for the cache
-        # on each platform.
-        # https://github.com/ActiveState/appdirs
-        # On linux this converges to
-        # '$HOME/.cache/scikit-image'
-        # With a version qualifier
-        path=pooch.os_cache("scikit-image"),
-        base_url=url,
-        version=pooch_version,
-        env="SKIMAGE_DATADIR",
-        registry=registry,
-        urls=registry_urls,
-    )
+        # Create a new friend to manage your sample data storage
+        self.pooch = pooch.create(
+            # Pooch uses appdirs to select an appropriate directory for the cache
+            # on each platform.
+            # https://github.com/ActiveState/appdirs
+            # On linux this converges to
+            # '$HOME/.cache/scikit-image'
+            # With a version qualifier
+            path=pooch.os_cache("scikit-image"),
+            base_url=url,
+            version=pooch_version,
+            env="SKIMAGE_DATADIR",
+            registry=registry,
+            urls=registry_urls,
+        )
 
-    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+        self.data_dir = osp.join(str(self.pooch.abspath), 'data')
+        self.init_pooch()
 
+    def fetch(self, data_filename):
+        """Fetch a given data file from either the local cache or the repository.
 
-    return image_fetcher, data_dir
+        This function provides the path location of the data file given
+        its name in the scikit-image repository.
 
+        Parameters
+        ----------
+        data_filename:
+            Name of the file in the scikit-image repository. e.g.
+            'restoration/tess/camera_rl.npy'.
 
-image_fetcher, data_dir = create_image_fetcher()
+        Returns
+        -------
+        Path of the local file as a python string.
 
-if image_fetcher is None:
+        Raises
+        ------
+        KeyError:
+            If the filename is not known to the scikit-image distribution.
+
+        ModuleNotFoundError:
+            If the filename is known to the scikit-image distribution but pooch
+            is not installed.
+
+        ConnectionError:
+            If scikit-image is unable to connect to the internet but the
+            dataset has not been downloaded yet.
+        """
+        resolved_path = osp.join(self.data_dir, '..', data_filename)
+        expected_hash = registry[data_filename]
+
+        # Case 1:
+        # The file may already be in the data_dir.
+        # We may have decided to ship it in the scikit-image distribution.
+        if _has_hash(resolved_path, expected_hash):
+            # Nothing to be done, file is where it is expected to be
+            return resolved_path
+
+        # Case 2:
+        # The user is using a cloned version of the github repo, which
+        # contains both the publicly shipped data, and test data.
+        # In this case, the file would be located relative to the
+        # skimage_distribution_dir
+        gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
+        if _has_hash(gh_repository_path, expected_hash):
+            parent = osp.dirname(resolved_path)
+            os.makedirs(parent, exist_ok=True)
+            shutil.copy2(gh_repository_path, resolved_path)
+            return resolved_path
+
+        # Case 3:
+        # Pooch not found.
+        if self.pooch is None:
+            raise ModuleNotFoundError(
+                "The requested file is part of the scikit-image distribution, "
+                "but requires the installation of an optional dependency, pooch. "
+                "To install pooch, use your preferred python package manager. "
+                "Follow installation instruction found at "
+                "https://scikit-image.org/docs/stable/install.html"
+            )
+
+        # Case 4:
+        # Pooch needs to download the data. Let the image fetcher to search for
+        # our data. A ConnectionError is raised if no internet connection is
+        # available.
+        try:
+            resolved_path = self.pooch.fetch(data_filename)
+        except ConnectionError as err:
+            # If we decide in the future to suppress the underlying 'requests'
+            # error, change this to `raise ... from None`. See PEP 3134.
+            raise ConnectionError(
+                'Tried to download a scikit-image dataset, but no internet '
+                'connection is available. To avoid this message in the '
+                'future, try `skimage.data.download_all()` when you are '
+                'connected to the internet.'
+            ) from err
+        return resolved_path
+
+    def init_pooch(self):
+        """Create the skimage data directory, and populate it with README.md
+
+        This function creates directories, and has been the source of issues for
+        downstream users, see
+        https://github.com/scikit-image/scikit-image/issues/4660
+        https://github.com/scikit-image/scikit-image/issues/4664
+        """
+        if self.pooch is None:
+            return
+        os.makedirs(self.data_dir, exist_ok=True)
+        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
+                     osp.join(self.data_dir, 'README.txt'))
+
+        data_base_dir = osp.join(self.data_dir, '..')
+        # Fetch all legacy data so that it is available and visible by default
+        for filename in legacy_registry:
+            self.fetch(filename)
+
+image_fetcher = ImageFetcher()
+data_dir = image_fetcher.data_dir
+
+# Simple semantics for testing purposes
+if image_fetcher.pooch is None:
     has_pooch = False
 else:
     has_pooch = True
-
-def _fetch(data_filename):
-    """Fetch a given data file from either the local cache or the repository.
-
-    This function provides the path location of the data file given
-    its name in the scikit-image repository.
-
-    Parameters
-    ----------
-    data_filename:
-        Name of the file in the scikit-image repository. e.g.
-        'restoration/tess/camera_rl.npy'.
-
-    Returns
-    -------
-    Path of the local file as a python string.
-
-    Raises
-    ------
-    KeyError:
-        If the filename is not known to the scikit-image distribution.
-
-    ModuleNotFoundError:
-        If the filename is known to the scikit-image distribution but pooch
-        is not installed.
-
-    ConnectionError:
-        If scikit-image is unable to connect to the internet but the
-        dataset has not been downloaded yet.
-    """
-    resolved_path = osp.join(data_dir, '..', data_filename)
-    expected_hash = registry[data_filename]
-
-    # Case 1:
-    # The file may already be in the data_dir.
-    # We may have decided to ship it in the scikit-image distribution.
-    if _has_hash(resolved_path, expected_hash):
-        # Nothing to be done, file is where it is expected to be
-        return resolved_path
-
-    # Case 2:
-    # The user is using a cloned version of the github repo, which
-    # contains both the publicly shipped data, and test data.
-    # In this case, the file would be located relative to the
-    # skimage_distribution_dir
-    gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
-    if _has_hash(gh_repository_path, expected_hash):
-        parent = osp.dirname(resolved_path)
-        os.makedirs(parent, exist_ok=True)
-        shutil.copy2(gh_repository_path, resolved_path)
-        return resolved_path
-
-    # Case 3:
-    # Pooch not found.
-    if image_fetcher is None:
-        raise ModuleNotFoundError(
-            "The requested file is part of the scikit-image distribution, "
-            "but requires the installation of an optional dependency, pooch. "
-            "To install pooch, use your preferred python package manager. "
-            "Follow installation instruction found at "
-            "https://scikit-image.org/docs/stable/install.html"
-        )
-
-    # Case 4:
-    # Pooch needs to download the data. Let the image fetcher to search for
-    # our data. A ConnectionError is raised if no internet connection is
-    # available.
-    try:
-        resolved_path = image_fetcher.fetch(data_filename)
-    except ConnectionError as err:
-        # If we decide in the future to suppress the underlying 'requests'
-        # error, change this to `raise ... from None`. See PEP 3134.
-        raise ConnectionError(
-            'Tried to download a scikit-image dataset, but no internet '
-            'connection is available. To avoid this message in the '
-            'future, try `skimage.data.download_all()` when you are '
-            'connected to the internet.'
-        ) from err
-    return resolved_path
-
-
-def _init_pooch():
-    os.makedirs(data_dir, exist_ok=True)
-    shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                 osp.join(data_dir, 'README.txt'))
-
-    data_base_dir = osp.join(data_dir, '..')
-    # Fetch all legacy data so that it is available by default
-    for filename in legacy_registry:
-        _fetch(filename)
-
-
-# This function creates directories, and has been the source of issues for
-# downstream users, see
-# https://github.com/scikit-image/scikit-image/issues/4660
-# https://github.com/scikit-image/scikit-image/issues/4664
-if has_pooch:
-    _init_pooch()
 
 
 def download_all(directory=None):
@@ -282,7 +283,7 @@ def download_all(directory=None):
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
 
-    if image_fetcher is None:
+    if image_fetcher.pooch is None:
         raise ModuleNotFoundError(
             "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
@@ -290,15 +291,15 @@ def download_all(directory=None):
             "https://scikit-image.org/docs/stable/install.html"
         )
     # Consider moving this kind of logic to Pooch
-    old_dir = image_fetcher.path
+    old_dir = image_fetcher.pooch.path
     try:
         if directory is not None:
-            image_fetcher.path = directory
+            image_fetcher.pooch.path = directory
 
-        for filename in image_fetcher.registry:
-            _fetch(filename)
+        for filename in image_fetcher.pooch.registry:
+            image_fetcher.fetch(filename)
     finally:
-        image_fetcher.path = old_dir
+        image_fetcher.pooch.path = old_dir
 
 
 def lbp_frontal_face_cascade_filename():
@@ -313,7 +314,7 @@ def lbp_frontal_face_cascade_filename():
            https://github.com/opencv/opencv/tree/master/data/lbpcascades
     """
 
-    return _fetch('data/lbpcascade_frontalface_opencv.xml')
+    return image_fetcher.fetch('data/lbpcascade_frontalface_opencv.xml')
 
 
 def load(f, as_gray=False):
@@ -359,7 +360,7 @@ def _load(f, as_gray=False):
     # importing io is quite slow since it scans all the backends
     # we lazy import it here
     from ..io import imread
-    return imread(_fetch(f), as_gray=as_gray)
+    return imread(image_fetcher.fetch(f), as_gray=as_gray)
 
 
 def camera():
@@ -984,7 +985,7 @@ def stereo_motorcycle():
     .. [2] http://vision.middlebury.edu/stereo/data/scenes2014/
 
     """
-    filename = _fetch("data/motorcycle_disp.npz")
+    filename = image_fetcher.fetch("data/motorcycle_disp.npz")
     disp = np.load(filename)['arr_0']
     return (_load("data/motorcycle_left.png"),
             _load("data/motorcycle_right.png"),
@@ -1020,4 +1021,4 @@ def lfw_subset():
     .. [2] http://vis-www.cs.umass.edu/lfw/
 
     """
-    return np.load(_fetch('data/lfw_subset.npy'))
+    return np.load(image_fetcher.fetch('data/lfw_subset.npy'))
