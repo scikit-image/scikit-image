@@ -16,9 +16,9 @@ points while obeying smoothness considerations. Typically it is a good idea to
 smooth images a bit before analyzing, as done in the following examples.
 
 We initialize a circle around the astronaut's face and use the default boundary
-condition ``bc='periodic'`` to fit a closed curve. The default parameters
-``w_line=0, w_edge=1`` will make the curve search towards edges, such as the
-boundaries of the face.
+condition ``boundary_condition='periodic'`` to fit a closed curve. The default
+parameters ``w_line=0, w_edge=1`` will make the curve search towards edges,
+such as the boundaries of the face.
 
 .. [1] *Snakes: Active contour models*. Kass, M.; Witkin, A.; Terzopoulos, D.
        International Journal of Computer Vision 1 (4): 321 (1988).
@@ -57,8 +57,8 @@ plt.show()
 ######################################################################
 # Here we initialize a straight line between two points, `(5, 136)` and
 # `(424, 50)`, and require that the spline has its end points there by giving
-# the boundary condition `bc='fixed'`. We furthermore make the algorithm
-# search for dark lines by giving a negative `w_line` value.
+# the boundary condition `boundary_condition='fixed'`. We furthermore
+# make the algorithm search for dark lines by giving a negative `w_line` value.
 
 img = data.text()
 
