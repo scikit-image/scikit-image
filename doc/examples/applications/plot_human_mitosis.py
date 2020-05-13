@@ -33,6 +33,7 @@ image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleH
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
+ax.set_title('Microscopy image of human cells')
 plt.show()
 
 #####################################################################
