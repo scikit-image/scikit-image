@@ -9,7 +9,6 @@ from libc.math cimport atan2, fabs
 
 from .._shared.fused_numerics cimport np_floats
 from ..util import img_as_float64
-from .util import _prepare_grayscale_input_2D
 
 cnp.import_array()
 
@@ -183,7 +182,8 @@ def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
     return np.asarray(corner_response)
 
 
-def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
+def _corner_orientations(np_floats[:, ::1] image, Py_ssize_t[:, :] corners,
+                         mask):
     """Compute the orientation of corners.
 
     The orientation of corners is computed using the first order central moment
@@ -247,7 +247,10 @@ def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
 
     """
 
-    image = img_as_float64(_prepare_grayscale_input_2D(image))
+    if np_floats is cnp.float32_t:
+        dtype = np.float32
+    else:
+        dtype = np.float64
 
     if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
         raise ValueError("Size of mask must be uneven.")
@@ -260,11 +263,11 @@ def _corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     cdef Py_ssize_t mcols = mask.shape[1]
     cdef Py_ssize_t mrows2 = (mrows - 1) / 2
     cdef Py_ssize_t mcols2 = (mcols - 1) / 2
-    cdef double[:, :] cimage = np.pad(image, (mrows2, mcols2), mode='constant',
-                                      constant_values=0)
-    cdef double[:] orientations = np.zeros(corners.shape[0], dtype=np.double)
-    cdef double curr_pixel
-    cdef double m01, m10, m01_tmp
+    cdef np_floats[:, :] cimage = np.pad(image, (mrows2, mcols2),
+                                         mode='constant',
+                                         constant_values=0)
+    cdef np_floats[:] orientations = np.zeros(corners.shape[0], dtype=dtype)
+    cdef np_floats curr_pixel, m01, m10, m01_tmp
 
     with nogil:
         for i in range(corners.shape[0]):
