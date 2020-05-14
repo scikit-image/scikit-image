@@ -329,15 +329,17 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def _pad_to_shape(psf, image):
+def _pad_to_shape(image, psf):
     """
     Will add pad around psf to get same shape as image in blind RL deconvolve
+
     Parameters
     ----------
     image : ndarray
        Input degraded image (can be N dimensional).
     psf : ndarray
        The point spread function.
+
    Returns
    -------
    container : ndarray
@@ -355,6 +357,7 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
                     return_iterations=False, refine_psf=False,
                     iter_callback=None):
     """Richardson-Lucy deconvolution.
+
     Parameters
     ----------
     image : ndarray
@@ -372,12 +375,14 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     refine_psf : boolean, optional
         Refines the passed PSF by means of blind deconvolution.[2]
         If no PSF is passed, this is automatically turned on.
+
     Returns
     -------
     im_deconv : ndarray
        The deconvolved image.
     psf : ndarray
         The last PSF estimate to deconvolve image.
+
     Examples
     --------
     >>> from skimage import color, data, restoration
@@ -387,6 +392,7 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     >>> camera = convolve2d(camera, psf, 'same')
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
     >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
+
     Notes
     -----
     The Richardson-Lucy algorithm is an iterative algorithm to
@@ -406,6 +412,7 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     Due to its nature, the algorithm may divide by 0.
     The function catches this issue and aborts the iterative process.
     Mostly, the optimal number of iterations is before this error may occur.
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
@@ -426,7 +433,7 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     # psf is padded with 0 to allow convolution with image
     # of shape image.shape.
     elif psf is not None and refine_psf:
-        psf = _pad_to_shape(psf, image)
+        psf = _pad_to_shape(image, psf)
         psf = psf.astype(np.float)
 
     else:
