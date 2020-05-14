@@ -444,9 +444,6 @@ def test_isolated_seeds():
 
 
 def test_prob_tol():
-    # Turn warnings into errors
-    warnings.simplefilter('error')
-
     np.random.seed(0)
     a = np.random.random((7, 7))
     mask = - np.ones(a.shape)
