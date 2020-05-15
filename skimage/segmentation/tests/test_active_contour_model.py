@@ -71,7 +71,7 @@ def test_RGB():
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
     snake = active_contour(imgRGB, init, boundary_condition='fixed',
-                           alpha=0.1, beta=1.0, w_line=-5/3., w_edge=0)
+                           alpha=0.1, beta=1.0, w_line=-5/3., w_edge=0, gamma=0.1)
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
