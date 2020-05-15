@@ -42,8 +42,7 @@ c = 220 + 100*np.cos(s)
 init = np.array([r, c]).T
 
 snake = active_contour(gaussian(img, 3),
-                       init, alpha=0.015, beta=10, gamma=0.001,
-                       coordinates='rc')
+                       init, alpha=0.015, beta=10, gamma=0.001)
 
 fig, ax = plt.subplots(figsize=(7, 7))
 ax.imshow(img, cmap=plt.cm.gray)
@@ -67,8 +66,7 @@ c = np.linspace(5, 424, 100)
 init = np.array([r, c]).T
 
 snake = active_contour(gaussian(img, 1), init, boundary_condition='fixed',
-                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1,
-                       coordinates='rc')
+                       alpha=0.1, beta=1.0, w_line=-5, w_edge=0, gamma=0.1)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.imshow(img, cmap=plt.cm.gray)

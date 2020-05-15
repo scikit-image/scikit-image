@@ -54,9 +54,9 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         be combined by parsing 'fixed-free', 'free-fixed'. Parsing
         'fixed-fixed' or 'free-free' yields same behaviour as 'fixed' and
         'free', respectively.
-    coordinates : {'rc' or 'xy'}, optional
-        Whether to use rc or xy coordinates. The 'xy' option (current default)
-        will be removed in version 0.18.
+    coordinates : {'rc'}, optional
+        This option remains for compatibility purpose only and has no effect.
+        Coordinates must be set in a row-column format.
 
     Returns
     -------
@@ -94,8 +94,10 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    if coordinates == 'rc':
-        snake_xy = snake[:, ::-1]
+    if coordinates is not 'rc':
+        raise ValueError('Coordinate values must be set in a row column format.'
+                         '`coordinates` must be indifferently set to "rc" or None.')
+    snake_xy = snake[:, ::-1]
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
