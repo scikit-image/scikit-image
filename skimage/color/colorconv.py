@@ -54,7 +54,8 @@ import functools
 import numpy as np
 from warnings import warn
 from scipy import linalg
-from ..util import dtype, dtype_limits
+from ..exposure import rescale_intensity
+from ..util import dtype, dtype_limits, invert
 
 
 def guess_spatial_dimensions(image):
@@ -1448,6 +1449,7 @@ def separate_stains(rgb, conv_matrix):
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [2] https://github.com/jnkather/ColorDeconvolutionMatlab
 
     Examples
     --------
@@ -1457,9 +1459,13 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
     rgb = _prepare_colorarray(rgb, force_copy=True)
-    rgb += 2
-    stains = np.reshape(-np.log10(rgb), (-1, 3)) @ conv_matrix
-    return np.reshape(stains, rgb.shape)
+    rgb += np.exp(1)  # avoiding log artifacts
+
+    stains = np.reshape(-np.log(rgb), (-1, 3)) @ conv_matrix
+    stains = np.reshape(stains, rgb.shape)
+    stains = rescale_intensity(stains, out_range=(0, 1))
+
+    return invert(stains)
 
 
 def combine_stains(stains, conv_matrix):
@@ -1513,8 +1519,6 @@ def combine_stains(stains, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
-    from ..exposure import rescale_intensity
-
     stains = _prepare_colorarray(stains)
     logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
     rgb2 = np.power(10, logrgb2)
