@@ -16,9 +16,11 @@ from ._warps import (swirl, resize, rotate, rescale,
                      downscale_local_mean, warp, warp_coords, warp_polar)
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
+from .distance_transform import generalized_distance_transform
 
 
 __all__ = ['match_histograms',
+           'generalized_distance_transform',
            'hough_circle',
            'hough_ellipse',
            'hough_line',
