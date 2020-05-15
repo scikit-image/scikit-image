@@ -14,6 +14,8 @@ https://scikit-image.org
 
 New Features
 ------------
+- Vector-to-vector rotation matrix generation
+  (``skimage.transform.compute_rotation_matrix``) (#3125)
 
 
 
