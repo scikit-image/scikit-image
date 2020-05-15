@@ -109,7 +109,7 @@ def test_bad_input():
         active_contour(img, init, max_iterations=-15)
 
 
-def test_xy_coord_warning():
+def test_coord_raises():
     img = rgb2gray(data.astronaut())
     s = np.linspace(0, 2*np.pi, 400)
     x = 100 + 100*np.sin(s)
