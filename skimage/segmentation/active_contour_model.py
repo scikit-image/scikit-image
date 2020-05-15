@@ -99,7 +99,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     if coordinates != 'rc':
         raise ValueError('Coordinate values must be set in a row column '
                          'format. `coordinates` must be indifferently set '
-                         'to "rc" or None.')
+                         'to "rc".')
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
