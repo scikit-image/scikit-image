@@ -71,7 +71,8 @@ def test_RGB():
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
     snake = active_contour(imgRGB, init, boundary_condition='fixed',
-                           alpha=0.1, beta=1.0, w_line=-5/3., w_edge=0, gamma=0.1)
+                           alpha=0.1, beta=1.0, w_line=-5/3., w_edge=0,
+                           gamma=0.1)
     assert_equal(np.array(snake[:10, 0], dtype=np.int32), refr)
     assert_equal(np.array(snake[:10, 1], dtype=np.int32), refc)
 
@@ -106,6 +107,7 @@ def test_bad_input():
         active_contour(img, init, boundary_condition='wrong')
     with testing.raises(ValueError):
         active_contour(img, init, max_iterations=-15)
+
 
 def test_xy_coord_warning():
     img = rgb2gray(data.astronaut())
