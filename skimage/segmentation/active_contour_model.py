@@ -33,8 +33,8 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     beta : float, optional
         Snake smoothness shape parameter. Higher values makes snake smoother.
     w_line : float, optional
-        Controls attraction to brightness. Use negative values to attract toward
-        dark regions.
+        Controls attraction to brightness. Use negative values to attract
+        toward dark regions.
     w_edge : float, optional
         Controls attraction to edges. Use negative values to repel snake from
         edges.
@@ -94,9 +94,10 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
     25
 
     """
-    if coordinates is not 'rc':
-        raise ValueError('Coordinate values must be set in a row column format.'
-                         '`coordinates` must be indifferently set to "rc" or None.')
+    if coordinates != 'rc':
+        raise ValueError('Coordinate values must be set in a row column '
+                         'format. `coordinates` must be indifferently set '
+                         'to "rc" or None.')
     max_iterations = int(max_iterations)
     if max_iterations <= 0:
         raise ValueError("max_iterations should be >0.")
