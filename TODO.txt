@@ -74,6 +74,16 @@ Version 0.19
   decorator from `label2rgb` and set `bg_label` default value to 0.
 * In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
 
+Version 0.20
+------------
+
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+
 Other
 -----
 * Remove custom fused type in ``skimage/morphology/_max_tree.pyx`` once
