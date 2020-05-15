@@ -125,4 +125,4 @@ def test_xy_coord_warning():
         snake = active_contour(gaussian(img, 3), init,
                                boundary_condition='periodic', alpha=0.015,
                                beta=10, w_line=0, w_edge=1, gamma=0.001,
-                               max_iterations=100, coordinates='xy')
+                               max_iterations=100, coordinates=None)
