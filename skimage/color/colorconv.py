@@ -1448,7 +1448,10 @@ def separate_stains(rgb, conv_matrix):
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
-    .. [2] https://github.com/jnkather/ColorDeconvolutionMatlab
+    .. [2] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution,” Anal. Quant. Cytol. Histol., vol.
+           23, no. 4, pp. 291–299, Aug. 2001.
+    .. [3] https://github.com/DIPlib/diplib/
 
     Examples
     --------
@@ -1460,13 +1463,12 @@ def separate_stains(rgb, conv_matrix):
     from ..exposure import rescale_intensity
 
     rgb = _prepare_colorarray(rgb, force_copy=True)
-    rgb += np.e  # avoiding log artifacts
+    rgb += np.maximum(rgb, 1E-6)  # avoiding log artifacts
+    log_adjust = -np.log10(1E-6)  # used to compensate the sum above
 
-    stains = np.reshape(-np.log(rgb), (-1, 3)) @ conv_matrix
-    stains = np.reshape(stains, rgb.shape)
-    stains = rescale_intensity(stains, out_range=(0, 1))
+    stains = np.reshape(-np.log10(rgb) / log_adjust, (-1, 3)) @ conv_matrix
 
-    return invert(stains)
+    return np.reshape(stains, rgb.shape)
 
 
 def combine_stains(stains, conv_matrix):
