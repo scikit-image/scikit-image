@@ -1463,7 +1463,7 @@ def separate_stains(rgb, conv_matrix):
     from ..exposure import rescale_intensity
 
     rgb = _prepare_colorarray(rgb, force_copy=True)
-    rgb += np.maximum(rgb, 1E-6)  # avoiding log artifacts
+    rgb = np.maximum(rgb, 1E-6)  # avoiding log artifacts
     log_adjust = -np.log10(1E-6)  # used to compensate the sum above
 
     stains = np.reshape(-np.log10(rgb) / log_adjust, (-1, 3)) @ conv_matrix
