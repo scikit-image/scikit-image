@@ -1459,7 +1459,7 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
     rgb = _prepare_colorarray(rgb, force_copy=True)
-    rgb += np.exp(1)  # avoiding log artifacts
+    rgb += np.e  # avoiding log artifacts
 
     stains = np.reshape(-np.log(rgb), (-1, 3)) @ conv_matrix
     stains = np.reshape(stains, rgb.shape)
