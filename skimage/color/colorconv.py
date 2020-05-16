@@ -54,7 +54,6 @@ import functools
 import numpy as np
 from warnings import warn
 from scipy import linalg
-from ..exposure import rescale_intensity
 from ..util import dtype, dtype_limits, invert
 
 
@@ -1458,6 +1457,8 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
+    from ..exposure import rescale_intensity
+
     rgb = _prepare_colorarray(rgb, force_copy=True)
     rgb += np.e  # avoiding log artifacts
 
@@ -1519,6 +1520,8 @@ def combine_stains(stains, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
+    from ..exposure import rescale_intensity
+
     stains = _prepare_colorarray(stains)
     logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
     rgb2 = np.power(10, logrgb2)
