@@ -54,7 +54,7 @@ import functools
 import numpy as np
 from warnings import warn
 from scipy import linalg
-from ..util import dtype, dtype_limits, invert
+from ..util import dtype, dtype_limits
 
 
 def guess_spatial_dimensions(image):
@@ -1466,7 +1466,7 @@ def separate_stains(rgb, conv_matrix):
     rgb = np.maximum(rgb, 1E-6)  # avoiding log artifacts
     log_adjust = -np.log10(1E-6)  # used to compensate the sum above
 
-    stains = np.reshape(-np.log10(rgb) / log_adjust, (-1, 3)) @ conv_matrix
+    stains = (-np.log10(rgb) / log_adjust) @ conv_matrix
     stains = np.reshape(stains, rgb.shape)
 
     return np.clip(stains, a_min=0, a_max=1)
@@ -1528,8 +1528,9 @@ def combine_stains(stains, conv_matrix):
     stains = _prepare_colorarray(stains)
     logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
     rgb2 = np.power(10, logrgb2)
-    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape),
-                             in_range=(-1, 1))
+    log_adjust = -np.log10(1E-6)  # used to compensate the sum above
+    return rescale_intensity(np.reshape(rgb2 * log_adjust, stains.shape),
+                             in_range=(0, 1))
 
 
 def lab2lch(lab):
