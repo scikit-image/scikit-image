@@ -1467,8 +1467,9 @@ def separate_stains(rgb, conv_matrix):
     log_adjust = -np.log10(1E-6)  # used to compensate the sum above
 
     stains = np.reshape(-np.log10(rgb) / log_adjust, (-1, 3)) @ conv_matrix
+    stains = np.reshape(stains, rgb.shape)
 
-    return np.reshape(stains, rgb.shape)
+    return np.clip(stains, a_min=0, a_max=1)
 
 
 def combine_stains(stains, conv_matrix):
