@@ -1,5 +1,4 @@
 import numpy as np
-import warnings
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 from skimage._shared._warnings import expected_warnings
