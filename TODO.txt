@@ -11,22 +11,7 @@ Version 0.17
 Version 0.18
 ------------
 
-* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
-  deprecation warning.
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
@@ -41,7 +26,6 @@ Version 0.18
         * `` skimage/feature/corner.py::corner_orientations``
     * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
       ``threshold_rel=0``.
-* In ``skimage/transform`` remove histogram_matching.py.
 * In ``skimage/restoration/_denoise.py`` remove warning regarding
   ``rescale_sigma``.
     * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
@@ -82,6 +66,16 @@ Version 0.19
 * In ``skimage/color/colorlabel.py``, remove the `change_default_value`
   decorator from `label2rgb` and set `bg_label` default value to 0.
 * In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
+
+Version 0.20
+------------
+
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
 
 Other
 -----
