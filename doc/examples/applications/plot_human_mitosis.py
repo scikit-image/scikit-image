@@ -26,11 +26,6 @@ from skimage import feature, filters, io, measure, morphology, util
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
 
-#####################################################################
-# This image is a TIFF file. If you run into issues loading it, please
-# consider using ``external.tifffile.imread`` or following:
-# https://github.com/scikit-image/scikit-image/issues/4326#issuecomment-559595147
-
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
 ax.set_title('Microscopy image of human cells')
