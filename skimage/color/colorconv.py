@@ -1464,12 +1464,12 @@ def separate_stains(rgb, conv_matrix):
 
     rgb = _prepare_colorarray(rgb, force_copy=True)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
-    log_adjust = -np.log10(1E-6)  # used to compensate the sum above
+    log_adjust = -np.log(1E-6)  # used to compensate the sum above
 
-    stains = (-np.log10(rgb) / log_adjust) @ conv_matrix
+    stains = (-np.log(rgb) / log_adjust) @ conv_matrix
     stains = np.reshape(stains, rgb.shape)
 
-    return np.clip(stains, a_min=0, a_max=1)
+    return stains
 
 
 def combine_stains(stains, conv_matrix):
@@ -1513,6 +1513,9 @@ def combine_stains(stains, conv_matrix):
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
+    .. [2] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution,” Anal. Quant. Cytol. Histol., vol.
+           23, no. 4, pp. 291–299, Aug. 2001.
 
     Examples
     --------
@@ -1526,11 +1529,12 @@ def combine_stains(stains, conv_matrix):
     from ..exposure import rescale_intensity
 
     stains = _prepare_colorarray(stains)
-    logrgb2 = -np.reshape(stains, (-1, 3)) @ conv_matrix
-    rgb2 = np.power(10, logrgb2)
-    log_adjust = -np.log10(1E-6)  # used to compensate the sum above
-    return rescale_intensity(np.reshape(rgb2 * log_adjust, stains.shape),
-                             in_range=(0, 1))
+    # log_adjust here is used to compensate the sum within separate_stains().
+    log_adjust = -np.log(1E-6)
+    log_rgb = -(stains * log_adjust) @ conv_matrix
+    rgb = np.power(np.e, log_rgb)
+
+    return rescale_intensity(rgb, in_range=(0, 1))
 
 
 def lab2lch(lab):
