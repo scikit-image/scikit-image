@@ -1460,14 +1460,11 @@ def separate_stains(rgb, conv_matrix):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
-    from ..exposure import rescale_intensity
-
     rgb = _prepare_colorarray(rgb, force_copy=True)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
     log_adjust = -np.log(1E-6)  # used to compensate the sum above
 
     stains = (-np.log(rgb) / log_adjust) @ conv_matrix
-    stains = np.reshape(stains, rgb.shape)
 
     return stains
 
