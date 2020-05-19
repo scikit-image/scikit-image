@@ -1531,7 +1531,7 @@ def combine_stains(stains, conv_matrix):
     log_rgb = -(stains * log_adjust) @ conv_matrix
     rgb = np.exp(log_rgb)
 
-    return rgb
+    return rescale_intensity(rgb, in_range=(0, 1))
 
 
 def lab2lch(lab):
