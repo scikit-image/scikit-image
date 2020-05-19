@@ -1529,9 +1529,9 @@ def combine_stains(stains, conv_matrix):
     # log_adjust here is used to compensate the sum within separate_stains().
     log_adjust = -np.log(1E-6)
     log_rgb = -(stains * log_adjust) @ conv_matrix
-    rgb = np.power(np.e, log_rgb)
+    rgb = np.exp(log_rgb)
 
-    return rescale_intensity(rgb, in_range=(0, 1))
+    return rgb
 
 
 def lab2lch(lab):
