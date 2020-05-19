@@ -36,10 +36,10 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
     if size is not None:
         try:
             size = int(size)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exception:
             raise TypeError(
                 f"size must be either None or interpretable as an integer.\n" f"type(size): {type(size)}."
-            )
+            ) from exception
 
         if size < 0:
             raise ValueError(f"size must be non-negative.\n" f"size: {size}.")
@@ -47,8 +47,8 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
     # Cast value to np.ndarray.
     try:
         value = np.array(value, dtype=dtype)
-    except ValueError:
-        raise ValueError(f"value and dtype are incompatible with one another.")
+    except ValueError as exception:
+        raise ValueError(f"value and dtype are incompatible with one another.") from exception
 
     # Validate value's dimensionality and length.
     if value.ndim == 0:
@@ -155,16 +155,16 @@ def _validate_ndarray(
     # Validate compliance with dtype.
     try:
         array = np.array(array, dtype) # Side effect: breaks alias.
-    except TypeError:
+    except TypeError as exception:
         raise TypeError(
             f"array is of a type that is incompatible with dtype.\n"
             f"type(array): {type(array)}, dtype: {dtype}."
-        )
-    except ValueError:
+        ) from exception
+    except ValueError as exception:
         raise ValueError(
             f"array has a value that is incompatible with dtype.\n"
             f"array: {array}, \ntype(array): {type(array)}, dtype: {dtype}."
-        )
+        ) from exception
 
     # Verify compliance with forbid_object_dtype.
     if forbid_object_dtype:
@@ -204,9 +204,11 @@ def _validate_ndarray(
     if required_shape is not None:
         try:
             required_shape_satisfied = np.array_equal(array.reshape(required_shape).shape, array.shape)
-        except ValueError:
-            raise ValueError(f"array is incompatible with required_shape.\n"
-                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
+        except ValueError as exception:
+            raise ValueError(
+                f"array is incompatible with required_shape.\n"
+                f"array.shape: {array.shape}, required_shape: {required_shape}."
+            ) from exception
         if not required_shape_satisfied:
             raise ValueError(f"array is compatible with required_shape but does not match required_shape.\n"
                              f"array.shape: {array.shape}, required_shape: {required_shape}.")

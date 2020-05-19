@@ -528,14 +528,13 @@ class _Lddmm:
         try:
             affine_inv_gradient = solve(affine_inv_hessian_approx, affine_inv_gradient_reduction, assume_a='pos').reshape(matching_affine_inv_gradient.shape[-2:])
         except np.linalg.LinAlgError as exception:
-            exception.args = (
-                *exception.args, f"The Hessian was not invertible in the Gauss-Newton update of the affine transform. "
-                                 f"This may be because the image was constant along one or more dimensions. "
-                                 f"Consider removing any constant dimensions. "
-                                 f"Otherwise you may try using a smaller value for affine_stepsize, a smaller value for deformative_stepsize, or a larger value for sigma_regularization. "
-                                 f"The calibrate=True option may be of use in determining optimal parameter values."
-            )
-            raise exception
+            raise RuntimeError(
+                "The Hessian was not invertible in the Gauss-Newton update of the affine transform. "
+                "This may be because the image was constant along one or more dimensions. "
+                "Consider removing any constant dimensions. "
+                "Otherwise you may try using a smaller value for affine_stepsize, a smaller value for deformative_stepsize, or a larger value for sigma_regularization. "
+                "The calibrate=True option may be of use in determining optimal parameter values."
+            ) from exception
         # Append a row of zeros at the end of the 0th dimension.
         zeros = np.zeros((1, self.target.ndim + 1))
         affine_inv_gradient = np.concatenate((affine_inv_gradient, zeros), 0)
