@@ -1445,13 +1445,17 @@ def separate_stains(rgb, conv_matrix):
     * ``ahx_from_rgb``: Alcian Blue + Hematoxylin
     * ``hpx_from_rgb``: Hematoxylin + PAS
 
+    This implementation borrows some ideas from DIPlib [2]_, e.g. the
+    compensation using a small value to avoid log artifacts when
+    calculating the Beer-Lambert law.
+
     References
     ----------
     .. [1] https://web.archive.org/web/20160624145052/http://www.mecourse.com/landinig/software/cdeconv/cdeconv.html
-    .. [2] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+    .. [2] https://github.com/DIPlib/diplib/
+    .. [3] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
            staining by color deconvolution,” Anal. Quant. Cytol. Histol., vol.
            23, no. 4, pp. 291–299, Aug. 2001.
-    .. [3] https://github.com/DIPlib/diplib/
 
     Examples
     --------
@@ -1462,9 +1466,9 @@ def separate_stains(rgb, conv_matrix):
     """
     rgb = _prepare_colorarray(rgb, force_copy=True)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
-    log_adjust = -np.log(1E-6)  # used to compensate the sum above
+    log_adjust = np.log(1E-6)  # used to compensate the sum above
 
-    stains = (-np.log(rgb) / log_adjust) @ conv_matrix
+    stains = (np.log(rgb) / log_adjust) @ conv_matrix
 
     return stains
 
