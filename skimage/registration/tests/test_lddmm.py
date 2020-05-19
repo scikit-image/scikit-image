@@ -319,10 +319,10 @@ def test_lddmm_transform_image(deform_to):
     )
 
     deformed_subject = lddmm_transform_image(
-        subject=subject,                         subject_resolution=subject_resolution, 
-        output_resolution=output_resolution,     deform_to=deform_to, 
+        subject=subject, subject_resolution=subject_resolution, 
+        output_resolution=output_resolution, deform_to=deform_to, 
         extrapolation_fill_value=extrapolation_fill_value,
-        affine_phi=affine_phi,                   phi_inv_affine_inv=phi_inv_affine_inv, 
+        affine_phi=affine_phi, phi_inv_affine_inv=phi_inv_affine_inv, 
         template_resolution=template_resolution, target_resolution=target_resolution, 
     )
 
@@ -336,10 +336,10 @@ def _test_lddmm_register(rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
 
     reg_output = lddmm_register(**lddmm_register_kwargs)
 
-    template            = lddmm_register_kwargs['template']
-    target              = lddmm_register_kwargs['target']
+    template = lddmm_register_kwargs['template']
+    target = lddmm_register_kwargs['target']
     template_resolution = lddmm_register_kwargs['template_resolution'] if 'template_resolution' in lddmm_register_kwargs.keys() else 1
-    target_resolution   = lddmm_register_kwargs[  'target_resolution'] if   'target_resolution' in lddmm_register_kwargs.keys() else 1
+    target_resolution = lddmm_register_kwargs['target_resolution'] if 'target_resolution' in lddmm_register_kwargs.keys() else 1
 
     deformed_target = lddmm_transform_image(
         subject=target, 
@@ -587,9 +587,9 @@ def test__transform_points():
     position_field_resolution = subject_resolution
     # Indicates a 90 degree rotation to the right.
     affine = np.array([
-        [0,1,0],
-        [-1,0,0],
-        [0,0,1],
+        [ 0, 1, 0],
+        [-1, 0, 0],
+        [ 0, 0, 1],
     ])
     position_field = _lddmm_utilities._multiply_coords_by_affine(affine, 
         _lddmm_utilities._compute_coords(subject.shape, position_field_resolution))

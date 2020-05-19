@@ -124,6 +124,7 @@ def test__validate_ndarray():
     kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(3, -1))
     correct_output = np.arange(3 * 4).reshape(3, 4)
     assert np.array_equal(_validate_ndarray(**kwargs), correct_output)
+
     # Test improper use.
 
     # Validate arguments.
@@ -192,7 +193,13 @@ def test__validate_ndarray():
 
     kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(3, 5))
     expected_exception = ValueError
-    match = "array must match required_shape."
+    match = "array is incompatible with required_shape."
+    with pytest.raises(expected_exception, match=match):
+        _validate_ndarray(**kwargs)
+
+    kwargs = dict(array=np.arange(3 * 4).reshape(3, 4), required_shape=(4, -1))
+    expected_exception = ValueError
+    match = "array is compatible with required_shape but does not match required_shape."
     with pytest.raises(expected_exception, match=match):
         _validate_ndarray(**kwargs)
 

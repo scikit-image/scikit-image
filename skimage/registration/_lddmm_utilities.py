@@ -1,8 +1,8 @@
 """
 Defines:
     Internal functions:
-        _validate_scalar_to_multi(value, size=None, dtype=float)
-        _validate_ndarray(array, minimum_ndim=0, required_ndim=None, dtype=None, 
+        _validate_scalar_to_multi(value, size=None, dtype=None)
+        _validate_ndarray(array, dtype=None, minimum_ndim=0, required_ndim=None, 
             forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None, required_shape=None)
         _validate_resolution(resolution, ndim)
         _compute_axes(shape, resolution=1, origin='center')
@@ -22,7 +22,7 @@ from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
 
-def _validate_scalar_to_multi(value, size=None, dtype=float):
+def _validate_scalar_to_multi(value, size=None, dtype=None):
     """
     If value's length is 1, upcast it to match size. 
     Otherwise, if it does not match size, raise error.
@@ -46,13 +46,13 @@ def _validate_scalar_to_multi(value, size=None, dtype=float):
 
     # Cast value to np.ndarray.
     try:
-        value = np.array(value, dtype)
+        value = np.array(value, dtype=dtype)
     except ValueError:
         raise ValueError(f"value and dtype are incompatible with one another.")
 
     # Validate value's dimensionality and length.
     if value.ndim == 0:
-        value = np.array([value])
+        value = np.array([value.item()])
     if value.ndim == 1:
         if size is not None and len(value) == 1:
             # Upcast scalar to match size.
@@ -69,11 +69,10 @@ def _validate_scalar_to_multi(value, size=None, dtype=float):
             f"value must not have more than 1 dimension.\n" f"value.ndim: {value.ndim}."
         )
 
-    # TODO: verify that this is necessary and rewrite/remove accordingly.
-    # Check for np.nan values.
-    if np.any(np.isnan(value)):
+    # Check for np.nan values if the dtype is not object.
+    if value.dtype != 'object' and np.any(np.isnan(value)):
         raise NotImplementedError(
-            "np.nan values encountered. What input led to this result?\n"
+            "np.nan values encountered for a value not cast to dtype object. What input led to this result?\n"
             "Write in an exception as appropriate."
         )
         raise ValueError(
@@ -86,9 +85,9 @@ def _validate_scalar_to_multi(value, size=None, dtype=float):
 
 def _validate_ndarray(
     array,
+    dtype=None,
     minimum_ndim=0,
     required_ndim=None,
-    dtype=None,
     forbid_object_dtype=True,
     broadcast_to_shape=None,
     reshape_to_shape=None,
@@ -155,7 +154,7 @@ def _validate_ndarray(
     # Cast array to np.ndarray.
     # Validate compliance with dtype.
     try:
-        array = np.array(array, dtype)  # Side effect: breaks alias.
+        array = np.array(array, dtype) # Side effect: breaks alias.
     except TypeError:
         raise TypeError(
             f"array is of a type that is incompatible with dtype.\n"
@@ -206,12 +205,11 @@ def _validate_ndarray(
         try:
             required_shape_satisfied = np.array_equal(array.reshape(required_shape).shape, array.shape)
         except ValueError:
-            # array could not be reshaped to required_shape.
-            required_shape_satisfied = False
+            raise ValueError(f"array is incompatible with required_shape.\n"
+                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
         if not required_shape_satisfied:
-            # array was unable to be reshaped to required_shape or had its shape changed in reshaping to required_shape.
-            raise ValueError(f"array must match required_shape.\n"
-                            f"array.shape: {array.shape}, required_shape: {required_shape}.")
+            raise ValueError(f"array is compatible with required_shape but does not match required_shape.\n"
+                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
 
     return array
 
@@ -219,7 +217,7 @@ def _validate_ndarray(
 def _validate_resolution(resolution, ndim):
     """Validate resolution to assure its length matches the dimensionality of image."""
 
-    resolution = _validate_scalar_to_multi(resolution, size=ndim)
+    resolution = _validate_scalar_to_multi(resolution, size=ndim, dtype=float)
 
     if np.any(resolution <= 0):
         raise ValueError(
@@ -361,23 +359,35 @@ def resample(
     """
     Resamples image from an old resolution to a new resolution.
     
-    Args:
-        image (np.ndarray): The image to be resampled
-        new_resolution (float, seq): The resolution of the resampled image.
-        old_resolution (float, seq, optional): The resolution of the input image. Defaults to 1.
-        err_to_larger (bool, optional): Determines whether to round the new shape up or down. Defaults to True.
-        extrapolation_fill_value (float, optional): The fill_value kwarg passed to interpn. Defaults to None.
-        origin (str, optional): The origin to use for the image axes and coordinates used internally. Defaults to 'center'.
-        method (str, optional): The method of interpolation, passed as the method kwarg in interpn. Defaults to 'linear'.
-        image_is_coords (bool, optional): If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. Defaults to False.
-        anti_aliasing (bool, optional): If True, applies a gaussian filter across dimensions to be downsampled before interpolating. Defaults to True.
+    Parameters
+    ----------
+        image: np.ndarray
+            The image to be resampled
+        new_resolution: float, seq
+            The resolution of the resampled image.
+        old_resolution: float, seq, optional
+            The resolution of the input image. By default 1.
+        err_to_larger: bool, optional
+            Determines whether to round the new shape up or down. By default True.
+        extrapolation_fill_value: float, optional
+            The fill_value kwarg passed to interpn. By default None.
+        origin: str, optional
+            The origin to use for the image axes and coordinates used internally. By default 'center'.
+        method: str, optional
+            The method of interpolation, passed as the method kwarg in interpn. By default 'linear'.
+        image_is_coords: bool, optional
+            If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. By default False.
+        anti_aliasing: bool, optional
+            If True, applies a gaussian filter across dimensions to be downsampled before interpolating. By default True.
     
-    Returns:
-        np.ndarray: The result of resampling image at new_resolution.
+    Returns
+    -------
+    np.ndarray
+        The result of resampling image at new_resolution.
     """
 
     # Validate inputs and define ndim & old_shape based on image_is_coords.
-    image = _validate_ndarray(image)  # Breaks alias.
+    image = _validate_ndarray(image) # Breaks alias.
     if image_is_coords:
         ndim = image.ndim - 1
         old_shape = image.shape[:-1]
@@ -424,3 +434,58 @@ def resample(
     )
 
     return new_image
+
+
+#TODO: finalize function and import.
+def sinc_resample(array, new_shape, only_real=True):
+    raise NotImplementedError("sinc_resample has not yet been completed.")
+
+    # Validate inputs.
+    array = _validate_ndarray(array)
+    new_shape = _validate_ndarray(new_shape, dtype=int, required_shape=array.ndim)
+    only_real = bool(only_real)
+
+    if not only_real:
+        # Roll the fourier-transformed array such that the nyquist frequency is between both ends of the array if the shape is odd.
+        # If the shape is even, the first element after rolling is the nyquist frequency; it is then split between the first and last element.
+        shifts = np.floor_divide(array.shape, 2)
+
+        fourier_transformed_array = np.fft.fft(array, axis=dim)
+        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(array.ndim))
+
+        # For each dim whose shape is even, split the nyquist frequency existing at the first element into a new last element.
+        for dim in filter(lambda dim: array.shape[dim] % 2 == 0, range(array.ndim)):
+            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
+            np.concatenate(
+                (
+                    nyquist_frequency_slice_halved,
+                    fourier_transformed_array[(*[slice(None)] * dim, slice(1))], # Slice out all but the first element along dimension dim.
+                    # eval(f"fourier_transformed_array[{':,' * dim} 1:]"), # Slice out all but the first element along dimension dim.
+                    nyquist_frequency_slice_halved,
+                ),
+                axis=dim,
+                out=fourier_transformed_array,
+            )
+
+        # Zero pad or truncate at the ends of fourier_transformed_array as necessary to achieve the desired shape.
+
+        # Truncate.
+        truncate_by = np.maximum(array.shape - new_shape, 0)
+        truncate_slices = (slice(0, array.shape[dim] - cut_off) for dim, cut_off in enumerate(truncate_by))
+        fourier_transformed_array = fourier_transformed_array[truncate_slices]
+
+        # Pad.
+        pad_by = np.maximum(new_shape - array.shape, 0)
+        pad_width = tuple((0, pad) for pad in pad_by)
+        fourier_transformed_array = np.pad(fourier_transformed_array, pad_width=pad_width, mode='constant', constant_values=0)
+
+        
+
+        for dim in range(array.ndim):
+            fourier_transformed_array = np.fft.fft(array, axis=dim)
+            fourier_transformed_array = np.roll(fourier_transformed_array, shifts[dim], axis=dim)
+            # If the original array's shape in this dimension is even, split the nyquist frequency at both ends of array.
+            if array.shape[dim] % 2 == 1:
+                fourier_transformed_array[0] /= 2
+                if fourier_transformed_array.ndim != 1: raise Exception(f"ndim: {fourier_transformed_array.ndim}")
+                fourier_transformed_array = np.append(fourier_transformed_array, fourier_transformed_array[0])
