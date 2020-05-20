@@ -244,6 +244,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         if force_copy:
             image = image.copy()
         return image
+    else:
+        dtype = np.float64
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
         raise ValueError("Can not convert from {} to {}."
