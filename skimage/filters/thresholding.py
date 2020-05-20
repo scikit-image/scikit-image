@@ -1219,7 +1219,7 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
     References
     ----------
     .. [1] Phansalskar N. et al. "Adaptive local thresholding for detection of
-           nuclei in diversity stained cytology images.", International 
+           nuclei in diversity stained cytology images.", International
            Conference on Communications and Signal Processing (ICCSP),
            pp. 218-220, 2011
            :DOI:`10.1109/ICCSP.2011.5739305`
@@ -1229,12 +1229,13 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
     >>> from skimage.exposure import equalize_adapthist
     >>> image = data.moon()
     >>> image_eq = equalize_adapthist(image)
-    >>> t_phansalkar = threshold_phansalkar(image_eq, window_size=15, k=0.25, p=2.0, q=10.0)
+    >>> t_phansalkar = threshold_phansalkar(image_eq, window_size=15, k=0.25)
     >>> binary_image = image_eq > t_phansalkar
     """
-    
+
     if r is None:
         imin, imax = dtype_limits(image, clip_negative=False)
         r = 0.5 * (imax - imin)
     m, s = _mean_std(image, window_size)
-    return m * (1 + np.power(p, (-q * m) ) + k * ((s / r) - 1))
+    return m * (1 + np.power(p, (-q * m)) + k * ((s / r) - 1))
+  
