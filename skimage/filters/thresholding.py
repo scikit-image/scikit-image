@@ -1183,12 +1183,14 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
     """Applies Phansalkar local threshold to an array. Phansalkar is a
     modification of Sauvola technique to deal with low contrast images.
+
     This method is using the following formula::
         T = m(x,y) * (1 + p * exp( -q * m(x,y) ) + k * ((s(x,y) / R) - 1))
     where m(x,y) and s(x,y) are the mean and standard deviation of
     pixel (x,y) neighborhood defined by a rectangular window with size w
     times w centered around the pixel. k, p and q are configurable parameters.
     R is the maximum standard deviation of a greyscale image.
+
     Parameters
     ----------
     image : ndarray
@@ -1206,16 +1208,19 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
         Value of the parameter p.
     q : float, optional
         Value of the parameter q.
+
     Returns
     -------
     threshold : (N, M) ndarray
         Threshold mask. All pixels with an intensity higher than
         this value are assumed to be foreground.
+
     Notes
     -----
     This algorithm is originally designed for detection of cell nuclei in low
     contrast images. Therefore the historgram has to be equalized beforehand
     using :func:`skimage.exposure.equalize_adapthist`.
+
     References
     ----------
     .. [1] Phansalskar N. et al. "Adaptive local thresholding for detection of
@@ -1223,6 +1228,7 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
            Conference on Communications and Signal Processing (ICCSP),
            pp. 218-220, 2011
            :DOI:`10.1109/ICCSP.2011.5739305`
+
     Examples
     --------
     >>> from skimage import data
