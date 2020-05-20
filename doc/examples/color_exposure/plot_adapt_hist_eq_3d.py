@@ -194,7 +194,7 @@ for iax, ax in enumerate(axs[:]):
     ax.set_ylabel('y', labelpad=-25)
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_zticks([im_orig.shape[2] * 2/3.])
+    ax.set_zticks([im_orig.shape[2] * 2 / 3.])
     ax.set_zticklabels('z')
     ax.tick_params(axis='z', which='major', pad=-12)
     ax.w_zaxis._axinfo['tick']['linewidth'] = 0
@@ -224,13 +224,13 @@ rect_ax.text(0.17, 0.35, '$I_{degr}(x,y,z) = e^{-x}I_{orig}(x,y,z)$',
 
 fc = {'size': 14}
 rect_ax.text(0.02, 0.61, '3D cell image', rotation=90, fontdict=fc)
-rect_ax.text(0.02, 0.15, '$\it{Degraded}$ image',
+rect_ax.text(0.02, 0.15, r'$\it{Degraded}$ image',
              rotation=90, fontdict=fc)
 rect_ax.text(0.13, 0.92, 'Input volume', fontdict=fc)
-rect_ax.text(0.51, 0.91, '$\it{Global}$\nhistogram equalization',
+rect_ax.text(0.51, 0.91, r'$\it{Global}$' + '\nhistogram equalization',
              fontdict=fc, horizontalalignment='center')
 rect_ax.text(0.84, 0.91,
-             '$\it{Adaptive}$\nhistogram equalization (AHE)',
+             r'$\it{Adaptive}$' + '\nhistogram equalization (AHE)',
              fontdict=fc, horizontalalignment='center')
 rect_ax.text(0.58, 0.83, 'non-local', fontsize=12, color='crimson')
 rect_ax.text(0.89, 0.83, 'local kernel', fontsize=12, color='crimson')
