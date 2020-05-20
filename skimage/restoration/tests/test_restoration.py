@@ -82,7 +82,7 @@ def test_richardson_lucy():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolved, _ = restoration.richardson_lucy(data, psf, 5)
+    deconvolved = restoration.richardson_lucy(data, psf, 5)
 
     path = fetch('restoration/tests/camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
@@ -108,7 +108,8 @@ def test_blind_richardson_lucy():
     im_deconv, psf = restoration.richardson_lucy(im_conv,
                                                  iterations=iterations)
 
-    path = fetch('restoration/tests/reconstruction_blind_RL.npy')
+    #path = fetch('restoration/tests/reconstruction_blind_RL.npy')
+    path = 'skimage/restoration/tests/reconstruction_blind_RL.npy'
 
     im_deconv_test, psf_test = np.load(path)
     np.testing.assert_allclose(im_deconv, im_deconv_test, rtol=1e-3)
