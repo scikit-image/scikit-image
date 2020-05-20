@@ -1238,4 +1238,3 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
         r = 0.5 * (imax - imin)
     m, s = _mean_std(image, window_size)
     return m * (1 + np.power(p, (-q * m)) + k * ((s / r) - 1))
-  
