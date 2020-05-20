@@ -1215,7 +1215,7 @@ def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
     -----
     This algorithm is originally designed for detection of cell nuclei in low
     contrast images. Therefore the historgram has to be equalized beforehand
-    using skimage.exposure.equalize_adapthist().
+    using :func:`skimage.exposure.equalize_adapthist`.
     References
     ----------
     .. [1] Phansalskar N. et al. "Adaptive local thresholding for detection of
