@@ -75,7 +75,7 @@ def compute_features(img, multichannel=True,
     return np.array(features)
 
 
-def trainable_segmentation(img, mask, multichannel=True,
+def trainable_segmentation(img, mask, clf, multichannel=True,
                            intensity=True, edges=True, texture=True,
                            sigma_min=0.5, sigma_max=16, downsample=10):
     """
@@ -91,7 +91,6 @@ def trainable_segmentation(img, mask, multichannel=True,
     training_labels = mask[mask>0].ravel()
     data = features[:, mask == 0].T
     t3 = time()
-    clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
     clf.fit(training_data[::downsample], training_labels[::downsample])
     t4 = time()
     labels = clf.predict(data)
@@ -101,7 +100,7 @@ def trainable_segmentation(img, mask, multichannel=True,
     print("compute features", t2 - t1)
     print("fit", t4 - t3)
     print("predict", t5 - t4)
-    return result, clf
+    return result
 
 
 from time import time
@@ -122,7 +121,8 @@ mask[150:200, 720:860] = 4
 
 sigma_min = 1
 sigma_max = 32
-result, clf = trainable_segmentation(im, mask, multichannel=True,
+clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+result = trainable_segmentation(im, mask, clf, multichannel=True,
                         intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max, downsample=15)
 
