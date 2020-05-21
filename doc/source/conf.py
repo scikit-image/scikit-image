@@ -413,6 +413,9 @@ def linkcode_resolve(domain, info):
         except:
             return None
 
+    # Strip decorators which would resolve to the source of the decorator
+    obj = inspect.unwrap(obj)
+
     try:
         fn = inspect.getsourcefile(obj)
     except:
