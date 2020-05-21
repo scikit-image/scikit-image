@@ -1527,9 +1527,8 @@ def combine_stains(stains, conv_matrix):
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
     """
-    from ..exposure import rescale_intensity
-
     stains = _prepare_colorarray(stains)
+
     # log_adjust here is used to compensate the sum within separate_stains().
     log_adjust = -np.log(1E-6)
     log_rgb = -(stains * log_adjust) @ conv_matrix
