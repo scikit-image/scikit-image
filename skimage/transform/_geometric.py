@@ -768,6 +768,9 @@ class AffineTransform(ProjectiveTransform):
     scale : {s as float or (sx, sy) as array, list or tuple}, optional
         Scale factor(s). If a single value, it will be assigned to both
         sx and sy.
+
+        .. versionadded:: 0.17
+           Added support for supplying a single scalar value.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
