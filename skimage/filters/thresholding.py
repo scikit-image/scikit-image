@@ -853,8 +853,9 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
-                   '`threshold_niblack` must not be even on any dimension. '
+            msg = ('Window size for `threshold_sauvola`, '
+                   '`threshold_niblack` or `threshold_phansalkar` '
+                   'must not be even on any dimension. '
                    'Got {}'.format(axis_sizes))
             raise ValueError(msg)
 
@@ -862,8 +863,9 @@ def _validate_window_size(axis_sizes):
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
-    The algorithm uses integral images to speedup computation. This is
-    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
+    The algorithm uses integral images to speedup computation.
+    This is used by :func:`threshold_niblack`, :func:`threshold_sauvola`
+    and :func:`threshold_phansalkar`.
 
     Parameters
     ----------
