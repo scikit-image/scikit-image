@@ -338,12 +338,13 @@ def hsv2rgb(hsv):
     v = arr[..., 2]
 
     hi = np.stack([hi, hi, hi], axis=-1).astype(np.uint8) % 6
-    out = np.choose(hi, [np.stack((v, t, p), axis=-1),
-                         np.stack((q, v, p), axis=-1),
-                         np.stack((p, v, t), axis=-1),
-                         np.stack((p, q, v), axis=-1),
-                         np.stack((t, p, v), axis=-1),
-                         np.stack((v, p, q), axis=-1)])
+    out = np.choose(
+        hi, np.stack([np.stack((v, t, p), axis=-1),
+                      np.stack((q, v, p), axis=-1),
+                      np.stack((p, v, t), axis=-1),
+                      np.stack((p, q, v), axis=-1),
+                      np.stack((t, p, v), axis=-1),
+                      np.stack((v, p, q), axis=-1)]))
 
     return out
 
