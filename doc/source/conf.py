@@ -424,14 +424,12 @@ def linkcode_resolve(domain, info):
         return None
 
     try:
-        source, lineno = inspect.findsource(obj)
+        source, start_line = inspect.getsourcelines(obj)
     except:
-        lineno = None
-
-    if lineno:
-        linespec = "#L%d" % (lineno + 1)
-    else:
         linespec = ""
+    else:
+        stop_line = start_line + len(source) - 1
+        linespec = f"#L{start_line}-L{stop_line}"
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 
