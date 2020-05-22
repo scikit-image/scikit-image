@@ -1,3 +1,22 @@
+"""
+=====================
+Image blind Deconvolution
+=====================
+We present here a usage example of a blind deconvolution algorithms
+based on the Richardson-Lucy deconvolution algorithm ([1]_, [2]_).
+
+Blind deconvolution is the term given to an image-restoration technique in
+which complete knowledge of both the point-spread function (PSF) and the
+object are not available.
+
+.. [1] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
+       "Blind deconvolution by means of the Richardson–Lucy algorithm."
+        JOSA A 12, no. 1 (1995): 58-65.
+
+.. [2] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+"""
+
+
 import numpy as np
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
