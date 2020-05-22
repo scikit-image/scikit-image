@@ -54,15 +54,15 @@ image_eq = equalize_adapthist(image)
 
 # The Phansalkar threshold can additionally be modified using the parameters
 # p and q. According to the authors, the parameter p can be changed
-# from 1.0 to 5.0, while 3.0 gave the best results for their usecase. 
-thresh_phansalkar_p1 = threshold_phansalkar(image_eq, window_size=window_size, p=1.5)
-thresh_phansalkar_p3 = threshold_phansalkar(image_eq, window_size=window_size, p=3.0)
+# from 1.0 to 5.0, while 3.0 gave the best results for their usecase.
+thresh_phan_p1 = threshold_phansalkar(image_eq, window_size=window_size, p=1.5)
+thresh_phan_p3 = threshold_phansalkar(image_eq, window_size=window_size, p=3.0)
 
-#process binary masks
+# process binary masks
 binary_niblack = image > thresh_niblack
 binary_sauvola = image > thresh_sauvola
-binary_phansalkar_p1 = image_eq > thresh_phansalkar_p1
-binary_phansalkar_p3 = image_eq > thresh_phansalkar_p3
+binary_phansalkar_p1 = image_eq > thresh_phan_p1
+binary_phansalkar_p3 = image_eq > thresh_phan_p3
 
 plt.figure(figsize=(10, 7))
 plt.subplot(3, 2, 1)
