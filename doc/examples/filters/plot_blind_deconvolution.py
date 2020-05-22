@@ -1,7 +1,7 @@
 """
-=====================
+=========================
 Image blind Deconvolution
-=====================
+=========================
 We present here a usage example of a blind deconvolution algorithms
 based on the Richardson-Lucy deconvolution algorithm ([1]_, [2]_).
 
