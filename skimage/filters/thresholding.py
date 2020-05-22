@@ -1181,8 +1181,10 @@ def threshold_multiotsu(image, classes=3, nbins=256):
 
 
 def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
-    """Applies Phansalkar local threshold to an array. Phansalkar is a
-    modification of Sauvola technique to deal with low contrast images.
+    """Find the Phansalkar local threshold for an array.
+    
+    Phansalkar is a modification of Sauvola thresholding designed to deal with
+    low contrast images.
 
     This method is using the following formula::
         T = m(x,y) * (1 + p * exp( -q * m(x,y) ) + k * ((s(x,y) / R) - 1))
