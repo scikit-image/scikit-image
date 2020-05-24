@@ -13,7 +13,7 @@ for each pixel neighborhood.
 The local version [2]_ of the histogram equalization emphasized every local
 graylevel variations.
 
-These algorithms can both be used on 2-D and 3-D images.
+These algorithms can be used on both 2D and 3D images.
 
 References
 ----------
@@ -106,9 +106,9 @@ plt.show()
 # 3D Equalization
 # ===============
 #
-# 3D Volumes can also be equalized in a similar fashion
-# Here we run equalize a 3D volume. The histograms are collected from
-# the entire image, but only a single slice is shown for visual inspection
+# 3D Volumes can also be equalized in a similar fashion.
+# Here the histograms are collected from the entire 3D image, but
+# only a single slice is shown for visual inspection.
 
 
 matplotlib.rcParams['font.size'] = 9
@@ -143,10 +143,10 @@ def plot_img_and_hist(image, axes, bins=256):
 # Load an example image
 img = img_as_ubyte(data.brain())
 
-# Global equalize
+# Global equalization
 img_rescale = exposure.equalize_hist(img)
 
-# Equalization
+# Local equalization
 neighborhood = ball(20)
 img_eq = rank.equalize(img, selem=neighborhood)
 
