@@ -353,7 +353,7 @@ plt.tight_layout()
 # threshold is determined by maximizing the variance between two classes of
 # pixels of the local neighborhood defined by a structuring element.
 #
-# These algorithms can both be used on 2-D and 3-D images.
+# These algorithms can be used on both 2D and 3D images.
 #
 # The example compares the local threshold with the global threshold
 # :py:func:`skimage.filters.threshold_otsu`.
@@ -433,18 +433,18 @@ fig.colorbar(ax[0].imshow(p8[3], cmap=plt.cm.gray), ax=ax[0])
 ax[0].set_title('Original')
 
 fig.colorbar(ax[1].imshow(t_loc_otsu[3], cmap=plt.cm.gray), ax=ax[1])
-ax[1].set_title('Local Otsu ($r=%d$)' % radius)
+ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 ax[2].imshow(p8[3] >= t_loc_otsu[3], cmap=plt.cm.gray)
-ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
+ax[2].set_title('Original >= local Otsu')
 
 ax[3].imshow(glob_otsu[3], cmap=plt.cm.gray)
-ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
     a.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The following example shows how local Otsu thresholding handles a global
