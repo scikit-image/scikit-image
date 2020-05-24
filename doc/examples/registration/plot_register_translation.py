@@ -59,7 +59,8 @@ plt.show()
 print(f"Detected pixel offset (y, x): {shift}")
 
 # subpixel precision
-shift, error, diffphase = phase_cross_correlation(image, offset_image, 100)
+shift, error, diffphase = phase_cross_correlation(image, offset_image,
+                                                  upsample_factor=100)
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)

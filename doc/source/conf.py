@@ -161,6 +161,10 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',
     'backreferences_dir': 'api',
     'reference_url': {'skimage': None},
+    # Default thumbnail size (400, 280)
+    # Default CSS rescales (160, 112)
+    # Size is decreased to reduce webpage loading time
+    'thumbnail_size': (280, 196),
     'subsection_order': ExplicitOrder([
         '../examples/data',
         '../examples/numpy_operations',
@@ -409,6 +413,9 @@ def linkcode_resolve(domain, info):
         except:
             return None
 
+    # Strip decorators which would resolve to the source of the decorator
+    obj = inspect.unwrap(obj)
+
     try:
         fn = inspect.getsourcefile(obj)
     except:
@@ -417,14 +424,12 @@ def linkcode_resolve(domain, info):
         return None
 
     try:
-        source, lineno = inspect.findsource(obj)
+        source, start_line = inspect.getsourcelines(obj)
     except:
-        lineno = None
-
-    if lineno:
-        linespec = "#L%d" % (lineno + 1)
-    else:
         linespec = ""
+    else:
+        stop_line = start_line + len(source) - 1
+        linespec = f"#L{start_line}-L{stop_line}"
 
     fn = relpath(fn, start=dirname(skimage.__file__))
 

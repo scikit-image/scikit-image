@@ -173,7 +173,7 @@ def _scale(a, n, m, copy=True):
             return a
 
 
-def convert(image, dtype, force_copy=False, uniform=False):
+def _convert(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
@@ -203,7 +203,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
         conversion errors.
 
     .. versionchanged :: 0.15
-        ``convert`` no longer warns about possible precision or sign
+        ``_convert`` no longer warns about possible precision or sign
         information loss. See discussions on these warnings at:
         https://github.com/scikit-image/scikit-image/issues/2602
         https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
@@ -223,7 +223,10 @@ def convert(image, dtype, force_copy=False, uniform=False):
     """
     image = np.asarray(image)
     dtypeobj_in = image.dtype
-    dtypeobj_out = np.dtype(dtype)
+    if dtype is np.floating:
+        dtypeobj_out = np.dtype('float64')
+    else:
+        dtypeobj_out = np.dtype(dtype)
     dtype_in = dtypeobj_in.type
     dtype_out = dtypeobj_out.type
     kind_in = dtypeobj_in.kind
@@ -349,6 +352,28 @@ def convert(image, dtype, force_copy=False, uniform=False):
     return image.astype(dtype_out)
 
 
+def convert(image, dtype, force_copy=False, uniform=False):
+    warn("The use of this function is discouraged as its behavior may change "
+         "dramatically in scikit-image 1.0. This function will be removed"
+         "in scikit-image 1.0.", FutureWarning, stacklevel=2)
+    return _convert(image=image, dtype=dtype,
+                    force_copy=force_copy, uniform=uniform)
+
+
+if _convert.__doc__ is not None:
+    convert.__doc__ = _convert.__doc__ + """
+
+    Warns
+    -----
+    FutureWarning:
+        .. versionadded:: 0.17
+
+        The use of this function is discouraged as its behavior may change
+        dramatically in scikit-image 1.0. This function will be removed
+        in scikit-image 1.0.
+    """
+
+
 def img_as_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
@@ -372,7 +397,7 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.float32, force_copy)
+    return _convert(image, np.float32, force_copy)
 
 
 def img_as_float64(image, force_copy=False):
@@ -398,7 +423,7 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.float64, force_copy)
+    return _convert(image, np.float64, force_copy)
 
 
 def img_as_float(image, force_copy=False):
@@ -427,7 +452,7 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return convert(image, np.floating, force_copy)
+    return _convert(image, np.floating, force_copy)
 
 
 def img_as_uint(image, force_copy=False):
@@ -451,7 +476,7 @@ def img_as_uint(image, force_copy=False):
     Positive values are scaled between 0 and 65535.
 
     """
-    return convert(image, np.uint16, force_copy)
+    return _convert(image, np.uint16, force_copy)
 
 
 def img_as_int(image, force_copy=False):
@@ -476,7 +501,7 @@ def img_as_int(image, force_copy=False):
     the output image will still only have positive values.
 
     """
-    return convert(image, np.int16, force_copy)
+    return _convert(image, np.int16, force_copy)
 
 
 def img_as_ubyte(image, force_copy=False):
@@ -500,7 +525,7 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return convert(image, np.uint8, force_copy)
+    return _convert(image, np.uint8, force_copy)
 
 
 def img_as_bool(image, force_copy=False):
@@ -524,4 +549,4 @@ def img_as_bool(image, force_copy=False):
     half is False. All negative values (if present) are False.
 
     """
-    return convert(image, np.bool_, force_copy)
+    return _convert(image, np.bool_, force_copy)

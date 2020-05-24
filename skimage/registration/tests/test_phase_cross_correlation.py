@@ -29,7 +29,8 @@ def test_subpixel_precision():
 
     # subpixel precision
     result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image, 100,
+                                                       shifted_image,
+                                                       upsample_factor=100,
                                                        space="fourier")
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
@@ -42,7 +43,8 @@ def test_real_input():
 
     # subpixel precision
     result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image, 100)
+                                                       shifted_image,
+                                                       upsample_factor=100)
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
@@ -54,7 +56,8 @@ def test_size_one_dimension_input():
 
     # subpixel precision
     result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image, 20,
+                                                       shifted_image,
+                                                       upsample_factor=20,
                                                        space="fourier")
     assert_allclose(result[:2], -np.array((-2.4, 0)), atol=0.05)
 
@@ -76,7 +79,7 @@ def test_3d_input():
     shifted_image = fourier_shift(reference_image, subpixel_shift)
     result, error, diffphase = phase_cross_correlation(reference_image,
                                                        shifted_image,
-                                                       100,
+                                                       upsample_factor=100,
                                                        space="fourier")
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
@@ -121,7 +124,7 @@ def test_4d_input_subpixel():
     shifted_image = fourier_shift(reference_image, subpixel_shift)
     result, error, diffphase = phase_cross_correlation(reference_image,
                                                        shifted_image,
-                                                       10,
+                                                       upsample_factor=10,
                                                        space="fourier")
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 

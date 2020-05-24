@@ -183,7 +183,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn('"cg" mode may be slow because UMFPACK is not availabel. '
+                warn('"cg" mode may be slow because UMFPACK is not available. '
                      'Consider building Scipy with UMFPACK or use a '
                      'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
                      stacklevel=2)
@@ -191,6 +191,7 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
         else:
+            # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
             ml = ruge_stuben_solver(lap_sparse)
             M = ml.aspreconditioner(cycle='V')
@@ -263,7 +264,8 @@ def _preprocess(labels):
 
 
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None):
+                  multichannel=False, return_full_prob=False, spacing=None,
+                  *, prob_tol=1e-3):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -309,7 +311,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           requires that the pyamg module is installed.
 
     tol : float, optional
-        tolerance to achieve when solving the linear system using
+        Tolerance to achieve when solving the linear system using
         the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
     copy : bool, optional
         If copy is False, the `labels` array will be overwritten with
@@ -325,6 +327,9 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     spacing : iterable of floats, optional
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
+    prob_tol : float, optional
+        Tolerance on the resulting probability to be in the interval [0, 1].
+        If the tolerance is not satisfied, a warning is displayed.
 
     Returns
     -------
@@ -416,10 +421,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     """
     # Parse input data
-    if mode not in ('cg_mg', 'cg', 'bf', 'bicgstab', 'cg_j', None):
+    if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
             "{mode} is not a valid mode. Valid modes are 'cg_mg',"
-            " 'cg', 'cg_j', 'bicgstab', 'bf' and None".format(mode=mode))
+            " 'cg', 'cg_j', 'bf' and None".format(mode=mode))
 
     # Spacing kwarg checks
     if spacing is None:
@@ -483,6 +488,11 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     # where X[i, j] is the probability that a marker of label i arrives
     # first at pixel j by anisotropic diffusion.
     X = _solve_linear_system(lap_sparse, B, tol, mode)
+
+    if X.min() < -prob_tol or X.max() > 1 + prob_tol:
+        warn('The probability range is outside [0, 1] given the tolerance '
+             '`prob_tol`. Consider decreasing `beta` and/or decreasing '
+             '`tol`.')
 
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds

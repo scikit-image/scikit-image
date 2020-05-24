@@ -199,6 +199,9 @@ def test_affine_init():
     assert_almost_equal(tform2.shear, shear)
     assert_almost_equal(tform2.translation, translation)
 
+    # scalar vs. tuple scale arguments
+    assert_almost_equal(AffineTransform(scale=0.5).scale, AffineTransform(scale=(0.5, 0.5)).scale)
+
 
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform()
