@@ -19,7 +19,6 @@ This release of scikit-image officially supports Python 3.6, 3.7, and
 
 New Features
 ------------
-- Added majority rank filter - ``filters.rank.majority``.
 - Added 3D implementation of rank autolevel filter - ``filters.rank.autolevel``.
 # - Added 3D implementation of rank autolevel_percentile filter - ``filters.rank.autolevel_percentile``.
 - Added 3D implementation of rank equalize filter - ``filters.rank.equalize``.

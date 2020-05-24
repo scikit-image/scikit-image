@@ -406,39 +406,39 @@ plt.tight_layout()
 ######################################################################
 # The example compares the local threshold with the global threshold in 3D
 
-def normalize_pixels(i):
-    i = 256*(i/np.amax(i))
-    return i.astype(np.uint8)
+from skimage import exposure
 
-p8 = data.brain()
+brain = data.brain()
 
-p8 = normalize_pixels(p8)
+brain = exposure.rescale_intensity(data.brain().astype(float))
 
 radius = 50
-selem = ball(radius)
+neighborhood = ball(radius)
 
 # t_loc_otsu is an image
-t_loc_otsu = otsu(p8, selem)
-loc_otsu = p8 >= t_loc_otsu
+t_loc_otsu = rank.otsu(brain, neighborhood)
+loc_otsu = brain >= t_loc_otsu
 
 # t_glob_otsu is a scalar
-t_glob_otsu = threshold_otsu(p8)
-glob_otsu = p8 >= t_glob_otsu
+t_glob_otsu = threshold_otsu(brain)
+glob_otsu = brain >= t_glob_otsu
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
                          sharex=True, sharey=True)
 ax = axes.ravel()
 
-fig.colorbar(ax[0].imshow(p8[3], cmap=plt.cm.gray), ax=ax[0])
+slice_index = 3
+
+fig.colorbar(ax[0].imshow(brain[slice_index], cmap=plt.cm.gray), ax=ax[0])
 ax[0].set_title('Original')
 
-fig.colorbar(ax[1].imshow(t_loc_otsu[3], cmap=plt.cm.gray), ax=ax[1])
+fig.colorbar(ax[1].imshow(t_loc_otsu[slice_index], cmap=plt.cm.gray), ax=ax[1])
 ax[1].set_title('Local Otsu ($r=%d$)' % radius)
 
-ax[2].imshow(p8[3] >= t_loc_otsu[3], cmap=plt.cm.gray)
+ax[2].imshow(brain[slice_index] >= t_loc_otsu[slice_index], cmap=plt.cm.gray)
 ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
 
-ax[3].imshow(glob_otsu[3], cmap=plt.cm.gray)
+ax[3].imshow(glob_otsu[slice_index], cmap=plt.cm.gray)
 ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
 
 for a in ax:
