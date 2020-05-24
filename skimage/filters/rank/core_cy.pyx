@@ -54,10 +54,7 @@ cdef inline char is_in_mask_3D(Py_ssize_t rows, Py_ssize_t cols,
             p < 0 or p > planes - 1):
         return 0
     else:
-        if mask[p * rows * cols + r * cols + c]:
-            return 1
-        else:
-            return 0
+        return mask[p * rows * cols + r * cols + c]:
 
 
 cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
@@ -312,9 +309,9 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t scols = selem.shape[2]
     cdef Py_ssize_t odepth = out.shape[3]
 
-    cdef Py_ssize_t centre_p = <Py_ssize_t>(selem.shape[0] / 2) + shift_x
-    cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[1] / 2) + shift_y
-    cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[2] / 2) + shift_z
+    cdef Py_ssize_t centre_p = (selem.shape[0] // 2) + shift_x
+    cdef Py_ssize_t centre_r = (selem.shape[1] // 2) + shift_y
+    cdef Py_ssize_t centre_c = (selem.shape[2] // 2) + shift_z
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0
@@ -324,7 +321,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     assert centre_c < scols
     assert centre_p < splanes
 
-    cdef Py_ssize_t mid_bin = n_bins / 2
+    cdef Py_ssize_t mid_bin = n_bins // 2
 
     # define pointers to the data
     cdef char* mask_data = &mask[0, 0, 0]
