@@ -1,10 +1,8 @@
-import os
 import numpy as np
 from skimage._shared.testing import (assert_equal, assert_array_equal,
                                      assert_allclose)
 from skimage._shared import testing
 
-import skimage
 from skimage.util import img_as_ubyte, img_as_float
 from skimage import data, util, morphology
 from skimage.morphology import grey, disk, ball
@@ -329,11 +327,6 @@ class TestRank():
         image_uint = img_as_ubyte(data.camera()[:50, :50])
         image_float = img_as_float(image_uint)
 
-        np.random.seed(0)
-        volume_uint = np.random.randint(0, high=256,
-                                        size=(10, 10, 10), dtype=np.uint8)
-        volume_float = img_as_float(volume_uint)
-
         methods = ['autolevel', 'equalize', 'gradient', 'threshold',
                    'subtract_mean', 'enhance_contrast', 'pop']
 
@@ -343,6 +336,14 @@ class TestRank():
             with expected_warnings(["Possible precision loss"]):
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
+
+    def test_compare_ubyte_vs_float_3d(self):
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_uint = np.random.randint(0, high=256,
+                                        size=(10, 10, 10), dtype=np.uint8)
+        volume_float = img_as_float(volume_uint)
 
         methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
                      'majority', 'maximum', 'mean', 'geometric_mean',
@@ -357,7 +358,6 @@ class TestRank():
                 out_f = func(volume_float, ball(3))
             assert_equal(out_u, out_f)
 
-
     def test_compare_8bit_unsigned_vs_signed(self):
         # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -369,12 +369,6 @@ class TestRank():
         image_u = img_as_ubyte(image_s)
         assert_equal(image_u, img_as_ubyte(image_s))
 
-        np.random.seed(0)
-        volume_s = np.random.randint(0, high=127,
-                                     size=(10, 10, 10), dtype=np.int8)
-        volume_u = img_as_ubyte(volume_s)
-        assert_equal(volume_u, img_as_ubyte(volume_s))
-
         methods = ['autolevel', 'equalize', 'gradient', 'maximum',
                    'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
                    'modal', 'enhance_contrast', 'pop', 'threshold']
@@ -385,6 +379,17 @@ class TestRank():
             with expected_warnings(["Possible precision loss"]):
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
+
+    def test_compare_8bit_unsigned_vs_signed_3d(self):
+        # filters applied on 8-bit volume ore 16-bit volume (having only real 8-bit
+        # of dynamic) should be identical
+
+        # Create signed int8 volume that and convert it to uint8
+        np.random.seed(0)
+        volume_s = np.random.randint(0, high=127,
+                                     size=(10, 10, 10), dtype=np.int8)
+        volume_u = img_as_ubyte(volume_s)
+        assert_equal(volume_u, img_as_ubyte(volume_s))
 
         methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
                      'majority', 'maximum', 'mean', 'geometric_mean',
@@ -398,7 +403,6 @@ class TestRank():
             with expected_warnings(["Possible precision loss"]):
                 out_s = func(volume_s, ball(3))
             assert_equal(out_u, out_s)
-
 
     @parametrize('method',
                  ['autolevel', 'equalize', 'gradient', 'maximum',
@@ -415,7 +419,6 @@ class TestRank():
         volume8 = np.random.randint(128, high=256,
                                     size=(10, 10, 10), dtype=np.uint8)
         volume16 = volume8.astype(np.uint16)
-        assert_equal(volume8, volume16)
 
         methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
                      'majority', 'maximum', 'mean', 'geometric_mean',
@@ -433,7 +436,6 @@ class TestRank():
             f16 = func(volume16, ball(3))
 
             assert_equal(f8, f16)
-
 
     def test_trivial_selem8(self):
         # check that min, max and mean returns identity if structuring element

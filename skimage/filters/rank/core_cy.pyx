@@ -54,7 +54,7 @@ cdef inline char is_in_mask_3D(Py_ssize_t rows, Py_ssize_t cols,
             p < 0 or p > planes - 1):
         return 0
     else:
-        return mask[p * rows * cols + r * cols + c]:
+        return mask[p * rows * cols + r * cols + c]
 
 
 cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
