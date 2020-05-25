@@ -70,7 +70,8 @@ in scientific python distributions. To install many of them using ``pip`` use
 the command:
 
 .. code-block:: bash
-  python3 -m pip install scikit-image[optional]
+
+    python3 -m pip install scikit-image[optional]
 
 
 A note on virtual environments
