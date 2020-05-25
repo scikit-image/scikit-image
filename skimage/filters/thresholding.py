@@ -124,11 +124,11 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
         """
         Select a wrapper function to return a thresholded image. 
         """
-        if ( func.__name__ == 'threshold_local' ):
+        if func == threshold_local:
             # threshold_local requires the additional parameter 'block_size'
             def wrapper(im):
                 return im > func(im, 15)
-        elif ( func.__name__ == 'threshold_phansalkar' ):
+        elif func == threshold_phansalkar:
             # threshold_phansalkar requires an equalized image
             def wrapper(im):
                 im_eq = equalize_adapthist(im)
