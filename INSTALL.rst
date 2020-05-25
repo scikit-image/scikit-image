@@ -1,6 +1,249 @@
 Installing scikit-image
 =======================
 
+These instructions should help you get started using ``scikit-image``.
+
+We outline 4 different ways which we recommend using to get started with image
+processing and scikit-image.
+
+1. Scientfic Python Distributions -- Recommended
+2. ``pip`` based installations
+3. ``conda`` based installations
+4. System-wide package manager
+
+After your installation, you should be able to run the following code
+from a python console or jupyter notebook:
+
+.. code-block:: python
+
+  import skimage
+  print("scikit-image installed with version " + skimage.__version__)
+
+Should you have any questions getting started using ``scikit-image`` after
+reading this guide, please open an issue on
+`github <https://github.com/scikit-image/scikit-image/issues>`_
+to get additional help.
+
+For instructions on how to install scikit-image from source, please see the
+contribution guide.
+.. TODO: cross reference the contribution guide.
+
+1. Scientfic Python Distributions
+---------------------------------
+
+``scikit-image`` comes pre-installed with several Python distributions
+including:
+
+- `Anaconda <https://www.anaconda.com/distribution/>`_
+- `Python(x,y) <https://python-xy.github.io/>`_
+- `WinPython <https://winpython.github.io/>`_
+
+These have the advantage of comming pre-installed with many other useful
+packages for scientific computing and image analysis. Follow the instructions
+on the respective websites to get going.
+
+Note that the version of ``scikit-image`` installed with these distributions
+may different than the one you expect. This should not stop you from getting
+started with your project. We simply suggest you check the installed version of
+``scikit-image`` with the code snippet included at the top of this guide.
+
+
+2. ``pip`` based installation
+-----------------------------
+
+To install ``scikit-image`` with `pip <https://pip.pypa.io/en/stable/>`_, you
+may use the following commands
+
+.. code-block:: bash
+
+  # Update pip to a more recent version
+  python3 -m pip install -U pip
+  # Install scikit-image
+  python3 -m pip install -U scikit-image
+
+
+This is the easiest way of obtaining the latest released version of
+``scikit-image``.
+
+We also offer an easy way to install related packages. These are often included
+in scientific python distributions. To install many of them using ``pip`` use
+the command:
+
+.. code-block:: bash
+  python3 -m pip install scikit-image[optional]
+
+
+A note on virtual environments
+++++++++++++++++++++++++++++++
+
+Scientific Python Distributions listed in the first section take care to only
+install compatibile packages together. Often conflicts can arise between
+specific combinations of packages. To avoid breaking your python environments,
+we recommendg learning about virtual environments in python. You can learn more
+about them by reading Python's official documentation on `Virtual Environments
+and Packages <https://docs.python.org/3/tutorial/venv.html>`_.
+
+
+Known challenges
+++++++++++++++++
+
+1. Different python installations can cause confusion. To check which python
+   executable you are using, use the commands:
+
+
+.. code-block:: bash
+  # Linux and MAC
+  which python3
+  # Windows
+  where python3
+
+From your python console or jupyter notebook, you may use the python commands:
+
+.. code-block:: python
+
+  import sys
+  print(sys.executable)
+
+To make sure the executable used matches your expectations.
+
+
+2. Never use ``sudo`` when installing packages with ``pip``. This may cause
+   ``pip`` to overwrite important files for your operating system which may
+   require you to completely reinstall your system.
+
+
+3. ``conda`` based installation
+-------------------------------
+
+`conda <https://docs.conda.io>`_ can be a useful package manager for building
+applications with dependencies not available on pypi in a cross-platform
+setting. While detailed instructions on how to use conda are considered out of
+scope in this tutorial we point you to:
+
+- `conda's official documnetation <https://docs.conda.io>`_
+- `conda-forge <https://conda-forge.org>`_ a channel maintained with the latest scikit-image package.
+- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
+
+4. System wide installation
+---------------------------
+
+**Linux only:** If you must use your system's package manager to install
+scikit-image, we recommend reading the official documentation from your
+operating system. Each operating system, and Linux distribution, has its own
+package manager, and as such the exact installation steps might differ for each
+system.
+
+We warn that this may install an older version of scikit-image which we may not
+support anymore. For these reasons, we **do not** recommend using the following
+strategy to install ``scikit-image``.
+
+For brevity, we provide instructions for getting started with Ubuntu.
+To install scikit-image, you may use the command:
+
+.. code-block:: bash
+  sudo apt install python3-skimage
+
+.. NOTE: I know we are repeating instructions. This is really important thought!
+
+Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
+overwrite critical system libraries which may require you to reinstall your
+operating system.
+
+Known challenges
+++++++++++++++++
+
+1. Conflicting versions of Python: If you installed an other version of python, then the default ``python3``
+command may not be the system's python version where you just installed
+``scikit-image`` using this command. Make sure that ``python3`` points to
+the expected location for your system. For Ubuntu 20.04, the expected location
+reported from the command:
+
+.. code-block:: bash
+
+  which python3
+
+is ``/usr/bin/python3``. When running the test command above, you may print
+the executable used to run python with the following python code:
+
+.. code-block:: python
+
+  import sys
+  print(sys.executable)
+  import skimage
+  print("scikit-image installed with version " + skimage.__version__)
+
+
+2. User local packages: Packages installed by your user account (using pip) may
+   take precedence over packages installed by the operating system.
+   If you have trouble getting the correct version of ``scikit-image``
+   take a look at the contents of the directories (if they exist):
+     - ``~/.local/lib/python3.6``
+     - ``~/.local/lib/python3.7``
+     - ``~/.local/lib/python3.8``
+   If you are trying to use the operating system package manager, we recommend
+   you simply delete all directories listed above.
+
+
+Supported platforms
+-------------------
+
+The platforms officially supported by scikit-image are:
+
+1. Windows 64 bit
+2. Mac OSX
+3. Linux 64 bit
+
+Since Windows 32 bit remains a popular platform, we continue to support it for
+the time being.  However, we strongly recommend all users of Windows 32 bit
+begin to switch over to Windows 64 bit if they can.
+
+Help us learn what other platforms you would like to install scikit-image on.
+We are very insterested in learning how ``scikit-image`` is
+`used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
+
+Unsupported platforms include:
+
+1. Linux 32 bit.
+2. Raspberry Pi running Rapsbian (32 bit arm): While we do not official support
+   this distribution, we point users to `piwheels`_ and scikit-image's specific
+   page:
+     * https://www.piwheels.org/project/scikit-image/
+     * You may need to install additional system dependencies listed in
+       https://www.piwheels.org/project/imagecodecs/ See
+       `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>_`.
+3. NVidia Jetson (64 bit arm):
+     * Follow conversation on
+       `Issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
+
+While we do not directly support the platforms above, many of the core
+developers have experience using the platforms listed above. Do not hesitate to
+ask us questions pertaining to your specific use case.
+
+If you would like to help package scikit-image for the platforms above, reach
+out on github so that we may help you get started.
+
+
+End of instructions
+===================
+
+I propose ending the installation instructions here. This should get everybody
+a working installation of scikit-image without complicating things with:
+
+- compiler requirements (which users don't need)
+- Build and doc dependencies
+- Conda-forge instructions which we don't test with CIs and go stale quickly (e.g. channel priority)
+  - Almost every month, I get a user confused about how to install opencv on conda-forge
+    due to confusing instructions specifying the ``-c conda-forge``. I consider
+    conda-forge rather advanced usage.
+- Editable instructions which leave users with an unkown version of scikit-image
+
+If these instructions are deemed to be OK, I can work on moving this valuable
+information to a different guide to keep it in our knowledge base.
+
+Installing scikit-image
+=======================
+
+
 We are assuming that you have default Python environment already configured on
 your computer and you intend to install ``scikit-image`` inside of it. If you
 want to create and work with Python virtual environments, please follow the
