@@ -110,6 +110,10 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     * otsu
     * triangle
     * yen
+    * local
+    * niblack
+    * sauvola
+    * phansalkar
 
     Examples
     --------
@@ -118,10 +122,22 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """
     def thresh(func):
         """
-        A wrapper function to return a thresholded image.
+        Select a wrapper function to return a thresholded image. 
         """
-        def wrapper(im):
-            return im > func(im)
+        if ( func.__name__ == 'threshold_local' ):
+            # threshold_local requires the additional parameter 'block_size'
+            def wrapper(im):
+                return im > func(im, 15)
+        elif ( func.__name__ == 'threshold_phansalkar' ):
+            # threshold_phansalkar requires an equalized image
+            def wrapper(im):
+                im_eq = equalize_adapthist(im)
+                return im_eq > func(im_eq)
+        else:
+            # standard case
+            def wrapper(im):
+                return im > func(im)
+
         try:
             wrapper.__orifunc__ = func.__orifunc__
         except AttributeError:
@@ -135,10 +151,14 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
                            'Minimum': thresh(threshold_minimum),
                            'Otsu': thresh(threshold_otsu),
                            'Triangle': thresh(threshold_triangle),
-                           'Yen': thresh(threshold_yen)})
+                           'Yen': thresh(threshold_yen),
+                           'Local': thresh(threshold_local),
+                           'Niblack': thresh(threshold_niblack),
+                           'Sauvola': thresh(threshold_sauvola),
+                           'Phansalkar': thresh(threshold_phansalkar)})
 
     return _try_all(image, figsize=figsize,
-                    methods=methods, verbose=verbose)
+                    methods=methods, num_cols=4, verbose=verbose)
 
 
 def threshold_local(image, block_size, method='gaussian', offset=0,
