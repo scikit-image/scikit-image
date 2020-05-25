@@ -122,7 +122,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """
     def thresh(func):
         """
-        Select a wrapper function to return a thresholded image. 
+        Select a wrapper function to return a thresholded image.
         """
         if func == threshold_local:
             # threshold_local requires the additional parameter 'block_size'
