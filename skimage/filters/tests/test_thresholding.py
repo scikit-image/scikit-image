@@ -203,7 +203,8 @@ class TestSimpleImage():
              [False, True, True, True, False],
              [True, True, False, False, False]]
         )
-        thres = threshold_phansalkar(self.image, window_size=3, k=0.25, r=128, p=2.0, q=10.0)
+        thres = threshold_phansalkar(self.image, window_size=3,
+                                     k=0.25, r=128, p=2.0, q=10.0)
         out = self.image > thres
         assert_equal(ref, out)
 
@@ -239,7 +240,8 @@ class TestSimpleImage():
              [False, True, True, True, False],
              [True, True, False, False, False]]
         )
-        thres = threshold_phansalkar(self.image, window_size=(3, 5), k=0.25, r=128, p=2.0, q=10.0)
+        thres = threshold_phansalkar(self.image, window_size=(3, 5),
+                                     k=0.25, r=128, p=2.0, q=10.0)
         out = self.image > thres
         assert_array_equal(ref, out)
 
