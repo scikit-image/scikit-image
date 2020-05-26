@@ -119,7 +119,7 @@ To make sure the executable used matches your expectations.
 `conda <https://docs.conda.io>`_ can be a useful package manager for building
 applications with dependencies not available on pypi in a cross-platform
 setting. While detailed instructions on how to use conda are considered out of
-scope in this tutorial we point you to:
+scope in this tutorial, we encourage you to check these resources:
 
 - `conda's official documnetation <https://docs.conda.io>`_
 - `conda-forge <https://conda-forge.org>`_ a channel maintained with the latest scikit-image package.
