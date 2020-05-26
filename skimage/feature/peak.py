@@ -1,3 +1,4 @@
+from warnings import warn
 import numpy as np
 import scipy.ndimage as ndi
 from .. import measure
@@ -162,6 +163,20 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     out = np.zeros_like(image, dtype=np.bool)
 
     threshold_abs = threshold_abs if threshold_abs is not None else image.min()
+
+    if min_distance < 1:
+        warn("min_distance lower then 1 is deprecated. "
+             "In this case, peak_local_max acts as finding "
+             "image > max(threshold_abs, threshold_rel). In version 0.20 "
+             "this warning will be replaced by a ValueError.",
+             FutureWarning, stacklevel=2)
+
+    if footprint is not None and footprint.size == 1:
+        warn("footprint.size lower then 2 is deprecated. "
+             "In this cases, peak_local_max acts as finding "
+             "image > max(threshold_abs, threshold_rel). In version 0.20 "
+             "this warning will be replaced by a ValueError.",
+             FutureWarning, stacklevel=2)
 
     if isinstance(exclude_border, bool):
         exclude_border = (min_distance if exclude_border else 0,) * image.ndim

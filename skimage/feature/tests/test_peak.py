@@ -2,6 +2,7 @@ import itertools
 import numpy as np
 import pytest
 import unittest
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import assert_array_almost_equal
 from skimage._shared.testing import assert_equal
 from scipy import ndimage as ndi
@@ -341,14 +342,19 @@ class TestPeakLocalMax():
         '''
         image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
-        result = peak.peak_local_max(image, labels=np.ones((10, 20)),
-                                     footprint=footprint,
-                                     min_distance=1, threshold_rel=0,
-                                     threshold_abs=-1, indices=False,
-                                     exclude_border=False)
+
+        with expected_warnings(["footprint.size lower then 2 is deprecated."]):
+            result = peak.peak_local_max(image, labels=np.ones((10, 20)),
+                                         footprint=footprint,
+                                         min_distance=1, threshold_rel=0,
+                                         threshold_abs=-1, indices=False,
+                                         exclude_border=False)
         assert np.all(result)
-        result = peak.peak_local_max(image, footprint=footprint, threshold_abs=-1,
-                                     indices=False, exclude_border=False)
+        with expected_warnings(["footprint.size lower then 2 is deprecated."]):
+            result = peak.peak_local_max(image, footprint=footprint,
+                                         threshold_abs=-1,
+                                         indices=False,
+                                         exclude_border=False)
         assert np.all(result)
 
     def test_3D(self):
@@ -391,7 +397,9 @@ class TestPeakLocalMax():
         assert_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+        with expected_warnings(["min_distance lower then 1 is deprecated."]):
+            assert len(peak.peak_local_max(image,
+                                           min_distance=0)) == image.size - 1
 
 
 @pytest.mark.parametrize(
