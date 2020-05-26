@@ -347,35 +347,31 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
 
     # the current local histogram distribution
     # cdef Py_ssize_t* histo
-    cdef Py_ssize_t* histo
+    cdef Py_ssize_t [::1] histo = np.zeros(n_bins, dtype=np.intp)
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
     # the east structuring element border
-    cdef Py_ssize_t se_size = srows * scols * splanes * sizeof(Py_ssize_t)
-    se_e_r = np.zeros(se_size, dtype=np.intp)
-    se_e_c = np.zeros(se_size, dtype=np.intp)
-    se_e_p = np.zeros(se_size, dtype=np.intp)
+    cdef Py_ssize_t se_size = srows * scols * splanes
+    cdef Py_ssize_t [::1] se_e_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_e_c = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_e_p = np.empty(se_size, dtype=np.intp)
 
-    se_w_p = np.zeros(se_size, dtype=np.intp)
-    se_w_r = np.zeros(se_size, dtype=np.intp)
-    se_w_c = np.zeros(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_w_p = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_w_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_w_c = np.empty(se_size, dtype=np.intp)
 
-    se_n_p = np.zeros(se_size, dtype=np.intp)
-    se_n_r = np.zeros(se_size, dtype=np.intp)
-    se_n_c = np.zeros(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_n_p = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_n_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_n_c = np.empty(se_size, dtype=np.intp)
 
-    se_s_p = np.zeros(se_size, dtype=np.intp)
-    se_s_r = np.zeros(se_size, dtype=np.intp)
-    se_s_c = np.zeros(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_s_p = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_s_r = np.empty(se_size, dtype=np.intp)
+    cdef Py_ssize_t [::1] se_s_c = np.empty(se_size, dtype=np.intp)
 
     # number of element in each attack border
     cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w, num_se_u, num_se_d
 
-    histo = np.zeros(n_bins, dtype=np.intp)
-    # for i in range(n_bins):
-    #     histo[i] = 0
-    histo[:] = 0
 
     num_se_n = num_se_s = num_se_e = num_se_w = 0
 
