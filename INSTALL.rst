@@ -4,10 +4,10 @@ Installing scikit-image
 We outline 4 different ways which we recommend using to get started with image
 processing and scikit-image.
 
-1. Scientfic Python Distributions -- Recommended
-2. ``pip`` based installations
-3. ``conda`` based installations
-4. System-wide package manager
+1. `Scientific Python Distributions`_ -- Recommended
+2. `pip based installation`_
+3. `conda based installation`_
+4. `System-wide package manager`_
 
 After your installation, you should be able to run the following code
 from a Python console or Jupyter notebook:
@@ -22,12 +22,11 @@ reading this guide, please open an issue on
 `github <https://github.com/scikit-image/scikit-image/issues>`_
 to get additional help.
 
-For instructions on how to install scikit-image from source, please see the
-contribution guide.
-.. TODO: cross reference the contribution guide.
+For those attempting to build scikit-image from source, or trying contribute
+code back to scikit-image, we've provided development instructions below.
 
-1. Scientfic Python Distributions
----------------------------------
+Scientific Python Distributions
+-------------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions.
 These have the advantage of comming pre-installed with many other useful
@@ -46,8 +45,8 @@ started with your project. We simply suggest you check the installed version of
 ``scikit-image`` with the code snippet included at the top of this guide.
 
 
-2. pip based installation
--------------------------
+pip based installation
+----------------------
 
 To install ``scikit-image`` with `pip <https://pip.pypa.io/en/stable/>`_, you
 may use the following commands
@@ -82,8 +81,8 @@ the command:
     `Virtual Environments and Packages
     <https://docs.python.org/3/tutorial/venv.html>`_.
 
-3. conda based installation
----------------------------
+conda based installation
+------------------------
 
 `conda <https://docs.conda.io>`_ can be a useful package manager for building
 applications with dependencies not available on pypi in a cross-platform
@@ -94,7 +93,7 @@ scope in this tutorial, we encourage you to check these resources:
 - `conda-forge <https://conda-forge.org>`_ a channel maintained with the latest scikit-image package.
 - `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
 
-4. System wide installation
+System-wide package manager
 ---------------------------
 
 **Linux only:** Because installing ``scikit-image`` using your system's package
@@ -121,7 +120,7 @@ information on their `python3-skimage package
 <https://packages.ubuntu.com/focal/python/python3-skimage>`_.
 
 
-.. note::
+.. warning::
 
     Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
     overwrite critical system libraries which may require you to reinstall your
