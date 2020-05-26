@@ -43,7 +43,7 @@ Note that the version of ``scikit-image`` installed with these distributions
 may different than the one you expect. This should not stop you from getting
 started with your project. We simply suggest you check the installed version of
 ``scikit-image`` with the code snippet included at the top of this guide so
-that you can refer to the appropriate documentation.
+that you can refer to the appropriate documentation version.
 
 
 pip based installation
