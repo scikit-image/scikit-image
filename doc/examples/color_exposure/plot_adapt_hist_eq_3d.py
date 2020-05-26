@@ -12,7 +12,6 @@ degraded version of it.
 .. [1] https://en.wikipedia.org/wiki/Histogram_equalization
 """
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import cm, colors
@@ -20,16 +19,16 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from skimage import exposure
-from skimage import io
+import imageio
 
 
 #############
 # Prepare data and apply hist. eq.
 #############
 
-im_orig = io.imread('https://github.com/scikit-image/'
-                    'skimage-tutorials/blob/master/images/cells.tif?raw=True',
-                    plugin='tifffile')
+im_orig = imageio.volread('https://github.com/scikit-image/'
+                          'skimage-tutorials/blob/master/'
+                          'images/cells.tif?raw=True')
 im_orig = im_orig.transpose()
 
 # apply some rescaling
@@ -211,7 +210,7 @@ plt.subplots_adjust(left=0.,
 
 # highlight AHE
 rect_ax = fig.add_axes([0, 0, 1, 1], facecolor='none')
-rect_ax.axis(False)
+rect_ax.set_axis_off()
 rect = patches.Rectangle((0.69, 0.01), 0.305, 0.98,
                          edgecolor='grey', facecolor='none',
                          linewidth=2, linestyle='--')
@@ -237,8 +236,8 @@ rect_ax.text(0.89, 0.83, 'local kernel', fontsize=12, color='crimson')
 
 # add colorbar
 cbar_ax = fig.add_axes([0.08, 0.47, 0.008, 0.08])
-norm = mpl.colors.Normalize(vmin=0, vmax=1)
-cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+norm = colors.Normalize(vmin=0, vmax=1)
+cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
                     cax=cbar_ax)
 cbar.set_ticks([0, 1])
 
