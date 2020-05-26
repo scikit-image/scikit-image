@@ -12,6 +12,8 @@ from .morphsnakes import (morphological_geodesic_active_contour,
                           morphological_chan_vese, inverse_gaussian_gradient,
                           circle_level_set,
                           disk_level_set, checkerboard_level_set)
+from .trainable_segmentation import (multiscale_basic_features,
+                                     fit_segmenter, predict_segmenter)
 from ..morphology import flood, flood_fill
 
 
@@ -35,4 +37,7 @@ __all__ = ['random_walker',
            'checkerboard_level_set',
            'flood',
            'flood_fill',
+           'multiscale_basic_features',
+           'fit_segmenter',
+           'predict_segmenter'
            ]

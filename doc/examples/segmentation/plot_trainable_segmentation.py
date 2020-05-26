@@ -18,117 +18,40 @@ segmentation").
 """
 
 
-from itertools import combinations_with_replacement
-import itertools
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, filters, feature, segmentation
-from skimage import img_as_float32
+from skimage import io, segmentation
 from sklearn.ensemble import RandomForestClassifier
+from functools import partial
 
-
-def _features_sigma(img, sigma, intensity=True, edges=True, texture=True):
-    """Features for a single value of the Gaussian blurring parameter ``sigma``
-    """
-    features = []
-    img_blur = filters.gaussian(img, sigma)
-    if intensity:
-        features.append(img_blur)
-    if edges:
-        features.append(filters.sobel(img_blur))
-    if texture:
-        H_elems = [np.gradient(np.gradient(img_blur)[ax0], axis=ax1)
-            for ax0, ax1 in combinations_with_replacement(range(img.ndim), 2)]
-        eigvals = feature.hessian_matrix_eigvals(H_elems)
-        for eigval_mat in eigvals:
-            features.append(eigval_mat)
-    return features
-
-
-def _compute_features_gray(img, intensity=True, edges=True, texture=True,
-                          sigma_min=0.5, sigma_max=16):
-    """Features for a single channel image. ``img`` can be 2d or 3d.
-    """
-    # computations are faster as float32
-    img = img_as_float32(img)
-    sigmas = np.logspace(np.log2(sigma_min), np.log2(sigma_max),
-            num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1), base=2, endpoint=True)
-    n_sigmas = len(sigmas)
-    all_results = [_features_sigma(img, sigma, intensity=intensity, edges=edges, texture=texture) for sigma in sigmas]
-    return list(itertools.chain.from_iterable(all_results))
-
-
-def compute_features(img, multichannel=True,
-                          intensity=True, edges=True, texture=True,
-                          sigma_min=0.5, sigma_max=16):
-    """Features for a single- or multi-channel image.
-    """
-    if img.ndim == 3 and multichannel:
-        all_results = (_compute_features_gray(
-                img[..., dim], intensity=intensity, edges=edges, texture=texture,
-                sigma_min=sigma_min, sigma_max=sigma_max) for dim in range(img.shape[-1]))
-        features = list(itertools.chain.from_iterable(all_results))
-    else:
-        features = _compute_features_gray(
-            img[..., dim], intensity=intensity, edges=edges, texture=texture,
-            sigma_min=sigma_min, sigma_max=sigma_max)
-    return np.array(features)
-
-
-def trainable_segmentation(img, mask, clf, multichannel=True,
-                           intensity=True, edges=True, texture=True,
-                           sigma_min=0.5, sigma_max=16, downsample=10):
-    """
-    Segmentation using labeled parts of the image and a random forest classifier.
-    """
-    print(img.shape)
-    t1 = time()
-    features = compute_features(im, multichannel=multichannel,
-                            intensity=intensity, edges=edges, texture=texture,
-                            sigma_min=sigma_min, sigma_max=sigma_max)
-    t2 = time()
-    training_data = features[:, mask > 0].T
-    training_labels = mask[mask>0].ravel()
-    data = features[:, mask == 0].T
-    t3 = time()
-    clf.fit(training_data[::downsample], training_labels[::downsample])
-    t4 = time()
-    labels = clf.predict(data)
-    t5 = time()
-    result = np.copy(mask)
-    result[mask == 0] = labels
-    print("compute features", t2 - t1)
-    print("fit", t4 - t3)
-    print("predict", t5 - t4)
-    return result
-
-
-from time import time
-# This image is in the public domain and could be added to the Gitlab data repo
 filename = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG/1280px-Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG'
-im = io.imread(filename)
+full_img = io.imread(filename)
 
-# Build a mask for training the segmentation.
+img = full_img[:900, :900]
+
+# Build an array of labels for training the segmentation.
 # Here we use rectangles but visualization libraries such as plotly
 # (and napari?) can be used to draw a mask on the image.
-mask = np.zeros(im.shape[:2], dtype=np.uint8)
-mask[:100] = 1
-mask[:170, :400] = 1
-mask[600:900, 200:650] = 2
-mask[330:430, 210:320] = 3
-mask[260:340, 60:170] = 4
-mask[150:200, 720:860] = 4
+training_labels = np.zeros(img.shape[:2], dtype=np.uint8)
+training_labels[:130] = 1
+training_labels[:170, :400] = 1
+training_labels[600:900, 200:650] = 2
+training_labels[330:430, 210:320] = 3
+training_labels[260:340, 60:170] = 4
+training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
 sigma_max = 32
+features_func = partial(segmentation.multiscale_basic_features, intensity=True, edges=False, texture=True,
+                        sigma_min=sigma_min, sigma_max=sigma_max)
 clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-result = trainable_segmentation(im, mask, clf, multichannel=True,
-                        intensity=True, edges=False, texture=True,
-                        sigma_min=sigma_min, sigma_max=sigma_max, downsample=15)
+result, clf = segmentation.fit_segmenter(img, training_labels, clf,
+                            features_func=features_func, downsample=5)
+
 
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(9, 4))
-ax[0].imshow(segmentation.mark_boundaries(im, result, mode='thick'))
-ax[0].contour(mask)
+ax[0].imshow(segmentation.mark_boundaries(img, result, mode='thick'))
+ax[0].contour(training_labels)
 ax[0].set_title('Image, mask and segmentation boundaries')
 ax[1].imshow(result)
 ax[1].set_title('Segmentation')
@@ -165,4 +88,24 @@ for ch, color in zip(range(3), ['r', 'g', 'b']):
     ax[1].set_xlabel("$\sigma$")
 
 fig.tight_layout()
+
+##############################################################################
+# Fitting new images
+# ------------------
+#
+# If you have several images of similar objects acquired in similar conditions,
+# you can used the classifier trained with `fit_segmenter` to segment other
+# images. In the example below we just use a different part of the image.
+
+img_new = full_img[:700, 900:]
+
+result_new = segmentation.predict_segmenter(img_new, clf, features_func)
+fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(6, 4))
+ax[0].imshow(segmentation.mark_boundaries(img_new, result_new, mode='thick'))
+ax[0].set_title('Image')
+ax[1].imshow(result_new)
+ax[1].set_title('Segmentation')
+fig.tight_layout()
+
 plt.show()
+
