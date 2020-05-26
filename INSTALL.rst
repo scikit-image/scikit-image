@@ -63,7 +63,7 @@ may use the following commands
 
 
 This is the easiest way of obtaining the latest released version of
-``scikit-image``.
+``scikit-image`` if python is already available on your system.
 
 We also offer an easy way to install related packages. These are often included
 in scientific python distributions. To install many of them using ``pip`` use
