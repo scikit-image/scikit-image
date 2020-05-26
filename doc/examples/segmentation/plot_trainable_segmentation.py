@@ -42,11 +42,13 @@ training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
 sigma_max = 32
-features_func = partial(segmentation.multiscale_basic_features, intensity=True, edges=False, texture=True,
+features_func = partial(segmentation.multiscale_basic_features,
+                        intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max)
 clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-result, clf = segmentation.fit_segmenter(img, training_labels, clf,
-                            features_func=features_func, downsample=5)
+result, clf = segmentation.fit_segmenter(
+        img, training_labels, clf,
+        features_func=features_func, downsample=5)
 
 
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(9, 4))
@@ -74,18 +76,19 @@ feature_importance = (
         clf.feature_importances_[:l//3],
         clf.feature_importances_[l//3:2*l//3],
         clf.feature_importances_[2*l//3:])
-sigmas = np.logspace(np.log2(sigma_min), np.log2(sigma_max),
-            num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
-            base=2, endpoint=True)
+sigmas = np.logspace(
+        np.log2(sigma_min), np.log2(sigma_max),
+        num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
+        base=2, endpoint=True)
 for ch, color in zip(range(3), ['r', 'g', 'b']):
     ax[0].plot(sigmas, feature_importance[ch][::3], 'o', color=color)
     ax[0].set_title("Intensity features")
-    ax[0].set_xlabel("$\sigma$")
+    ax[0].set_xlabel("$\\sigma$")
 for ch, color in zip(range(3), ['r', 'g', 'b']):
     ax[1].plot(sigmas, feature_importance[ch][1::3], 'o', color=color)
     ax[1].plot(sigmas, feature_importance[ch][2::3], 's', color=color)
     ax[1].set_title("Texture features")
-    ax[1].set_xlabel("$\sigma$")
+    ax[1].set_xlabel("$\\sigma$")
 
 fig.tight_layout()
 
@@ -108,4 +111,3 @@ ax[1].set_title('Segmentation')
 fig.tight_layout()
 
 plt.show()
-

@@ -1,10 +1,14 @@
 from functools import partial
 import numpy as np
-from skimage.segmentation import fit_segmenter, predict_segmenter, multiscale_basic_features
+from skimage.segmentation import (
+    fit_segmenter,
+    predict_segmenter,
+    multiscale_basic_features,
+)
 from scipy import spatial
 
-class DummyNNClassifier(object):
 
+class DummyNNClassifier(object):
     def fit(self, X, labels):
         self.X = X
         self.labels = labels
@@ -23,8 +27,13 @@ def test_trainable_segmentation_singlechannel():
     labels[:2] = 1
     labels[-2:] = 2
     clf = DummyNNClassifier()
-    features_func = partial(multiscale_basic_features, edges=False,
-            texture=False, sigma_min=0.5, sigma_max=2)
+    features_func = partial(
+        multiscale_basic_features,
+        edges=False,
+        texture=False,
+        sigma_min=0.5,
+        sigma_max=2,
+    )
     out, clf = fit_segmenter(img, labels, clf, features_func)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
@@ -38,8 +47,13 @@ def test_trainable_segmentation_multichannel():
     labels[:2] = 1
     labels[-2:] = 2
     clf = DummyNNClassifier()
-    features_func = partial(multiscale_basic_features, edges=False,
-            texture=False, sigma_min=0.5, sigma_max=2)
+    features_func = partial(
+        multiscale_basic_features,
+        edges=False,
+        texture=False,
+        sigma_min=0.5,
+        sigma_max=2,
+    )
     out, clf = fit_segmenter(img, labels, clf, features_func)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
