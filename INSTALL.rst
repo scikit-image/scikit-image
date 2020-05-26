@@ -1,7 +1,7 @@
 Installing scikit-image
 =======================
 
-We outline 4 different ways which we recommend using to get started with image
+We outline 4 different ways that we recommend to get started with image
 processing and scikit-image.
 
 1. `Scientific Python Distributions`_ -- Recommended
