@@ -236,10 +236,12 @@ rect_ax.text(0.89, 0.83, 'local kernel', fontsize=12, color='crimson')
 
 # add colorbar
 cbar_ax = fig.add_axes([0.08, 0.47, 0.008, 0.08])
-norm = colors.Normalize(vmin=0, vmax=1)
-cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
-                    cax=cbar_ax)
-cbar.set_ticks([0, 1])
+cbar_ax.imshow(np.arange(256).reshape(256, 1)[::-1],
+               cmap=cmap, aspect="auto")
+cbar_ax.set_xticks([])
+cbar_ax.set_yticks([0, 255])
+cbar_ax.set_xticklabels([])
+cbar_ax.set_yticklabels([1., 0.])
 
 
 plt.show()
