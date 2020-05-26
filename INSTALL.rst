@@ -153,7 +153,7 @@ operating system.
 Known challenges
 ++++++++++++++++
 
-1. Conflicting versions of Python: If you installed an other version of python, then the default ``python3``
+1. Conflicting versions of Python: If you installed another version of python, then the default ``python3``
 command may not be the system's python version where you just installed
 ``scikit-image`` using this command. Make sure that ``python3`` points to
 the expected location for your system. For Ubuntu 20.04, the expected location
