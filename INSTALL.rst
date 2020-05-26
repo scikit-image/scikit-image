@@ -33,7 +33,7 @@ These have the advantage of comming pre-installed with many other useful
 packages for scientific computing and image analysis. Follow the instructions
 on the respective websites to get going. If you don't have python installed on
 your computer, these are the fastest way to get started with your project.
-We can recommend the following 3 distributions:
+As of June 2020, we recommend one of the following 3 distributions:
 
 - `Anaconda <https://www.anaconda.com/distribution/>`_
 - `Python(x,y) <https://python-xy.github.io/>`_
