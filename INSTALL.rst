@@ -128,7 +128,7 @@ scope in this tutorial, we encourage you to check these resources:
 4. System wide installation
 ---------------------------
 
-**Linux only:** If you must use your system's package manager to install
+**Linux only:** If you intend to use your system's package manager to install
 scikit-image, we recommend reading the official documentation from your
 operating system. Each operating system, and Linux distribution, has its own
 package manager, and as such the exact installation steps might differ for each
