@@ -37,7 +37,7 @@ from functools import partial
 _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
-sigma = 0.3
+sigma = 0.2
 noisy = random_noise(image, var=sigma ** 2)
 
 # Parameters to test when calibrating the denoising algorithm
@@ -99,7 +99,7 @@ for ax, img, title in zip(axes,
 
 from skimage.restoration.j_invariant import _invariant_denoise
 
-sigma_range = np.arange(0.12, 0.26, 0.03)
+sigma_range = np.arange(sigma/2, 1.5*sigma, 0.025)
 
 parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
                       'multichannel': True}
@@ -113,7 +113,7 @@ self_supervised_loss = [mse(img, noisy) for img in denoised_invariant]
 ground_truth_loss = [mse(img, image) for img in denoised_invariant]
 
 opt_idx = np.argmin(self_supervised_loss)
-plot_idx = [0, 2, 4]
+plot_idx = [0, opt_idx, len(sigma_range) - 1]
 
 get_inset = lambda x: x[25:225, 100:300]
 
