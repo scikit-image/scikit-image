@@ -11,7 +11,7 @@ object are not available.
 
 .. [1] Fish, D. A., A. M. Brinicombe, E. R. Pike, and J. G. Walker.
        "Blind deconvolution by means of the Richardson–Lucy algorithm."
-        JOSA A 12, no. 1 (1995): 58-65.
+       JOSA A 12, no. 1 (1995): 58-65.
 
 .. [2] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 """
@@ -20,7 +20,6 @@ object are not available.
 import numpy as np
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
-
 from skimage.filters import gaussian
 from skimage.restoration import richardson_lucy
 

@@ -397,18 +397,23 @@ def richardson_lucy(image, psf=None, iterations=50, clip=True,
     -----
     The Richardson-Lucy algorithm is an iterative algorithm to
     deconvolve an image using a given point spread function (PSF).
+
     If no PSF is provided, the algorithm performs an "inverse" Richardson
     Lucy algorithm as described in Fish et al., 1995.
+
     It is an iterative process where the PSF
     and image is deconvolved, respectively.
+
     It is more noise tolerant than other algorithms,
     such as Ayers-Dainty and the Wiener filter algorithms
     (taken from the paper).
+
     The algorithm performs well with gaussian PSFs and can recover
     them nicely without any prior knowledge. If one has already an
     educated guess, one should pass the PSF as argument to the function.
     Note, that the PSF should have the same shape as the image,
     and the PSF should be centered.
+
     Due to its nature, the algorithm may divide by 0.
     The function catches this issue and aborts the iterative process.
     Mostly, the optimal number of iterations is before this error may occur.
