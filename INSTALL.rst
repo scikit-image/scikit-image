@@ -42,7 +42,8 @@ We can recommend the following 3 distributions:
 Note that the version of ``scikit-image`` installed with these distributions
 may different than the one you expect. This should not stop you from getting
 started with your project. We simply suggest you check the installed version of
-``scikit-image`` with the code snippet included at the top of this guide.
+``scikit-image`` with the code snippet included at the top of this guide so
+that you can refer to the appropriate documentation.
 
 
 pip based installation
@@ -76,7 +77,7 @@ the command:
     Scientific Python Distributions listed in the first section take care to
     only install compatibile packages together. Often conflicts can arise
     between specific combinations of packages. To avoid breaking your python
-    environments, we recommendg learning about virtual environments in python.
+    environments, we recommend learning about virtual environments in python.
     You can learn more about them by reading Python's official documentation on
     `Virtual Environments and Packages
     <https://docs.python.org/3/tutorial/venv.html>`_.
