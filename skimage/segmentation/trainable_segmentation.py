@@ -106,7 +106,7 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
     features_func : function, optional
         function computing features on all pixels of the image, to be passed
         to the classifier. The output should be of shape
-        (m_features, *labels.shape). If None,
+        ``(m_features, *labels.shape)``. If None,
         :func:`skimage.segmentation.multiscale_basic_features` is used.
     downsample : int, optional
         downsample the number of training points. Use downsample > 1 if you
