@@ -350,7 +350,7 @@ class TestPeakLocalMax():
                                          threshold_abs=-1, indices=False,
                                          exclude_border=False)
         assert np.all(result)
-        with expected_warnings(["footprint.size lower then 2 is deprecated."]):
+        with expected_warnings(["footprint.size lower than 2 is deprecated."]):
             result = peak.peak_local_max(image, footprint=footprint,
                                          threshold_abs=-1,
                                          indices=False,
