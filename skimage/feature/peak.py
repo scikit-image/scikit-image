@@ -1,9 +1,10 @@
 import numpy as np
 import scipy.ndimage as ndi
+from scipy import spatial
 from .. import measure
 
 
-def _get_high_intensity_peaks(image, mask, num_peaks):
+def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     """
     Return the highest intensity peak coordinates.
     """
@@ -13,6 +14,22 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     # Highest peak first
     idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
+
+    if len(coord):
+        # Use KDtree to find the peaks that are too close to each other
+        tree = spatial.cKDTree(coord)
+
+        rejected_peaks_indices = set()
+        for idx, point in enumerate(coord):
+            if idx not in rejected_peaks_indices:
+                candidates = tree.query_ball_point(point, r=min_distance,
+                                                   p=p_norm)
+                candidates.remove(idx)
+                rejected_peaks_indices.update(candidates)
+
+        # Remove the peaks that are too close to each other
+        coord = np.delete(coord, tuple(rejected_peaks_indices),
+                          axis=0)
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
