@@ -397,7 +397,7 @@ class TestPeakLocalMax():
         assert_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        with expected_warnings(["min_distance lower then 1 is deprecated."]):
+        with expected_warnings(["min_distance lower than 1 is deprecated."]):
             assert len(peak.peak_local_max(image,
                                            min_distance=0)) == image.size - 1
 
