@@ -2,10 +2,14 @@ import numpy as np
 import skimage.data as data
 from skimage.data import image_fetcher
 from skimage import io
-from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
+from skimage._shared.testing import assert_equal, assert_almost_equal, fetch, skipif
 import os
 import pytest
-
+try:
+    import pooch
+    has_pooch = True
+except ImportError:
+    has_pooch = False
 
 def test_data_dir():
     # data_dir should be a directory people can use as a standard directory
@@ -133,10 +137,11 @@ def test_lfw_subset():
     """ Test that "lfw_subset" can be loaded."""
     data.lfw_subset()
 
-
+@skipif(not has_pooch, reason="pooch is not installed")
 def test_skin():
     skin = data.skin()
     assert skin.ndim == 3
+
 
 def test_cell():
     """ Test that "cell" image can be loaded."""
