@@ -20,12 +20,11 @@ segmentation").
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import io, segmentation
+from skimage import data, segmentation
 from sklearn.ensemble import RandomForestClassifier
 from functools import partial
 
-filename = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG/1280px-Normal_Epidermis_and_Dermis_with_Intradermal_Nevus_10x.JPG'
-full_img = io.imread(filename)
+full_img = data.skin()
 
 img = full_img[:900, :900]
 
