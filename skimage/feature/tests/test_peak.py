@@ -343,14 +343,14 @@ class TestPeakLocalMax():
         image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
 
-        with expected_warnings(["footprint.size lower then 2 is deprecated."]):
+        with expected_warnings(["footprint.size lower than 2 is deprecated."]):
             result = peak.peak_local_max(image, labels=np.ones((10, 20)),
                                          footprint=footprint,
                                          min_distance=1, threshold_rel=0,
                                          threshold_abs=-1, indices=False,
                                          exclude_border=False)
         assert np.all(result)
-        with expected_warnings(["footprint.size lower then 2 is deprecated."]):
+        with expected_warnings(["footprint.size lower than 2 is deprecated."]):
             result = peak.peak_local_max(image, footprint=footprint,
                                          threshold_abs=-1,
                                          indices=False,
@@ -397,7 +397,7 @@ class TestPeakLocalMax():
         assert_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        with expected_warnings(["min_distance lower then 1 is deprecated."]):
+        with expected_warnings(["min_distance lower than 1 is deprecated."]):
             assert len(peak.peak_local_max(image,
                                            min_distance=0)) == image.size - 1
 
