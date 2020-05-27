@@ -233,7 +233,7 @@ class TestPeakLocalMax():
     def test_empty_non2d_indices(self):
         image = np.zeros((10, 10, 10))
         result = peak.peak_local_max(image,
-                                     footprint=np.ones((3, 3), bool),
+                                     footprint=np.ones((3, 3, 3), bool),
                                      min_distance=1, threshold_rel=0,
                                      indices=True, exclude_border=False)
         assert result.shape == (0, image.ndim)
@@ -341,7 +341,8 @@ class TestPeakLocalMax():
         '''
         image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
-        result = peak.peak_local_max(image, labels=np.ones((10, 20)),
+        result = peak.peak_local_max(image,
+                                     labels=np.ones((10, 20), dtype=int),
                                      footprint=footprint,
                                      min_distance=1, threshold_rel=0,
                                      threshold_abs=-1, indices=False,

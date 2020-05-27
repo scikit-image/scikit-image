@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
 from .. import measure
-from ..filters import rank_order
 
 
 def _get_high_intensity_peaks(image, mask, num_peaks):
@@ -14,34 +13,43 @@ def _get_high_intensity_peaks(image, mask, num_peaks):
     # Highest peak first
     idx_maxsort = np.argsort(-intensities)
     coord = np.transpose(coord)[idx_maxsort]
-    # select num_peaks peaks
+
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
     return coord
 
 
-def _get_peak_mask(image, min_distance, footprint, threshold):
+def _get_peak_mask(image, footprint, threshold, mask=None):
     """
     Return the mask containing all peak candidates above thresholds.
     """
-    if footprint is not None:
-        print(footprint.shape, image.shape)
-        image_max = ndi.maximum_filter(image, footprint=footprint,
-                                       mode='constant')
-    else:
-        size = 2 * min_distance + 1
-        image_max = ndi.maximum_filter(image, size=size, mode='constant')
-    mask = image == image_max
-    mask &= image > threshold
-    return mask
+    if footprint.size == 1 or image.size == 1:
+        return image > threshold
+
+    image_max = ndi.maximum_filter(image, footprint=footprint,
+                                   mode='constant')
+
+    out = image == image_max
+
+    # no peak for a trivial image
+    image_is_trivial = np.all(out) if mask is None else np.all(out[mask])
+    if image_is_trivial:
+        out[:] = False
+        if mask is not None:
+            # isolated pixels in masked area are returned as peaks
+            isolated_px = np.logical_xor(mask, ndi.binary_opening(mask))
+            out[isolated_px] = True
+
+    out &= image > threshold
+    return out
 
 
-def _exclude_border(mask, exclude_border):
+def _exclude_border(mask, border_width):
     """
     Remove peaks near the borders
     """
     # zero out the image borders
-    for i, excluded in enumerate(exclude_border):
+    for i, excluded in enumerate(border_width):
         if excluded == 0:
             continue
         mask[(slice(None),) * i + (slice(None, excluded),)] = False
@@ -49,10 +57,58 @@ def _exclude_border(mask, exclude_border):
     return mask
 
 
+def _get_threshold(image, threshold_abs, threshold_rel):
+    """
+
+    """
+    threshold_abs = threshold_abs if threshold_abs is not None else image.min()
+
+    if threshold_rel is not None:
+        threshold = max(threshold_abs, threshold_rel * image.max())
+    else:
+        threshold = threshold_abs
+
+    return threshold
+
+
+def _get_excluded_border_width(image, min_distance, exclude_border):
+    """
+
+    """
+
+    if isinstance(exclude_border, bool):
+        border_width = (min_distance if exclude_border else 0,) * image.ndim
+    elif isinstance(exclude_border, int):
+        if exclude_border < 0:
+            raise ValueError("`exclude_border` cannot be a negative value")
+        border_width = (exclude_border,) * image.ndim
+    elif isinstance(exclude_border, tuple):
+        if len(exclude_border) != image.ndim:
+            raise ValueError(
+                "`exclude_border` should have the same length as the "
+                "dimensionality of the image.")
+        for exclude in exclude_border:
+            if not isinstance(exclude, int):
+                raise ValueError(
+                    "`exclude_border`, when expressed as a tuple, must only "
+                    "contain ints."
+                )
+            if exclude < 0:
+                raise ValueError(
+                    "`exclude_border` cannot contain a negative value")
+        border_width = exclude_border
+    else:
+        raise TypeError(
+            "`exclude_border` must be bool, int, or tuple with the same "
+            "length as the dimensionality of the image.")
+
+    return border_width
+
+
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None,
-                   num_peaks_per_label=np.inf):
+                   num_peaks_per_label=np.inf, p_norm=np.inf):
     """Find peaks in an image as coordinate list or boolean mask.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
@@ -107,6 +163,11 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
+    p_norm : float
+        Which Minkowski p-norm to use. Should be in the range [1, inf].
+        A finite large p may cause a ValueError if overflow can occur.
+        ``inf`` corresponds to the Chebyshev distance and 2 to the
+        Euclidean distance.
 
     Returns
     -------
@@ -155,103 +216,79 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
     array([[10, 10, 10]])
 
     """
-    out = np.zeros_like(image, dtype=np.bool)
+    border_width = _get_excluded_border_width(image, min_distance,
+                                              exclude_border)
 
-    threshold_abs = threshold_abs if threshold_abs is not None else image.min()
-
-    if threshold_rel is not None:
-        threshold = max(threshold_abs, threshold_rel * image.max())
-    else:
-        threshold = threshold_abs
-
-    if isinstance(exclude_border, bool):
-        exclude_border = (min_distance if exclude_border else 0,) * image.ndim
-    elif isinstance(exclude_border, int):
-        if exclude_border < 0:
-            raise ValueError("`exclude_border` cannot be a negative value")
-        exclude_border = (exclude_border,) * image.ndim
-    elif isinstance(exclude_border, tuple):
-        if len(exclude_border) != image.ndim:
-            raise ValueError(
-                "`exclude_border` should have the same length as the "
-                "dimensionality of the image.")
-        for exclude in exclude_border:
-            if not isinstance(exclude, int):
-                raise ValueError(
-                    "`exclude_border`, when expressed as a tuple, must only "
-                    "contain ints."
-                )
-            if exclude < 0:
-                raise ValueError(
-                    "`exclude_border` cannot contain a negative value")
-    else:
-        raise TypeError(
-            "`exclude_border` must be bool, int, or tuple with the same "
-            "length as the dimensionality of the image.")
+    threshold = _get_threshold(image, threshold_abs, threshold_rel)
 
     if footprint is None:
         size = 2 * min_distance + 1
         footprint = np.ones((size, ) * image.ndim, dtype=bool)
 
-    # no peak for a trivial image
-    if np.all(image == image.flat[0]):
-        if indices is True:
-            return np.empty((0, image.ndim), np.int)
+    if labels is None:
+        # Non maximum filter
+        mask = _get_peak_mask(image, footprint, threshold)
+
+        mask = _exclude_border(mask, border_width)
+
+        # Select highest intensities (num_peaks)
+        coordinates = _get_high_intensity_peaks(image, mask,
+                                                num_peaks,
+                                                min_distance, p_norm)
+
+    else:
+        _labels = _exclude_border(labels.astype(int, casting="safe"),
+                                  border_width)
+
+        if np.issubdtype(image.dtype, np.floating):
+            bg_val = np.finfo(image.dtype).min
         else:
-            return out
-
-    # In the case of labels, call ndi on each label
-    if labels is not None:
-
-        # create a mask for the non-exclude region
-        inner_mask = _exclude_border(np.ones_like(labels, dtype=bool),
-                                     exclude_border)
+            bg_val = np.iinfo(image.dtype).min
 
         # For each label, extract a smaller image enclosing the object of
-        # interest, identify num_peaks_per_label peaks and mark them in
-        # variable out.
-        for label_idx, obj in enumerate(ndi.find_objects(labels.astype(int))):
+        # interest, identify num_peaks_per_label peaks
+        labels_peak_coord = []
+
+        for label_idx, obj in enumerate(ndi.find_objects(_labels)):
+
             if obj is None:
                 continue
-            img_object = image[obj] * (labels[obj] == label_idx + 1)
-            mask = _get_peak_mask(img_object, min_distance, footprint,
-                                  threshold)
 
-            if exclude_border:
-                # remove peaks fall in the exclude region
-                mask &= inner_mask[obj]
+            label_mask = labels[obj] == label_idx + 1
+            img_object = image[obj]
+            img_object[np.logical_not(label_mask)] = bg_val
+
+            mask = _get_peak_mask(img_object, footprint, threshold, label_mask)
+
             coordinates = _get_high_intensity_peaks(img_object, mask,
-                                                    num_peaks_per_label)
-            nd_indices = tuple(coordinates.T)
-            mask.fill(False)
-            mask[nd_indices] = True
-            out[obj] += mask
+                                                    num_peaks_per_label,
+                                                    min_distance,
+                                                    p_norm)
 
-        if not indices and np.isinf(num_peaks):
-            return out
+            # transform the coordinate in gloal image indices space
+            for idx, s in enumerate(obj):
+                coordinates[:, idx] += s.start
 
-        coordinates = _get_high_intensity_peaks(image, out, num_peaks)
-        if indices:
-            return coordinates
+            labels_peak_coord.append(coordinates)
+
+        if labels_peak_coord:
+            coordinates = np.vstack(labels_peak_coord)
         else:
-            out.fill(False)
-            nd_indices = tuple(coordinates.T)
-            out[nd_indices] = True
-            return out
+            coordinates = np.empty((0, 2), dtype=int)
 
-    # Non maximum filter
-    mask = _get_peak_mask(image, min_distance, footprint, threshold)
+        if len(coordinates) > num_peaks:
+            out = np.zeros_like(image, dtype=np.bool)
+            out[tuple(coordinates.T)] = True
+            coordinates = _get_high_intensity_peaks(image, out,
+                                                    num_peaks,
+                                                    min_distance,
+                                                    p_norm)
 
-    mask = _exclude_border(mask, exclude_border)
-
-    # Select highest intensities (num_peaks)
-    coordinates = _get_high_intensity_peaks(image, mask, num_peaks)
-
-    if indices is True:
+    if indices:
         return coordinates
     else:
-        nd_indices = tuple(coordinates.T)
-        out[nd_indices] = True
+        out = np.zeros_like(image, dtype=np.bool)
+        out[tuple(coordinates.T)] = True
         return out
 
 
