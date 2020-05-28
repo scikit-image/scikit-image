@@ -19,20 +19,19 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
         # Use KDtree to find the peaks that are too close to each other
         tree = spatial.cKDTree(coord)
 
+        indices = tree.query_ball_point(coord, r=min_distance, p=p_norm)
         rejected_peaks_indices = set()
-        for idx, point in enumerate(coord):
+        for idx, candidates in enumerate(indices):
             if idx not in rejected_peaks_indices:
-                candidates = tree.query_ball_point(point, r=min_distance,
-                                                   p=p_norm)
                 candidates.remove(idx)
                 rejected_peaks_indices.update(candidates)
 
         # Remove the peaks that are too close to each other
-        coord = np.delete(coord, tuple(rejected_peaks_indices),
-                          axis=0)
+        coord = np.delete(coord, tuple(rejected_peaks_indices), axis=0)
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
+
     return coord
 
 
