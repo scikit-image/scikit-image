@@ -157,21 +157,6 @@ else:
 import plotly.io as pio
 pio.renderers.default = 'sphinx_gallery'
 
-# mayavi configuration
-image_scrapers = ('matplotlib',)
-try:
-    # Run the mayavi examples and find the mayavi figures if mayavi is
-    # installed
-    from mayavi import mlab
-except Exception:  # can raise all sorts of errors
-    image_scrapers = ('matplotlib',)
-else:
-    image_scrapers += ('mayavi',)
-    # Do not pop up any mayavi windows while running the
-    # examples. These are very annoying since they steal the focus. 
-    mlab.options.offscreen = True
-
-
 sphinx_gallery_conf = {
     'doc_module': ('skimage',),
     # path to your examples scripts
@@ -210,7 +195,6 @@ sphinx_gallery_conf = {
      },
     # Remove sphinx_gallery_thumbnail_number from generated files
     'remove_config_comments':True,
-    'image_scrapers': image_scrapers,
 }
 
 

@@ -25,13 +25,3 @@ import plotly.express as px
 fig = px.imshow(img)
 fig
 
-######################################################################
-# 3d data
-# =======
-
-from mayavi import mlab
-
-img = data.binary_blobs(length=64, n_dim=3, blob_size_fraction=0.25)
-img = img.astype(np.uint8)
-mlab.figure()
-mlab.contour3d(img, contours=[0.5])
