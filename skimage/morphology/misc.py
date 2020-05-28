@@ -2,7 +2,7 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_kwarg
 from .selem import _default_selem
 
 # Our function names don't exactly correspond to ndimages.
@@ -139,6 +139,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
+@deprecate_kwarg({'area_threshold': 'min_size'}, removed_version="0.20")
 def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     """Remove contiguous holes smaller than the specified size.
 
