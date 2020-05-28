@@ -70,6 +70,8 @@ Version 0.19
 Version 0.20
 ------------
 
+* In ``skimage/feature/peak.py``, remove the deprecation warnings in
+  `peak_local_max` and replace them by a ValueError.
 
 Version 1.0
 -----------
