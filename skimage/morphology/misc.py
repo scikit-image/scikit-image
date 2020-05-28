@@ -48,11 +48,13 @@ def _check_dtype_supported(ar):
                         "Got %s." % ar.dtype)
 
 
-def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
+@deprecate_kwarg({'min_size': 'area_threshold'}, removed_version="0.20")
+def remove_small_objects(ar, area_threshold=64, connectivity=1,
+                         in_place=False):
     """Remove objects smaller than the specified size.
 
     Expects ar to be an array with labeled objects, and removes objects
-    smaller than min_size. If `ar` is bool, the image is first labeled.
+    smaller than area_threshold. If `ar` is bool, the image is first labeled.
     This leads to potentially different behavior for bool and 0-and-1
     arrays.
 
@@ -61,12 +63,12 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
-    min_size : int, optional (default: 64)
+    area_threshold : int, optional
         The smallest allowable object size.
-    connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
+    connectivity : int, {1, 2, ..., ar.ndim}, optional
         The connectivity defining the neighborhood of a pixel. Used during
         labelling if `ar` is bool.
-    in_place : bool, optional (default: False)
+    in_place : bool, optional
         If ``True``, remove the objects in the input array itself.
         Otherwise, make a copy.
 
@@ -111,7 +113,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     else:
         out = ar.copy()
 
-    if min_size == 0:  # shortcut for efficiency
+    if area_threshold == 0:  # shortcut for efficiency
         return out
 
     if out.dtype == bool:
@@ -132,26 +134,25 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
         warn("Only one label was provided to `remove_small_objects`. "
              "Did you mean to use a boolean array?")
 
-    too_small = component_sizes < min_size
+    too_small = component_sizes < area_threshold
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
 
     return out
 
 
-@deprecate_kwarg({'area_threshold': 'min_size'}, removed_version="0.20")
-def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
+def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
-    min_size : int, optional (default: 64)
+    area_threshold : int, optional
         The maximum area, in pixels, of a contiguous hole that will be filled.
-    connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
+    connectivity : int, {1, 2, ..., ar.ndim}, optional
         The connectivity defining the neighborhood of a pixel.
-    in_place : bool, optional (default: False)
+    in_place : bool, optional
         If `True`, remove the connected components in the input array itself.
         Otherwise, make a copy.
 
@@ -217,7 +218,7 @@ def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
         out = np.logical_not(out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, min_size, connectivity, in_place)
+    out = remove_small_objects(out, area_threshold, connectivity, in_place)
 
     if in_place:
         np.logical_not(out, out=out)

@@ -71,7 +71,7 @@ Version 0.20
 ------------
 
 * In ``skimage.morphology.misc.py``, remove the `deprecate_kwarg`
-  decorator from `remove_small_holes`.
+  decorator from `remove_small_objects`.
 
 Version 1.0
 -----------
