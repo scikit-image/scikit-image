@@ -140,16 +140,15 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
 
 @deprecate_kwarg({'area_threshold': 'min_size'}, removed_version="0.20")
-def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
+def remove_small_holes(ar, min_size=64, connectivity=1, in_place=False):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
-    area_threshold : int, optional (default: 64)
+    min_size : int, optional (default: 64)
         The maximum area, in pixels, of a contiguous hole that will be filled.
-        Replaces `min_size`.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     in_place : bool, optional (default: False)
@@ -218,7 +217,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
         out = np.logical_not(out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, in_place)
+    out = remove_small_objects(out, min_size, connectivity, in_place)
 
     if in_place:
         np.logical_not(out, out=out)
