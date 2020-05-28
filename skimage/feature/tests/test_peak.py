@@ -184,7 +184,8 @@ class TestPeakLocalMax():
         nd_image = np.zeros((5, 5, 5))
         nd_image[2, 2, 2] = 1
         with expected_warnings(["indices argument is deprecated"]):
-            peaks = peak.peak_local_max(nd_image, min_distance=1, indices=False)
+            peaks = peak.peak_local_max(nd_image, min_distance=1,
+                                        indices=False)
         assert (peaks == nd_image.astype(np.bool)).all()
 
     def test_ndarray_exclude_border(self):
