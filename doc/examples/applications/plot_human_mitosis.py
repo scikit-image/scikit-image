@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import feature, filters, io, measure, morphology, util
+from skimage import color, feature, filters, io, measure, morphology, util
 
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
@@ -142,6 +142,9 @@ print(cleaned_dividing.max())
 # =============
 # To separate touching and overlapping cells, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
+# To visualize the segmentation conveniently, we colour-code the labelled
+# regions using the `color.label2rgb` function, specifying the background
+# label with argument `bg_label=0`.
 
 distance = ndi.distance_transform_edt(cells)
 
@@ -153,16 +156,27 @@ markers = measure.label(local_maxi)
 segmented_cells = morphology.watershed(-distance, markers, mask=cells)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
-ax[0].imshow(cells, cmap='flag')
+ax[0].imshow(cells, cmap='gray')
 ax[0].set_title('Touching cells')
 ax[0].axis('off')
-ax[1].imshow(segmented_cells, cmap='flag')
+ax[1].imshow(color.label2rgb(segmented_cells, bg_label=0))
 ax[1].set_title('Segmented cells')
 ax[1].axis('off')
 plt.show()
 
 #####################################################################
-# We find a total number of
+# Additionally, we may use function `color.label2rgb` to overlay the original
+# image with the segmentation result, using transparency (alpha parameter).
+
+color_labels = color.label2rgb(segmented_cells, image, alpha=0.4, bg_label=0)
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.imshow(color_labels)
+ax.set_title('Segmentation result over raw image')
+plt.show()
+
+#####################################################################
+# Finally, we find a total number of
 
 print(segmented_cells.max())
 
