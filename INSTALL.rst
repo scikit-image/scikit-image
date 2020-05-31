@@ -590,6 +590,6 @@ a seperate list for more advanced members of our community to install.
 * `imread <https://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
 
-.. include:: ../../requirements/extra.txt
+.. include:: ../../requirements/extras.txt
   :literal:
 
