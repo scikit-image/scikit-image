@@ -336,7 +336,7 @@ We also make a few more assumptions about your system:
 - You've cloned the git repository into a directory called ``scikit-image``. 
   This directory contains the following files:
 
-.. code-blocks::
+.. code-block::
 
     scikit-image
     ├── asv.conf.json
