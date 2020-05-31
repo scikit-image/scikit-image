@@ -17,13 +17,9 @@ from a Python console or Jupyter notebook:
   import skimage
   print("scikit-image installed with version " + skimage.__version__)
 
-Should you have any questions getting started using ``scikit-image`` after
-reading this guide, please open an issue on
-`github <https://github.com/scikit-image/scikit-image/issues>`_
-to get additional help.
-
 For those attempting to build scikit-image from source, or trying contribute
-code back to scikit-image, we've provided development instructions below.
+code back to scikit-image, we've provided instructions under the heading
+`Installing scikit-image for contributors`_.
 
 Scientific Python Distributions
 -------------------------------
@@ -49,8 +45,66 @@ that you can refer to the appropriate documentation version.
 pip based installation
 ----------------------
 
+This is the easiest way of obtaining the latest released version of
+``scikit-image`` if Python is already available on your system.
+
+
+**Finding your Python command**
+
 To install ``scikit-image`` with `pip <https://pip.pypa.io/en/stable/>`_, you
-may use the following commands
+may use the following commands from a command prompt. Note that this command
+prompt is not the Python command prompt, but, depending on your operating
+system, this is called:
+
+- A linux terminal window
+- A MacOSX terminal window
+- A Windows Command Prompt
+
+In that window, execute the command:
+
+.. code-block:: sh
+
+  # For linux or mac
+  which python3
+  # Linux and Mac might not have the command python
+  which python
+  # For windows
+  where python
+  # Windows might not have the command python3
+  where python3
+
+To ensure you know which python executable you are using.
+We found that the most likely commands for users is:
+
+- For MacOSX: ``python3``
+- For Linux:  ``python3``
+- For Windows: ``python`` (Notice the lack of 3)
+- If Python is installed with ``conda``, then it is: ``python``.
+
+Once you have found your Python command, use one of the commands to establish
+the version of Python you are using:
+
+.. code-block:: sh
+
+  python3 --version
+  python --version
+
+To ensure the version is at least Python 3.6. If not, you may not be able
+to install the most updated version of scikit-image. However,
+this should not stop you from installing an older version and get you going
+with your image processing project.
+
+We simply suggest you check the installed version of ``scikit-image`` with the
+code snippet included at the top of this guide so that you can refer to the
+appropriate documentation version.
+
+**Installing scikit-image**
+
+Now that you have found the Python executable on your machine, use the commands
+below to install ``scikit-image``.
+The instructions below use the ``python3`` command. Make sure you use the
+command that you found calls the appropriate Python executable on your
+particular machine.
 
 .. code-block:: sh
 
@@ -58,10 +112,6 @@ may use the following commands
   python3 -m pip install -U pip
   # Install scikit-image
   python3 -m pip install -U scikit-image
-
-
-This is the easiest way of obtaining the latest released version of
-``scikit-image`` if python is already available on your system.
 
 We also offer an easy way to install related packages. These are often included
 in scientific python distributions. To install many of them using ``pip`` use
@@ -82,13 +132,20 @@ the command:
     `Virtual Environments and Packages
     <https://docs.python.org/3/tutorial/venv.html>`_.
 
+.. warning::
+
+    Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
+    overwrite critical system libraries which may require you to reinstall your
+    operating system.
+
 conda based installation
 ------------------------
 
 `conda <https://docs.conda.io>`_ can be a useful package manager for building
-applications with dependencies not available on pypi in a cross-platform
-setting. While detailed instructions on how to use conda are considered out of
-scope in this tutorial, we encourage you to check these resources:
+applications with dependencies not available on `PyPi <https://pypi.org/>`_ in
+a cross-platform setting. While detailed instructions on how to use conda are
+considered out of scope in this tutorial, we encourage you to check these
+resources:
 
 - `conda's official documnetation <https://docs.conda.io>`_
 - `conda-forge <https://conda-forge.org>`_ a channel maintained with the latest scikit-image package.
@@ -168,32 +225,61 @@ which may require you to completely reinstall your system.
 
 **User local packages**
 
-Packages installed by your user account (using pip) may
-take precedence over packages installed in your python environment.
-If you have trouble getting the correct version of ``scikit-image``
-take a look at the contents of the directories (if they exist):
+Packages installed by your user account (using pip) may take precedence over
+packages installed in your python environment.  If you have trouble getting the
+correct version of ``scikit-image`` up and running, take a look at the contents
+of the directories (if they exist). ``X`` refers to the minor version of Python
+you are using
 
-- ``~/.local/lib/python3.6``
-- ``~/.local/lib/python3.7``
-- ``~/.local/lib/python3.8``
+- Linux: ``~/.local/lib/python3.X``,
+- Windows: ``C:\Users\YOUR_USER_NAME_HERE\AppData\Roaming\Python\Python3X``
 
 If you are using virtual environments, conda, or the system package manager,
 then the installation files in those directories are not necessary, and can
 safely be deleted.
 
+**python3 vs python2 vs python**
+
+For a long time, the executable `python` was a pointer to `python2` on Linux.
+For Ubuntu 20.04 (focal) and onward, a package
+`python-is-python3 <https://packages.ubuntu.com/focal/python-is-python3>`_
+exists to help `python` become a pointer to `python3`.
+
+For most Windows installations the `python3` executable does not exist.
+This is currently being worked on with conda-forge and discussed in a
+`GitHub issue <https://github.com/conda-forge/python-feedstock/issues/349>`_.
+
+Versions of ``scikit-image`` after ``0.14.2`` no longer support Python2.
+
+Additional Help and Support
+---------------------------
+
+Should you have any questions getting started using ``scikit-image`` after
+reading this guide, feel free to ask us questions on:
+
+- Our `forum on image.sc <https://forum.image.sc/tags/scikit-image>`_
+- Our `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_
+- Our `chat channel <https://skimage.zulipchat.com/>`_
+- `Stack Overflow <https://stackoverflow.com/questions/tagged/scikit-image>`_
+
+to get additional help.
+
+Finally, if you believe there is an issue with the instructions themselves,
+please open a new issue on
+`GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
 
 Supported platforms
 -------------------
 
 The platforms officially supported by scikit-image are:
 
-1. Windows 64 bit
-2. Mac OSX
-3. Linux 64 bit
+1. Windows 64 bit on x86 processors
+2. Mac OSX on x86 processors
+3. Linux 64 bit on x86 processors
 
-Since Windows 32 bit remains a popular platform, we continue to support it for
-the time being.  However, we strongly recommend all users of Windows 32 bit
-begin to switch over to Windows 64 bit if they can.
+Since Windows 32 bit on x86 processros remains a popular platform, we continue
+to support it for the time being. However, we strongly recommend all users of
+Windows 32 bit begin to switch over to Windows 64 bit if they can.
 
 We are very insterested in learning how ``scikit-image`` is
 `used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
@@ -201,19 +287,23 @@ Help us learn what other platforms you would like to install scikit-image!
 
 Unsupported platforms include:
 
-1. Linux on 32 bit Intel processors.
-2. Linux on 32 bit arm (Raspberry Pi running Rapsbian): While we do not official support
-   this distribution, we point users to `piwheels <https://wwww.piwheels.org>`_
-   and
-   `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
+1. Linux on 32 bit x86 processors.
+2. Linux on 32 bit on ARM processors (Raspberry Pi running Rapsbian):
+
+   - While we do not official support this distribution, we point users to
+     `piwheels <https://wwww.piwheels.org>`_
+     and
+     `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
 
    - You may need to install additional system dependencies listed for
      `imagecodecs <https://www.piwheels.org/project/imagecodecs/>`_.
      See
      `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>`_.
 
-3. Linux on 64 bit arm (NVidia Jetson):
-   - Follow the conversation on `Issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
+3. Linux on 64 bit ARM processors (NVidia Jetson):
+
+   - Follow the conversation on
+     `Issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
 
 While we do not directly support the platforms above, many of the core
 developers have experience using the platforms listed above. Do not hesitate to
@@ -221,8 +311,8 @@ ask us questions pertaining to your specific use case.
 
 .. note::
 
-    If you would like to help package scikit-image for the platforms above, reach
-    out on github so that we may help you get started.
+    If you would like to help package scikit-image for the platforms above,
+    reach out on GitHub so that we may help you get started.
 
 
 .. tip::
@@ -231,72 +321,139 @@ ask us questions pertaining to your specific use case.
     the developer instructions below can help get you started.
 
 
-End of instructions
-===================
-
-
-Installing scikit-image
-=======================
-
+Installing scikit-image for contributors
+========================================
 
 We are assuming that you have default Python environment already configured on
-your computer and you intend to install ``scikit-image`` inside of it. If you
-want to create and work with Python virtual environments, please follow the
-instructions on `venv`_ and `virtual environments`_.
+your computer and you intend to install ``scikit-image`` inside of it.
 
-There are two ways you can install ``scikit-image`` on your preferred Python
-environment.
+We also make a few more assumptions about your system:
 
-1. Standard Installation
-2. Development Installation
+- You have a C compiler setup.
+- You have a C++ compiler setup.
+- You are running a version of python compatible with our system as listed
+  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
 
-1. Standard Installation:
--------------------------
 
-``scikit-image`` comes pre-installed with several Python distributions,
-including `Anaconda <https://www.anaconda.com/distribution/>`_,
-`Python(x,y) <https://python-xy.github.io/>`_ and
-`WinPython <https://winpython.github.io/>`_.
+Build environment setup
+-----------------------
 
-On all major operating systems, install it via shell/command prompt::
+Once you've cloned your fork of the scikit-image repository,
+you should set up a Python development environment tailored for scikit-image.
+You may choose the environment manager of your choice.
+Here we provide instructions for two popular environment managers:
+``venv`` (pip based) and ``conda`` (Anaconda or Miniconda).
 
-  pip install scikit-image
+venv
+====
+When using ``venv``, you may find the following bash commands useful:
 
-If you are running Anaconda or miniconda, use::
+.. code-block:: sh
 
-  conda install -c conda-forge scikit-image
-
-The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
-
-2. Development Installation:
-----------------------------
-
-You can install the ``scikit-image`` development version if either your
-distribution ships an outdated version or you want to develop and work on new
-features before the package is released officially.
-
-First, uninstall any existing installations::
-
-  pip uninstall scikit-image
-
-or, on conda-based systems::
-
-  conda uninstall scikit-image
-
-Now, clone scikit-image on your local computer, and install::
-
-  git clone https://github.com/scikit-image/scikit-image.git
-  cd scikit-image
+  # Create a virtualenv named ``skimage-dev`` that lives in the directory of
+  # the same name
+  python -m venv skimage-dev
+  # Activate it. On Linux and MacOS:
+  source skimage-dev/bin/activate
+  # Install all development and runtime dependencies of scikit-image
+  pip install -r <(cat requirements/*.txt)
+  # Build and install scikit-image from source
   pip install -e .
+  # Test your installation
+  pytest skimage
 
-To update the installation::
+On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
 
-  git pull  # Grab latest source
-  pip install -e .  # Reinstall
+conda
+=====
 
-Platform-specific notes follow below.
+When using conda for development, we
+recommend adding the conda-forge channel for the most updated version
+of many dependencies.
+Some dependencies we use (for testing and documentation) are not available
+from the default anaconda channel. Please follow the official
+`conda-forge installation instructions <https://conda-forge.org/#about>`_
+before you get started.
 
-**a. Windows**
+.. code-block:: sh
+
+  # Create a conda environment named ``skimage-dev``
+  conda create --name skimage-dev
+  # Activate it
+  conda activate skimage-dev
+  # Install major development and runtime dependencies of scikit-image
+  # (the rest can be installed from conda-forge or pip, if needed)
+  conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
+  # Install minimal testing dependencies
+  conda install pytest
+  # Install scikit-image from source
+  pip install -e . --no-deps
+  # Test your installation
+  pytest skimage
+
+To update the installation:
+
+.. code-block:: sh
+
+    # Grab the latest source
+    git checkout master
+    git pull
+    # Update the installation
+    pip install -e . -vv
+
+Testing
+-------
+
+``scikit-image`` has an extensive test suite that ensures correct
+execution on your system.  The test suite has to pass before a pull
+request can be merged, and tests should be added to cover any
+modifications to the code base.
+
+We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+testing framework, with tests located in the various
+``skimage/submodule/tests`` folders.
+
+Our testing requirements are listed below:
+
+.. include:: ../../requirements/test.txt
+   :literal:
+
+
+Run all tests using:
+
+.. code-block:: sh
+
+    pytest skimage
+
+Or the tests for a specific submodule:
+
+.. code-block:: sh
+
+    pytest skimage/morphology
+
+Or tests from a specific file:
+
+.. code-block:: sh
+
+    pytest skimage/morphology/tests/test_grey.py
+
+Or a single test within that file:
+
+.. code-block:: sh
+
+    pytest skimage/morphology/tests/test_grey.py::test_3d_fallback_black_tophat
+
+Use ``--doctest-modules`` to run doctests. For example, run all tests and all
+doctests using:
+
+.. code-block:: sh
+
+    pytest --doctest-modules skimage
+
+Platform-specific notes
+-----------------------
+
+**Windows**
 
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means
 that your computer does not have recommended compilers for Python. You can
@@ -312,49 +469,52 @@ either download and install Windows compilers from `here`_  or use
 A run-through of the compilation process for Windows is included in
 our `setup of Azure Pipelines`_ (a continuous integration service).
 
-.. _miniconda: http://conda.pydata.org/miniconda.html
-.. _python.org: https://www.python.org/
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
-.. _venv: https://docs.python.org/3/library/venv.html
-.. _virtual environments: https://docs.python-guide.org/dev/virtualenvs/
 .. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
-**b. Debian and Ubuntu**
+**Debian and Ubuntu**
 
-Install all the required dependencies::
+Install suitable compilers:
 
-  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy python3-tk
+.. code-block:: sh
 
-Install suitable compilers::
+  sudo apt-get install build-essential
 
-  sudo apt-get install build-essential cython3
 
-Complete the general development installation instructions above.
+Full reuqirements list
+----------------------
+**Build Requirements**
 
-Build Requirements
-------------------
-* `Python >= 3.5 <https://www.python.org/>`__
-* `Numpy >= 1.11 <https://numpy.org/>`__
-* `Cython >= 0.23.4 <https://cython.org/>`__
-
-Documentation Requirements
---------------------------
-
-.. include:: ../../requirements/docs.txt
+.. include:: ../../requirements/build.txt
    :literal:
 
-Runtime Requirements
---------------------
+**Runtime Requirements**
 
 .. include:: ../../requirements/default.txt
    :literal:
 
-Optional Requirements
----------------------
+**Test Requirements**
+
+.. include:: ../../requirements/test.txt
+   :literal:
+
+**Documentation Requirements**
+
+.. include:: ../../requirements/docs.txt
+   :literal:
+
+**Optional Requirements**
 
 You can use ``scikit-image`` with the basic requirements listed above, but some
 functionality is only available with the following installed:
+
+* `SimpleITK <http://www.simpleitk.org/>`__
+    Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
+    including specialized formats using in medical imaging.
+
+* `Astropy <https://www.astropy.org>`__
+    Provides FITS I/O capability.
 
 * `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
     A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
@@ -363,21 +523,19 @@ functionality is only available with the following installed:
     The ``pyamg`` module is used for the fast `cg_mg` mode of random
     walker segmentation.
 
-* `Astropy <https://www.astropy.org>`__
-    Provides FITS I/O capability.
+* `Dask <https://dask.org/>`__
+    The ``dask`` module is used as to scale up certain functions.
 
-* `SimpleITK <http://www.simpleitk.org/>`__
-    Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
-    including specialized formats using in medical imaging.
+
+Extra requirements
+------------------
+
+These requirements have been included as a conveinence, but are not widely
+installable through pypi on our supported platforms.  As such, we keep them in
+a seperate list for more advanced members of our community to install.
 
 * `imread <https://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
-
-Testing Requirements
---------------------
-
-.. include:: ../../requirements/test.txt
-   :literal:
 
 Warnings during testing phase
 -----------------------------
@@ -388,7 +546,9 @@ certain tests to fail if you are building scikit-image with versions of
 dependencies that were not tested at the time of the release. To disable
 failures on warnings, export the environment variable
 ``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests::
+tests:
+
+.. code-block:: sh
 
    export SKIMAGE_TEST_STRICT_WARNINGS=False
    pytest --pyargs skimage
