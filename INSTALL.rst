@@ -333,6 +333,36 @@ We also make a few more assumptions about your system:
 - You have a C++ compiler setup.
 - You are running a version of python compatible with our system as listed
   in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
+- You've cloned the git repository into a directory called ``scikit-image``. 
+  This directory contains the following files:
+
+.. code-blocks::
+
+    scikit-image
+    ├── asv.conf.json
+    ├── azure-pipelines.yml
+    ├── benchmarks
+    ├── CODE_OF_CONDUCT.md
+    ├── CONTRIBUTING.txt
+    ├── CONTRIBUTORS.txt
+    ├── doc
+    ├── INSTALL.rst
+    ├── LICENSE.txt
+    ├── Makefile
+    ├── MANIFEST.in
+    ├── README.md
+    ├── RELEASE.txt
+    ├── requirements
+    ├── requirements.txt
+    ├── setup.cfg
+    ├── setup.py
+    ├── skimage
+    ├── TODO.txt
+    ├── tools
+    └── viewer_examples
+
+All commands below are assumed to be running from the ``scikit-image``
+directory containing the files above.
 
 
 Build environment setup
@@ -358,7 +388,7 @@ When using ``venv``, you may find the following bash commands useful:
   # Install all development and runtime dependencies of scikit-image
   pip install -r <(cat requirements/*.txt)
   # Build and install scikit-image from source
-  pip install -e .
+  pip install -e . -vv
   # Test your installation
   pytest skimage
 
@@ -387,11 +417,15 @@ before you get started.
   # Install minimal testing dependencies
   conda install pytest
   # Install scikit-image from source
-  pip install -e . --no-deps
+  pip install -e . -vv
   # Test your installation
   pytest skimage
 
-To update the installation:
+Updating the installation
+=========================
+
+When updating your isntallation, it is often necessary to recompile submodules
+that have changed. Do so with the following commands:
 
 .. code-block:: sh
 
@@ -449,6 +483,22 @@ doctests using:
 .. code-block:: sh
 
     pytest --doctest-modules skimage
+
+Warnings during testing phase
+-----------------------------
+
+Scikit-image tries to catch all warnings in its development builds to ensure
+that crucial warnings from dependencies are not missed.  This might cause
+certain tests to fail if you are building scikit-image with versions of
+dependencies that were not tested at the time of the release. To disable
+failures on warnings, export the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
+tests:
+
+.. code-block:: sh
+
+   export SKIMAGE_TEST_STRICT_WARNINGS=False
+   pytest --pyargs skimage
 
 Platform-specific notes
 -----------------------
@@ -527,8 +577,11 @@ functionality is only available with the following installed:
     The ``dask`` module is used as to scale up certain functions.
 
 
-Extra requirements
-------------------
+.. include:: ../../requirements/optional.txt
+  :literal:
+
+
+**Extra Requirements**
 
 These requirements have been included as a conveinence, but are not widely
 installable through pypi on our supported platforms.  As such, we keep them in
@@ -537,18 +590,6 @@ a seperate list for more advanced members of our community to install.
 * `imread <https://pythonhosted.org/imread/>`__
     Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
 
-Warnings during testing phase
------------------------------
+.. include:: ../../requirements/extra.txt
+  :literal:
 
-Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed.  This might cause
-certain tests to fail if you are building scikit-image with versions of
-dependencies that were not tested at the time of the release. To disable
-failures on warnings, export the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests:
-
-.. code-block:: sh
-
-   export SKIMAGE_TEST_STRICT_WARNINGS=False
-   pytest --pyargs skimage
