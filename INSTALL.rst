@@ -37,7 +37,7 @@ As of June 2020, we recommend one of the following 3 distributions:
 
 Note that the version of ``scikit-image`` installed with these distributions
 may different than the one you expect. This should not stop you from getting
-started with your project. We simply suggest you check the installed version of
+started with your project. We suggest you check the installed version of
 ``scikit-image`` with the code snippet included at the top of this guide so
 that you can refer to the appropriate documentation version.
 
@@ -94,7 +94,7 @@ to install the most updated version of scikit-image. However,
 this should not stop you from installing an older version and get you going
 with your image processing project.
 
-We simply suggest you check the installed version of ``scikit-image`` with the
+We suggest you check the installed version of ``scikit-image`` with the
 code snippet included at the top of this guide so that you can refer to the
 appropriate documentation version.
 
