@@ -84,6 +84,16 @@ def test_3d_input():
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
+def test_input_with_nans():
+    reference_image = img_as_float(camera())
+    moving_image = np.roll(img_as_float(camera()), 20, axis=1)
+    expected = np.array([0, -20])  # so we expect to recover a -20 pixel shift
+    # Add NaN pixels
+    reference_image[0][0] = np.nan
+    result = phase_cross_correlation(reference_image, moving_image)
+    assert np.allclose(result, expected)
+
+
 def test_unknown_space_input():
     image = np.ones((5, 5))
     with testing.raises(ValueError):

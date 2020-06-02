@@ -190,6 +190,13 @@ def phase_cross_correlation(reference_image, moving_image, *,
         return _masked_phase_cross_correlation(reference_image, moving_image,
                                                reference_mask, moving_mask,
                                                overlap_ratio)
+    # If input images contain NaN pixels, must mask before correlation
+    if np.isnan(reference_image).any() or np.isnan(moving_image).any():
+        reference_mask = ~np.isnan(reference_image)
+        moving_mask = ~np.isnan(moving_image)
+        return _masked_phase_cross_correlation(reference_image, moving_image,
+                                               reference_mask, moving_mask,
+                                               overlap_ratio)
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
