@@ -380,6 +380,7 @@ class Test_lddmm_register:
         lddmm_register_kwargs = dict(
             template=template,
             target=target,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
@@ -400,6 +401,7 @@ class Test_lddmm_register:
         lddmm_register_kwargs = dict(
             template=template,
             target=target,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
@@ -420,6 +422,7 @@ class Test_lddmm_register:
         lddmm_register_kwargs = dict(
             template=template,
             target=target,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
