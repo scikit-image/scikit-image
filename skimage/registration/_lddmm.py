@@ -14,6 +14,7 @@ from ._lddmm_utilities import _compute_coords
 from ._lddmm_utilities import _multiply_coords_by_affine
 from ._lddmm_utilities import _compute_tail_determinant
 from ._lddmm_utilities import resample
+from ._lddmm_utilities import sinc_resample
 
 r'''
   _            _       _                         
@@ -25,6 +26,11 @@ r'''
                                                  
 '''
 
+#TODO: resolution --> spacing, template_resolution --> template_spacing.
+#TODO: template --> reference_image, target --> moving_image.
+#TODO: create issue that moving_image rudely implies one of two equal uses of a registration.
+#TODO: explore replacing my lddmm_transform_[image/points] with scipy.ndimage.map_coordinates, allowable by converting position_fields to relative vector fields and putting the coordinates at the front of the shape.
+#TODO: add attributes used to docstrings, check for natural groupings.
 class _Lddmm:
     """
     Class for storing shared values and objects used in registration and performing the registration via methods.
@@ -235,9 +241,10 @@ class _Lddmm:
             # Compute velocity_fields gradient.
             if iteration >= self.num_affine_only_iterations: velocity_fields_gradients = self._compute_velocity_fields_gradients()
             # Update affine.
-            self._update_affine(affine_inv_gradient, iteration)
+            self._update_affine(affine_inv_gradient, iteration)  # rigid_only=iteration < self.rigid_only_iterations)
             # Update velocity_fields.
             if iteration >= self.num_affine_only_iterations: self._update_velocity_fields(velocity_fields_gradients)
+        # End for loop.
 
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
@@ -264,24 +271,46 @@ class _Lddmm:
 
             # Accumulators.
             matching_energies=self.matching_energies,
-            regularization_energies=self.matching_energies,
+            regularization_energies=self.regularization_energies,
             total_energies=self.total_energies,
 
             # Debuggers.
             lddmm=self,
         )
+        # TODO:
+        '''
+        a new take on the return 'value':
 
+        affine_phi, phi_inv_affine_inv, position_field_components, diagnostics (everything else)
+        
+        position_field --> map_coordinates coords: subtract coordinate of the first pixel and divide by pixel size in each dimension
+        '''
+        # return dict(**params) --> transform_necessary_values, just_cuz_values, calibration_accumulators
 
     def _update_and_apply_position_field(self):
         """
         Calculate phi_inv from v
         Compose on the right with Ainv
-        Apply phi_invAinv to template
+        Apply phi_inv_affine_inv to template
+
+        Accesses attributes:
+            template
+            template_axes
+            template_coords
+            target_coords
+            num_timesteps
+            delta_t
+            affine
+            velocity_fields
+            phi_inv
+            phi_inv_affine_inv
+            deformed_template_to_time
+            deformed_template
 
         Updates attributes:
             phi_inv
-            deformed_template_to_time
             phi_inv_affine_inv
+            deformed_template_to_time
             deformed_template
         """
 
@@ -341,6 +370,12 @@ class _Lddmm:
         """
         Apply contrast_coefficients to deformed_template to produce contrast_deformed_template.
 
+        Accsses attributes:
+            contrast_polynomial_basis
+            contrast_coefficients
+            contrast_deformed_template
+
+
         Updates attributes:
             contrast_deformed_template
         """
@@ -351,6 +386,14 @@ class _Lddmm:
     def _compute_weights(self):
         """
         Compute the matching_weights between the contrast_deformed_template and the target.
+
+        Accsses attributes:
+            target
+            sigma_matching
+            sigma_artifact
+            contrast_deformed_template
+            artifact_mean_value
+            matching_weights
 
         Updates attributes:
             artifact_mean_value
@@ -368,6 +411,22 @@ class _Lddmm:
     def _compute_cost(self):
         """
         Compute the matching cost using a weighted sum of square error.
+
+        Accsses attributes:
+            target
+            template
+            template_resolution
+            target_resolution
+            contrast_deformed_template
+            sigma_regularization
+            sigma_matching
+            delta_t
+            fourier_high_pass_filter
+            fourier_velocity_fields
+            matching_weights
+            matching_energies
+            regularization_energies
+            total_energies
 
         Updates attributes:
             matchin_energies
@@ -396,6 +455,20 @@ class _Lddmm:
     def _compute_contrast_map(self):
         """
         Compute contrast_coefficients mapping deformed_template to target.
+
+        Accesses attributes:
+            target
+            target_resolution
+            deformed_template
+            spatially_varying_contrast_map
+            sigma_matching
+            contrast_order
+            sigma_contrast
+            contrast_tolerance
+            contrast_maxiter
+            matching_weights
+            contrast_polynomial_basis
+            contrast_coefficients
 
         Updates attributes:
             contrast_polynomial_basis
@@ -452,12 +525,35 @@ class _Lddmm:
             basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
 
             # Solve for contrast_coefficients.
-            self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', message='Ill-conditioned matrix')
+                self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
 
 
     def _compute_affine_inv_gradient(self):
         """
         Compute and return the affine_inv gradient.
+
+        Accesss attributes:
+            template
+            target
+            template_resolution
+            template_axes
+            target_coords
+            deformed_template
+            contrast_deformed_template
+            sigma_matching
+            contrast_order
+            phi_inv
+            matching_weights
+            contrast_coefficients
+            affine
+
+        Updates attributes:
+            None
+
+        Returns:
+            affine_inv_gradient
         """
 
         # Generate the template image deformed by phi_inv but not affected by the affine.
@@ -553,6 +649,13 @@ class _Lddmm:
 
         if self.calibrate, appends the current self.affine to self.affines.
 
+        Accesses attributes:
+            calibrate
+            fixed_affine_scale
+            affine_stepsize
+            affine
+            affines
+
         Updates attributes:
             affine
             affines
@@ -581,6 +684,29 @@ class _Lddmm:
     def _compute_velocity_fields_gradients(self):
         """
         Compute and return the gradients of the self.velocity_fields.
+
+        Accesses attributes:
+            template
+            target
+            template_axes
+            target_axes
+            template_coords
+            template_resolution
+            deformed_template_to_time
+            deformed_template
+            contrast_deformed_template
+            sigma_regularization
+            sigma_matching
+            contrast_order
+            num_timesteps
+            delta_t
+            low_pass_filter
+            matching_weights
+            contrast_coefficients
+            velocity_fields
+            affine
+            phi
+            affine_phi
 
         Updates attributes:
             phi
@@ -656,6 +782,13 @@ class _Lddmm:
 
         if self.calibrate, calculates and appends the maximum velocity to self.maximum_velocities.
 
+        Accesses attributes:
+            calibrate
+            deformative_stepsize
+            num_timesteps
+            velocity_fields
+            maximum_velocities
+
         Updates attributes:
             velocity_fields
             maximum_velocities
@@ -673,6 +806,16 @@ class _Lddmm:
     def _compute_affine_phi(self):
         """
         Compute and set self.affine_phi. Called once in case there were no deformative iterations to set it.
+
+        Accesses attributes:
+            template_axes
+            template_coords
+            delta_t
+            num_timesteps
+            velocity_fields
+            affine
+            phi
+            affine_phi
 
         Updates attributes:
             phi
@@ -701,6 +844,7 @@ class _Lddmm:
             self.affine_phi = _multiply_coords_by_affine(self.affine, self.phi)
     
 
+    # TODO: move into example file.
     def _generate_calibration_plots(self):
         """
         Plot the energies, maximum velocities, translation components, and linear components as functions of the number of iterations.
@@ -882,7 +1026,6 @@ def lddmm_register(
     ValueError
         Raised if multiscales is provided with values both above and below 1.
     """
-    if multiscales is not None: raise NotImplementedError(f"multiscale functionality has not yet been completed, pending finalization of a sinc_resample function in _lddmm_utilities.py.")
 
     # Validate images and resolutions.
     # Images.
@@ -998,60 +1141,15 @@ def lddmm_register(
         if scale_index < len(multiscales) - 1:
             initial_affine = lddmm_dict['affine']
             initial_contrast_coefficients = lddmm_dict['contrast_coefficients']
-            next_template_scale = np.round(multiscales[scale_index + 1] * template.shape) / template.shape
-            #TODO: finish this.
-            initial_velocity_fields = None# and SINC UPSAMPLE lddmm_dict['velocity_fields'] # <-- function not yet completed in _lddmm_utilities.py
+            next_template_shape = np.round(multiscales[scale_index + 1] * template.shape)
+            initial_velocity_fields = sinc_resample(lddmm_dict['velocity_fields'], new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
         
         # End multiscales loop.
     
     return lddmm_dict
 
-    # TODO: remove dead code.
-    # Set up _Lddmm instance.
-    lddmm = _Lddmm(
-        # Images.
-        template=template,
-        target=target,
-        # Image resolutions.
-        template_resolution=template_resolution,
-        target_resolution=target_resolution,
-        # Iterations.
-        num_iterations=num_iterations,
-        num_affine_only_iterations=num_affine_only_iterations,
-        num_rigid_affine_iterations=num_rigid_affine_iterations,
-        # Stepsizes.
-        affine_stepsize=affine_stepsize,
-        deformative_stepsize=deformative_stepsize,
-        # Affine specifiers.
-        fixed_affine_scale=fixed_affine_scale,
-        # Velocity field specifiers.
-        sigma_regularization=sigma_regularization,
-        smooth_length=smooth_length,
-        num_timesteps=num_timesteps,
-        # Contrast map specifiers.
-        contrast_order=contrast_order,
-        spatially_varying_contrast_map=spatially_varying_contrast_map,
-        contrast_maxiter=contrast_maxiter,
-        contrast_tolerance=contrast_tolerance,
-        sigma_contrast=sigma_contrast,
-        # Artifact specifiers.
-        check_artifacts=check_artifacts,
-        sigma_artifact=sigma_artifact,
-        # # vs. accuracy tradeoff.
-        sigma_matching=sigma_matching,
-        # Initial values.
-        initial_affine=initial_affine,
-        initial_contrast_coefficients=initial_contrast_coefficients,
-        initial_velocity_fields=initial_velocity_fields,
-        # Diagnostic outputs.
-        calibrate=calibrate,
-        track_progress_every_n=track_progress_every_n,
-    )
 
-    return lddmm.register()
-
-
-def _generate_position_field(
+def generate_position_field(
     affine,
     velocity_fields,
     velocity_field_resolution,
@@ -1061,6 +1159,42 @@ def _generate_position_field(
     target_resolution,
     deform_to="template",
 ):
+    """
+    Integrate velocity_fields and apply affine to produce a position field.
+
+    Parameters
+    ----------
+    affine : np.ndarray
+        The affine array to be incorporated into the returned position field.
+    velocity_fields : np.ndarray
+        The velocity_fields defining the diffeomorphic flow. The leading dimensions are spatial, and the last two dimensions are the number of time steps and the coordinates.
+    velocity_field_resolution : float, seq
+        The resolution of velocity_fields, with multiple values given to specify anisotropy.
+    template_shape : seq
+        The shape of the template.
+    template_resolution : float, seq
+        The resolution of the template, with multiple values given to specify anisotropy.
+    target_shape : seq
+        The shape of the target.
+    target_resolution : float, seq
+        The resolution of the target, with multiple values given to specify anisotropy.
+    deform_to : str, optional
+        The direction of the deformation. By default "template".
+
+    Returns
+    -------
+    np.ndarray
+        The position field for the registration in the space of the image specified by deform_to.
+
+    Raises
+    ------
+    ValueError
+        Raised if the leading dimensions of velocity_fields fail to match template_shape.
+    TypeError
+        Raised if deform_to is not of type str.
+    ValueError
+        Raised if deform_to is neither 'template' nor 'target'.
+    """
 
     # Validate inputs.
     # Validate template_shape. Not rigorous.
@@ -1383,144 +1517,3 @@ def lddmm_transform_points(
     transformed_points = _transform_points(points, position_field, position_field_resolution)
 
     return transformed_points
-
-
-# Temporary note, this is matlab code for sinc upsampling to inspire a sinc_resample function in _lddmm_utilities.py.
-'''
-function [I] = upsample(I,nup)
-% for multiscale registration, we will need to upsample v appropriately
-% I'd like to do so without changing the energy of the flow
-% linear interpolation for example adds sharp corners that really increase
-% the energy
-% the appropriate way to do this is by zero padding in the fourier domain
-% there is a lot of book keeping to deal with though
-​
-% start with a simple example
-% I'll use 2D
-% one dimension even
-% one dimension odd
-% clear all;
-% close all;
-% fclose all;
-% I = image;
-% I = I.CData;
-% close all;
-% I = I(:,1:end-1);
-% n = [size(I,1),size(I,2)];
-% figure;
-% imagesc(I)
-% 
-% nup = [128 128];
-​
-% now recall
-% if there are an even number of samples
-% then we have 0 freq
-% paired freqs
-% and nyquist (unpaired)
-% if we have odd number of samples then we just have 0 freq and paired freq
-% so odd is probably easier to deal with
-% recall
-% fftshift([1,2,3]) = [3,1,2] % zero frequency in the middle
-% fftshift([1,2,3,4]) = [3,4,1,2] % nyqust first, zero frequency shifted
-% right
-​
-% first work out what the fftshift will do, so I can shift it there and
-% back
-% if its even we just shift right by half
-% if its odd we shift by less than half
-n = size(I);
-if length(n) == 2
-    n(3) = 1;
-end
-row_even = ~mod(n(1),2);
-col_even = ~mod(n(2),2);
-slice_even = ~mod(n(3),2);
-​
-if row_even
-    row_shift = n(1)/2;
-else
-    row_shift = (n(1)-1)/2;
-end
-if col_even
-    col_shift = n(2)/2;
-else
-    col_shift = (n(2)-1)/2;
-end
-if slice_even
-    slice_shift = n(3)/2;
-else
-    slice_shift = (n(3)-1)/2;
-end
-​
-​
-​
-​
-% now we'll deal with rows
-if nup(1)>n(1) % if not upsampling rows, just leave it
-    Ihat = fft(I,[],1); <-- fft axis 0
-    Ihat = circshift(Ihat,[row_shift,0,0]); <-- roll
-    if row_even
-        % if its even, the first thing I want to do is make nyquist paired
-        Ihat(1,:,:) = Ihat(1,:,:)/2.0;
-        Ihat = [Ihat;Ihat(1,:,:)];
-        n(1) = n(1) + 1;
-    end
-    % now pad
-    Ihat = padarray(Ihat,[nup(1)-n(1),0,0],0,'post');
-    % shift it
-    Ihat = circshift(Ihat,[-row_shift,0,0]);
-    % inverse
-    I = ifft(Ihat,[],1,'symmetric'); <-- ifft: .real
-end
-
-
-alt:
-
-rfft version: rfft, leave n None
-    don't roll
-    possibly don't split the nyquist
-    don't roll back
-    irfft back, specify n = nup(1)
-
-
-
-​
-% now columns
-if nup(2)>n(2)
-    Ihat = fft(I,[],2);
-    Ihat = circshift(Ihat,[0,col_shift,0]);
-    if col_even
-        % if its even, the first thing I want to do is make nyquist paired
-        Ihat(:,1,:) = Ihat(:,1,:)/2.0;
-        Ihat = [Ihat,Ihat(:,1,:)];
-        n(2) = n(2) + 1;
-    end
-    % now pad
-    Ihat = padarray(Ihat,[0,nup(2)-n(2),0],0,'post');
-    % shift it
-    Ihat = circshift(Ihat,[0,-col_shift,0]);
-    % inverse
-    I = ifft(Ihat,[],2,'symmetric');
-end
-​
-% now slices
-if nup(3)>n(3)
-    Ihat = fft(I,[],3);
-    Ihat = circshift(Ihat,[0,0,slice_shift]);
-    if col_even
-        % if its even, the first thing I want to do is make nyquist paired
-        Ihat(:,:,1) = Ihat(:,:,1)/2.0;
-        Ihat = cat(3,Ihat,Ihat(:,:,1));
-        n(3) = n(3) + 1;
-    end
-    % now pad
-    Ihat = padarray(Ihat,[0,0,nup(3)-n(3)],0,'post');
-    % shift it
-    Ihat = circshift(Ihat,[0,0,-slice_shift]);
-    % inverse
-    I = ifft(Ihat,[],3,'symmetric');    
-end
-% correct normalization
-% note inverse has 1/n
-I = I * prod(nup) / prod(n);
-​'''

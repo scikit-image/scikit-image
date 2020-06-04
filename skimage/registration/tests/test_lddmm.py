@@ -334,7 +334,7 @@ class Test_lddmm_transform_image:
 Test lddmm_register.
 """
 #TODO: Verify that these warnings aren't a problem.
-@pytest.mark.filterwarnings('ignore:Ill-conditioned matrix')
+# @pytest.mark.filterwarnings('ignore:Ill-conditioned matrix')
 class Test_lddmm_register:
 
     def _test_lddmm_register(self, rtol=0, atol=1-1e-9, **lddmm_register_kwargs):
@@ -423,7 +423,7 @@ class Test_lddmm_register:
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
-    
+
     def test_identity_disk_to_disk_registration(self):
 
         template = np.array([[(col-4)**2 + (row-4)**2 <= 4**2 for col in range(9)] for row in range(9)], int)
@@ -435,7 +435,7 @@ class Test_lddmm_register:
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
-    
+
     def test_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
         # template (before padding) has shape (21, 29) and semi-radii 4 and 10.
@@ -453,7 +453,7 @@ class Test_lddmm_register:
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
-    
+
     def test_non_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
         # template (before padding) has shape (21, 29) and semi-radii 6 and 10.
@@ -520,6 +520,21 @@ class Test_lddmm_register:
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
+
+    def test_identity_multiscale_registration(self):
+
+        template = np.zeros((20,30))
+        target = np.copy(template)
+
+        lddmm_register_kwargs = dict(
+            template=template,
+            target=target,
+            num_iterations=[0, 0, 0, 0],
+            multiscales=[10, (2,3), [3,2], 1],
+        )
+
+        self._test_lddmm_register(**lddmm_register_kwargs)
+
 
 """
 Test _transform_points.

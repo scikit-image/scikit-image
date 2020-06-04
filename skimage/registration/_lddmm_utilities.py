@@ -433,7 +433,7 @@ def resample(
 
 
 #TODO: finalize function and import.
-def sinc_resample(array, new_shape, compute_complex=False):
+def sinc_resample(array, new_shape):
     """
     Resample array to new_shape by padding and truncating at high frequencies in the fourier domain.
 
@@ -453,109 +453,12 @@ def sinc_resample(array, new_shape, compute_complex=False):
     # Validate inputs.
     array = _validate_ndarray(array)
     new_shape = _validate_ndarray(new_shape, dtype=int, required_ndim=1, required_shape=array.ndim)
-    compute_complex = bool(compute_complex)
 
-    if compute_complex:
-        # Convert array to phase space.
-        fourier_transformed_array = np.fft.fftn(array)
-        # Roll the fourier-transformed array such that the nyquist frequency is between both ends of the array if the shape is odd.
-        # If the shape is even, the first element after rolling is the nyquist frequency; it is then split between the first and last element.
-        shifts = np.floor_divide(array.shape, 2)
-        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
+    resampled_array = np.copy(array)
 
-        # For each dim whose shape is even, split the nyquist frequency existing at the first element into a new last element.
-        for dim in filter(lambda dim: array.shape[dim] % 2 == 0, range(array.ndim)):
-            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
-            fourier_transformed_array = np.concatenate(
-                (
-                    nyquist_frequency_slice_halved,
-                    fourier_transformed_array[(*[slice(None)] * dim, slice(1))], # Slice out all but the first element along dimension dim.
-                    # eval(f"fourier_transformed_array[{':,' * dim} 1:]"), # Slice out all but the first element along dimension dim.
-                    nyquist_frequency_slice_halved,
-                ),
-                axis=dim,
-            )
+    for dim in range(array.ndim):
+        fourier_transformed_array = np.fft.rfft(resampled_array, axis=dim)
+        resampled_array = np.fft.irfft(fourier_transformed_array, axis=dim, n=new_shape[dim])
+    resampled_array *= resampled_array.size / array.size
 
-        # fourier_transformed_array has an odd shape in each dimension and the nyquist frequency exists around the ends of each dimension.
-
-        # Truncate and/or zero-pad at the ends of fourier_transformed_array as necessary to achieve the desired shape.
-
-        # Truncate.
-        truncate_by = np.maximum(fourier_transformed_array.shape - new_shape, 0)
-        truncate_slices = tuple(slice(0, fourier_transformed_array.shape[dim] - cut_off) for dim, cut_off in enumerate(truncate_by))
-        fourier_transformed_array = fourier_transformed_array[truncate_slices]
-
-        # Pad.
-        pad_by = np.maximum(new_shape - fourier_transformed_array.shape, 0)
-        # Pad symmetrically. If pad is odd, pad the extra element on the left.
-        pad_width = tuple((pad // 2 + pad % 2, pad // 2) for pad in pad_by)
-        fourier_transformed_array = np.pad(fourier_transformed_array, pad_width=pad_width, mode='constant', constant_values=0)
-
-        # Roll the fourier-transformed array back such that the first element is the zero-frequency.
-        shifts = - np.floor_divide(fourier_transformed_array.shape, 2)
-        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
-
-        # Convert fourier_transformed_array back to native space.
-        new_complex_array = np.fft.ifftn(fourier_transformed_array, s=new_shape) * np.prod(new_shape) / np.prod(array.shape)
-
-        return new_complex_array
-
-    else:
-        # Compute only the real components, but do it to completion per-dimension.
-        # This is done per-dimension rather than for all dimensions simultaneously for the real-only (compute_complex==False) calls 
-        # to avoid the special cases necessary to otherwise handle the drop of redundant information in np.fft.rfftn.
-
-        for dim in range(array.ndim):
-
-            # Convert array to phase space.
-            fourier_transformed_array = np.fft.rfft(array, axis=dim)
-            # If the shape is even, the nyquist frequency is at the end of array.
-
-            # Truncate or zero-pad at the end of fourier_transformed_array as necessary to achieve the desired shape.
-
-            this_dim_shape_adjustment = new_shape[dim] - fourier_transformed_array.shape[dim]
-            if this_dim_shape_adjustment < 0:
-                # Truncate.
-                truncate_by = abs(this_dim_shape_adjustment)
-                truncate_slice = (*[slice(None)] * dim, slice(0, fourier_transformed_array.shape[dim] - truncate_by))
-                fourier_transformed_array = fourier_transformed_array[truncate_slice]
-            elif this_dim_shape_adjustment > 0:
-                # Pad.
-                pad_by = this_dim_shape_adjustment
-                # Pad symmetrically. If pad is odd, pad the extra element on the left.
-                pad_width = (*[(0, 0)] * dim, (pad_by // 2 + pad_by % 2, pad_by // 2), *[(0, 0)] * (fourier_transformed_array.ndim - dim - 1))
-                fourier_transformed_array = np.pad(fourier_transformed_array, pad_width=pad_width, mode='constant', constant_values=0)
-
-            # Convert fourier_transformed_array back to native space and update array.
-            array = np.fft.irfft(fourier_transformed_array, n=new_shape[dim]) * np.prod(new_shape) / np.prod(array.shape)
-
-        return array
-    
-
-
-
-    '''
-    # Convert array to phase space.
-        fourier_transformed_array = np.fft.fftn(array)
-        # Roll the fourier-transformed array such that the nyquist frequency is between both ends of the array if the shape is odd.
-        # If the shape is even, the first element after rolling is the nyquist frequency; it is then split between the first and last element.
-        shifts = np.floor_divide(array.shape, 2)
-        shifts[-1] = 1
-        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
-
-        # For each dim whose shape is even, split the nyquist frequency existing at the first element into a new last element.
-        for dim in filter(lambda dim: array.shape[dim] % 2 == 0, range(array.ndim - 1)):
-            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
-            fourier_transformed_array = np.concatenate(
-                (
-                    nyquist_frequency_slice_halved,
-                    fourier_transformed_array[(*[slice(None)] * dim, slice(1))], # Slice out all but the first element along dimension dim.
-                    # eval(f"fourier_transformed_array[{':,' * dim} 1:]"), # Slice out all but the first element along dimension dim.
-                    nyquist_frequency_slice_halved,
-                ),
-                axis=dim,
-            )
-        if array.shape[-1] % 2 == 0:
-            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
-            fourier_transformed_array[...,-1] /= 2
-    '''
+    return resampled_array

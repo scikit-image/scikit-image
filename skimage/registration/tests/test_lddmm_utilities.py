@@ -564,18 +564,14 @@ class Test_resample:
 """
 Test sinc_resample.
 """
-@pytest.mark.skip
+# @pytest.mark.skip
 class Test_sinc_resample:
-
-    # Note: these tests only verify that the correct shapes are achieved, 
-    # and that the real part of a complex run is the same as running with compute_complex=False.
 
     # Test shape of an upsample.
     def test_upsample_shape(self):
         kwargs = dict(
             array=np.arange(10*20*30).reshape(10,20,30),
             new_shape=(12, 45, 30),
-            compute_complex=False,
         )
         output = sinc_resample(**kwargs)
         assert np.array_equal(output.shape, kwargs['new_shape'])
@@ -585,7 +581,6 @@ class Test_sinc_resample:
         kwargs = dict(
             array=np.arange(10*20*30).reshape(10,20,30),
             new_shape=(8, 20, 14),
-            compute_complex=False,
         )
         output = sinc_resample(**kwargs)
         assert np.array_equal(output.shape, kwargs['new_shape'])
@@ -595,50 +590,34 @@ class Test_sinc_resample:
         kwargs = dict(
             array=np.arange(10*20*30).reshape(10,20,30),
             new_shape=(10, 23, 27),
-            compute_complex=False,
         )
         output = sinc_resample(**kwargs)
         assert np.array_equal(output.shape, kwargs['new_shape'])
 
-    # # Test that running with compute_complex=False and compute_complex=True but taking the real part yield identical results.
-    # def test_(self):
-        # kwargs = dict(
-        #     array=np.arange(10*20*30).reshape(10,20,30),
-        #     new_shape=(10, 23, 27),
-        # )
-        # real_output = sinc_resample(**kwargs, compute_complex=False)
-        # complex_output = sinc_resample(**kwargs, compute_complex=True)
-        # print(
-        #     real_output.shape, np.unique(real_output),
-        #     real_output[3, :3, :3], 
-        #     complex_output.shape, np.unique(complex_output),
-        #     complex_output.real[3, :3, :3], 
-        # sep='\n'*3)
-        # assert np.allclose(real_output, complex_output.real)
-
-
-    # Test shape of a downsample.
-    def test_(self):
+    # Test preservation of the trends in a general resample.
+    def test_preserves_trends(self):
         kwargs = dict(
-            array=np.array([1,2,3,2,1]),
-            new_shape=11,
-            compute_complex=True,
+            array=np.array([
+                [0, 1, 2, 3, 4, 3, 2, 1, 0],
+                [2, 3, 4, 5, 6, 5, 4, 3, 2],
+                [0, 1, 2, 3, 4, 3, 2, 1, 0],
+            ]), # Shape: (3, 9).
+            new_shape=(5, 7),
         )
         output = sinc_resample(**kwargs)
-        print(output.real.round(2))
-        print(output.imag.round(2))
-        # raise Exception
-
-    # Test shape of a downsample.
-    def test_(self):
-        kwargs = dict(
-            array=np.array([1,2,3,2,1]),
-            new_shape=11,
-            compute_complex=False,
-        )
-        output = sinc_resample(**kwargs)
-        print(output.round(2))
-        raise Exception
+        # Check that the first half of rows are ascending.
+        for row in range((output.shape[0] - 1) // 2):
+            assert np.all(output[row, :] <= output[row + 1, :])
+        # Check that the second half of rows are descending.
+        for row in range(output.shape[0] // 2, output.shape[0] - 1):
+            assert np.all(output[row, :] >= output[row + 1, :])
+        # Check that the first half of columns are ascending.
+        for col in range((output.shape[1] - 1) // 2):
+            assert np.all(output[:, col] <= output[:, col + 1])
+        # Check that the second half of columns are descending.
+        for col in range(output.shape[1] // 2, output.shape[1] - 1):
+            assert np.all(output[:, col] >= output[:, col + 1])
+        
 
 """
 Perform tests.
