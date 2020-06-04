@@ -86,9 +86,9 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
 def _validate_ndarray(
     array,
     dtype=None,
-    minimum_ndim=0,
-    required_ndim=None,
     forbid_object_dtype=True,
+    minimum_ndim=1,
+    required_ndim=None,
     broadcast_to_shape=None,
     reshape_to_shape=None,
     required_shape=None,
@@ -97,18 +97,19 @@ def _validate_ndarray(
     Cast (a copy of) array to a np.ndarray if possible and return it 
     unless it is noncompliant with minimum_ndim, required_ndim, and dtype.
     
-    Note:
+    Note: the following checks and validations are performed in order.
     
-    If required_ndim is None, _validate_ndarray will accept any object.
-    If it is possible to cast to dtype, otherwise an exception is raised.
+    If required_ndim is None or 0, _validate_ndarray will accept any object.
+    
+    array is cast to an np.ndarray of type dtype.
 
-    If np.array(array).ndim == 0 and required_ndim == 1, array will be upcast to ndim 1.
+    If minimum_ndim is provided and array.ndim < minimum_ndim, array.shape is left-padded by 1's until minimum_ndim is satisfied.
+
+    If required_ndim is provided and array.ndim != required_ndim, an exception is raised.
+
+    If forbid_object_dtype == True and array.dtype == object, an exception is raised, unless dtype is provided as object.
     
-    If forbid_object_dtype == True and the dtype is object, an exception is raised 
-    unless object is the dtype.
-    
-    If a shape is provided to broadcast_to_shape, unless noncompliance is found with 
-    required_ndim, array is broadcasted to that shape.
+    If a shape is provided to broadcast_to_shape, array is broadcasted to that shape.
     
     If a shape is provided to reshape_to_shape, array is reshaped to that shape.
 
@@ -174,22 +175,15 @@ def _validate_ndarray(
                 f"while forbid_object_dtype == True and dtype != object."
             )
 
+    # Validate compliance with minimum_ndim by left-padding the shape with 1's as necessary.
+    if array.ndim < minimum_ndim:
+        array = array.reshape(*[1] * (minimum_ndim - array.ndim), *array.shape)
+
     # Validate compliance with required_ndim.
     if required_ndim is not None and array.ndim != required_ndim:
-        # Upcast from ndim 0 to ndim 1 if appropriate.
-        if array.ndim == 0 and required_ndim == 1:
-            array = np.array([array])
-        else:
-            raise ValueError(
-                f"If required_ndim is not None, array.ndim must equal it unless array.ndim == 0 and required_ndin == 1.\n"
-                f"array.ndim: {array.ndim}, required_ndim: {required_ndim}."
-            )
-
-    # Verify compliance with minimum_ndim.
-    if array.ndim < minimum_ndim:
         raise ValueError(
-            f"array.ndim must be at least equal to minimum_ndim.\n"
-            f"array.ndim: {array.ndim}, minimum_ndim: {minimum_ndim}."
+            f"If required_ndim is not None, array.ndim must be made to equal it.\n"
+            f"array.ndim: {array.ndim}, required_ndim: {required_ndim}."
         )
 
     # Broadcast array if appropriate.
@@ -216,10 +210,10 @@ def _validate_ndarray(
     return array
 
 
-def _validate_resolution(resolution, ndim):
+def _validate_resolution(resolution, ndim, dtype=float):
     """Validate resolution to assure its length matches the dimensionality of image."""
 
-    resolution = _validate_scalar_to_multi(resolution, size=ndim, dtype=float)
+    resolution = _validate_scalar_to_multi(resolution, size=ndim, dtype=dtype)
 
     if np.any(resolution <= 0):
         raise ValueError(
@@ -439,26 +433,40 @@ def resample(
 
 
 #TODO: finalize function and import.
-def sinc_resample(array, new_shape, only_real=True):
-    raise NotImplementedError("sinc_resample has not yet been completed.")
+def sinc_resample(array, new_shape, compute_complex=False):
+    """
+    Resample array to new_shape by padding and truncating at high frequencies in the fourier domain.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        The array to be resampled.
+    new_shape : seq
+        The shape to resample array to.
+
+    Returns
+    -------
+    np.ndarray
+        A copy of array after resampling.
+    """
 
     # Validate inputs.
     array = _validate_ndarray(array)
-    new_shape = _validate_ndarray(new_shape, dtype=int, required_shape=array.ndim)
-    only_real = bool(only_real)
+    new_shape = _validate_ndarray(new_shape, dtype=int, required_ndim=1, required_shape=array.ndim)
+    compute_complex = bool(compute_complex)
 
-    if not only_real:
+    if compute_complex:
+        # Convert array to phase space.
+        fourier_transformed_array = np.fft.fftn(array)
         # Roll the fourier-transformed array such that the nyquist frequency is between both ends of the array if the shape is odd.
         # If the shape is even, the first element after rolling is the nyquist frequency; it is then split between the first and last element.
         shifts = np.floor_divide(array.shape, 2)
-
-        fourier_transformed_array = np.fft.fft(array, axis=dim)
-        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(array.ndim))
+        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
 
         # For each dim whose shape is even, split the nyquist frequency existing at the first element into a new last element.
         for dim in filter(lambda dim: array.shape[dim] % 2 == 0, range(array.ndim)):
             nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
-            np.concatenate(
+            fourier_transformed_array = np.concatenate(
                 (
                     nyquist_frequency_slice_halved,
                     fourier_transformed_array[(*[slice(None)] * dim, slice(1))], # Slice out all but the first element along dimension dim.
@@ -466,28 +474,88 @@ def sinc_resample(array, new_shape, only_real=True):
                     nyquist_frequency_slice_halved,
                 ),
                 axis=dim,
-                out=fourier_transformed_array,
             )
 
-        # Zero pad or truncate at the ends of fourier_transformed_array as necessary to achieve the desired shape.
+        # fourier_transformed_array has an odd shape in each dimension and the nyquist frequency exists around the ends of each dimension.
+
+        # Truncate and/or zero-pad at the ends of fourier_transformed_array as necessary to achieve the desired shape.
 
         # Truncate.
-        truncate_by = np.maximum(array.shape - new_shape, 0)
-        truncate_slices = (slice(0, array.shape[dim] - cut_off) for dim, cut_off in enumerate(truncate_by))
+        truncate_by = np.maximum(fourier_transformed_array.shape - new_shape, 0)
+        truncate_slices = tuple(slice(0, fourier_transformed_array.shape[dim] - cut_off) for dim, cut_off in enumerate(truncate_by))
         fourier_transformed_array = fourier_transformed_array[truncate_slices]
 
         # Pad.
-        pad_by = np.maximum(new_shape - array.shape, 0)
-        pad_width = tuple((0, pad) for pad in pad_by)
+        pad_by = np.maximum(new_shape - fourier_transformed_array.shape, 0)
+        # Pad symmetrically. If pad is odd, pad the extra element on the left.
+        pad_width = tuple((pad // 2 + pad % 2, pad // 2) for pad in pad_by)
         fourier_transformed_array = np.pad(fourier_transformed_array, pad_width=pad_width, mode='constant', constant_values=0)
 
-        
+        # Roll the fourier-transformed array back such that the first element is the zero-frequency.
+        shifts = - np.floor_divide(fourier_transformed_array.shape, 2)
+        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
+
+        # Convert fourier_transformed_array back to native space.
+        new_complex_array = np.fft.ifftn(fourier_transformed_array, s=new_shape) * np.prod(new_shape) / np.prod(array.shape)
+
+        return new_complex_array
+
+    else:
+        # Compute only the real components, but do it to completion per-dimension.
+        # This is done per-dimension rather than for all dimensions simultaneously for the real-only (compute_complex==False) calls 
+        # to avoid the special cases necessary to otherwise handle the drop of redundant information in np.fft.rfftn.
 
         for dim in range(array.ndim):
-            fourier_transformed_array = np.fft.fft(array, axis=dim)
-            fourier_transformed_array = np.roll(fourier_transformed_array, shifts[dim], axis=dim)
-            # If the original array's shape in this dimension is even, split the nyquist frequency at both ends of array.
-            if array.shape[dim] % 2 == 1:
-                fourier_transformed_array[0] /= 2
-                if fourier_transformed_array.ndim != 1: raise Exception(f"ndim: {fourier_transformed_array.ndim}")
-                fourier_transformed_array = np.append(fourier_transformed_array, fourier_transformed_array[0])
+
+            # Convert array to phase space.
+            fourier_transformed_array = np.fft.rfft(array, axis=dim)
+            # If the shape is even, the nyquist frequency is at the end of array.
+
+            # Truncate or zero-pad at the end of fourier_transformed_array as necessary to achieve the desired shape.
+
+            this_dim_shape_adjustment = new_shape[dim] - fourier_transformed_array.shape[dim]
+            if this_dim_shape_adjustment < 0:
+                # Truncate.
+                truncate_by = abs(this_dim_shape_adjustment)
+                truncate_slice = (*[slice(None)] * dim, slice(0, fourier_transformed_array.shape[dim] - truncate_by))
+                fourier_transformed_array = fourier_transformed_array[truncate_slice]
+            elif this_dim_shape_adjustment > 0:
+                # Pad.
+                pad_by = this_dim_shape_adjustment
+                # Pad symmetrically. If pad is odd, pad the extra element on the left.
+                pad_width = (*[(0, 0)] * dim, (pad_by // 2 + pad_by % 2, pad_by // 2), *[(0, 0)] * (fourier_transformed_array.ndim - dim - 1))
+                fourier_transformed_array = np.pad(fourier_transformed_array, pad_width=pad_width, mode='constant', constant_values=0)
+
+            # Convert fourier_transformed_array back to native space and update array.
+            array = np.fft.irfft(fourier_transformed_array, n=new_shape[dim]) * np.prod(new_shape) / np.prod(array.shape)
+
+        return array
+    
+
+
+
+    '''
+    # Convert array to phase space.
+        fourier_transformed_array = np.fft.fftn(array)
+        # Roll the fourier-transformed array such that the nyquist frequency is between both ends of the array if the shape is odd.
+        # If the shape is even, the first element after rolling is the nyquist frequency; it is then split between the first and last element.
+        shifts = np.floor_divide(array.shape, 2)
+        shifts[-1] = 1
+        fourier_transformed_array = np.roll(fourier_transformed_array, shifts, axis=range(fourier_transformed_array.ndim))
+
+        # For each dim whose shape is even, split the nyquist frequency existing at the first element into a new last element.
+        for dim in filter(lambda dim: array.shape[dim] % 2 == 0, range(array.ndim - 1)):
+            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
+            fourier_transformed_array = np.concatenate(
+                (
+                    nyquist_frequency_slice_halved,
+                    fourier_transformed_array[(*[slice(None)] * dim, slice(1))], # Slice out all but the first element along dimension dim.
+                    # eval(f"fourier_transformed_array[{':,' * dim} 1:]"), # Slice out all but the first element along dimension dim.
+                    nyquist_frequency_slice_halved,
+                ),
+                axis=dim,
+            )
+        if array.shape[-1] % 2 == 0:
+            nyquist_frequency_slice_halved = np.expand_dims(fourier_transformed_array.take(0, axis=dim) / 2, dim)
+            fourier_transformed_array[...,-1] /= 2
+    '''
