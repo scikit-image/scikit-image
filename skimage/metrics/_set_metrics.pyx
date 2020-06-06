@@ -31,7 +31,6 @@ def hausdorff_distance_onesided(cnp.float64_t[:, ::1] points_sup,
         between points in ``points_sup`` and ``points_inf``.
 
     """
-    assert points_sup.shape[1] == points_inf.shape[1]
 
     cdef double d2_max = 0.
     cdef double d2_min_i = DBL_MAX
