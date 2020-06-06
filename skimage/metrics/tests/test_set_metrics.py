@@ -32,7 +32,8 @@ def test_hausdorff_simple():
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), distance)
 
 
-@parametrize("points_a, points_b", itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2))
+@parametrize("points_a, points_b",
+             itertools.product([(0, 0), (3, 0), (1, 4), (4, 1)], repeat=2))
 def test_hausdorff_region_single(points_a, points_b):
     shape = (5, 5)
     coords_a = np.zeros(shape, dtype=np.bool)
@@ -46,7 +47,8 @@ def test_hausdorff_region_single(points_a, points_b):
 
 
 @parametrize("points_a, points_b",
-             itertools.product([(5, 4), (4, 5), (3, 4), (4, 3)], [(6, 4), (2, 6), (2, 4), (4, 0)]))
+             itertools.product([(5, 4), (4, 5), (3, 4), (4, 3)],
+                               [(6, 4), (2, 6), (2, 4), (4, 0)]))
 def test_hausdorff_region_different_points(points_a, points_b):
     shape = (7, 7)
     coords_a = np.zeros(shape, dtype=np.bool)
@@ -102,7 +104,8 @@ def test_gallery():
 
 
 @parametrize("points_a, points_b",
-             itertools.product([(0, 0, 1), (0, 1, 0), (1, 0, 0)], [(0, 0, 2), (0, 2, 0), (2, 0, 0)]))
+             itertools.product([(0, 0, 1), (0, 1, 0), (1, 0, 0)],
+                               [(0, 0, 2), (0, 2, 0), (2, 0, 0)]))
 def test_3d_hausdorff_region(points_a, points_b):
     hausdorff_distances_list = []
     shape = (3, 3, 3)
