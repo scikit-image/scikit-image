@@ -1,6 +1,6 @@
 import warnings
 import numpy as np
-from scipy.interpolate import interpn
+from scipy.interpolate import RegularGridInterpolator
 from scipy.linalg import inv, solve, det, svd
 from scipy.sparse.linalg import cg, LinearOperator
 from skimage.transform import rescale
@@ -155,13 +155,12 @@ class _Lddmm:
         self.fourier_velocity_fields = np.zeros_like(self.velocity_fields, np.complex128)
         self.matching_weights = np.ones_like(self.target)
         self.deformed_template_to_time = []
-        self.deformed_template = interpn(
+        self.deformed_template = RegularGridInterpolator(
             points=self.template_axes, 
             values=self.template, 
-            xi=self.phi_inv_affine_inv, 
             bounds_error=False, 
             fill_value=None, 
-        )
+        )(xi=self.phi_inv_affine_inv)
         if spatially_varying_contrast_map:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros((*self.target.shape, self.contrast_order + 1))
@@ -197,7 +196,7 @@ class _Lddmm:
 
         # Preempt known error.
         if np.any(np.array(self.template.shape) == 1) or np.any(np.array(self.target.shape) == 1):
-            raise RuntimeError(f"Known issue: Images with a 1 in their shape are not supported by scipy.interpolate.interpn.\n"
+            raise RuntimeError(f"Known issue: Images with a 1 in their shape are not supported by scipy.interpolate.RegularGridInterpolator.\n"
                                f"self.template.shape: {self.template.shape}, self.target.shape: {self.target.shape}.\n")
 
     def register(self):
@@ -322,23 +321,21 @@ class _Lddmm:
         for timestep in range(self.num_timesteps):
             # Compute phi_inv.
             sample_coords = self.template_coords - self.velocity_fields[..., timestep, :] * self.delta_t
-            self.phi_inv = interpn(
+            self.phi_inv = RegularGridInterpolator(
                 points=self.template_axes, 
                 values=self.phi_inv - self.template_coords, 
-                xi=sample_coords, 
                 bounds_error=False, 
                 fill_value=None, 
-            ) + sample_coords
+            )(xi=sample_coords) + sample_coords
 
             # Compute deformed_template_to_time
             self.deformed_template_to_time.append(
-                interpn(
+                RegularGridInterpolator(
                     points=self.template_axes, 
                     values=self.template, 
-                    xi=self.phi_inv, 
                     bounds_error=False, 
                     fill_value=None, 
-                )
+                )(xi=self.phi_inv)
             )
             
             # End time loop.
@@ -347,23 +344,21 @@ class _Lddmm:
         affine_inv_target_coords = _multiply_coords_by_affine(inv(self.affine), self.target_coords)
 
         # Apply phi_inv to affine_inv_target_coords.
-        self.phi_inv_affine_inv = interpn(
+        self.phi_inv_affine_inv = RegularGridInterpolator(
             points=self.template_axes, 
             values=self.phi_inv - self.template_coords, 
-            xi=affine_inv_target_coords, 
             bounds_error=False, 
             fill_value=None, 
-        ) + affine_inv_target_coords
+        )(xi=affine_inv_target_coords,) + affine_inv_target_coords
 
         # Apply phi_inv_affine_inv to template.
         # deformed_template is sampled at the coordinates of the target.
-        self.deformed_template = interpn(
+        self.deformed_template = RegularGridInterpolator(
             points=self.template_axes, 
             values=self.template, 
-            xi=self.phi_inv_affine_inv, 
             bounds_error=False, 
             fill_value=None, 
-        )
+        )(xi=self.phi_inv_affine_inv)
 
 
     def _apply_contrast_map(self):
@@ -557,26 +552,24 @@ class _Lddmm:
         """
 
         # Generate the template image deformed by phi_inv but not affected by the affine.
-        non_affine_deformed_template = interpn(
+        non_affine_deformed_template = RegularGridInterpolator(
             points=self.template_axes, 
             values=self.template, 
-            xi=self.phi_inv, 
             bounds_error=False, 
             fill_value=None, 
-        )
+        )(xi=self.phi_inv)
 
         # Compute the gradient of non_affine_deformed_template.
         non_affine_deformed_template_gradient = np.stack(np.gradient(non_affine_deformed_template, *self.template_resolution), -1)
 
         # Apply the affine to each component of non_affine_deformed_template_gradient.
         sample_coords = _multiply_coords_by_affine(inv(self.affine), self.target_coords)
-        deformed_template_gradient = interpn(
+        deformed_template_gradient = RegularGridInterpolator(
             points=self.template_axes,
             values=non_affine_deformed_template_gradient,
-            xi=sample_coords,
             bounds_error=False,
             fill_value=None,
-        )
+        )(xi=sample_coords)
 
         # Reshape and broadcast deformed_template_gradient from shape (x,y,z,3) to (x,y,z,3,1) to (x,y,z,3,4) - for a 3D example.
         deformed_template_gradient_broadcast = np.repeat(np.expand_dims(deformed_template_gradient, -1), repeats=self.target.ndim + 1, axis=-1)
@@ -729,13 +722,12 @@ class _Lddmm:
 
             # Update phi.
             sample_coords = self.template_coords + self.velocity_fields[..., timestep, :] * self.delta_t
-            self.phi = interpn(
+            self.phi = RegularGridInterpolator(
                 points=self.template_axes, 
                 values=self.phi - self.template_coords, 
-                xi=sample_coords, 
                 bounds_error=False, 
                 fill_value=None, 
-            ) + sample_coords
+            )(xi=sample_coords) + sample_coords
 
             # Apply affine by multiplication.
             # This transforms error in the target space back to time t.
@@ -746,13 +738,12 @@ class _Lddmm:
             det_grad_phi = _compute_tail_determinant(grad_phi)
 
             # Transform error in target space back to time t.
-            error_at_t = interpn(
+            error_at_t = RegularGridInterpolator(
                 points=self.target_axes,
                 values=d_matching_d_deformed_template,
-                xi=self.affine_phi,
                 bounds_error=False,
                 fill_value=None,
-            )
+            )(xi=self.affine_phi)
 
             # The gradient of the template image deformed to time t.
             deformed_template_to_time_gradient = np.stack(np.gradient(self.deformed_template_to_time[timestep], *self.template_resolution, axis=tuple(range(self.template.ndim))), -1)
@@ -831,13 +822,12 @@ class _Lddmm:
 
             # Update phi.
             sample_coords = self.template_coords + self.velocity_fields[..., timestep, :] * self.delta_t
-            self.phi = interpn(
+            self.phi = RegularGridInterpolator(
                 points=self.template_axes, 
                 values=self.phi - self.template_coords, 
-                xi=sample_coords, 
                 bounds_error=False, 
                 fill_value=None, 
-            ) + sample_coords
+            )(xi=sample_coords) + sample_coords
 
             # Apply affine by multiplication.
             # This transforms error in the target space back to time t.
@@ -1235,22 +1225,20 @@ def generate_position_field(
     for timestep in (reversed(range(num_timesteps)) if deform_to == "template" else range(num_timesteps)):
         if deform_to == "template":
             sample_coords = template_coords + velocity_fields[..., timestep, :] * delta_t
-            phi = interpn(
+            phi = RegularGridInterpolator(
                 points=template_axes,
                 values=phi - template_coords,
-                xi=sample_coords,
                 bounds_error=False,
                 fill_value=None,
-            ) + sample_coords
+            )(xi=sample_coords) + sample_coords
         elif deform_to == "target":
             sample_coords = template_coords - velocity_fields[..., timestep, :] * delta_t
-            phi_inv = interpn(
+            phi_inv = RegularGridInterpolator(
                 points=template_axes,
                 values=phi_inv - template_coords,
-                xi=sample_coords,
                 bounds_error=False,
                 fill_value=None,
-            ) + sample_coords
+            )(xi=sample_coords) + sample_coords
 
     # Apply the affine transform to the position field.
     if deform_to == "template":
@@ -1260,13 +1248,12 @@ def generate_position_field(
     elif deform_to == "target":
         # Apply the affine by interpolation.
         sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)
-        phi_inv_affine_inv = interpn(
+        phi_inv_affine_inv = RegularGridInterpolator(
             points=template_axes,
             values=phi_inv - template_coords,
-            xi=sample_coords,
             bounds_error=False,
             fill_value=None,
-        ) + sample_coords
+        )(xi=sample_coords) + sample_coords
         # phi_inv_affine_inv has the resolution of the target.
 
     # return appropriate position field.
@@ -1311,13 +1298,12 @@ def _transform_image(
         )
 
     # Interpolate subject at position field.
-    deformed_subject = interpn(
+    deformed_subject = RegularGridInterpolator(
         points=_compute_axes(shape=subject.shape, resolution=subject_resolution),
         values=subject,
-        xi=position_field,
         bounds_error=False,
         fill_value=extrapolation_fill_value,
-    )
+    )(xi=position_field)
 
     return deformed_subject
 
@@ -1358,7 +1344,7 @@ def lddmm_transform_image(
         deform_to: str, optional
             Either "template" or "target", indicating which position field to apply to subject. By default "template".
         extrapolation_fill_value: float, optional
-            The fill_value kwarg passed to scipy.interpolate.interpn. 
+            The fill_value kwarg passed to scipy.interpolate.RegularGridInterpolator. 
             If None, this is set to a low quantile of the subject's 10**-subject.ndim quantile to estimate background. By default None.
         affine_phi: np.ndarray, optional
             The position field in the shape of the template for deforming images to the template space. By default None.
@@ -1442,13 +1428,12 @@ def _transform_points(
                          f"points.shape[-1]: {points.shape[-1]}, position_field.ndim - 1: {position_field.ndim - 1}.")
 
     # Interpolate points at position_field.
-    transformed_points = interpn(
+    transformed_points = RegularGridInterpolator(
         points=_compute_axes(shape=position_field.shape[:-1], resolution=position_field_resolution),
         values=position_field,
-        xi=points,
         bounds_error=False,
         fill_value=None,
-    )
+    )(xi=points)
 
     return transformed_points
 
