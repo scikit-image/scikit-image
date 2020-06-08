@@ -19,7 +19,7 @@ Defines:
 import numpy as np
 import warnings
 
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
 
@@ -367,11 +367,11 @@ def resample(
         err_to_larger: bool, optional
             Determines whether to round the new shape up or down. By default True.
         extrapolation_fill_value: float, optional
-            The fill_value kwarg passed to RegularGridInterpolator. By default None.
+            The fill_value kwarg passed to interpn. By default None.
         origin: str, optional
             The origin to use for the image axes and coordinates used internally. By default 'center'.
         method: str, optional
-            The method of interpolation, passed as the method kwarg in RegularGridInterpolator. By default 'linear'.
+            The method of interpolation, passed as the method kwarg in interpn. By default 'linear'.
         image_is_coords: bool, optional
             If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. By default False.
         anti_aliasing: bool, optional
@@ -422,12 +422,13 @@ def resample(
         )  # Mutates image.
 
     # Interpolate image.
-    new_image = RegularGridInterpolator(
+    new_image = interpn(
         points=old_axes,
         values=image,
+        xi=new_coords,
         bounds_error=False,
         fill_value=extrapolation_fill_value,
-    )(xi=new_coords)
+    )
 
     return new_image
 
