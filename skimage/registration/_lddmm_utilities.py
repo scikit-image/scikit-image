@@ -13,6 +13,7 @@ Defines:
         resample(image, new_resolution, old_resolution=1, 
             err_to_larger=True, extrapolation_fill_value=None, 
             origin='center', method='linear', image_is_coords=False)
+        sinc_resample(array, new_shape)
 """
 
 import numpy as np
@@ -431,7 +432,6 @@ def resample(
     return new_image
 
 
-#TODO: finalize function and import.
 def sinc_resample(array, new_shape):
     """
     Resample array to new_shape by padding and truncating at high frequencies in the fourier domain.
