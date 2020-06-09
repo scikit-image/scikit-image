@@ -670,7 +670,7 @@ class _Lddmm:
         # Set scale of self.affine if appropriate.
         if self.fixed_affine_scale is not None:
             U, _, Vh = svd(self.affine[:-1, :-1])
-            self.affine[:-1, :-1] = U @ np.diag([self.fixed_affine_scale] * len(self.affine) - 1) @ Vh
+            self.affine[:-1, :-1] = U @ np.diag([self.fixed_affine_scale] * (len(self.affine) - 1)) @ Vh
         # If self.fixed_affine_scale was not provided (is None), project self.affine to a rigid affine if appropriate.
         elif iteration < self.num_rigid_affine_iterations:
             U, _, Vh = svd(self.affine[:-1, :-1])
@@ -1105,6 +1105,7 @@ def lddmm_register(
 
         # Extract appropriate multiscale_lddmm_kwargs.
         this_scale_lddmm_kwargs = dict(map(lambda kwarg_item: (kwarg_item[0], kwarg_item[1][scale_index]), multiscale_lddmm_kwargs.items()))
+        # this_scale_lddmm_kwargs = dict(map(lambda kwarg_name: (kwarg_name, multiscale_lddmm_kwargs[kwarg_name][scale_index]), multiscale_lddmm_kwargs.keys()))
 
         # rescale images and resolutions.
         # template.
