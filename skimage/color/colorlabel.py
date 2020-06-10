@@ -166,6 +166,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
         if image.ndim > label.ndim:
             image = img_as_float(rgb2gray(image))
+        else:
+            image = img_as_float(image)
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
     # Ensure that all labels are non-negative so we can index into

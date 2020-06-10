@@ -19,23 +19,17 @@ def image():
 
 
 @pytest.mark.parametrize(
-    "mask, shift_x, shift_y, mode, cval, behavior, n_warning, warning_type",
-    [(True, None, None, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (None, 1, None, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (None, None, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (True, 1, 1, 'nearest', 0.0, 'ndimage', 1, (UserWarning,)),
-     (None, False, False, 'constant', 0.0, 'rank', 1, (UserWarning,)),
-     (None, False, False, 'nearest', 0.0, 'rank', 0, []),
-     (None, False, False, 'nearest', 0.0, 'ndimage', 0, [])]
+    "mode, cval, behavior, n_warning, warning_type",
+    [('nearest', 0.0, 'ndimage', 0, []),
+     ('constant', 0.0, 'rank', 1, (UserWarning,)),
+     ('nearest', 0.0, 'rank', 0, []),
+     ('nearest', 0.0, 'ndimage', 0, [])]
 )
-def test_median_warning(image, mask, shift_x, shift_y, mode, cval, behavior,
+def test_median_warning(image, mode, cval, behavior,
                         n_warning, warning_type):
-    if mask:
-        mask = np.ones((image.shape), dtype=np.bool_)
 
     with pytest.warns(None) as records:
-        median(image, mask=mask, shift_x=shift_x, shift_y=shift_y, mode=mode,
-               behavior=behavior)
+        median(image, mode=mode, behavior=behavior)
 
     assert len(records) == n_warning
     for rec in records:

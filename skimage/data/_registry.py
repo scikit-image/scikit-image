@@ -16,6 +16,7 @@ legacy_datasets = [
     'coffee.png',
     'coins.png',
     'color.png',
+    'cell.png',
     'grass.png',
     'gravel.png',
     'horse.png',

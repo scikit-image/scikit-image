@@ -1,4 +1,6 @@
+import pytest
 import numpy as np
+
 from skimage._shared.testing import assert_array_equal
 from skimage import data
 from skimage.feature import BRIEF, corner_peaks, corner_harris
@@ -13,9 +15,10 @@ def test_color_image_unsupported_error():
         BRIEF().extract(img, keypoints)
 
 
-def test_normal_mode():
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
+def test_normal_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for normal mode."""
-    img = data.coins()
+    img = data.coins().astype(dtype)
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
                              threshold_abs=0, threshold_rel=0.1)
@@ -36,9 +39,10 @@ def test_normal_mode():
     assert_array_equal(extractor.descriptors, expected)
 
 
-def test_uniform_mode():
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
+def test_uniform_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
-    img = data.coins()
+    img = data.coins().astype(dtype)
 
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
                              threshold_abs=0, threshold_rel=0.1)
@@ -64,8 +68,9 @@ def test_unsupported_mode():
         BRIEF(mode='foobar')
 
 
-def test_border():
-    img = np.zeros((100, 100))
+@pytest.mark.parametrize('dtype', ['float32', 'float64', 'uint8', 'int'])
+def test_border(dtype):
+    img = np.zeros((100, 100), dtype=dtype)
     keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
 
     extractor = BRIEF(patch_size=41)

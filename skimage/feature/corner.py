@@ -1135,4 +1135,5 @@ def corner_orientations(image, corners, mask):
     array([  45.,  135.,  -45., -135.])
 
     """
+    image = _prepare_grayscale_input_2D(image)
     return _corner_orientations(image, corners, mask)

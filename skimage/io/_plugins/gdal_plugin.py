@@ -10,16 +10,10 @@ except ImportError:
                       "for further instructions.")
 
 
-def imread(fname, dtype=None):
+def imread(fname):
     """Load an image from file.
 
     """
-    if dtype is not None:
-        warn('The dtype argument was always silently ignored. It will be '
-             'removed from scikit-image version 0.17. To avoid this '
-             'warning, do not specify it in your function call.',
-             UserWarning, stacklevel=2)
-
     ds = gdal.Open(fname)
 
-    return ds.ReadAsArray().astype(dtype)
+    return ds.ReadAsArray()

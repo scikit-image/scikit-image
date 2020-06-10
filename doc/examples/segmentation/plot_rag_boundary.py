@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 img = data.coffee()
 gimg = color.rgb2gray(img)
 
-labels = segmentation.slic(img, compactness=30, n_segments=400)
+labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 edges = filters.sobel(gimg)
 edges_rgb = color.gray2rgb(edges)
 
