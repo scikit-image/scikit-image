@@ -32,23 +32,23 @@ ax.set_title('Microscopy image of human cells')
 plt.show()
 
 #####################################################################
-# We can see many cells on a dark background. They are fairly smooth and
-# elliptical. In addition, some of them present brighter spots: They are going
-# through the process of cell division
-# (`mitosis <https://en.wikipedia.org/wiki/Mitosis>`_).
+# We can see many cell nuclei on a dark background. Most of them are smooth
+# and have an elliptical shape. However, we can distinguish some brighter
+# spots corresponding to nuclei undergoing
+# `mitosis <https://en.wikipedia.org/wiki/Mitosis>`_ (cell division).
 
 #####################################################################
 # Estimate the mitotic index
 # ==========================
-# Cellular biology uses the
+# Cell biology uses the
 # `mitotic index <https://en.wikipedia.org/wiki/Mitotic_index>`_
-# to quantify cell division (and,
-# hence, cell population growth). By definition, it is the ratio of cells in
-# mitosis (over the total number of cells). To analyze the above image,
-# we are thus interested in two thresholds: one separating the cells from the
+# to quantify cell division and,
+# hence, cell proliferation. By definition, it is the ratio of cells in
+# mitosis over the total number of cells. To analyze the above image,
+# we are thus interested in two thresholds: one separating the nuclei from the
 # background, the other separating the dividing nuclei (brighter spots) from
-# the cytoplasm of their respective mother cells (and, intensity-wise, from
-# the other cells). To separate these three different classes of pixels, we
+# the non-dividing nuclei.
+# To separate these three different classes of pixels, we
 # resort to :ref:`sphx_glr_auto_examples_segmentation_plot_multiotsu.py`.
 
 thresholds = filters.threshold_multiotsu(image, classes=3)
@@ -64,8 +64,9 @@ ax[1].axis('off')
 plt.show()
 
 #####################################################################
-# Since there are touching cells, thresholding is not enough to segment all
-# the cells. If it were, we could readily compute a mitotic index for this
+# Since there are overlapping nuclei, thresholding is not enough to segment
+# all the nuclei.
+# If it were, we could readily compute a mitotic index for this
 # sample:
 
 cells = image > thresholds[0]
@@ -105,11 +106,11 @@ plt.show()
 # =====================
 # Clearly, not all connected regions in the middle plot are dividing nuclei.
 # On one hand, the second threshold (value of ``thresholds[1]``) appears to be
-# too low to separate those very bright areas corresponding to cell division
-# from relatively bright pixels otherwise present in many cells. On the other
+# too low to separate those very bright areas corresponding to dividing nuclei
+# from relatively bright pixels otherwise present in many nuclei. On the other
 # hand, we want a smoother image, removing small spurious objects and,
 # possibly, merging clusters of neighbouring objects (some could correspond to
-# two emerging nuclei in one mother cell). In a way, the segmentation
+# two nuclei emerging from one cell division). In a way, the segmentation
 # challenge we are facing with dividing nuclei is the opposite of that with
 # (touching) cells.
 
