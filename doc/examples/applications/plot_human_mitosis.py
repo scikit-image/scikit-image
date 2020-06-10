@@ -5,7 +5,7 @@ Segment human cells (in mitosis)
 
 In this example, we analyze a microscopy image of human cells. We use data
 provided by Jason Moffat [1]_ through
-[CellProfiler](https://cellprofiler.org/examples/#human-cells).
+`CellProfiler <https://cellprofiler.org/examples/#human-cells>`_.
 
 .. [1] Moffat J, Grueneberg DA, Yang X, Kim SY, Kloepfer AM, Hinkle G, Piqani
        B, Eisenhaure TM, Luo B, Grenier JK, Carpenter AE, Foo SY, Stewart SA,
@@ -35,12 +35,14 @@ plt.show()
 # We can see many cells on a dark background. They are fairly smooth and
 # elliptical. In addition, some of them present brighter spots: They are going
 # through the process of cell division
-# ([mitosis](https://en.wikipedia.org/wiki/Mitosis)).
+# (`mitosis <https://en.wikipedia.org/wiki/Mitosis>`_).
 
 #####################################################################
 # Estimate the mitotic index
 # ==========================
-# Cellular biology uses the mitotic index to quantify cell division (and,
+# Cellular biology uses the
+# `mitotic index <https://en.wikipedia.org/wiki/Mitotic_index>`_
+# to quantify cell division (and,
 # hence, cell population growth). By definition, it is the ratio of cells in
 # mitosis (over the total number of cells). To analyze the above image,
 # we are thus interested in two thresholds: one separating the cells from the
