@@ -28,7 +28,7 @@ image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleH
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
-ax.set_title('Microscopy image of human cells')
+ax.set_title('Microscopy image of human cells stained for nuclear DNA')
 plt.show()
 
 #####################################################################
@@ -94,7 +94,7 @@ ax[0].imshow(image)
 ax[0].set_title('Original')
 ax[0].axis('off')
 ax[2].imshow(cells)
-ax[2].set_title('Cells?')
+ax[2].set_title('All nuclei?')
 ax[2].axis('off')
 ax[1].imshow(dividing)
 ax[1].set_title('Dividing nuclei?')
@@ -128,7 +128,7 @@ binary_smoother_dividing = smoother_dividing > 20
 
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.imshow(binary_smoother_dividing)
-ax.set_title('Cells in mitosis')
+ax.set_title('Dividing nuclei')
 ax.axis('off')
 plt.show()
 
@@ -141,9 +141,9 @@ print(cleaned_dividing.max())
 # dividing nuclei in this sample.
 
 #####################################################################
-# Segment cells
-# =============
-# To separate touching and overlapping cells, we resort to
+# Segment nuclei
+# ==============
+# To separate overlapping nuclei, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
 # To visualize the segmentation conveniently, we colour-code the labelled
 # regions using the `color.label2rgb` function, specifying the background
@@ -160,10 +160,10 @@ segmented_cells = morphology.watershed(-distance, markers, mask=cells)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
-ax[0].set_title('Touching cells')
+ax[0].set_title('Overlapping nuclei')
 ax[0].axis('off')
 ax[1].imshow(color.label2rgb(segmented_cells, bg_label=0))
-ax[1].set_title('Segmented cells')
+ax[1].set_title('Segmented nuclei')
 ax[1].axis('off')
 plt.show()
 
