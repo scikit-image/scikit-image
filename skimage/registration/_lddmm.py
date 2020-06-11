@@ -81,8 +81,8 @@ class _Lddmm:
         # Constant inputs.
 
         # Images.
-        self.template = _validate_ndarray(template)
-        self.target = _validate_ndarray(target, required_ndim=self.template.ndim)
+        self.template = _validate_ndarray(template, dtype=float)
+        self.target = _validate_ndarray(target, dtype=float, required_ndim=self.template.ndim)
 
         # Resolution.
         self.template_resolution = _validate_scalar_to_multi(template_resolution if template_resolution is not None else 1, self.template.ndim, float)
@@ -405,6 +405,10 @@ class _Lddmm:
         likelihood_matching = np.exp((self.contrast_deformed_template - self.target)**2 * (-1/(2 * self.sigma_matching**2))) / np.sqrt(2 * np.pi * self.sigma_matching**2)
         likelihood_artifact = np.exp((self.artifact_mean_value - self.target)**2 * (-1/(2 * self.sigma_artifact**2))) / np.sqrt(2 * np.pi * self.sigma_artifact**2)
 
+        # Account for priors. Currently a hack.
+        likelihood_matching *= 0.8
+        likelihood_artifact *= 0.2
+
         self.matching_weights = likelihood_matching / (likelihood_matching + likelihood_artifact)
 
 
@@ -527,7 +531,10 @@ class _Lddmm:
             # Solve for contrast_coefficients.
             with warnings.catch_warnings():
                 warnings.filterwarnings('ignore', message='Ill-conditioned matrix')
-                self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
+                try:
+                    self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
+                except np.linalg.LinAlgError as e:
+                    raise np.linalg.LinAlgError(f"This exception may have been raised because the contrast_polynomial_basis vectors were not independent, i.e. the template is constant.") from e
 
 
     def _compute_affine_inv_gradient(self):
@@ -1104,8 +1111,7 @@ def lddmm_register(
     for scale_index, scale in enumerate(multiscales):
 
         # Extract appropriate multiscale_lddmm_kwargs.
-        this_scale_lddmm_kwargs = dict(map(lambda kwarg_item: (kwarg_item[0], kwarg_item[1][scale_index]), multiscale_lddmm_kwargs.items()))
-        # this_scale_lddmm_kwargs = dict(map(lambda kwarg_name: (kwarg_name, multiscale_lddmm_kwargs[kwarg_name][scale_index]), multiscale_lddmm_kwargs.keys()))
+        this_scale_lddmm_kwargs = dict(map(lambda kwarg_name: (kwarg_name, multiscale_lddmm_kwargs[kwarg_name][scale_index]), multiscale_lddmm_kwargs.keys()))
 
         # rescale images and resolutions.
         # template.
