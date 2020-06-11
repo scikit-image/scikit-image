@@ -131,7 +131,7 @@ class _Lddmm:
         self.template_coords = _compute_coords(self.template.shape, self.template_resolution)
         self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
         self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
-        self.artifact_mean_value = np.max(self.target) if self.sigma_artifact is not None else 0
+        self.artifact_mean_value = np.max(self.target) if self.check_artifacts else 0
         self.fourier_high_pass_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.fourier_high_pass_filter = (
@@ -166,7 +166,7 @@ class _Lddmm:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros((*self.target.shape, self.contrast_order + 1))
             else:
-                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, required_shape=(*self.target.shape, self.contrast_order + 1))
+                self.contrast_coefficients = _validate_ndarray(initial_contrast_coefficients, broadcast_to_shape=(*self.target.shape, self.contrast_order + 1))
         else:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros(self.contrast_order + 1)
@@ -400,7 +400,7 @@ class _Lddmm:
             matching_weights
         """
         
-        self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
+        # self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
         
         likelihood_matching = np.exp((self.contrast_deformed_template - self.target)**2 * (-1/(2 * self.sigma_matching**2))) / np.sqrt(2 * np.pi * self.sigma_matching**2)
         likelihood_artifact = np.exp((self.artifact_mean_value - self.target)**2 * (-1/(2 * self.sigma_artifact**2))) / np.sqrt(2 * np.pi * self.sigma_artifact**2)
@@ -409,7 +409,12 @@ class _Lddmm:
         likelihood_matching *= 0.8
         likelihood_artifact *= 0.2
 
+        # follow-up hack
+        likelihood_matching[likelihood_matching == 0] = 0.8
+        likelihood_artifact[likelihood_artifact == 0] = 0.2
+
         self.matching_weights = likelihood_matching / (likelihood_matching + likelihood_artifact)
+        self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
 
 
     def _compute_cost(self):
@@ -1148,6 +1153,15 @@ def lddmm_register(
         # Overwrite initials for next scale if applicable.
         if scale_index < len(multiscales) - 1:
             initial_affine = lddmm_dict['affine']
+            if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1]:
+                if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
+                    # If spatially_varying_contrast_map at this scale and next, resize contrast_coefficients.
+                    next_target_shape = np.round(multiscales[scale_index + 1] * target.shape)
+                    initial_contrast_coefficients = resize(lddmm_dict['contrast_coefficients'], (*next_target_shape, multiscale_lddmm_kwargs['contrast_order'][scale_index + 1] + 1))
+                else:
+                    # If not spatially_varying_contrast_map at this scale and next, average contrast_coefficients.
+                    initial_contrast_coefficients = np.mean(lddmm_dict['contrast_coefficients'], axis=np.arange(template.ndim))
+
             initial_contrast_coefficients = lddmm_dict['contrast_coefficients']
             next_template_shape = np.round(multiscales[scale_index + 1] * template.shape)
             initial_velocity_fields = sinc_resample(lddmm_dict['velocity_fields'], new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
