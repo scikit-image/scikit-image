@@ -527,13 +527,17 @@ class Test_lddmm_register:
     def test_identity_multiscale_registration(self):
 
         template = np.zeros((20,30))
+        # target has shape (21, 29) and semi-radii 6 and 10.
+        template = np.array([[(col-14)**2/12**2 + (row-10)**2/8**2 <= 1 for col in range(29)] for row in range(21)])
         target = np.copy(template)
 
         lddmm_register_kwargs = dict(
             template=template,
             target=target,
-            num_iterations=[0, 0, 0, 0],
-            multiscales=[10, (2,3), [3,2], 1],
+            num_iterations=1,
+            # num_affine_only_iterations=[1, 0, 0, 0],
+            # num_rigid_affine_iterations=0,
+            multiscales=[5, (2,3), [3,2], 1],
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
