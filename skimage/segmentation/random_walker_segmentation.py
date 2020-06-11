@@ -499,9 +499,10 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     labels[inds_isolated_seeds] = isolated_values
     labels = labels.reshape(labels_shape)
 
-    if return_full_prob:
-        mask = labels == 0
+    mask = labels == 0
+    mask[inds_isolated_seeds] = False
 
+    if return_full_prob:
         out = np.zeros((nlabels,) + labels_shape)
         for lab, (label_prob, prob) in enumerate(zip(out, X), start=1):
             label_prob[mask] = prob
@@ -509,6 +510,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     else:
         X = np.argmax(X, axis=0) + 1
         out = labels.astype(labels_dtype)
-        out[labels == 0] = X
+        out[mask] = X
 
     return out
