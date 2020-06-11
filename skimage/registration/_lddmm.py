@@ -1152,17 +1152,20 @@ def lddmm_register(
 
         # Overwrite initials for next scale if applicable.
         if scale_index < len(multiscales) - 1:
+            # initial_affine.
             initial_affine = lddmm_dict['affine']
-            if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1]:
-                if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
-                    # If spatially_varying_contrast_map at this scale and next, resize contrast_coefficients.
-                    next_target_shape = np.round(multiscales[scale_index + 1] * target.shape)
-                    initial_contrast_coefficients = resize(lddmm_dict['contrast_coefficients'], (*next_target_shape, multiscale_lddmm_kwargs['contrast_order'][scale_index + 1] + 1))
-                else:
-                    # If not spatially_varying_contrast_map at this scale and next, average contrast_coefficients.
+            # initial_contrast_coefficients.
+            if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1] and multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
+                # If spatially_varying_contrast_map at next scale and at this scale, resize contrast_coefficients.
+                next_target_shape = np.round(multiscales[scale_index + 1] * target.shape)
+                initial_contrast_coefficients = resize(lddmm_dict['contrast_coefficients'], (*next_target_shape, multiscale_lddmm_kwargs['contrast_order'][scale_index + 1] + 1))
+            elif not multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1] and multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
+                    # If spatially_varying_contrast_map at this scale but not at next scale, average contrast_coefficients.
                     initial_contrast_coefficients = np.mean(lddmm_dict['contrast_coefficients'], axis=np.arange(template.ndim))
-
-            initial_contrast_coefficients = lddmm_dict['contrast_coefficients']
+            else:
+                # If spatially_varying_contrast_map at next scale but not this scale or at neither scale, initialize directly.
+                initial_contrast_coefficients = lddmm_dict['contrast_coefficients']
+            # initial_velocity_fields.
             next_template_shape = np.round(multiscales[scale_index + 1] * template.shape)
             initial_velocity_fields = sinc_resample(lddmm_dict['velocity_fields'], new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
         
