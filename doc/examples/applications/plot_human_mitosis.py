@@ -38,6 +38,24 @@ plt.show()
 # `mitosis <https://en.wikipedia.org/wiki/Mitosis>`_ (cell division).
 
 #####################################################################
+# Another way of visualizing a greyscale image is contour plotting:
+
+fig, ax = plt.subplots(figsize=(5, 5))
+qcs = ax.contour(image, origin='image')
+ax.set_title('Contour plot of the same raw image')
+plt.show()
+
+#####################################################################
+# The contour lines are drawn at these levels:
+
+qcs.levels
+
+#####################################################################
+# Each level has, respectively, the following number of segments:
+
+[len(seg) for seg in qcs.allsegs]
+
+#####################################################################
 # Estimate the mitotic index
 # ==========================
 # Cell biology uses the
