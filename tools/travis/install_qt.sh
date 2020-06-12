@@ -4,7 +4,6 @@ set -ev
 if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     echo "backend : Template" > $MPL_DIR/matplotlibrc
 fi
-pip install -U pip
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" == "PyQt5" ]]; then
     if [[ $MINIMUM_REQUIREMENTS == "1" ]]; then
@@ -17,7 +16,7 @@ if [[ "${QT}" == "PyQt5" ]]; then
         # https://github.com/scikit-image/scikit-image/pull/3744#issuecomment-463450663
         pip install --retries 3 -q $PIP_FLAGS "pyqt5<5.12"
     else
-        pip install --retries 3 -q $PIP_FLAGS pyqt5
+        pip install --retries 3 -q $PIP_FLAGS "pyqt5!=5.15.0"
     fi
     MPL_QT_API=PyQt5
     export QT_API=pyqt5
