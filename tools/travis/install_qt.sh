@@ -4,6 +4,7 @@ set -ev
 if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     echo "backend : Template" > $MPL_DIR/matplotlibrc
 fi
+pip install -U pip
 # Now configure Matplotlib to use Qt5
 if [[ "${QT}" == "PyQt5" ]]; then
     if [[ $MINIMUM_REQUIREMENTS == "1" ]]; then
