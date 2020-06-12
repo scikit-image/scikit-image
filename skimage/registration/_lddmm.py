@@ -786,11 +786,11 @@ class _Lddmm:
             d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_time_gradient * (-1.0) * det(self.affine)
 
             # To convert from derivative to gradient we smooth by applying a physical-unit low-pass filter in the frequency domain.
-            matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=tuple(range(self.template.ndim))) * self.low_pass_filter
+            matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=tuple(range(self.template.ndim))) * np.expand_dims(self.low_pass_filter, -1)
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += np.fft.fftn(self.velocity_fields[...,timestep,:], axes=tuple(range(self.template.ndim))) / self.sigma_regularization**2
             # Multiply by a voxel-unit low-pass filter to further smooth.
-            matching_cost_at_t_gradient *= self.preconditioner_low_pass_filter
+            matching_cost_at_t_gradient *= np.expand_dims(self.preconditioner_low_pass_filter, -1)
             # Invert fourier transform back to the spatial domain.
             d_matching_d_velocity_at_t = np.fft.ifftn(matching_cost_at_t_gradient, axes=tuple(range(self.template.ndim))).real
 
