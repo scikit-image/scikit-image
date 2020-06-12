@@ -134,12 +134,12 @@ class _Lddmm:
         self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
         self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
         self.artifact_mean_value = np.max(self.target) if self.check_artifacts else 0
-        self.fourier_high_pass_filter_power = 2
+        self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.fourier_high_pass_filter = (
             1 - self.smooth_length**2 
             * np.sum((-2 + 2 * np.cos(2 * np.pi * fourier_velocity_fields_coords * self.template_resolution)) / self.template_resolution**2, axis=-1)
-        )**self.fourier_high_pass_filter_power
+        )**self.fourier_filter_power
         self.delta_t = 1 / self.num_timesteps
 
         # Dynamics.
@@ -185,14 +185,14 @@ class _Lddmm:
             (1 - self.smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
-            )**(2 * self.fourier_high_pass_filter_power)
+            )**(2 * self.fourier_filter_power)
         )**2
         # This filter affects the optimization but not the optimum.
         self.preconditioner_low_pass_filter = 1 / (
             (1 - preconditioner_smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
-            )**(2 * self.fourier_high_pass_filter_power)
+            )**(2 * self.fourier_filter_power)
         )**2
 
         # Accumulators.
@@ -786,11 +786,11 @@ class _Lddmm:
             d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_time_gradient * (-1.0) * det(self.affine)
 
             # To convert from derivative to gradient we smooth by applying a physical-unit low-pass filter in the frequency domain.
-            matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=tuple(range(self.template.ndim))) * np.expand_dims(self.low_pass_filter, -1)
+            matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=tuple(range(self.template.ndim))) * self.low_pass_filter
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += np.fft.fftn(self.velocity_fields[...,timestep,:], axes=tuple(range(self.template.ndim))) / self.sigma_regularization**2
             # Multiply by a voxel-unit low-pass filter to further smooth.
-            matching_cost_at_t_gradient *= 
+            matching_cost_at_t_gradient *= self.preconditioner_low_pass_filter
             # Invert fourier transform back to the spatial domain.
             d_matching_d_velocity_at_t = np.fft.ifftn(matching_cost_at_t_gradient, axes=tuple(range(self.template.ndim))).real
 
