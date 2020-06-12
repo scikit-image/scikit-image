@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det, svd
 from scipy.sparse.linalg import cg, LinearOperator
-from skimage.transform import rescale
+from skimage.transform import resize, rescale
 from matplotlib import pyplot as plt
 
 from ._lddmm_utilities import _validate_ndarray
@@ -57,6 +57,7 @@ class _Lddmm:
         # Velocity field specifiers.
         sigma_regularization=None,
         smooth_length=None,
+        preconditioner_smooth_length=None,
         num_timesteps=None,
         # Contrast map specifiers.
         contrast_order=None,
@@ -103,6 +104,7 @@ class _Lddmm:
         # Velocity field specifiers.
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
         self.smooth_length = float(smooth_length) if smooth_length is not None else 2 * np.max(self.template_resolution)
+        self.preconditioner_smooth_length = float(preconditioner_smooth_length) if preconditioner_smooth_length is not None else 5 * np.max(self.template_resolution)
         self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
 
         # Contrast map specifiers.
@@ -183,7 +185,14 @@ class _Lddmm:
             (1 - self.smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
-            )**self.fourier_high_pass_filter_power
+            )**(2 * self.fourier_high_pass_filter_power)
+        )**2
+        # This filter affects the optimization but not the optimum.
+        self.preconditioner_low_pass_filter = 1 / (
+            (1 - preconditioner_smooth_length**2 * (
+                np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
+                )
+            )**(2 * self.fourier_high_pass_filter_power)
         )**2
 
         # Accumulators.
@@ -413,7 +422,7 @@ class _Lddmm:
         likelihood_matching[likelihood_matching == 0] = 0.8
         likelihood_artifact[likelihood_artifact == 0] = 0.2
 
-        self.matching_weights = likelihood_matching / (likelihood_matching + likelihood_artifact)
+        self.matching_weights = likelihood_matching / (1 + likelihood_matching + likelihood_artifact)
         self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
 
 
@@ -449,7 +458,7 @@ class _Lddmm:
         )
 
         regularization_energy = (
-            np.sum(np.sum(np.abs(self.fourier_velocity_fields)**2, axis=(-1,-2)) * self.fourier_high_pass_filter) * 
+            np.sum(np.sum(np.abs(self.fourier_velocity_fields)**2, axis=(-1,-2)) * self.fourier_high_pass_filter**2) * 
             (np.prod(self.template_resolution) * self.delta_t / (2 * self.sigma_regularization**2) / self.template.size)
         )
 
@@ -776,10 +785,12 @@ class _Lddmm:
             # & (the determinant of the jacobian of the transformation).
             d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_time_gradient * (-1.0) * det(self.affine)
 
-            # To convert from derivative to gradient we smooth by applying a low-pass filter in the frequency domain.
+            # To convert from derivative to gradient we smooth by applying a physical-unit low-pass filter in the frequency domain.
             matching_cost_at_t_gradient = np.fft.fftn(d_matching_d_velocity_at_t, axes=tuple(range(self.template.ndim))) * np.expand_dims(self.low_pass_filter, -1)
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += np.fft.fftn(self.velocity_fields[...,timestep,:], axes=tuple(range(self.template.ndim))) / self.sigma_regularization**2
+            # Multiply by a voxel-unit low-pass filter to further smooth.
+            matching_cost_at_t_gradient *= 
             # Invert fourier transform back to the spatial domain.
             d_matching_d_velocity_at_t = np.fft.ifftn(matching_cost_at_t_gradient, axes=tuple(range(self.template.ndim))).real
 
@@ -919,6 +930,7 @@ def lddmm_register(
     # Velocity field specifiers.
     sigma_regularization=None,
     smooth_length=None,
+    preconditioner_smooth_length=None,
     num_timesteps=None,
     # Contrast map specifiers.
     contrast_order=None,
@@ -976,7 +988,9 @@ def lddmm_register(
         sigma_regularization: float, optional
             A scalar indicating the freedom to deform. Overrides 0 input. By default 10 * np.max(self.template_resolution).
         smooth_length: float, optional
-            The length scale of smoothing. Overrides 0 input. By default 2 * np.max(self.template_resolution).
+            The length scale of smoothing of the velocity_fields in physical units. Determines the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
+        preconditioner_smooth_length: float, optional
+            The length of preconditioner smoothing of the velocity_fields in physical units. Determines the optimization of the velocity_fields. By default 5 * np.max(self.template_resolution).
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. By default 5.
         contrast_order: int, optional
@@ -1089,6 +1103,7 @@ def lddmm_register(
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
         smooth_length=smooth_length,
+        preconditioner_smooth_length=preconditioner_smooth_length,
         num_timesteps=num_timesteps,
         # Contrast map specifiers.
         contrast_order=contrast_order,
