@@ -21,7 +21,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import color, feature, filters, io, measure, morphology, util
+from skimage import (
+    color, feature, filters, io, measure, morphology, segmentation, util
+)
 
 
 image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
@@ -174,7 +176,7 @@ local_maxi = feature.peak_local_max(distance, indices=False,
 
 markers = measure.label(local_maxi)
 
-segmented_cells = morphology.watershed(-distance, markers, mask=cells)
+segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
