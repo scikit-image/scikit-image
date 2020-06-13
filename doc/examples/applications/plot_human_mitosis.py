@@ -45,6 +45,7 @@ plt.show()
 fig, ax = plt.subplots(figsize=(5, 5))
 qcs = ax.contour(image, origin='image')
 ax.set_title('Contour plot of the same raw image')
+# sphinx_gallery_thumbnail_number = 2
 plt.show()
 
 #####################################################################
