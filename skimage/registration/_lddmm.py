@@ -134,13 +134,27 @@ class _Lddmm:
         self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
         self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
         self.artifact_mean_value = np.max(self.target) if self.check_artifacts else 0
+        self.delta_t = 1 / self.num_timesteps
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.fourier_high_pass_filter = (
             1 - self.smooth_length**2 
             * np.sum((-2 + 2 * np.cos(2 * np.pi * fourier_velocity_fields_coords * self.template_resolution)) / self.template_resolution**2, axis=-1)
         )**self.fourier_filter_power
-        self.delta_t = 1 / self.num_timesteps
+        fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
+        self.low_pass_filter = 1 / (
+            (1 - self.smooth_length**2 * (
+                np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
+                )
+            )**(2 * self.fourier_filter_power)
+        )
+        # This filter affects the optimization but not the optimum.
+        self.preconditioner_low_pass_filter = 1 / (
+            (1 - preconditioner_smooth_length**2 * (
+                np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
+                )
+            )**(2 * self.fourier_filter_power)
+        )
 
         # Dynamics.
         if initial_affine is None:
@@ -180,20 +194,6 @@ class _Lddmm:
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = self.deformed_template**power
         self.contrast_deformed_template = np.sum(self.contrast_polynomial_basis * self.contrast_coefficients, axis=-1) # Initialized value not used.
-        fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
-        self.low_pass_filter = 1 / (
-            (1 - self.smooth_length**2 * (
-                np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
-                )
-            )**(2 * self.fourier_filter_power)
-        )**2
-        # This filter affects the optimization but not the optimum.
-        self.preconditioner_low_pass_filter = 1 / (
-            (1 - preconditioner_smooth_length**2 * (
-                np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
-                )
-            )**(2 * self.fourier_filter_power)
-        )**2
 
         # Accumulators.
         self.matching_energies = []
@@ -722,6 +722,7 @@ class _Lddmm:
             num_timesteps
             delta_t
             low_pass_filter
+            preconditioner_low_pass_filter
             matching_weights
             contrast_coefficients
             velocity_fields
