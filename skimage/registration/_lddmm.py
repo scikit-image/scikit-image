@@ -515,9 +515,10 @@ class _Lddmm:
                 regularization_matrix = np.zeros_like(contrast_coefficients)
                 for dim in range(self.target.ndim):
                     regularization_matrix += (np.roll(contrast_coefficients, 1, axis=dim) - 2 * contrast_coefficients + np.roll(contrast_coefficients, -1, axis=dim)) / self.target_resolution[dim]**2
+                # regularization_matrix is now the Laplacian of contrast_coefficients.
                 regularization_matrix /= self.sigma_contrast**2
 
-                return (matching_matrix @ contrast_coefficients[..., None] - regularization_matrix[...,None]).ravel()
+                return (matching_matrix @ contrast_coefficients[..., None] - regularization_matrix[..., None]).ravel()
             linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
 
             # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
