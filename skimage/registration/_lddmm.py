@@ -56,8 +56,8 @@ class _Lddmm:
         fixed_affine_scale=None,
         # Velocity field specifiers.
         sigma_regularization=None,
-        smooth_length=None,
-        preconditioner_smooth_length=None,
+        velocity_smooth_length=None,
+        preconditioner_velocity_smooth_length=None,
         num_timesteps=None,
         # Contrast map specifiers.
         contrast_order=None,
@@ -65,6 +65,7 @@ class _Lddmm:
         contrast_maxiter=None,
         contrast_tolerance=None,
         sigma_contrast=None,
+        contrast_smooth_length=None,
         # Artifact specifiers.
         check_artifacts=None,
         sigma_artifact=None,
@@ -103,8 +104,8 @@ class _Lddmm:
 
         # Velocity field specifiers.
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
-        self.smooth_length = float(smooth_length) if smooth_length is not None else 2 * np.max(self.template_resolution)
-        self.preconditioner_smooth_length = float(preconditioner_smooth_length) if preconditioner_smooth_length is not None else 5 * np.max(self.template_resolution)
+        self.velocity_smooth_length = float(velocity_smooth_length) if velocity_smooth_length is not None else 2 * np.max(self.template_resolution)
+        self.preconditioner_velocity_smooth_length = float(preconditioner_velocity_smooth_length) if preconditioner_velocity_smooth_length is not None else 5 * np.max(self.template_resolution)
         self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
 
         # Contrast map specifiers.
@@ -114,6 +115,7 @@ class _Lddmm:
         self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
         self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
         self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
+        self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 2 * np.max(self.target_resolution)
 
         # Artifact specifiers.
         self.check_artifacts = bool(check_artifacts) if check_artifacts is not None else False
@@ -138,19 +140,19 @@ class _Lddmm:
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.fourier_high_pass_filter = (
-            1 - self.smooth_length**2 
+            1 - self.velocity_smooth_length**2 
             * np.sum((-2 + 2 * np.cos(2 * np.pi * fourier_velocity_fields_coords * self.template_resolution)) / self.template_resolution**2, axis=-1)
         )**self.fourier_filter_power
         fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.low_pass_filter = 1 / (
-            (1 - self.smooth_length**2 * (
+            (1 - self.velocity_smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
             )**(2 * self.fourier_filter_power)
         )
         # This filter affects the optimization but not the optimum.
         self.preconditioner_low_pass_filter = 1 / (
-            (1 - preconditioner_smooth_length**2 * (
+            (1 - preconditioner_velocity_smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
             )**(2 * self.fourier_filter_power)
@@ -471,85 +473,123 @@ class _Lddmm:
 
 
     def _compute_contrast_map(self):
-        """
-        Compute contrast_coefficients mapping deformed_template to target.
+            """
+            Compute contrast_coefficients mapping deformed_template to target.
 
-        Accesses attributes:
-            target
-            target_resolution
-            deformed_template
-            spatially_varying_contrast_map
-            sigma_matching
-            contrast_order
-            sigma_contrast
-            contrast_tolerance
-            contrast_maxiter
-            matching_weights
-            contrast_polynomial_basis
-            contrast_coefficients
+            Accesses attributes:
+                target
+                target_resolution
+                deformed_template
+                spatially_varying_contrast_map
+                sigma_matching
+                contrast_order
+                sigma_contrast
+                contrast_tolerance
+                contrast_maxiter
+                matching_weights
+                contrast_polynomial_basis
+                contrast_coefficients
 
-        Updates attributes:
-            contrast_polynomial_basis
-            contrast_coefficients
-        """
+            Updates attributes:
+                contrast_polynomial_basis
+                contrast_coefficients
+            """
 
-        # Update self.contrast_polynomial_basis.
-        for power in range(self.contrast_order + 1):
-            self.contrast_polynomial_basis[..., power] = self.deformed_template**power
+            # Update self.contrast_polynomial_basis.
+            for power in range(self.contrast_order + 1):
+                self.contrast_polynomial_basis[..., power] = self.deformed_template**power
 
-        if self.spatially_varying_contrast_map:
-            # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
+            if self.spatially_varying_contrast_map:
+                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
 
-            # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
-            contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
-            matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / self.sigma_matching**2) @ contrast_polynomial_basis_transpose
+                # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
+                contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
+                matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / self.sigma_matching**2) @ contrast_polynomial_basis_transpose
 
-            # Shape: (*self.target.shape, self.contrast_order + 1)
-            target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / self.sigma_matching**2
+                # Shape: (*self.target.shape, self.contrast_order + 1)
+                target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / self.sigma_matching**2
 
-            def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
-                """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) - regularization_matrix).ravel()."""
+                def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
+                    """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) + regularization_matrix).ravel()."""
 
-                contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
+                    contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
 
-                regularization_matrix = np.zeros_like(contrast_coefficients)
-                for dim in range(self.target.ndim):
-                    regularization_matrix += (np.roll(contrast_coefficients, 1, axis=dim) - 2 * contrast_coefficients + np.roll(contrast_coefficients, -1, axis=dim)) / self.target_resolution[dim]**2
-                # regularization_matrix is now the Laplacian of contrast_coefficients.
-                regularization_matrix /= self.sigma_contrast**2
+                    # regularization_matrix = ((identity - contrast_smooth_length**2 * Laplacian)**(2 * fourier_filter_power) / sigma_contrast**2) @ contrast_coefficients
+                    regularization_matrix = np.copy(contrast_coefficients)
+                    for _ in range(2 * self.fourier_filter_power):
+                        regularization_matrix_laplacian = np.zeros_like(regularization_matrix)
+                        for dim in range(self.target.ndim):
+                            regularization_matrix_laplacian += (np.roll(regularization_matrix, 1, axis=dim) - 2 * regularization_matrix + np.roll(regularization_matrix, -1, axis=dim)) / self.target_resolution[dim]**2
+                        # regularization_matrix_laplacian is now the Laplacian of regularization_matrix.
+                        regularization_matrix -= regularization_matrix_laplacian * self.contrast_smooth_length**2
+                    regularization_matrix /= self.sigma_contrast**2
 
-                return (matching_matrix @ contrast_coefficients[..., None] - regularization_matrix[..., None]).ravel()
-            linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
+                    return (matching_matrix @ contrast_coefficients[..., None] + regularization_matrix[..., None]).ravel()
+                linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
 
-            # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
-            contrast_coefficients_update = cg(linear_operator, target_matrix.ravel(), x0=self.contrast_coefficients.ravel(), tol=self.contrast_tolerance, maxiter=self.contrast_maxiter)
-            if contrast_coefficients_update[1] != 0:
-                warnings.warn(
-                    f"scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
-                    RuntimeWarning
-                )
-            self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
+                # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
+                contrast_coefficients_update = cg(linear_operator, target_matrix.ravel(), x0=self.contrast_coefficients.ravel(), tol=self.contrast_tolerance, maxiter=self.contrast_maxiter)
+                if contrast_coefficients_update[1] != 0:
+                    warnings.warn(
+                        f"scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
+                        RuntimeWarning
+                    )
+                self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
 
-        else:
-            # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == False.
+            # Penalty on derivative squared, pending depracation in favor of above.
+            elif False:
+                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
 
-            # Ravel necessary components for convenient matrix multiplication.
-            deformed_template_ravel = np.ravel(self.deformed_template)
-            target_ravel = np.ravel(self.target)
-            matching_weights_ravel = np.ravel(self.matching_weights)
-            contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(self.target.size, -1) # A view, not a copy.
+                # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
+                contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
+                matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / self.sigma_matching**2) @ contrast_polynomial_basis_transpose
 
-            # Create intermediate composites.
-            basis_transpose_basis = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, contrast_polynomial_basis_semi_ravel)
-            basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
+                # Shape: (*self.target.shape, self.contrast_order + 1)
+                target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / self.sigma_matching**2
 
-            # Solve for contrast_coefficients.
-            with warnings.catch_warnings():
-                warnings.filterwarnings('ignore', message='Ill-conditioned matrix')
-                try:
-                    self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
-                except np.linalg.LinAlgError as e:
-                    raise np.linalg.LinAlgError(f"This exception may have been raised because the contrast_polynomial_basis vectors were not independent, i.e. the template is constant.") from e
+                def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
+                    """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) - regularization_matrix).ravel()."""
+
+                    contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
+
+                    regularization_matrix = np.zeros_like(contrast_coefficients)
+                    for dim in range(self.target.ndim):
+                        regularization_matrix += (np.roll(contrast_coefficients, 1, axis=dim) - 2 * contrast_coefficients + np.roll(contrast_coefficients, -1, axis=dim)) / self.target_resolution[dim]**2
+                    # regularization_matrix is now the Laplacian of contrast_coefficients.
+                    regularization_matrix /= self.sigma_contrast**2
+
+                    return (matching_matrix @ contrast_coefficients[..., None] - regularization_matrix[..., None]).ravel()
+                linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
+
+                # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
+                contrast_coefficients_update = cg(linear_operator, target_matrix.ravel(), x0=self.contrast_coefficients.ravel(), tol=self.contrast_tolerance, maxiter=self.contrast_maxiter)
+                if contrast_coefficients_update[1] != 0:
+                    warnings.warn(
+                        f"scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
+                        RuntimeWarning
+                    )
+                self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
+
+            else:
+                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == False.
+
+                # Ravel necessary components for convenient matrix multiplication.
+                deformed_template_ravel = np.ravel(self.deformed_template)
+                target_ravel = np.ravel(self.target)
+                matching_weights_ravel = np.ravel(self.matching_weights)
+                contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(self.target.size, -1) # A view, not a copy.
+
+                # Create intermediate composites.
+                basis_transpose_basis = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, contrast_polynomial_basis_semi_ravel)
+                basis_transpose_target = np.matmul(contrast_polynomial_basis_semi_ravel.T * matching_weights_ravel, target_ravel)
+
+                # Solve for contrast_coefficients.
+                with warnings.catch_warnings():
+                    warnings.filterwarnings('ignore', message='Ill-conditioned matrix')
+                    try:
+                        self.contrast_coefficients = solve(basis_transpose_basis, basis_transpose_target, assume_a='pos')
+                    except np.linalg.LinAlgError as e:
+                        raise np.linalg.LinAlgError(f"This exception may have been raised because the contrast_polynomial_basis vectors were not independent, i.e. the template is constant.") from e
 
 
     def _compute_affine_inv_gradient(self):
@@ -931,8 +971,8 @@ def lddmm_register(
     fixed_affine_scale=None,
     # Velocity field specifiers.
     sigma_regularization=None,
-    smooth_length=None,
-    preconditioner_smooth_length=None,
+    velocity_smooth_length=None,
+    preconditioner_velocity_smooth_length=None,
     num_timesteps=None,
     # Contrast map specifiers.
     contrast_order=None,
@@ -940,6 +980,7 @@ def lddmm_register(
     contrast_maxiter=None,
     contrast_tolerance=None,
     sigma_contrast=None,
+    contrast_smooth_length=None,
     # Artifact specifiers.
     check_artifacts=None,
     sigma_artifact=None,
@@ -989,9 +1030,9 @@ def lddmm_register(
             The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. By default None.
         sigma_regularization: float, optional
             A scalar indicating the freedom to deform. Overrides 0 input. By default 10 * np.max(self.template_resolution).
-        smooth_length: float, optional
+        velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical units. Determines the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
-        preconditioner_smooth_length: float, optional
+        preconditioner_velocity_smooth_length: float, optional
             The length of preconditioner smoothing of the velocity_fields in physical units. Determines the optimization of the velocity_fields. By default 5 * np.max(self.template_resolution).
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. By default 5.
@@ -1005,6 +1046,8 @@ def lddmm_register(
             The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. By default 1e-5.
         sigma_contrast: float, optional
             The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 1e-2.
+        contrast_smooth_length: float, optional
+            The length scale of smoothing of the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 2 * np.max(self.target_resolution).
         check_artifacts: bool, optional
             If True, artifacts are jointly classified with registration using sigma_artifact. By default False.
         sigma_artifact: float, optional
@@ -1104,8 +1147,8 @@ def lddmm_register(
         fixed_affine_scale=fixed_affine_scale,
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
-        smooth_length=smooth_length,
-        preconditioner_smooth_length=preconditioner_smooth_length,
+        velocity_smooth_length=velocity_smooth_length,
+        preconditioner_velocity_smooth_length=preconditioner_velocity_smooth_length,
         num_timesteps=num_timesteps,
         # Contrast map specifiers.
         contrast_order=contrast_order,
@@ -1113,6 +1156,7 @@ def lddmm_register(
         contrast_maxiter=contrast_maxiter,
         contrast_tolerance=contrast_tolerance,
         sigma_contrast=sigma_contrast,
+        contrast_smooth_length=contrast_smooth_length,
         # Artifact specifiers.
         check_artifacts=check_artifacts,
         sigma_artifact=sigma_artifact,
