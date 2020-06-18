@@ -1,4 +1,4 @@
-# Copied from numpy development branch
+# Copied from numpy master
 import sys
 from typing import Any, overload, Sequence, TYPE_CHECKING, Union
 

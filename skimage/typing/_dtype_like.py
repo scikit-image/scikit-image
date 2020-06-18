@@ -1,3 +1,4 @@
+# Copied from numpy master
 from typing import Any, Dict, List, Sequence, Tuple, Union
 
 from numpy import dtype

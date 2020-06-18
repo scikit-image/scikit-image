@@ -1,3 +1,4 @@
+# Copied from numpy master
 from typing import Sequence, Tuple, Union
 
 _Shape = Tuple[int, ...]
