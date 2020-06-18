@@ -14,16 +14,16 @@ pip list
 tools/build_versions.py
 section_end "List.installed.dependencies"
 
+section "type.test"
+(cd .. && mypy --ignore-missing-imports skimage/segmentation/)
+section_end "type.test"
+
 section "Test"
 # When installing from sdist
 # We can't run it in the git directory since there is a folder called `skimage`
 # in there. pytest will crawl that instead of the module we installed and want to test
-(cd .. && pytest $TEST_ARGS --pyargs skimage)
+pytest $TEST_ARGS --pyargs skimage
 section_end "Test"
-
-section "type.test"
-mypy --ignore-missing-imports skimage/segmentation/
-section_end "type.test"
 
 section "Flake8.test"
 flake8 --exit-zero --exclude=test_* skimage doc/examples viewer_examples
