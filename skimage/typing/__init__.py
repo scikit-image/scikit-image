@@ -8,7 +8,5 @@ from ._image_types import (ImageArray, LabelsArray, Image2dArray,
 from typing import Any
 if sys.version_info >= (3, 8):
     from typing import Literal
-elif sys.version_info >= (3, 7):
-    from typing_extensions import Literal
 else:
-    Literal = Any
+    from typing_extensions import Literal
