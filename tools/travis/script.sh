@@ -15,7 +15,8 @@ tools/build_versions.py
 section_end "List.installed.dependencies"
 
 section "type.test"
-(cd .. && mypy --ignore-missing-imports skimage/segmentation/)
+pwd
+mypy --ignore-missing-imports skimage/segmentation/
 section_end "type.test"
 
 section "Test"
