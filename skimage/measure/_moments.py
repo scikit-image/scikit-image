@@ -1,6 +1,6 @@
 import numpy as np
 from .._shared.utils import check_nD
-from . import _moments_cy
+from . import _moments_cy  # type: ignore
 import itertools
 
 

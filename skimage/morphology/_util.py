@@ -3,9 +3,13 @@
 
 import numpy as np
 from scipy import ndimage as ndi
+from typing import Union, Optional, Tuple, Sequence
+from ..typing import _SupportsArray
 
-
-def _validate_connectivity(image_dim, connectivity, offset):
+def _validate_connectivity(
+        image_dim: int,
+        connectivity: Optional[Union[int, _SupportsArray]],
+        offset: Optional[Sequence[int]]) -> Tuple[np.ndarray, np.ndarray]:
     """Convert any valid connectivity to a structuring element and offset.
 
     Parameters

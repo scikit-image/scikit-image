@@ -5,3 +5,5 @@ pytest-cov
 pytest-localserver
 flake8
 codecov
+mypy
+typing_extensions

@@ -7,11 +7,12 @@ Pattern Anal Mach Intell. 2006 Nov;28(11):1768-83.
 Installing pyamg and using the 'cg_mg' mode of random_walker improves
 significantly the performance.
 """
-
+from typing import Optional, Sequence
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
 from .._shared.utils import warn
+from ..typing import ImageArray, LabelsArray, ArrayLike, Literal
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -263,9 +264,12 @@ def _preprocess(labels):
     return labels, nlabels, mask, inds_isolated_seeds, isolated_values
 
 
-def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None,
-                  *, prob_tol=1e-3):
+def random_walker(data: ImageArray, labels: LabelsArray, beta: float = 130,
+                  mode: Literal['cg', 'cg_j', 'cg_mg', 'bf'] = 'cg_j',
+                  tol: float = 1.e-3, copy: bool = True,
+                  multichannel: bool = False, return_full_prob: bool = False,
+                  spacing: Optional[Sequence] = None, *,
+                  prob_tol: float = 1e-3) -> LabelsArray:
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel

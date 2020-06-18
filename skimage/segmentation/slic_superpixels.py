@@ -7,9 +7,11 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.vq import kmeans2
 from numpy import random
 
-from ._slic import (_slic_cython, _enforce_label_connectivity_cython)
+from ._slic import (_slic_cython, _enforce_label_connectivity_cython)  # type: ignore
 from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
+from ..typing import ArrayLike, ImageArray, MaskArray, LabelsArray, Literal
+from typing import Optional, Union, Sequence, Type, cast
 
 
 def _get_mask_centroids(mask, n_centroids):
@@ -85,10 +87,15 @@ def _get_grid_centroids(image, n_centroids):
     return centroids, steps
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
-         spacing=None, multichannel=True, convert2lab=None,
-         enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=None, mask=None):
+def slic(image: ImageArray, n_segments: int = 100,
+         compactness: float = 10., max_iter: int = 10,
+         sigma: Union[float, Sequence[float]] = 0,
+         spacing: Optional[Sequence] = None,
+         multichannel: bool = True, convert2lab: Optional[bool] = None,
+         enforce_connectivity: bool = True, min_size_factor: float = 0.5,
+         max_size_factor: float = 3,
+         slic_zero: bool = False, start_label: Optional[Literal[0, 1]] = None,
+         mask: Optional[MaskArray] = None) -> LabelsArray:
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -258,15 +265,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         spacing = np.ones(3, dtype=dtype)
     elif isinstance(spacing, (list, tuple)):
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
-
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma], dtype=dtype)
-        sigma /= spacing.astype(dtype)
+        sigma /= spacing.astype(dtype)  # type: ignore
     elif isinstance(sigma, (list, tuple)):
         sigma = np.array(sigma, dtype=dtype)
-    if (sigma > 0).any():
+
+    if (sigma > 0).any():  # type: ignore
         # add zero smoothing for multichannel dimension
-        sigma = list(sigma) + [0]
+        sigma = list(sigma) + [0]  # type: ignore
         image = ndi.gaussian_filter(image, sigma)
 
     n_centroids = centroids.shape[0]
@@ -293,7 +300,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
 
     if enforce_connectivity:
         if use_mask:
-            segment_size = mask.sum() / n_centroids
+            segment_size = mask.sum() / n_centroids  # type: ignore
         else:
             segment_size = np.prod(image.shape[:3]) / n_centroids
         min_size = int(min_size_factor * segment_size)

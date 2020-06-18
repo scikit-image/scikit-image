@@ -4,7 +4,7 @@ import base64
 import numpy as np
 
 from . import _marching_cubes_lewiner_luts as mcluts
-from . import _marching_cubes_lewiner_cy
+from . import _marching_cubes_lewiner_cy  # type: ignore
 from ._marching_cubes_classic import _marching_cubes_classic
 
 
