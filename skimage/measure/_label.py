@@ -1,5 +1,6 @@
 from ._ccomp import label_cython as clabel
-
+from scipy.ndimage import distance_transform_edt
+import numpy as np
 
 def label(input, neighbors=None, background=None, return_num=False,
           connectivity=None):
@@ -91,3 +92,66 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 0 0]]
     """
     return clabel(input, neighbors, background, return_num, connectivity)
+
+
+def expand_labels(input, distance):
+    r"""Expand labels in label image by ``distance`` pixels without overlapping.
+
+    Given a label image, each label is grown by up to distance pixels. 
+    However, where labels would start to overlap, the label growth may
+    stop at less than distance pixels (this is where it differs from a 
+    morphological dilation, where a connected component with a high label 
+    number can potentially override connected components with lower label
+    numbers)::
+
+    This is equivalent to CellProfiler [1] IdentifySecondaryObjects method
+    using the option "Distance-N"
+
+    The basic idea is that you have some seed labels that you want 
+    to grow by n pixels to give a mask for a larger object.
+    
+    If you were only dealing with a single seed object, you could simply dilate with 
+    a suitably sized structuring element. However, in general you have multiple seed 
+    points and you don't want to merge those. Distance N will grow up to N pixels without
+    merging objects that are closer together than 2N. 
+
+    There is an important edge case when regions are separated by one background pixels,
+    see the discussion in [2].
+    We give no guarantee which region will get to expand into the 1-pixel gap. 
+
+    Parameters
+    ----------
+    input : ndarray of dtype int
+        label image
+    distance : int
+        number of pixels to grow the labels
+    Returns
+    -------
+    enlarged_labels : ndarray of dtype int
+        Labeled array, where all connected regions have been enlarged
+
+    See Also
+    --------
+    label
+
+    References
+    ----------
+    .. [1] https://github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/modules/identifysecondaryobjects.py
+    .. [2] https://forum.image.sc/t/equivalent-to-cellprofilers-identifysecondaryobjects-distance-n-in-fiji/39146/16
+
+    Examples
+    --------
+    >>> TODO
+    """
+    
+    distances, indexmap = distance_transform_edt(input == 0, return_indices = True)
+    labels_out = np.zeros(input.shape, input.dtype)
+    dilate_mask = distances <= distance
+    # build the array slice, this change to [1] enables support for arbitrary dimensions
+    indexmap_slices = []
+    for el in indexmap:
+        indexmap_slices.append(np.s_[el[dilate_mask]])
+    labels_out[dilate_mask] = input[tuple(indexmap_slices)]
+    return labels_out
+
+ 
