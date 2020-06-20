@@ -4,6 +4,15 @@ import numpy as np
 from skimage import filters, feature
 from skimage import img_as_float32
 
+try:
+    from sklearn.exceptions import NotFittedError
+    has_sklearn = True
+except ImportError:
+    has_sklearn = False
+
+    class NotFittedError(Exception):
+        pass
+
 
 def _singlescale_basic_features(img, sigma, intensity=True, edges=True,
                                 texture=True):
@@ -29,7 +38,10 @@ def _singlescale_basic_features(img, sigma, intensity=True, edges=True,
 def _mutiscale_basic_features_singlechannel(
     img, intensity=True, edges=True, texture=True, sigma_min=0.5, sigma_max=16
 ):
-    """Features for a single channel image. ``img`` can be 2d or 3d.
+    """Features for a single channel nd image.
+
+    Parameters
+    ----------
     """
     # computations are faster as float32
     img = img_as_float32(img)
@@ -40,7 +52,6 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    n_sigmas = len(sigmas)
     all_results = [
         _singlescale_basic_features(
             img, sigma, intensity=intensity, edges=edges, texture=texture
@@ -51,7 +62,7 @@ def _mutiscale_basic_features_singlechannel(
 
 
 def multiscale_basic_features(
-    img,
+    image,
     multichannel=True,
     intensity=True,
     edges=True,
@@ -59,24 +70,54 @@ def multiscale_basic_features(
     sigma_min=0.5,
     sigma_max=16,
 ):
-    """Features for a single- or multi-channel image.
+    """Local features for a single- or multi-channel nd image.
+
+    Intensity, gradient intensity and local structure are computed at
+    different scales thanks to Gaussian blurring.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image, which can be grayscale or multichannel.
+    multichannel : bool, default False
+        True if the last dimension corresponds to color channels.
+    intensity : bool, default True
+        If True, pixel intensities averaged over the different scales
+        are added to the feature set.
+    edges : bool, default True
+        If True, intensities of local gradients averaged over the different
+        scales are added to the feature set.
+    texture : bool, default True
+        If True, eigenvalues of the Hessian matrix after Gaussian blurring
+        at different scales are added to the feature set.
+    sigma_min : float, optional
+        Smallest value of the Gaussian kernel used to average local
+        neighbourhoods before extracting features.
+    sigma_max : float, optional
+        Largest value of the Gaussian kernel used to average local
+        neighbourhoods before extracting features.
+
+    Returns
+    -------
+    features : np.ndarray
+        Array of shape ``(n_features,) + image.shape``
     """
-    if img.ndim >= 3 and multichannel:
+    if image.ndim >= 3 and multichannel:
         all_results = (
             _mutiscale_basic_features_singlechannel(
-                img[..., dim],
+                image[..., dim],
                 intensity=intensity,
                 edges=edges,
                 texture=texture,
                 sigma_min=sigma_min,
                 sigma_max=sigma_max,
             )
-            for dim in range(img.shape[-1])
+            for dim in range(image.shape[-1])
         )
         features = list(itertools.chain.from_iterable(all_results))
     else:
         features = _mutiscale_basic_features_singlechannel(
-            img,
+            image,
             intensity=intensity,
             edges=edges,
             texture=texture,
@@ -84,6 +125,85 @@ def multiscale_basic_features(
             sigma_max=sigma_max,
         )
     return np.array(features)
+
+
+class TrainableSegmenter(object):
+    """
+    Estimator for classifying pixels.
+
+    Parameters
+    ----------
+    clf : classifier object, optional
+        classifier object, exposing a ``fit`` and a ``predict`` method as in
+        scikit-learn's API, for example an instance of
+        ``RandomForestClassifier`` or ``LogisticRegression`` classifier.
+    features_func : function, optional
+        function computing features on all pixels of the image, to be passed
+        to the classifier. The output should be of shape
+        ``(m_features, *labels.shape)``. If None,
+        :func:`skimage.segmentation.multiscale_basic_features` is used.
+    downsample : int, optional
+        downsample the number of training points. Use downsample > 1 if you
+        built the training set by brushing through large areas but not all
+        points are needed to train efficiently the classifier. The training
+        time increases with the number of training points.
+
+    Methods
+    -------
+    fit
+    predict
+    """
+
+    def __init__(self, clf=None, features_func=None, downsample=10):
+        if clf is None:
+            try:
+                from sklearn.ensemble import RandomForestClassifier
+                self.clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+            except ImportError:
+                raise ImportError(
+                    "Please install scikit-learn or pass a classifier instance"
+                    "to TrainableSegmenter."
+                        )
+        else:
+            self.clf = clf
+        self.features_func = features_func
+        self.downsample = downsample
+
+
+    def fit(self, image, labels):
+        """
+        Train classifier using partially labeled (annotated) image.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image, which can be grayscale or multichannel, and must have a
+            number of dimensions compatible with ``self.features_func``.
+        labels : ndarray of ints
+            Labeled array of shape compatible with ``image`` (same shape for a
+            single-channel image). Labels >= 1 correspond to the training set and
+            label 0 to unlabeled pixels to be segmented.
+        """
+        output, clf = fit_segmenter(image, labels, self.clf,
+                                    self.features_func, self.downsample)
+        self.segmented_image = output
+
+
+    def predict(self, image):
+        """
+        Segment new image using trained internal classifier.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image, which can be grayscale or multichannel, and must have a
+            number of dimensions compatible with ``self.features_func``.
+
+        Raises
+        ------
+        NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
+        """
+        return predict_segmenter(image, self.clf, self.features_func)
 
 
 def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
@@ -95,7 +215,7 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
     image : ndarray
         Input image, which can be grayscale or multichannel, and must have a
         number of dimensions compatible with ``features_func``.
-    labels : ndarray
+    labels : ndarray of ints
         Labeled array of shape compatible with ``image`` (same shape for a
         single-channel image). Labels >= 1 correspond to the training set and
         label 0 to unlabeled pixels to be segmented.
@@ -122,6 +242,9 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
     clf : classifier object
         classifier trained on ``labels``
 
+    Raises
+    ------
+    NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
     """
     if features_func is None:
         features_func = multiscale_basic_features
@@ -139,6 +262,28 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
 def predict_segmenter(image, clf, features_func=None):
     """
     Segmentation of images using a pretrained classifier.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image, which can be grayscale or multichannel, and must have a
+        number of dimensions compatible with ``features_func``.
+    clf : classifier object
+        trained classifier object, exposing a ``predict`` method as in
+        scikit-learn's API, for example an instance of
+        ``RandomForestClassifier`` or ``LogisticRegression`` classifier. The
+        classifier must be already trained, for example with
+        :func:`skimage.segmentation.fit_segmenter`.
+    features_func : function, optional
+        function computing features on all pixels of the image, to be passed
+        to the classifier. The output should be of shape
+        ``(m_features, *labels.shape)``. If None,
+        :func:`skimage.segmentation.multiscale_basic_features` is used.
+
+    Returns
+    -------
+    output : ndarray
+        Labeled array, built from the prediction of the classifier.
     """
     if features_func is None:
         features_func = multiscale_basic_features
@@ -146,6 +291,12 @@ def predict_segmenter(image, clf, features_func=None):
     features = features_func(image)
     sh = features.shape
     features = features.reshape((sh[0], np.prod(sh[1:]))).T
-    predicted_labels = clf.predict(features)
+    try:
+        predicted_labels = clf.predict(features)
+    except NotFittedError:
+        raise NotFittedError(
+                "You must train the classifier `clf` first"
+                "for example with the `fit_segmenter` function."
+                            )
     output = predicted_labels.reshape(sh[1:])
     return output
