@@ -156,30 +156,32 @@ plt.show()
 
 img = data.astronaut()
 img_hsv = color.rgb2hsv(img)
-
 img_hsv_copy = np.copy(img_hsv)
-# Fill hue channel with a different color using flood fill
-_ = flood_fill(img_hsv_copy[..., 0], (313, 160), 0.5,
-               tolerance=0.016, in_place=True)
 
-# Return mask for post-processing
+# flood function returns a mask of flooded pixels 
 mask = flood(img_hsv[..., 0], (313, 160), tolerance=0.016)
-mask = morphology.remove_small_holes(mask, 40)  # fill small holes
-# Remove white pixels from flag, using saturation channel
-mask = np.logical_and(mask, img_hsv[..., 1] > 0.4)
-# Remove thin structures with binary opening
-mask = morphology.binary_opening(mask, np.ones((3, 3)))
 # Set pixels of mask to new value for hue channel
 img_hsv[mask, 0] = 0.5
+# Post-processing in order to improve the result
+mask_postprocessed = morphology.remove_small_holes(mask, 40)  # fill small holes
+# Remove white pixels from flag, using saturation channel
+mask_postprocessed = np.logical_and(mask_postprocessed,
+                                    img_hsv_copy[..., 1] > 0.4)
+# Remove thin structures with binary opening
+mask_postprocessed = morphology.binary_opening(mask_postprocessed,
+                                               np.ones((3, 3)))
+# Fill small holes with binary closing
+mask_postprocessed = morphology.binary_closing(
+        mask_postprocessed, morphology.disk(20))
+img_hsv_copy[mask_postprocessed, 0] = 0.5
 
 fig, ax = plt.subplots(1, 2, figsize=(8, 4))
-ax[0].imshow(color.hsv2rgb(img_hsv_copy))
+ax[0].imshow(color.hsv2rgb(img_hsv))
 ax[0].axis('off')
 ax[0].set_title('After flood fill')
-ax[1].imshow(img)
-ax[1].contour(mask)
+ax[1].imshow(color.hsv2rgb(img_hsv_copy))
 ax[1].axis('off')
-ax[1].set_title('Contour of flood mask after post-processing')
+ax[1].set_title('After flood fill and post-processing')
 
 fig.tight_layout()
 plt.show()
