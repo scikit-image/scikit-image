@@ -85,7 +85,7 @@ plt.show()
 output = []
 
 for i in range(8):
-    tol = 5 + 20*i
+    tol = 5 + 20 * i
     output.append(flood_fill(cameraman, (0, 0), 255, tolerance=tol))
 
 # Initialize plot and place original image
@@ -96,9 +96,9 @@ ax[0, 0].axis('off')
 
 # Plot all eight different tolerances for comparison.
 for i in range(8):
-    m, n = np.unravel_index(i+1, (3, 3))
+    m, n = np.unravel_index(i + 1, (3, 3))
     ax[m, n].imshow(output[i], cmap=plt.cm.gray)
-    ax[m, n].set_title('Tolerance {0}'.format(str(5 + 20*i)))
+    ax[m, n].set_title('Tolerance {0}'.format(str(5 + 20 * i)))
     ax[m, n].axis('off')
     ax[m, n].plot(0, 0, 'bo')  # seed point
 
@@ -158,21 +158,20 @@ img = data.astronaut()
 img_hsv = color.rgb2hsv(img)
 img_hsv_copy = np.copy(img_hsv)
 
-# flood function returns a mask of flooded pixels 
+# flood function returns a mask of flooded pixels
 mask = flood(img_hsv[..., 0], (313, 160), tolerance=0.016)
 # Set pixels of mask to new value for hue channel
 img_hsv[mask, 0] = 0.5
 # Post-processing in order to improve the result
-mask_postprocessed = morphology.remove_small_holes(mask, 40)  # fill small holes
 # Remove white pixels from flag, using saturation channel
-mask_postprocessed = np.logical_and(mask_postprocessed,
+mask_postprocessed = np.logical_and(mask,
                                     img_hsv_copy[..., 1] > 0.4)
 # Remove thin structures with binary opening
 mask_postprocessed = morphology.binary_opening(mask_postprocessed,
                                                np.ones((3, 3)))
 # Fill small holes with binary closing
 mask_postprocessed = morphology.binary_closing(
-        mask_postprocessed, morphology.disk(20))
+                mask_postprocessed, morphology.disk(20))
 img_hsv_copy[mask_postprocessed, 0] = 0.5
 
 fig, ax = plt.subplots(1, 2, figsize=(8, 4))
@@ -185,4 +184,3 @@ ax[1].set_title('After flood fill and post-processing')
 
 fig.tight_layout()
 plt.show()
-
