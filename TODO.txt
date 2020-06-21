@@ -7,33 +7,11 @@ Version 0.17
   scikit-image-wheels repo.
 * Finalize ``skimage.future.graph`` API.
 * Finalize ``skimage.future.manual_segmentation`` API.
-* In ``skimage.filters.median``, remove the parameters ``mask``, ``shift_x``,
-  and ``shift_y``.
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.frangi``
-* Remove deprecated arguments ``beta1`` and ``beta2`` from function ``skimage.filters.hessian``
-* Remove unused arguments ``dtype`` in ``imread`` functions. See #3918.
-* Remove ``rough_wall`` from ``skimage.data.__init__``.
-* Remove parameter ``img`` from skimage.morphology.skeletonize_3d.
 
 Version 0.18
 ------------
 
-* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
-  deprecation warning.
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
@@ -48,7 +26,6 @@ Version 0.18
         * `` skimage/feature/corner.py::corner_orientations``
     * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
       ``threshold_rel=0``.
-* In ``skimage/transform`` remove histogram_matching.py.
 * In ``skimage/restoration/_denoise.py`` remove warning regarding
   ``rescale_sigma``.
     * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
@@ -57,6 +34,7 @@ Version 0.18
 Version 0.19
 ------------
 
+* Set ``start_label`` to 1 in ``slic`` and remove the DeprecationWarning.
 * In ``skimage/draw/draw.py`` remove ``circle'' and related tests.
 * In ``skimage/segmentation/morphsnakes.py`` remove ``circle_level_set'' and related tests.
   * Also make sure to look in the function ``_init_level_set``
@@ -85,6 +63,19 @@ Version 0.19
   ``marching_cube_classic``.
 * In ``skimage/color/colorconv.py``, remove the `alpha`and `is_rgb`
   arguments and the associated deprecation warnings from `gray2rgb`.
+* In ``skimage/color/colorlabel.py``, remove the `change_default_value`
+  decorator from `label2rgb` and set `bg_label` default value to 0.
+* In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
+
+Version 0.20
+------------
+
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
 
 Other
 -----
@@ -114,6 +105,9 @@ Other
   regarding ``Passing `np.nan` to mean no clipping in np.clip``.
 * Remove direct allocation of ``output`` from ``skimage/filters/_gaussian.py``,
   when ``scipy`` upgrades to 1.1.
+* Specify atol value in `cg` calls and remove condition on scipy's version in
+  ``skimage/segmentation/random_walker_segmentation.py`` when ``scipy`` upgrades
+  to 1.1.
 * Remove '--verify-repo=none' in tlmgr calls in ``tools/travis/osx_install.sh``,
   when texlive 2020 is available.
 * Once NumPy is set to >= 1.17, consider removing

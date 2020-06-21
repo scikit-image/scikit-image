@@ -111,9 +111,6 @@ class TestColorconv(TestCase):
     def test_rgb2hsv_error_grayscale(self):
         self.assertRaises(ValueError, rgb2hsv, self.img_grayscale)
 
-    def test_rgb2hsv_error_one_element(self):
-        self.assertRaises(ValueError, rgb2hsv, self.img_rgb[0, 0])
-
     def test_rgb2hsv_dtype(self):
         rgb = img_as_float(self.img_rgb)
         rgb32 = img_as_float32(self.img_rgb)
@@ -133,9 +130,6 @@ class TestColorconv(TestCase):
 
     def test_hsv2rgb_error_grayscale(self):
         self.assertRaises(ValueError, hsv2rgb, self.img_grayscale)
-
-    def test_hsv2rgb_error_one_element(self):
-        self.assertRaises(ValueError, hsv2rgb, self.img_rgb[0, 0])
 
     def test_hsv2rgb_dtype(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
@@ -164,9 +158,6 @@ class TestColorconv(TestCase):
     # implemented with color._convert()
     def test_rgb2xyz_error_grayscale(self):
         self.assertRaises(ValueError, rgb2xyz, self.img_grayscale)
-
-    def test_rgb2xyz_error_one_element(self):
-        self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0, 0])
 
     def test_rgb2xyz_dtype(self):
         img = self.colbars_array
@@ -730,3 +721,58 @@ def test_gray2rgba_alpha():
     with pytest.raises(ValueError) as err:
         rgba = gray2rgba(img, alpha)
     assert expected_err_msg == str(err.value)
+
+
+@pytest.mark.parametrize("func", [rgb2gray, gray2rgb, gray2rgba])
+@pytest.mark.parametrize("shape", ([(3, ), (2, 3), (4, 5, 3), (5, 4, 5, 3),
+                                    (4, 5, 4, 5, 3)]))
+def test_nD_gray_conversion(func, shape):
+    img = np.random.rand(*shape)
+    out = func(img)
+
+    msg_list = []
+    if img.ndim == 3 and func == gray2rgb:
+        msg_list.append('Pass-through of possibly RGB images in gray2rgb')
+    elif img.ndim == 2 and func == rgb2gray:
+        msg_list.append('The behavior of rgb2gray will change')
+
+    with expected_warnings(msg_list):
+        out = func(img)
+
+    common_ndim = min(out.ndim, len(shape))
+
+    assert out.shape[:common_ndim] == shape[:common_ndim]
+
+
+@pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,
+                                  rgb2xyz, xyz2rgb,
+                                  rgb2hed, hed2rgb,
+                                  rgb2rgbcie, rgbcie2rgb,
+                                  xyz2lab, lab2xyz,
+                                  lab2rgb, rgb2lab,
+                                  xyz2luv, luv2xyz,
+                                  luv2rgb, rgb2luv,
+                                  lab2lch, lch2lab,
+                                  rgb2yuv, yuv2rgb,
+                                  rgb2yiq, yiq2rgb,
+                                  rgb2ypbpr, ypbpr2rgb,
+                                  rgb2ycbcr, ycbcr2rgb,
+                                  rgb2ydbdr, ydbdr2rgb])
+@pytest.mark.parametrize("shape", ([(3, ), (2, 3), (4, 5, 3), (5, 4, 5, 3),
+                                    (4, 5, 4, 5, 3)]))
+def test_nD_color_conversion(func, shape):
+    img = np.random.rand(*shape)
+    out = func(img)
+
+    assert out.shape == img.shape
+
+
+@pytest.mark.parametrize("shape", ([(4, ), (2, 4), (4, 5, 4), (5, 4, 5, 4),
+                                    (4, 5, 4, 5, 4)]))
+def test_rgba2rgb_nD(shape):
+    img = np.random.rand(*shape)
+    out = rgba2rgb(img)
+
+    expected_shape = shape[:-1] + (3, )
+
+    assert out.shape == expected_shape

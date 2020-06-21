@@ -26,7 +26,7 @@ PROJECT_URLS = {
     "Source Code": 'https://github.com/scikit-image/scikit-image'
 }
 
-with open('README.md') as f:
+with open('README.md', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
 if sys.version_info < (3, 6):
@@ -107,7 +107,7 @@ def openmp_build_ext():
     return ConditionalOpenMP
 
 
-with open('skimage/__init__.py') as fid:
+with open('skimage/__init__.py', encoding='utf-8') as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.strip().split()[-1][1:-1]
@@ -115,7 +115,7 @@ with open('skimage/__init__.py') as fid:
 
 
 def parse_requirements_file(filename):
-    with open(filename) as fid:
+    with open(filename, encoding='utf-8') as fid:
         requires = [l.strip() for l in fid.readlines() if l]
 
     return requires
@@ -191,6 +191,7 @@ if __name__ == "__main__":
         name=DISTNAME,
         description=DESCRIPTION,
         long_description=LONG_DESCRIPTION,
+        long_description_content_type="text/markdown",
         maintainer=MAINTAINER,
         maintainer_email=MAINTAINER_EMAIL,
         url=URL,
