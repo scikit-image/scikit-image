@@ -9,7 +9,8 @@ from ..typing import _SupportsArray
 def _validate_connectivity(
         image_dim: int,
         connectivity: Optional[Union[int, _SupportsArray]],
-        offset: Optional[Sequence[int]]) -> Tuple[np.ndarray, np.ndarray]:
+        offset: Optional[Sequence[int]],
+) -> Tuple[np.ndarray, np.ndarray]:
     """Convert any valid connectivity to a structuring element and offset.
 
     Parameters
