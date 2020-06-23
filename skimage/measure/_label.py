@@ -113,7 +113,7 @@ def expand_labels(label_image, distance):
     stop at less than distance pixels (this is where it differs from a 
     morphological dilation, where a connected component with a high label 
     number can potentially override connected components with lower label
-    numbers)::
+    numbers):
 
     This is equivalent to CellProfiler [1] IdentifySecondaryObjects method
     using the option "Distance-N"
@@ -126,9 +126,9 @@ def expand_labels(label_image, distance):
     points and you don't want to merge those. Distance N will grow up to N pixels without
     merging objects that are closer together than 2N. 
 
-    There is an important edge case when regions are separated by one background pixels,
-    see the discussion in [2].
-    We give no guarantee which region will get to expand into the 1-pixel gap. 
+    There is an important edge case when a pixel has the same distance to multiple regions,
+    as it is not defined which region expands into that space, see the discussion in [2].
+    Here, the exact bahaviour depends on the upstream implementation
 
     Parameters
     ----------
@@ -144,7 +144,7 @@ def expand_labels(label_image, distance):
 
     See Also
     --------
-    label
+    :func:`label`, :func:`skimage.segmentation.watershed`
 
     References
     ----------
@@ -153,7 +153,30 @@ def expand_labels(label_image, distance):
 
     Examples
     --------
-    >>> TODO
+    >>> labels = np.array([0, 1, 0, 0, 0, 0, 2])
+    >>> expand_labels(labels, distance=1)
+    array([1, 1, 1, 0, 0, 2, 2])
+
+    Labels will not overwrite each other:
+
+    >>> expand_labels(labels, distance=3)
+    array([1, 1, 1, 1, 2, 2, 2])
+
+    In case of ties, behavior is undefined, but currently resolves to the
+    label closest to ``(0,) * ndim`` in lexicographical order.
+
+    >>> labels_tied = np.array([0, 1, 0, 2, 0])
+    >>> expand_labels(labels_tied, 1)
+    array([1, 1, 1, 2, 2])
+    >>> labels2d = np.array(
+    ...     [[0, 1, 0, 0],
+    ...      [2, 0, 0, 0],
+    ...      [0, 3, 0, 0]]
+    ... )
+    >>> expand_labels(labels2d, 1)
+    array([[2, 1, 1, 0],
+           [2, 2, 0, 0],
+           [2, 3, 3, 0]])
     """
     
     distances, nearest_label_coords = distance_transform_edt(
