@@ -106,29 +106,31 @@ def label(input, neighbors=None, background=None, return_num=False,
 
 
 def expand_labels(label_image, distance):
-    r"""Expand labels in label image by ``distance`` pixels without overlapping.
+    """Expand labels in label image by ``distance`` pixels without overlapping.
 
     Given a label image, each label is grown by up to distance pixels. 
     However, where labels would start to overlap, the label growth may
     stop at less than distance pixels (this is where it differs from a 
     morphological dilation, where a connected component with a high label 
     number can potentially override connected components with lower label
-    numbers):
+    numbers).
 
-    This is equivalent to CellProfiler [1] IdentifySecondaryObjects method
-    using the option "Distance-N"
+    This is equivalent to CellProfiler [1] [2] IdentifySecondaryObjects method
+    using the option "Distance-N".
 
     The basic idea is that you have some seed labels that you want 
     to grow by n pixels to give a mask for a larger object.
     
-    If you were only dealing with a single seed object, you could simply dilate with 
-    a suitably sized structuring element. However, in general you have multiple seed 
-    points and you don't want to merge those. Distance N will grow up to N pixels without
-    merging objects that are closer together than 2N. 
-
-    There is an important edge case when a pixel has the same distance to multiple regions,
-    as it is not defined which region expands into that space, see the discussion in [2].
-    Here, the exact bahaviour depends on the upstream implementation
+    If you were only dealing with a single seed object, you could simply
+    dilate with a suitably sized structuring element. However, in general you
+    have multiple seed points and you don't want to merge those. Distance N
+    will grow up to N pixels without merging objects that are closer together
+    than 2N.
+    
+    There is an important edge case when a pixel has the same distance to
+    multiple regions, as it is not defined which region expands into that
+    space, see the discussion in [1]. Here, the exact bahaviour depends on
+    the upstream implementation.
 
     Parameters
     ----------
@@ -144,12 +146,13 @@ def expand_labels(label_image, distance):
 
     See Also
     --------
-    :func:`label`, :func:`skimage.segmentation.watershed`
+    :py:func:`label`, :py:func:`skimage.segmentation.watershed`
 
     References
     ----------
-    .. [1] https://github.com/CellProfiler/CellProfiler/blob/082930ea95add7b72243a4fa3d39ae5145995e9c/cellprofiler/modules/identifysecondaryobjects.py#L559
-    .. [2] https://forum.image.sc/t/equivalent-to-cellprofilers-identifysecondaryobjects-distance-n-in-fiji/39146/16
+    .. [1] https://cellprofiler.org
+    .. [2] https://github.com/CellProfiler/CellProfiler/blob/082930ea95add7b72243a4fa3d39ae5145995e9c/cellprofiler/modules/identifysecondaryobjects.py#L559
+    .. [3] https://forum.image.sc/t/equivalent-to-cellprofilers-identifysecondaryobjects-distance-n-in-fiji/39146/16
 
     Examples
     --------
