@@ -58,6 +58,20 @@ SAMPLE2D_EXPANDED_3 = np.array(
        [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0]]
        )
 
+# non-integer expansion
+SAMPLE2D_EXPANDED_1_5 = np.array(
+      [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+       [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+       [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+       [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+       [1, 1, 1, 1, 1, 0, 0, 0, 2, 2, 2],
+       [1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2],
+       [0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2],
+       [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+
 EDGECASE2D =  np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
@@ -120,6 +134,7 @@ SAMPLE3D_EXPANDED_2 =np.array(
     [
     (SAMPLE1D, SAMPLE1D_EXPANDED_3, 3),
     (SAMPLE2D, SAMPLE2D_EXPANDED_3, 3),
+    (SAMPLE2D, SAMPLE2D_EXPANDED_1_5, 1.5),
     (EDGECASE1D, EDGECASE1D_EXPANDED_3, 3),
     (EDGECASE2D, EDGECASE2D_EXPANDED_4, 4),
     (SAMPLE3D, SAMPLE3D_EXPANDED_2, 2)
