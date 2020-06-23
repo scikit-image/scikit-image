@@ -82,7 +82,7 @@ def expand_labels(label_image, distance):
     distances, nearest_label_coords = distance_transform_edt(
         label_image == 0, return_indices=True
     )
-    labels_out = np.zeros(label_image.shape, label_image.dtype)
+    labels_out = np.zeros_like(label_image)
     dilate_mask = distances <= distance
     # build the coordinates to find nearest labels,
     # in contrast to [1] this implementation supports label arrays
