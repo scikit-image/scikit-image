@@ -49,7 +49,6 @@ def expand_labels(label_image, distance):
     ----------
     .. [1] https://cellprofiler.org
     .. [2] https://github.com/CellProfiler/CellProfiler/blob/082930ea95add7b72243a4fa3d39ae5145995e9c/cellprofiler/modules/identifysecondaryobjects.py#L559
-    .. [3] https://forum.image.sc/t/equivalent-to-cellprofilers-identifysecondaryobjects-distance-n-in-fiji/39146/16
 
     Examples
     --------
