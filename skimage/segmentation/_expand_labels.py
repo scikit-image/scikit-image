@@ -43,7 +43,7 @@ def expand_labels(label_image, distance):
 
     See Also
     --------
-    :py:func:`label`, :py:func:`skimage.segmentation.watershed`
+    :func:`skimage.measure.label`, :func:`skimage.segmentation.watershed`
 
     References
     ----------
