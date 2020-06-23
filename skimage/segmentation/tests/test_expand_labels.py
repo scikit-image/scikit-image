@@ -157,8 +157,8 @@ def test_binary_blobs(ndim, distance):
     - Distance beyond the expanded labels should always exceed the input
       distance.
     """
-    array = data.binary_blobs(length=64, blob_size_fraction=0.05, n_dim=ndim)
-    labels = measure.label(array)
+    img = data.binary_blobs(length=64, blob_size_fraction=0.05, n_dim=ndim)
+    labels = measure.label(img)
     expanded = expand_labels(labels, distance=distance)
     original_mask = labels != 0
     assert_array_equal(labels[original_mask], expanded[original_mask])
