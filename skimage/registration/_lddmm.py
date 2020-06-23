@@ -115,7 +115,7 @@ class _Lddmm:
         self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
         self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
         self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
-        self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 2 * np.max(self.target_resolution)
+        self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 10 * np.max(self.target_resolution)
 
         # Artifact specifiers.
         self.check_artifacts = bool(check_artifacts) if check_artifacts is not None else False
@@ -157,6 +157,12 @@ class _Lddmm:
                 )
             )**(2 * self.fourier_filter_power)
         )
+        fourier_target_coords = _compute_coords(self.target.shape, 1 / (self.target_resolution * self.target.shape), origin='zero')
+        self.contrast_high_pass_filter = (
+            1 - self.contrast_smooth_length**2 * (
+                np.sum((-2 + 2 * np.cos(2 * np.pi * self.target_resolution * fourier_target_coords)) / self.target_resolution**2, -1)
+            )
+        )**self.fourier_filter_power / self.sigma_contrast
 
         # Dynamics.
         if initial_affine is None:
@@ -500,6 +506,72 @@ class _Lddmm:
                 self.contrast_polynomial_basis[..., power] = self.deformed_template**power
 
             if self.spatially_varying_contrast_map:
+                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
+
+                '=============================================================================================================================='
+
+                # C is contrast_coefficients.
+                # B is the contrast_polynomial_basis.
+                # W is weights.
+                # L is contrast_high_pass_filter.
+                # This is the minimization problem: sum(|BC - J|^2 W^2 / 2) + sum(|LC|^2 / 2).
+                # The linear equation we need to solve for C is this: W^2 B^T B C  + L^T L C = W^2 B^T J.
+                # Where W acts by pointwise multiplication, B acts by matrix multiplication at every point, and L acts by filtering in the Fourier domain.
+                # Let L C = D. --> C = L^{-1} D.
+                # This reformulates the problem to: W^2 B^T B L^{-1} D + L^T D = W^2 B^T J.
+                # Then, to make it nicer we act on both sides with L^{-T}, yielding: L^{-T}(B^T B) L^{-1}D + D = L^{-T} W^2 B^t J.
+                # Then we factor the left side: [L^{-T} B^T  B L^{-1} + identity]D = L^{-T}W^2 B^T J
+
+                spatial_ndim = self.contrast_polynomial_basis.ndim - 1
+
+                # Represents W in the equation.
+                weights = np.sqrt(self.matching_weights) / self.sigma_matching
+
+                # Represents the right hand side of the equation.
+                right_hand_side = self.contrast_polynomial_basis * (weights**2 * self.target)[..., None]
+
+                # Reformulate with block elimination.
+                high_pass_contrast_coefficients = np.fft.ifftn(np.fft.fftn(self.contrast_coefficients, axes=range(spatial_ndim)) * self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
+                low_pass_right_hand_side = np.fft.ifftn(np.fft.fftn(right_hand_side, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
+                for _ in range(self.contrast_maxiter):
+                    linear_operator_high_pass_contrast_coefficients = np.fft.ifftn(np.fft.fftn((
+                        np.sum(
+                            np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
+                            axis=-1,
+                        ) * weights**2
+                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + high_pass_contrast_coefficients
+                    residual = linear_operator_high_pass_contrast_coefficients - low_pass_right_hand_side
+                    # Compute the optimal step size.
+                    linear_operator_residual = np.fft.ifftn(np.fft.fftn((
+                        np.sum(
+                            np.fft.ifftn(np.fft.fftn(residual, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
+                            axis=-1,
+                        ) * weights**2
+                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + residual
+                    optimal_stepsize = np.sum(residual**2) / np.sum(linear_operator_residual * residual)
+                    # Take gradient descent step at half the optimal step size.
+                    high_pass_contrast_coefficients -= optimal_stepsize * residual / 2
+                
+                self.contrast_coefficients = np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
+
+
+
+                APPLYOP_to_contrast_coefficients = np.fft.ifftn(np.fft.fftn((
+                    np.sum(
+                        np.fft.ifftn(np.fft.fftn(self.contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
+                        axis=-1,
+                    ) * weights**2
+                )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + self.contrast_coefficients
+
+
+
+
+
+
+                '=============================================================================================================================='
+
+            # Spatially varying contrast code regularized like velocity_fields using scipy.sparse.linalg.cg, pending depracation in favor of above.
+            elif False:
                 # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
 
                 # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
