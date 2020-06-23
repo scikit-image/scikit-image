@@ -1,5 +1,5 @@
 """ 
-expand_labels is based on code in  CellProfiler, 
+expand_labels is  inspired by code in CellProfiler, 
 code licensed under BSD-3 licenses.
 Website: http://www.cellprofiler.org
 
@@ -134,8 +134,9 @@ def expand_labels(label_image, distance):
     ----------
     label_image : ndarray of dtype int
         label image
-    distance : int
-        number of pixels to grow the labels
+    distance : float
+        Number of pixels by which to grow the labels.
+
     Returns
     -------
     enlarged_labels : ndarray of dtype int
@@ -155,12 +156,18 @@ def expand_labels(label_image, distance):
     >>> TODO
     """
     
-    distances, indexmap = distance_transform_edt(label_image == 0, return_indices = True)
+    distances, nearest_label_coords = distance_transform_edt(
+        label_image == 0, return_indices=True
+    )
     labels_out = np.zeros(label_image.shape, label_image.dtype)
     dilate_mask = distances <= distance
-    # build the array slice, this change to [1] enables support for arbitrary dimensions
-    indexmap_slices = []
-    for el in indexmap:
-        indexmap_slices.append(el[dilate_mask])
-    labels_out[dilate_mask] = label_image[tuple(indexmap_slices)]
+    # build the coordinates to find nearest labels,
+    # in contrast to [1] this implementation supports label arrays
+    # of any dimension
+    masked_nearest_label_coords = [
+        dimension_indices[dilate_mask]
+        for dimension_indices in nearest_label_coords
+    ]
+    nearest_labels = label_image[tuple(masked_nearest_label_coords)]
+    labels_out[dilate_mask] = nearest_labels
     return labels_out
