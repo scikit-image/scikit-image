@@ -129,6 +129,8 @@ SAMPLE3D_EXPANDED_2 =np.array(
         [3, 3, 5, 5],
         [5, 5, 5, 5]]])
 
+SAMPLE_EDGECASE_BEHAVIOUR = np.array([[0, 1, 0, 0], [2, 0, 0, 0], [0, 3, 0, 0]])
+
 @testing.parametrize(
     "input_array, expected_output, expand_distance", 
     [
@@ -171,3 +173,20 @@ def test_binary_blobs(ndim, distance):
     beyond_expanded_distances = distance_map[~expanded.astype(bool)]
     if beyond_expanded_distances.size > 0:
         assert np.all(beyond_expanded_distances > distance)
+
+def test_edge_case_behaviour():
+    """ Check edge case behavior to detect upstream changes
+
+    For edge cases where a pixel has the same distance to several regions,
+    lexicographical order seems to determine which region gets to expand 
+    into this pixel given the current upstream behaviour in 
+    scipy.ndimage.distance_map_edt. 
+
+    As a result, we expect different results when transposing the array.
+    If this test fails, something has changed upstream.
+    """
+    expanded = expand_labels(SAMPLE_EDGECASE_BEHAVIOUR, 1)
+    expanded_transpose = expand_labels(SAMPLE_EDGECASE_BEHAVIOUR.T, 1)
+    assert not np.all(expanded == expanded_transpose.T)
+
+     
