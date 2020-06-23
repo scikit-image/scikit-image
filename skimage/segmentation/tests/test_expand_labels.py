@@ -171,6 +171,7 @@ def test_binary_blobs(ndim, distance):
     if beyond_expanded_distances.size > 0:
         assert np.all(beyond_expanded_distances > distance)
 
+
 def test_edge_case_behaviour():
     """ Check edge case behavior to detect upstream changes
 
