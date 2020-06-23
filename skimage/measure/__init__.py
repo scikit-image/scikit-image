@@ -11,12 +11,11 @@ from ._moments import (moments, moments_central, moments_coords,
 from .profile import profile_line
 from .fit import LineModelND, CircleModel, EllipseModel, ransac
 from .block import block_reduce
-from ._label import label, expand_labels
+from ._label import label
 from .entropy import shannon_entropy
 
 
-__all__ = ['expand_labels',
-           'find_contours',
+__all__ = ['find_contours',
            'regionprops',
            'regionprops_table',
            'perimeter',
@@ -44,4 +43,4 @@ __all__ = ['expand_labels',
            'points_in_poly',
            'grid_points_in_poly',
            'shannon_entropy',
-]
+           ]

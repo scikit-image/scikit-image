@@ -1,5 +1,4 @@
 from itertools import product
-import math
 from scipy import ndimage as ndi
 from skimage import data
 
@@ -7,12 +6,10 @@ import numpy as np
 from numpy import array
 
 from skimage import measure
-from skimage._shared._warnings import expected_warnings
-from skimage.measure import expand_labels
+from skimage.segmentation._expand_labels import expand_labels
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_array_equal, assert_almost_equal,
-                                     assert_array_almost_equal, assert_equal)
+from skimage._shared.testing import assert_array_equal
 
 SAMPLE1D = np.array([0, 0, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0])
 SAMPLE1D_EXPANDED_3 = array([4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0])

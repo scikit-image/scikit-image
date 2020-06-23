@@ -14,8 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.filters import sobel
-from skimage.measure import label, expand_labels
-from skimage.segmentation import watershed
+from skimage.measure import label
+from skimage.segmentation import watershed, expand_labels
 from skimage.color import label2rgb
 from skimage import data
 
