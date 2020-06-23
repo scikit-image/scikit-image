@@ -23,6 +23,20 @@ def expand_labels(label_image, distance):
     number can potentially override connected components with lower label
     numbers).
 
+    Parameters
+    ----------
+    label_image : ndarray of dtype int
+        label image
+    distance : float
+        Number of pixels by which to grow the labels.
+
+    Returns
+    -------
+    enlarged_labels : ndarray of dtype int
+        Labeled array, where all connected regions have been enlarged
+
+    Notes
+    -----
     This is equivalent to CellProfiler [1] [2] IdentifySecondaryObjects method
     using the option "Distance-N".
 
@@ -38,18 +52,6 @@ def expand_labels(label_image, distance):
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
     space. Here, the exact bahaviour depends on the upstream implementation.
-
-    Parameters
-    ----------
-    label_image : ndarray of dtype int
-        label image
-    distance : float
-        Number of pixels by which to grow the labels.
-
-    Returns
-    -------
-    enlarged_labels : ndarray of dtype int
-        Labeled array, where all connected regions have been enlarged
 
     See Also
     --------
