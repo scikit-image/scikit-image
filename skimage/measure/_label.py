@@ -1,3 +1,14 @@
+""" 
+expand_labels is based on code in  CellProfiler, 
+code licensed under BSD-3 licenses.
+Website: http://www.cellprofiler.org
+
+Copyright (c) 2020 Broad Institute
+All rights reserved.
+
+Original author/s: Cellprofiler team 
+"""
+
 from ._ccomp import label_cython as clabel
 from scipy.ndimage import distance_transform_edt
 import numpy as np
@@ -94,7 +105,7 @@ def label(input, neighbors=None, background=None, return_num=False,
     return clabel(input, neighbors, background, return_num, connectivity)
 
 
-def expand_labels(input, distance):
+def expand_labels(label_image, distance):
     r"""Expand labels in label image by ``distance`` pixels without overlapping.
 
     Given a label image, each label is grown by up to distance pixels. 
@@ -121,7 +132,7 @@ def expand_labels(input, distance):
 
     Parameters
     ----------
-    input : ndarray of dtype int
+    label_image : ndarray of dtype int
         label image
     distance : int
         number of pixels to grow the labels
@@ -144,14 +155,12 @@ def expand_labels(input, distance):
     >>> TODO
     """
     
-    distances, indexmap = distance_transform_edt(input == 0, return_indices = True)
-    labels_out = np.zeros(input.shape, input.dtype)
+    distances, indexmap = distance_transform_edt(label_image == 0, return_indices = True)
+    labels_out = np.zeros(label_image.shape, label_image.dtype)
     dilate_mask = distances <= distance
     # build the array slice, this change to [1] enables support for arbitrary dimensions
     indexmap_slices = []
     for el in indexmap:
         indexmap_slices.append(np.s_[el[dilate_mask]])
-    labels_out[dilate_mask] = input[tuple(indexmap_slices)]
+    labels_out[dilate_mask] = label_image[tuple(indexmap_slices)]
     return labels_out
-
- 

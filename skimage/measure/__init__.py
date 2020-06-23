@@ -15,7 +15,8 @@ from ._label import label, expand_labels
 from .entropy import shannon_entropy
 
 
-__all__ = ['find_contours',
+__all__ = ['expand_labels',
+           'find_contours',
            'regionprops',
            'regionprops_table',
            'perimeter',
