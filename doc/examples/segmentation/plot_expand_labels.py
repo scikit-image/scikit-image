@@ -44,7 +44,7 @@ color1 = label2rgb(seg1, image=coins, bg_label=0)
 axes[0].imshow(color1)
 axes[0].set_title('Sobel+Watershed')
 
-color2 = label2rgb(expanded, image=coins, image_alpha=0.5, bg_label=0)
+color2 = label2rgb(expanded, image=coins, bg_label=0)
 axes[1].imshow(color2)
 axes[1].set_title('Expanded labels')
 
