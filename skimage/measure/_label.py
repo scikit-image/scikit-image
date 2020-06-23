@@ -147,7 +147,7 @@ def expand_labels(label_image, distance):
 
     References
     ----------
-    .. [1] https://github.com/CellProfiler/CellProfiler/blob/master/cellprofiler/modules/identifysecondaryobjects.py
+    .. [1] https://github.com/CellProfiler/CellProfiler/blob/082930ea95add7b72243a4fa3d39ae5145995e9c/cellprofiler/modules/identifysecondaryobjects.py#L559
     .. [2] https://forum.image.sc/t/equivalent-to-cellprofilers-identifysecondaryobjects-distance-n-in-fiji/39146/16
 
     Examples
@@ -161,6 +161,6 @@ def expand_labels(label_image, distance):
     # build the array slice, this change to [1] enables support for arbitrary dimensions
     indexmap_slices = []
     for el in indexmap:
-        indexmap_slices.append(np.s_[el[dilate_mask]])
+        indexmap_slices.append(el[dilate_mask])
     labels_out[dilate_mask] = label_image[tuple(indexmap_slices)]
     return labels_out
