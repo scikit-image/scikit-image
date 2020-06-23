@@ -3,7 +3,6 @@ from scipy import ndimage as ndi
 from skimage import data
 
 import numpy as np
-from numpy import array
 
 from skimage import measure
 from skimage.segmentation._expand_labels import expand_labels
