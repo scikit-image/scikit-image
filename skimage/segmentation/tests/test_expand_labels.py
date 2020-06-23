@@ -12,7 +12,7 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal
 
 SAMPLE1D = np.array([0, 0, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0])
-SAMPLE1D_EXPANDED_3 = array([4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0])
+SAMPLE1D_EXPANDED_3 = np.array([4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0])
 
 # Some pixels are important edge cases with undefined behaviour:
 # these are the pixels that are at the same distance from
