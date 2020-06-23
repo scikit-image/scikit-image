@@ -1,14 +1,3 @@
-""" 
-expand_labels is  inspired by code in CellProfiler, 
-code licensed under BSD-3 licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2020 Broad Institute
-All rights reserved.
-
-Original author/s: Cellprofiler team 
-"""
-
 from ._ccomp import label_cython as clabel
 
 def label(input, neighbors=None, background=None, return_num=False,

@@ -1,3 +1,14 @@
+""" 
+expand_labels is  inspired by code in CellProfiler, 
+code licensed under BSD-3 licenses.
+Website: http://www.cellprofiler.org
+
+Copyright (c) 2020 Broad Institute
+All rights reserved.
+
+Original author/s: Cellprofiler team 
+"""
+
 import numpy as np
 from scipy.ndimage import distance_transform_edt
 
@@ -26,8 +37,7 @@ def expand_labels(label_image, distance):
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
-    space, see the discussion in [1]. Here, the exact bahaviour depends on
-    the upstream implementation.
+    space. Here, the exact bahaviour depends on the upstream implementation.
 
     Parameters
     ----------
