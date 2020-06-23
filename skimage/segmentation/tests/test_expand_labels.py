@@ -69,7 +69,7 @@ SAMPLE2D_EXPANDED_1_5 = np.array(
        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
 
-EDGECASE2D =np.array(
+EDGECASE2D = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
      [0, 0, 1, 1, 0, 2, 2, 0, 0, 0, 0],
@@ -186,3 +186,4 @@ def test_edge_case_behaviour():
     expanded = expand_labels(SAMPLE_EDGECASE_BEHAVIOUR, 1)
     expanded_transpose = expand_labels(SAMPLE_EDGECASE_BEHAVIOUR.T, 1)
     assert not np.all(expanded == expanded_transpose.T)
+    
