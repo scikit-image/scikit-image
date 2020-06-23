@@ -77,7 +77,7 @@ EDGECASE2D =  np.array(
      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]]
 )
 
-EDGECASE2D_EXPANDED_4 = array(
+EDGECASE2D_EXPANDED_4 = np.array(
       [[1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0],
        [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2],
        [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
