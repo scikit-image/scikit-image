@@ -3,7 +3,6 @@ from __future__ import print_function, division
 import numpy as np
 from numpy.testing import assert_almost_equal
 import itertools
-import pytest
 
 from skimage._shared.testing import parametrize
 from skimage.metrics import hausdorff_distance
@@ -12,10 +11,8 @@ from skimage.metrics import hausdorff_distance
 def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=np.bool)
     non_empty = np.zeros((3, 2), dtype=np.bool)
-    with pytest.raises(ValueError):
-        hausdorff_distance(empty, non_empty)
-    with pytest.raises(ValueError):
-        hausdorff_distance(non_empty, empty)
+    assert hausdorff_distance(empty, non_empty) == 0.
+    assert hausdorff_distance(non_empty, empty) == 0.
     assert hausdorff_distance(empty, empty) == 0.
 
 

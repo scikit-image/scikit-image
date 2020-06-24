@@ -3,25 +3,24 @@ import numpy as np
 from ._set_metrics import hausdorff_distance_onesided
 
 
-def hausdorff_distance(a, b):
+def hausdorff_distance(image0, image1):
     """
-    Calculate the Hausdorff distance [1]_ between two sets of points.
+    Calculate the Hausdorff distance between nonzero elements of given images.
 
-    The Hausdorff distance is the maximum distance between any point on
-    ``a`` and its nearest point on ``b``, and vice-versa.
+    The Hausdorff distance [1]_ is the maximum distance between any point on
+    ``image0`` and its nearest point on ``image1``, and vice-versa.
 
     Parameters
     ----------
-    a, b : ndarray, dtype=bool
+    image0, image1 : ndarray
         Arrays where ``True`` represents a point that is included in a
         set of points. Both arrays must have the same shape.
 
     Returns
     -------
     distance : float
-        The Hausdorff distance between sets ``a`` and ``b``, using
-        Euclidian distance to calculate the distance between points in ``a``
-        and ``b``.
+        The Hausdorff distance between coordinates of nonzero pixels in
+        ``image0`` and ``image1``, using the Euclidian distance.
 
     References
     ----------
@@ -32,32 +31,27 @@ def hausdorff_distance(a, b):
     >>> points_a = (3, 0)
     >>> points_b = (6, 0)
     >>> shape = (7, 1)
-    >>> coords_a = np.zeros(shape, dtype=np.bool)
-    >>> coords_b = np.zeros(shape, dtype=np.bool)
-    >>> coords_a[points_a] = True
-    >>> coords_b[points_b] = True
-    >>> hausdorff_distance(coords_a, coords_b)
+    >>> image_a = np.zeros(shape, dtype=np.bool)
+    >>> image_b = np.zeros(shape, dtype=np.bool)
+    >>> image_a[points_a] = True
+    >>> image_b[points_b] = True
+    >>> hausdorff_distance(image_a, image_b)
     3.0
 
     """
-    if a.dtype != np.bool or b.dtype != np.bool:
-        raise ValueError('Arrays must have dtype = \'bool\'')
-    if a.shape != b.shape:
-        raise ValueError('Array shapes must be identical')
-
-    a_points = np.transpose(np.nonzero(a))
-    b_points = np.transpose(np.nonzero(b))
+    a_points = np.transpose(np.nonzero(image0))
+    b_points = np.transpose(np.nonzero(image1))
 
     # Handle empty sets properly
-    if a_points.shape[0] == 0 or b_points.shape[0] == 0:
-        if a_points.shape[0] == b_points.shape[0]:
+    if len(a_points) == 0 or len(b_points) == 0:
+        if len(a_points) == len(b_points):
             # Both sets are empty and thus the distance is zero
             return 0.
         else:
             # Exactly one set is empty; the distance is infinite
             return np.inf
 
-    a_points = np.require(a_points, np.float64, ['C'])
-    b_points = np.require(b_points, np.float64, ['C'])
+    a_points = np.ascontiguousarray(a_points, dtype=np.float64)
+    b_points = np.ascontiguousarray(b_points, dtype=np.float64)
     return max(hausdorff_distance_onesided(a_points, b_points),
                hausdorff_distance_onesided(b_points, a_points))
