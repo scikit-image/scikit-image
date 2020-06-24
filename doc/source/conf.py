@@ -165,6 +165,11 @@ sphinx_gallery_conf = {
     # Default CSS rescales (160, 112)
     # Size is decreased to reduce webpage loading time
     'thumbnail_size': (280, 196),
+    # This option requires optipng to compress images
+    # Optimization level between 0-7
+    # sphinx-gallery default: -o7
+    # optipng default: -o2
+    'compress_images': ('images', 'thumbnails', '-o2'),
     'subsection_order': ExplicitOrder([
         '../examples/data',
         '../examples/numpy_operations',
