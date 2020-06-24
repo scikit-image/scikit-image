@@ -31,7 +31,7 @@ def expand_labels(label_image, distance):
     Where labels are spaced more than ``distance`` pixels are apart, this is
     equivalent to a morpholgical dilation with a disc or hyperball of radius ``distance``.
     However, in contrast to a morphological dilation, ``expand_labels`` will
-    not expand a region into a neighbouring region.  
+    not expand a region into a neighboring region.  
 
     This implementation of ``expand_labels`` is derived from CellProfiler [1], where
     it is known as module "IdentifySecondaryObjects (Distance-N)" [2].

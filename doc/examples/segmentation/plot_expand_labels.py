@@ -3,12 +3,12 @@
 Expand segmentation labels without overlap
 ==========================================
 
-When you have a set of regions
-segmentations. The :py:func:`skimage.segmentation.join_segmentations`
-function computes the join of two segmentations, in which a pixel is
-placed in the same segment if and only if it is in the same segment in
-*both* segmentations.
-
+Given several connected components represented by a label image, these
+connected components can be expanded into background regions using
+ :py:func:`skimage.segmentation.expand_labels`.
+In contrast to :py:func:`skimage.morphology.dilation` this method will
+not let connected components expand into neighboring connected components
+with lower label number.
 """
 import numpy as np
 import matplotlib.pyplot as plt
