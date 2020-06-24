@@ -48,5 +48,5 @@ __all__ = ['find_contours',
            'compare_mse',
            'compare_nrmse',
            'compare_psnr',
-           'shannon_entropy'
-           ]
+           'shannon_entropy',
+]

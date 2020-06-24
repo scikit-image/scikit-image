@@ -24,7 +24,7 @@ if __name__ == '__main__':
     from numpy.distutils.core import setup
     setup(maintainer='scikit-image Developers',
           maintainer_email='scikit-image@python.org',
-          description='Graph-based Image-processing Algorithms',
+          description='Metrics to compare images',
           url='https://github.com/scikit-image/scikit-image',
           license='Modified BSD',
           **(configuration(top_path='').todict())
