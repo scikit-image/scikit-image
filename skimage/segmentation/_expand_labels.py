@@ -1,14 +1,3 @@
-""" 
-expand_labels is  inspired by code in CellProfiler, 
-code licensed under BSD-3 licenses.
-Website: http://www.cellprofiler.org
-
-Copyright (c) 2020 Broad Institute
-All rights reserved.
-
-Original author/s: Cellprofiler team 
-"""
-
 import numpy as np
 from scipy.ndimage import distance_transform_edt
 
@@ -16,12 +5,14 @@ from scipy.ndimage import distance_transform_edt
 def expand_labels(label_image, distance):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
-    Given a label image, each label is grown by up to distance pixels.
-    However, where labels would start to overlap, the label growth may
-    stop at less than distance pixels (this is where it differs from a
-    morphological dilation, where a connected component with a high label
-    number can potentially override connected components with lower label
-    numbers).
+    Given a label image, `expand_labels` expands each connected component by up
+    to ``distance`` pixels by assigning the integer label of a connected component 
+    to background pixels that are within a Euclidean distance of <= ``distance`` 
+    pixels of that component. Where multiple connected components are within 
+    ``distance`` pixels of a background pixel, the label value of the closest
+    connected component will be assigned (see Notes for multiple labels at equal 
+    distance).
+     
 
     Parameters
     ----------
@@ -37,17 +28,13 @@ def expand_labels(label_image, distance):
 
     Notes
     -----
-    This is equivalent to CellProfiler [1] [2] IdentifySecondaryObjects method
-    using the option "Distance-N".
+    Where labels are spaced more than ``distance`` pixels are apart, this is
+    equivalent to a morpholgical dilation with a disc or hyperball of radius ``distance``.
+    However, in contrast to a morphological dilation, ``expand_labels`` will
+    not expand a region into a neighbouring region.  
 
-    The basic idea is that you have some seed labels that you want
-    to grow by n pixels to give a mask for a larger object.
-
-    If you were only dealing with a single seed object, you could simply
-    dilate with a suitably sized structuring element. However, in general you
-    have multiple seed points and you don't want to merge those. Distance N
-    will grow up to N pixels without merging objects that are closer together
-    than 2N.
+    This implementation of ``expand_labels`` is derived from CellProfiler [1], where
+    it is known as module "IdentifySecondaryObjects (Distance-N)" [2].
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
@@ -55,7 +42,7 @@ def expand_labels(label_image, distance):
 
     See Also
     --------
-    :func:`skimage.measure.label`, :func:`skimage.segmentation.watershed`
+    :func:`skimage.measure.label`, :func:`skimage.segmentation.watershed`, :func:`skimage.morphology.dilation`
 
     References
     ----------
