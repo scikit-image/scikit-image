@@ -1,3 +1,14 @@
+"""
+expand_labels is derived from code that was
+originally part of CellProfiler, code licensed under BSD license.
+Website: http://www.cellprofiler.org
+
+Copyright (c) 2020 Broad Institute
+All rights reserved.
+
+Original authors: CellProfiler team
+
+"""
 import numpy as np
 from scipy.ndimage import distance_transform_edt
 
@@ -5,13 +16,14 @@ from scipy.ndimage import distance_transform_edt
 def expand_labels(label_image, distance):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
-    Given a label image, `expand_labels` expands each connected component by up
-    to ``distance`` pixels by assigning the integer label of a connected component 
-    to background pixels that are within a Euclidean distance of <= ``distance`` 
-    pixels of that component. Where multiple connected components are within 
-    ``distance`` pixels of a background pixel, the label value of the closest
-    connected component will be assigned (see Notes for multiple labels at equal 
-    distance).
+    Given a label image, `expand_labels` grows label regions (connected components) 
+    outwards by up to ``distance`` pixels without overflowing into neighboring regions.
+    More specifically, each background pixel that is within Euclidean distance
+    of <= ``distance`` pixels of a connected component is assigned the label of that
+    connected component.
+    Where multiple connected components are within ``distance`` pixels of a background 
+    pixel, the label value of the closest connected component will be assigned (see 
+    Notes for the case of multiple labels at equal distance).
      
 
     Parameters
@@ -31,14 +43,15 @@ def expand_labels(label_image, distance):
     Where labels are spaced more than ``distance`` pixels are apart, this is
     equivalent to a morpholgical dilation with a disc or hyperball of radius ``distance``.
     However, in contrast to a morphological dilation, ``expand_labels`` will
-    not expand a region into a neighboring region.  
+    not expand a label region into a neighboring region.  
 
     This implementation of ``expand_labels`` is derived from CellProfiler [1], where
     it is known as module "IdentifySecondaryObjects (Distance-N)" [2].
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
-    space. Here, the exact bahaviour depends on the upstream implementation.
+    space. Here, the exact bahaviour depends on the upstream implementation
+    of ``scipy.ndimage.distance_transform_edt``.
 
     See Also
     --------
