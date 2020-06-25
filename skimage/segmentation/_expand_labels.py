@@ -41,7 +41,7 @@ def expand_labels(label_image, distance):
     Notes
     -----
     Where labels are spaced more than ``distance`` pixels are apart, this is
-    equivalent to a morpholgical dilation with a disc or hyperball of radius ``distance``.
+    equivalent to a morphological dilation with a disc or hyperball of radius ``distance``.
     However, in contrast to a morphological dilation, ``expand_labels`` will
     not expand a label region into a neighboring region.  
 
