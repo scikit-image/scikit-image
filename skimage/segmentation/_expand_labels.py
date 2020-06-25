@@ -16,7 +16,7 @@ from scipy.ndimage import distance_transform_edt
 def expand_labels(label_image, distance):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
-    Given a label image, `expand_labels` grows label regions (connected components) 
+    Given a label image, ``expand_labels`` grows label regions (connected components) 
     outwards by up to ``distance`` pixels without overflowing into neighboring regions.
     More specifically, each background pixel that is within Euclidean distance
     of <= ``distance`` pixels of a connected component is assigned the label of that
@@ -25,7 +25,6 @@ def expand_labels(label_image, distance):
     pixel, the label value of the closest connected component will be assigned (see 
     Notes for the case of multiple labels at equal distance).
      
-
     Parameters
     ----------
     label_image : ndarray of dtype int
@@ -41,16 +40,16 @@ def expand_labels(label_image, distance):
     Notes
     -----
     Where labels are spaced more than ``distance`` pixels are apart, this is
-    equivalent to a morpholgical dilation with a disc or hyperball of radius ``distance``.
+    equivalent to a morphological dilation with a disc or hyperball of radius ``distance``.
     However, in contrast to a morphological dilation, ``expand_labels`` will
     not expand a label region into a neighboring region.  
 
-    This implementation of ``expand_labels`` is derived from CellProfiler [1], where
-    it is known as module "IdentifySecondaryObjects (Distance-N)" [2].
+    This implementation of ``expand_labels`` is derived from CellProfiler [1]_, where
+    it is known as module "IdentifySecondaryObjects (Distance-N)" [2]_.
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
-    space. Here, the exact bahaviour depends on the upstream implementation
+    space. Here, the exact behavior depends on the upstream implementation
     of ``scipy.ndimage.distance_transform_edt``.
 
     See Also
