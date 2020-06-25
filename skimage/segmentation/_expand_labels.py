@@ -25,7 +25,6 @@ def expand_labels(label_image, distance):
     pixel, the label value of the closest connected component will be assigned (see 
     Notes for the case of multiple labels at equal distance).
      
-
     Parameters
     ----------
     label_image : ndarray of dtype int
