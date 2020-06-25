@@ -4,8 +4,7 @@ from ._set_metrics import hausdorff_distance_onesided
 
 
 def hausdorff_distance(image0, image1):
-    """
-    Calculate the Hausdorff distance between nonzero elements of given images.
+    """Calculate the Hausdorff distance between nonzero elements of given images.
 
     The Hausdorff distance [1]_ is the maximum distance between any point on
     ``image0`` and its nearest point on ``image1``, and vice-versa.
