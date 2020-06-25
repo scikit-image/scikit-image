@@ -50,7 +50,7 @@ def expand_labels(label_image, distance):
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
-    space. Here, the exact bahaviour depends on the upstream implementation
+    space. Here, the exact behavior depends on the upstream implementation
     of ``scipy.ndimage.distance_transform_edt``.
 
     See Also
