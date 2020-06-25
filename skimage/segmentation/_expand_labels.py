@@ -46,7 +46,7 @@ def expand_labels(label_image, distance):
     not expand a label region into a neighboring region.  
 
     This implementation of ``expand_labels`` is derived from CellProfiler [1], where
-    it is known as module "IdentifySecondaryObjects (Distance-N)" [2].
+    it is known as module "IdentifySecondaryObjects (Distance-N)" [2]_.
 
     There is an important edge case when a pixel has the same distance to
     multiple regions, as it is not defined which region expands into that
