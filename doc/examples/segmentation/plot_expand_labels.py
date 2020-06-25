@@ -5,7 +5,7 @@ Expand segmentation labels without overlap
 
 Given several connected components represented by a label image, these
 connected components can be expanded into background regions using
- :py:func:`skimage.segmentation.expand_labels`.
+:py:func:`skimage.segmentation.expand_labels`.
 In contrast to :py:func:`skimage.morphology.dilation` this method will
 not let connected components expand into neighboring connected components
 with lower label number.
