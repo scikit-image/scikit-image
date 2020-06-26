@@ -417,20 +417,20 @@ class _Lddmm:
             matching_weights
         """
         
-        # self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
-        
         likelihood_matching = np.exp((self.contrast_deformed_template - self.target)**2 * (-1/(2 * self.sigma_matching**2))) / np.sqrt(2 * np.pi * self.sigma_matching**2)
         likelihood_artifact = np.exp((self.artifact_mean_value - self.target)**2 * (-1/(2 * self.sigma_artifact**2))) / np.sqrt(2 * np.pi * self.sigma_artifact**2)
 
-        # Account for priors. Currently a hack.
+        # Account for priors.
         likelihood_matching *= 0.8
         likelihood_artifact *= 0.2
 
-        # follow-up hack
-        likelihood_matching[likelihood_matching == 0] = 0.8
-        likelihood_artifact[likelihood_artifact == 0] = 0.2
+        # Where the denominator is less than 1e-6 of its maximum, set it to 1e-6 of its maximum to avoid division by zero.
+        likelihood_sum = likelihood_matching + likelihood_artifact
+        likelihood_sum_max = mp.max(likelihood_sum)
+        likelihood_sum[likelihood_sum < 1e-6 * likelihood_sum_max] = 1e-6 * likelihood_sum_max
 
-        self.matching_weights = likelihood_matching / (1 + likelihood_matching + likelihood_artifact)
+        self.matching_weights = likelihood_matching / likelihood_sum
+
         self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
 
 
@@ -539,7 +539,7 @@ class _Lddmm:
                             np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
                             axis=-1,
                         ) * weights**2
-                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + high_pass_contrast_coefficients
+                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + high_pass_contrast_coefficients
                     residual = linear_operator_high_pass_contrast_coefficients - low_pass_right_hand_side
                     # Compute the optimal step size.
                     linear_operator_residual = np.fft.ifftn(np.fft.fftn((
@@ -547,7 +547,7 @@ class _Lddmm:
                             np.fft.ifftn(np.fft.fftn(residual, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
                             axis=-1,
                         ) * weights**2
-                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + residual
+                    )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + residual
                     optimal_stepsize = np.sum(residual**2) / np.sum(linear_operator_residual * residual)
                     # Take gradient descent step at half the optimal step size.
                     high_pass_contrast_coefficients -= optimal_stepsize * residual / 2
@@ -561,7 +561,7 @@ class _Lddmm:
                         np.fft.ifftn(np.fft.fftn(self.contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
                         axis=-1,
                     ) * weights**2
-                )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim))).real + self.contrast_coefficients
+                )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + self.contrast_coefficients
 
 
 
@@ -853,6 +853,7 @@ class _Lddmm:
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[..., power]
         d_matching_d_deformed_template = matching_error_prime * contrast_map_prime
+        d_matching_d_deformed_template_padded = np.pad(d_matching_d_deformed_template, 2)
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
         # it will be phi_10_inv = phi_01 = phi.
@@ -883,7 +884,7 @@ class _Lddmm:
             # Transform error in target space back to time t.
             error_at_t = interpn(
                 points=self.target_axes,
-                values=d_matching_d_deformed_template,
+                values=d_matching_d_deformed_template_padded,
                 xi=self.affine_phi,
                 bounds_error=False,
                 fill_value=None,
