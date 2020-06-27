@@ -235,7 +235,6 @@ class RegionProperties:
 
     @property
     def feret_diameter(self):
-        from ..morphology.convex_hull import convex_hull_image
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
