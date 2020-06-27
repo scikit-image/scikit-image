@@ -883,7 +883,7 @@ class _Lddmm:
 
             # Transform error in target space back to time t.
             error_at_t = interpn(
-                points=self.target_axes,
+                points=_compute_axes(d_matching_d_deformed_template_padded.shape, self.target_resolution),
                 values=d_matching_d_deformed_template_padded,
                 xi=self.affine_phi,
                 bounds_error=False,
