@@ -853,7 +853,7 @@ class _Lddmm:
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += power * self.deformed_template**(power - 1) * self.contrast_coefficients[..., power]
         d_matching_d_deformed_template = matching_error_prime * contrast_map_prime
-        d_matching_d_deformed_template_padded = np.pad(d_matching_d_deformed_template, 2)
+        d_matching_d_deformed_template_padded = np.pad(d_matching_d_deformed_template, 2, mode='constant', constant_values=0)
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
         # it will be phi_10_inv = phi_01 = phi.
