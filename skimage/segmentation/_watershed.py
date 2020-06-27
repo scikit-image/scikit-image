@@ -93,11 +93,15 @@ def _validate_inputs(image, markers, mask, connectivity):
             mask.astype(np.int8))
 
 
-def watershed(image: ImagendArray, markers: Optional[LabelsArray] = None,
-              connectivity: Union[int,_SupportsArray] = 1,
-              offset: Optional[np.ndarray] = None,
-              mask: Optional[MaskArray] = None,
-              compactness: float = 0, watershed_line: bool = False):
+def watershed(
+    image: ImagendArray,
+    markers: Optional[LabelsArray] = None,
+    connectivity: Union[int,_SupportsArray] = 1,
+    offset: Optional[np.ndarray] = None,
+    mask: Optional[MaskArray] = None,
+    compactness: float = 0,
+    watershed_line: bool = False,
+) -> LabelsArray:
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
