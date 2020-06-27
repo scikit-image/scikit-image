@@ -426,7 +426,7 @@ class _Lddmm:
 
         # Where the denominator is less than 1e-6 of its maximum, set it to 1e-6 of its maximum to avoid division by zero.
         likelihood_sum = likelihood_matching + likelihood_artifact
-        likelihood_sum_max = mp.max(likelihood_sum)
+        likelihood_sum_max = np.max(likelihood_sum)
         likelihood_sum[likelihood_sum < 1e-6 * likelihood_sum_max] = 1e-6 * likelihood_sum_max
 
         self.matching_weights = likelihood_matching / likelihood_sum
