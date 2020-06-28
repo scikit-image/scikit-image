@@ -90,4 +90,3 @@ def label(input, neighbors=None, background=None, return_num=False,
      [0 0 0]]
     """
     return clabel(input, neighbors, background, return_num, connectivity)
-
