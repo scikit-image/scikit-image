@@ -3,12 +3,12 @@ import numpy as np
 
 from typing_extensions import Annotated
 
-ImageArray = Annotated[np.ndarray, 'image',
+Image3D = Annotated[np.ndarray, 'image_3d',
                         'a 2D or 3D single or multichannel image']
-Image2dArray = Annotated[np.ndarray, 'image_2d']
-ImagendArray = Annotated[np.ndarray, 'image_nd',
+Image2D = Annotated[np.ndarray, 'image_2d']
+Image = Annotated[np.ndarray, 'image_nd',
                             'nd image']
-LabelsArray = Annotated[np.ndarray, 'labels',
+Labels = Annotated[np.ndarray, 'labels',
                         'array of integers representing labels']
-MaskArray = Annotated[np.ndarray, 'mask',
+Mask = Annotated[np.ndarray, 'mask',
                         'array of bools to be used as mask']

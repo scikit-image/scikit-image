@@ -10,7 +10,7 @@ from numpy import random
 from ._slic import (_slic_cython, _enforce_label_connectivity_cython)  # type: ignore
 from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
-from ..typing import ArrayLike, ImageArray, MaskArray, LabelsArray, Literal
+from ..typing import Image3D, Mask, Labels, Literal
 from typing import Optional, Union, Sequence, Type, cast
 
 
@@ -87,7 +87,7 @@ def _get_grid_centroids(image, n_centroids):
     return centroids, steps
 
 
-def slic(image: ImageArray, n_segments: int = 100,
+def slic(image: Image3D, n_segments: int = 100,
          compactness: float = 10., max_iter: int = 10,
          sigma: Union[float, Sequence[float]] = 0,
          spacing: Optional[Sequence] = None,
@@ -95,7 +95,7 @@ def slic(image: ImageArray, n_segments: int = 100,
          enforce_connectivity: bool = True, min_size_factor: float = 0.5,
          max_size_factor: float = 3,
          slic_zero: bool = False, start_label: Optional[Literal[0, 1]] = None,
-         mask: Optional[MaskArray] = None) -> LabelsArray:
+         mask: Optional[Mask] = None) -> Labels:
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -263,8 +263,10 @@ def slic(image: ImageArray, n_segments: int = 100,
 
     if spacing is None:
         spacing = np.ones(3, dtype=dtype)
-    elif isinstance(spacing, (list, tuple)):
+    else:
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
+
+    spacing = cast(np.ndarray, spacing)
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma], dtype=dtype)
         sigma /= spacing.astype(dtype)  # type: ignore

@@ -32,7 +32,7 @@ from ..morphology.extrema import local_minima
 from ..morphology._util import (_validate_connectivity,
                                 _offsets_to_raveled_neighbors)
 from ..util import crop, regular_seeds
-from ..typing import ImagendArray, LabelsArray, MaskArray, _SupportsArray
+from ..typing import Image, Labels, Mask, _SupportsArray
 from typing import Optional, Union
 
 
@@ -94,14 +94,14 @@ def _validate_inputs(image, markers, mask, connectivity):
 
 
 def watershed(
-    image: ImagendArray,
-    markers: Optional[LabelsArray] = None,
+    image: Image,
+    markers: Optional[Labels] = None,
     connectivity: Union[int,_SupportsArray] = 1,
     offset: Optional[np.ndarray] = None,
-    mask: Optional[MaskArray] = None,
+    mask: Optional[Mask] = None,
     compactness: float = 0,
     watershed_line: bool = False,
-) -> LabelsArray:
+) -> Labels:
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters

@@ -12,7 +12,7 @@ import numpy as np
 from scipy import sparse, ndimage as ndi
 
 from .._shared.utils import warn
-from ..typing import ImageArray, LabelsArray, ArrayLike, Literal
+from ..typing import Image3D, Labels, Literal
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -265,8 +265,8 @@ def _preprocess(labels):
 
 
 def random_walker(
-    data: ImageArray,
-    labels: LabelsArray,
+    data: Image3D,
+    labels: Labels,
     beta: float = 130,
     mode: Literal['cg', 'cg_j', 'cg_mg', 'bf'] = 'cg_j',
     tol: float = 1.e-3,
@@ -276,7 +276,7 @@ def random_walker(
     spacing: Optional[Sequence] = None,
     *,
     prob_tol: float = 1e-3,
-) -> LabelsArray:
+) -> Labels:
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
