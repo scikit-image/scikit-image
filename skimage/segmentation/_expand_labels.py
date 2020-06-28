@@ -13,7 +13,7 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def expand_labels(label_image, distance):
+def expand_labels(label_image, distance=1):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
     Given a label image, ``expand_labels`` grows label regions (connected components) 
@@ -30,7 +30,7 @@ def expand_labels(label_image, distance):
     label_image : ndarray of dtype int
         label image
     distance : float
-        Number of pixels by which to grow the labels.
+        Euclidean distance in pixels by which to grow the labels. Default is one.
 
     Returns
     -------
