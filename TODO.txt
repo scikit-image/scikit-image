@@ -70,6 +70,8 @@ Version 0.19
 Version 0.20
 ------------
 
+* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
+  decorator from `find_contours`.
 
 Version 1.0
 -----------
