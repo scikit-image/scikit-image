@@ -137,7 +137,6 @@ SAMPLE_EDGECASE_BEHAVIOUR = np.array([[0, 1, 0, 0], [2, 0, 0, 0], [0, 3, 0, 0]])
     (EDGECASE2D, EDGECASE2D_EXPANDED_4, 4),
     (SAMPLE3D, SAMPLE3D_EXPANDED_2, 2)
     ]
-
 )
 def test_expand_labels(input_array, expected_output, expand_distance):
     expanded = expand_labels(input_array, expand_distance)
