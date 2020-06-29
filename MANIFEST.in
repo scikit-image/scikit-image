@@ -1,6 +1,7 @@
 include setup*.py
 include MANIFEST.in
-include *.md
+include README.md
+include LICENSE.txt
 include *.txt
 include *.rst
 recursive-include requirements *.txt
