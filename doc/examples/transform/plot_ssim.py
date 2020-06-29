@@ -28,6 +28,7 @@ from skimage import data, img_as_float
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error
 
+
 img = img_as_float(data.camera())
 rows, cols = img.shape
 
