@@ -25,7 +25,7 @@ Scientific Python Distributions
 -------------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions.
-These have the advantage of comming pre-installed with many other useful
+These have the advantage of coming pre-installed with many other useful
 packages for scientific computing and image analysis. Follow the instructions
 on the respective websites to get going. If you don't have python installed on
 your computer, these are the fastest way to get started with your project.
@@ -277,7 +277,7 @@ The platforms officially supported by scikit-image are:
 2. Mac OSX on x86 processors
 3. Linux 64 bit on x86 processors
 
-Since Windows 32 bit on x86 processros remains a popular platform, we continue
+Since Windows 32 bit on x86 processors remains a popular platform, we continue
 to support it for the time being. However, we strongly recommend all users of
 Windows 32 bit begin to switch over to Windows 64 bit if they can.
 
