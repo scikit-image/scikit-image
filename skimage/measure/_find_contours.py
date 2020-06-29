@@ -1,4 +1,6 @@
 import numpy as np
+from skimage._shared.utils import deprecate_kwarg
+
 from ._find_contours_cy import _get_contour_segments
 
 from collections import deque
@@ -6,6 +8,7 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
+@deprecate_kwarg({'array': 'image'}, removed_version="0.20")
 def find_contours(image, level,
                   fully_connected='low', positive_orientation='low',
                   *,
