@@ -143,9 +143,8 @@ def test_expand_labels(input_array, expected_output, expand_distance):
     assert_array_equal(expanded, expected_output)
 
 
-@testing.parametrize(
-    'ndim, distance', list(product([2, 3], range(6))),
-)
+@testing.parametrize('ndim', [2, 3])
+@testing.parametrize('distance', range(6))
 def test_binary_blobs(ndim, distance):
     """Check some invariants with label expansion.
     
