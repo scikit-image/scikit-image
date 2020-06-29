@@ -1,4 +1,3 @@
-from itertools import product
 from scipy import ndimage as ndi
 from skimage import data
 
