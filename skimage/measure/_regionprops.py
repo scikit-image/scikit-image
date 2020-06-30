@@ -205,18 +205,20 @@ class RegionProperties:
         self._cache = {}
         self._ndim = label_image.ndim
 
+        self._extra_properties = {}
         if extra_properties is None:
             extra_properties = []
-        self._extra_properties = {
-            func.__name__: func for func in extra_properties
-        }
-        for name in self._extra_properties:
+        for func in extra_properties:
+            name = func.__name__
             if hasattr(self, name):
                 msg = (
                     f"Extra property '{name}' is shadowed by existing "
                     "property and will be inaccessible. Consider renaming it."
                 )
                 warn(msg)
+        self._extra_properties = {
+            func.__name__: func for func in extra_properties
+        }
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
@@ -664,7 +666,7 @@ def regionprops_table(label_image, intensity_image=None,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample. 
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a warning is 
+        property the extra property wil not be visible and a UserWarning is 
         issued.
 
     Returns
@@ -790,7 +792,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample. 
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a warning is 
+        property the extra property wil not be visible and a UserWarning is 
         issued.
         
     Returns
