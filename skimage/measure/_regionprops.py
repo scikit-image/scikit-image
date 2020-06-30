@@ -210,7 +210,7 @@ class RegionProperties:
         self._extra_properties = {
             func.__name__: func for func in extra_properties
         }
-        for name in _extra_properties:
+        for name in self._extra_properties:
             if hasattr(self, name):
                 msg = (
                     f"Extra property '{name}' is shadowed by existing "
