@@ -138,6 +138,7 @@ def _infer_number_of_required_args(func):
         n_args -= len(argspec.defaults)
     return n_args
 
+
 def _infer_regionprop_dtype(func, *, intensity, ndim):
     """Infer the dtype of a region property calculated by func.
 
@@ -164,7 +165,7 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample = np.zeros((3,) * ndim, dtype=np.intp)
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
-    propmasks =  [(sample == n) for n in labels]
+    propmasks = [(sample == n) for n in labels]
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
             return func(mask, np.random.random(sample.shape))
@@ -680,11 +681,11 @@ def regionprops_table(label_image, intensity_image=None,
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
     extra_properties : Iterable of callables
-        Add extra property computation functions that are not included with 
+        Add extra property computation functions that are not included with
         skimage. The name of the property is derived from the function name,
-        the dtype is inferred by calling the function on a small sample. 
+        the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is 
+        property the extra property wil not be visible and a UserWarning is
         issued.
 
     Returns
@@ -806,13 +807,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
             will be less trivial. For example, the new orientation is
             :math:`\frac{\pi}{2}` plus the old orientation.
     extra_properties : Iterable of callables
-        Add extra property computation functions that are not included with 
+        Add extra property computation functions that are not included with
         skimage. The name of the property is derived from the function name,
-        the dtype is inferred by calling the function on a small sample. 
+        the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is 
+        property the extra property wil not be visible and a UserWarning is
         issued.
-        
+
     Returns
     -------
     properties : list of RegionProperties
