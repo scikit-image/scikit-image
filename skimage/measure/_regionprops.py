@@ -1,3 +1,4 @@
+import inspect
 from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
@@ -213,7 +214,15 @@ class RegionProperties:
     def __getattr__(self, attr):
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
-            if self._intensity_image is None:
+
+            # count number of required arguments
+            argspec = inspect.getfullargspec(func)
+            n_args = len(argspec.args)
+            if argspec.defaults is not None:
+                n_args -= len(argspec.defaults)
+
+            # apply func to intensity image if possible, just image otherwise
+            if self._intensity_image is None or n_args == 1:
                 return func(self.image)
             else:
                 return func(self.image, self._intensity_image)
