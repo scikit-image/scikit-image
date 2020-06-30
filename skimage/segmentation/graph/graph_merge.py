@@ -118,15 +118,12 @@ def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
             for nbr in rag.neighbors(n2):
                 _invalidate_edge(rag, n2, nbr)
 
-            if not in_place_merge:
-                next_id = rag.next_id()
-                _rename_node(rag, n2, next_id)
-                src, dst = n1, next_id
-            else:
-                src, dst = n1, n2
+            src, dst = n1, n2
 
             merge_func(rag, src, dst)
-            new_id = rag.merge_nodes(src, dst, weight_func)
+            new_id = rag.merge_nodes(
+                src, dst, weight_func, in_place=in_place_merge
+            )
             _revalidate_node_edges(rag, new_id, edge_heap)
 
     label_map = np.arange(labels.max() + 1)
