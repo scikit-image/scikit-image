@@ -186,7 +186,7 @@ class RegionProperties:
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active):
+                 cache_active, *, extra_properties=None):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
@@ -203,6 +203,24 @@ class RegionProperties:
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
+
+        if extra_properties is None:
+            extra_properties = []
+        self._extra_properties = {
+            func.__name__: func for func in extra_properties
+        }
+
+    def __getattr__(self, attr):
+        if attr in self._extra_properties:
+            func = self._extra_properties[attr]
+            if self._intensity_image is None:
+                return func(self.image)
+            else:
+                return func(self.image, self._intensity_image)
+        else:
+            raise AttributeError(
+                f"'{type(self)}' object has no attribute '{attr}'"
+            )
 
     @property
     @_cached
@@ -584,7 +602,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-'):
+                      cache=True, separator='-', extra_properties=None):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -697,12 +715,12 @@ def regionprops_table(label_image, intensity_image=None,
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+                coordinates=None, *, extra_properties=None):
     r"""Measure properties of labeled image regions.
 
     Parameters
     ----------
-    label_image : (N, M) ndarray
+    label_image : (M, N[, P]) ndarray
         Labeled input image. Labels with value 0 are ignored.
 
         .. versionchanged:: 0.14.1
@@ -711,7 +729,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
             inconsistent handling of images with singleton dimensions. To
             recover the old behaviour, use
             ``regionprops(np.squeeze(label_image), ...)``.
-    intensity_image : (N, M) ndarray, optional
+    intensity_image : (M, N[, P]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
     cache : bool, optional
@@ -731,8 +749,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
             0.15 and earlier. However, for some properties, the transformation
             will be less trivial. For example, the new orientation is
             :math:`\frac{\pi}{2}` plus the old orientation.
-
-
+    extra_properties : Iterable of callables
+        Add extra property computation functions that are not included with skimage.
+        The name of the property is derived from the function name, the dtype is inferred
+        by calling the function on a small sample. If the name of the property clashes
+        with an existing property the existing property will be overridden.
+        
     Returns
     -------
     properties : list of RegionProperties
@@ -953,7 +975,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache)
+                                 cache, extra_properties=extra_properties)
         regions.append(props)
 
     return regions
