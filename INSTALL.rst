@@ -65,28 +65,19 @@ In that window, execute the command:
 .. code-block:: sh
 
   # For linux or mac
-  which python3
-  # Linux and Mac might not have the command python
   which python
+  # Linux and Mac might not have the command python point to python3
+  which python3
   # For windows
   where python
-  # Windows might not have the command python3
+  # Windows might not have the command python
   where python3
-
-To ensure you know which python executable you are using.
-We found that the most likely commands for users is:
-
-- For MacOSX: ``python3``
-- For Linux:  ``python3``
-- For Windows: ``python`` (Notice the lack of 3)
-- If Python is installed with ``conda``, then it is: ``python``.
 
 Once you have found your Python command, use one of the commands to establish
 the version of Python you are using:
 
 .. code-block:: sh
 
-  python3 --version
   python --version
 
 To ensure the version is at least Python 3.6. If not, you may not be able
@@ -102,16 +93,16 @@ appropriate documentation version.
 
 Now that you have found the Python executable on your machine, use the commands
 below to install ``scikit-image``.
-The instructions below use the ``python3`` command. Make sure you use the
-command that you found calls the appropriate Python executable on your
+The instructions below use the ``python`` command for simplificy. Make sure you
+use the command that you found calls the appropriate Python executable on your
 particular machine.
 
 .. code-block:: sh
 
   # Update pip to a more recent version
-  python3 -m pip install -U pip
+  python -m pip install -U pip
   # Install scikit-image
-  python3 -m pip install -U scikit-image
+  python -m pip install -U scikit-image
 
 We also offer an easy way to install related packages. These are often included
 in scientific python distributions. To install many of them using ``pip`` use
@@ -119,7 +110,7 @@ the command:
 
 .. code-block:: sh
 
-    python3 -m pip install scikit-image[optional]
+    python -m pip install scikit-image[optional]
 
 
 .. tip::
@@ -194,15 +185,19 @@ The following are a few common challenges encountered in install
 **Multiple Python installations**
 
 Different python installations can cause confusion. The default command
-``python3`` you type may not be the one you expect. To check which python
+``python`` you type may not be the one you expect. To check which python
 executable you are using, use the commands:
 
 
 .. code-block:: sh
 
     # For Linux and MAC
+    which python
+    # or
     which python3
     # For Windows
+    where python
+    # or
     where python3
 
 From your python console or Jupyter notebook, you may use the python commands:
@@ -333,7 +328,7 @@ We also make a few more assumptions about your system:
 - You have a C++ compiler setup.
 - You are running a version of python compatible with our system as listed
   in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
-- You've cloned the git repository into a directory called ``scikit-image``. 
+- You've cloned the git repository into a directory called ``scikit-image``.
   This directory contains the following files:
 
 .. code-block::
