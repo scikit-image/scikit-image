@@ -210,6 +210,13 @@ class RegionProperties:
         self._extra_properties = {
             func.__name__: func for func in extra_properties
         }
+        for name in _extra_properties:
+            if hasattr(self, name):
+                msg = (
+                    f"Extra property '{name}' is shadowed by existing "
+                    "property and will be inaccessible. Consider renaming it."
+                )
+                warn(msg)
 
     def __getattr__(self, attr):
         if attr in self._extra_properties:
@@ -582,14 +589,22 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     out = {}
     n = len(regions)
     for prop in properties:
-        dtype = COL_DTYPES[prop]
-        column_buffer = np.zeros(n, dtype=dtype)
         r = regions[0][prop]
+        if prop in COL_DTYPES:
+            dtype = COL_DTYPES[prop]
+        else:
+            func = r._extra_properties[prop]
+            dtype = _infer_regionprop_dtype(
+                func,
+                intensity_image=r._intensity_image is not None,
+                ndim=r.image.ndim,
+            )
+        column_buffer = np.zeros(n, dtype=dtype)
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
-        if np.isscalar(r) or prop in OBJECT_COLUMNS:
+        if np.isscalar(r) or prop in OBJECT_COLUMNS or dtype is np.object_:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
@@ -644,6 +659,13 @@ def regionprops_table(label_image, intensity_image=None,
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
+    extra_properties : Iterable of callables
+        Add extra property computation functions that are not included with 
+        skimage. The name of the property is derived from the function name,
+        the dtype is inferred by calling the function on a small sample. 
+        If the name of an extra property clashes with the name of an existing
+        property the extra property wil not be visible and a warning is 
+        issued.
 
     Returns
     -------
@@ -705,8 +727,11 @@ def regionprops_table(label_image, intensity_image=None,
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
-                          cache=cache)
-
+                          cache=cache, extra_properties=extra_properties)
+    if extra_properties is not None:
+        properties = (
+            list(properties) + [prop.__name__ for prop in extra_properties]
+        )
     if len(regions) == 0:
         label_image = np.zeros((3,) * label_image.ndim, dtype=int)
         label_image[(1,) * label_image.ndim] = 1
@@ -714,13 +739,15 @@ def regionprops_table(label_image, intensity_image=None,
             intensity_image = np.zeros(label_image.shape,
                                        dtype=intensity_image.dtype)
         regions = regionprops(label_image, intensity_image=intensity_image,
-                              cache=cache)
+                              cache=cache, extra_properties=extra_properties)
 
         out_d = _props_to_dict(regions, properties=properties,
                                separator=separator)
         return {k: v[:0] for k, v in out_d.items()}
 
-    return _props_to_dict(regions, properties=properties, separator=separator)
+    return _props_to_dict(
+        regions, properties=properties, separator=separator
+    )
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
@@ -759,10 +786,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
             will be less trivial. For example, the new orientation is
             :math:`\frac{\pi}{2}` plus the old orientation.
     extra_properties : Iterable of callables
-        Add extra property computation functions that are not included with skimage.
-        The name of the property is derived from the function name, the dtype is inferred
-        by calling the function on a small sample. If the name of the property clashes
-        with an existing property the existing property will be overridden.
+        Add extra property computation functions that are not included with 
+        skimage. The name of the property is derived from the function name,
+        the dtype is inferred by calling the function on a small sample. 
+        If the name of an extra property clashes with the name of an existing
+        property the extra property wil not be visible and a warning is 
+        issued.
         
     Returns
     -------
