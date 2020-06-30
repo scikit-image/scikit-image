@@ -172,8 +172,8 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
-    if (np.isscalar(props1) and np.isscalar(props2) or
-            np.array(props1).shape == np.array(props2).shape):
+    if (np.isscalar(props1) and np.isscalar(props2)
+        or np.array(props1).shape == np.array(props2).shape):
         dtype = np.array(props1).dtype.type
     else:
         dtype = np.object_
