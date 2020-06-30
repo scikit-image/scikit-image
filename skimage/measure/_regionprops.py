@@ -118,6 +118,44 @@ COL_DTYPES = {
 PROP_VALS = set(PROPS.values())
 
 
+def _infer_regionprop_dtype(func, *, intensity, ndim):
+    """Infer the dtype of a region property calculated by func.
+
+    If a region property function always returns the same shape and type of
+    output regardless of input size, then the dtype is the dtype of the
+    returned array. Otherwise, the property has object dtype.
+
+    Parameters
+    ----------
+    func : callable
+        Function to be tested. The signature should be array[bool] -> Any if
+        intensity is False, or *(array[bool], array[float]) -> Any otherwise.
+    intensity : bool
+        Whether the regionprop is calculated on an intensity image.
+    ndim : int
+        The number of dimensions for which to check func.
+
+    Returns
+    -------
+    dtype : NumPy data type
+        The data type of the returned property.
+    """
+    labels = [1, 2]
+    sample = np.zeros((3,) * ndim, dtype=np.intp)
+    sample[(0,) * ndim] = labels[0]
+    sample[(slice(1, None),) * ndim] = labels[1]
+    propmasks =  [(sample == n) for n in labels]
+    if intensity:
+        func = lambda mask: func(mask, np.random.random(sample))
+    props1, props2 = map(func, propmasks)
+    if (np.isscalar(props1) and np.isscalar(props2) or
+            np.array(props1).shape == np.array(props2).shape):
+        dtype = np.array(props1).dtype.type
+    else:
+        dtype = np.object_
+    return dtype
+
+
 def _cached(f):
     @wraps(f)
     def wrapper(obj):
