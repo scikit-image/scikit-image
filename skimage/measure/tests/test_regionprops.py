@@ -540,6 +540,8 @@ def test_regionprops_table():
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
+
+def test_regionprops_table_no_regions():
     out = regionprops_table(np.zeros((2, 2), dtype=int),
                             properties=('label', 'area', 'bbox'),
                             separator='+')
