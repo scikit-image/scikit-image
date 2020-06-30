@@ -119,6 +119,25 @@ COL_DTYPES = {
 PROP_VALS = set(PROPS.values())
 
 
+def _infer_number_of_required_args(func):
+    """Infer the number of required arguments for a function
+
+    Parameters
+    ----------
+    func : callable
+        The function that is being inspected.
+
+    Returns
+    -------
+    n_args : int
+        The number of required arguments of func.
+    """
+    argspec = inspect.getfullargspec(func)
+    n_args = len(argspec.args)
+    if argspec.defaults is not None:
+        n_args -= len(argspec.defaults)
+    return n_args
+
 def _infer_regionprop_dtype(func, *, intensity, ndim):
     """Infer the dtype of a region property calculated by func.
 
@@ -146,9 +165,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     sample[(0,) * ndim] = labels[0]
     sample[(slice(1, None),) * ndim] = labels[1]
     propmasks =  [(sample == n) for n in labels]
-    if intensity:
-        func = lambda mask: func(mask, np.random.random(sample))
-    props1, props2 = map(func, propmasks)
+    if intensity and _infer_number_of_required_args(func) == 2:
+        def _func(mask):
+            return func(mask, np.random.random(sample.shape))
+    else:
+        _func = func
+    props1, props2 = map(_func, propmasks)
     if (np.isscalar(props1) and np.isscalar(props2) or
             np.array(props1).shape == np.array(props2).shape):
         dtype = np.array(props1).dtype.type
@@ -223,12 +245,7 @@ class RegionProperties:
     def __getattr__(self, attr):
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
-
-            # count number of required arguments
-            argspec = inspect.getfullargspec(func)
-            n_args = len(argspec.args)
-            if argspec.defaults is not None:
-                n_args -= len(argspec.defaults)
+            n_args = _infer_number_of_required_args(func)
 
             # apply func to intensity image if possible, just image otherwise
             if self._intensity_image is None or n_args == 1:
@@ -591,14 +608,15 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     out = {}
     n = len(regions)
     for prop in properties:
-        r = regions[0][prop]
+        r = regions[0]
+        rp = getattr(r, prop)
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
         else:
             func = r._extra_properties[prop]
             dtype = _infer_regionprop_dtype(
                 func,
-                intensity_image=r._intensity_image is not None,
+                intensity=r._intensity_image is not None,
                 ndim=r.image.ndim,
             )
         column_buffer = np.zeros(n, dtype=dtype)
@@ -606,15 +624,15 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
-        if np.isscalar(r) or prop in OBJECT_COLUMNS or dtype is np.object_:
+        if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
         else:
-            if isinstance(r, np.ndarray):
-                shape = r.shape
+            if isinstance(rp, np.ndarray):
+                shape = rp.shape
             else:
-                shape = (len(r),)
+                shape = (len(rp),)
 
             for ind in np.ndindex(shape):
                 for k in range(n):
