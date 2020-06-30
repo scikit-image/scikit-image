@@ -27,8 +27,8 @@ Scientific Python Distributions
 ``scikit-image`` comes pre-installed with several Python distributions.
 These have the advantage of coming pre-installed with many other useful
 packages for scientific computing and image analysis. Follow the instructions
-on the respective websites to get going. If you don't have python installed on
-your computer, these are the fastest way to get started with your project.
+on their respective websites to get going. If you don't have python installed 
+on your computer, these are the fastest way to get started with your project.
 As of June 2020, we recommend one of the following 3 distributions:
 
 - `Anaconda <https://www.anaconda.com/distribution/>`_
@@ -36,7 +36,7 @@ As of June 2020, we recommend one of the following 3 distributions:
 - `WinPython <https://winpython.github.io/>`_
 
 Note that the version of ``scikit-image`` installed with these distributions
-may different than the one you expect. This should not stop you from getting
+may be different than the one you expect. This should not stop you from getting
 started with your project. We suggest you check the installed version of
 ``scikit-image`` with the code snippet included at the top of this guide so
 that you can refer to the appropriate documentation version.
@@ -70,8 +70,6 @@ In that window, execute the command:
   which python3
   # For windows
   where python
-  # Windows might not have the command python
-  where python3
 
 Once you have found your Python command, use one of the commands to establish
 the version of Python you are using:
@@ -112,17 +110,6 @@ the command:
 
     python -m pip install scikit-image[optional]
 
-
-.. tip::
-
-    Scientific Python Distributions listed in the first section take care to
-    only install compatibile packages together. Often conflicts can arise
-    between specific combinations of packages. To avoid breaking your python
-    environments, we recommend learning about virtual environments in python.
-    You can learn more about them by reading Python's official documentation on
-    `Virtual Environments and Packages
-    <https://docs.python.org/3/tutorial/venv.html>`_.
-
 .. warning::
 
     Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
@@ -142,6 +129,18 @@ resources:
 - `conda-forge <https://conda-forge.org>`_ a channel maintained with the latest scikit-image package.
 - `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
 
+.. tip::
+
+    Scientific Python Distributions listed in the first section take care to
+    only install compatible packages together. Conflicts can often arise
+    between specific combinations of packages. To avoid breaking your python
+    environments, we recommend learning about virtual environments in python.
+    You can learn more about them by reading Python's official documentation on
+    `Virtual Environments and Packages
+    <https://docs.python.org/3/tutorial/venv.html>`_  or, if using conda,
+    in conda's `official getting started guide
+    <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_
+
 System-wide package manager
 ---------------------------
 
@@ -153,7 +152,7 @@ documentation from your operating system. Each operating system, and Linux
 distribution, has its own package manager, and as such the exact installation
 steps might differ for each system.
 
-We warn that this may install an older version of scikit-image which we may not
+We warn that this may install an older version of scikit-image that we may not
 support anymore.
 
 For brevity, we provide instructions for getting started with Ubuntu.
@@ -172,8 +171,8 @@ information on their `python3-skimage package
 .. warning::
 
     Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
-    overwrite critical system libraries which may require you to reinstall your
-    operating system.
+    overwrite critical system libraries, which may require you to reinstall 
+    your operating system.
 
 
 Common challenges
@@ -244,7 +243,7 @@ For most Windows installations the `python3` executable does not exist.
 This is currently being worked on with conda-forge and discussed in a
 `GitHub issue <https://github.com/conda-forge/python-feedstock/issues/349>`_.
 
-Versions of ``scikit-image`` after ``0.14.2`` no longer support Python2.
+Versions of ``scikit-image`` after ``0.14.5`` no longer support Python2.
 
 Additional Help and Support
 ---------------------------
@@ -278,7 +277,7 @@ Windows 32 bit begin to switch over to Windows 64 bit if they can.
 
 We are very insterested in learning how ``scikit-image`` is
 `used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
-Help us learn what other platforms you would like to install scikit-image!
+Help us learn on which other platforms you would like to install scikit-image!
 
 Unsupported platforms include:
 
@@ -287,7 +286,7 @@ Unsupported platforms include:
 
    - While we do not official support this distribution, we point users to
      `piwheels <https://wwww.piwheels.org>`_
-     and
+     and their
      `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
 
    - You may need to install additional system dependencies listed for
@@ -324,12 +323,16 @@ your computer and you intend to install ``scikit-image`` inside of it.
 
 We also make a few more assumptions about your system:
 
-- You have a C compiler setup.
-- You have a C++ compiler setup.
+- You have a C compiler set up.
+- You have a C++ compiler set up.
 - You are running a version of python compatible with our system as listed
   in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/master/setup.py#L212>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
-  This directory contains the following files:
+  You have set up the `upstream` remote to point to our repository and `origin`
+  to point to your fork.
+
+
+This directory contains the following files:
 
 .. code-block::
 
@@ -371,6 +374,7 @@ Here we provide instructions for two popular environment managers:
 
 venv
 ====
+
 When using ``venv``, you may find the following bash commands useful:
 
 .. code-block:: sh
@@ -393,7 +397,7 @@ conda
 =====
 
 When using conda for development, we
-recommend adding the conda-forge channel for the most updated version
+recommend adding the conda-forge channel for the most up-to-date version
 of many dependencies.
 Some dependencies we use (for testing and documentation) are not available
 from the default anaconda channel. Please follow the official
@@ -409,8 +413,6 @@ before you get started.
   # Install major development and runtime dependencies of scikit-image
   # (the rest can be installed from conda-forge or pip, if needed)
   conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
-  # Install minimal testing dependencies
-  conda install pytest
   # Install scikit-image from source
   pip install -e . -vv
   # Test your installation
@@ -419,14 +421,14 @@ before you get started.
 Updating the installation
 =========================
 
-When updating your isntallation, it is often necessary to recompile submodules
+When updating your installation, it is often necessary to recompile submodules
 that have changed. Do so with the following commands:
 
 .. code-block:: sh
 
     # Grab the latest source
     git checkout master
-    git pull
+    git pull upstream master
     # Update the installation
     pip install -e . -vv
 
@@ -434,11 +436,11 @@ Testing
 -------
 
 ``scikit-image`` has an extensive test suite that ensures correct
-execution on your system.  The test suite has to pass before a pull
+execution on your system.  The test suite must pass before a pull
 request can be merged, and tests should be added to cover any
 modifications to the code base.
 
-We make use of the `pytest <https://docs.pytest.org/en/latest/>`__
+We use the `pytest <https://docs.pytest.org/en/latest/>`__
 testing framework, with tests located in the various
 ``skimage/submodule/tests`` folders.
 
@@ -527,7 +529,7 @@ Install suitable compilers:
   sudo apt-get install build-essential
 
 
-Full reuqirements list
+Full requirements list
 ----------------------
 **Build Requirements**
 
@@ -569,7 +571,7 @@ functionality is only available with the following installed:
     walker segmentation.
 
 * `Dask <https://dask.org/>`__
-    The ``dask`` module is used as to scale up certain functions.
+    The ``dask`` module is used to speed up certain functions.
 
 
 .. include:: ../../requirements/optional.txt
@@ -578,7 +580,7 @@ functionality is only available with the following installed:
 
 **Extra Requirements**
 
-These requirements have been included as a conveinence, but are not widely
+These requirements have been included as a convenience, but are not widely
 installable through pypi on our supported platforms.  As such, we keep them in
 a seperate list for more advanced members of our community to install.
 

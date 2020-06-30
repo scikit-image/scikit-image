@@ -173,8 +173,8 @@ Once you've fixed all merge conflicts, do::
 Build environment setup
 -----------------------
 
-Please reffer to the Installation instructions to install scikit-image
-for contributors.
+Please refer to `Installing scikit-image`_ for development installation 
+instructions.
 
 Guidelines
 ----------
