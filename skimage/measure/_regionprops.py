@@ -2,9 +2,13 @@ from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage as ndi
+from scipy.spatial.distance import pdist
 
 from ._label import label
 from . import _moments
+from ._find_contours import find_contours
+from ._marching_cubes_lewiner import marching_cubes
+
 
 from functools import wraps
 
@@ -32,6 +36,7 @@ PROPS = {
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
+    'FeretDiameter': 'feret_diameter',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
@@ -81,6 +86,7 @@ COL_DTYPES = {
     'equivalent_diameter': float,
     'euler_number': int,
     'extent': float,
+    'feret_diameter': float,
     'filled_area': int,
     'filled_image': object,
     'moments_hu': float,
@@ -226,6 +232,18 @@ class RegionProperties:
     @property
     def extent(self):
         return self.area / self.image.size
+
+    @property
+    def feret_diameter(self):
+        identity_convex_hull = np.pad(self.convex_image,
+                                      2, mode='constant', constant_values=0)
+        if self._ndim == 2:
+            coordinates = np.vstack(find_contours(identity_convex_hull, .5, 
+                                                  fully_connected = 'high'))
+        elif self._ndim == 3:
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=.5)
+        distances = pdist(coordinates, 'sqeuclidean')
+        return sqrt(np.max(distances))
 
     @property
     def filled_area(self):
@@ -718,6 +736,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
+    **feret_diameter** : float
+        Maximum Feret's diameter computed as the longest distance between
+        points around a region's convex hull contour as determined by
+        ``find_contours``. [5]_
     **filled_area** : int
         Number of pixels of the region will all the holes filled in. Describes
         the area of the filled_image.
@@ -832,6 +854,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
            Features, from Lecture notes in computer science, p. 676. Springer,
            Berlin, 1993.
     .. [4] https://en.wikipedia.org/wiki/Image_moment
+    .. [5] W. Pabst, E. Gregorová. Characterization of particles and particle
+           systems, pp. 27-28. ICT Prague, 2007.
+           https://old.vscht.cz/sil/keramika/Characterization_of_particles/CPPS%20_English%20version_.pdf
 
     Examples
     --------
