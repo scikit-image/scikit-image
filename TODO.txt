@@ -70,6 +70,8 @@ Version 0.19
 Version 0.20
 ------------
 
+* In ``skimage/feature/peak.py``, remove the `indices` argument and
+  the decorator `remove_arg`.
 * In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
   decorator from `find_contours`.
 
