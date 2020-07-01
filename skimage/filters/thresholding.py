@@ -278,7 +278,7 @@ def threshold_otsu(image, nbins=256):
 
     # Check if the image is multi-colored or not
     if np.all(image == image[0]):
-        raise ValueError("threshold_otsu cannot threshold single-valued images")
+        raise ValueError("Cannot threshold single-valued images")
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
