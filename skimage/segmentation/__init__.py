@@ -1,3 +1,4 @@
+from ._expand_labels import expand_labels
 from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
 from ._felzenszwalb import felzenszwalb
@@ -18,28 +19,30 @@ from .trainable_segmentation import (multiscale_basic_features,
 from ..morphology import flood, flood_fill
 
 
-__all__ = ['random_walker',
-           'active_contour',
-           'felzenszwalb',
-           'slic',
-           'quickshift',
-           'find_boundaries',
-           'mark_boundaries',
-           'clear_border',
-           'join_segmentations',
-           'relabel_sequential',
-           'watershed',
-           'chan_vese',
-           'morphological_geodesic_active_contour',
-           'morphological_chan_vese',
-           'inverse_gaussian_gradient',
-           'circle_level_set',
-           'disk_level_set',
-           'checkerboard_level_set',
-           'flood',
-           'flood_fill',
-           'multiscale_basic_features',
-           'fit_segmenter',
-           'predict_segmenter',
-           'TrainableSegmenter'
-           ]
+__all__ = [
+    'expand_labels',
+    'random_walker',
+    'active_contour',
+    'felzenszwalb',
+    'slic',
+    'quickshift',
+    'find_boundaries',
+    'mark_boundaries',
+    'clear_border',
+    'join_segmentations',
+    'relabel_sequential',
+    'watershed',
+    'chan_vese',
+    'morphological_geodesic_active_contour',
+    'morphological_chan_vese',
+    'inverse_gaussian_gradient',
+    'circle_level_set',
+    'disk_level_set',
+    'checkerboard_level_set',
+    'flood',
+    'flood_fill',
+    'multiscale_basic_features',
+    'fit_segmenter',
+    'predict_segmenter',
+    'TrainableSegmenter'
+]
