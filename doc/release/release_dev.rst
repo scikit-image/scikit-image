@@ -16,6 +16,10 @@ New Features
 ------------
 
 
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------

@@ -115,7 +115,9 @@ def _blob_overlap(blob1, blob2, *, sigma_dim=1):
 
     # we divide coordinates by sigma * sqrt(ndim) to rescale space to isotropy,
     # giving spheres of radius = 1 or < 1.
-    if blob1[-1] > blob2[-1]:
+    if blob1[-1] == blob2[-1] == 0:
+        return 0.0
+    elif blob1[-1] > blob2[-1]:
         max_sigma = blob1[-sigma_dim:]
         r1 = 1
         r2 = blob2[-1] / blob1[-1]
