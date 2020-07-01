@@ -12,7 +12,7 @@ import numpy as np
 from scipy import sparse, ndimage as ndi
 
 from .._shared.utils import warn
-from ..typing import Image3D, Labels, Literal
+from ..typing import Image3D, Labels
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -268,7 +268,7 @@ def random_walker(
     data: Image3D,
     labels: Labels,
     beta: float = 130,
-    mode: Literal['cg', 'cg_j', 'cg_mg', 'bf'] = 'cg_j',
+    mode: str = 'cg_j',
     tol: float = 1.e-3,
     copy: bool = True,
     multichannel: bool = False,

@@ -95,13 +95,13 @@ def _validate_inputs(image, markers, mask, connectivity):
 
 def watershed(
     image: Image,
-    markers: Optional[Labels] = None,
-    connectivity: Union[int,_SupportsArray] = 1,
+    markers: Optional[Union[int, Labels]] = None,
+    connectivity: Union[int, _SupportsArray] = 1,
     offset: Optional[np.ndarray] = None,
     mask: Optional[Mask] = None,
     compactness: float = 0,
     watershed_line: bool = False,
-) -> Labels:
+    ) -> Labels:
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters

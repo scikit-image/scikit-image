@@ -87,15 +87,22 @@ def _get_grid_centroids(image, n_centroids):
     return centroids, steps
 
 
-def slic(image: Image3D, n_segments: int = 100,
-         compactness: float = 10., max_iter: int = 10,
-         sigma: Union[float, Sequence[float]] = 0,
-         spacing: Optional[Sequence] = None,
-         multichannel: bool = True, convert2lab: Optional[bool] = None,
-         enforce_connectivity: bool = True, min_size_factor: float = 0.5,
-         max_size_factor: float = 3,
-         slic_zero: bool = False, start_label: Optional[Literal[0, 1]] = None,
-         mask: Optional[Mask] = None) -> Labels:
+def slic(
+    image: Image3D,
+    n_segments: int = 100,
+    compactness: float = 10.,
+    max_iter: int = 10,
+    sigma: Union[float, Sequence[float]] = 0,
+    spacing: Optional[Sequence] = None,
+    multichannel: bool = True,
+    convert2lab: Optional[bool] = None,
+    enforce_connectivity: bool = True,
+    min_size_factor: float = 0.5,
+    max_size_factor: float = 3,
+    slic_zero: bool = False,
+    start_label: Optional[Literal[0, 1]] = None,
+    mask: Optional[Mask] = None
+    ) -> Labels:
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
