@@ -271,13 +271,13 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+    if image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
 
     # Check if the image is multi-colored or not
-    if not np.all(image == image[0]):
+    if np.all(image == image[0]):
         raise ValueError("threshold_otsu cannot threshold single-valued images")
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
