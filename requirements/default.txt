@@ -6,4 +6,4 @@ pillow>=4.3.0,!=7.1.0,!=7.1.1
 imageio>=2.3.0
 tifffile>=2019.7.26
 PyWavelets>=1.1.1
-typing_extensions
+typing_extensions>=3.7.4
