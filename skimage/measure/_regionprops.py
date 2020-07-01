@@ -247,12 +247,20 @@ class RegionProperties:
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
             n_args = _infer_number_of_required_args(func)
-
-            # apply func to intensity image if possible, just image otherwise
-            if self._intensity_image is None or n_args == 1:
+            # determine whether func requires intensity image
+            if n_args == 2:
+                if self._intensity_image is not None:
+                    return func(self.image, self._intensity_image)
+                else:
+                    raise AttributeError(
+                    f"intensity image required to calculate {attr}"
+                    )
+            elif n_args == 1:
                 return func(self.image)
             else:
-                return func(self.image, self._intensity_image)
+                raise AttributeError(f"Function provided for custom regionprop"
+                " {attr} takes incorrect number of arguments."
+                )
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
