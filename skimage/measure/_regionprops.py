@@ -1037,9 +1037,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     7741
     >>> props[1]['pixelcount']
     42
-    
+
     """
-    
+
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
 
