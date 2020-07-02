@@ -731,7 +731,7 @@ def regionprops_table(label_image, intensity_image=None,
     >>> from skimage import data, util, measure
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
-    >>> props = regionprops_table(label_image, image,
+    >>> props = measure.regionprops_table(label_image, image,
     ...                           properties=['label', 'inertia_tensor',
     ...                                       'inertia_tensor_eigvals'])
     >>> props  # doctest: +ELLIPSIS +SKIP
