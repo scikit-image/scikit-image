@@ -28,6 +28,10 @@ SAMPLE = np.array(
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 
+SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
+SAMPLE_MULTIPLE[3:5, 7:8] = 2
+INTENSITY_SAMPLE_MULTIPLE = SAMPLE_MULTIPLE.copy() * 2.0
+
 SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
 SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
@@ -651,11 +655,9 @@ def test_extra_properties_mixed():
 
 
 def test_extra_properties_table():
-    out = regionprops_table(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+    out = regionprops_table(SAMPLE_MULTIPLE, intensity_image=INTENSITY_SAMPLE_MULTIPLE,
                             properties=('label',),
                             extra_properties=(median_intensity, pixelcount)
                             )
-    assert out == {'label': array([1]),
-                   'median_intensity': array([1.]),
-                   'pixelcount': array([72])
-                   }
+    assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
+    assert_array_equal(out['pixelcount'], array([10,  2]))
