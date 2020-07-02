@@ -1,7 +1,5 @@
 import numpy as np
-
-from ._set_metrics import hausdorff_distance_onesided
-
+from scipy.spatial import cKDTree
 
 def hausdorff_distance(image0, image1):
     """Calculate the Hausdorff distance between nonzero elements of given images.
@@ -41,16 +39,13 @@ def hausdorff_distance(image0, image1):
     a_points = np.transpose(np.nonzero(image0))
     b_points = np.transpose(np.nonzero(image1))
 
-    # Handle empty sets properly
-    if len(a_points) == 0 or len(b_points) == 0:
-        if len(a_points) == len(b_points):
-            # Both sets are empty and thus the distance is zero
-            return 0.
-        else:
-            # Exactly one set is empty; the distance is infinite
-            return np.inf
+    # Handle empty sets properly:
+    # - if both sets are empty, return zero
+    # - if only one set is empty, return infinity
+    if len(a_points) == 0:
+        return 0 if len(b_points) == 0 else np.inf
+    elif len(b_points) == 0:
+        return np.inf
 
-    a_points = np.ascontiguousarray(a_points, dtype=np.float64)
-    b_points = np.ascontiguousarray(b_points, dtype=np.float64)
-    return max(hausdorff_distance_onesided(a_points, b_points),
-               hausdorff_distance_onesided(b_points, a_points))
+    return max(max(cKDTree(a_points).query(b_points, k=1)[0]),
+               max(cKDTree(b_points).query(a_points, k=1)[0]))
