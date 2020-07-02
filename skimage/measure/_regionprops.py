@@ -250,7 +250,7 @@ class RegionProperties:
             # determine whether func requires intensity image
             if n_args == 2:
                 if self._intensity_image is not None:
-                    return func(self.image, self._intensity_image)
+                    return func(self.image, self.intensity_image)
                 else:
                     raise AttributeError(
                         f"intensity image required to calculate {attr}"
@@ -754,6 +754,30 @@ def regionprops_table(label_image, intensity_image=None,
     4      5            0.222222  ...                  0.111111
 
     [5 rows x 7 columns]
+
+    If we want to measure a feature that does not come as a built-in
+    property, we can define custom functions and pass them as 
+    ``extra_properies``. Let's create a custom function that measures
+    the inensity quartiles in a region:
+
+    >>> from skimage import data, util, measure
+    >>> import numpy as np
+    >>> def quartiles(regionmask, intensity):
+    >>>     return np.percentile(intensity[regionmask], q=(25, 50, 75))
+    >>>
+    >>> image = data.coins()
+    >>> label_image = measure.label(image > 110, connectivity=image.ndim)
+    >>> props = measure.regionprops_table(label_image, intensity_image=image, 
+    >>>                                   properties=('label',),
+    >>>                                   extra_properties=(quartiles,))
+    >>> import pandas as pd # doctest: +SKIP
+    >>> pd.DataFrame(props).head() # doctest: +SKIP
+       label  quartiles-0  quartiles-1  quartiles-2
+0      1       117.00        123.0        130.0
+1      2       111.25        112.0        114.0
+2      3       111.00        111.0        111.0
+3      4       111.00        111.5        112.5
+4      5       112.50        113.0        114.0
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
