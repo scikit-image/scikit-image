@@ -655,9 +655,10 @@ def test_extra_properties_mixed():
 
 
 def test_extra_properties_table():
-    out = regionprops_table(SAMPLE_MULTIPLE, intensity_image=INTENSITY_SAMPLE_MULTIPLE,
+    out = regionprops_table(SAMPLE_MULTIPLE,
+                            intensity_image=INTENSITY_SAMPLE_MULTIPLE,
                             properties=('label',),
                             extra_properties=(median_intensity, pixelcount)
                             )
     assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
-    assert_array_equal(out['pixelcount'], array([10,  2]))
+    assert_array_equal(out['pixelcount'], array([10, 2]))

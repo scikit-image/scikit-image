@@ -756,7 +756,7 @@ def regionprops_table(label_image, intensity_image=None,
     [5 rows x 7 columns]
 
     If we want to measure a feature that does not come as a built-in
-    property, we can define custom functions and pass them as 
+    property, we can define custom functions and pass them as
     ``extra_properies``. Let's create a custom function that measures
     the inensity quartiles in a region:
 
@@ -767,7 +767,7 @@ def regionprops_table(label_image, intensity_image=None,
     >>>
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
-    >>> props = measure.regionprops_table(label_image, intensity_image=image, 
+    >>> props = measure.regionprops_table(label_image, intensity_image=image,
     >>>                                   properties=('label',),
     >>>                                   extra_properties=(quartiles,))
     >>> import pandas as pd # doctest: +SKIP
