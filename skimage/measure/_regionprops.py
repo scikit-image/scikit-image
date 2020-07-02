@@ -1013,7 +1013,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     Examples
     --------
     >>> from skimage import data, util
-    >>> from skimage.measure import label
+    >>> from skimage.measure import label, regionprops
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
@@ -1024,8 +1024,22 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> props[0]['centroid']
     (22.72987986048314, 81.91228523446583)
 
+    Add custom measurements by passing functions as ``extra_properties``
+    >>> from skimage import data, util
+    >>> from skimage.measure import label, regionprops
+    >>> import numpy as np
+    >>> img = util.img_as_ubyte(data.coins()) > 110
+    >>> label_img = label(img, connectivity=img.ndim)
+    >>> def pixelcount(regionmask):
+    >>>     return np.sum(regionmask)
+    >>> props = regionprops(label_img, extra_properties=(pixelcount,))
+    >>> props[0].pixelcount
+    7741
+    >>> props[1]['pixelcount']
+    42
+    
     """
-
+    
     if label_image.ndim not in (2, 3):
         raise TypeError('Only 2-D and 3-D images supported.')
 
