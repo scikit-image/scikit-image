@@ -616,14 +616,14 @@ def too_few_args():
 
 def test_extra_properties():
     region = regionprops(SAMPLE, extra_properties=(pixelcount,))[0]
-    assert region.pixelcount == np.sum(SAMPLE==1)
+    assert region.pixelcount == np.sum(SAMPLE == 1)
 
 
 def test_extra_properties_intensity():
-    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, 
-                        extra_properties=(median_intensity,)
-                        )[0]
-    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE==1])
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity,)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
 
 
 def test_extra_properties_no_intensity_provided():
@@ -638,24 +638,24 @@ def test_extra_properties_nr_args():
         _ = region.too_few_args
     with testing.raises(AttributeError):
         region = regionprops(SAMPLE, extra_properties=(too_many_args,))[0]
-        _ = region.too_many_args    
+        _ = region.too_many_args
 
 
 def test_extra_properties_mixed():
     # mixed properties, with and without intensity
-    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, 
-                        extra_properties=(median_intensity, pixelcount)
-                        )[0]
-    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE==1])
-    assert region.pixelcount == np.sum(SAMPLE==1)
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity, pixelcount)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.pixelcount == np.sum(SAMPLE == 1)
 
 
 def test_extra_properties_table():
-    out = regionprops_table(SAMPLE, intensity_image=INTENSITY_SAMPLE, 
-                            properties=('label',), 
+    out = regionprops_table(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                            properties=('label',),
                             extra_properties=(median_intensity, pixelcount)
                             )
-    assert out == {'label': array([1]), 
+    assert out == {'label': array([1]),
                    'median_intensity': array([1.]),
                    'pixelcount': array([72])
                    }

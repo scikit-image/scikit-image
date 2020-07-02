@@ -173,7 +173,7 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
         _func = func
     props1, props2 = map(_func, propmasks)
     if (np.isscalar(props1) and np.isscalar(props2)
-         or np.array(props1).shape == np.array(props2).shape):
+            or np.array(props1).shape == np.array(props2).shape):
         dtype = np.array(props1).dtype.type
     else:
         dtype = np.object_
@@ -253,14 +253,14 @@ class RegionProperties:
                     return func(self.image, self._intensity_image)
                 else:
                     raise AttributeError(
-                    f"intensity image required to calculate {attr}"
+                        f"intensity image required to calculate {attr}"
                     )
             elif n_args == 1:
                 return func(self.image)
             else:
                 raise AttributeError(f"Function provided for custom regionprop"
-                " {attr} takes incorrect number of arguments."
-                )
+                                     " {attr} takes incorrect number of arguments."
+                                     )
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
