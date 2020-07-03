@@ -772,12 +772,12 @@ def regionprops_table(label_image, intensity_image=None,
     ...                                   extra_properties=(quartiles,))
     >>> import pandas as pd # doctest: +SKIP
     >>> pd.DataFrame(props).head() # doctest: +SKIP
-       label  quartiles-0  quartiles-1  quartiles-2
-0      1       117.00        123.0        130.0
-1      2       111.25        112.0        114.0
-2      3       111.00        111.0        111.0
-3      4       111.00        111.5        112.5
-4      5       112.50        113.0        114.0
+           label  quartiles-0  quartiles-1  quartiles-2
+    0      1       117.00        123.0        130.0
+    1      2       111.25        112.0        114.0
+    2      3       111.00        111.0        111.0
+    3      4       111.00        111.5        112.5
+    4      5       112.50        113.0        114.0
 
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
