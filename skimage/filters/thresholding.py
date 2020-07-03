@@ -251,11 +251,6 @@ def threshold_otsu(image, nbins=256):
         Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
-    Raises
-    ------
-    ValueError
-         If ``image`` only contains a single grayscale value.
-
     References
     ----------
     .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
