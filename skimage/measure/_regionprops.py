@@ -258,10 +258,10 @@ class RegionProperties:
             elif n_args == 1:
                 return func(self.image)
             else:
-                raise AttributeError(f"Function provided for custom regionprop"
-                                     " {attr} takes incorrect number of"
-                                     " arguments."
-                                     )
+                raise AttributeError(
+                    f"Function provided for custom regionprop {attr} takes {n_args} "
+                    "arguments, but only 1 or 2 are supported."
+                )
         else:
             raise AttributeError(
                 f"'{type(self)}' object has no attribute '{attr}'"
