@@ -763,7 +763,7 @@ def regionprops_table(label_image, intensity_image=None,
     >>> from skimage import data, util, measure
     >>> import numpy as np
     >>> def quartiles(regionmask, intensity):
-    >>>     return np.percentile(intensity[regionmask], q=(25, 50, 75))
+    ...     return np.percentile(intensity[regionmask], q=(25, 50, 75))
     >>>
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
