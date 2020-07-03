@@ -757,7 +757,7 @@ def regionprops_table(label_image, intensity_image=None,
 
     If we want to measure a feature that does not come as a built-in
     property, we can define custom functions and pass them as
-    ``extra_properies``. For example, we can create a custom function
+    ``extra_properties``. For example, we can create a custom function
     that measures the intensity quartiles in a region:
 
     >>> from skimage import data, util, measure
