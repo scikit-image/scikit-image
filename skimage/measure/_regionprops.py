@@ -36,7 +36,7 @@ PROPS = {
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
-    'FeretDiameter': 'feret_diameter',
+    'FeretDiameterMax': 'feret_diameter_max',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
@@ -86,7 +86,7 @@ COL_DTYPES = {
     'equivalent_diameter': float,
     'euler_number': int,
     'extent': float,
-    'feret_diameter': float,
+    'feret_diameter_max': float,
     'filled_area': int,
     'filled_image': object,
     'moments_hu': float,
@@ -234,7 +234,7 @@ class RegionProperties:
         return self.area / self.image.size
 
     @property
-    def feret_diameter(self):
+    def feret_diameter_max(self):
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
