@@ -4,9 +4,70 @@ import numpy as np
 import numpy.testing as npt
 from skimage._shared.utils import (check_nD, deprecate_kwarg,
                                    _validate_interpolation_order,
-                                   change_default_value)
+                                   change_default_value, remove_arg)
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
+
+
+def test_remove_argument():
+
+    @remove_arg('arg1', changed_version='0.12')
+    def foo(arg0, arg1=0, arg2=1):
+        """Expected docstring"""
+        return arg0, arg1, arg2
+
+    @remove_arg('arg1', changed_version='0.12',
+                help_msg="Some indication on future behavior")
+    def bar(arg0, arg1=0, arg2=1):
+        """Expected docstring"""
+        return arg0, arg1, arg2
+
+    # Assert warning messages
+    expected_msg = ("arg1 argument is deprecated and will be removed "
+                    "in version 0.12. To avoid this warning, "
+                    "please do not use the arg1 argument. Please see "
+                    "foo documentation for more details.")
+
+    with pytest.warns(FutureWarning) as record:
+        assert foo(0, 1) == (0, 1, 1)
+
+    assert str(record[0].message) == expected_msg
+
+    with pytest.warns(FutureWarning) as record:
+        assert foo(0, arg1=1) == (0, 1, 1)
+
+    assert str(record[0].message) == expected_msg
+
+    expected_msg = ("arg1 argument is deprecated and will be removed "
+                    "in version 0.12. To avoid this warning, "
+                    "please do not use the arg1 argument. Please see "
+                    "bar documentation for more details."
+                    " Some indication on future behavior")
+
+    with pytest.warns(FutureWarning) as record:
+        assert bar(0, 1) == (0, 1, 1)
+
+    assert str(record[0].message) == expected_msg
+
+    with pytest.warns(FutureWarning) as record:
+        assert bar(0, arg1=1) == (0, 1, 1)
+
+    assert str(record[0].message) == expected_msg
+
+    # Assert that nothing happens if arg1 is set
+    with pytest.warns(None) as record:
+        # No kwargs
+        assert foo(0) == (0, 0, 1)
+        assert foo(0, arg2=0) == (0, 0, 0)
+
+        # Function name and doc is preserved
+        assert foo.__name__ == 'foo'
+        if sys.flags.optimize < 2:
+            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
+            assert foo.__doc__ == 'Expected docstring'
+
+    # Assert no warning was raised
+    assert not record.list
 
 
 def test_change_default_value():

@@ -129,12 +129,14 @@ registry = {
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
     "data/brain.tiff": "bcdbaf424fbad7b1fb0f855f608c68e5a838f35affc323ff04ea17f678eef5c6",
+    "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
 }
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
     "data/rank_filters_tests_3d.npz": "https://gitlab.com/xialuoke4062/data/-/raw/master/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
     "data/brain.tiff": "https://gitlab.com/xialuoke4062/data/-/raw/master/brain.tiff",
+    "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
 }
 
 legacy_registry = {

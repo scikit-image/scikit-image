@@ -51,6 +51,10 @@ New Features
 # - Added 3D implementation of rank percentile filter - ``filters.rank.percentile``.
 # - Added 3D implementation of rank windowed_histogram filter - ``filters.rank.windowed_histogram``.
 
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------
