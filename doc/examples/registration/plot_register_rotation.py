@@ -266,18 +266,16 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # Finally, we note that large changes in scale will dramatically alter the
 # magnitude spectra, especially since a big change in scale will usually be
 # accompanied by some cropping and loss of information content. The literature
-# advises staying within 1.8-2x scale change. This is fine for most biological
-# imaging applications.
-
-"""
-References
-----------
-
-.. [1] B.S. Reddy and B.N. Chatterji. An FFT-based technique for translation,
-       rotation and scale- invariant image registration. IEEE Trans. Image
-       Processing, 5(8):1266–1271, 1996. :DOI: `10.1109/83.506761`
-
-.. [2] Tzimiropoulos, Georgios, and Tania Stathaki. "Robust FFT-based
-       scale-invariant image registration." In 4th SEAS DTC Technical
-       Conference. 2009. :DOI: `10.1109/TPAMI.2010.107`
-"""
+# advises staying within 1.8-2x scale change [1]_ [2]_. This is fine for most
+# biological imaging applications.
+#
+# References
+# ----------
+#
+# .. [1] B.S. Reddy and B.N. Chatterji. An FFT-based technique for translation,
+#        rotation and scale- invariant image registration. IEEE Trans. Image
+#        Processing, 5(8):1266–1271, 1996. :DOI:`10.1109/83.506761`
+#
+# .. [2] Tzimiropoulos, Georgios, and Tania Stathaki. "Robust FFT-based
+#        scale-invariant image registration." In 4th SEAS DTC Technical
+#        Conference. 2009. :DOI:`10.1109/TPAMI.2010.107`
