@@ -259,8 +259,8 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # you look closely, there are some common patterns in those spectra, and they
 # do end up aligning well by phase correlation as demonstrated.
 #
-# 2. Images must be windowed using windows with cirular symmetry, to remove the
-# spectral leakage coming from image borders. There is no clearly optimal
+# 2. Images must be windowed using windows with circular symmetry, to remove
+# the spectral leakage coming from image borders. There is no clearly optimal
 # choice of window.
 #
 # Finally, we note that large changes in scale will dramatically alter the
@@ -268,13 +268,16 @@ print(f"Recovered value for scaling difference: {shift_scale}")
 # accompanied by some cropping and loss of information content. The literature
 # advises staying within 1.8-2x scale change. This is fine for most biological
 # imaging applications.
-#
-# Further reading:
-#
-# B.S. Reddy and B.N. Chatterji. An FFT-based technique for translation,
-# rotation and scale- invariant image registration. IEEE Trans. Image
-# Processing, 5(8):1266–1271, 1996.
-#
-# Tzimiropoulos, Georgios, and Tania Stathaki. "Robust FFT-based
-# scale-invariant image registration." In 4th SEAS DTC Technical Conference.
-# 2009.
+
+"""
+References
+----------
+
+.. [1] B.S. Reddy and B.N. Chatterji. An FFT-based technique for translation,
+       rotation and scale- invariant image registration. IEEE Trans. Image
+       Processing, 5(8):1266–1271, 1996. :DOI: `10.1109/83.506761`
+
+.. [2] Tzimiropoulos, Georgios, and Tania Stathaki. "Robust FFT-based
+       scale-invariant image registration." In 4th SEAS DTC Technical
+       Conference. 2009. :DOI: `10.1109/TPAMI.2010.107`
+"""
