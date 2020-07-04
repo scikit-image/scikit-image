@@ -11,22 +11,7 @@ Version 0.17
 Version 0.18
 ------------
 
-* Set ``preserve_range`` to ``False`` in ``radon`` and remove the
-  deprecation warning.
-* Remove deprecated function ``guess_spatial_dimensions`` in ``skimage.color.__init__``.
-* Remove deprecated function ``load`` in ``skimage.data.__init__.py``.
-* The following functions are deprecated and should be removed in 0.18:
-  `skimage.measure.compare_mse`,
-  `skimage.measure.compare_nrmse`,
-  `skimage.measure.compare_pnsr`
-  `skimage.measure.compare_ssim`
-* `skimage/measure/tests/test_simple_metrics.py` should also be removed
-* make coordinates='rc' the default in ``segmentation.active_contour``
-* remove deprecated ``bc`` argument in ``segmentation.active_contour``
 * In ``skimage/measure/_ccomp.label_cython`` remove the deprecated parameter
-  ``neighbors`` and update the tests. Set the default value of ``connectivity``
-  to 2.
-* In ``skimage/morphology/convex_hull.py`` remove the deprecated parameter
   ``neighbors`` and update the tests. Set the default value of ``connectivity``
   to 2.
 * In ``skimage.features.corner_peaks``, remove the warning.
@@ -41,7 +26,6 @@ Version 0.18
         * `` skimage/feature/corner.py::corner_orientations``
     * In ``skimage/feature/orb.py::_detect_octage`` remove explicitely setting
       ``threshold_rel=0``.
-* In ``skimage/transform`` remove histogram_matching.py.
 * In ``skimage/restoration/_denoise.py`` remove warning regarding
   ``rescale_sigma``.
     * In ``skimage/restoration/_cycle_spin.py::cycle_spin`` unskip the doctest
@@ -83,6 +67,20 @@ Version 0.19
   decorator from `label2rgb` and set `bg_label` default value to 0.
 * In ``skimage/feature/__init__.py``, remove `masked_register_translation`.
 
+Version 0.20
+------------
+
+* In ``skimage/feature/peak.py``, remove the `indices` argument and
+  the decorator `remove_arg`.
+* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
+  decorator from `find_contours`.
+
+Version 1.0
+-----------
+
+* consider removing the argument `coordinates` in
+  `skimage.segmentation.active_contour`, which has not effect.
+
 Other
 -----
 * Remove custom fused type in ``skimage/morphology/_max_tree.pyx`` once
@@ -121,3 +119,5 @@ Other
 * Once numpydoc > 0.9.x (ie https://github.com/numpy/numpydoc/pull/256) is
   released, remove `strip_signature_backslash = True` in
   ``doc/source/conf.py``.
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).
