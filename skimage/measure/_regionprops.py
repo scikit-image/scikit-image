@@ -695,7 +695,9 @@ def regionprops_table(label_image, intensity_image=None,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
         property the extra property wil not be visible and a UserWarning is
-        issued.
+        issued. A property computation function must take a region mask as its
+        first argument. If the property requires an intensity image, it must
+        accept the intensity image as the second argument.
 
     Returns
     -------
@@ -845,7 +847,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
         property the extra property wil not be visible and a UserWarning is
-        issued.
+        issued. A property computation function must take a region mask as its
+        first argument. If the property requires an intensity image, it must
+        accept the intensity image as the second argument.
 
     Returns
     -------
