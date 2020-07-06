@@ -152,7 +152,7 @@ class _Lddmm:
         )
         # This filter affects the optimization but not the optimum.
         self.preconditioner_low_pass_filter = 1 / (
-            (1 - preconditioner_velocity_smooth_length**2 * (
+            (1 - self.preconditioner_velocity_smooth_length**2 * (
                 np.sum((-2 + 2 * np.cos(2 * np.pi * self.template_resolution * fourier_template_coords)) / self.template_resolution**2, -1)
                 )
             )**(2 * self.fourier_filter_power)
