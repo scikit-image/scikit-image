@@ -1461,19 +1461,20 @@ def _transform_image(
 
     # Resample position_field if necessary.
     if output_resolution is not None and output_shape is not None:
-        if output_resolution is not None:
-            # resample position_field to match output_resolution.
-            position_field = resample(
-                image=position_field, 
-                new_resolution=output_resolution, 
-                old_resolution=position_field_resolution, 
-                err_to_larger=True, 
-                extrapolation_fill_value=None, 
-                image_is_coords=True, 
-            )
-        else:
-            # resize position_field to match output_shape.
-            position_field = resize(position_field, output_shape)
+        raise RuntimeError(f"Both output_resolution and output_shape were provided. Only one may be provided.")
+    if output_resolution is not None:
+        # resample position_field to match output_resolution.
+        position_field = resample(
+            image=position_field, 
+            new_resolution=output_resolution, 
+            old_resolution=position_field_resolution, 
+            err_to_larger=True, 
+            extrapolation_fill_value=None, 
+            image_is_coords=True, 
+        )
+    else:
+        # resize position_field to match output_shape.
+        position_field = resize(position_field, output_shape)
 
     # Interpolate subject at position field.
     deformed_subject = interpn(
