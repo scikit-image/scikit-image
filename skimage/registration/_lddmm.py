@@ -1589,7 +1589,7 @@ def lddmm_transform_image(
 
     # Call _transform_image.
 
-    deformed_subject = _transform_image(subject, subject_resolution, output_resolution, position_field, position_field_resolution, extrapolation_fill_value)
+    deformed_subject = _transform_image(subject, subject_resolution, output_resolution, output_shape, position_field, position_field_resolution, extrapolation_fill_value)
 
     return deformed_subject
 
