@@ -948,7 +948,7 @@ def allen_mouse_brain_atlas():
     Available from: http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/average_template/
     """
 
-    return np.load('data/allen_mouse_brain_atlas.npy')
+    return np.load(_fetch('data/allen_mouse_brain_atlas.npy'))
 
 
 def cleared_mouse_brain():
@@ -960,4 +960,4 @@ def cleared_mouse_brain():
     cleared_mouse_brain : (142, 83, 121) float64 ndarray
     """
     
-    return np.load('data/cleared_mouse_brain.npy')
+    return np.load(_fetch('data/cleared_mouse_brain.npy'))
