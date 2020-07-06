@@ -1035,7 +1035,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> def pixelcount(regionmask):
-    >>>     return np.sum(regionmask)
+            return np.sum(regionmask)
     >>> props = regionprops(label_img, extra_properties=(pixelcount,))
     >>> props[0].pixelcount
     7741
