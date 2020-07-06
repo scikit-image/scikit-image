@@ -1439,6 +1439,7 @@ def _transform_image(
     subject,
     subject_resolution,
     output_resolution,
+    output_shape,
     position_field,
     position_field_resolution,
     extrapolation_fill_value=None,
@@ -1459,15 +1460,20 @@ def _transform_image(
         output_resolution = _validate_resolution(output_resolution, subject.ndim)
 
     # Resample position_field if necessary.
-    if output_resolution is not None:
-        position_field = resample(
-            image=position_field, 
-            new_resolution=output_resolution, 
-            old_resolution=position_field_resolution, 
-            err_to_larger=True, 
-            extrapolation_fill_value=None, 
-            image_is_coords=True, 
-        )
+    if output_resolution is not None and output_shape is not None:
+        if output_resolution is not None:
+            # resample position_field to match output_resolution.
+            position_field = resample(
+                image=position_field, 
+                new_resolution=output_resolution, 
+                old_resolution=position_field_resolution, 
+                err_to_larger=True, 
+                extrapolation_fill_value=None, 
+                image_is_coords=True, 
+            )
+        else:
+            # resize position_field to match output_shape.
+            position_field = resize(position_field, output_shape)
 
     # Interpolate subject at position field.
     deformed_subject = interpn(
@@ -1485,6 +1491,7 @@ def lddmm_transform_image(
     subject,
     subject_resolution=1,
     output_resolution=None,
+    output_shape=None,
     deform_to="template",
     extrapolation_fill_value=None,
     # lddmm_register output (lddmm_dict).
@@ -1513,7 +1520,9 @@ def lddmm_transform_image(
             The resolution of subject in each dimension, or just one scalar to indicate isotropy. By default 1.
         output_resolution: float, seq, optional
             The resolution of the output deformed_subject in each dimension, or just one scalar to indicate isotropy, 
-            or None to indicate the resolution of template or target based on deform_to. By default None.
+            or None to indicate the resolution of template or target based on deform_to. Cannot be provided along with output_shape. By default None.
+        output_shape: seq, optional
+            The shape of the output deformed_subject, or None to indicate the shape of the template or target based on deform_to. Cannot be provided along with output_resolution. By default None.
         deform_to: str, optional
             Either "template" or "target", indicating which position field to apply to subject. By default "template".
         extrapolation_fill_value: float, optional
@@ -1558,6 +1567,9 @@ def lddmm_transform_image(
     # Validate output_resolution.
     if output_resolution is not None:
         output_resolution = _validate_resolution(output_resolution, subject.ndim)
+    # Validate output_shape.
+    if output_shape is not None:
+        output_shape = _validate_ndarray(output_shape, required_shape=subject.ndim)
     # Validate extrapolation_fill_value.
     if extrapolation_fill_value is None:
         extrapolation_fill_value = np.quantile(subject, 10**-subject.ndim)
