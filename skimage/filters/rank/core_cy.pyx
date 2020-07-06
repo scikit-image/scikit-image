@@ -346,8 +346,8 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef unsigned char[:, :, :] t_n = (np.diff(t, axis=1) > 0).view(np.uint8)
 
     # the current local histogram distribution
-    # cdef Py_ssize_t* histo
-    cdef Py_ssize_t [::1] histo = np.zeros(n_bins, dtype=np.intp)
+    cdef Py_ssize_t* histo
+    # cdef Py_ssize_t [::1] histo = np.zeros(n_bins, dtype=np.intp)
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
@@ -400,9 +400,9 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                     num_se_s += 1
 
     for p in range(planes):
-        # for i in range(n_bins):
-        #     histo[i] = 0
-        histo[:] = 0
+        for i in range(n_bins):
+            histo[i] = 0
+        # histo[:] = 0
         pop = 0
 
         for r in range(srows):
