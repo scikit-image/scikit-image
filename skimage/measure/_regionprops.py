@@ -736,7 +736,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
-    **feret_diameter** : float
+    **feret_diameter_max** : float
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours``. [5]_
