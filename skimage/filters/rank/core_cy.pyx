@@ -55,6 +55,8 @@ cdef inline char is_in_mask_3D(Py_ssize_t planes, Py_ssize_t rows,
             p < 0 or p > planes - 1):
         return 0
     else:
+        if not mask:
+            return 1
         return mask[p * rows * cols + r * cols + c]
 
 

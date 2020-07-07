@@ -134,8 +134,8 @@ registry = {
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
-    "data/rank_filters_tests_3d.npz": "https://gitlab.com/xialuoke4062/data/-/raw/master/Tests_besides_Equalize_Otsu/add18_entropy/rank_filters_tests_3d.npz",
-    "data/brain.tiff": "https://gitlab.com/xialuoke4062/data/-/raw/master/brain.tiff",
+    "data/rank_filters_tests_3d.npz": "https://gitlab.com/scikit-image/data/-/raw/6a9914054f36d49e2722e9dbb357ecfa4b0215d0/rank_filters_tests_3d.npz",
+    "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/6a9914054f36d49e2722e9dbb357ecfa4b0215d0/brain.tiff",
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
 }
 
