@@ -1,3 +1,4 @@
+import inspect
 from warnings import warn
 from math import sqrt, atan2, pi as PI
 import numpy as np
@@ -118,6 +119,67 @@ COL_DTYPES = {
 PROP_VALS = set(PROPS.values())
 
 
+def _infer_number_of_required_args(func):
+    """Infer the number of required arguments for a function
+
+    Parameters
+    ----------
+    func : callable
+        The function that is being inspected.
+
+    Returns
+    -------
+    n_args : int
+        The number of required arguments of func.
+    """
+    argspec = inspect.getfullargspec(func)
+    n_args = len(argspec.args)
+    if argspec.defaults is not None:
+        n_args -= len(argspec.defaults)
+    return n_args
+
+
+def _infer_regionprop_dtype(func, *, intensity, ndim):
+    """Infer the dtype of a region property calculated by func.
+
+    If a region property function always returns the same shape and type of
+    output regardless of input size, then the dtype is the dtype of the
+    returned array. Otherwise, the property has object dtype.
+
+    Parameters
+    ----------
+    func : callable
+        Function to be tested. The signature should be array[bool] -> Any if
+        intensity is False, or *(array[bool], array[float]) -> Any otherwise.
+    intensity : bool
+        Whether the regionprop is calculated on an intensity image.
+    ndim : int
+        The number of dimensions for which to check func.
+
+    Returns
+    -------
+    dtype : NumPy data type
+        The data type of the returned property.
+    """
+    labels = [1, 2]
+    sample = np.zeros((3,) * ndim, dtype=np.intp)
+    sample[(0,) * ndim] = labels[0]
+    sample[(slice(1, None),) * ndim] = labels[1]
+    propmasks = [(sample == n) for n in labels]
+    if intensity and _infer_number_of_required_args(func) == 2:
+        def _func(mask):
+            return func(mask, np.random.random(sample.shape))
+    else:
+        _func = func
+    props1, props2 = map(_func, propmasks)
+    if (np.isscalar(props1) and np.isscalar(props2)
+            or np.array(props1).shape == np.array(props2).shape):
+        dtype = np.array(props1).dtype.type
+    else:
+        dtype = np.object_
+    return dtype
+
+
 def _cached(f):
     @wraps(f)
     def wrapper(obj):
@@ -148,7 +210,7 @@ class RegionProperties:
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active):
+                 cache_active, *, extra_properties=None):
 
         if intensity_image is not None:
             if not intensity_image.shape == label_image.shape:
@@ -165,6 +227,45 @@ class RegionProperties:
         self._cache_active = cache_active
         self._cache = {}
         self._ndim = label_image.ndim
+
+        self._extra_properties = {}
+        if extra_properties is None:
+            extra_properties = []
+        for func in extra_properties:
+            name = func.__name__
+            if hasattr(self, name):
+                msg = (
+                    f"Extra property '{name}' is shadowed by existing "
+                    "property and will be inaccessible. Consider renaming it."
+                )
+                warn(msg)
+        self._extra_properties = {
+            func.__name__: func for func in extra_properties
+        }
+
+    def __getattr__(self, attr):
+        if attr in self._extra_properties:
+            func = self._extra_properties[attr]
+            n_args = _infer_number_of_required_args(func)
+            # determine whether func requires intensity image
+            if n_args == 2:
+                if self._intensity_image is not None:
+                    return func(self.image, self.intensity_image)
+                else:
+                    raise AttributeError(
+                        f"intensity image required to calculate {attr}"
+                    )
+            elif n_args == 1:
+                return func(self.image)
+            else:
+                raise AttributeError(
+                    "Custom regionprop function's number of arguments must be 1 or 2"
+                    f"but {attr} takes {n_args} arguments."
+                )
+        else:
+            raise AttributeError(
+                f"'{type(self)}' object has no attribute '{attr}'"
+            )
 
     @property
     @_cached
@@ -517,22 +618,31 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     out = {}
     n = len(regions)
     for prop in properties:
-        dtype = COL_DTYPES[prop]
+        r = regions[0]
+        rp = getattr(r, prop)
+        if prop in COL_DTYPES:
+            dtype = COL_DTYPES[prop]
+        else:
+            func = r._extra_properties[prop]
+            dtype = _infer_regionprop_dtype(
+                func,
+                intensity=r._intensity_image is not None,
+                ndim=r.image.ndim,
+            )
         column_buffer = np.zeros(n, dtype=dtype)
-        r = regions[0][prop]
 
         # scalars and objects are dedicated one column per prop
         # array properties are raveled into multiple columns
         # for more info, refer to notes 1
-        if np.isscalar(r) or prop in OBJECT_COLUMNS:
+        if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
             for i in range(n):
                 column_buffer[i] = regions[i][prop]
             out[prop] = np.copy(column_buffer)
         else:
-            if isinstance(r, np.ndarray):
-                shape = r.shape
+            if isinstance(rp, np.ndarray):
+                shape = rp.shape
             else:
-                shape = (len(r),)
+                shape = (len(rp),)
 
             for ind in np.ndindex(shape):
                 for k in range(n):
@@ -546,7 +656,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-'):
+                      cache=True, separator='-', extra_properties=None):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -579,6 +689,15 @@ def regionprops_table(label_image, intensity_image=None,
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
+    extra_properties : Iterable of callables
+        Add extra property computation functions that are not included with
+        skimage. The name of the property is derived from the function name,
+        the dtype is inferred by calling the function on a small sample.
+        If the name of an extra property clashes with the name of an existing
+        property the extra property wil not be visible and a UserWarning is
+        issued. A property computation function must take a region mask as its
+        first argument. If the property requires an intensity image, it must
+        accept the intensity image as the second argument.
 
     Returns
     -------
@@ -614,7 +733,7 @@ def regionprops_table(label_image, intensity_image=None,
     >>> from skimage import data, util, measure
     >>> image = data.coins()
     >>> label_image = measure.label(image > 110, connectivity=image.ndim)
-    >>> props = regionprops_table(label_image, image,
+    >>> props = measure.regionprops_table(label_image, image,
     ...                           properties=['label', 'inertia_tensor',
     ...                                       'inertia_tensor_eigvals'])
     >>> props  # doctest: +ELLIPSIS +SKIP
@@ -638,10 +757,37 @@ def regionprops_table(label_image, intensity_image=None,
 
     [5 rows x 7 columns]
 
+    If we want to measure a feature that does not come as a built-in
+    property, we can define custom functions and pass them as
+    ``extra_properties``. For example, we can create a custom function
+    that measures the intensity quartiles in a region:
+
+    >>> from skimage import data, util, measure
+    >>> import numpy as np
+    >>> def quartiles(regionmask, intensity):
+    ...     return np.percentile(intensity[regionmask], q=(25, 50, 75))
+    >>>
+    >>> image = data.coins()
+    >>> label_image = measure.label(image > 110, connectivity=image.ndim)
+    >>> props = measure.regionprops_table(label_image, intensity_image=image,
+    ...                                   properties=('label',),
+    ...                                   extra_properties=(quartiles,))
+    >>> import pandas as pd # doctest: +SKIP
+    >>> pd.DataFrame(props).head() # doctest: +SKIP
+           label  quartiles-0  quartiles-1  quartiles-2
+    0      1       117.00        123.0        130.0
+    1      2       111.25        112.0        114.0
+    2      3       111.00        111.0        111.0
+    3      4       111.00        111.5        112.5
+    4      5       112.50        113.0        114.0
+
     """
     regions = regionprops(label_image, intensity_image=intensity_image,
-                          cache=cache)
-
+                          cache=cache, extra_properties=extra_properties)
+    if extra_properties is not None:
+        properties = (
+            list(properties) + [prop.__name__ for prop in extra_properties]
+        )
     if len(regions) == 0:
         label_image = np.zeros((3,) * label_image.ndim, dtype=int)
         label_image[(1,) * label_image.ndim] = 1
@@ -649,22 +795,24 @@ def regionprops_table(label_image, intensity_image=None,
             intensity_image = np.zeros(label_image.shape,
                                        dtype=intensity_image.dtype)
         regions = regionprops(label_image, intensity_image=intensity_image,
-                              cache=cache)
+                              cache=cache, extra_properties=extra_properties)
 
         out_d = _props_to_dict(regions, properties=properties,
                                separator=separator)
         return {k: v[:0] for k, v in out_d.items()}
 
-    return _props_to_dict(regions, properties=properties, separator=separator)
+    return _props_to_dict(
+        regions, properties=properties, separator=separator
+    )
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None):
+                coordinates=None, *, extra_properties=None):
     r"""Measure properties of labeled image regions.
 
     Parameters
     ----------
-    label_image : (N, M) ndarray
+    label_image : (M, N[, P]) ndarray
         Labeled input image. Labels with value 0 are ignored.
 
         .. versionchanged:: 0.14.1
@@ -673,7 +821,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
             inconsistent handling of images with singleton dimensions. To
             recover the old behaviour, use
             ``regionprops(np.squeeze(label_image), ...)``.
-    intensity_image : (N, M) ndarray, optional
+    intensity_image : (M, N[, P]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image.
         Default is None.
     cache : bool, optional
@@ -693,7 +841,15 @@ def regionprops(label_image, intensity_image=None, cache=True,
             0.15 and earlier. However, for some properties, the transformation
             will be less trivial. For example, the new orientation is
             :math:`\frac{\pi}{2}` plus the old orientation.
-
+    extra_properties : Iterable of callables
+        Add extra property computation functions that are not included with
+        skimage. The name of the property is derived from the function name,
+        the dtype is inferred by calling the function on a small sample.
+        If the name of an extra property clashes with the name of an existing
+        property the extra property wil not be visible and a UserWarning is
+        issued. A property computation function must take a region mask as its
+        first argument. If the property requires an intensity image, it must
+        accept the intensity image as the second argument.
 
     Returns
     -------
@@ -861,7 +1017,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     Examples
     --------
     >>> from skimage import data, util
-    >>> from skimage.measure import label
+    >>> from skimage.measure import label, regionprops
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
@@ -871,6 +1027,20 @@ def regionprops(label_image, intensity_image=None, cache=True,
     >>> # centroid of first labeled object
     >>> props[0]['centroid']
     (22.72987986048314, 81.91228523446583)
+
+    Add custom measurements by passing functions as ``extra_properties``
+    >>> from skimage import data, util
+    >>> from skimage.measure import label, regionprops
+    >>> import numpy as np
+    >>> img = util.img_as_ubyte(data.coins()) > 110
+    >>> label_img = label(img, connectivity=img.ndim)
+    >>> def pixelcount(regionmask):
+    ...     return np.sum(regionmask)
+    >>> props = regionprops(label_img, extra_properties=(pixelcount,))
+    >>> props[0].pixelcount
+    7741
+    >>> props[1]['pixelcount']
+    42
 
     """
 
@@ -915,7 +1085,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache)
+                                 cache, extra_properties=extra_properties)
         regions.append(props)
 
     return regions

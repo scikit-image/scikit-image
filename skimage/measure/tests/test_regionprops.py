@@ -28,6 +28,10 @@ SAMPLE = np.array(
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 
+SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
+SAMPLE_MULTIPLE[3:5, 7:8] = 2
+INTENSITY_SAMPLE_MULTIPLE = SAMPLE_MULTIPLE.copy() * 2.0
+
 SAMPLE_3D = np.zeros((6, 6, 6), dtype=np.uint8)
 SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
@@ -540,6 +544,8 @@ def test_regionprops_table():
                    'bbox+0': array([0]), 'bbox+1': array([0]),
                    'bbox+2': array([10]), 'bbox+3': array([18])}
 
+
+def test_regionprops_table_no_regions():
     out = regionprops_table(np.zeros((2, 2), dtype=int),
                             properties=('label', 'area', 'bbox'),
                             separator='+')
@@ -593,3 +599,66 @@ def test_deprecated_coords_argument():
         region = regionprops(SAMPLE, coordinates='rc')
     with testing.raises(ValueError):
         region = regionprops(SAMPLE, coordinates='xy')
+
+
+def pixelcount(regionmask):
+    """a short test for an extra property"""
+    return np.sum(regionmask)
+
+
+def median_intensity(regionmask, intensity_image):
+    return np.median(intensity_image[regionmask])
+
+
+def too_many_args(regionmask, intensity_image, superfluous):
+    return 1
+
+
+def too_few_args():
+    return 1
+
+
+def test_extra_properties():
+    region = regionprops(SAMPLE, extra_properties=(pixelcount,))[0]
+    assert region.pixelcount == np.sum(SAMPLE == 1)
+
+
+def test_extra_properties_intensity():
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity,)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+
+
+def test_extra_properties_no_intensity_provided():
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(median_intensity,))[0]
+        _ = region.median_intensity
+
+
+def test_extra_properties_nr_args():
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(too_few_args,))[0]
+        _ = region.too_few_args
+    with testing.raises(AttributeError):
+        region = regionprops(SAMPLE, extra_properties=(too_many_args,))[0]
+        _ = region.too_many_args
+
+
+def test_extra_properties_mixed():
+    # mixed properties, with and without intensity
+    region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                         extra_properties=(median_intensity, pixelcount)
+                         )[0]
+    assert region.median_intensity == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.pixelcount == np.sum(SAMPLE == 1)
+
+
+def test_extra_properties_table():
+    out = regionprops_table(SAMPLE_MULTIPLE,
+                            intensity_image=INTENSITY_SAMPLE_MULTIPLE,
+                            properties=('label',),
+                            extra_properties=(median_intensity, pixelcount)
+                            )
+    assert_array_almost_equal(out['median_intensity'], array([2., 4.]))
+    assert_array_equal(out['pixelcount'], array([10, 2]))
