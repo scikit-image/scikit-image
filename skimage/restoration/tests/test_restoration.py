@@ -86,17 +86,19 @@ def test_richardson_lucy():
 
     path = fetch('restoration/tests/camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
-    
-    
+
+
 def test_richardson_lucy_filtered():
     test_img_astro = rgb2gray(astronaut())
-    
+
     psf = np.ones((5, 5)) / 25
     data = convolve2d(test_img_astro, psf, 'same')
-    deconvolved = restoration.richardson_lucy(data, psf, 5, filter_epsilon=1e-6)
+    deconvolved = restoration.richardson_lucy(data, psf, 5,
+                                              filter_epsilon=1e-6)
 
     path = fetch('restoration/tests/astronaut_rl.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3,
+                               atol=1e-8)
 
 
 if __name__ == '__main__':

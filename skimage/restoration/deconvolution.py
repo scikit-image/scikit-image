@@ -341,7 +341,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    epsilon: float, optional
+    filter_epsilon: float, optional
        Value below which intermediate results become 0 to avoid division
        by small numbers.
 
@@ -374,7 +374,7 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
         if filter_epsilon:
             relative_blur = np.where(conv < filter_epsilon, 0, image / conv)
         else:
-            relative_blur = image /conv
+            relative_blur = image / conv
         im_deconv *= convolve(relative_blur, psf_mirror, mode='same')
 
     if clip:
