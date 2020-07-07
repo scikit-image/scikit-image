@@ -159,7 +159,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     if clip_limit > 0.0:
         clim = int(np.clip(clip_limit * np.product(kernel_size), 1, None))
     else:
-        clim = NR_OF_GRAY  # Large value, do not clip (AHE)
+        # largest possible value, i.e., do not clip (AHE)
+        clim = np.product(kernel_size)
 
     hist = np.apply_along_axis(np.bincount, -1, hist_blocks, minlength=nbins)
     hist = np.apply_along_axis(clip_histogram, -1, hist, clip_limit=clim)
