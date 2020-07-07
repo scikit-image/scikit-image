@@ -1,3 +1,18 @@
+"""
+This is an implementation of the LDDMM algorithm with modifications, based on 
+"Diffeomorphic registration with intensity transformation and missing data: Application to 3D digital pathology of Alzheimer's disease." 
+This paper extends on an older LDDMM paper, 
+"Computing large deformation metric mappings via geodesic flows of diffeomorphisms."
+
+This is the more recent paper:
+Tward, Daniel, et al. "Diffeomorphic registration with intensity transformation and missing data: Application to 3D digital pathology of Alzheimer's disease." Frontiers in neuroscience 14 (2020).
+https://doi.org/10.3389/fnins.2020.00052
+
+This is the original LDDMM paper:
+Beg, M. Faisal, et al. "Computing large deformation metric mappings via geodesic flows of diffeomorphisms." International journal of computer vision 61.2 (2005): 139-157.
+https://doi.org/10.1023/B:VISI.0000043755.93987.aa
+"""
+
 import warnings
 import numpy as np
 from scipy.interpolate import interpn
@@ -58,6 +73,7 @@ class _Lddmm:
         sigma_regularization=None,
         velocity_smooth_length=None,
         preconditioner_velocity_smooth_length=None,
+        maximum_velocity_fields_update=None,
         num_timesteps=None,
         # Contrast map specifiers.
         contrast_order=None,
@@ -66,11 +82,14 @@ class _Lddmm:
         contrast_tolerance=None,
         sigma_contrast=None,
         contrast_smooth_length=None,
-        # Artifact specifiers.
-        check_artifacts=None,
-        sigma_artifact=None,
         # Smoothness vs. accuracy tradeoff.
         sigma_matching=None,
+        # Classification specifiers.
+        classify_and_weight_voxels=None,
+        sigma_artifact=None,
+        sigma_background=None,
+        artifact_prior=None,
+        background_prior=None,
         # Initial values.
         initial_affine=None,
         initial_contrast_coefficients=None,
@@ -106,6 +125,7 @@ class _Lddmm:
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
         self.velocity_smooth_length = float(velocity_smooth_length) if velocity_smooth_length is not None else 2 * np.max(self.template_resolution)
         self.preconditioner_velocity_smooth_length = float(preconditioner_velocity_smooth_length) if preconditioner_velocity_smooth_length is not None else 5 * np.max(self.template_resolution)
+        self.maximum_velocity_fields_update = float(maximum_velocity_fields_update) if maximum_velocity_fields_update is not None else 1
         self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
 
         # Contrast map specifiers.
@@ -117,12 +137,17 @@ class _Lddmm:
         self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
         self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 10 * np.max(self.target_resolution)
 
-        # Artifact specifiers.
-        self.check_artifacts = bool(check_artifacts) if check_artifacts is not None else False
-        self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * float(sigma_matching) if sigma_matching else 5 * np.std(self.target) # Default: 5 * self.sigma_matching.
-
         # Smoothness vs. accuracy tradeoff.
         self.sigma_matching = float(sigma_matching) if sigma_matching else np.std(self.target)
+
+        # Classification specifiers.
+        self.classify_and_weight_voxels = bool(classify_and_weight_voxels) if classify_and_weight_voxels is not None else False
+        self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * float(sigma_matching) if sigma_matching else 5 * self.sigma_matching.
+        self.sigma_background = float(sigma_background) if sigma_background else 2 * self.sigma_matching.
+        self.artifact_prior = float(artifact_prior) if artifact_prior is not None else 1/3
+        self.background_prior = float(background_prior) if background_prior is not None else 1/3
+        if self.artifact_prior + self.background_prior >= 1:
+            raise ValueError(f"artifact_prior and background_prior must sum to less than 1.")
 
         # Diagnostic outputs.
         self.calibrate = bool(calibrate) if calibrate is not None else False
@@ -135,7 +160,8 @@ class _Lddmm:
         self.template_coords = _compute_coords(self.template.shape, self.template_resolution)
         self.target_axes = _compute_axes(self.target.shape, self.target_resolution)
         self.target_coords = _compute_coords(self.target.shape, self.target_resolution)
-        self.artifact_mean_value = np.max(self.target) if self.check_artifacts else 0
+        self.artifact_mean_value = np.max(self.target)
+        self.background_mean_value = np.min(self.target)
         self.delta_t = 1 / self.num_timesteps
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
@@ -244,7 +270,7 @@ class _Lddmm:
             self._apply_contrast_map()
             # Compute weights. 
             # This is the expectation step of the expectation maximization algorithm.
-            if self.check_artifacts and iteration % 1 == 0: self._compute_weights()
+            if self.classify_and_weight_voxels and iteration % 1 == 0: self._compute_weights()
             # Compute cost.
             self._compute_cost()
 
@@ -408,30 +434,40 @@ class _Lddmm:
             target
             sigma_matching
             sigma_artifact
+            sigma_background
+            artifact_prior
+            background_prior
             contrast_deformed_template
             artifact_mean_value
+            background_mean_value
             matching_weights
 
         Updates attributes:
             artifact_mean_value
+            background_mean_value
             matching_weights
         """
         
         likelihood_matching = np.exp((self.contrast_deformed_template - self.target)**2 * (-1/(2 * self.sigma_matching**2))) / np.sqrt(2 * np.pi * self.sigma_matching**2)
         likelihood_artifact = np.exp((self.artifact_mean_value - self.target)**2 * (-1/(2 * self.sigma_artifact**2))) / np.sqrt(2 * np.pi * self.sigma_artifact**2)
+        likelihood_background = np.exp((self.background_mean_value - self.target)**2 * (-1/(2 * self.sigma_background**2))) / np.sqrt(2 * np.pi * self.sigma_background**2)
 
         # Account for priors.
-        likelihood_matching *= 0.8
-        likelihood_artifact *= 0.2
+        likelihood_matching *= 1 - self.artifact_prior - self.background_prior
+        likelihood_artifact *= self.artifact_prior
+        likelihood_background *= self.background_prior
 
         # Where the denominator is less than 1e-6 of its maximum, set it to 1e-6 of its maximum to avoid division by zero.
-        likelihood_sum = likelihood_matching + likelihood_artifact
+        likelihood_sum = likelihood_matching + likelihood_artifact + likelihood_background
         likelihood_sum_max = np.max(likelihood_sum)
         likelihood_sum[likelihood_sum < 1e-6 * likelihood_sum_max] = 1e-6 * likelihood_sum_max
 
         self.matching_weights = likelihood_matching / likelihood_sum
+        artifact_weights = likelihood_artifact / likelihood_sum
+        background_weights = likelihood_background / likelihood_sum
 
-        self.artifact_mean_value = np.mean(self.target * (1 - self.matching_weights)) / np.mean(1 - self.matching_weights)
+        self.artifact_mean_value = np.mean(self.target * artifact_weights) / np.mean(artifact_weights)
+        self.background_mean_value = np.mean(self.target * background_weights) / np.mean(background_weights)
 
 
     def _compute_cost(self):
@@ -932,9 +968,19 @@ class _Lddmm:
             maximum_velocities
         """
 
-        for timestep in range(self.num_timesteps):
-            self.velocity_fields[...,timestep,:] -= velocity_fields_gradients[timestep] * self.deformative_stepsize
 
+        for timestep in range(self.num_timesteps):
+            velocity_fields_update = velocity_fields_gradients[timestep] * self.deformative_stepsize
+            # Apply a sigmoid squashing function to the velocity_fields_update to ensure they yield an update of less than self.maximum_velocity_fields_update voxels while remaining smooth.
+            velocity_fields_update_norm = np.sqrt(np.sum(velocity_fields_update**2, axis=-1))
+            velocity_fields_update = (
+                velocity_fields_update / velocity_fields_update_norm * 
+                np.arctan(velocity_fields_update_norm * np.pi / 2 / self.maximum_velocity_fields_update) * 
+                self.maximum_velocity_fields_update * 2 / np.pi
+            )
+
+            self.velocity_fields[...,timestep,:] -= velocity_fields_update
+            
         # Save maximum velocity for calibration plotting.
         if self.calibrate:
             maximum_velocity = np.sqrt(np.sum(self.velocity_fields**2, axis=-1)).max()
@@ -1046,6 +1092,7 @@ def lddmm_register(
     sigma_regularization=None,
     velocity_smooth_length=None,
     preconditioner_velocity_smooth_length=None,
+    maximum_velocity_fields_update=None,
     num_timesteps=None,
     # Contrast map specifiers.
     contrast_order=None,
@@ -1054,11 +1101,14 @@ def lddmm_register(
     contrast_tolerance=None,
     sigma_contrast=None,
     contrast_smooth_length=None,
-    # Artifact specifiers.
-    check_artifacts=None,
-    sigma_artifact=None,
     # Smoothness vs. accuracy tradeoff.
     sigma_matching=None,
+    # Classification specifiers.
+    classify_and_weight_voxels=None,
+    sigma_artifact=None,
+    sigma_background=None,
+    artifact_prior=None,
+    background_prior=None,
     # Initial values.
     initial_affine=None,
     initial_contrast_coefficients=None,
@@ -1107,6 +1157,8 @@ def lddmm_register(
             The length scale of smoothing of the velocity_fields in physical units. Determines the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
         preconditioner_velocity_smooth_length: float, optional
             The length of preconditioner smoothing of the velocity_fields in physical units. Determines the optimization of the velocity_fields. By default 5 * np.max(self.template_resolution).
+        maximum_velocity_fields_update: float, optional
+            The maximum allowed update to the velocity_fields in units of voxels. By default 1.
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. By default 5.
         contrast_order: int, optional
@@ -1121,14 +1173,21 @@ def lddmm_register(
             The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 1e-2.
         contrast_smooth_length: float, optional
             The length scale of smoothing of the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 2 * np.max(self.target_resolution).
-        check_artifacts: bool, optional
-            If True, artifacts are jointly classified with registration using sigma_artifact. By default False.
-        sigma_artifact: float, optional
-            The level of expected variation between artifact and non-artifact intensities. Overrides 0 input. By default 5 * sigma_matching.
         sigma_matching: float, optional
             An estimate of the spread of the noise in the target, 
             representing the tradeoff between the regularity and accuracy of the registration, where a smaller value should result in a less smooth, more accurate result. 
             Typically it should be set to an estimate of the standard deviation of the noise in the image, particularly with artifacts. Overrides 0 input. By default the standard deviation of the target.
+        classify_and_weight_voxels: bool, optional
+            If True, artifacts and background are jointly classified with registration using sigma_artifact, artifact_prior, sigma_background, and background_prior. 
+            Artifacts refer to excessively bright voxels while background refers to excessively dim voxels. By default False.
+        sigma_artifact: float, optional
+            The level of expected variation between artifact and non-artifact intensities. Overrides 0 input. By default 5 * sigma_matching.
+        sigma_background: float, optional
+            The level of expected variation between background and non-background intensities. Overrides 0 input. By default 2 * sigma_matching.
+        artifact_prior: float, optional
+            The prior probability at which we expect to find that any given voxel is artifact. By default 1/3.
+        background_prior: float, optional
+            The prior probability at which we expect to find that any given voxel is background. By default 1/3.
         initial_affine: np.ndarray, optional
             The affine array that the registration will begin with. By default np.eye(template.ndim + 1).
         initial_contrast_coefficients: np.ndarray, optional
@@ -1222,6 +1281,7 @@ def lddmm_register(
         sigma_regularization=sigma_regularization,
         velocity_smooth_length=velocity_smooth_length,
         preconditioner_velocity_smooth_length=preconditioner_velocity_smooth_length,
+        maximum_velocity_fields_update=maximum_velocity_fields_update,
         num_timesteps=num_timesteps,
         # Contrast map specifiers.
         contrast_order=contrast_order,
@@ -1230,11 +1290,14 @@ def lddmm_register(
         contrast_tolerance=contrast_tolerance,
         sigma_contrast=sigma_contrast,
         contrast_smooth_length=contrast_smooth_length,
-        # Artifact specifiers.
-        check_artifacts=check_artifacts,
-        sigma_artifact=sigma_artifact,
         # # vs. accuracy tradeoff.
         sigma_matching=sigma_matching,
+        # Classification specifiers.
+        classify_and_weight_voxels=classify_and_weight_voxels,
+        sigma_artifact=sigma_artifact,
+        sigma_background=sigma_background,
+        artifact_prior=artifact_prior,
+        background_prior=background_prior,
         # # Initial values.
         # initial_affine=initial_affine,
         # initial_contrast_coefficients=initial_contrast_coefficients,
