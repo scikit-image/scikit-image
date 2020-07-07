@@ -105,7 +105,8 @@ def _clahe(image, kernel_size, clip_limit, nbins):
     kernel_size: int or N-tuple of int
         Defines the shape of contextual regions used in the algorithm.
     clip_limit : float
-        Normalized clipping limit (higher values give more contrast).
+        Normalized clipping limit between 0 and 1 (higher values give more
+        contrast).
     nbins : int
         Number of gray bins for histogram ("data range").
 
@@ -116,8 +117,7 @@ def _clahe(image, kernel_size, clip_limit, nbins):
 
     The number of "effective" graylevels in the output image is set by `nbins`;
     selecting a small value (eg. 128) speeds up processing and still produce
-    an output image of good quality. The output image will have the same
-    minimum and maximum value as the input image. A clip limit smaller than 1
+    an output image of good quality. A clip limit of 0 or larger equal 1
     results in standard (non-contrast limited) AHE.
     """
     ndim = image.ndim
