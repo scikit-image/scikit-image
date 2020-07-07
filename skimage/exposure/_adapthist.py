@@ -75,9 +75,6 @@ def equalize_adapthist(image, kernel_size=None,
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
 
-    if clip_limit == 1.0:
-        return img_as_float(image)  # convert to float for consistency
-
     image = img_as_uint(image)
     image = np.round(
         rescale_intensity(image, out_range=(0, NR_OF_GRAY - 1))
