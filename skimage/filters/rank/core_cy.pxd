@@ -15,7 +15,7 @@ cdef dtype_t _max(dtype_t a, dtype_t b) nogil
 cdef dtype_t _min(dtype_t a, dtype_t b) nogil
 
 
-cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
+cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
                             dtype_t, Py_ssize_t, Py_ssize_t, double,
                             double, Py_ssize_t, Py_ssize_t) nogil,
                 dtype_t[:, ::1] image,
@@ -28,7 +28,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
                 Py_ssize_t n_bins) except *
 
 
-cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
+cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
                                dtype_t, Py_ssize_t, Py_ssize_t, double,
                                double, Py_ssize_t, Py_ssize_t) nogil,
                    dtype_t[:, :, ::1] image,
