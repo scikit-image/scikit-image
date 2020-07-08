@@ -26,9 +26,9 @@ import imageio
 # Prepare data and apply hist. eq.
 #############
 
-im_orig = imageio.volread('https://github.com/scikit-image/'
-                          'skimage-tutorials/blob/master/'
-                          'images/cells.tif?raw=True')
+from skimage.data import image_fetcher
+path = image_fetcher.fetch('data/cells.tif')
+img_orig = io.imread(path) 
 im_orig = im_orig.transpose()
 
 # apply some rescaling
