@@ -1,12 +1,16 @@
-from numpy.testing import assert_array_equal, assert_equal, assert_raises, \
-    assert_almost_equal
 import numpy as np
+from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import test_parallel
+from skimage._shared import testing
+from skimage._shared.testing import assert_array_equal, assert_equal
+from skimage._shared.testing import assert_almost_equal
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
+                          disk,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
-                          _bezier_segment, bezier_curve)
+                          _bezier_segment, bezier_curve, rectangle,
+                          rectangle_perimeter)
 from skimage.measure import regionprops
 
 
@@ -29,7 +33,8 @@ def test_set_color_with_alpha():
     set_color(img, (rr, cc), 1, alpha=alpha)
 
     # Wrong dimensionality color
-    assert_raises(ValueError, set_color, img, (rr, cc), (255, 0, 0), alpha=alpha)
+    with testing.raises(ValueError):
+        set_color(img, (rr, cc), (255, 0, 0), alpha=alpha)
 
     img = np.zeros((10, 10, 3))
 
@@ -209,10 +214,15 @@ def test_polygon_exceed():
     assert_array_equal(img, img_)
 
 
-def test_circle():
+def test_circle_deprecated():
+    with expected_warnings(['circle is deprecated']):
+        _ = circle(7, 7, 6)
+
+
+def test_disk():
     img = np.zeros((15, 15), 'uint8')
 
-    rr, cc = circle(7, 7, 6)
+    rr, cc = disk((7, 7), 6)
     img[rr, cc] = 1
 
     img_ = np.array(
@@ -512,6 +522,27 @@ def test_ellipse_with_shape():
 
     assert_array_equal(img, img_)
 
+    img = np.zeros((10, 9, 3), 'uint8')
+
+    rr, cc = ellipse(7, 7, 3, 10, shape=img.shape)
+    img[rr, cc, 0] = 1
+
+    img_ = np.zeros_like(img)
+    img_[..., 0] = np.array(
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1]],
+    )
+
+    assert_array_equal(img, img_)
+
 
 def test_ellipse_negative():
     rr, cc = ellipse(-3, -3, 1.7, 1.7)
@@ -548,7 +579,8 @@ def test_ellipse_rotated():
         rr, cc = ellipse(500, 600, 200, 400, rotation=angle)
         img[rr, cc] = 1
         # estimate orientation of ellipse
-        angle_estim = np.round(regionprops(img)[0].orientation, 3) % (np.pi / 2)
+        angle_estim_raw = regionprops(img)[0].orientation
+        angle_estim = np.round(angle_estim_raw, 3) % (np.pi / 2)
         assert_almost_equal(angle_estim, angle % (np.pi / 2), 2)
 
 
@@ -851,7 +883,8 @@ def test_polygon_perimeter():
     out[rr, cc] = 1
     assert_array_equal(out, expected)
 
-    assert_raises(ValueError, polygon_perimeter, [0], [1], clip=True)
+    with testing.raises(ValueError):
+        polygon_perimeter([0], [1], clip=True)
 
 
 def test_polygon_perimeter_outside_image():
@@ -861,6 +894,218 @@ def test_polygon_perimeter_outside_image():
     assert_equal(len(cc), 0)
 
 
-if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+def test_rectangle_end():
+    expected = np.array([[0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    start = (0, 1)
+    end = (3, 3)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(start, end=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # Swap start and end
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(end=start, start=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # Bottom left and top right
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(start=(3, 1), end=(0, 3), shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(end=(3, 1), start=(0, 3), shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_extent():
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    start = (1, 1)
+    extent = (3, 3)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    img = np.zeros((5, 5, 3), dtype=np.uint8)
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[rr, cc, 0] = 1
+    expected_2 = np.zeros_like(img)
+    expected_2[..., 0] = expected
+    assert_array_equal(img, expected_2)
+
+
+def test_rectangle_extent_negative():
+    # These two tests should be done together.
+    expected = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 1, 1, 1],
+                         [0, 0, 1, 2, 2, 1],
+                         [0, 0, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+
+    start = (3, 5)
+    extent = (-1, -2)
+    img = np.zeros(expected.shape, dtype=np.uint8)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 1
+
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 2
+    assert_array_equal(img, expected)
+
+    # Ensure that rr and cc have no overlap
+    img = np.zeros(expected.shape, dtype=np.uint8)
+    rr, cc = rectangle(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 2
+
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_perimiter():
+    expected = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 1, 1, 1],
+                         [0, 0, 1, 0, 0, 1],
+                         [0, 0, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+    start = (2, 3)
+    end = (2, 4)
+    img = np.zeros(expected.shape, dtype=np.uint8)
+    # Test that the default parameter is indeed end
+    rr, cc = rectangle_perimeter(start, end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # Swap start and end
+    img = np.zeros(expected.shape, dtype=np.uint8)
+    rr, cc = rectangle_perimeter(end=start, start=end, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    img = np.zeros(expected.shape, dtype=np.uint8)
+    start = (2, 3)
+    extent = (1, 2)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_perimiter_clip_bottom_right():
+    # clip=False
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 1],
+                         [0, 1, 0, 0, 0],
+                         [0, 1, 0, 0, 0],
+                         [0, 1, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (2, 2)
+    extent = (10, 10)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape,
+                                 clip=False)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # clip=True
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 1],
+                         [0, 1, 0, 0, 1],
+                         [0, 1, 0, 0, 1],
+                         [0, 1, 1, 1, 1]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle_perimeter(start, extent=extent, shape=img.shape,
+                                 clip=True)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_perimiter_clip_top_left():
+    # clip=False
+    expected = np.array([[0, 0, 0, 1, 0],
+                         [0, 0, 0, 1, 0],
+                         [0, 0, 0, 1, 0],
+                         [1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (-5, -5)
+    end = (2, 2)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=False)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    # clip=True
+    expected = np.array([[1, 1, 1, 1, 0],
+                         [1, 0, 0, 1, 0],
+                         [1, 0, 0, 1, 0],
+                         [1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=True)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_perimiter_clip_top_right():
+    expected = np.array([[0, 1, 1, 1, 1],
+                         [0, 1, 0, 0, 1],
+                         [0, 1, 0, 0, 1],
+                         [0, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (-10, 2)
+    end = (2, 10)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=True)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    expected = np.array([[0, 1, 0, 0, 0],
+                         [0, 1, 0, 0, 0],
+                         [0, 1, 0, 0, 0],
+                         [0, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=False)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+
+def test_rectangle_perimiter_clip_bottom_left():
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [1, 1, 1, 0, 0],
+                         [1, 0, 1, 0, 0],
+                         [1, 0, 1, 0, 0],
+                         [1, 1, 1, 0, 0]], dtype=np.uint8)
+    img = np.zeros((5, 5), dtype=np.uint8)
+    start = (2, -3)
+    end = (10, 1)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=True)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)
+
+    expected = np.array([[0, 0, 0, 0, 0],
+                         [1, 1, 1, 0, 0],
+                         [0, 0, 1, 0, 0],
+                         [0, 0, 1, 0, 0],
+                         [0, 0, 1, 0, 0]], dtype=np.uint8)
+
+    img = np.zeros((5, 5), dtype=np.uint8)
+    rr, cc = rectangle_perimeter(start, end=end, shape=img.shape,
+                                 clip=False)
+    img[rr, cc] = 1
+    assert_array_equal(img, expected)

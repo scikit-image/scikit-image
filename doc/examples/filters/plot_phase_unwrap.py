@@ -26,7 +26,7 @@ image_wrapped = np.angle(np.exp(1j * image))
 # Perform phase unwrapping
 image_unwrapped = unwrap_phase(image_wrapped)
 
-fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, subplot_kw={'adjustable':'box-forced'})
+fig, ax = plt.subplots(2, 2, sharex=True, sharey=True)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
 fig.colorbar(ax1.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi), ax=ax1)
@@ -80,6 +80,7 @@ ax3.set_title('Unwrapped without wrap_around')
 fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='rainbow'), ax=ax4)
 ax4.set_title('Unwrapped with wrap_around')
 
+plt.tight_layout()
 plt.show()
 
 
@@ -93,10 +94,10 @@ plt.show()
 # vertical direction (lower right), the situation changes: Unwrapping paths are
 # now allowed to pass from the bottom to the top of the image and vice versa, in
 # effect providing a way to determine the offset between the two regions.
-# 
+#
 # References
 # ----------
-# 
+#
 # .. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
 #        and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
 #        algorithm based on sorting by reliability following a noncontinuous

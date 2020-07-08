@@ -14,7 +14,7 @@ Data type  Range
 =========  =================================
 uint8      0 to 255
 uint16     0 to 65535
-uint32     0 to 2\ :sup:`32`
+uint32     0 to 2\ :sup:`32` - 1
 float      -1 to 1 or 0 to 1
 int8       -128 to 127
 int16      -32768 to 32767
@@ -33,7 +33,7 @@ functions that convert dtypes and properly rescale image intensities (see
 `Input types`_). You should **never use** ``astype`` on an image, because it
 violates these assumptions about the dtype range::
 
-   >>> from skimage import img_as_float
+   >>> from skimage.util import img_as_float
    >>> image = np.arange(0, 50, 10, dtype=np.uint8)
    >>> print(image.astype(np.float)) # These float values are out of range.
    [  0.  10.  20.  30.  40.]
@@ -63,24 +63,19 @@ img_as_int     Convert to 16-bit int.
 =============  =================================
 
 These functions convert images to the desired dtype and *properly rescale their
-values*. If conversion reduces the precision of the image, then a warning is
-issued::
+values*::
 
-   >>> from skimage import img_as_ubyte
+   >>> from skimage.util import img_as_ubyte
    >>> image = np.array([0, 0.5, 1], dtype=float)
    >>> img_as_ubyte(image)
-   WARNING:dtype_converter:Possible precision loss when converting from
-   float64 to uint8
    array([  0, 128, 255], dtype=uint8)
 
-Warnings can be locally ignored with a context manager::
+Be careful! These conversions can result in a loss of precision, since 8 bits
+cannot hold the same amount of information as 64 bits::
 
-   >>> import warnings
-   >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> with warnings.catch_warnings():
-   ...     warnings.simplefilter("ignore")
-   ...     img_as_ubyte(image)
-   array([  0, 128, 255], dtype=uint8)
+   >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
+   >>> image_as_ubyte(image)
+   array([  0, 128, 128, 255], dtype=uint8)
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
@@ -119,9 +114,52 @@ unnecessary data copies take place.
 A user that requires a specific type of output (e.g., for display purposes),
 may write::
 
-   >>> from skimage import img_as_uint
+   >>> from skimage.util import img_as_uint
    >>> out = img_as_uint(sobel(image))
    >>> plt.imshow(out)
+
+
+Working with OpenCV
+===================
+
+It is possible that you may need to use an image created using ``skimage`` with
+OpenCV_ or vice versa. OpenCV image data can be accessed (without copying) in
+NumPy (and, thus, in scikit-image).
+OpenCV uses BGR (instead of scikit-image's RGB) for color images, and its
+dtype is uint8 by default (See `Image data types and what they mean`_). BGR stands
+for Blue Green Red.
+
+Converting BGR to RGB or vice versa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The color images in ``skimage`` and OpenCV have 3 dimensions: width, height and
+color. RGB and BGR use the same color space, except the order of colors is reversed.
+
+Note that in ``scikit-image`` we usually refer to ``rows`` and ``columns`` instead
+of width and height (see :ref:`numpy-images-coordinate-conventions`).
+
+The following instruction effectively reverses the order of the colors, leaving
+the rows and columns unaffected.
+
+    >>> image = image[:, :, ::-1]
+
+Using an image from OpenCV with ``skimage``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
+default. If you prefer working with floating point images, :func:`img_as_float`
+can be used to convert the image::
+
+    >>> from skimage.util import img_as_float
+    >>> image = img_as_float(any_opencv_image)
+
+Using an image from ``skimage`` with OpenCV
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The reverse can be achieved with :func:`img_as_ubyte`::
+
+    >>> from skimage.util import img_as_ubyte
+    >>> cv_image = img_as_ubyte(any_skimage_image)
 
 
 Image processing pipeline
@@ -133,7 +171,7 @@ a custom function that requires a particular dtype, you should call one of the
 dtype conversion functions (here, ``func1`` and ``func2`` are ``skimage``
 functions)::
 
-   >>> from skimage import img_as_float
+   >>> from skimage.util import img_as_float
    >>> image = img_as_float(func1(func2(image)))
    >>> processed_image = custom_func(image)
 
@@ -198,6 +236,6 @@ just the positive range of a signed dtype.
 References
 ==========
 
-.. _numpy: http://docs.scipy.org/doc/numpy/user/
-.. [1] http://docs.scipy.org/doc/numpy/user/basics.types.html
-
+.. _numpy: https://docs.scipy.org/doc/numpy/user/
+.. [1] https://docs.scipy.org/doc/numpy/user/basics.types.html
+.. _OpenCV: https://opencv.org/

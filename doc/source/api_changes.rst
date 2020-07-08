@@ -1,3 +1,54 @@
+Version 0.16
+------------
+- The following functions are deprecated and will be removed in 0.18:
+  ``skimage.measure.compare_mse``,
+  ``skimage.measure.compare_nrmse``,
+  ``skimage.measure.compare_pnsr``,
+  ``skimage.measure.compare_ssim``
+  Their functionality still exists, but under the new ``skimage.metrics``
+  submodule under different names.
+- Additionally, three new functions have been added to ``skimage.metrics``:
+  ``skimage.metrics.variation_of_information``
+  ``skimage.metrics.adapted_rand_error``
+  ``skimage.metrics.contingency_table``
+- A new example of plotting these evaluation metrics has been added to the docs.
+
+Version 0.15
+------------
+- ``skimage.feature.canny`` now uses a more accurate Gaussian filter
+  internally; output values will be different from 0.14.
+- ``skimage.filters.threshold_niblack`` and
+  ``skimage.filters.threshold_sauvola``
+  now accept a tuple as ``window_size`` besides integers.
+
+Version 0.14
+------------
+- ``skimage.filters.gaussian_filter`` has been removed. Use
+  ``skimage.filters.gaussian`` instead.
+- ``skimage.filters.gabor_filter`` has been removed. Use
+  ``skimage.filters.gabor`` instead.
+- The old syntax support for ``skimage.transform.integrate`` has been removed.
+- The ``normalise`` parameter of ``skimage.feature.hog`` was removed due to
+  incorrect behavior: it only applied a square root instead of a true
+  normalization. If you wish to duplicate the old behavior, set
+  ``transform_sqrt=True``.
+- ``skimage.measure.structural_similarity`` has been removed. Use
+  ``skimage.measure.compare_ssim`` instead.
+- In ``skimage.measure.compare_ssim``, the `dynamic_range` has been removed in
+  favor of '`data_range`.
+- In ``skimage.restoration.denoise_bilateral``, the `sigma_range` kwarg has
+  been removed in favor of `sigma_color`.
+- ``skimage.measure.marching_cubes`` has been removed in favor of
+  ``skimage.measure.marching_cubes_lewiner``.
+- ``ntiles_*`` parameters have been removed from
+  ``skimage.exposure.equalize_adapthist``. Use ``kernel_size`` instead.
+- ``skimage.restoration.nl_means_denoising`` has been removed in
+  favor of ``skimage.restoration.denoise_nl_means``.
+- ``skimage.measure.LineModel`` has been removed in favor of
+  ``skimage.measure.LineModelND``.
+- In ``skimage.feature.hog`` visualise has been changed to visualize.
+- `freeimage` plugin of ``skimage.io`` has been removed.
+
 Version 0.13
 ------------
 - `skimage.filter` has been removed. Use `skimage.filters` instead.

@@ -5,10 +5,10 @@ Niblack and Sauvola Thresholding
 
 Niblack and Sauvola thresholds are local thresholding techniques that are
 useful for images where the background is not uniform, especially for text
-recognition. Instead of calculating a single global threshold for the entire
-image, several thresholds are calculated for every pixel by using specific
-formulae that take into account the mean and standard deviation of the local
-neighborhood (defined by a window centered around the pixel).
+recognition [1]_, [2]_. Instead of calculating a single global threshold for
+the entire image, several thresholds are calculated for every pixel by using
+specific formulae that take into account the mean and standard deviation of the
+local neighborhood (defined by a window centered around the pixel).
 
 Here, we binarize an image using these algorithms compare it to a common global
 thresholding technique. Parameter `window_size` determines the size of the
@@ -19,7 +19,7 @@ window that contains the surrounding pixels.
 .. [2] J. Sauvola and M. Pietikainen, "Adaptive document image
        binarization," Pattern Recognition 33(2),
        pp. 225-236, 2000.
-       DOI:10.1016/S0031-3203(99)00055-2
+       :DOI:`10.1016/S0031-3203(99)00055-2`
 """
 import matplotlib
 import matplotlib.pyplot as plt

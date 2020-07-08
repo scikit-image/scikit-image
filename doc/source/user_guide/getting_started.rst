@@ -12,7 +12,7 @@ Most functions of ``skimage`` are found within submodules: ::
     >>> camera = data.camera()
 
 A list of submodules and functions is found on the `API reference
-<http://scikit-image.org/docs/stable/api/api.html>`_ webpage.
+<https://scikit-image.org/docs/stable/api/api.html>`_ webpage.
 
 Within scikit-image, images are represented as NumPy arrays, for
 example 2-D arrays for grayscale 2-D images ::
@@ -41,3 +41,17 @@ from image files, using :func:`skimage.io.imread`: ::
     >>> from skimage import io
     >>> moon = io.imread(filename)
 
+Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
+
+    >>> import os
+    >>> from natsort import natsorted, ns
+    >>> from skimage import io
+    >>> list_files = os.listdir('.')
+    >>> list_files
+    ['01.png', '010.png', '0101.png', '0190.png', '02.png']
+    >>> list_files = natsorted(list_files)
+    >>> list_files
+    ['01.png', '02.png', '010.png', '0101.png', '0190.png']
+    >>> image_list = []
+    >>> for filename in list_files:
+    ...   image_list.append(io.imread(filename))

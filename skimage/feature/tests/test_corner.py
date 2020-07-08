@@ -1,12 +1,14 @@
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_raises,
-                           assert_almost_equal, assert_warns)
-
+from skimage._shared.testing import assert_array_equal, assert_almost_equal
 from skimage import data
 from skimage import img_as_float
+from skimage import draw
 from skimage.color import rgb2gray
 from skimage.morphology import octagon
 from skimage._shared.testing import test_parallel
+from skimage._shared._warnings import expected_warnings
+from skimage._shared import testing
+import pytest
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
@@ -15,6 +17,15 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              structure_tensor, structure_tensor_eigvals,
                              hessian_matrix, hessian_matrix_eigvals,
                              hessian_matrix_det, shape_index)
+
+
+@pytest.fixture
+def im3d():
+    r = 10
+    pad = 10
+    im3 = draw.ellipsoid(r, r, r)
+    im3 = np.pad(im3, pad, mode='constant').astype(np.uint8)
+    return im3
 
 
 def test_structure_tensor():
@@ -60,9 +71,6 @@ def test_hessian_matrix():
                                        [0, 0,  0, 0, 0],
                                        [0, 0,  2, 0, 0]]))
 
-    matrix2d = np.random.rand(3, 3)
-    assert_warns(UserWarning, hessian_matrix, matrix2d, sigma=0.1)
-
 
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
@@ -97,8 +105,8 @@ def test_structure_tensor_eigvals():
 def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc')
-    l1, l2 = hessian_matrix_eigvals(Hrr, Hrc, Hcc)
+    H = hessian_matrix(square, sigma=0.1, order='rc')
+    l1, l2 = hessian_matrix_eigvals(H)
     assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
                                       [0, 1,  0, 1, 0],
                                       [2, 0, -2, 0, 2],
@@ -111,6 +119,26 @@ def test_hessian_matrix_eigvals():
                                       [0,  0,  0,  0, 0]]))
 
 
+def test_hessian_matrix_eigvals_3d(im3d):
+    H = hessian_matrix(im3d)
+    E = hessian_matrix_eigvals(H)
+    # test descending order:
+    e0, e1, e2 = E
+    assert np.all(e0 >= e1) and np.all(e1 >= e2)
+
+    E0, E1, E2 = E[:, E.shape[1] // 2]  # cross section
+    row_center, col_center = np.array(E0.shape) // 2
+    circles = [draw.circle_perimeter(row_center, col_center, radius,
+                                     shape=E0.shape)
+               for radius in range(1, E0.shape[1] // 2 - 1)]
+    response0 = np.array([np.mean(E0[c]) for c in circles])
+    response2 = np.array([np.mean(E2[c]) for c in circles])
+    # eigenvalues are negative just inside the sphere, positive just outside
+    assert np.argmin(response2) < np.argmax(response0)
+    assert np.min(response2) < 0
+    assert np.max(response0) > 0
+
+
 @test_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
@@ -119,10 +147,30 @@ def test_hessian_matrix_det():
     assert_almost_equal(det, 0, decimal=3)
 
 
+def test_hessian_matrix_det_3d(im3d):
+    D = hessian_matrix_det(im3d)
+    D0 = D[D.shape[0] // 2]
+    row_center, col_center = np.array(D0.shape) // 2
+    # testing in 3D is hard. We test this by showing that you get the
+    # expected flat-then-low-then-high 2nd derivative response in a circle
+    # around the midplane of the sphere.
+    circles = [draw.circle_perimeter(row_center, col_center, r, shape=D0.shape)
+               for r in range(1, D0.shape[1] // 2 - 1)]
+    response = np.array([np.mean(D0[c]) for c in circles])
+    lowest = np.argmin(response)
+    highest = np.argmax(response)
+    assert lowest < highest
+    assert response[lowest] < 0
+    assert response[highest] > 0
+
+
 def test_shape_index():
+    # software floating point arm doesn't raise a warning on divide by zero
+    # https://github.com/scikit-image/scikit-image/issues/3335
     square = np.zeros((5, 5))
     square[2, 2] = 4
-    s = shape_index(square, sigma=0.1)
+    with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
+        s = shape_index(square, sigma=0.1)
     assert_almost_equal(
         s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
                      [ np.nan,      0, np.nan,      0, np.nan],
@@ -271,17 +319,18 @@ def test_subpix_no_class():
 
 def test_subpix_border():
     img = np.zeros((50, 50))
-    img[1:25,1:25] = 255
-    img[25:-1,25:-1] = 255
+    img[1:25, 1:25] = 255
+    img[25:-1, 25:-1] = 255
     corner = corner_peaks(corner_harris(img), threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
-    ref = np.array([[ 0.52040816,  0.52040816],
-                    [ 0.52040816, 24.47959184],
-                    [24.47959184,  0.52040816],
-                    [24.5       , 24.5       ],
+    ref = np.array([[24.5, 24.5],
+                    [0.52040816, 0.52040816],
+                    [0.52040816, 24.47959184],
+                    [24.47959184, 0.52040816],
                     [24.52040816, 48.47959184],
                     [48.47959184, 24.52040816],
                     [48.47959184, 48.47959184]])
+
     assert_almost_equal(subpix, ref)
 
 
@@ -302,17 +351,24 @@ def test_num_peaks():
 def test_corner_peaks():
     response = np.zeros((10, 10))
     response[2:5, 2:5] = 1
+    response[8:10, 0:2] = 1
 
     corners = corner_peaks(response, exclude_border=False, min_distance=10,
                            threshold_rel=0)
-    assert len(corners) == 1
+    assert corners.shape == (1, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1)
-    assert len(corners) == 4
+    corners = corner_peaks(response, exclude_border=False, min_distance=5,
+                           threshold_rel=0)
+    assert corners.shape == (2, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                           indices=False)
-    assert np.sum(corners) == 4
+    with pytest.warns(FutureWarning,
+                      match="Until version 0.16, threshold_rel.*"):
+        corners = corner_peaks(response, exclude_border=False, min_distance=1)
+        assert corners.shape == (5, 2)
+
+        corners = corner_peaks(response, exclude_border=False, min_distance=1,
+                               indices=False)
+        assert np.sum(corners) == 5
 
 
 def test_blank_image_nans():
@@ -332,49 +388,50 @@ def test_blank_image_nans():
 
 def test_corner_fast_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast, img)
+    with testing.raises(ValueError):
+        corner_fast(img)
 
 
 @test_parallel()
 def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())
-    expected = np.array([[101, 198],
-                        [140, 205],
-                        [141, 242],
-                        [177, 156],
-                        [188, 113],
-                        [197, 148],
-                        [213, 117],
-                        [223, 375],
-                        [232, 266],
-                        [245, 137],
-                        [249, 171],
-                        [300, 244],
-                        [305,  57],
-                        [325, 245],
-                        [339, 242],
-                        [346, 279],
-                        [353, 172],
-                        [358, 307],
-                        [362, 252],
-                        [362, 328],
-                        [363, 192],
-                        [364, 147],
-                        [369, 159],
-                        [374, 171],
-                        [379, 183],
-                        [387, 195],
-                        [390, 149],
-                        [401, 197],
-                        [403, 162],
-                        [413, 181],
-                        [444, 310],
-                        [464, 251],
-                        [476, 250],
-                        [489, 155],
-                        [492, 139],
-                        [494, 169],
-                        [496, 266]])
+    expected = np.array([[444, 310],
+                         [374, 171],
+                         [249, 171],
+                         [492, 139],
+                         [403, 162],
+                         [496, 266],
+                         [362, 328],
+                         [476, 250],
+                         [353, 172],
+                         [346, 279],
+                         [494, 169],
+                         [177, 156],
+                         [413, 181],
+                         [213, 117],
+                         [390, 149],
+                         [140, 205],
+                         [232, 266],
+                         [489, 155],
+                         [387, 195],
+                         [101, 198],
+                         [363, 192],
+                         [364, 147],
+                         [300, 244],
+                         [325, 245],
+                         [141, 242],
+                         [401, 197],
+                         [197, 148],
+                         [339, 242],
+                         [188, 113],
+                         [362, 252],
+                         [379, 183],
+                         [358, 307],
+                         [245, 137],
+                         [369, 159],
+                         [464, 251],
+                         [305,  57],
+                         [223, 375]])
     actual = corner_peaks(corner_fast(img, 12, 0.3),
                           min_distance=10, threshold_rel=0)
     assert_array_equal(actual, expected)
@@ -382,14 +439,18 @@ def test_corner_fast_astronaut():
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((3, 3)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
-    assert_raises(ValueError, corner_orientations, img,
-                  np.asarray([[7, 7]]), np.ones((4, 4)))
+    with testing.raises(ValueError):
+        corner_orientations(
+            img,
+            np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
 @test_parallel()
@@ -397,18 +458,25 @@ def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
     corners = corner_peaks(corner_fast(img, 11, 0.35),
                            min_distance=10, threshold_abs=0, threshold_rel=0.1)
-    expected = np.array([-1.75220190e+00,  2.01197383e+00, -2.01162417e+00,
-                         -1.88247204e-01,  1.19134149e+00, -6.61151410e-01,
-                         -2.99143370e+00,  2.17103132e+00, -7.52950306e-04,
-                          1.25854853e+00,  2.43573659e+00, -1.69230287e+00,
-                         -9.88548213e-01,  1.47154532e+00, -1.65449964e+00,
-                          1.09650167e+00,  1.07812134e+00, -1.68885773e+00,
-                         -1.64397304e+00,  3.09780364e+00, -3.49561988e-01,
-                         -1.46554357e+00, -2.81524886e+00,  8.12701702e-01,
-                          2.47305654e+00, -1.63869275e+00,  5.46905279e-02,
-                         -4.40598471e-01,  3.14918803e-01, -1.76069982e+00,
-                          3.05330950e+00,  2.39291733e+00, -1.22091334e-01,
-                         -3.09279990e-01,  1.45931342e+00])
+    expected = np.array([-4.40598471e-01, -1.46554357e+00,
+                         2.39291733e+00, -1.63869275e+00,
+                         1.45931342e+00, -1.64397304e+00,
+                         -1.76069982e+00, 1.09650167e+00,
+                         -1.65449964e+00, 1.19134149e+00,
+                         5.46905279e-02, 2.17103132e+00,
+                         8.12701702e-01, -1.22091334e-01,
+                         -2.01162417e+00, 1.25854853e+00,
+                         3.05330950e+00, 2.01197383e+00,
+                         1.07812134e+00, 3.09780364e+00,
+                         -3.49561988e-01, 2.43573659e+00,
+                         3.14918803e-01, -9.88548213e-01,
+                         -1.88247204e-01, 2.47305654e+00,
+                         -2.99143370e+00, 1.47154532e+00,
+                         -6.61151410e-01, -1.68885773e+00,
+                         -3.09279990e-01, -2.81524886e+00,
+                         -1.75220190e+00, -1.69230287e+00,
+                         -7.52950306e-04])
+
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
@@ -420,11 +488,6 @@ def test_corner_orientations_square():
                            min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     actual_orientations_degrees = np.rad2deg(actual_orientations)
-    expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])
+    expected_orientations_degree = np.array([45, 135, -45, -135])
     assert_array_equal(actual_orientations_degrees,
                        expected_orientations_degree)
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()

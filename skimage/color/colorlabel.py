@@ -2,13 +2,10 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import warn
-from .. import img_as_float
+from .._shared.utils import warn, change_default_value
+from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import rgb2gray, gray2rgb
-
-import six
-from six.moves import zip
 
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
@@ -18,8 +15,8 @@ DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
                   'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
 
 
-color_dict = dict((k, v) for k, v in six.iteritems(rgb_colors.__dict__)
-                  if isinstance(v, tuple))
+color_dict = {k: v for k, v in rgb_colors.__dict__.items()
+              if isinstance(v, tuple)}
 
 
 def _rgb_vector(color):
@@ -33,7 +30,7 @@ def _rgb_vector(color):
     color : str or array
         Color name in `color_dict` or RGB float values between [0, 1].
     """
-    if isinstance(color, six.string_types):
+    if isinstance(color, str):
         color = color_dict[color]
     # Slice to handle RGBA colors.
     return np.array(color[:3])
@@ -74,6 +71,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     return mapped_labels, color_cycle
 
 
+@change_default_value("bg_label", new_value=0, changed_version="0.19")
 def label2rgb(label, image=None, colors=None, alpha=0.3,
               bg_label=-1, bg_color=(0, 0, 0), image_alpha=1, kind='overlay'):
     """Return an RGB image where color-coded labels are painted over the image.
@@ -91,7 +89,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
     bg_label : int, optional
-        Label that's treated as the background.
+        Label that's treated as the background. If `bg_label` is specified,
+        `bg_color` is `None`, and `kind` is `overlay`,
+        background is not painted by any colors.
     bg_color : str or array, optional
         Background color. Must be a name in `color_dict` or RGB float values
         between [0, 1].
@@ -112,8 +112,10 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     if kind == 'overlay':
         return _label2rgb_overlay(label, image, colors, alpha, bg_label,
                                   bg_color, image_alpha)
-    else:
+    elif kind == 'avg':
         return _label2rgb_avg(label, image, bg_label, bg_color)
+    else:
+        raise ValueError("`kind` must be either 'overlay' or 'avg'.")
 
 
 def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
@@ -133,7 +135,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
     alpha : float [0, 1], optional
         Opacity of colorized labels. Ignored if image is `None`.
     bg_label : int, optional
-        Label that's treated as the background.
+        Label that's treated as the background. If `bg_label` is specified and
+        `bg_color` is `None`, background is not painted by any colors.
     bg_color : str or array, optional
         Background color. Must be a name in `color_dict` or RGB float values
         between [0, 1].
@@ -161,7 +164,10 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
 
-        image = img_as_float(rgb2gray(image))
+        if image.ndim > label.ndim:
+            image = img_as_float(rgb2gray(image))
+        else:
+            image = img_as_float(image)
         image = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
     # Ensure that all labels are non-negative so we can index into
@@ -222,7 +228,8 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     bg = (labels == bg_label)
     if bg.any():
         labels = labels[labels != bg_label]
-        out[bg] = bg_color
+        mask = (label_field == bg_label).nonzero()
+        out[mask] = bg_color
     for label in labels:
         mask = (label_field == label).nonzero()
         color = image[mask].mean(axis=0)

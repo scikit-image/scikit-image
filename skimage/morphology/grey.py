@@ -29,8 +29,8 @@ def _shift_selem(selem, shift_x, shift_y):
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
         The shifted structuring element.
     """
-    if selem.ndim > 2:
-        # do nothing for 3D or higher structuring elements
+    if selem.ndim != 2:
+        # do nothing for 1D or 3D or higher structuring elements
         return selem
     m, n = selem.shape
     if m % 2 == 0:
@@ -376,6 +376,14 @@ def white_tophat(image, selem=None, out=None):
     out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
+    See also
+    --------
+    black_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
     Examples
     --------
     >>> # Subtract grey background from bright peak
@@ -397,11 +405,24 @@ def white_tophat(image, selem=None, out=None):
     selem = np.array(selem)
     if out is image:
         opened = opening(image, selem)
-        out -= opened
+        if np.issubdtype(opened.dtype, np.bool_):
+            np.logical_xor(out, opened, out=out)
+        else:
+            out -= opened
         return out
     elif out is None:
         out = np.empty_like(image)
-    out = ndi.white_tophat(image, footprint=selem, output=out)
+    # work-around for NumPy deprecation warning for arithmetic 
+    # operations on bool arrays
+    if isinstance(image, np.ndarray) and image.dtype == np.bool:
+        image_ = image.view(dtype=np.uint8)
+    else:
+        image_ = image
+    if isinstance(out, np.ndarray) and out.dtype == np.bool:
+        out_ = out.view(dtype=np.uint8)
+    else:
+        out_ = out
+    out_ = ndi.white_tophat(image_, footprint=selem, output=out_)
     return out
 
 
@@ -430,6 +451,14 @@ def black_tophat(image, selem=None, out=None):
     out : array, same shape and type as `image`
         The result of the morphological black top hat.
 
+    See also
+    --------
+    white_tophat
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Top-hat_transform
+
     Examples
     --------
     >>> # Change dark peak to bright peak and subtract background
@@ -453,5 +482,8 @@ def black_tophat(image, selem=None, out=None):
     else:
         original = image
     out = closing(image, selem, out=out)
-    out -= original
+    if np.issubdtype(out.dtype, np.bool_):
+        np.logical_xor(out, original, out=out)
+    else:
+        out -= original
     return out

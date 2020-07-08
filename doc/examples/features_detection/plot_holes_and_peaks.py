@@ -54,8 +54,7 @@ seed = np.copy(image)
 seed[1:-1, 1:-1] = image.min()
 rec = reconstruction(seed, mask, method='dilation')
 
-fig, ax = plt.subplots(2, 2, figsize=(5, 4), sharex=True, sharey=True,
-                       subplot_kw={'adjustable': 'box-forced'})
+fig, ax = plt.subplots(2, 2, figsize=(5, 4), sharex=True, sharey=True)
 ax = ax.ravel()
 
 ax[0].imshow(image, cmap='gray')

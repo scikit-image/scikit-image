@@ -9,18 +9,20 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 
-http://scikit-image.org
+https://scikit-image.org
 
 
 New Features
 ------------
 
 
-
+- A new doc tutorial presenting a cell biology example has been added to the
+  gallery (#4648). The scientific content benefited from a much appreciated
+  review by Pierre Poulain and Fred Bernard, both assistant professors at
+  Université de Paris and Institut Jacques Monod.
 
 Improvements
 ------------
-
 
 
 
@@ -29,9 +31,14 @@ API Changes
 
 
 
+Bugfixes
+--------
+
+
 
 Deprecations
 ------------
+
 
 
 Contributors to this release

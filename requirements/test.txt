@@ -1,0 +1,7 @@
+# pytest 3.7.3 is broken on macOS, see:
+# https://github.com/pytest-dev/pytest/issues/3888
+pytest!=3.7.3
+pytest-cov
+pytest-localserver
+flake8
+codecov

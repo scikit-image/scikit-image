@@ -1,23 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """ Create lookup tables for the marching cubes algorithm, by parsing
-the file "LookUpTable.h". This prints a text to the stdout wich
+the file "LookUpTable.h". This prints a text to the stdout which
 can then be copied to luts.py.
 
 The luts are tuples of shape and base64 encoded bytes.
 
 """
-
 import sys
 import base64
 
-# Get base64 encode/decode functions
-if sys.version_info >= (3, ):
-    base64encode = base64.encodebytes
-    base64decode = base64.decodebytes
-else:
-    base64encode = base64.encodestring
-    base64decode = base64.decodestring
 
 def create_luts(fname):
 
@@ -110,8 +102,8 @@ def get_table(lines1, needle, i):
     code = '\n'.join(lines2)
     code = code.split('=',1)[1]
     array = eval(code)
-    array64 = base64encode(array.tostring()).decode('utf-8')
-    # Reverse: bytes = base64decode(text.encode('utf-8'))
+    array64 = base64.encodebytes(array.tostring()).decode('utf-8')
+    # Reverse: bytes = base64.decodebytes(text.encode('utf-8'))
     text = '%s = %s, """\n%s"""' % (name, str(array.shape), array64)
 
     # Build actual lines
@@ -151,22 +143,10 @@ if __name__ == '__main__':
     import os
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
 
-    if True:
-        with open(os.path.join(os.getcwd(), 'mcluts.py'), 'w') as f:
-            f.write('# -*- coding: utf-8 -*-\n')
-            f.write('# Copyright (C) 2012, Almar Klein\n# Copyright (C) 2002, Thomas Lewiner\n\n')
-            f.write('# This file was auto-generated from LookUpTable.h by createluts.py.\n\n')
-            f.write(create_luts(fname))
-
-    else:
-        for prefix in ['TILING', 'TEST']:
-            tmp = ['luts.'+a for a in getLutNames(prefix)]
-            print(', '.join(tmp))
-            print('')
-            for name in getLutNames(prefix):
-                print('self.%s = Lut(%s)' % (name, name))
-            print('')
-            for name in getLutNames(prefix):
-                print('cdef Lut %s' % name)
-            print('')
-            print('')
+    with open(os.path.join(os.getcwd(), 'mcluts.py'), 'w') as f:
+        f.write('# -*- coding: utf-8 -*-\n')
+        f.write(
+            '# This file was auto-generated from `mc_meta/LookUpTable.h` by\n'
+            '# `mc_meta/createluts.py`.\n\n'
+        )
+        f.write(create_luts(fname))

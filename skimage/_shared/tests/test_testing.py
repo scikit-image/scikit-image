@@ -2,8 +2,13 @@
 """
 
 import numpy as np
-from nose.tools import (assert_true, assert_raises, assert_equal)
+from numpy.testing import assert_equal
 from skimage._shared.testing import doctest_skip_parser, test_parallel
+from skimage._shared import testing
+import pytest
+
+from skimage._shared._warnings import expected_warnings
+from warnings import warn
 
 
 def test_skipper():
@@ -32,8 +37,8 @@ def test_skipper():
 
     f2 = doctest_skip_parser(f)
     c2 = doctest_skip_parser(c)
-    assert_true(f is f2)
-    assert_true(c is c2)
+    assert f is f2
+    assert c is c2
 
     expected = \
         """ Header
@@ -53,7 +58,7 @@ def test_skipper():
     f2 = doctest_skip_parser(f)
     c2 = doctest_skip_parser(c)
 
-    assert_true(f is f2)
+    assert f is f2
     expected = \
         """ Header
 
@@ -68,8 +73,10 @@ def test_skipper():
     del HAVE_AMODULE
     f.__doc__ = docstring
     c.__doc__ = docstring
-    assert_raises(NameError, doctest_skip_parser, f)
-    assert_raises(NameError, doctest_skip_parser, c)
+    with testing.raises(NameError):
+        doctest_skip_parser(f)
+    with testing.raises(NameError):
+        doctest_skip_parser(c)
 
 
 def test_test_parallel():
@@ -92,6 +99,30 @@ def test_test_parallel():
         state.append(None)
     change_state3()
     assert len(state) == 6
+
+
+def test_parallel_warning():
+    @test_parallel()
+    def change_state_warns_fails():
+        warn("Test warning for test parallel", stacklevel=2)
+
+    with expected_warnings(['Test warning for test parallel']):
+        change_state_warns_fails()
+
+    @test_parallel(warnings_matching=['Test warning for test parallel'])
+    def change_state_warns_passes():
+        warn("Test warning for test parallel", stacklevel=2)
+
+    change_state_warns_passes()
+
+
+def test_expected_warnings_noop():
+    # This will ensure the line beolow it behaves like a no-op
+    with expected_warnings(['Expected warnings test']):
+
+        # This should behave as a no-op
+        with expected_warnings(None):
+            warn('Expected warnings test')
 
 
 if __name__ == '__main__':
