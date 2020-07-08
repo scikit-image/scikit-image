@@ -204,6 +204,12 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double,
     assert centre_r < srows
     assert centre_c < scols
 
+    # the longest side of selem should be smaller than the shortest of image
+    selem_max = max(srows, scols)
+    image_min = min(rows, cols)
+    if (selem_max + 1) // 2 >= image_min:
+        raise ValueError("half selem size greater than image size")
+
     cdef Py_ssize_t mid_bin = n_bins / 2
 
     # define pointers to the data
@@ -403,6 +409,12 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], double
         raise ValueError("half selem + shift_y must be between 0 and selem")
     if not 0 <= centre_c < scols:
         raise ValueError("half selem + shift_z must be between 0 and selem")
+
+    # the longest side of selem should be smaller than the shortest of image
+    selem_max = max(splanes, srows, scols)
+    image_min = min(planes, rows, cols)
+    if (selem_max + 1) // 2 >= image_min:
+        raise ValueError("half selem size greater than image size")
 
     cdef Py_ssize_t mid_bin = n_bins // 2
 

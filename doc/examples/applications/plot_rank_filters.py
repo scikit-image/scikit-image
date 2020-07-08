@@ -412,7 +412,7 @@ brain = data.brain()
 
 brain = exposure.rescale_intensity(data.brain().astype(float))
 
-radius = 50
+radius = 5
 neighborhood = ball(radius)
 
 # t_loc_otsu is an image
