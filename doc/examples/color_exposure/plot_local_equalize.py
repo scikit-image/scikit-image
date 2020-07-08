@@ -147,7 +147,7 @@ img = img_as_ubyte(data.brain())
 img_rescale = exposure.equalize_hist(img)
 
 # Local equalization
-neighborhood = ball(5)
+neighborhood = ball(1)
 img_eq = rank.equalize(img, selem=neighborhood)
 
 # Display results
