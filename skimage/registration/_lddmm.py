@@ -974,7 +974,7 @@ class _Lddmm:
             # Apply a sigmoid squashing function to the velocity_fields_update to ensure they yield an update of less than self.maximum_velocity_fields_update voxels while remaining smooth.
             velocity_fields_update_norm = np.sqrt(np.sum(velocity_fields_update**2, axis=-1))
             velocity_fields_update = (
-                velocity_fields_update / velocity_fields_update_norm * 
+                velocity_fields_update / velocity_fields_update_norm[..., None] * 
                 np.arctan(velocity_fields_update_norm * np.pi / 2 / self.maximum_velocity_fields_update) * 
                 self.maximum_velocity_fields_update * 2 / np.pi
             )
