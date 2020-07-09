@@ -975,7 +975,7 @@ class _Lddmm:
             velocity_fields_update_norm = np.sqrt(np.sum(velocity_fields_update**2, axis=-1))
             velocity_fields_update = (
                 velocity_fields_update / velocity_fields_update_norm[..., None] * 
-                np.arctan(velocity_fields_update_norm * np.pi / 2 / self.maximum_velocity_fields_update) * 
+                np.arctan(velocity_fields_update_norm[..., None] * np.pi / 2 / self.maximum_velocity_fields_update) * 
                 self.maximum_velocity_fields_update * 2 / np.pi
             )
 
