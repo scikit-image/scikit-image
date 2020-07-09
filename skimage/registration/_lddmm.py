@@ -142,8 +142,8 @@ class _Lddmm:
 
         # Classification specifiers.
         self.classify_and_weight_voxels = bool(classify_and_weight_voxels) if classify_and_weight_voxels is not None else False
-        self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * float(sigma_matching) if sigma_matching else 5 * self.sigma_matching.
-        self.sigma_background = float(sigma_background) if sigma_background else 2 * self.sigma_matching.
+        self.sigma_artifact = float(sigma_artifact) if sigma_artifact else 5 * self.sigma_matching
+        self.sigma_background = float(sigma_background) if sigma_background else 2 * self.sigma_matching
         self.artifact_prior = float(artifact_prior) if artifact_prior is not None else 1/3
         self.background_prior = float(background_prior) if background_prior is not None else 1/3
         if self.artifact_prior + self.background_prior >= 1:
