@@ -134,7 +134,7 @@ class _Lddmm:
         self.spatially_varying_contrast_map = bool(spatially_varying_contrast_map) if spatially_varying_contrast_map is not None else False
         self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
         self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
-        self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1e-2
+        self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1
         self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 10 * np.max(self.target_resolution)
 
         # Smoothness vs. accuracy tradeoff.
@@ -1166,11 +1166,11 @@ def lddmm_register(
         spatially_varying_contrast_map: bool, optional
             If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. By default False.
         contrast_maxiter: int, optional
-            The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 100.
+            The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 5.
         contrast_tolerance: float, optional
-            The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. By default 1e-5.
+            Deprecated. The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. By default 1e-5.
         sigma_contrast: float, optional
-            The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 1e-2.
+            The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 1.
         contrast_smooth_length: float, optional
             The length scale of smoothing of the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 2 * np.max(self.target_resolution).
         sigma_matching: float, optional
