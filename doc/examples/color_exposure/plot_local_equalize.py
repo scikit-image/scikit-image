@@ -70,7 +70,7 @@ img = img_as_ubyte(data.moon())
 img_rescale = exposure.equalize_hist(img)
 
 # Equalization
-selem = disk(30)
+selem = disk(1)
 img_eq = rank.equalize(img, selem=selem)
 
 
