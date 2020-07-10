@@ -368,6 +368,7 @@ plt.tight_layout()
 
 from skimage.filters.rank import otsu
 from skimage.filters import threshold_otsu
+from skimage import exposure
 
 p8 = data.page()
 
@@ -405,10 +406,6 @@ plt.tight_layout()
 
 ######################################################################
 # The example compares the local threshold with the global threshold in 3D
-
-from skimage import exposure
-
-brain = data.brain()
 
 brain = exposure.rescale_intensity(data.brain().astype(float))
 
