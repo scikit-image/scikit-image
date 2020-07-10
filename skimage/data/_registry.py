@@ -135,6 +135,7 @@ registry = {
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
     "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
+    "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/blob/master/astronaut_rl.npy",
 }
 
 legacy_registry = {
