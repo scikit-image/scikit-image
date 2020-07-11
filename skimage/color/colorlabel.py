@@ -33,6 +33,8 @@ def _rgb_vector(color):
     if isinstance(color, str):
         color = color_dict[color]
     # Slice to handle RGBA colors.
+    else:
+        color = color[:3]
     return np.array(color[:3])
 
 
@@ -45,7 +47,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     # Temporarily set background color; it will be removed later.
     if bg_color is None:
         bg_color = (0, 0, 0)
-    bg_color = _rgb_vector([bg_color])
+    bg_color = _rgb_vector(bg_color)
 
     # map labels to their ranks among all labels from small to large
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
@@ -66,7 +68,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
     # Modify labels and color cycle so background color is used only once.
     color_cycle = itertools.cycle(colors)
-    color_cycle = itertools.chain(bg_color, color_cycle)
+    color_cycle = itertools.chain([bg_color], color_cycle)
 
     return mapped_labels, color_cycle
 
