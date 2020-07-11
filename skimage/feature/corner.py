@@ -331,7 +331,7 @@ def structure_tensor_eigenvalues(A_elems):
 
 
 def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute Eigenvalues of structure tensor.
+    """Compute eigenvalues of structure tensor.
 
     Parameters
     ----------
@@ -372,7 +372,7 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
 
 
 def hessian_matrix_eigvals(H_elems):
-    """Compute Eigenvalues of Hessian matrix.
+    """Compute eigenvalues of Hessian matrix.
 
     Parameters
     ----------
