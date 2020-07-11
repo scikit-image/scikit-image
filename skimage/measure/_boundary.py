@@ -30,17 +30,18 @@ def moore_neighborhood(current, backtrack):  # y, x
         if np.all(point == backtrack):
             # we return the sorted neighborhood
             return np.concatenate((neighbors[i:], neighbors[:i]))
-    return 0  # TODO: FIX. Should not return 0 because it will break boundary
+    else:
+        raise RuntimeError("The backtrack is not on the neighborhood")
 
 
 # TODO: work with the coordinates, to make it more generic
 # Any array of coordinates should work
-def boundary_tracing(region):
+def boundary_tracing(coords):
     """Coordinates of the region's boundary. The region must not have isolated
     points.
     Parameters
     ----------
-    region : obj
+    coords : obj
         Obtained with skimage.measure.regionprops()
     Returns
     -------
@@ -50,8 +51,6 @@ def boundary_tracing(region):
         The following coordinates are in clockwise order.
     """
 
-    # creating the binary image
-    coords = region.coords
     maxs = np.amax(coords, axis=0)
 
     # should consider the minimum as well
