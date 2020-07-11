@@ -33,21 +33,21 @@ def test_structure_tensor():
     square = np.zeros((5, 5))
     square[2, 2] = 1
     Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    assert_array_equal(Acc, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  0,  1,  0],
-                                      [ 0,  4,  0,  4,  0],
-                                      [ 0,  1,  0,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Arc, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  0, -1,  0],
-                                      [ 0,  0,  0, -0,  0],
-                                      [ 0, -1, -0,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Arr, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  4,  1,  0],
-                                      [ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  4,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
+    assert_array_equal(Acc, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 0, 1, 0],
+                                      [0, 4, 0, 4, 0],
+                                      [0, 1, 0, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Arc, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 0, -1, 0],
+                                      [0, 0, 0, -0, 0],
+                                      [0, -1, -0, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Arr, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 4, 1, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 1, 4, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
 
 
 def test_structure_tensor_orders():

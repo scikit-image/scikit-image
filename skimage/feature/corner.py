@@ -315,7 +315,8 @@ def structure_tensor_eigenvalues(A_elems):
 
     Examples
     --------
-    >>> from skimage.feature import structure_tensor, structure_tensor_eigenvalues
+    >>> from skimage.feature import structure_tensor
+    >>> from skimage.feature import structure_tensor_eigenvalues
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> A_elems = structure_tensor(square, sigma=0.1, order='rc')
