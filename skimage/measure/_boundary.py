@@ -34,9 +34,7 @@ def moore_neighborhood(current, backtrack):  # y, x
         raise RuntimeError("The backtrack is not on the neighborhood")
 
 
-# TODO: work with the coordinates, to make it more generic
-# Any array of coordinates should work
-def boundary_tracing(coords):
+def trace_boundary(coords):
     """Coordinates of the region's boundary. The region must not have isolated
     points.
     Parameters
