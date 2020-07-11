@@ -67,7 +67,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
-    order : {'xy', 'rc'}, optional
+    order : {'rc', 'xy'}, optional
         This parameter allows for the use of reverse or forward order of
         the image axes in gradient computation. 'rc' indicates the use of
         the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
@@ -103,7 +103,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
             warn('deprecation warning: the default order of the structure '
                  'tensor values will be "row-column" instead of "xy" starting '
                  'in skimage version 0.20. Use order="rc" or order="xy" to '
-                 'set this explicitly', stacklevel=2)
+                 'set this explicitly.', category=FutureWarning, stacklevel=2)
             order = 'xy'
         else:
             order = 'rc'
@@ -191,30 +191,6 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
     return H_elems
 
 
-def _hessian_matrix_image(H_elems):
-    """Convert the upper-diagonal elements of the Hessian matrix to a matrix.
-
-    Parameters
-    ----------
-    H_elems : list of array
-        The upper-diagonal elements of the Hessian matrix, as returned by
-        `hessian_matrix`.
-
-    Returns
-    -------
-    hessian_image : array
-        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
-        containing the Hessian matrix corresponding to each coordinate.
-    """
-    image = H_elems[0]
-    hessian_image = np.zeros(image.shape + (image.ndim, image.ndim))
-    for idx, (row, col) in \
-            enumerate(combinations_with_replacement(range(image.ndim), 2)):
-        hessian_image[..., row, col] = H_elems[idx]
-        hessian_image[..., col, row] = H_elems[idx]
-    return hessian_image
-
-
 def hessian_matrix_det(image, sigma=1, approximate=True):
     """Compute the approximate Hessian Determinant over an image.
 
@@ -256,7 +232,7 @@ def hessian_matrix_det(image, sigma=1, approximate=True):
         integral = integral_image(image)
         return np.array(_hessian_matrix_det(integral, sigma))
     else:  # slower brute-force implementation for nD images
-        hessian_mat_array = _hessian_matrix_image(hessian_matrix(image, sigma))
+        hessian_mat_array = _symmetric_image(hessian_matrix(image, sigma))
         return np.linalg.det(hessian_mat_array)
 
 
@@ -266,8 +242,96 @@ def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
     return l1, l2
 
 
+def _symmetric_compute_eigenvalues(S_elems):
+    """Compute eigenvalues from the upperdiagonal entries of a symmetric matrix
+
+    Parameters
+    ----------
+    S_elems : list of ndarray
+        The upper-diagonal elements of the matrix, as returned by
+        `hessian_matrix` or `structure_tensor`.
+
+
+    Returns
+    -------
+    eigs : ndarray
+        The eigenvalues of the Hessian matrix, in decreasing order. The
+        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
+        contains the ith-largest eigenvalue at position (j, k).
+
+    """
+
+    if len(S_elems) == 3:  # Use fast Cython code for 2D
+        eigs = np.array(_image_orthogonal_matrix22_eigvals(*S_elems))
+    else:
+        matrices = _symmetric_image(S_elems)
+        # eigvalsh returns eigenvalues in increasing order. We want decreasing
+        eigs = np.linalg.eigvalsh(matrices)[..., ::-1]
+        leading_axes = tuple(range(eigs.ndim - 1))
+        eigs = np.transpose(eigs, (eigs.ndim - 1,) + leading_axes)
+    return eigs
+
+
+def _symmetric_image(S_elems):
+    """Convert the upper-diagonal elements of a matrix to the full
+    symmetric matrix.
+
+    Parameters
+    ----------
+    S_elems : list of array
+        The upper-diagonal elements of the matrix, as returned by
+        `hessian_matrix` or `structure_tensor`.
+
+    Returns
+    -------
+    image : array
+        An array of shape ``(M, N[, ...], image.ndim, image.ndim)``,
+        containing the matrix corresponding to each coordinate.
+    """
+    image = S_elems[0]
+    symmetric_image = np.zeros(image.shape + (image.ndim, image.ndim))
+    for idx, (row, col) in \
+            enumerate(combinations_with_replacement(range(image.ndim), 2)):
+        symmetric_image[..., row, col] = S_elems[idx]
+        symmetric_image[..., col, row] = S_elems[idx]
+    return symmetric_image
+
+
+def structure_tensor_eigenvalues(A_elems):
+    """Compute eigenvalues of structure tensor.
+
+    Parameters
+    ----------
+    A_elems : list of ndarray
+        The upper-diagonal elements of the structure tensor, as returned
+        by `structure_tensor`.
+
+    Returns
+    -------
+    ndarray
+        The eigenvalues of the structure tensor, in decreasing order. The
+        eigenvalues are the leading dimension. That is, the coordinate
+        [i, j, k] corresponds to the ith-largest eigenvalue at position (j, k).
+
+    Examples
+    --------
+    >>> from skimage.feature import structure_tensor, structure_tensor_eigenvalues
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    >>> structure_tensor_eigenvalues(A_elems)[0]
+    array([[0., 0., 0., 0., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 4., 0., 4., 0.],
+           [0., 2., 4., 2., 0.],
+           [0., 0., 0., 0., 0.]])
+
+    """
+    return _symmetric_compute_eigenvalues(A_elems)
+
+
 def structure_tensor_eigvals(Axx, Axy, Ayy):
-    """Compute Eigen values of structure tensor.
+    """Compute Eigenvalues of structure tensor.
 
     Parameters
     ----------
@@ -299,6 +363,10 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
            [0., 0., 0., 0., 0.]])
 
     """
+    warn('deprecation warning: the function structure_tensor_eigvals is '
+         'deprecated and will be removed in version 0.20. Please use '
+         'structure_tensor_eigenvalues instead.',
+         category=FutureWarning, stacklevel=2)
 
     return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
 
@@ -332,15 +400,8 @@ def hessian_matrix_eigvals(H_elems):
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
     """
-    if len(H_elems) == 3:  # Use fast Cython code for 2D
-        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
-    else:
-        matrices = _hessian_matrix_image(H_elems)
-        # eigvalsh returns eigenvalues in increasing order. We want decreasing
-        eigvals = np.linalg.eigvalsh(matrices)[..., ::-1]
-        leading_axes = tuple(range(eigvals.ndim - 1))
-        eigvals = np.transpose(eigvals, (eigvals.ndim - 1,) + leading_axes)
-    return eigvals
+
+    return _symmetric_compute_eigenvalues(H_elems)
 
 
 def shape_index(image, sigma=1, mode='constant', cval=0):
@@ -598,7 +659,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     """
 
-    Arr, Arc, Acc = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # minimum eigenvalue of A
     response = ((Arr + Acc) - np.sqrt((Arr - Acc) ** 2 + 4 * Arc ** 2)) / 2
@@ -672,7 +733,7 @@ def corner_foerstner(image, sigma=1):
 
     """
 
-    Arr, Arc, Acc = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # determinant
     detA = Arr * Acc - Arc ** 2

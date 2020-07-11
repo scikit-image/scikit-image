@@ -15,6 +15,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_kitchen_rosenfeld, corner_foerstner,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
+                             structure_tensor_eigenvalues,
                              hessian_matrix, hessian_matrix_eigvals,
                              hessian_matrix_det, shape_index)
 
@@ -85,11 +86,11 @@ def test_hessian_matrix_3d():
                                                   [0,  0,  0,  0,  0]]))
 
 
-def test_structure_tensor_eigvals():
+def test_structure_tensor_eigenvalues():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
-    l1, l2 = structure_tensor_eigvals(Acc, Arc, Arr)
+    A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    l1, l2 = structure_tensor_eigenvalues(A_elems)
     assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
                                      [0, 2, 4, 2, 0],
                                      [0, 4, 0, 4, 0],
@@ -100,6 +101,15 @@ def test_structure_tensor_eigvals():
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigvals():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    eigvals = structure_tensor_eigvals(*A_elems)
+    eigenvalues = structure_tensor_eigenvalues(A_elems)
+    assert_array_equal(eigvals, eigenvalues)
 
 
 def test_hessian_matrix_eigvals():
