@@ -44,13 +44,13 @@ def _compute_derivatives(image, mode='constant', cval=0):
     return imx, imy
 
 
-def structure_tensor(image, sigma=1, mode='constant', cval=0):
+def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
     """Compute structure tensor using sum of squared differences.
 
     The structure tensor A is defined as::
 
-        A = [Axx Axy]
-            [Axy Ayy]
+        A = [Arr Arc]
+            [Arc Acc]
 
     which is approximated by the weighted sum of squared differences in a local
     window around each pixel in the image.
@@ -67,14 +67,19 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+    order : {'xy', 'rc'}, optional
+        This parameter allows for the use of reverse or forward order of
+        the image axes in gradient computation. 'rc' indicates the use of
+        the first axis initially (Arr, Arc, Acc), whilst 'xy' indicates the
+        usage of the last axis initially (Axx, Axy, Ayy).
 
     Returns
     -------
-    Axx : ndarray
+    Arr : ndarray
         Element of the structure tensor for each pixel in the input image.
-    Axy : ndarray
+    Arc : ndarray
         Element of the structure tensor for each pixel in the input image.
-    Ayy : ndarray
+    Acc : ndarray
         Element of the structure tensor for each pixel in the input image.
 
     Examples
@@ -82,8 +87,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     >>> from skimage.feature import structure_tensor
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> Axx
+    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    >>> Acc
     array([[0., 0., 0., 0., 0.],
            [0., 1., 0., 1., 0.],
            [0., 4., 0., 4., 0.],
@@ -91,17 +96,30 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
            [0., 0., 0., 0., 0.]])
 
     """
+    if order is None:
+        if image.ndim == 2:
+            # The legacy 2D code followed (x, y) convention, so we swap the
+            # axis order to maintain compatibility with old code
+            warn('deprecation warning: the default order of the structure '
+                 'tensor values will be "row-column" instead of "xy" starting '
+                 'in skimage version 0.20. Use order="rc" or order="xy" to '
+                 'set this explicitly', stacklevel=2)
+            order = 'xy'
+        else:
+            order = 'rc'
 
     image = _prepare_grayscale_input_2D(image)
 
-    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
+    derivatives = _compute_derivatives(image, mode=mode, cval=cval)
 
-    # structure tensore
-    Axx = ndi.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
-    Axy = ndi.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
-    Ayy = ndi.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+    if order == 'rc':
+        derivatives = reversed(derivatives)
 
-    return Axx, Axy, Ayy
+    # structure tensor
+    A_elems = [ndi.gaussian_filter(der0 * der1, sigma, mode=mode, cval=cval)
+               for der0, der1 in combinations_with_replacement(derivatives, 2)]
+
+    return A_elems
 
 
 def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc'):
@@ -272,8 +290,8 @@ def structure_tensor_eigvals(Axx, Axy, Ayy):
     >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
-    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
+    >>> Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    >>> structure_tensor_eigvals(Acc, Arc, Arr)[0]
     array([[0., 0., 0., 0., 0.],
            [0., 2., 4., 2., 0.],
            [0., 4., 0., 4., 0.],
@@ -510,12 +528,12 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
 
     # determinant
-    detA = Axx * Ayy - Axy ** 2
+    detA = Arr * Acc - Arc ** 2
     # trace
-    traceA = Axx + Ayy
+    traceA = Arr + Acc
 
     if method == 'k':
         response = detA - k * traceA ** 2
@@ -580,10 +598,10 @@ def corner_shi_tomasi(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma)
 
     # minimum eigenvalue of A
-    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy) ** 2 + 4 * Axy ** 2)) / 2
+    response = ((Arr + Acc) - np.sqrt((Arr - Acc) ** 2 + 4 * Arc ** 2)) / 2
 
     return response
 
@@ -654,12 +672,12 @@ def corner_foerstner(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = structure_tensor(image, sigma)
+    Arr, Arc, Acc = structure_tensor(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy ** 2
+    detA = Arr * Acc - Arc ** 2
     # trace
-    traceA = Axx + Ayy
+    traceA = Arr + Acc
 
     w = np.zeros_like(image, dtype=np.double)
     q = np.zeros_like(image, dtype=np.double)

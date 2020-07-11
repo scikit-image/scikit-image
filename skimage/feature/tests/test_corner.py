@@ -31,18 +31,18 @@ def im3d():
 def test_structure_tensor():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    assert_array_equal(Axx, np.array([[ 0,  0,  0,  0,  0],
+    Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    assert_array_equal(Acc, np.array([[ 0,  0,  0,  0,  0],
                                       [ 0,  1,  0,  1,  0],
                                       [ 0,  4,  0,  4,  0],
                                       [ 0,  1,  0,  1,  0],
                                       [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Axy, np.array([[ 0,  0,  0,  0,  0],
+    assert_array_equal(Arc, np.array([[ 0,  0,  0,  0,  0],
                                       [ 0,  1,  0, -1,  0],
                                       [ 0,  0,  0, -0,  0],
                                       [ 0, -1, -0,  1,  0],
                                       [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Ayy, np.array([[ 0,  0,  0,  0,  0],
+    assert_array_equal(Arr, np.array([[ 0,  0,  0,  0,  0],
                                       [ 0,  1,  4,  1,  0],
                                       [ 0,  0,  0,  0,  0],
                                       [ 0,  1,  4,  1,  0],
@@ -88,8 +88,8 @@ def test_hessian_matrix_3d():
 def test_structure_tensor_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    l1, l2 = structure_tensor_eigvals(Axx, Axy, Ayy)
+    Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    l1, l2 = structure_tensor_eigvals(Acc, Arc, Arr)
     assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
                                      [0, 2, 4, 2, 0],
                                      [0, 4, 0, 4, 0],
