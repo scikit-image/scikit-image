@@ -5,7 +5,7 @@ Code copied from https://github.com/machine-shop/deepwings/blob/master/deepwings
 """
 
 
-def moore_neighborhood(current, backtrack):  # y, x
+def _moore_neighborhood(current, backtrack):  # y, x
     """Returns clockwise list of pixels from the moore neighborhood of current\
     pixel:
     The first element is the coordinates of the backtrack pixel.
@@ -81,7 +81,7 @@ def trace_boundary(coords):
     counter = 0
 
     while True:
-        neighbors_current = moore_neighborhood(current, backtrack)
+        neighbors_current = _moore_neighborhood(current, backtrack)
         y = neighbors_current[:, 0]
         x = neighbors_current[:, 1]
         idx = np.argmax(binary[tuple([y, x])])
