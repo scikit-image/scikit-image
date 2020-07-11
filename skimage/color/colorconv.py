@@ -1033,7 +1033,7 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
 
 def rgb2lab(rgb, illuminant="D65", observer="2"):
-    """Conversion from the sRGB color space (IEC 61966-2-1:1999 )
+    """Conversion from the sRGB color space (IEC 61966-2-1:1999)
     to the CIE Lab colorspace under the given illuminant and observer.
 
     Parameters
