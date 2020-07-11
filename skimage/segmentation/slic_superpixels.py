@@ -1,6 +1,6 @@
 import warnings
 import functools
-import collections as coll
+from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.spatial.distance import pdist, squareform
@@ -259,7 +259,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     elif isinstance(spacing, (list, tuple)):
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
 
-    if not isinstance(sigma, coll.Iterable):
+    if not isinstance(sigma, Iterable):
         sigma = np.array([sigma, sigma, sigma], dtype=dtype)
         sigma /= spacing.astype(dtype)
     elif isinstance(sigma, (list, tuple)):
