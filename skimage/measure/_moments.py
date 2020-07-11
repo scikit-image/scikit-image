@@ -112,7 +112,7 @@ def moments_coords_central(coords, center=None, order=3):
         # This format corresponds to coordinate tuples as returned by
         # e.g. np.nonzero: (row_coords, column_coords).
         # We represent them as an npoints x ndim array.
-        coords = np.transpose(coords)
+        coords = np.stack(coords, axis=-1)
     check_nD(coords, 2)
     ndim = coords.shape[1]
     if center is None:

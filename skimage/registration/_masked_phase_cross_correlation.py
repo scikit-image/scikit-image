@@ -80,7 +80,7 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
                                    overlap_ratio=overlap_ratio)
 
     # Generalize to the average of multiple equal maxima
-    maxima = np.transpose(np.nonzero(xcorr == xcorr.max()))
+    maxima = np.stack(np.nonzero(xcorr == xcorr.max()), axis=1)
     center = np.mean(maxima, axis=0)
     shifts = center - np.array(reference_image.shape) + 1
 
