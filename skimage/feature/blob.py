@@ -184,7 +184,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
                 else:
                     blob1[-1] = 0
 
-    return np.array([b for b in blobs_array if b[-1] > 0])
+    return np.stack([b for b in blobs_array if b[-1] > 0])
 
 
 def _format_exclude_border(img_ndim, exclude_border):

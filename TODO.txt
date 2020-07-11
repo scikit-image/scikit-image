@@ -70,6 +70,10 @@ Version 0.19
 Version 0.20
 ------------
 
+* In ``skimage/feature/peak.py``, remove the `indices` argument and
+  the decorator `remove_arg`.
+* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
+  decorator from `find_contours`.
 
 Version 1.0
 -----------
@@ -115,3 +119,5 @@ Other
 * Once numpydoc > 0.9.x (ie https://github.com/numpy/numpydoc/pull/256) is
   released, remove `strip_signature_backslash = True` in
   ``doc/source/conf.py``.
+* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
+  doc/source/conf.py as the default value will be comparable (#4801).

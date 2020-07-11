@@ -315,7 +315,7 @@ def hessian_matrix_eigvals(H_elems):
            [ 0.,  0.,  2.,  0.,  0.]])
     """
     if len(H_elems) == 3:  # Use fast Cython code for 2D
-        eigvals = np.array(_image_orthogonal_matrix22_eigvals(*H_elems))
+        eigvals = np.stack(_image_orthogonal_matrix22_eigvals(*H_elems))
     else:
         matrices = _hessian_matrix_image(H_elems)
         # eigvalsh returns eigenvalues in increasing order. We want decreasing

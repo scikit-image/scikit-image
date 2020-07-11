@@ -57,9 +57,9 @@ def sup_inf(u):
 
     erosions = []
     for P_i in P:
-        erosions.append(ndi.binary_erosion(u, P_i))
+        erosions.append(ndi.binary_erosion(u, P_i).astype(np.int8))
 
-    return np.array(erosions, dtype=np.int8).max(0)
+    return np.stack(erosions, axis=0).max(0)
 
 
 def inf_sup(u):
@@ -75,9 +75,9 @@ def inf_sup(u):
 
     dilations = []
     for P_i in P:
-        dilations.append(ndi.binary_dilation(u, P_i))
+        dilations.append(ndi.binary_dilation(u, P_i).astype(np.int8))
 
-    return np.array(dilations, dtype=np.int8).min(0)
+    return np.stack(dilations, axis=0).min(0)
 
 
 _curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS

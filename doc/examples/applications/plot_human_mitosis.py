@@ -24,9 +24,11 @@ from scipy import ndimage as ndi
 from skimage import (
     color, feature, filters, io, measure, morphology, segmentation, util
 )
+from skimage.data import image_fetcher
 
 
-image = io.imread('https://github.com/CellProfiler/examples/blob/master/ExampleHuman/images/AS_09125_050116030001_D03f00d0.tif?raw=true')
+path = image_fetcher.fetch('data/mitosis.tif')
+image = io.imread(path)
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
