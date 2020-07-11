@@ -251,14 +251,12 @@ def _symmetric_compute_eigenvalues(S_elems):
         The upper-diagonal elements of the matrix, as returned by
         `hessian_matrix` or `structure_tensor`.
 
-
     Returns
     -------
     eigs : ndarray
-        The eigenvalues of the Hessian matrix, in decreasing order. The
-        eigenvalues are the leading dimension. That is, ``eigs[i, j, k]``
-        contains the ith-largest eigenvalue at position (j, k).
-
+        The eigenvalues of the matrix, in decreasing order. The eigenvalues are
+        the leading dimension. That is, ``eigs[i, j, k]`` contains the
+        ith-largest eigenvalue at position (j, k).
     """
 
     if len(S_elems) == 3:  # Use fast Cython code for 2D
