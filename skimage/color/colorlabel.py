@@ -33,8 +33,6 @@ def _rgb_vector(color):
     if isinstance(color, str):
         color = color_dict[color]
     # Slice to handle RGBA colors.
-    else:
-        color = color[:3]
     return np.array(color[:3])
 
 
