@@ -260,7 +260,7 @@ def _symmetric_compute_eigenvalues(S_elems):
     """
 
     if len(S_elems) == 3:  # Use fast Cython code for 2D
-        eigs = np.array(_image_orthogonal_matrix22_eigvals(*S_elems))
+        eigs = np.stack(_image_orthogonal_matrix22_eigvals(*S_elems))
     else:
         matrices = _symmetric_image(S_elems)
         # eigvalsh returns eigenvalues in increasing order. We want decreasing
@@ -399,7 +399,6 @@ def hessian_matrix_eigvals(H_elems):
            [ 0.,  1.,  0.,  1.,  0.],
            [ 0.,  0.,  2.,  0.,  0.]])
     """
-
     return _symmetric_compute_eigenvalues(H_elems)
 
 
