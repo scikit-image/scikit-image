@@ -995,7 +995,7 @@ def corner_peaks(image, min_distance=1, threshold_abs=None, threshold_rel=None,
                             threshold_abs=threshold_abs,
                             threshold_rel=threshold_rel,
                             exclude_border=exclude_border,
-                            indices=True, num_peaks=np.inf,
+                            num_peaks=np.inf,
                             footprint=footprint, labels=labels,
                             num_peaks_per_label=num_peaks_per_label)
 
