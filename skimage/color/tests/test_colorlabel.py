@@ -6,7 +6,8 @@ from skimage.color.colorlabel import label2rgb
 
 from skimage._shared import testing
 from skimage._shared.testing import (assert_array_almost_equal,
-                                     assert_array_equal, assert_warns, assert_no_warnings)
+                                     assert_array_equal, assert_warns,
+                                     assert_no_warnings)
 
 
 def test_deprecation_warning():
@@ -205,4 +206,4 @@ def test_bg_color_rgb_string():
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
-    assert_no_warnings(label2rgb,labels, image=img, bg_label=0, bg_color='red')
+    assert_no_warnings(label2rgb, labels, image=img, bg_label=0, bg_color='red')
