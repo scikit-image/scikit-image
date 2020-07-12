@@ -206,7 +206,8 @@ def test_bg_color_rgb_string():
     labels = np.zeros((10, 10), dtype=np.int64)
     labels[1:3, 1:3] = 1
     labels[6:9, 6:9] = 2
-    assert_no_warnings(label2rgb, labels, image=img, bg_label=0, bg_color='red')
+    output = label2rgb(labels, image=img, alpha=0.9, bg_label=0, bg_color='red')
+    assert output[0, 0, 0] > 0.9 # red channel
 
 
 def test_avg_with_2d_image():
