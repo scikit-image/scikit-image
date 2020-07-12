@@ -103,7 +103,8 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order=None):
             warn('deprecation warning: the default order of the structure '
                  'tensor values will be "row-column" instead of "xy" starting '
                  'in skimage version 0.20. Use order="rc" or order="xy" to '
-                 'set this explicitly.', category=FutureWarning, stacklevel=2)
+                 'set this explicitly.  (Specify order="xy" to maintain the '
+                 'old behavior.)', category=FutureWarning, stacklevel=2)
             order = 'xy'
         else:
             order = 'rc'

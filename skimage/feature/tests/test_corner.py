@@ -53,7 +53,8 @@ def test_structure_tensor():
 def test_structure_tensor_orders():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    A_elems_default = structure_tensor(square, sigma=0.1)
+    with expected_warnings(['the default order of the structure']):
+        A_elems_default = structure_tensor(square, sigma=0.1)
     A_elems_xy = structure_tensor(square, sigma=0.1, order='xy')
     A_elems_rc = structure_tensor(square, sigma=0.1, order='rc')
     assert_array_equal(A_elems_xy, A_elems_default)
@@ -117,7 +118,8 @@ def test_structure_tensor_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 1
     A_elems = structure_tensor(square, sigma=0.1, order='rc')
-    eigvals = structure_tensor_eigvals(*A_elems)
+    with expected_warnings(['structure_tensor_eigvals is deprecated']):
+        eigvals = structure_tensor_eigvals(*A_elems)
     eigenvalues = structure_tensor_eigenvalues(A_elems)
     assert_array_equal(eigvals, eigenvalues)
 
