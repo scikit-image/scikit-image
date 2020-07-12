@@ -74,6 +74,10 @@ Version 0.20
   the decorator `remove_arg`.
 * In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
   decorator from `find_contours`.
+* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
+  `structure_tensor`.
+* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
+  function.
 
 Version 1.0
 -----------
