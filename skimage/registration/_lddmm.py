@@ -78,8 +78,7 @@ class _Lddmm:
         # Contrast map specifiers.
         contrast_order=None,
         spatially_varying_contrast_map=None,
-        contrast_maxiter=None,
-        contrast_tolerance=None,
+        contrast_iterations=None,
         sigma_contrast=None,
         contrast_smooth_length=None,
         # Smoothness vs. accuracy tradeoff.
@@ -132,8 +131,7 @@ class _Lddmm:
         self.contrast_order = int(contrast_order) if contrast_order else 1
         if self.contrast_order < 1: raise ValueError(f"contrast_order must be at least 1.\ncontrast_order: {self.contrast_order}")
         self.spatially_varying_contrast_map = bool(spatially_varying_contrast_map) if spatially_varying_contrast_map is not None else False
-        self.contrast_maxiter = int(contrast_maxiter) if contrast_maxiter else 5
-        self.contrast_tolerance = float(contrast_tolerance) if contrast_tolerance else 1e-5
+        self.contrast_iterations = int(contrast_iterations) if contrast_iterations else 5
         self.sigma_contrast = float(sigma_contrast) if sigma_contrast else 1
         self.contrast_smooth_length = float(contrast_smooth_length) if contrast_smooth_length else 10 * np.max(self.target_resolution)
 
@@ -526,8 +524,7 @@ class _Lddmm:
                 sigma_matching
                 contrast_order
                 sigma_contrast
-                contrast_tolerance
-                contrast_maxiter
+                contrast_iterations
                 matching_weights
                 contrast_polynomial_basis
                 contrast_coefficients
@@ -543,8 +540,6 @@ class _Lddmm:
 
             if self.spatially_varying_contrast_map:
                 # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
-
-                '=============================================================================================================================='
 
                 # C is contrast_coefficients.
                 # B is the contrast_polynomial_basis.
@@ -569,7 +564,7 @@ class _Lddmm:
                 # Reformulate with block elimination.
                 high_pass_contrast_coefficients = np.fft.ifftn(np.fft.fftn(self.contrast_coefficients, axes=range(spatial_ndim)) * self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
                 low_pass_right_hand_side = np.fft.ifftn(np.fft.fftn(right_hand_side, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
-                for _ in range(self.contrast_maxiter):
+                for _ in range(self.contrast_iterations):
                     linear_operator_high_pass_contrast_coefficients = np.fft.ifftn(np.fft.fftn((
                         np.sum(
                             np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
@@ -589,94 +584,6 @@ class _Lddmm:
                     high_pass_contrast_coefficients -= optimal_stepsize * residual / 2
                 
                 self.contrast_coefficients = np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
-
-
-
-                APPLYOP_to_contrast_coefficients = np.fft.ifftn(np.fft.fftn((
-                    np.sum(
-                        np.fft.ifftn(np.fft.fftn(self.contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
-                        axis=-1,
-                    ) * weights**2
-                )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + self.contrast_coefficients
-
-
-
-
-
-
-                '=============================================================================================================================='
-
-            # Spatially varying contrast code regularized like velocity_fields using scipy.sparse.linalg.cg, pending depracation in favor of above.
-            elif False:
-                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
-
-                # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
-                contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
-                matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / self.sigma_matching**2) @ contrast_polynomial_basis_transpose
-
-                # Shape: (*self.target.shape, self.contrast_order + 1)
-                target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / self.sigma_matching**2
-
-                def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
-                    """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) + regularization_matrix).ravel()."""
-
-                    contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
-
-                    # regularization_matrix = ((identity - contrast_smooth_length**2 * Laplacian)**(2 * fourier_filter_power) / sigma_contrast**2) @ contrast_coefficients
-                    regularization_matrix = np.copy(contrast_coefficients)
-                    for _ in range(2 * self.fourier_filter_power):
-                        regularization_matrix_laplacian = np.zeros_like(regularization_matrix)
-                        for dim in range(self.target.ndim):
-                            regularization_matrix_laplacian += (np.roll(regularization_matrix, 1, axis=dim) - 2 * regularization_matrix + np.roll(regularization_matrix, -1, axis=dim)) / self.target_resolution[dim]**2
-                        # regularization_matrix_laplacian is now the Laplacian of regularization_matrix.
-                        regularization_matrix -= regularization_matrix_laplacian * self.contrast_smooth_length**2
-                    regularization_matrix /= self.sigma_contrast**2
-
-                    return (matching_matrix @ contrast_coefficients[..., None] + regularization_matrix[..., None]).ravel()
-                linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
-
-                # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
-                contrast_coefficients_update = cg(linear_operator, target_matrix.ravel(), x0=self.contrast_coefficients.ravel(), tol=self.contrast_tolerance, maxiter=self.contrast_maxiter)
-                if contrast_coefficients_update[1] != 0:
-                    warnings.warn(
-                        f"scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
-                        RuntimeWarning
-                    )
-                self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
-
-            # Penalty on derivative squared, pending depracation in favor of above.
-            elif False:
-                # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == True.
-
-                # Shape: (*self.target.shape, self.contrast_order + 1, self.contrast_order + 1)
-                contrast_polynomial_basis_transpose = np.transpose(self.contrast_polynomial_basis[..., None], (*range(self.target.ndim), self.target.ndim + 1, self.target.ndim))
-                matching_matrix = (self.contrast_polynomial_basis[..., None] * self.matching_weights[..., None, None] / self.sigma_matching**2) @ contrast_polynomial_basis_transpose
-
-                # Shape: (*self.target.shape, self.contrast_order + 1)
-                target_matrix = self.target[..., None] * self.contrast_polynomial_basis * self.matching_weights[..., None] / self.sigma_matching**2
-
-                def _matvec(contrast_coefficients, self=self, matching_matrix=matching_matrix):
-                    """Returns (matching_matrix @ contrast_coefficients.reshape(self.contrast_coefficients.shape) - regularization_matrix).ravel()."""
-
-                    contrast_coefficients = contrast_coefficients.reshape(self.contrast_coefficients.shape)
-
-                    regularization_matrix = np.zeros_like(contrast_coefficients)
-                    for dim in range(self.target.ndim):
-                        regularization_matrix += (np.roll(contrast_coefficients, 1, axis=dim) - 2 * contrast_coefficients + np.roll(contrast_coefficients, -1, axis=dim)) / self.target_resolution[dim]**2
-                    # regularization_matrix is now the Laplacian of contrast_coefficients.
-                    regularization_matrix /= self.sigma_contrast**2
-
-                    return (matching_matrix @ contrast_coefficients[..., None] - regularization_matrix[..., None]).ravel()
-                linear_operator = LinearOperator((self.contrast_coefficients.size, self.contrast_coefficients.size), matvec=_matvec)
-
-                # Use scipy.sparse.linalg.cg to update self.contrast_coefficients.
-                contrast_coefficients_update = cg(linear_operator, target_matrix.ravel(), x0=self.contrast_coefficients.ravel(), tol=self.contrast_tolerance, maxiter=self.contrast_maxiter)
-                if contrast_coefficients_update[1] != 0:
-                    warnings.warn(
-                        f"scipy.sparse.linalg.cg in _compute_contrast_map has not successfully converged with convergence code {contrast_coefficients_update[1]}.", 
-                        RuntimeWarning
-                    )
-                self.contrast_coefficients = contrast_coefficients_update[0].reshape(self.contrast_coefficients.shape)
 
             else:
                 # Compute and set self.contrast_coefficients for self.spatially_varying_contrast_map == False.
@@ -1097,8 +1004,7 @@ def lddmm_register(
     # Contrast map specifiers.
     contrast_order=None,
     spatially_varying_contrast_map=None,
-    contrast_maxiter=None,
-    contrast_tolerance=None,
+    contrast_iterations=None,
     sigma_contrast=None,
     contrast_smooth_length=None,
     # Smoothness vs. accuracy tradeoff.
@@ -1166,10 +1072,8 @@ def lddmm_register(
             The order of the polynomial fit between the contrasts of the template and target. This is important to set greater than 1 if template and target are cross-modal. 3 is generally good for histology. Overrides 0 input. By default 1.
         spatially_varying_contrast_map: bool, optional
             If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. By default False.
-        contrast_maxiter: int, optional
-            The maximum number of iterations to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 5.
-        contrast_tolerance: float, optional
-            Deprecated. The tolerance for convergence to the optimal contrast_coefficients if spatially_varying_contrast_map == True. By default 1e-5.
+        contrast_iterations: int, optional
+            The number of iterations of gradient descent to converge toward the optimal contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 5.
         sigma_contrast: float, optional
             The scale of variation in the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 1.
         contrast_smooth_length: float, optional
@@ -1287,8 +1191,7 @@ def lddmm_register(
         # Contrast map specifiers.
         contrast_order=contrast_order,
         spatially_varying_contrast_map=spatially_varying_contrast_map,
-        contrast_maxiter=contrast_maxiter,
-        contrast_tolerance=contrast_tolerance,
+        contrast_iterations=contrast_iterations,
         sigma_contrast=sigma_contrast,
         contrast_smooth_length=contrast_smooth_length,
         # # vs. accuracy tradeoff.
