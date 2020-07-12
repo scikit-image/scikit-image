@@ -1,5 +1,5 @@
 """
-This is an implementation of the LDDMM algorithm with modifications, based on 
+This is an implementation of the LDDMM algorithm with modifications, written by Devin Crowley and based on 
 "Diffeomorphic registration with intensity transformation and missing data: Application to 3D digital pathology of Alzheimer's disease." 
 This paper extends on an older LDDMM paper, 
 "Computing large deformation metric mappings via geodesic flows of diffeomorphisms."
@@ -124,8 +124,8 @@ class _Lddmm:
         # Velocity field specifiers.
         self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
         self.velocity_smooth_length = float(velocity_smooth_length) if velocity_smooth_length is not None else 2 * np.max(self.template_resolution)
-        self.preconditioner_velocity_smooth_length = float(preconditioner_velocity_smooth_length) if preconditioner_velocity_smooth_length is not None else 5 * np.max(self.template_resolution)
-        self.maximum_velocity_fields_update = float(maximum_velocity_fields_update) if maximum_velocity_fields_update is not None else 1
+        self.preconditioner_velocity_smooth_length = float(preconditioner_velocity_smooth_length) if preconditioner_velocity_smooth_length is not None else 0 # Default is inactive.
+        self.maximum_velocity_fields_update = float(maximum_velocity_fields_update) if maximum_velocity_fields_update is not None else np.max(self.template.shape * self.template_resolution) # Default is effectively inactive.
         self.num_timesteps = int(num_timesteps) if num_timesteps is not None else 5
 
         # Contrast map specifiers.
@@ -1148,21 +1148,22 @@ def lddmm_register(
         affine_stepsize: float, optional
             The unitless stepsize for affine adjustments. Should be between 0 and 1. By default 0.3.
         deformative_stepsize: float, optional
-            The stepsize for deformative adjustments. Optimal values are problem-specific. If equal to 0 then the result is affine-only registration. By default 0.
+            The stepsize for deformative adjustments. Optimal values are problem-specific. Setting preconditioner_velocity_smooth_length increases the appropriate value of deformative_stepsize. 
+            If equal to 0 then the result is affine-only registration. By default 0.
         fixed_affine_scale: float, optional
             The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. By default None.
         sigma_regularization: float, optional
             A scalar indicating the freedom to deform. Overrides 0 input. By default 10 * np.max(self.template_resolution).
         velocity_smooth_length: float, optional
-            The length scale of smoothing of the velocity_fields in physical units. Determines the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
+            The length scale of smoothing of the velocity_fields in physical units. Affects the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
         preconditioner_velocity_smooth_length: float, optional
-            The length of preconditioner smoothing of the velocity_fields in physical units. Determines the optimization of the velocity_fields. By default 5 * np.max(self.template_resolution).
+            The length of preconditioner smoothing of the velocity_fields in physical units. Affects the optimization of the velocity_fields, but not the optimum. By default 0.
         maximum_velocity_fields_update: float, optional
-            The maximum allowed update to the velocity_fields in units of voxels. By default 1.
+            The maximum allowed update to the velocity_fields in physical units. Affects the optimization of the velocity_fields, but not the optimum. Overrides 0 input. By default np.max(self.template.shape * self.template_resolution).
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism. Overrides 0 input. By default 5.
         contrast_order: int, optional
-            The order of the polynomial fit between the contrasts of the template and target. Overrides 0 input. By default 1.
+            The order of the polynomial fit between the contrasts of the template and target. This is important to set greater than 1 if template and target are cross-modal. 3 is generally good for histology. Overrides 0 input. By default 1.
         spatially_varying_contrast_map: bool, optional
             If True, uses a polynomial per voxel to compute the contrast map rather than a single polynomial. By default False.
         contrast_maxiter: int, optional
