@@ -6,7 +6,7 @@ Image3D = Annotated[np.ndarray, 'image_3d',
 Image2D = Annotated[np.ndarray, 'image_2d',
                         'a 2D single or multichannel image']
 Image = Annotated[np.ndarray, 'image',
-                            'nd-dimensional image']
+                            'an nD image']
 Labels = Annotated[np.ndarray, 'labels',
                         'array of integers representing labels']
 Mask = Annotated[np.ndarray, 'mask',
