@@ -27,7 +27,7 @@ else:
 
 # TODO: support buffer protocols once
 #
-# https://github.com/python/typing/issues/593
+# https://bugs.python.org/issue27501
 #
 # is resolved.  See also the mypy issue:
 #
