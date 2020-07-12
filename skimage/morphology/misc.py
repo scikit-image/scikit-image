@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from .._shared.utils import warn
 from .selem import _default_selem
 
-# Our function names don't exactly correspond to ndimages.
+# Our function names don't exactly correspond to ndimage's.
 # This dictionary translates from our names to scipy's.
 funcs_gray = ('erosion', 'dilation', 'opening', 'closing')
 skimage2ndimage = {x: 'grey_' + x for x in funcs_gray}
