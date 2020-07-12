@@ -868,7 +868,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
                 break
 
     # estimate final model using all inliers
-    if best_inliers is not None and sum(best_inliers) > 0:
+    if best_inliers is not None and any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
         best_model.estimate(*data_inliers)
