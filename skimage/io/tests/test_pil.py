@@ -33,7 +33,6 @@ def teardown():
 def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.
     Call `use_plugin` directly before the tests to ensure that PIL is used.
-
     """
     try:
         use_plugin('pil')

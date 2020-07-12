@@ -12,7 +12,6 @@ except ImportError:
 
 def imread(fname):
     """Load an image from file.
-
     """
     ds = gdal.Open(fname)
 
