@@ -11,5 +11,5 @@ else:
 
 
 __all__ = [
-        '_SupportsArray'
+    '_SupportsArray'
         ]
