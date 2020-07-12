@@ -1033,7 +1033,8 @@ def lab2xyz(lab, illuminant="D65", observer="2"):
 
 
 def rgb2lab(rgb, illuminant="D65", observer="2"):
-    """RGB to lab color space conversion.
+    """Conversion from the sRGB color space (IEC 61966-2-1:1999)
+    to the CIE Lab colorspace under the given illuminant and observer.
 
     Parameters
     ----------
@@ -1056,6 +1057,10 @@ def rgb2lab(rgb, illuminant="D65", observer="2"):
 
     Notes
     -----
+    RGB is a device-dependent color space so, if you use this function, be
+    sure that the image you are analyzing has been mapped to the sRGB color
+    space.
+
     This function uses rgb2xyz and xyz2lab.
     By default Observer= 2A, Illuminant= D65. CIE XYZ tristimulus values
     x_ref=95.047, y_ref=100., z_ref=108.883. See function `get_xyz_coords` for
