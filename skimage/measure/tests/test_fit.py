@@ -389,11 +389,7 @@ def test_ransac_sample_duplicates():
 
 
 def test_ransac_with_no_final_inliers():
-    data = np.array(
-        [[943., 1374.5],
-         [1518., 3293.5],
-         [749., 3450.5],
-         [2237., 3578.5],
-         [1022., 3668.5]], dtype=np.float64)
-    model, inliers = ransac(data, LineModelND, 3, 0.001, random_state=1523427)
+    data = np.random.rand(5, 2)
+    model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
+                            residual_threshold=0, random_state=1523427)
     assert_equal(inliers, [False, False, False, False, False])
