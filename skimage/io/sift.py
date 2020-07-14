@@ -26,16 +26,16 @@ def _sift_read(filelike, mode='SIFT'):
     Returns
     -------
     data : record array with fields
-      - row: int
-          row position of feature
-      - column: int
-          column position of feature
-      - scale: float
-          feature scale
-      - orientation: float
-          feature orientation
-      - data: array
-          feature values
+        - row: int
+            row position of feature
+        - column: int
+            column position of feature
+        - scale: float
+            feature scale
+        - orientation: float
+            feature orientation
+        - data: array
+            feature values
 
     """
     if isinstance(filelike, str):
