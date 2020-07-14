@@ -52,32 +52,24 @@ def imshow_on_ax(axes, dim, column, image, overlaid_image=None, quantile_thresho
 template = allen_mouse_brain_atlas()
 target = cleared_mouse_brain()
 
-
-# Downsample images if desired.
-# Note: with downsample_factor = 1, lddmm_register runs in approximately 40-50 minutes.
-# This runtime declines roughly as the cube of downsample_factor.
-# Optimization parameters may require adjustment for sufficiently large downsample_factor values.
-downsample_factor = 2
-template = resample(template, downsample_factor)
-target   = resample(  target, downsample_factor)
-
+# Specify resolutions.
+template_resolution = np.array([100, 100, 100])
+target_resolution = np.array([100, 100, 100])
 
 # Learn registration from template to target.
-# The stepsizes for lddmm_register are calibrated for this data without any downsampling (downsample_factor = 1 above), hence the correction.
-print(
-    "Please allow approximately 5 minutes for lddmm_register to finish with these inputs,\n"
-    "or ~10-15 minutes if running with a single CPU.\n"
-)
 lddmm_dict = lddmm_register(
     template                    = template,
     target                      = target,
+    template_resolution         = template_resolution,
+    target_resolution           = target_resolution,
+    multiscales                 = [8, 4],
     affine_stepsize             = 0.3,
-    deformative_stepsize        = 5e-1 * downsample_factor,
-    sigma_regularization        = 2e1,
+    deformative_stepsize        = 2e1,
+    sigma_regularization        = 5e1,
     contrast_order              = 3,
-    num_iterations              = 150,
-    num_affine_only_iterations  = 100,
-    num_rigid_affine_iterations = 50,
+    num_iterations              = [50, 100],
+    num_affine_only_iterations  = [50, 0],
+    num_rigid_affine_iterations = [25, 0],
     # calibrate=True outputs a diagnostic plot at the end of lddmm_register that is useful for determining appropriate stepsizes.
     calibrate                   = False,
     # track_progress_every_n=10 prints a progress update every 10 iterations of registration. 
