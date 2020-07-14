@@ -109,6 +109,11 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
       >> vv.mesh(np.fliplr(verts), faces, normals, values)
       >> vv.use().Run()
 
+    To reduce the number of triangles in the mesh for better performance,
+    see this `example
+    <https://docs.enthought.com/mayavi/mayavi/auto/example_julia_set_decimation.html#example-julia-set-decimation>`_
+    using the ``mayavi`` package.
+
     References
     ----------
     .. [1] Thomas Lewiner, Helio Lopes, Antonio Wilson Vieira and Geovan

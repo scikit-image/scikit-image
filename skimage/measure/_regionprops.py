@@ -37,7 +37,7 @@ PROPS = {
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
     # 'Extrema',
-    'FeretDiameter': 'feret_diameter',
+    'FeretDiameterMax': 'feret_diameter_max',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
@@ -87,7 +87,7 @@ COL_DTYPES = {
     'equivalent_diameter': float,
     'euler_number': int,
     'extent': float,
-    'feret_diameter': float,
+    'feret_diameter_max': float,
     'filled_area': int,
     'filled_image': object,
     'moments_hu': float,
@@ -331,9 +331,8 @@ class RegionProperties:
     def extent(self):
         return self.area / self.image.size
 
-
     @property  # type: ignore
-    def feret_diameter(self):
+    def feret_diameter_max(self):
         identity_convex_hull = np.pad(self.convex_image,
                                       2, mode='constant', constant_values=0)
         if self._ndim == 2:
@@ -890,7 +889,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as ``area / (rows * cols)``
-    **feret_diameter** : float
+    **feret_diameter_max** : float
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours``. [5]_

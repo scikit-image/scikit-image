@@ -22,7 +22,6 @@ def setup_module(self):
     """The effect of the `plugin.use` call may be overridden by later imports.
     Call `use_plugin` directly before the tests to ensure that SimpleITK is
     used.
-
     """
     use_plugin('simpleitk')
 

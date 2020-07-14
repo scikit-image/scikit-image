@@ -44,6 +44,11 @@ Bugfixes
 Deprecations
 ------------
 
+- In ``skimage.feature.structure_tensor``, an ``order`` argument has been
+  introduced which will default to 'rc' starting in version 0.20.
+- ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
+  removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
+  instead.
 
 
 Contributors to this release
