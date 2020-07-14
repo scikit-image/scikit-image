@@ -146,7 +146,7 @@ def test_expand_labels(input_array, expected_output, expand_distance):
 @testing.parametrize('distance', range(6))
 def test_binary_blobs(ndim, distance):
     """Check some invariants with label expansion.
-    
+
     - New labels array should exactly contain the original labels array.
     - Distance to old labels array within new labels should never exceed input
       distance.
@@ -172,9 +172,9 @@ def test_edge_case_behaviour():
     """ Check edge case behavior to detect upstream changes
 
     For edge cases where a pixel has the same distance to several regions,
-    lexicographical order seems to determine which region gets to expand 
-    into this pixel given the current upstream behaviour in 
-    scipy.ndimage.distance_map_edt. 
+    lexicographical order seems to determine which region gets to expand
+    into this pixel given the current upstream behaviour in
+    scipy.ndimage.distance_map_edt.
 
     As a result, we expect different results when transposing the array.
     If this test fails, something has changed upstream.

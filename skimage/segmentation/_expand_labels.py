@@ -16,15 +16,15 @@ from scipy.ndimage import distance_transform_edt
 def expand_labels(label_image, distance=1):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
-    Given a label image, ``expand_labels`` grows label regions (connected components) 
+    Given a label image, ``expand_labels`` grows label regions (connected components)
     outwards by up to ``distance`` pixels without overflowing into neighboring regions.
     More specifically, each background pixel that is within Euclidean distance
     of <= ``distance`` pixels of a connected component is assigned the label of that
     connected component.
-    Where multiple connected components are within ``distance`` pixels of a background 
-    pixel, the label value of the closest connected component will be assigned (see 
+    Where multiple connected components are within ``distance`` pixels of a background
+    pixel, the label value of the closest connected component will be assigned (see
     Notes for the case of multiple labels at equal distance).
-     
+
     Parameters
     ----------
     label_image : ndarray of dtype int
