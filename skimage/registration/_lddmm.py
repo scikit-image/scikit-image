@@ -121,7 +121,7 @@ class _Lddmm:
         self.fixed_affine_scale = float(fixed_affine_scale) if fixed_affine_scale is not None else None
 
         # Velocity field specifiers.
-        self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else 10 * np.max(self.template_resolution)
+        self.sigma_regularization = float(sigma_regularization) if sigma_regularization is not None else np.inf
         self.velocity_smooth_length = float(velocity_smooth_length) if velocity_smooth_length is not None else 2 * np.max(self.template_resolution)
         self.preconditioner_velocity_smooth_length = float(preconditioner_velocity_smooth_length) if preconditioner_velocity_smooth_length is not None else 0 # Default is inactive.
         self.maximum_velocity_fields_update = float(maximum_velocity_fields_update) if maximum_velocity_fields_update is not None else np.max(self.template.shape * self.template_resolution) # Default is effectively inactive.
@@ -1059,7 +1059,7 @@ def lddmm_register(
         fixed_affine_scale: float, optional
             The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. By default None.
         sigma_regularization: float, optional
-            A scalar indicating the freedom to deform. Overrides 0 input. By default 10 * np.max(self.template_resolution).
+            A scalar indicating the freedom to deform. Overrides 0 input. By default np.inf.
         velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical units. Affects the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
         preconditioner_velocity_smooth_length: float, optional
