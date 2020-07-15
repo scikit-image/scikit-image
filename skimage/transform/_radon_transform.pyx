@@ -9,6 +9,7 @@ cimport cython
 from libc.math cimport cos, sin, floor, ceil, sqrt, abs, M_PI
 from .._shared.fused_numerics cimport np_floats
 
+cnp.import_array()
 
 cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
                       np_floats ray_position):

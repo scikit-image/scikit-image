@@ -190,7 +190,8 @@ def test_reproducibility():
     when specifying random_state
     """
     img = data.coffee()
-    labels1 = segmentation.slic(img, compactness=30, n_segments=400)
+    labels1 = segmentation.slic(
+        img, compactness=30, n_segments=400, start_label=0)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
     results = [None] * 4
     for i in range(len(results)):

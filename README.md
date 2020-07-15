@@ -5,7 +5,7 @@
 [![codecov.io](https://codecov.io/github/scikit-image/scikit-image/coverage.svg?branch=master)](https://codecov.io/github/scikit-image/scikit-image?branch=master)
 
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
-- **Mailing list:** [https://mail.python.org/mailman/listinfo/scikit-image](https://mail.python.org/mailman/listinfo/scikit-image)
+- **Mailing list:** [https://mail.python.org/mailman3/lists/scikit-image.python.org/](https://mail.python.org/mailman3/lists/scikit-image.python.org/)
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
 - **Benchmarks:** [https://pandas.pydata.org/speed/scikit-image/](https://pandas.pydata.org/speed/scikit-image/)
 

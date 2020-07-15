@@ -68,7 +68,7 @@ def merge_boundary(graph, src, dst):
 
 img = data.coffee()
 edges = filters.sobel(color.rgb2gray(img))
-labels = segmentation.slic(img, compactness=30, n_segments=400)
+labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_boundary(labels, edges)
 
 graph.show_rag(labels, g, img)
@@ -83,7 +83,7 @@ graph.show_rag(labels, g, img)
 plt.title('RAG after hierarchical merging')
 
 plt.figure()
-out = color.label2rgb(labels2, img, kind='avg')
+out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 plt.imshow(out)
 plt.title('Final segmentation')
 

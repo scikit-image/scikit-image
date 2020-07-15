@@ -205,10 +205,10 @@ def test_bool_array_input():
     dx = 31 * np.sin(phi)
     dst = (center_y + dy, center_x + dx)
 
-    profile_u8 = profile_line(mask.astype(np.uint8), src, dst)
+    profile_u8 = profile_line(mask.astype(np.uint8), src, dst, mode='reflect')
     assert all(profile_u8[:radius] == 1)
 
-    profile_b = profile_line(mask, src, dst)
+    profile_b = profile_line(mask, src, dst, mode='reflect')
     assert all(profile_b[:radius] == 1)
 
     assert all(profile_b == profile_u8)

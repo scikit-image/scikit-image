@@ -9,9 +9,15 @@ class SegmentationSuite:
         self.image = np.random.random((400, 400, 100))
         self.image[:200, :200, :] += 1
         self.image[300:, 300:, :] += 0.5
+        self.msk = np.zeros((400, 400, 100))
+        self.msk[10:-10, 10:-10, 10:-10] = 1
 
     def time_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False)
+
+    def time_mask_slic(self):
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          mask=self.msk)
 
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.

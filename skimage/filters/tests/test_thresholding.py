@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from skimage import util
 from skimage import data
 from skimage.color import rgb2gray
-from skimage.draw import circle
+from skimage.draw import disk
 from skimage._shared._warnings import expected_warnings
 from skimage.exposure import histogram
 from skimage.filters.thresholding import (threshold_local,
@@ -242,8 +242,12 @@ def test_otsu_astro_image():
 
 def test_otsu_one_color_image():
     img = np.ones((10, 10), dtype=np.uint8)
-    with testing.raises(ValueError):
-        threshold_otsu(img)
+    assert threshold_otsu(img) == 1
+
+
+def test_otsu_one_color_image_3d():
+    img = np.ones((10, 10, 10), dtype=np.uint8)
+    assert threshold_otsu(img) == 1
 
 
 def test_li_camera_image():
@@ -329,7 +333,9 @@ def test_li_pathological_arrays():
     e = np.array([1, 1])
     f = np.array([1, 2])
     arrays = [a, b, c, d, e, f]
-    thresholds = [threshold_li(arr) for arr in arrays]
+    with np.errstate(divide='ignore'):
+        # ignoring "divide by zero encountered in log" error from np.log(0)
+        thresholds = [threshold_li(arr) for arr in arrays]
     assert np.all(np.isfinite(thresholds))
 
 
@@ -565,7 +571,7 @@ def test_multiotsu_output():
     coords = [(25, 25), (50, 50), (75, 75)]
     values = [64, 128, 192]
     for coor, val in zip(coords, values):
-        rr, cc = circle(coor[1], coor[0], 20)
+        rr, cc = disk(coor, 20)
         image[rr, cc] = val
     thresholds = [0, 64, 128]
     assert np.array_equal(thresholds, threshold_multiotsu(image, classes=4))

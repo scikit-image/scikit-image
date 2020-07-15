@@ -765,8 +765,12 @@ class AffineTransform(ProjectiveTransform):
     ----------
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
-    scale : (sx, sy) as array, list or tuple, optional
-        Scale factors.
+    scale : {s as float or (sx, sy) as array, list or tuple}, optional
+        Scale factor(s). If a single value, it will be assigned to both
+        sx and sy.
+
+        .. versionadded:: 0.17
+           Added support for supplying a single scalar value.
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
@@ -805,7 +809,11 @@ class AffineTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            sx, sy = scale
+            if np.isscalar(scale):
+                sx = sy = scale
+            else:
+                sx, sy = scale
+
             self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
@@ -1367,13 +1375,13 @@ def estimate_transform(ttype, src, dst, **kwargs):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import transform as tf
+    >>> from skimage import transform
 
     >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
 
-    >>> tform = tf.estimate_transform('similarity', src, dst)
+    >>> tform = transform.estimate_transform('similarity', src, dst)
 
     >>> np.allclose(tform.inverse(tform(src)), src)
     True
@@ -1385,7 +1393,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
     >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
+    >>> tform2 = transform.SimilarityTransform(scale=1.1, rotation=1,
     ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right

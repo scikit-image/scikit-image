@@ -4,14 +4,14 @@ How to contribute to scikit-image
 =================================
 
 Developing Open Source is great fun!  Join us on the `scikit-image mailing
-list <https://mail.python.org/mailman/listinfo/scikit-image>`_ and tell us
+list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ and tell us
 which of the following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
 * If you're looking for something to implement, you can find a list of
   `requested features on GitHub <https://github.com/scikit-image/scikit-image/wiki/Requested-features>`__.
   In addition, you can browse the
-  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?state=open>`__.
+  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
 * The technical detail of the `development process`_ is summed up below.
   Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
 
@@ -69,13 +69,13 @@ Here's the long and short of it:
 
    * Enter your GitHub username and password (repeat contributors or advanced
      users can remove this step by `connecting to GitHub with SSH
-     <https://help.github.com/en/articles/connecting-to-github-with-ssh>`_).
+     <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
 
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
    * If you want, post on the `mailing list
-     <https://mail.python.org/mailman/listinfo/scikit-image>`_ to explain your changes or
+     <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ to explain your changes or
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
@@ -225,7 +225,7 @@ Guidelines
 * For new functionality, always add an example to the gallery.
 * No changes are ever committed without review and approval by two core
   team members.  Ask on the
-  `mailing list <https://mail.python.org/mailman/listinfo/scikit-image>`_ if
+  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
 * Examples in the gallery should have a maximum figure width of 8 inches.
@@ -245,7 +245,9 @@ Stylistic Guidelines
    import matplotlib.pyplot as plt
    from scipy import ndimage as ndi
 
-   cimport numpy as cnp  # in Cython code
+   # only in Cython code
+   cimport numpy as cnp
+   cnp.import_array()
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
@@ -349,7 +351,7 @@ successfully passes all tests. To do so,
   your scikit-image fork
 
 It corresponds to steps one and two in
-`Travis-CI documentation <https://about.travis-ci.org/docs/user/getting-started/>`__
+`Travis-CI documentation <https://docs.travis-ci.com/user/tutorial/#to-get-started-with-travis-ci-using-github>`__
 (Step three is already done in scikit-image).
 
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
@@ -438,7 +440,7 @@ scikit-image/tools/deploy-docs.sh
 -  Paste the output into the secure: field of ``.travis.yml``.
 -  The decrypted GH\_TOKEN env var will be available for travis scripts
 
-https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
 https://docs.travis-ci.com/user/encryption-keys/
 
 Deprecation cycle
@@ -596,7 +598,7 @@ included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
 more about the features of `asv`, please refer to the official
-`airpseed velocity documentation <http://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+`airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
 
 Testing the benchmarks locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
