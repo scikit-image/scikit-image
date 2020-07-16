@@ -40,14 +40,14 @@ training_labels[260:340, 60:170] = 4
 training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
-sigma_max = 32
+sigma_max = 16
 features_func = partial(segmentation.multiscale_basic_features,
                         intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max)
-clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-segmenter = segmentation.TrainableSegmenter(
-        clf=clf, features_func=features_func)
-segmenter.fit(img, training_labels)
+clf = RandomForestClassifier(n_estimators=50, n_jobs=-1, max_depth=9, max_samples=0.05)
+segmenter = segmentation.TrainableSegmenter(clf=clf, features_func=features_func)
+segmenter.compute_features(img)
+segmenter.fit(training_labels)
 result = segmenter.segmented_image
 
 

@@ -16,8 +16,6 @@ segmentation").
 .. [2] https://www.ilastik.org/documentation/pixelclassification/pixelclassification
 .. [3] https://imagej.net/Trainable_Weka_Segmentation#Training_features_.282D.29
 """
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, segmentation
@@ -40,22 +38,23 @@ training_labels[260:340, 60:170] = 4
 training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
-sigma_max = 32
+sigma_max = 16
 features_func = partial(segmentation.multiscale_basic_features,
                         intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max)
-clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+features = features_func(img)
+clf = RandomForestClassifier(n_estimators=50, n_jobs=-1, 
+                             max_depth=10, max_samples=0.05)
 result, clf = segmentation.fit_segmenter(
-        img, training_labels, clf,
-        features_func=features_func, downsample=5)
-
+        training_labels, features, clf,
+        )
 
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(9, 4))
 ax[0].imshow(segmentation.mark_boundaries(img, result, mode='thick'))
 ax[0].contour(training_labels)
 ax[0].set_title('Image, mask and segmentation boundaries')
 ax[1].imshow(result)
-ax[1].set_title('Segmentation')
+ax[1].set_title('Segmentation') 
 fig.tight_layout()
 
 ##############################################################################
@@ -101,7 +100,8 @@ fig.tight_layout()
 
 img_new = full_img[:700, 900:]
 
-result_new = segmentation.predict_segmenter(img_new, clf, features_func)
+features_new = features_func(img_new)
+result_new = segmentation.predict_segmenter(features_new, clf)
 fig, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(6, 4))
 ax[0].imshow(segmentation.mark_boundaries(img_new, result_new, mode='thick'))
 ax[0].set_title('Image')

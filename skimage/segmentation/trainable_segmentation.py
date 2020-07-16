@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 from skimage import filters, feature
 from skimage import img_as_float32
+from joblib import Parallel, delayed
 
 try:
     from sklearn.exceptions import NotFittedError
@@ -14,25 +15,15 @@ except ImportError:
         pass
 
 
-def _singlescale_basic_features(img, sigma, intensity=True, edges=True,
-                                texture=True):
-    """Features for a single value of the Gaussian blurring parameter ``sigma``
-    """
-    features = []
-    img_blur = filters.gaussian(img, sigma)
-    if intensity:
-        features.append(img_blur)
-    if edges:
-        features.append(filters.sobel(img_blur))
-    if texture:
-        H_elems = [
-            np.gradient(np.gradient(img_blur)[ax0], axis=ax1)
-            for ax0, ax1 in combinations_with_replacement(range(img.ndim), 2)
+
+def _texture_filter(gaussian_filtered):
+    H_elems = [
+            np.gradient(np.gradient(gaussian_filtered)[ax0], axis=ax1)
+            for ax0, ax1 in combinations_with_replacement(range(gaussian_filtered.ndim), 2)
         ]
-        eigvals = feature.hessian_matrix_eigvals(H_elems)
-        for eigval_mat in eigvals:
-            features.append(eigval_mat)
-    return features
+    eigvals = feature.hessian_matrix_eigvals(H_elems)
+    return eigvals
+
 
 
 def _mutiscale_basic_features_singlechannel(
@@ -44,7 +35,7 @@ def _mutiscale_basic_features_singlechannel(
     ----------
     """
     # computations are faster as float32
-    img = img_as_float32(img)
+    img = np.ascontiguousarray(img_as_float32(img))
     sigmas = np.logspace(
         np.log2(sigma_min),
         np.log2(sigma_max),
@@ -52,13 +43,19 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    all_results = [
-        _singlescale_basic_features(
-            img, sigma, intensity=intensity, edges=edges, texture=texture
-        )
-        for sigma in sigmas
-    ]
-    return list(itertools.chain.from_iterable(all_results))
+    all_filtered = Parallel(n_jobs=-1, prefer='threads')(delayed(filters.gaussian)(img, sigma) for sigma in sigmas)
+    features = []
+    if intensity:
+        features += all_filtered
+    if edges:
+        all_edges = Parallel(n_jobs=-1, prefer='threads')(delayed(filters.sobel)(filtered_img)
+                                for filtered_img in all_filtered)
+        features += all_edges
+    if texture:
+        all_texture = Parallel(n_jobs=-1, prefer='threads')(delayed(_texture_filter)(filtered_img)
+                                for filtered_img in all_filtered)
+        features += itertools.chain.from_iterable(all_texture)
+    return features
 
 
 def multiscale_basic_features(
@@ -142,19 +139,15 @@ class TrainableSegmenter(object):
         to the classifier. The output should be of shape
         ``(m_features, *labels.shape)``. If None,
         :func:`skimage.segmentation.multiscale_basic_features` is used.
-    downsample : int, optional
-        downsample the number of training points. Use downsample > 1 if you
-        built the training set by brushing through large areas but not all
-        points are needed to train efficiently the classifier. The training
-        time increases with the number of training points.
 
     Methods
     -------
+    compute_features
     fit
     predict
     """
 
-    def __init__(self, clf=None, features_func=None, downsample=10):
+    def __init__(self, clf=None, features_func=None):
         if clf is None:
             try:
                 from sklearn.ensemble import RandomForestClassifier
@@ -167,25 +160,30 @@ class TrainableSegmenter(object):
         else:
             self.clf = clf
         self.features_func = features_func
-        self.downsample = downsample
+        self.features = None
 
+    def compute_features(self, image):
+        if self.features_func is None:
+            self.features_func = multiscale_basic_features
+        self.features = self.features_func(image)
 
-    def fit(self, image, labels):
+    def fit(self, labels, image=None):
         """
         Train classifier using partially labeled (annotated) image.
 
         Parameters
         ----------
-        image : ndarray
-            Input image, which can be grayscale or multichannel, and must have a
-            number of dimensions compatible with ``self.features_func``.
         labels : ndarray of ints
             Labeled array of shape compatible with ``image`` (same shape for a
             single-channel image). Labels >= 1 correspond to the training set and
             label 0 to unlabeled pixels to be segmented.
+        image : ndarray
+            Input image, which can be grayscale or multichannel, and must have a
+            number of dimensions compatible with ``self.features_func``.
         """
-        output, clf = fit_segmenter(image, labels, self.clf,
-                                    self.features_func, self.downsample)
+        if self.features is None:
+            self.compute_features(image)
+        output, clf = fit_segmenter(labels, self.features, self.clf)
         self.segmented_image = output
 
 
@@ -203,31 +201,28 @@ class TrainableSegmenter(object):
         ------
         NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
         """
-        return predict_segmenter(image, self.clf, self.features_func)
+        if self.features_func is None:
+            self.features_func = multiscale_basic_features
+        features = self.features_func(image)
+        return predict_segmenter(features, self.clf)
 
 
-def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
+def fit_segmenter(labels, features, clf, downsample=10):
     """
     Segmentation using labeled parts of the image and a classifier.
 
     Parameters
     ----------
-    image : ndarray
-        Input image, which can be grayscale or multichannel, and must have a
-        number of dimensions compatible with ``features_func``.
     labels : ndarray of ints
-        Labeled array of shape compatible with ``image`` (same shape for a
-        single-channel image). Labels >= 1 correspond to the training set and
+        Image of labels. Labels >= 1 correspond to the training set and
         label 0 to unlabeled pixels to be segmented.
+    features : ndarray
+        Array of features, with the first dimension corresponding to the number
+        of features, and the other dimensions correspond to ``labels.shape``.
     clf : classifier object
         classifier object, exposing a ``fit`` and a ``predict`` method as in
         scikit-learn's API, for example an instance of
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier.
-    features_func : function, optional
-        function computing features on all pixels of the image, to be passed
-        to the classifier. The output should be of shape
-        ``(m_features, *labels.shape)``. If None,
-        :func:`skimage.segmentation.multiscale_basic_features` is used.
     downsample : int, optional
         downsample the number of training points. Use downsample > 1 if you
         built the training set by brushing through large areas but not all
@@ -246,12 +241,9 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
     ------
     NotFittedError if ``self.clf`` has not been fitted yet (use ``self.fit``).
     """
-    if features_func is None:
-        features_func = multiscale_basic_features
-    features = features_func(image)
     training_data = features[:, labels > 0].T
     training_labels = labels[labels > 0].ravel()
-    clf.fit(training_data[::downsample], training_labels[::downsample])
+    clf.fit(training_data, training_labels)
     data = features[:, labels == 0].T
     predicted_labels = clf.predict(data)
     output = np.copy(labels)
@@ -259,15 +251,16 @@ def fit_segmenter(image, labels, clf, features_func=None, downsample=10):
     return output, clf
 
 
-def predict_segmenter(image, clf, features_func=None):
+def predict_segmenter(features, clf):
     """
     Segmentation of images using a pretrained classifier.
 
     Parameters
     ----------
-    image : ndarray
-        Input image, which can be grayscale or multichannel, and must have a
-        number of dimensions compatible with ``features_func``.
+    features : ndarray
+        Array of features, with the first dimension corresponding to the number
+        of features, and the other dimensions are compatible with the shape of 
+        the image to segment.
     clf : classifier object
         trained classifier object, exposing a ``predict`` method as in
         scikit-learn's API, for example an instance of
@@ -285,10 +278,6 @@ def predict_segmenter(image, clf, features_func=None):
     output : ndarray
         Labeled array, built from the prediction of the classifier.
     """
-    if features_func is None:
-        features_func = multiscale_basic_features
-        # print a warning here?
-    features = features_func(image)
     sh = features.shape
     features = features.reshape((sh[0], np.prod(sh[1:]))).T
     try:
