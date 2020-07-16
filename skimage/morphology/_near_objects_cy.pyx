@@ -10,6 +10,7 @@
 import numpy as np
 cimport numpy as cnp
 
+from _shared.fused_numerics cimport np_real_numeric
 
 # Must be defined to use QueueWithHistory
 ctypedef Py_ssize_t QueueItem
@@ -18,21 +19,8 @@ ctypedef Py_ssize_t QueueItem
 include "_queue_with_history.pxi"
 
 
-ctypedef fused dtype_t:
-    cnp.uint8_t
-    cnp.uint16_t
-    cnp.uint32_t
-    cnp.uint64_t
-    cnp.int8_t
-    cnp.int16_t
-    cnp.int32_t
-    cnp.int64_t
-    cnp.float32_t
-    cnp.float64_t
-
-
 def _remove_near_objects(
-    dtype_t[::1] image not None,
+    np_real_numeric[::1] image not None,
     Py_ssize_t[::1] labels not None,
     Py_ssize_t[::1] raveled_indices not None,
     Py_ssize_t[::1] neighbor_offsets not None,
@@ -118,7 +106,7 @@ def _remove_near_objects(
 
 
 cdef inline void _remove_object(
-    dtype_t[::1] image,
+    np_real_numeric[::1] image,
     Py_ssize_t[::1] labels,
     Py_ssize_t start_index,
     Py_ssize_t[::1] neighbor_offsets,
