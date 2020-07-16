@@ -34,7 +34,8 @@ def test_trainable_segmentation_singlechannel():
         sigma_min=0.5,
         sigma_max=2,
     )
-    out, clf = fit_segmenter(img, labels, clf, features_func)
+    features = features_func(img)
+    out, clf = fit_segmenter(labels, features, clf)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
 
@@ -54,6 +55,7 @@ def test_trainable_segmentation_multichannel():
         sigma_min=0.5,
         sigma_max=2,
     )
-    out, clf = fit_segmenter(img, labels, clf, features_func)
+    features = features_func(img)
+    out, clf = fit_segmenter(labels, features, clf)
     assert np.all(out[:10] == 1)
     assert np.all(out[10:] == 2)
