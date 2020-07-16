@@ -42,7 +42,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from skimage import (
-    feature, filters, io, measure, morphology, segmentation, util
+    exposure, io
 )
 from skimage.data import image_fetcher
 
@@ -133,10 +133,9 @@ def slice_in_3D(ax, i):
                   [0, 1, 1]])
 
     Z = Z * data.shape
-
     r = [-1, 1]
-
     X, Y = np.meshgrid(r, r)
+
     # Plot vertices
     ax.scatter3D(Z[:, 0], Z[:, 1], Z[:, 2])
 
@@ -202,3 +201,85 @@ def explore_slices(data, cmap="gray"):
     return display_slice
 
 explore_slices(data);
+
+#####################################################################
+# Adjust exposure
+# ===============
+# Scikit-image's `exposure` module contains a number of functions for
+# adjusting image contrast. These functions operate on pixel values.
+# Generally, image dimensionality or pixel spacing needn't be considered.
+
+#####################################################################
+# `Gamma correction <https://en.wikipedia.org/wiki/Gamma_correction>`_
+# brightens or darkens an image. A power-law transform, where `gamma` denotes
+# the power-law exponent, is applied to each pixel in the image: `gamma < 1`
+# will brighten an image, while `gamma > 1` will darken an image.
+
+def plot_hist(ax, data, title=None):
+    # Helper function for plotting histograms
+    ax.hist(data.ravel(), bins=256)
+    ax.ticklabel_format(axis="y", style="scientific", scilimits=(0, 0))
+
+    if title:
+        ax.set_title(title)
+
+gamma_low_val = 0.5
+gamma_low = exposure.adjust_gamma(data, gamma=gamma_low_val)
+
+gamma_high_val = 1.5
+gamma_high = exposure.adjust_gamma(data, gamma=gamma_high_val)
+
+_, ((a, b, c), (d, e, f)) = plt.subplots(nrows=2, ncols=3, figsize=(12, 8))
+
+show_plane(a, data[32], title="Original")
+show_plane(b, gamma_low[32], title="Gamma = {}".format(gamma_low_val))
+show_plane(c, gamma_high[32], title="Gamma = {}".format(gamma_high_val))
+
+plot_hist(d, data)
+plot_hist(e, gamma_low)
+plot_hist(f, gamma_high)
+
+#####################################################################
+# `Histogram
+# equalization <https://en.wikipedia.org/wiki/Histogram_equalization>`_
+# improves contrast in an image by redistributing pixel intensities. The most
+# common pixel intensities get spread out, letting areas of lower local
+# contrast gain a higher contrast. This may enhance background noise though.
+
+equalized_data = exposure.equalize_hist(data)
+
+explore_slices(equalized_data);
+
+#####################################################################
+# Let us plot the image histogram before and after histogram equalization.
+# Below, we plot the respective cumulative distribution functions (CDF).
+
+_, ((a, b), (c, d)) = plt.subplots(nrows=2, ncols=2, figsize=(16, 8))
+
+plot_hist(a, data, title="Original histogram")
+plot_hist(b, equalized_data, title="Equalized histogram")
+
+cdf, bins = exposure.cumulative_distribution(data.ravel())
+c.plot(bins, cdf, "r")
+c.set_title("Original CDF")
+
+cdf, bins = exposure.cumulative_distribution(equalized_data.ravel())
+d.plot(bins, cdf, "r")
+d.set_title("Histogram equalization CDF")
+
+#####################################################################
+# Most experimental images are affected by salt and pepper noise. A few bright
+# artifacts can decrease the relative intensity of the pixels of interest. A
+# simple way to improve contrast is to clip the pixel values on the lowest and
+# highest extremes. Clipping the darkest and brightest 0.5% of pixels will
+# increase the overall contrast of the image.
+
+vmin, vmax = np.percentile(data, q=(0.5, 99.5))
+
+clipped_data = exposure.rescale_intensity(
+    data,
+    in_range=(vmin, vmax),
+    out_range=np.float32
+)
+
+explore_slices(clipped_data);
