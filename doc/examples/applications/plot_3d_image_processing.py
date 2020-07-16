@@ -1,6 +1,6 @@
 """
 ============================
-Analyze 3D images (of cells)
+Explore 3D images (of cells)
 ============================
 
 This tutorial is an introduction to three-dimensional image processing. Images
@@ -8,7 +8,18 @@ are represented as `numpy` arrays. A single-channel, or grayscale, image is a
 2D matrix of pixel intensities of shape `(row, column)`. We can construct a 3D
 volume as a series of 2D planes, giving 3D images the shape
 `(plane, row, column)`. A multichannel, or RGB(A), image has an additional
-channel dimension in the final position containing color information.
+`channel` dimension in the final position containing color information.
+
+These conventions are summarized in the table below:
+
+=============== ===============================
+Image type      Coordinates
+=============== ===============================
+2D grayscale    `(row, column)`
+2D multichannel `(row, column, channel)`
+3D grayscale    `(plane, row, column)`
+3D multichannel `(plane, row, column, channel)`
+=============== ===============================
 
 Some 3D images are constructed with equal resolution in each dimension (e.g.,
 computer-generated rendering of a sphere). Most experimental data are captured
