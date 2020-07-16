@@ -93,6 +93,7 @@ def show_plane(ax, plane, cmap="gray", title=None):
     if title:
         ax.set_title(title)
 
+
 _, (a, b, c) = plt.subplots(ncols=3, figsize=(15, 5))
 
 show_plane(a, data[32], title="Plane = 32")
@@ -115,6 +116,7 @@ def display(im3d, cmap="gray", step=2):
         ax.imshow(image, cmap=cmap, vmin=vmin, vmax=vmax)
         ax.set_xticks([])
         ax.set_yticks([])
+
 
 display(data)
 
@@ -204,6 +206,7 @@ def explore_slices(data, cmap="gray"):
 
     return display_slice
 
+
 explore_slices(data);
 
 #####################################################################
@@ -227,6 +230,7 @@ def plot_hist(ax, data, title=None):
 
     if title:
         ax.set_title(title)
+
 
 gamma_low_val = 0.5
 gamma_low = exposure.adjust_gamma(data, gamma=gamma_low_val)
