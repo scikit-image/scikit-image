@@ -207,7 +207,7 @@ class TrainableSegmenter(object):
         return predict_segmenter(features, self.clf)
 
 
-def fit_segmenter(labels, features, clf, downsample=10):
+def fit_segmenter(labels, features, clf):
     """
     Segmentation using labeled parts of the image and a classifier.
 
@@ -223,12 +223,7 @@ def fit_segmenter(labels, features, clf, downsample=10):
         classifier object, exposing a ``fit`` and a ``predict`` method as in
         scikit-learn's API, for example an instance of
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier.
-    downsample : int, optional
-        downsample the number of training points. Use downsample > 1 if you
-        built the training set by brushing through large areas but not all
-        points are needed to train efficiently the classifier. The training
-        time increases with the number of training points.
-
+    
     Returns
     -------
     output : ndarray
