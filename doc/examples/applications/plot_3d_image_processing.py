@@ -85,6 +85,7 @@ except TypeError as e:
 # We can thus use it to visualize 2D planes. By fixing one axis, we can
 # observe three different views of the image.
 
+
 def show_plane(ax, plane, cmap="gray", title=None):
     ax.imshow(plane, cmap=cmap)
     ax.axis("off")
@@ -103,6 +104,7 @@ show_plane(c, data[:, :, 128], title="Column = 128")
 # two-dimensional planes. Let us write a helper function, `display`, to
 # display 30 planes of our data. By default, every other plane is displayed.
 
+
 def display(im3d, cmap="gray", step=2):
     _, axes = plt.subplots(nrows=5, ncols=6, figsize=(16, 14))
 
@@ -120,6 +122,7 @@ display(data)
 # Alternatively, we can explore these planes (slices) interactively using
 # Jupyter widgets. Let the user select which slice to display and show the
 # position of this slice in the 3D dataset.
+
 
 def slice_in_3D(ax, i):
     # From https://stackoverflow.com/questions/44881885/python-draw-3d-cube
@@ -180,8 +183,9 @@ def slice_in_3D(ax, i):
 
     # Autoscale plot axes
     scaling = np.array([getattr(ax,
-        "get_{}lim".format(dim))() for dim in "xyz"])
+                                "get_{}lim".format(dim))() for dim in "xyz"])
     ax.auto_scale_xyz(* [[np.min(scaling), np.max(scaling)]] * 3)
+
 
 def explore_slices(data, cmap="gray"):
     from ipywidgets import interact
@@ -214,6 +218,7 @@ explore_slices(data);
 # brightens or darkens an image. A power-law transform, where `gamma` denotes
 # the power-law exponent, is applied to each pixel in the image: `gamma < 1`
 # will brighten an image, while `gamma > 1` will darken an image.
+
 
 def plot_hist(ax, data, title=None):
     # Helper function for plotting histograms
