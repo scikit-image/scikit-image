@@ -90,8 +90,7 @@ plt.show()
 
 image = data.coins()
 
-filtered_image, background = rolling_ball(image, radius=30,
-                                          white_background=True)
+filtered_image, background = rolling_ball(image, radius=50)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
