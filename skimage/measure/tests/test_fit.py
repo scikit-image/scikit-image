@@ -392,5 +392,5 @@ def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
     model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
                             residual_threshold=0, random_state=1523427)
-    assert_equal(inliers, None)
-    assert_equal(model, None)
+    assert inliers is None
+    assert model is None
