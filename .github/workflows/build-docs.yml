@@ -28,7 +28,9 @@ jobs:
           python setup.py install
       - name: Push docs
         run: |
+          echo starting
           eval "$(ssh-agent -s)"
+          echo after sshagent
           ssh-add - <<< "${DEPLOY_KEY}"
           git config --global user.email "travis@travis-ci.com"
           git config --global user.name "Travis Bot"
