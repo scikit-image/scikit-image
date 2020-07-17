@@ -130,6 +130,7 @@ class Test__transform_image:
         subject = np.arange(3*4).reshape(3,4)
         subject_resolution = 1
         output_resolution = 1
+        output_shape=None
         position_field_resolution = subject_resolution
         position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
 
@@ -137,6 +138,7 @@ class Test__transform_image:
             subject=subject,
             subject_resolution=subject_resolution,
             output_resolution=output_resolution,
+            output_shape=output_shape,
             position_field=position_field,
             position_field_resolution=position_field_resolution,
         )
@@ -157,6 +159,7 @@ class Test__transform_image:
         ])
         subject_resolution = 1
         output_resolution = 2
+        output_shape = None
         position_field_resolution = subject_resolution
         position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution)
 
@@ -164,6 +167,7 @@ class Test__transform_image:
             subject=subject,
             subject_resolution=subject_resolution,
             output_resolution=output_resolution,
+            output_shape=output_shape,
             position_field=position_field,
             position_field_resolution=position_field_resolution,
         )
@@ -192,6 +196,7 @@ class Test__transform_image:
         ])
         subject_resolution = 1
         output_resolution = 1
+        output_shape = None
         position_field_resolution = subject_resolution
         position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution) + [0, -1] # Shift to the left by 1.
 
@@ -199,6 +204,7 @@ class Test__transform_image:
             subject=subject,
             subject_resolution=subject_resolution,
             output_resolution=output_resolution,
+            output_shape=output_shape,
             position_field=position_field,
             position_field_resolution=position_field_resolution,
         )
@@ -227,6 +233,7 @@ class Test__transform_image:
         ])
         subject_resolution = 1
         output_resolution = 1
+        output_shape = None
         position_field_resolution = subject_resolution
         position_field = _lddmm_utilities._compute_coords(subject.shape, position_field_resolution) + [0, -1] # Shift to the left by 1.
 
@@ -234,6 +241,7 @@ class Test__transform_image:
             subject=subject,
             subject_resolution=subject_resolution,
             output_resolution=output_resolution,
+            output_shape=output_shape,
             position_field=position_field,
             position_field_resolution=position_field_resolution,
         )
@@ -259,6 +267,7 @@ class Test__transform_image:
         ])
         subject_resolution = 1
         output_resolution = 1
+        output_shape = None
         position_field_resolution = subject_resolution
         # Indicates a 90 degree rotation to the right.
         affine = np.array([
@@ -273,6 +282,7 @@ class Test__transform_image:
             subject=subject,
             subject_resolution=subject_resolution,
             output_resolution=output_resolution,
+            output_shape=output_shape,
             position_field=position_field,
             position_field_resolution=position_field_resolution,
         )
@@ -302,6 +312,7 @@ class Test_lddmm_transform_image:
         ])
         subject_resolution = 1
         output_resolution = None
+        output_shape = None
         template_shape = (3,4)
         template_resolution = 1
         target_shape = (2,5)
@@ -315,6 +326,7 @@ class Test_lddmm_transform_image:
             subject,
             subject_resolution,
             output_resolution,
+            output_shape,
             position_field=affine_phi if deform_to == 'template' else phi_inv_affine_inv,
             position_field_resolution=template_resolution if deform_to == 'template' else target_resolution,
             extrapolation_fill_value=extrapolation_fill_value,
@@ -435,6 +447,7 @@ class Test_lddmm_register:
         lddmm_register_kwargs = dict(
             template=template,
             target=target,
+            num_affine_only_iterations=0,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
