@@ -3,7 +3,7 @@
 Ridge Directed Ring Detection
 =============================
 
-Robust and highly performant ring detection algorithm for 3d particle tracking
+Robust and highly performant ring detection algorithm for 3D particle tracking
 using 2d microscope imaging.
 
 Here's a quick description of the parameters. The explanations refer to the
