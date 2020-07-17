@@ -24,9 +24,8 @@ umbra."
 To implement this algorithm in skimage we can use the following:
 """
 
-from skimage.morphology import ball, erosion, dilation
-from skimage import morphology
 import numpy as np
+from skimage import morphology
 
 
 def rolling_ball(image, radius=30, white_background=False):
