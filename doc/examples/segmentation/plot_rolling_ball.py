@@ -25,6 +25,7 @@ To implement this algorithm in skimage we can use the following:
 """
 
 from skimage.morphology import ball, erosion, dilation
+from skimage import morphology
 import numpy as np
 
 
@@ -42,12 +43,12 @@ def rolling_ball(image, radius=30, white_background=False):
     # here: implemented as a sequence of small balls (B1, ..., Bk)
     # because the current implementation of a closure with a large ball
     # is slow and consumes a lot of memory
-    selem = ball(1)
+    selem = morphology.ball(1)
     for idx in range(radius):
-        background = erosion(background, selem)
+        background = morphology.erosion(background, selem)
 
     for idx in range(radius):
-        background = dilation(background, selem)
+        background = morphology.dilation(background, selem)
 
     # flatten the tensor
     background = np.argmax(background == False, axis=-1)
@@ -64,7 +65,7 @@ def rolling_ball(image, radius=30, white_background=False):
 ######################################################################
 # And then test it using an image with white background
 
-import skimage.data as data
+from skimage import data
 import matplotlib.pyplot as plt
 
 
@@ -110,18 +111,18 @@ plt.show()
 # If runtime is a concern, we can implement an efficient approximation
 # using a tophat filter and a disk element
 
-from skimage.morphology import disk, opening, black_tophat, white_tophat
+from skimage import morphology
 
 
 def rolling_ball(image, radius=50, white_background=False):
-    selem = disk(radius)
+    selem = morphology.disk(radius)
 
-    background = opening(image, selem)
+    background = morphology.opening(image, selem)
 
     if white_background:
-        filtered_image = black_tophat(image, selem)
+        filtered_image = morphology.black_tophat(image, selem)
     else:
-        filtered_image = white_tophat(image, selem)
+        filtered_image = morphology.white_tophat(image, selem)
 
     return filtered_image, background
 
@@ -129,7 +130,7 @@ def rolling_ball(image, radius=50, white_background=False):
 # Which produces almost identical results to the original algorithm
 # albeit being much faster.
 
-import skimage.data as data
+from skimage import data
 import matplotlib.pyplot as plt
 
 
