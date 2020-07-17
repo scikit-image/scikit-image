@@ -15,6 +15,8 @@ https://doi.org/10.1023/B:VISI.0000043755.93987.aa
 
 import warnings
 import numpy as np
+from collections import namedtuple
+
 from scipy.interpolate import interpn
 from scipy.linalg import inv, solve, det, svd
 from scipy.sparse.linalg import cg, LinearOperator
@@ -96,6 +98,8 @@ class _Lddmm:
         # Diagnostic outputs.
         calibrate=None,
         track_progress_every_n=None,
+        # Output specifiers.
+        map_coordinates_ify=None,
     ):
 
         # Constant inputs.
@@ -150,6 +154,9 @@ class _Lddmm:
         # Diagnostic outputs.
         self.calibrate = bool(calibrate) if calibrate is not None else False
         self.track_progress_every_n = int(track_progress_every_n) if track_progress_every_n is not None else 0
+
+        # Output specifiers.
+        self.map_coordinates_ify = bool(map_coordinates_ify) if map_coordinates_ify is not None else True
 
         # Constructions.
 
@@ -241,6 +248,7 @@ class _Lddmm:
             raise RuntimeError(f"Known issue: Images with a 1 in their shape are not supported by scipy.interpolate.interpn.\n"
                                f"self.template.shape: {self.template.shape}, self.target.shape: {self.target.shape}.\n")
 
+
     def register(self):
         """
         Register the template to the target using the current state of the attributes.
@@ -293,7 +301,28 @@ class _Lddmm:
         # Optionally display useful plots for calibrating the registration parameters.
         if self.calibrate:
             self._generate_calibration_plots()
+
+        # Unless requested in physical-space, convert centered, physical-space position fields to voxel-space position fields.
+        if self.map_coordinates_ify:
+            # Subtract the vector at spatial indices 0, divide by the resolution of the coordinates, and move the coordinate axis to the front.
+            self.phi = np.moveaxis((self.phi - self.phi.reshape(-1, self.template.ndim)[0]) / self.target_resolution, -1, 0)
+            self.phi_inv = np.moveaxis((self.phi_inv - self.phi_inv.reshape(-1, self.template.ndim)[0]) / self.template_resolution, -1, 0)
+            self.affine_phi = np.moveaxis((self.affine_phi - self.affine_phi.reshape(-1, self.template.ndim)[0]) / self.target_resolution, -1, 0)
+            self.phi_inv_affine_inv = np.moveaxis((self.phi_inv_affine_inv - self.phi_inv_affine_inv.reshape(-1, self.template.ndim)[0]) / self.template_resolution, -1, 0)
         
+        # Define namedtuple objects for lddmm output.
+        Lddmm = namedtuple('Lddmm', ('target_to_template_transform', 'template_to_target_transform', 'transform_components', 'diagnostics'))
+        Transform_components = namedtuple('Transform_components', ('template_to_target_affine', 'target_to_template_deformation', 'template_to_target_deformation'))
+        Diagnostics = namedtuple('Diagnostics', ('matching_energies, regularization_energies, total_energies'))
+
+        # Construct lddmm output.
+        transform_components = Transform_components(self.affine, self.phi, self.phi_inv)
+        diagnostics = Diagnostics(self.matching_energies, self.regularization_energies, self.total_energies)
+        lddmm = Lddmm(self.affine_phi, self.phi_inv_affine_inv, transform_components, diagnostics)
+
+        # Return constructed lddmm output.
+        return lddmm
+
         # Note: the user-level lddmm_transform_image function relies on many of these specific outputs with these specific keys to function. 
         # ----> Check the lddmm_transform_image function signature before adjusting these outputs.
         return dict(
@@ -875,11 +904,12 @@ class _Lddmm:
             maximum_velocities
         """
 
-
         for timestep in range(self.num_timesteps):
             velocity_fields_update = velocity_fields_gradients[timestep] * self.deformative_stepsize
             # Apply a sigmoid squashing function to the velocity_fields_update to ensure they yield an update of less than self.maximum_velocity_fields_update voxels while remaining smooth.
             velocity_fields_update_norm = np.sqrt(np.sum(velocity_fields_update**2, axis=-1))
+            # When the norm is 0 the update is zero so we can change the norm to 1 and avoid division by 0.
+            velocity_fields_update_norm[velocity_fields_update_norm == 0] = 1
             velocity_fields_update = (
                 velocity_fields_update / velocity_fields_update_norm[..., None] * 
                 np.arctan(velocity_fields_update_norm[..., None] * np.pi / 2 / self.maximum_velocity_fields_update) * 
@@ -1022,9 +1052,11 @@ def lddmm_register(
     # Diagnostic outputs.
     calibrate=None,
     track_progress_every_n=None,
+    # Output specifiers.
+    map_coordinates_ify=None,
 ):
     """
-    Compute a registration between template and target, to be applied with lddmm_transform_image.
+    Compute a registration between grayscale images template and target, to be applied with scipy.ndimage.map_coordinates.
     
     Parameters
     ----------
@@ -1059,7 +1091,9 @@ def lddmm_register(
         fixed_affine_scale: float, optional
             The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. By default None.
         sigma_regularization: float, optional
-            A scalar indicating the freedom to deform. Overrides 0 input. By default np.inf.
+            A scalar indicating the freedom to deform. Small values put harsher constraints on the smoothness of a deformation. 
+            With sufficiently large values, the registration will overfit any noise in the target, leading to unrealistic deformations. However, this may still be appropriate with a small num_iterations. 
+            Overrides 0 input. By default np.inf.
         velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical units. Affects the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
         preconditioner_velocity_smooth_length: float, optional
@@ -1106,6 +1140,9 @@ def lddmm_register(
             A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. By default False.
         track_progress_every_n: int, optional
             If positive, a progress update will be printed every track_progress_every_n iterations of registration. By default 0.
+        map_coordinates_ify: bool, optional
+            If True, the position fields encoding the transformation will be converted to units of voxels in the expected format of scipy.ndimage.map_coordinates. 
+            If False, they are left centered and in physical units with the coordinates exising in the last dimension. By default True.
     
     Example:
         >>> import numpy as np
@@ -1138,8 +1175,8 @@ def lddmm_register(
 
     # Validate images and resolutions.
     # Images.
-    template = _validate_ndarray(template)
-    target = _validate_ndarray(target, required_ndim=template.ndim)
+    template = _validate_ndarray(template, dtype=float)
+    target = _validate_ndarray(target, dtype=float, required_ndim=template.ndim)
     # Resolution.
     template_resolution = _validate_scalar_to_multi(template_resolution if template_resolution is not None else 1, template.ndim, float)
     target_resolution = _validate_scalar_to_multi(target_resolution if target_resolution is not None else 1, target.ndim, float)
@@ -1209,6 +1246,8 @@ def lddmm_register(
         # Diagnostic outputs.
         calibrate=calibrate,
         track_progress_every_n=track_progress_every_n,
+        # Output specifiers.
+        map_coordinates_ify=map_coordinates_ify,
     )
     for multiscale_kwarg_name, multiscale_kwarg_value in multiscale_lddmm_kwargs.items():
         multiscale_lddmm_kwargs[multiscale_kwarg_name] = _validate_scalar_to_multi(multiscale_kwarg_value, size=len(multiscales), dtype=None)
@@ -1439,7 +1478,7 @@ def _transform_image(
             extrapolation_fill_value=None, 
             image_is_coords=True, 
         )
-    else:
+    if output_shape is not None:
         # resize position_field to match output_shape.
         position_field = resize(position_field, output_shape)
 
