@@ -96,7 +96,6 @@ class _Lddmm:
         initial_contrast_coefficients=None,
         initial_velocity_fields=None,
         # Diagnostic outputs.
-        calibrate=None,
         track_progress_every_n=None,
         # Output specifiers.
         map_coordinates_ify=None,
@@ -152,7 +151,6 @@ class _Lddmm:
             raise ValueError(f"artifact_prior and background_prior must sum to less than 1.")
 
         # Diagnostic outputs.
-        self.calibrate = bool(calibrate) if calibrate is not None else False
         self.track_progress_every_n = int(track_progress_every_n) if track_progress_every_n is not None else 0
 
         # Output specifiers.
@@ -238,10 +236,8 @@ class _Lddmm:
         self.matching_energies = []
         self.regularization_energies = []
         self.total_energies = []
-        # For optional calibration plots.
-        if self.calibrate:
-            self.affines = []
-            self.maximum_velocities = [0] * self.num_affine_only_iterations
+        self.affines = []
+        self.maximum_velocities = [0] * self.num_affine_only_iterations
 
         # Preempt known error.
         if np.any(np.array(self.template.shape) == 1) or np.any(np.array(self.target.shape) == 1):
@@ -297,10 +293,6 @@ class _Lddmm:
 
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
-
-        # Optionally display useful plots for calibrating the registration parameters.
-        if self.calibrate:
-            self._generate_calibration_plots()
 
         # Unless requested in physical-space, convert centered, physical-space position fields to voxel-space position fields.
         if self.map_coordinates_ify:
@@ -735,7 +727,7 @@ class _Lddmm:
                 "This may be because the image was constant along one or more dimensions. "
                 "Consider removing any constant dimensions. "
                 "Otherwise you may try using a smaller value for affine_stepsize, a smaller value for deformative_stepsize, or a larger value for sigma_regularization. "
-                "The calibrate=True option may be of use in determining optimal parameter values."
+                "The values output in Diagnostics may be of use in determining optimal parameter values."
             ) from exception
         # Append a row of zeros at the end of the 0th dimension.
         zeros = np.zeros((1, self.target.ndim + 1))
@@ -750,13 +742,12 @@ class _Lddmm:
 
         If iteration < self.num_rigid_affine_iterations, project self.affine to a rigid affine.
 
-        If self.
+        If self.fixed_affine_scale
          is provided, it is imposed on self.affine.
 
-        if self.calibrate, appends the current self.affine to self.affines.
+        Appends the current self.affine to self.affines.
 
         Accesses attributes:
-            calibrate
             fixed_affine_scale
             affine_stepsize
             affine
@@ -782,9 +773,8 @@ class _Lddmm:
             U, _, Vh = svd(self.affine[:-1, :-1])
             self.affine[:-1, :-1] = U @ Vh
 
-        # Save affine for calibration plotting.
-        if self.calibrate:
-            self.affines.append(self.affine)
+        # Save affine for diagnostics.
+        self.affines.append(self.affine)
 
 
     def _compute_velocity_fields_gradients(self):
@@ -890,10 +880,9 @@ class _Lddmm:
         """
         Update self.velocity_fields based on velocity_fields_gradient.
 
-        if self.calibrate, calculates and appends the maximum velocity to self.maximum_velocities.
+        Calculates and appends the maximum velocity to self.maximum_velocities.
 
         Accesses attributes:
-            calibrate
             deformative_stepsize
             num_timesteps
             velocity_fields
@@ -918,10 +907,9 @@ class _Lddmm:
 
             self.velocity_fields[...,timestep,:] -= velocity_fields_update
             
-        # Save maximum velocity for calibration plotting.
-        if self.calibrate:
-            maximum_velocity = np.sqrt(np.sum(self.velocity_fields**2, axis=-1)).max()
-            self.maximum_velocities.append(maximum_velocity)
+        # Compute and save maximum velocity for diagnostics.
+        maximum_velocity = np.sqrt(np.sum(self.velocity_fields**2, axis=-1)).max()
+        self.maximum_velocities.append(maximum_velocity)
 
     
     def _compute_affine_phi(self):
@@ -963,37 +951,6 @@ class _Lddmm:
             # Apply affine by multiplication.
             # This transforms error in the target space back to time t.
             self.affine_phi = _multiply_coords_by_affine(self.affine, self.phi)
-    
-
-    # TODO: move into example file.
-    def _generate_calibration_plots(self):
-        """
-        Plot the energies, maximum velocities, translation components, and linear components as functions of the number of iterations.
-        """
-
-        fig, axes = plt.subplots(2, 2, figsize=(6, 6))
-
-        # Plot matching, regularization, and total energies.
-        ax = axes[0, 0]
-        ax.plot(list(zip(self.matching_energies, self.regularization_energies, self.total_energies)))
-        ax.set_title('Energies')
-
-        # Plot the maximum velocity.
-        ax = axes[0, 1]
-        ax.plot(self.maximum_velocities)
-        ax.set_title('Maximum\nvelocity')
-
-        # Plot affine[:, :-1], the translation components.
-        translations = [affine[:-1, -1] for affine in self.affines]
-        ax = axes[1, 0]
-        ax.plot(translations)
-        ax.set_title('Translation\ncomponents')
-
-        # Plot self.affine[:-1, :-1], the linear transformation components.
-        linear_components = [affine[:-1, :-1].ravel() for affine in self.affines]
-        ax = axes[1, 1]
-        ax.plot(linear_components)
-        ax.set_title('Linear\ncomponents')
 
     # End _Lddmm.
 
@@ -1050,7 +1007,6 @@ def lddmm_register(
     initial_contrast_coefficients=None,
     initial_velocity_fields=None,
     # Diagnostic outputs.
-    calibrate=None,
     track_progress_every_n=None,
     # Output specifiers.
     map_coordinates_ify=None,
@@ -1136,8 +1092,6 @@ def lddmm_register(
             and all others are set to zero. By default None.
         initial_velocity_fields: np.ndarray, optional
             The velocity fields that the registration will begin with. By default all zeros.
-        calibrate: bool, optional
-            A boolean flag indicating whether to accumulate additional intermediate values and display informative plots for calibration purposes. By default False.
         track_progress_every_n: int, optional
             If positive, a progress update will be printed every track_progress_every_n iterations of registration. By default 0.
         map_coordinates_ify: bool, optional
@@ -1244,7 +1198,6 @@ def lddmm_register(
         # initial_contrast_coefficients=initial_contrast_coefficients,
         # initial_velocity_fields=initial_velocity_fields,
         # Diagnostic outputs.
-        calibrate=calibrate,
         track_progress_every_n=track_progress_every_n,
         # Output specifiers.
         map_coordinates_ify=map_coordinates_ify,
