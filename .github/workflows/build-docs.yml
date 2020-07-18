@@ -19,10 +19,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements/build.txt
-          python -m pip install -r requirements/default.txt
-          python -m pip install -r requirements/optional.txt
-          python -m pip install -r requirements/docs.txt
+          # python -m pip install -r requirements/build.txt
+          # python -m pip install -r requirements/default.txt
+          # python -m pip install -r requirements/optional.txt
+          # python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
           python setup.py install
@@ -31,6 +31,7 @@ jobs:
           echo starting
           eval "$(ssh-agent -s)"
           echo after sshagent
+          echo "length of key: ${#DEPLOY_KEY}" 
           ssh-add - <<< "${DEPLOY_KEY}"
           git config --global user.email "travis@travis-ci.com"
           git config --global user.name "Travis Bot"
