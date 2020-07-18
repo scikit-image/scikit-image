@@ -25,7 +25,8 @@ jobs:
           # python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
-          python setup.py install
+          echo hello  
+          # python setup.py install
       - name: Push docs
         run: |
           echo starting
