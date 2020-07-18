@@ -19,14 +19,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # python -m pip install -r requirements/build.txt
-          # python -m pip install -r requirements/default.txt
-          # python -m pip install -r requirements/optional.txt
-          # python -m pip install -r requirements/docs.txt
+          python -m pip install -r requirements/build.txt
+          python -m pip install -r requirements/default.txt
+          python -m pip install -r requirements/optional.txt
+          python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
           echo hello  
-          # python setup.py install
+          python setup.py install
       - name: Push docs
         run: |
           echo starting
