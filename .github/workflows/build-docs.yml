@@ -42,7 +42,7 @@ jobs:
           git push --force --quiet "${GH_REF}" gh-pages
         env:
           GH_REF: git@github.com:scikit-image/docs.git
-          DEPLOY_KEY: ${{ secrets.GH_TOKEN }}
+          DEPLOY_KEY: ${{ secrets.DOC_DEPLOY_KEY_PRIVATE }}
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
       - name: Store docs as artifact
         uses: actions/upload-artifact@v1
