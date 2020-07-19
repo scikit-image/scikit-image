@@ -876,6 +876,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
     else:
         best_model = None
         best_inliers = None
-        warn("User warning: no inliers found. Model not fitted")
+        warn("No inliers found. Model not fitted")
 
     return best_model, best_inliers
