@@ -10,7 +10,7 @@ Sternberg (1983) in the paper
 [Biomedical Image Processing](https://ieeexplore.ieee.org/document/1654163).
 
 The idea of the algorithm is quite intuitive. We think of the image as a
-surface that has unit sized blockes stacked on top of each other for each
+surface that has unit-sized blocks stacked on top of each other for each
 pixel. The number of blocks is determined by the intensity of a pixel. To get
 the intensity of the background at a desired position, we imagine submerging a
 ball into the blocks at the desired pixel position. Once it is completely
