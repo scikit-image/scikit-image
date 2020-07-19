@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - dev/github-action-doc-build
+      - master
 
 name: Build docs
 
@@ -25,14 +25,10 @@ jobs:
           python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
-          echo hello  
           python setup.py install
       - name: Push docs
         run: |
-          echo starting
           eval "$(ssh-agent -s)"
-          echo after sshagent
-          echo "length of key: ${#DEPLOY_KEY}" 
           ssh-add - <<< "${DEPLOY_KEY}"
           git config --global user.email "travis@travis-ci.com"
           git config --global user.name "Travis Bot"
