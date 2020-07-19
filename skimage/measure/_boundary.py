@@ -41,6 +41,7 @@ def trace_boundary(coords):
     ----------
     coords : obj
         Obtained with skimage.measure.regionprops()
+        
     Returns
     -------
     boundary : 2D array
