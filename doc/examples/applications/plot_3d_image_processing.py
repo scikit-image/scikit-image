@@ -182,6 +182,7 @@ def slice_in_3D(ax, i):
     ax.set_xlabel("plane")
     ax.set_ylabel("row")
     ax.set_zlabel("col")
+ax.set_xlim(0, 100)
 
     # Autoscale plot axes
     scaling = np.array([getattr(ax,
