@@ -19,7 +19,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from skimage import exposure
-import imageio
+import imageio as io
 
 
 #############
@@ -28,7 +28,7 @@ import imageio
 
 from skimage.data import image_fetcher
 path = image_fetcher.fetch('data/cells.tif')
-img_orig = io.imread(path) 
+im_orig = io.volread(path)
 im_orig = im_orig.transpose()
 
 # apply some rescaling
