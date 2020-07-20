@@ -187,38 +187,41 @@ for iax, ax in enumerate(axs[:]):
     XYZlim = np.asarray([min(xyzlim[0]), max(xyzlim[1])])
     ax.set_xlim3d(XYZlim)
     ax.set_ylim3d(XYZlim)
-    ax.set_zlim3d(XYZlim * 3 / 4)
+    ax.set_zlim3d(XYZlim * 0.55)
+
+    try:
+        ax.set_aspect('equal')
+    except NotImplementedError:
+        pass
 
     ax.set_xlabel('x', labelpad=-25)
     ax.set_ylabel('y', labelpad=-25)
+    ax.text2D(0.63, 0.2, "z", transform=ax.transAxes)
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_zticks([im_orig.shape[2] * 2 / 3.])
-    ax.set_zticklabels('z')
-    ax.tick_params(axis='z', which='major', pad=-12)
-    ax.w_zaxis._axinfo['tick']['linewidth'] = 0
+    ax.set_zticks([])
     ax.grid(False)
     ax.elev = 30
 
 
-plt.subplots_adjust(left=0.,
+plt.subplots_adjust(left=0.01,
                     bottom=-.05,
                     right=1.03,
-                    top=1.19,
+                    top=1.1,
                     wspace=-0.2,
                     hspace=-0.45)
 
 # highlight AHE
 rect_ax = fig.add_axes([0, 0, 1, 1], facecolor='none')
 rect_ax.set_axis_off()
-rect = patches.Rectangle((0.69, 0.01), 0.305, 0.98,
+rect = patches.Rectangle((0.68, 0.01), 0.315, 0.98,
                          edgecolor='grey', facecolor='none',
                          linewidth=2, linestyle='--')
 rect_ax.add_patch(rect)
 
 # add text
-rect_ax.text(0.17, 0.35, '$I_{degr}(x,y,z) = e^{-x}I_{orig}(x,y,z)$',
-             fontsize=9, rotation=-19,
+rect_ax.text(0.18, 0.37, '$I_{degr}(x,y,z) = e^{-x}I_{orig}(x,y,z)$',
+             fontsize=9, rotation=-15,
              color=get_rgba([0.8], cmap='Blues', alpha=1.)[0])
 
 fc = {'size': 14}
@@ -235,7 +238,7 @@ rect_ax.text(0.58, 0.83, 'non-local', fontsize=12, color='crimson')
 rect_ax.text(0.89, 0.83, 'local kernel', fontsize=12, color='crimson')
 
 # add colorbar
-cbar_ax = fig.add_axes([0.08, 0.47, 0.008, 0.08])
+cbar_ax = fig.add_axes([0.1, 0.42, 0.008, 0.08])
 cbar_ax.imshow(np.arange(256).reshape(256, 1)[::-1],
                cmap=cmap, aspect="auto")
 cbar_ax.set_xticks([])
