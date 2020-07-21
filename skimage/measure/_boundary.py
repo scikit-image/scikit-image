@@ -37,10 +37,12 @@ def _moore_neighborhood(current, backtrack):  # y, x
 def trace_boundary(coords):
     """Coordinates of the region's boundary. The region must not have isolated
     points.
+    
     Parameters
     ----------
     coords : obj
         Obtained with skimage.measure.regionprops()
+        
     Returns
     -------
     boundary : 2D array
