@@ -29,4 +29,8 @@ def test_horse_example():
     regions = regionprops(horse)
     boundary = trace_boundary(regions[0].coords)
 
+    # Suggestion:
+    # Use erosion for testing
+    # https://github.com/scikit-image/scikit-image/pull/4165/files#diff-bfeb06dd4f95632ee7f7e3ae971d0065R370
+
     assert_array_equal(boundary, boundary_fixtures.HORSE_EXPECTED)
