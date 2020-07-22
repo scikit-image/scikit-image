@@ -22,7 +22,8 @@ Image type      Coordinates
 =============== ===============================
 
 Some 3D images are constructed with equal resolution in each dimension (e.g.,
-synchrotron tomography or computer-generated rendering of a sphere). Most experimental data are captured
+synchrotron tomography or computer-generated rendering of a sphere).
+But most experimental data are captured
 with a lower resolution in one of the three dimensions, e.g., photographing
 thin slices to approximate a 3D structure as a stack of 2D images.
 The distance between pixels in each dimension, called spacing, is encoded as a
@@ -94,11 +95,12 @@ def show_plane(ax, plane, cmap="gray", title=None):
         ax.set_title(title)
 
 
+(n_plane, n_row, n_col) = data.shape
 _, (a, b, c) = plt.subplots(ncols=3, figsize=(15, 5))
 
-show_plane(a, data[32], title="Plane = 32")
-show_plane(b, data[:, 128, :], title="Row = 128")
-show_plane(c, data[:, :, 128], title="Column = 128")
+show_plane(a, data[n_plane // 2], title="Plane = {}".format(n_plane // 2))
+show_plane(b, data[:, n_row // 2, :], title="Row = {}".format(n_row // 2))
+show_plane(c, data[:, :, n_col // 2], title="Column = {}".format(n_col // 2))
 
 #####################################################################
 # As hinted before, a three-dimensional image can be viewed as a series of
