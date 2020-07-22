@@ -379,6 +379,27 @@ To rebuild a full clean documentation, run:
     make clean
     make html
 
+Gallery
+~~~~~~~
+
+If you are contributing an example to the
+`gallery <https://scikit-image.org/docs/dev/auto_examples/>`_ (or editing an
+existing one), write in
+`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
+Indeed, the gallery is a
+`Sphinx-Gallery <https://sphinx-gallery.github.io/stable/index.html>`_ one.
+
+Refer to the above to build (all) the docs, and check how your edits render at
+``scikit-image/doc/build/html/auto_examples/`` (navigate to the file you have
+added or changed).
+
+When adding an example, visit also
+``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
+thumbnail renders on the gallery's homepage. To change the thumbnail image,
+please refer to this
+`section <https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
+of the Sphinx-Gallery docs.
+
 Requirements
 ~~~~~~~~~~~~
 
