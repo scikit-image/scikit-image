@@ -248,6 +248,7 @@ show_plane(c, gamma_high[32], title="Gamma = {}".format(gamma_high_val))
 plot_hist(d, data)
 plot_hist(e, gamma_low)
 plot_hist(f, gamma_high)
+# sphinx_gallery_thumbnail_number = 4
 
 #####################################################################
 # `Histogram
