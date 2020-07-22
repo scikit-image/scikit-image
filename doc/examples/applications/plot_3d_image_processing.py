@@ -22,7 +22,7 @@ Image type      Coordinates
 =============== ===============================
 
 Some 3D images are constructed with equal resolution in each dimension (e.g.,
-computer-generated rendering of a sphere). Most experimental data are captured
+synchrotron tomography or computer-generated rendering of a sphere). Most experimental data are captured
 with a lower resolution in one of the three dimensions, e.g., photographing
 thin slices to approximate a 3D structure as a stack of 2D images.
 The distance between pixels in each dimension, called spacing, is encoded as a
