@@ -20,11 +20,11 @@ puts it: "We can visualize a solid sphere that moves freely within the solid
 volume of the gel image umbra but is constrained by the upper surface of the
 umbra."
 
-To implement this algorithm in skimage we can use the following:
-
-..[1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
+.. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
 22-34. Available at: https://ieeexplore.ieee.org/document/1654163 [Accessed
 23 July. 2020].
+
+To implement this algorithm in skimage we can use the following:
 """
 
 import numpy as np
