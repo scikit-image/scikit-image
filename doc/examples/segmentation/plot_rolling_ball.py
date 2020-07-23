@@ -26,6 +26,8 @@ To implement this algorithm in skimage we can use the following:
 
 import numpy as np
 from skimage import morphology
+from skimage import data
+import matplotlib.pyplot as plt
 
 
 def rolling_ball(image, radius=30, white_background=False):
@@ -63,9 +65,6 @@ def rolling_ball(image, radius=30, white_background=False):
 
 ######################################################################
 # And then test it using an image with white background
-
-from skimage import data
-import matplotlib.pyplot as plt
 
 
 image = data.page()
@@ -109,8 +108,6 @@ plt.show()
 # If runtime is a concern, we can implement an efficient approximation
 # using a tophat filter and a disk element
 
-from skimage import morphology
-
 
 def rolling_ball(image, radius=50, white_background=False):
     selem = morphology.disk(radius)
@@ -127,9 +124,6 @@ def rolling_ball(image, radius=50, white_background=False):
 ######################################################################
 # Which produces almost identical results to the original algorithm
 # albeit being much faster.
-
-from skimage import data
-import matplotlib.pyplot as plt
 
 
 image = data.coins()
