@@ -9,13 +9,13 @@ used in biomedical image processing and was first proposed by Stanley R.
 Sternberg (1983) in the paper `Biomedical Image Processing`_.
 
 The idea of the algorithm is quite intuitive. We think of the image as a
-surface that has unit sized blockes stacked on top of each other for each
+surface that has unit-sized blocks stacked on top of each other for each
 pixel. The number of blocks is determined by the intensity of a pixel. To get
 the intensity of the background at a desired position, we imagine submerging a
 ball into the blocks at the desired pixel position. Once it is completely
 covered by the blocks, the height of the ball determines the intensity of the
 background at that position. We can then *roll* this ball around below the
-surface to get the the background values for the entire image. As Sternberg
+surface to get the background values for the entire image. As Sternberg
 puts it: "We can visualize a solid sphere that moves freely within the solid
 volume of the gel image umbra but is constrained by the upper surface of the
 umbra."
