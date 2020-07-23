@@ -1,7 +1,7 @@
 """
-=======================
+======================================================
 Background Subtraction using the Rolling Ball Method
-=======================
+======================================================
 
 The rolling ball filter is a segmentation method that aims to separate the
 background from a grayscale image in case of uneven exposure. It is frequently
