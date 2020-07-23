@@ -6,7 +6,7 @@ Background Subtraction using the Rolling Ball Method
 The rolling ball filter is a segmentation method that aims to separate the
 background from a grayscale image in case of uneven exposure. It is frequently
 used in biomedical image processing and was first proposed by Stanley R.
-Sternberg (1983) in the paper `Biomedical Image Processing`_.
+Sternberg (1983) in the paper Biomedical Image Processing [1]_.
 
 The idea of the algorithm is quite intuitive. We think of the image as a
 surface that has unit-sized blocks stacked on top of each other for each
@@ -22,7 +22,9 @@ umbra."
 
 To implement this algorithm in skimage we can use the following:
 
-_`Biomedical Image Processing`: https://ieeexplore.ieee.org/document/1654163
+..[1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
+22-34. Available at: https://ieeexplore.ieee.org/document/1654163 [Accessed
+23 July. 2020].
 """
 
 import numpy as np
