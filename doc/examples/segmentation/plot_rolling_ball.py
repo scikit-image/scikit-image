@@ -21,8 +21,7 @@ volume of the gel image umbra but is constrained by the upper surface of the
 umbra."
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
-22-34. Available at: https://ieeexplore.ieee.org/document/1654163 [Accessed
-23 July. 2020].
+22-34. :DOI:`10.1109/MC.1983.1654163`
 
 To implement this algorithm in skimage we can use the following:
 """
