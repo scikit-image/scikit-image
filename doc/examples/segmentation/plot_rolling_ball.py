@@ -41,8 +41,9 @@ def rolling_ball(image, radius=30, white_background=False):
 
     # tensor representation of the image
     # (stacked blocks as described in the paper)
-    background = (np.arange(255)[np.newaxis,
-                                 np.newaxis, :] < working_img[..., np.newaxis])
+    intensity = np.arange(np.iinfo(working_img.dtype).max)
+    background = (intensity[np.newaxis,
+                            np.newaxis, :] < working_img[..., np.newaxis])
 
     # roll the ball around
     # here: implemented as a sequence of small balls (B1, ..., Bk)
