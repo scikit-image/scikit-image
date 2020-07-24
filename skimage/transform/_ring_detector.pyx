@@ -42,6 +42,36 @@
 #  
 ################################################################################
 
+## EA NOTES
+# * EA20200724 : the opencv version shows better performace:
+#                * pre-processing takes x3 longer using hessian_matrix 
+#                  (skimage), and 
+#                * ring_detection takes about x1.2, showing higher 
+#                  sensitivity to choice of parameter (sigma and curv_thresh)
+# * EA20200724 : results seem more precise and less sensitive to choice of
+#                parameters when taking derivatives usind the
+#                filters.farid_v/h (or filters.scharr_v/h); however, these
+#                operators take x6  (x3) times longer to compute, w.r.t to 
+#                hessian_matrix, which uses np.gradient; this could probably
+#                be improved by programming them to allow the 2nd order
+#                derivatives directly.
+#
+
+## EA To consider 
+# * EA20200723 : store both principal curvatures and testing for  
+#                |Lpp|>|Lqq| for Lpp being the least principal curvature
+# * EA20200724 : allow the user to choose between np.gradient (skimage
+#                hessian_matrix), scharr, and farid operators; the latter 
+#                seem to offer more precise results, with less sensitivity to
+#                the choice of parameters. The former is faster.
+# * EA20200723 : add automated choice of curv_thresh (see notebook for HY)
+# * EA20200723 : verify results and efficiency are not significantly affected
+#                the transition from opencv to skimage (Hessian calculation)
+# * EA20200723 : explore the effect of separating the ridge detection function
+#                entirely; it may not affect the %%timeit results.
+
+## ancient TODOs
+
 # TODO: cast indices to unsigned int
 # TODO: add a test to verify rij <-> coords conversion works as expected
 # (assersion)
@@ -58,8 +88,8 @@ from cpython cimport bool
 import numpy as np
 cimport numpy as np
 
-import cv2
-from cv2 import fitEllipse
+#from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+from ..feature import hessian_matrix, hessian_matrix_eigvals
 
 from scipy import optimize
 
@@ -120,36 +150,36 @@ cdef inline INDX_t fround(DTYPE_t x):
     return <INDX_t>(x+.5) if x>=0. else <INDX_t>(x-.5)
 
 @cython.profile(False)
-cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lxx, 
-                                                DTYPE_t Lyy, 
-                                                DTYPE_t Lxy):
+cpdef inline DTYPE_t f_least_principal_curvature(DTYPE_t Lrr, 
+                                                DTYPE_t Lcc, 
+                                                DTYPE_t Lrc):
     '''
     compute the smallest eigen-value of the Hessian matrix
     
     Inputs:
-    Lxx,Lyy,Lxy are the Hessian matrix components 
+    Lrr,Lcc,Lrc are the Hessian matrix components 
     '''
     #cdef:
     #    DTYPE_t trH
     #    DTYPE_t discriminant
     #    DTYPE_t curvature
-    #trH = Lxx+Lyy
-    # numerically stabilising for the cases of extrimly small Lxy:
-    #discriminant = (Lxx-Lyy)**2 + 4*Lxy*Lxy
+    #trH = Lrr+Lcc
+    # numerically stabilising for the cases of extrimly small Lrc:
+    #discriminant = (Lrr-Lcc)**2 + 4*Lrc*Lrc
     #curvature = 0.5*(trH - sqrt( discriminant ))
     #return curvature
-    return 0.5*(Lxx + Lyy - sqrt((Lxx-Lyy)**2 + 4*Lxy*Lxy ))
+    return 0.5*(Lrr + Lcc - sqrt((Lrr-Lcc)**2 + 4*Lrc*Lrc ))
 
 
-cpdef least_principal_curvature(DTYPE_t [:,:] Lxx, DTYPE_t [:,:] Lyy,
-                                DTYPE_t [:,:] Lxy):
+cpdef least_principal_curvature(DTYPE_t [:,:] Lrr, DTYPE_t [:,:] Lcc,
+                                DTYPE_t [:,:] Lrc):
     '''
     compute the smallest eigen-value of the Hessian matrix
     
     Inputs:
-        Lxx,Lyy,Lxy are the Hessian matrix components 
+        Lrr,Lcc,Lrc are the Hessian matrix components 
     '''
-    assert Lxx is not None and Lyy is not None and Lxy is not None
+    assert Lrr is not None and Lcc is not None and Lrc is not None
 
     cdef:
         INDX_t Nrows 
@@ -157,39 +187,39 @@ cpdef least_principal_curvature(DTYPE_t [:,:] Lxx, DTYPE_t [:,:] Lyy,
         DTYPE_t [:,:] curv 
         INDX_t i,j
     
-    Nrows = Lxx.shape[0]
-    Ncols = Lxx.shape[1]
+    Nrows = Lrr.shape[0]
+    Ncols = Lrr.shape[1]
     curv = np.empty((Nrows,Ncols),dtype=DTYPE)
     
     for i in xrange(Nrows):
         for j in xrange(Ncols):
-            curv[i,j] = f_least_principal_curvature(Lxx[i,j], 
-                                                    Lyy[i,j],
-                                                    Lxy[i,j])
+            curv[i,j] = f_least_principal_curvature(Lrr[i,j], 
+                                                    Lcc[i,j],
+                                                    Lrc[i,j])
     return curv
 
 
 #@cython.profile(False)
 @cython.cdivision(True)
-cpdef inline least_principal_direction(DTYPE_t Lxx, DTYPE_t Lyy, DTYPE_t Lxy):
+cpdef inline least_principal_direction(DTYPE_t Lrr, DTYPE_t Lcc, DTYPE_t Lrc):
     '''
     compute the [cos , sin, tan] of the angle formed 
     by the eigen-vector of the Hessian Matrix, 
     corresponding to the smaller eigen-value
         
     Inputs:
-        Lxx,Lyy,Lxy are the Hessian matrix components 
+        Lrr,Lcc,Lrc are the Hessian matrix components 
     
     Note: input are expected to be single numbers (not arrays)
     '''
     cdef DTYPE_t D, tangent, denominator
-    if Lxy==0: 
-        return (1.,0.) if Lxx<Lyy else (0.,1.)
-    elif Lxy>0:
-        D = .5*(Lxx-Lyy)/Lxy
+    if Lrc==0: 
+        return (1.,0.) if Lrr<Lcc else (0.,1.)
+    elif Lrc>0:
+        D = .5*(Lrr-Lcc)/Lrc
         tangent = -D - sqrt(D*D + 1)
-    elif Lxy<0:
-        D = .5*(Lxx-Lyy)/Lxy
+    elif Lrc<0:
+        D = .5*(Lrr-Lcc)/Lrc
         tangent = -D + sqrt(D*D + 1)
     denominator = sqrt(1 + tangent*tangent)
     return  1./denominator, tangent / denominator
@@ -274,7 +304,7 @@ cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
 
 
 ###   Pre-processing the image   ###
-## get Lxx,Lyy & Lxy (the Hessian matrix entries), and the least principal
+## get Lrr,Lcc & Lrc (the Hessian matrix entries), and the least principal
 ## curvature (smallest eigen-value of the Hessian)
 
 
@@ -289,15 +319,15 @@ cpdef DTYPE_t [:] get_1d_gaussian_kernel_r(RIJ_t r):
 ##              (based on 40% of 2*pi*r) perform non-maximum suppresion 
 ##              (in a 3x3x3 cube)
 
-cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lxx, 
-                             DTYPE_t [:,:] Lyy, 
-                             DTYPE_t [:,:] Lxy, 
+cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lrr, 
+                             DTYPE_t [:,:] Lcc, 
+                             DTYPE_t [:,:] Lrc, 
                              DTYPE_t [:,:] curv, 
                              DTYPE_t curv_thresh=-20,
                              RIJ_t Rmin=5,
                              RIJ_t Rmax=55):
 
-    assert Lxx is not None and Lyy is not None and Lxy is not None and\
+    assert Lrr is not None and Lcc is not None and Lrc is not None and\
             curv is not None
 
     cdef:
@@ -331,7 +361,7 @@ cpdef ridge_circle_hough_transform(DTYPE_t [:,:] Lxx,
             # treshold the curvature (note that it should be smaller than...)
             if curv[i,j] > curv_thresh: continue
             # perform non-minimum suppression in the least principal direction
-            cosQ,sinQ = least_principal_direction(Lxx[i,j], Lyy[i,j], Lxy[i,j])
+            cosQ,sinQ = least_principal_direction(Lrr[i,j], Lcc[i,j], Lrc[i,j])
             if fabs(cosQ) > cos_q_pi:
                 if (curv[i,j] >= curv[i,j+1]) | (curv[i,j] >= curv[i,j-1]):
                     continue
@@ -905,7 +935,9 @@ def fitCircle(coords, i, j):
 #@cython.profile(True)
 cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges, 
                    RIJ_t Nrows, RIJ_t Ncols, RIJ_t Rmin, RIJ_t Rmax,
-                   RIJ_t thickness=3, DTYPE_t eccentricity=0.):   
+                   RIJ_t thickness=3,
+                   # DTYPE_t eccentricity=0., ## EA20200723 excluding opencv dependency 
+                    ):   
     ###   sub-pxl correction (if requested)   ###
     #
     # (i)  for each local max of the 3D Hough space get the ridges pxls within
@@ -948,7 +980,7 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
             ring_mask[row_min-i+r+thickness:r+thickness+row_max-i,\
                       col_min-j+r+thickness:r+thickness+col_max-j]
             ))
-        if eccentricity:
+        if False: # eccentricity: ## excluding 
             ## eccentricity larger than zero, that is, requested an ellipse fit
             ## make sure that cv2.fitEllipse does not crash.
             ## but better remove circles which do not have enough points on the
@@ -985,13 +1017,13 @@ cpdef subpxl_circles(RIJ_t [:,:] rings, directed_ridges,
     return rings_subpxl
 
 
-cpdef directed_ridge_detector(DTYPE_t [:,:] Lxx,
-                              DTYPE_t [:,:] Lyy, 
-                              DTYPE_t [:,:] Lxy, 
+cpdef directed_ridge_detector(DTYPE_t [:,:] Lrr,
+                              DTYPE_t [:,:] Lcc, 
+                              DTYPE_t [:,:] Lrc, 
                               DTYPE_t [:,:] curv, 
                               DTYPE_t curv_thresh=-20):
 
-    assert Lxx is not None and Lyy is not None and Lxy is not None and\
+    assert Lrr is not None and Lcc is not None and Lrc is not None and\
             curv is not None
 
     cdef:
@@ -1016,7 +1048,7 @@ cpdef directed_ridge_detector(DTYPE_t [:,:] Lxx,
             # treshold the curvature (note that it should be smaller than...)
             if curv[i,j] > curv_thresh: continue
             # perform non-minimum suppression in the least principal direction
-            cosQ,sinQ = least_principal_direction(Lxx[i,j], Lyy[i,j], Lxy[i,j])
+            cosQ,sinQ = least_principal_direction(Lrr[i,j], Lcc[i,j], Lrc[i,j])
             if fabs(cosQ) > cos_q_pi:
                 if (curv[i,j] >= curv[i,j+1]) | (curv[i,j] >= curv[i,j-1]):
                     continue
@@ -1046,7 +1078,6 @@ class RidgeHoughTransform():
     params = {
             ## Binarising image parameters:
             'sigma':1.8, # GX1920 full resolution; 10ms exp, gain13
-            'ksize':5,
             'curv_thresh':-25,
             ## Hough transform parameters:
             'Rmin':7,
@@ -1055,7 +1086,7 @@ class RidgeHoughTransform():
             'circle_thresh': 0.33 * 2 * pi,  #2.4 #3.2
             ## sub-pxling parameters:
             'dr':3,  # half-thickness of the ring to fit to an ellipse
-	    'eccentricity':0
+	        # 'eccentricity':0  ## EA20200723 excluding opencv dependency
             }
     deriv = {}
 
@@ -1071,26 +1102,28 @@ class RidgeHoughTransform():
         components), and its least principal curvature
         '''
         assert self.img.dtype==DTYPE
-        ksize = self.params['ksize']
-
-        if self.params['sigma']:
-            Blurred = cv2.GaussianBlur(self.img,(0,0),self.params['sigma'])
-        else:
-            Blurred = self.img
-        self.deriv['Lxx'] = cv2.Sobel(Blurred, cv2.CV_32F, 2,0, ksize=ksize)
-        self.deriv['Lyy'] = cv2.Sobel(Blurred, cv2.CV_32F, 0,2, ksize=ksize)
-        self.deriv['Lxy'] = cv2.Sobel(Blurred, cv2.CV_32F, 1,1, ksize=ksize)
-        ## Could possibly mask the image based on Laplacian (rather than
-        ## minimal principal curvature).
-        self.deriv['principal_curv'] = least_principal_curvature(\
-                self.deriv['Lxx'], self.deriv['Lyy'], self.deriv['Lxy'])
-
+      
+        hessian = hessian_matrix(self.img, sigma=self.params['sigma'])
+        ## EA20200723 : in the earlier versions of the code
+        ## Lrr, Lrc, Lcc were referred to as Lxx, Lxy, Lyy 
+        self.deriv['Lrr'], self.deriv['Lrc'], self.deriv['Lcc'] = hessian 
+        self.hessian = hessian
         
+        hessian_eigvals = hessian_matrix_eigvals((hessian))
+        principal_curvatures = hessian_eigvals 
+        ## the least principal curvature being hessian_eigvals[1]
+        self.deriv['principal_curv'] = principal_curvatures[1]
+        # self.deriv['principal_curv'] = least_principal_curvature(\
+        #        self.deriv['Lrr'], self.deriv['Lcc'], self.deriv['Lrc'])
+        ## EA20200723 TODO: consider storing both principal curvatures and testing for 
+        ## |Lpp|>|Lqq| for Lpp being the least principal curvature
+ 
+       
     def rings_detection(self):
         assert self.params['Rmin']>=3
         assert self.params['Rmin'] <= self.params['Rmax']
-        ht_out = ridge_circle_hough_transform(self.deriv['Lxx'], 
-                self.deriv['Lyy'], self.deriv['Lxy'],
+        ht_out = ridge_circle_hough_transform(self.deriv['Lrr'], 
+                self.deriv['Lcc'], self.deriv['Lrc'],
                 self.deriv['principal_curv'], self.params['curv_thresh'],
                 self.params['Rmin'], self.params['Rmax'])
         rings = votes2rings(ht_out['votes'], 
@@ -1103,15 +1136,16 @@ class RidgeHoughTransform():
                                  self.img.shape[0], self.img.shape[1], 
                                  self.params['Rmin'], self.params['Rmax'],
                                  self.params['dr'],
-                                 self.params['eccentricity'])
+                                 #self.params['eccentricity'] ## opencv dependency
+                                     )
         self.output = {'rings' : np.asarray(rings),
                        'rings_subpxl' : np.asarray(rings_subpxl),
                        }
 
 
     def directed_ridge_detector(self):
-        directed_ridges = directed_ridge_detector(self.deriv['Lxx'], 
-                self.deriv['Lyy'], self.deriv['Lxy'],
+        directed_ridges = directed_ridge_detector(self.deriv['Lrr'], 
+                self.deriv['Lcc'], self.deriv['Lrc'],
                 self.deriv['principal_curv'], self.params['curv_thresh'])
         self.output = {'directed_ridges' : directed_ridges,
                        }
@@ -1120,8 +1154,8 @@ class RidgeHoughTransform():
     def debugging_rings_detection(self):
         assert self.params['Rmin']>=3
         assert self.params['Rmin'] <= self.params['Rmax']
-        ht_out = ridge_circle_hough_transform(self.deriv['Lxx'], 
-                self.deriv['Lyy'], self.deriv['Lxy'],
+        ht_out = ridge_circle_hough_transform(self.deriv['Lrr'], 
+                self.deriv['Lcc'], self.deriv['Lrc'],
                 self.deriv['principal_curv'], self.params['curv_thresh'],
                 self.params['Rmin'], self.params['Rmax'])
         array_out = votes2array(ht_out['votes'], 
@@ -1136,7 +1170,8 @@ class RidgeHoughTransform():
                                       self.img.shape[0], self.img.shape[1],
                                       self.params['Rmin'], self.params['Rmax'],
                                       self.params['dr'],
-                                      self.params['eccentricity'])
+                                      #self.params['eccentricity'] ## opencv dependency
+                                     )
 
         self.output = {'directed_ridges': ht_out['directed_ridges'],
                        'votes': ht_out['votes'],
