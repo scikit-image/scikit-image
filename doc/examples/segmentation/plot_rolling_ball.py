@@ -27,15 +27,17 @@ To implement this algorithm in skimage we can use the following:
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from skimage import morphology
 from skimage import data
-import matplotlib.pyplot as plt
+from skimage.util import invert
 
 
 def rolling_ball(image, radius=30, white_background=False):
     working_img = image.copy()
     if white_background:
-        working_img = 255 - working_img
+        working_img = invert(working_img)
 
     # tensor representation of the image
     # (stacked blocks as described in the paper)
@@ -59,8 +61,8 @@ def rolling_ball(image, radius=30, white_background=False):
     filtered_image = working_img - background
 
     if white_background:
-        filtered_image = 255 - filtered_image
-        background = 255 - background
+        filtered_image = invert(filtered_image)
+        background = invert(background)
 
     return filtered_image, background
 
