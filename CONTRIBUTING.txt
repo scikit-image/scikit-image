@@ -79,8 +79,7 @@ Here's the long and short of it:
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
-<gitwash/index>` on how to use Git with ``scikit-image``
-(`<https://scikit-image.org/docs/dev/gitwash/index.html>`_).
+<gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
 4. Review process:
 
