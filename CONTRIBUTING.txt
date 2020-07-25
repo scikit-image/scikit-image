@@ -379,32 +379,12 @@ To rebuild a full clean documentation, run:
     make clean
     make html
 
-Gallery
-~~~~~~~
-
-If you are contributing an example to the
-`gallery <https://scikit-image.org/docs/dev/auto_examples/>`_ (or editing an
-existing one), write in
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
-Indeed, the gallery is a
-`Sphinx-Gallery <https://sphinx-gallery.github.io/stable/index.html>`_ one.
-
-Refer to the above to build (all) the docs, and check how your edits render at
-``scikit-image/doc/build/html/auto_examples/`` (navigate to the file you have
-added or changed).
-
-When adding an example, visit also
-``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
-thumbnail renders on the gallery's homepage. To change the thumbnail image,
-please refer to this
-`section <https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
-of the Sphinx-Gallery docs.
-
 Requirements
 ~~~~~~~~~~~~
 
-`Sphinx <http://www.sphinx-doc.org/en/stable/>`__ and LaTeX are needed to build
-the documentation.
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`_,
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_,
+and LaTeX are needed to build the documentation.
 
 **Sphinx:**
 
@@ -414,6 +394,25 @@ can be installed using: ``scikit-image/requirements/docs.txt`` file.
 .. code:: sh
 
     pip install -r requirements/docs.txt
+
+**Sphinx-Gallery:**
+
+The above-mentioned command includes the installation of Sphinx-Gallery.
+The gallery of :ref:`examples_gallery`
+is created using `Sphinx-Gallery <https://sphinx-gallery.github.io>`_.
+Refer to that page for complete instructions on syntax and usage.
+
+If you are contributing an example to the gallery or editing an existing one,
+build the docs (see above) and open a web browser to check how your edits
+render at ``scikit-image/doc/build/html/auto_examples/``: navigate to the file
+you have added or changed.
+
+When adding an example, visit also
+``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
+thumbnail renders on the gallery's homepage. To change the thumbnail image,
+please refer to `this section
+<https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
+of the Sphinx-Gallery docs.
 
 **LaTeX Ubuntu:**
 
