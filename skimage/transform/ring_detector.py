@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-
 from ._ring_detector import RidgeHoughTransform
 
 __all__ = ['ring_detector']
