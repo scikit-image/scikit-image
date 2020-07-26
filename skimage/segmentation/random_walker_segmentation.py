@@ -320,7 +320,6 @@ def random_walker(
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method. This mode
           requires that the pyamg module is installed.
-
     tol : float, optional
         Tolerance to achieve when solving the linear system using
         the conjugate gradient based modes ('cg', 'cg_j' and 'cg_mg').
@@ -354,9 +353,9 @@ def random_walker(
           probability that label `label_nb` reaches the pixel `(i, j)`
           first.
 
-    See also
+    See Also
     --------
-    skimage.morphology.watershed: watershed segmentation
+    skimage.morphology.watershed : watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 

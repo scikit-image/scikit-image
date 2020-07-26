@@ -6,3 +6,4 @@ pytest-localserver
 flake8
 codecov
 mypy
+pooch>=0.5.2
