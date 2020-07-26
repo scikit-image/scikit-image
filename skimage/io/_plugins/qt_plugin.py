@@ -7,7 +7,7 @@ from qtpy.QtWidgets import (QApplication, QLabel, QMainWindow, QWidget,
 from qtpy.QtGui import QImage, QPixmap
 from qtpy import QtCore
 
-# We try to aquire the gui lock first or else the gui import might
+# We try to acquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.
 window_manager.acquire('qt')
 
@@ -28,7 +28,7 @@ class ImageLabel(QLabel):
         # the constructor, because we can't guarantee
         # that every row of the numpy data is
         # 4-byte aligned. Which Qt would require
-        # if we didnt pass the stride.
+        # if we didn't pass the stride.
         self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                           arr.strides[0], QImage.Format_RGB888)
         self.pm = QPixmap.fromImage(self.img)

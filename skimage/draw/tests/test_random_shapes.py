@@ -3,7 +3,7 @@ import numpy as np
 from skimage.draw import random_shapes
 
 from skimage._shared import testing
-from skimage._shared.testing import expected_warnings
+from skimage._shared._warnings import expected_warnings
 
 
 def test_generates_color_images_with_correct_shape():
@@ -79,10 +79,38 @@ def test_generates_correct_bounding_boxes_for_circles():
     assert (image == 255).all()
 
 
+def test_generates_correct_bounding_boxes_for_ellipses():
+    image, labels = random_shapes(
+        (43, 44),
+        max_shapes=1,
+        min_size=20,
+        max_size=20,
+        shape='ellipse',
+        random_seed=42)
+    assert len(labels) == 1
+    label, bbox = labels[0]
+    assert label == 'ellipse', label
+
+    crop = image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]]
+
+    # The crop is filled.
+    assert (crop >= 0).any() and (crop < 255).any()
+
+    # The crop is complete.
+    image[bbox[0][0]:bbox[0][1], bbox[1][0]:bbox[1][1]] = 255
+    assert (image == 255).all()
+
+
 def test_generate_circle_throws_when_size_too_small():
     with testing.raises(ValueError):
         random_shapes(
             (64, 128), max_shapes=1, min_size=1, max_size=1, shape='circle')
+
+
+def test_generate_ellipse_throws_when_size_too_small():
+    with testing.raises(ValueError):
+        random_shapes(
+            (64, 128), max_shapes=1, min_size=1, max_size=1, shape='ellipse')
 
 
 def test_generate_triangle_throws_when_size_too_small():

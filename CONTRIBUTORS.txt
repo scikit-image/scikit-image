@@ -1,4 +1,30 @@
-﻿- Stefan van der Walt
+﻿# Acknowledgements
+
+scikit-image is a joint effort, created by a large community of contributors.
+For a full list of contributors, please visit
+[our GitHub repo](https://github.com/scikit-image/scikit-image/graphs/contributors)
+or use `git` in the source repository as follows:
+
+```
+git shortlog --summary --numbered
+
+```
+
+Previously, we asked authors to add their names to this file whenever
+they made a contribution.  Because these additions were not made
+consistently, we now refer to the git commit log as the ultimate
+record of code contribution.
+
+Please note that, on a project as large as this, there are *many*
+different ways to contribute, of which code is only one.  Other
+contributions include community & project management, code review,
+answering questions on forums, and web design.  We are grateful for
+each and every contributor, regardless of their role.
+
+
+## Historical credits list
+
+- Stefan van der Walt
   Project coordination
 
 - Nicolas Pinto
@@ -259,3 +285,19 @@
 
 - Lars Grüter
   Flood-fill based local maxima detection
+
+- Solutus Immensus
+  Histogram matching
+
+- Laurent P. René de Cotret
+  Implementation of masked image translation registration
+
+- Mark Harfouche
+  Enabled GIL free operation of many algorithms implemented in Cython.
+  Maintenance of the build and test infrastructure.
+
+- Taylor D. Scott
+  Simplified _upsampled_dft and extended register_translation to nD images.
+
+- David J. Mellert
+  Polar and log-polar warping, nD windows

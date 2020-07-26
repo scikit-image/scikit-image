@@ -8,11 +8,12 @@ from libc.math cimport log
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
+cnp.import_array()
 
 cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t* histo,
                               double pop, dtype_t g,
-                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               double p0, double p1,
                               Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -21,7 +22,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
     cdef Py_ssize_t mean = 0
 
     if pop:
-        for i in range(max_bin):
+        for i in range(n_bins):
             if (g > (i - s0)) and (g < (i + s1)):
                 bilat_pop += histo[i]
                 mean += histo[i] * i
@@ -36,7 +37,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t* histo,
                              double pop, dtype_t g,
-                             Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                             Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,
                              Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -44,7 +45,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
     cdef Py_ssize_t bilat_pop = 0
 
     if pop:
-        for i in range(max_bin):
+        for i in range(n_bins):
             if (g > (i - s0)) and (g < (i + s1)):
                 bilat_pop += histo[i]
         out[0] = <dtype_t_out>bilat_pop
@@ -55,7 +56,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t* histo,
                              double pop, dtype_t g,
-                             Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                             Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              double p0, double p1,
                              Py_ssize_t s0, Py_ssize_t s1) nogil:
 
@@ -64,7 +65,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
     cdef Py_ssize_t sum = 0
 
     if pop:
-        for i in range(max_bin):
+        for i in range(n_bins):
             if (g > (i - s0)) and (g < (i + s1)):
                 bilat_pop += histo[i]
                 sum += histo[i] * i
@@ -81,10 +82,10 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] mask,
           dtype_t_out[:, :, ::1] out,
           signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
-          Py_ssize_t max_bin):
+          Py_ssize_t n_bins):
 
     _core(_kernel_mean[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, 0, 0, s0, s1, max_bin)
+          shift_x, shift_y, 0, 0, s0, s1, n_bins)
 
 
 def _pop(dtype_t[:, ::1] image,
@@ -92,10 +93,10 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
-         Py_ssize_t max_bin):
+         Py_ssize_t n_bins):
 
     _core(_kernel_pop[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, 0, 0, s0, s1, max_bin)
+          shift_x, shift_y, 0, 0, s0, s1, n_bins)
 
 
 def _sum(dtype_t[:, ::1] image,
@@ -103,7 +104,7 @@ def _sum(dtype_t[:, ::1] image,
          char[:, ::1] mask,
          dtype_t_out[:, :, ::1] out,
          signed char shift_x, signed char shift_y, Py_ssize_t s0, Py_ssize_t s1,
-         Py_ssize_t max_bin):
+         Py_ssize_t n_bins):
 
     _core(_kernel_sum[dtype_t_out, dtype_t], image, selem, mask, out,
-          shift_x, shift_y, 0, 0, s0, s1, max_bin)
+          shift_x, shift_y, 0, 0, s0, s1, n_bins)

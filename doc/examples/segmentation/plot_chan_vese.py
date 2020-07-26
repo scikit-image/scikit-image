@@ -13,7 +13,7 @@ term which is dependent on the length of the boundary of the segmented
 region.
 
 This algorithm was first proposed by Tony Chan and Luminita Vese, in
-a publication entitled "An Active Countour Model Without Edges" [1]_. See also
+a publication entitled "An Active Contour Model Without Edges" [1]_. See also
 [2]_, [3]_.
 
 This implementation of the algorithm is somewhat simplified in the
@@ -43,7 +43,6 @@ References
 .. [3] The Chan-Vese Algorithm - Project Report, Rami Cohen, 2011
        :arXiv:`1107.2782`
 """
-import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, img_as_float
 from skimage.segmentation import chan_vese

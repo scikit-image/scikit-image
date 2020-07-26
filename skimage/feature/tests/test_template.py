@@ -10,7 +10,7 @@ from skimage._shared import testing
 def test_template():
     size = 100
     # Float prefactors ensure that image range is between 0 and 1
-    image = 0.5 * np.ones((400, 400))
+    image = np.full((400, 400), 0.5)
     target = 0.1 * (np.tri(size) + np.tri(size)[::-1])
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
@@ -47,7 +47,7 @@ def test_normalization():
     N = 20
     ipos, jpos = (2, 3)
     ineg, jneg = (12, 11)
-    image = 0.5 * np.ones((N, N))
+    image = np.full((N, N), 0.5)
     image[ipos:ipos + n, jpos:jpos + n] = 1
     image[ineg:ineg + n, jneg:jneg + n] = 0
 

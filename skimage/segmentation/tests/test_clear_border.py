@@ -7,17 +7,17 @@ from skimage._shared.testing import assert_array_equal, assert_
 def test_clear_border():
     image = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 1, 0],
-         [0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [1, 0, 0, 1, 0, 1, 0, 0, 0],
-         [0, 0, 1, 1, 1, 1, 1, 0, 0],
+         [1, 1, 0, 0, 1, 0, 0, 1, 0],
+         [1, 1, 0, 1, 0, 1, 0, 0, 0],
+         [0, 0, 0, 1, 1, 1, 1, 0, 0],
          [0, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
     # test default case
     result = clear_border(image.copy())
     ref = image.copy()
-    ref[2, 0] = 0
-    ref[0, -2] = 0
+    ref[1:3, 0:2] = 0
+    ref[0:2, -2] = 0
     assert_array_equal(result, ref)
 
     # test buffer
@@ -28,6 +28,17 @@ def test_clear_border():
     result = clear_border(image.copy(), buffer_size=1, bgval=2)
     assert_array_equal(result, 2 * np.ones_like(image))
 
+    # test mask
+    mask = np.array([[0, 0, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 0, 1, 1, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1]]).astype(np.bool)
+    result = clear_border(image.copy(), mask=mask)
+    ref = image.copy()
+    ref[1:3, 0:2] = 0
+    assert_array_equal(result, ref)
 
 def test_clear_border_3d():
     image = np.array([

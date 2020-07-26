@@ -8,12 +8,12 @@ from .selem import _default_selem
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
 funcs = ('erosion', 'dilation', 'opening', 'closing')
-skimage2ndimage = dict((x, 'grey_' + x) for x in funcs)
+skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
 funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
          'binary_closing', 'black_tophat', 'white_tophat')
-skimage2ndimage.update(dict((x, x) for x in funcs))
+skimage2ndimage.update({x: x for x in funcs})
 
 
 def default_selem(func):
@@ -92,12 +92,12 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> b
     array([[False, False, False, False, False],
            [ True,  True,  True, False, False],
-           [ True,  True,  True, False, False]], dtype=bool)
+           [ True,  True,  True, False, False]])
     >>> c = morphology.remove_small_objects(a, 7, connectivity=2)
     >>> c
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
-           [ True,  True,  True, False, False]], dtype=bool)
+           [ True,  True,  True, False, False]])
     >>> d = morphology.remove_small_objects(a, 6, in_place=True)
     >>> d is a
     True
@@ -139,9 +139,8 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
-                       min_size=None):
-    """Remove continguous holes smaller than the specified size.
+def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False):
+    """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------
@@ -155,7 +154,6 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     in_place : bool, optional (default: False)
         If `True`, remove the connected components in the input array itself.
         Otherwise, make a copy.
-
 
     Raises
     ------
@@ -181,13 +179,13 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True,  True,  True, False],
            [ True, False, False,  True,  True, False],
-           [ True,  True,  True,  True,  True, False]], dtype=bool)
+           [ True,  True,  True,  True,  True, False]])
     >>> c = morphology.remove_small_holes(a, 2, connectivity=2)
     >>> c
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
-           [ True,  True,  True,  True,  True, False]], dtype=bool)
+           [ True,  True,  True,  True,  True, False]])
     >>> d = morphology.remove_small_holes(a, 2, in_place=True)
     >>> d is a
     True
@@ -207,11 +205,6 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
         warn("Any labeled images will be returned as a boolean array. "
              "Did you mean to use a boolean array?", UserWarning)
 
-    if min_size is not None:
-        warn("the min_size argument is deprecated and will be removed in " +
-             "0.16. Use area_threshold instead.")
-        area_threshold = min_size
-
     if in_place:
         out = ar
     else:
@@ -219,7 +212,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
 
     # Creating the inverse of ar
     if in_place:
-        out = np.logical_not(out, out)
+        np.logical_not(out, out=out)
     else:
         out = np.logical_not(out)
 
@@ -227,7 +220,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, in_place=False,
     out = remove_small_objects(out, area_threshold, connectivity, in_place)
 
     if in_place:
-        out = np.logical_not(out, out)
+        np.logical_not(out, out=out)
     else:
         out = np.logical_not(out)
 

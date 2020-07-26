@@ -104,3 +104,18 @@ class TestCanny(unittest.TestCase):
 
         self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
                           low_threshold=0.5, high_threshold=-100)
+
+        # Example from issue #4282
+        image = data.camera()
+        self.assertRaises(ValueError, F.canny, image, use_quantiles=True,
+                          low_threshold=50, high_threshold=150)
+
+    def test_dtype(self):
+        """Check that the same output is produced regardless of image dtype."""
+        image_uint8 = data.camera()
+        image_float = img_as_float(image_uint8)
+
+        result_uint8 = F.canny(image_uint8)
+        result_float = F.canny(image_float)
+
+        assert_equal(result_uint8, result_float)

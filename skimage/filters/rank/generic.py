@@ -1,4 +1,4 @@
-"""
+r"""
 
 General Description
 -------------------
@@ -23,13 +23,13 @@ adjusted accordingly. The user may provide a mask image (same size as input
 image) where non zero values are the part of the image participating in the
 histogram computation. By default the entire image is filtered.
 
-This implementation outperforms grey.dilation for large structuring elements.
+This implementation outperforms :func:`skimage.morphology.dilation`
+for large structuring elements.
 
-Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
-histogram bins is determined from the maximum value present in the image.
-
-Result image is 8-/16-bit or double with respect to the input image and the
-rank filter operation.
+Input images will be cast in unsigned 8-bit integer or unsigned 16-bit integer
+if necessary. The number of histogram bins is then determined from the maximum
+value present in the image. Eventually, the output image is cast in the input
+dtype, or the `output_dtype` if set.
 
 To do
 -----
@@ -48,14 +48,14 @@ References
 
 """
 
-import functools
+
+import warnings
 import numpy as np
 from scipy import ndimage as ndi
-from ... import img_as_ubyte
-from ..._shared.utils import assert_nD, warn
+from ...util import img_as_ubyte
+from ..._shared.utils import check_nD, warn
 
 from . import generic_cy
-
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
@@ -63,18 +63,59 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
+def _preprocess_input(image, selem=None, out=None, mask=None, out_dtype=None,
+                      pixel_size=1):
+    """Preprocess and verify input for filters.rank methods.
 
-    assert_nD(image, 2)
-    if image.dtype not in (np.uint8, np.uint16):
+    Parameters
+    ----------
+    image : 2-D array (integer or float)
+        Input image.
+    selem : 2-D array (integer or float), optional
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (integer or float), optional
+        If None, a new array is allocated.
+    mask : ndarray (integer or float), optional
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    out_dtype : data-type, optional
+        Desired output data-type. Default is None, which means we cast output
+        in input dtype.
+    pixel_size : int, optional
+        Dimension of each pixel. Default value is 1.
+
+    Returns
+    -------
+    image : 2-D array (np.uint8 or np.uint16)
+    selem : 2-D array (np.uint8)
+        The neighborhood expressed as a binary 2-D array.
+    out : 3-D array (same dtype out_dtype or as input)
+        Output array. The two first dimensions are the spatial ones, the third
+        one is the pixel vector (length 1 by default).
+    mask : 2-D array (np.uint8)
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood.
+    n_bins : int
+        Number of histogram bins.
+
+    """
+    check_nD(image, 2)
+    input_dtype = image.dtype
+    if (input_dtype in (bool, np.bool, np.bool_)
+            or out_dtype in (bool, np.bool, np.bool_)):
+        raise ValueError('dtype cannot be bool.')
+    if input_dtype not in (np.uint8, np.uint16):
+        message = ('Possible precision loss converting image of type {} to '
+                   'uint8 as required by rank filters. Convert manually using '
+                   'skimage.util.img_as_ubyte to silence this warning.'
+                   .format(input_dtype))
+        warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
     selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=np.uint8)
-    else:
+    if mask is not None:
         mask = img_as_ubyte(mask)
         mask = np.ascontiguousarray(mask)
 
@@ -84,93 +125,140 @@ def _handle_input(image, selem, out, mask, out_dtype=None, pixel_size=1):
     if out is None:
         if out_dtype is None:
             out_dtype = image.dtype
-        out = np.empty(image.shape+(pixel_size,), dtype=out_dtype)
+        out = np.empty(image.shape + (pixel_size,), dtype=out_dtype)
     else:
         if len(out.shape) == 2:
-            out = out.reshape(out.shape+(pixel_size,))
+            out = out.reshape(out.shape + (pixel_size,))
 
-    is_8bit = image.dtype in (np.uint8, np.int8)
-
-    if is_8bit:
-        max_bin = 255
+    if image.dtype in (np.uint8, np.int8):
+        n_bins = 256
     else:
-        max_bin = max(4, image.max())
+        # Convert to a Python int to avoid the potential overflow when we add
+        # 1 to the maximum of the image.
+        n_bins = int(max(3, image.max())) + 1
 
-    bitdepth = int(np.log2(max_bin))
-    if bitdepth > 10:
-        warn("Bitdepth of %d may result in bad rank filter "
-             "performance due to large number of bins." % bitdepth)
+    if n_bins > 2 ** 10:
+        warn("Bad rank filter performance is expected due to a "
+             "large number of bins ({}), equivalent to an approximate "
+             "bitdepth of {:.1f}.".format(n_bins, np.log2(n_bins)),
+             stacklevel=2)
 
-    return image, selem, out, mask, max_bin
+    return image, selem, out, mask, n_bins
 
 
 def _apply_scalar_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
                             out_dtype=None):
-
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype)
-
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
-
-    return out.reshape(out.shape[:2])
-
-
-def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
-                            out_dtype=None, pixel_size=1):
-
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype,
-                                                     pixel_size=pixel_size)
-
-    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin)
-
-    return out
-
-
-def _default_selem(func):
-    """Decorator to add a default structuring element to morphology functions.
+    """Process the specific cython function to the image.
 
     Parameters
     ----------
     func : function
-        A morphology function such as erosion, dilation, opening, closing,
-        white_tophat, or black_tophat.
+        Cython function to apply.
+    image : 2-D array (integer or float)
+        Input image.
+    selem : 2-D array (integer or float)
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (integer or float)
+        If None, a new array is allocated.
+    mask : ndarray (integer or float)
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    out_dtype : data-type, optional
+        Desired output data-type. Default is None, which means we cast output
+        in input dtype.
 
     Returns
     -------
-    func_out : function
-        The function, using a default structuring element of same dimension
-        as the input image with connectivity 1.
+    out : 2-D array (same dtype as out_dtype or same as input image)
+        Output image.
+
     """
-    @functools.wraps(func)
-    def func_out(image, selem=None, *args, **kwargs):
-        if selem is None:
-            selem = ndi.generate_binary_structure(image.ndim, image.ndim)
-        return func(image, selem=selem, *args, **kwargs)
+    # preprocess and verify the input
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype)
 
-    return func_out
+    # apply cython function
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+         out=out, n_bins=n_bins)
+
+    return np.squeeze(out, axis=-1)
 
 
-def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def _apply_vector_per_pixel(func, image, selem, out, mask, shift_x, shift_y,
+                            out_dtype=None, pixel_size=1):
+    """
+
+    Parameters
+    ----------
+    func : function
+        Cython function to apply.
+    image : 2-D array (integer or float)
+        Input image.
+    selem : 2-D array (integer or float)
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (integer or float)
+        If None, a new array is allocated.
+    mask : ndarray (integer or float)
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    out_dtype : data-type, optional
+        Desired output data-type. Default is None, which means we cast output
+        in input dtype.
+    pixel_size : int, optional
+        Dimension of each pixel.
+
+    Returns
+    -------
+    out : 3-D array with float dtype of dimensions (H,W,N), where (H,W) are
+        the dimensions of the input image and N is n_bins or
+        ``image.max() + 1`` if no value is provided as a parameter.
+        Effectively, each pixel is a N-D feature vector that is the histogram.
+        The sum of the elements in the feature vector will be 1, unless no
+        pixels in the window were covered by both selem and mask, in which
+        case all elements will be 0.
+
+    """
+    # preprocess and verify the input
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem,
+                                                        out, mask,
+                                                        out_dtype,
+                                                        pixel_size)
+
+    # apply cython function
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+         out=out, n_bins=n_bins)
+
+    return out
+
+
+def autolevel(image, selem, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Auto-level image using local histogram.
 
-    This filter locally stretches the histogram of greyvalues to cover the
+    This filter locally stretches the histogram of gray values to cover the
     entire range of values from "white" to "black".
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -195,7 +283,8 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def bottomhat(image, selem, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Local bottom-hat of an image.
 
     This filter computes the morphological closing of the image and then
@@ -203,16 +292,16 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : 2-D array
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -222,15 +311,28 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import bottomhat
     >>> img = data.camera()
-    >>> out = bottomhat(img, disk(5))
+    >>> out = bottomhat(img, disk(5))  # doctest: +SKIP
 
     """
+    warnings.warn("rank.bottomhat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
 
     return _apply_scalar_per_pixel(generic_cy._bottomhat, image, selem,
                                    out=out, mask=mask,
@@ -242,16 +344,16 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -276,21 +378,22 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def gradient(image, selem, out=None, mask=None, shift_x=False,
+             shift_y=False):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -315,21 +418,22 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def maximum(image, selem, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Return local maximum of an image.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -368,16 +472,16 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -407,16 +511,16 @@ def geometric_mean(image, selem, out=None, mask=None,
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -441,8 +545,9 @@ def geometric_mean(image, selem, out=None, mask=None,
 
     """
 
-    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem, out=out,
-                                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply_scalar_per_pixel(generic_cy._geometric_mean, image, selem,
+                                   out=out, mask=mask, shift_x=shift_x,
+                                   shift_y=shift_y)
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
@@ -451,16 +556,16 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -469,6 +574,14 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     -------
     out : 2-D array (same dtype as input image)
         Output image.
+
+    Notes
+    -----
+    Subtracting the mean value may introduce underflow. To compensate
+    this potential underflow, the obtained difference is downscaled by
+    a factor of 2 and shifted by `n_bins / 2 - 1`, the median value of
+    the local histogram (`n_bins = max(3, image.max()) +1` for 16-bits
+    images and 256 otherwise).
 
     Examples
     --------
@@ -485,24 +598,23 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-@_default_selem
 def median(image, selem=None, out=None, mask=None,
            shift_x=False, shift_y=False):
     """Return local median of an image.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array, optional
+    selem : 2-D array (integer or float), optional
         The neighborhood expressed as a 2-D array of 1's and 0's. If None, a
         full square of size 3 is used.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -511,6 +623,11 @@ def median(image, selem=None, out=None, mask=None,
     -------
     out : 2-D array (same dtype as input image)
         Output image.
+
+    See also
+    --------
+    skimage.filters.median : Implementation of a median filtering which handles
+        images with floating precision.
 
     Examples
     --------
@@ -522,26 +639,29 @@ def median(image, selem=None, out=None, mask=None,
 
     """
 
+    if selem is None:
+        selem = ndi.generate_binary_structure(image.ndim, image.ndim)
     return _apply_scalar_per_pixel(generic_cy._median, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def minimum(image, selem, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Return local minimum of an image.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -575,23 +695,24 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def modal(image, selem, out=None, mask=None, shift_x=False,
+          shift_y=False):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -620,22 +741,22 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
     """Enhance contrast of an image.
 
-    This replaces each pixel by the local maximum if the pixel greyvalue is
+    This replaces each pixel by the local maximum if the pixel gray value is
     closer to the local maximum than the local minimum. Otherwise it is
     replaced by the local minimum.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -643,7 +764,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : 2-D array (same dtype as input image)
-        The result of the local enhance_contrast.
+        Output image
 
     Examples
     --------
@@ -668,16 +789,16 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -718,16 +839,16 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -760,24 +881,25 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_y=shift_y)
 
 
-def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def threshold(image, selem, out=None, mask=None, shift_x=False,
+              shift_y=False):
     """Local threshold of an image.
 
-    The resulting binary mask is True if the greyvalue of the center pixel is
+    The resulting binary mask is True if the gray value of the center pixel is
     greater than the local mean.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -810,7 +932,8 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def tophat(image, selem, out=None, mask=None, shift_x=False,
+           shift_y=False):
     """Local top-hat of an image.
 
     This filter computes the morphological opening of the image and then
@@ -818,16 +941,16 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -837,16 +960,28 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     out : 2-D array (same dtype as input image)
         Output image.
 
+    Warns
+    -----
+    Deprecated:
+        .. versionadded:: 0.17
+
+        This function is deprecated and will be removed in scikit-image 0.19.
+        This filter was misnamed and we believe that the usefulness is narrow.
+
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filters.rank import tophat
     >>> img = data.camera()
-    >>> out = tophat(img, disk(5))
+    >>> out = tophat(img, disk(5))  # doctest: +SKIP
 
     """
-
+    warnings.warn("rank.tophat is deprecated. This filter is named"
+                  " incorrectly, which can be confusing."
+                  " As we believe that the usefulness is narrow,"
+                  " this function will be removed in 0.19.",
+                  stacklevel=2, category=FutureWarning)
     return _apply_scalar_per_pixel(generic_cy._tophat, image, selem,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y)
@@ -858,16 +993,16 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -904,37 +1039,38 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
                                    shift_x=shift_x, shift_y=shift_y)
 
 
-def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+def entropy(image, selem, out=None, mask=None, shift_x=False,
+            shift_y=False):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
-    minimum number of bits needed to encode the local greylevel
+    minimum number of bits needed to encode the local gray level
     distribution.
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : 2-D array (integer or float)
         Input image.
-    selem : 2-D array
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
 
     Returns
     -------
-    out : ndarray (double)
+    out : ndarray (float)
         Output image.
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] `https://en.wikipedia.org/wiki/Entropy_(information_theory) <https://en.wikipedia.org/wiki/Entropy_(information_theory)>`_
 
     Examples
     --------
@@ -957,16 +1093,16 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array).
-    selem : 2-D array
+    image : 2-D array (integer or float)
+        Input image.
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        If None, a new array will be allocated.
-    mask : ndarray
+    out : 2-D array (integer or float), optional
+        If None, a new array is allocated.
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -978,7 +1114,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/Otsu's_method
+    .. [1] https://en.wikipedia.org/wiki/Otsu's_method
 
     Examples
     --------
@@ -1002,16 +1138,16 @@ def windowed_histogram(image, selem, out=None, mask=None,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array).
-    selem : 2-D array
+    image : 2-D array (integer or float)
+        Input image.
+    selem : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        If None, a new array will be allocated.
-    mask : ndarray
+    out : 2-D array (integer or float), optional
+        If None, a new array is allocated.
+    mask : ndarray (integer or float), optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
@@ -1021,13 +1157,13 @@ def windowed_histogram(image, selem, out=None, mask=None,
 
     Returns
     -------
-    out : 3-D array with float dtype of dimensions (H,W,N), where (H,W) are
-        the dimensions of the input image and N is n_bins or
-        ``image.max() + 1`` if no value is provided as a parameter.
-        Effectively, each pixel is a N-D feature vector that is the histogram.
-        The sum of the elements in the feature vector will be 1, unless no
-        pixels in the window were covered by both selem and mask, in which
-        case all elements will be 0.
+    out : 3-D array (float)
+        Array of dimensions (H,W,N), where (H,W) are the dimensions of the
+        input image and N is n_bins or ``image.max() + 1`` if no value is
+        provided as a parameter. Effectively, each pixel is a N-D feature
+        vector that is the histogram. The sum of the elements in the feature
+        vector will be 1, unless no pixels in the window were covered by both
+        selem and mask, in which case all elements will be 0.
 
     Examples
     --------
@@ -1047,3 +1183,45 @@ def windowed_histogram(image, selem, out=None, mask=None,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.double,
                                    pixel_size=n_bins)
+
+
+def majority(image, selem,
+             *,
+             out=None, mask=None, shift_x=False, shift_y=False):
+    """Majority filter assign to each pixel the most occuring value within
+    its neighborhood.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8, uint16 array).
+    selem : 2-D array (integer or float)
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray (integer or float), optional
+        If None, a new array will be allocated.
+    mask : ndarray (integer or float), optional
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int, optional
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters.rank import majority
+    >>> from skimage.morphology import disk
+    >>> img = data.camera()
+    >>> maj_img = majority(img, disk(5))
+
+    """
+
+    return _apply_scalar_per_pixel(generic_cy._majority, image, selem,
+                                   out=out, mask=mask,
+                                   shift_x=shift_x, shift_y=shift_y)

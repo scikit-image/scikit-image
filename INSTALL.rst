@@ -16,18 +16,19 @@ environment.
 -------------------------
 
 ``scikit-image`` comes pre-installed with several Python distributions,
-including `Anaconda <https://www.anaconda.com/download/>`_,
-`Enthought Canopy <https://www.enthought.com/product/canopy/>`_,
+including `Anaconda <https://www.anaconda.com/distribution/>`_,
 `Python(x,y) <https://python-xy.github.io/>`_ and
 `WinPython <https://winpython.github.io/>`_.
 
-On all other systems, install it via shell/command prompt::
+On all major operating systems, install it via shell/command prompt::
 
   pip install scikit-image
 
 If you are running Anaconda or miniconda, use::
 
   conda install -c conda-forge scikit-image
+
+The wheels can be downloaded manually from `PyPI <https://pypi.org/project/scikit-image/#files>`__.
 
 2. Development Installation:
 ----------------------------
@@ -57,8 +58,8 @@ To update the installation::
 
 Platform-specific notes follow below.
 
-a. Windows
-``````````
+**a. Windows**
+
 If you experience the error ``Error:unable to find vcvarsall.bat`` it means
 that your computer does not have recommended compilers for Python. You can
 either download and install Windows compilers from `here`_  or use
@@ -71,42 +72,41 @@ either download and install Windows compilers from `here`_  or use
    compiler=mingw32
 
 A run-through of the compilation process for Windows is included in
-our `setup of AppVeyor`_ (a continuous integration service).
+our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
-.. _python.org: http://python.org/
-.. _Christoph Gohlke's: http://www.lfd.uci.edu/~gohlke/pythonlibs/
-.. _setup of AppVeyor: https://github.com/scikit-image/scikit-image/blob/master/.appveyor.yml
+.. _python.org: https://www.python.org/
+.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/master/azure-pipelines.yml
 .. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
 .. _venv: https://docs.python.org/3/library/venv.html
-.. _virtual environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+.. _virtual environments: https://docs.python-guide.org/dev/virtualenvs/
 .. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
-b. Debian and Ubuntu
-````````````````````
+**b. Debian and Ubuntu**
+
 Install all the required dependencies::
 
-  sudo apt-get install python-matplotlib python-numpy python-pil python-scipy
+  sudo apt-get install python3-matplotlib python3-numpy python3-pil python3-scipy python3-tk
 
 Install suitable compilers::
 
-  sudo apt-get install build-essential cython
+  sudo apt-get install build-essential cython3
 
 Complete the general development installation instructions above.
 
 Build Requirements
 ------------------
-* `Python >= 3.5 <http://python.org>`__
-* `Numpy >= 1.11 <http://numpy.scipy.org/>`__
-* `Cython >= 0.23.4 <http://www.cython.org/>`__
+* `Python >= 3.5 <https://www.python.org/>`__
+* `Numpy >= 1.11 <https://numpy.org/>`__
+* `Cython >= 0.23.4 <https://cython.org/>`__
 
-Build Requirements (docs)
--------------------------
+Documentation Requirements
+--------------------------
 
 .. include:: ../../requirements/docs.txt
    :literal:
 
-Runtime requirements
+Runtime Requirements
 --------------------
 
 .. include:: ../../requirements/default.txt
@@ -118,31 +118,39 @@ Optional Requirements
 You can use ``scikit-image`` with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-* `PyQt5 <http://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
+* `PyQt5 <https://wiki.python.org/moin/PyQt>`__ or `PySide2 <https://wiki.qt.io/Qt_for_Python>`__ through `qtpy <https://github.com/spyder-ide/qtpy>`__
     A ``Qt`` plugin will provide ``imshow(x, fancy=True)`` and `skivi`.
 
-* `PyAMG <http://pyamg.org/>`__
+* `PyAMG <https://pyamg.org/>`__
     The ``pyamg`` module is used for the fast `cg_mg` mode of random
     walker segmentation.
 
-* `Astropy <http://www.astropy.org>`__
+* `Astropy <https://www.astropy.org>`__
     Provides FITS I/O capability.
 
 * `SimpleITK <http://www.simpleitk.org/>`__
-    Optional I/O plugin providing a wide variety of `formats <http://www.itk.org/Wiki/ITK_File_Formats>`__.
+    Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
     including specialized formats using in medical imaging.
 
-* `imread <http://pythonhosted.org/imread/>`__
-    Optional I/O plugin providing most standard `formats <http://pythonhosted.org//imread/formats.html>`__.
+* `imread <https://pythonhosted.org/imread/>`__
+    Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
 
-Testing requirements
+Testing Requirements
 --------------------
 
 .. include:: ../../requirements/test.txt
    :literal:
 
-Documentation requirements
---------------------------
+Warnings during testing phase
+-----------------------------
 
-.. include:: ../../requirements/docs.txt
-   :literal:
+Scikit-image tries to catch all warnings in its development builds to ensure
+that crucial warnings from dependencies are not missed.  This might cause
+certain tests to fail if you are building scikit-image with versions of
+dependencies that were not tested at the time of the release. To disable
+failures on warnings, export the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
+tests::
+
+   export SKIMAGE_TEST_STRICT_WARNINGS=False
+   pytest --pyargs skimage

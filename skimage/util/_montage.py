@@ -1,5 +1,4 @@
 import numpy as np
-from .. import exposure
 
 
 __all__ = ['montage']
@@ -85,13 +84,19 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
     (2, 6)
     """
 
+    # exposure imports scipy.linalg which is quite expensive.
+    # Since skimage.util is in the critical import path, we lazy import
+    # exposure to improve import time
+    from .. import exposure
     if multichannel:
         arr_in = np.asarray(arr_in)
     else:
         arr_in = np.asarray(arr_in)[..., np.newaxis]
 
     if arr_in.ndim != 4:
-        raise ValueError('Input array has to be either 3- or 4-dimensional')
+        raise ValueError('Input array has to be 3-dimensional for grayscale '
+                         'images, or 4-dimensional with `multichannel=True` '
+                         'for color images.')
 
     n_images, n_rows, n_cols, n_chan = arr_in.shape
 

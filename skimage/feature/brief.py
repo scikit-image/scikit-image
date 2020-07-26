@@ -5,7 +5,7 @@ from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
 from .brief_cy import _brief_loop
-from .._shared.utils import assert_nD
+from .._shared.utils import check_nD
 
 
 class BRIEF(DescriptorExtractor):
@@ -85,8 +85,10 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
-    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
-    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
+    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1,
+    ...                           threshold_rel=0)
+    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1,
+    ...                           threshold_rel=0)
     >>> extractor = BRIEF(patch_size=5)
     >>> extractor.extract(square1, keypoints1)
     >>> descriptors1 = extractor.descriptors
@@ -138,7 +140,7 @@ class BRIEF(DescriptorExtractor):
             Keypoint coordinates as ``(row, col)``.
 
         """
-        assert_nD(image, 2)
+        check_nD(image, 2)
 
         random = np.random.RandomState()
         random.seed(self.sample_seed)

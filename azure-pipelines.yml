@@ -1,0 +1,153 @@
+# Azure Pipelines configuration file for Continuous Integration
+# for building the package and running the tests under Windows.
+
+jobs:
+- job: 'Default'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    maxParallel: 10
+    matrix:
+      Python36:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python36-x64:
+        PYTHON_VERSION: '3.6'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+        BUILD_DOCS: 'true'
+      Python37:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python37-x64:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
+      Python38:
+        PYTHON_VERSION: '3.8'
+        ARCH: 'x86'
+        PIP_FLAGS: ''
+      Python38-x64:
+        PYTHON_VERSION: '3.8'
+        ARCH: 'x64'
+        PIP_FLAGS: ''
+        TEST_EXAMPLES: 'true'
+      Python37-x64-pre:
+        PYTHON_VERSION: '3.7'
+        ARCH: 'x64'
+        PIP_FLAGS: '--pre'
+  continueOnError: false
+  timeoutInMinutes: 60
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(PYTHON_VERSION)'
+      architecture: '$(ARCH)'
+
+  - powershell: |
+      Write-Host "##vso[task.setvariable variable=PATH;]${env:PYTHON};${env:PYTHON}\Scripts;${env:PATH}";
+    displayName: 'Add Python paths to PATH'
+
+  - bash: |
+      set -x
+
+      # Update pip
+      python -m pip install --retries 3 -U pip setuptools
+
+      # Check that we have the expected version and architecture for Python
+      python --version
+      pip --version
+      python -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
+      pip list
+
+      # Install the build and runtime dependencies of the project
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/default.txt
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/build.txt
+      pip list
+    displayName: 'Pre-installation'
+
+  - bash: |
+      set -x
+
+      # Compile the package and build the wheel
+      python setup.py bdist_wheel 
+
+      # Install the generated wheel package
+      ls dist
+      pip install ${PIP_FLAGS} --no-index --find-links dist/ scikit-image
+    displayName: 'Installation'
+
+  - bash: |
+      set -x
+
+      # Install the test dependencies
+      pip install ${PIP_FLAGS} --retries 3 -r requirements/test.txt
+      pip list
+
+      # Set non-UI Matplotlib backend
+      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+      echo "backend : Agg" > matplotlibrc
+    displayName: 'Pre-testing'
+
+  - bash: |
+      set -x
+
+      # Change the working directory in order to run the tests
+      # on the installed version of skimage
+      cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
+
+      # Show the info about the installed scikit-image
+      python -c "import skimage; print(skimage.__path__)"
+
+      # Force matplotlib to use the prepared config
+      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+
+      # Run unit tests with pytest
+      # We don't test docstring examples (--doctest-modules) on
+      # Windows due to inconsistent ndarray formatting in `numpy`.
+      # For more details, see https://github.com/numpy/numpy/issues/13468
+      export TEST_ARGS="-v --cov=skimage"
+      pytest ${TEST_ARGS} --pyargs skimage
+    displayName: 'Package testing'
+
+  - bash: |
+      set -x
+
+      # Install the doc dependencies
+      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
+      pip list
+
+      # Build the documentation
+      export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
+      make html
+    condition: eq(variables['BUILD_DOCS'], 'true')
+    displayName: 'Documentation testing'
+
+  - bash: |
+      set -x
+
+      # Install the doc dependencies
+      pip install ${PIP_FLAGS} --retries 3 -q -r requirements/docs.txt
+      pip list
+
+      # Force matplotlib to use the prepared config
+      export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
+
+      # Run example applications
+      for f in doc/examples/*/*.py; do
+        python "${f}"
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+      done
+    condition: eq(variables['TEST_EXAMPLES'], 'true')
+    displayName: 'Gallery testing'
+
+#  - bash: |
+#      # -- Publish the .whl artifacts
+#      # -- Upload the content of dist/*.whl to a public wheelhouse
+#    displayName: 'Further consideration'

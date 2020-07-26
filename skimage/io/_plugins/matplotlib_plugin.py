@@ -4,13 +4,12 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.image
 from ...util import dtype as dtypes
 from ...exposure import is_low_contrast
-from ...util.colormap import viridis
 from ..._shared.utils import warn
 from math import floor, ceil
 
 
 _default_colormap = 'gray'
-_nonstandard_colormap = viridis
+_nonstandard_colormap = 'viridis'
 _diverging_colormap = 'RdBu'
 
 
@@ -71,13 +70,13 @@ def _raise_warnings(image_properties):
     ip = image_properties
     if ip.unsupported_dtype:
         warn("Non-standard image type; displaying image with "
-             "stretched contrast.")
+             "stretched contrast.", stacklevel=3)
     if ip.low_data_range:
         warn("Low image data range; displaying image with "
-             "stretched contrast.")
+             "stretched contrast.", stacklevel=3)
     if ip.out_of_range_float:
         warn("Float image out of standard range; displaying "
-             "image with stretched contrast.")
+             "image with stretched contrast.", stacklevel=3)
 
 
 def _get_display_range(image):
@@ -147,8 +146,7 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         The `AxesImage` object returned by `plt.imshow`.
     """
     import matplotlib.pyplot as plt
-    if kwargs.get('cmap', None) == 'viridis':
-        kwargs['cmap'] = viridis
+
     lo, hi, cmap = _get_display_range(image)
 
     kwargs.setdefault('interpolation', 'nearest')

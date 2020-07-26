@@ -25,23 +25,21 @@ References
 
 import numpy as np
 
-from ..._shared.utils import assert_nD
+from ..._shared.utils import check_nD
 from . import bilateral_cy
-from .generic import _handle_input
-
+from .generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
            out_dtype=None):
-
-    assert_nD(image, 2)
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
-                                                     out_dtype)
+    check_nD(image, 2)
+    image, selem, out, mask, n_bins = _preprocess_input(image, selem, out, mask,
+                                                    out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, max_bin=max_bin, s0=s0, s1=s1)
+         out=out, n_bins=n_bins, s0=s0, s1=s1)
 
     return out.reshape(out.shape[:2])
 
@@ -88,7 +86,7 @@ def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------
@@ -205,7 +203,7 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
 
     See also
     --------
-    skimage.filters.denoise_bilateral for a Gaussian bilateral filter.
+    denoise_bilateral
 
     Examples
     --------

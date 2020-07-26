@@ -18,9 +18,14 @@ by 4 values on each side:
 """
 from libc.math cimport ceil, floor
 
+import numpy as np
+cimport numpy as np
+from .fused_numerics cimport np_real_numeric, np_floats
 
-cdef inline Py_ssize_t round(double r) nogil:
-    return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
+cdef inline Py_ssize_t round(np_floats r) nogil:
+    return <Py_ssize_t>(
+        (r + <np_floats>0.5) if (r > <np_floats>0.0) else (r - <np_floats>0.5)
+    )
 
 cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) nogil:
     return one if one > two else two
@@ -28,62 +33,68 @@ cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) nogil:
 cdef inline Py_ssize_t fmin(Py_ssize_t one, Py_ssize_t two) nogil:
     return one if one < two else two
 
+# Redefine np_real_numeric to force cross type compilation
+# this allows the output type to be different than the input dtype
+# https://cython.readthedocs.io/en/latest/src/userguide/fusedtypes.html#fused-types-and-arrays
+ctypedef fused np_real_numeric_out:
+    np_real_numeric
 
-cdef inline double nearest_neighbour_interpolation(double* image,
-                                                   Py_ssize_t rows,
-                                                   Py_ssize_t cols, double r,
-                                                   double c, char mode,
-                                                   double cval) nogil:
+cdef inline void nearest_neighbour_interpolation(
+        np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
+        np_floats r, np_floats c, char mode, np_real_numeric cval,
+        np_real_numeric_out* out) nogil:
     """Nearest neighbour interpolation at a given position in the image.
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : double
+    r, c : np_float
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    value : np_float
         Interpolated value.
 
     """
 
-    return get_pixel2d(image, rows, cols, round(r), round(c), mode, cval)
+    out[0] = <np_real_numeric_out>get_pixel2d(
+        image, rows, cols, round(r), round(c), mode, cval)
 
 
-cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
-                                          Py_ssize_t cols, double r, double c,
-                                          char mode, double cval) nogil:
+cdef inline void bilinear_interpolation(
+        np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
+        np_floats r, np_floats c, char mode, np_real_numeric cval,
+        np_real_numeric_out* out) nogil:
     """Bilinear interpolation at a given position in the image.
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : double
+    r, c : np_float
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    value : numeric
         Interpolated value.
 
     """
-    cdef double dr, dc
+    cdef np_floats dr, dc
     cdef long minr, minc, maxr, maxc
 
     minr = <long>floor(r)
@@ -92,30 +103,36 @@ cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
     maxc = <long>ceil(c)
     dr = r - minr
     dc = c - minc
-    top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
-          + dc * get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode,
-                                    cval) \
-             + dc * get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
-    return (1 - dr) * top + dr * bottom
 
+    cdef np.float64_t top
+    cdef np.float64_t bottom
 
-cdef inline double quadratic_interpolation(double x, double[3] f) nogil:
+    cdef np_real_numeric top_left = get_pixel2d(image, rows, cols, minr, minc, mode, cval)
+    cdef np_real_numeric top_right = get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
+    cdef np_real_numeric bottom_left = get_pixel2d(image, rows, cols, maxr, minc, mode, cval)
+    cdef np_real_numeric bottom_right = get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
+
+    top = (1 - dc) * top_left + dc * top_right
+    bottom = (1 - dc) * bottom_left + dc * bottom_right
+    out[0] = <np_real_numeric_out> ((1 - dr) * top + dr * bottom)
+
+cdef inline np_floats quadratic_interpolation(np_floats x,
+                                              np_real_numeric[3] f) nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Quadratic interpolation.
 
     Parameters
     ----------
-    x : double
+    x : np_float
         Position in the interval [0, 2].
-    f : double[3]
+    f : real numeric[3]
         Function values at positions [0, 2].
 
     Returns
     -------
-    value : double
-        Interpolated value.
+    value : np_float
+        Interpolated value to be used in biquadratic_interpolation.
 
     """
     return (x * f[2] * (x - 1)) / 2 - \
@@ -123,30 +140,30 @@ cdef inline double quadratic_interpolation(double x, double[3] f) nogil:
                     (f[0] * (x - 1) * (x - 2)) / 2
 
 
-cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
-                                             Py_ssize_t cols, double r,
-                                             double c, char mode,
-                                             double cval) nogil:
+cdef inline void biquadratic_interpolation(
+        np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
+        np_floats r, np_floats c, char mode, np_real_numeric cval,
+        np_real_numeric_out* out) nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Biquadratic interpolation at a given position in the image.
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : double
+    r, c : np_float
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    out : np_real_numeric
         Interpolated value.
 
     """
@@ -154,11 +171,11 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
     cdef long r0 = <long>round(r) - 1
     cdef long c0 = <long>round(c) - 1
 
-    cdef double xr = r - r0
-    cdef double xc = c - c0
+    cdef np_floats xr = r - r0
+    cdef np_floats xc = c - c0
 
-    cdef double fc[3]
-    cdef double fr[3]
+    cdef np_real_numeric fc[3]
+    cdef np_floats fr[3]
 
     cdef long pr, pc
 
@@ -169,36 +186,46 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
                                  r0 + pr, c0 + pc, mode, cval)
         fr[pr] = quadratic_interpolation(xc, fc)
 
-    # cubic interpolation for interpolated values of each row
-    return quadratic_interpolation(xr, fr)
+    out[0] = <np_real_numeric_out>quadratic_interpolation(xr, fr)
 
 
-cdef inline double cubic_interpolation(double x, double[4] f) nogil:
+cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) nogil:
     """Cubic interpolation.
 
     Parameters
     ----------
-    x : double
+    x : np_float
         Position in the interval [0, 1].
-    f : double[4]
+    f : real numeric[4]
         Function values at positions [-1, 0, 1, 2].
 
     Returns
     -------
-    value : double
-        Interpolated value.
+    value : np_float
+        Interpolated value to be used in bicubic_interpolation.
 
     """
-    return \
-        f[1] + 0.5 * x * \
-            (f[2] - f[0] + x * \
-                (2.0 * f[0] - 5.0 * f[1] + 4.0 * f[2] - f[3] + x * \
-                    (3.0 * (f[1] - f[2]) + f[3] - f[0])))
+
+    # Explicitly cast a floating point literal to the other operand's type
+    # to prevent promoting operands unnecessarily to double precision
+    return (
+        f[1] + <np_floats>0.5 * x * (
+            f[2] - f[0] + x * (
+                <np_floats>2.0 * f[0] -
+                <np_floats>5.0 * f[1] +
+                <np_floats>4.0 * f[2] - f[3] + x * (
+                    <np_floats>3.0 * (f[1] - f[2]) + f[3] - f[0]
+                )
+            )
+        )
+    )
 
 
-cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
-                                         Py_ssize_t cols, double r, double c,
-                                         char mode, double cval) nogil:
+cdef inline void bicubic_interpolation(np_real_numeric* image,
+                                       Py_ssize_t rows, Py_ssize_t cols,
+                                       np_floats r, np_floats c, char mode,
+                                       np_real_numeric cval,
+                                       np_real_numeric_out* out) nogil:
     """Bicubic interpolation at a given position in the image.
 
     Interpolation using Catmull-Rom splines, based on the bicubic convolution
@@ -206,20 +233,20 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : double
+    r, c : np_float
         Position at which to interpolate.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    out : np_real_numeric
         Interpolated value.
 
     References
@@ -234,15 +261,14 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     cdef long c0 = <long>floor(c)
 
     # scale position to range [0, 1]
-    cdef double xr = r - r0
-    cdef double xc = c - c0
+    cdef np_floats xr = r - r0
+    cdef np_floats xc = c - c0
 
     r0 -= 1
     c0 -= 1
 
-    cdef double fc[4]
-    cdef double fr[4]
-
+    cdef np_real_numeric fc[4]
+    cdef np_floats fr[4]
     cdef long pr, pc
 
     # row-wise cubic interpolation
@@ -251,18 +277,17 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
             fc[pc] = get_pixel2d(image, rows, cols, pr + r0, pc + c0, mode, cval)
         fr[pr] = cubic_interpolation(xc, fc)
 
-    # cubic interpolation for interpolated values of each row
-    return cubic_interpolation(xr, fr)
+    out[0] = <np_real_numeric_out>cubic_interpolation(xr, fr)
 
-
-cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               long r, long c, char mode,
-                               double cval) nogil:
+cdef inline np_real_numeric get_pixel2d(np_real_numeric* image,
+                                        Py_ssize_t rows, Py_ssize_t cols,
+                                        long r, long c, char mode,
+                                        np_real_numeric cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols : int
         Shape of image.
@@ -270,32 +295,35 @@ cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Position at which to get the pixel.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    value : numeric
         Pixel value at given position.
 
     """
-    if mode == 'C':
+    if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols + c]
     else:
-        return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
+        return <np_real_numeric>(image[coord_map(rows, r, mode) * cols +
+                                       coord_map(cols, c, mode)])
 
 
-cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                               Py_ssize_t dims, long r, long c,
-                               long d, char mode, double cval) nogil:
+cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
+                                        Py_ssize_t rows, Py_ssize_t cols,
+                                        Py_ssize_t dims, Py_ssize_t r,
+                                        Py_ssize_t c, Py_ssize_t d, char mode,
+                                        np_real_numeric cval) nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
     ----------
-    image : double array
+    image : numeric array
         Input image.
     rows, cols, dims : int
         Shape of image.
@@ -303,24 +331,23 @@ cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
         Position at which to get the pixel.
     mode : {'C', 'W', 'S', 'E', 'R'}
         Wrapping mode. Constant, Wrap, Symmetric, Edge or Reflect.
-    cval : double
+    cval : numeric
         Constant value to use for constant mode.
 
     Returns
     -------
-    value : double
+    out : np_real_numeric
         Pixel value at given position.
-
     """
-    if mode == 'C':
+    if mode == b'C':
         if (r < 0) or (r >= rows) or (c < 0) or (c >= cols):
             return cval
         else:
             return image[r * cols * dims + c * dims + d]
     else:
-        return image[coord_map(rows, r, mode) * cols * dims
-                     + coord_map(cols, c, mode) * dims
-                     + coord_map(dims, d, mode)]
+        return image[coord_map(rows, r, mode) * cols * dims +
+                     coord_map(cols, c, mode) * dims +
+                     coord_map(dims, d, mode)]
 
 
 cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
@@ -337,7 +364,7 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
         coordinate if `coord` falls outside [0, dim).
     """
     cdef Py_ssize_t cmax = dim - 1
-    if mode == 'S': # symmetric
+    if mode == b'S': # symmetric
         if coord < 0:
             coord = -coord - 1
         if coord > cmax:
@@ -345,17 +372,17 @@ cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
                 return <Py_ssize_t>(cmax - (coord % dim))
             else:
                 return <Py_ssize_t>(coord % dim)
-    elif mode == 'W': # wrap
+    elif mode == b'W': # wrap
         if coord < 0:
             return <Py_ssize_t>(cmax - ((-coord - 1) % dim))
         elif coord > cmax:
             return <Py_ssize_t>(coord % dim)
-    elif mode == 'E': # edge
+    elif mode == b'E': # edge
         if coord < 0:
             return 0
         elif coord > cmax:
             return cmax
-    elif mode == 'R': # reflect (mirror)
+    elif mode == b'R': # reflect (mirror)
         if dim == 1:
             return 0
         elif coord < 0:

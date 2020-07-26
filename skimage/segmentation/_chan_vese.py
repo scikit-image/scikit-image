@@ -258,7 +258,7 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3, max_iter=500,
     boundary of the segmented region.
 
     This algorithm was first proposed by Tony Chan and Luminita Vese,
-    in a publication entitled "An Active Countour Model Without Edges"
+    in a publication entitled "An Active Contour Model Without Edges"
     [1]_.
 
     This implementation of the algorithm is somewhat simplified in the

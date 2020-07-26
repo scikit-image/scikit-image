@@ -3,8 +3,8 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j 1
-SPHINXBUILD   ?= python $(shell which sphinx-build)
+SPHINXOPTS    ?= -j $(shell nproc || getconf _NPROCESSORS_ONLN || 1)
+SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
 
@@ -47,7 +47,11 @@ api:
 
 release_notes:
 	@echo "Copying release notes"
-	@tail -n +4 `ls release/*.rst | sort -k 2 -t . -n | tail -n 1` > release/_release_notes_for_docs.rst
+	@cat `$(PYTHON) -c \
+		"from pathlib import Path; from skimage import io; \
+		 l = list(str(e) for e in Path('release').glob('release_*.*.*')); \
+		 l.sort(key=io.collection.alphanumeric_key); print(l[-1])"` \
+		| tail -n +4 > release/_release_notes_for_docs.rst
 
 html: api release_notes
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
@@ -129,8 +133,8 @@ gh-pages:
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
-	--project-url=http://scikit-image.org \
-	--project-ml-url=https://mail.python.org/mailman/listinfo/scikit-image \
+	--project-url=https://scikit-image.org \
+	--project-ml-url=https://mail.python.org/mailman3/lists/scikit-image.python.org/ \
 	--repo-name=scikit-image \
 	--github-user=scikit-image \
 	--source-suffix=.rst

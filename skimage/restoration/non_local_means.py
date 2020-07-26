@@ -1,4 +1,6 @@
 import numpy as np
+from warnings import warn
+from .._shared.utils import convert_to_float
 from ._nl_means_denoising import (
     _nl_means_denoising_2d,
     _nl_means_denoising_3d,
@@ -7,9 +9,9 @@ from ._nl_means_denoising import (
 
 
 def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
-                     multichannel=False, fast_mode=True, sigma=0.):
-    """
-    Perform non-local means denoising on 2-D or 3-D grayscale images, and
+                     multichannel=False, fast_mode=True, sigma=0., *,
+                     preserve_range=None):
+    """Perform non-local means denoising on 2-D or 3-D grayscale images, and
     2-D RGB images.
 
     Parameters
@@ -38,6 +40,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
         The standard deviation of the (Gaussian) noise.  If provided, a more
         robust computation of patch weights is computed that takes the expected
         noise variance into account (see Notes below).
+    preserve_range : bool, optional
+        Whether to keep the original range of values. Otherwise, the input
+        image is converted according to the conventions of `img_as_float`.
+        Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
 
     Returns
     -------
@@ -70,7 +76,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     The computing time depends only weakly on the patch size, thanks to
     the computation of the integral of patches distances for a given
     shift, that reduces the number of operations [1]_. Therefore, this
-    algorithm executes faster than the classic algorith
+    algorithm executes faster than the classic algorithm
     (``fast_mode=False``), at the expense of using twice as much memory.
     This implementation has been proven to be more efficient compared to
     other alternatives, see e.g. [3]_.
@@ -125,6 +131,7 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     >>> a[10:-10, 10:-10] = 1.
     >>> a += 0.3 * np.random.randn(*a.shape)
     >>> denoised_a = denoise_nl_means(a, 7, 5, 0.1)
+
     """
     if image.ndim == 2:
         image = image[..., np.newaxis]
@@ -132,16 +139,26 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     if image.ndim != 3:
         raise NotImplementedError("Non-local means denoising is only \
         implemented for 2D grayscale and RGB images or 3-D grayscale images.")
-    nlm_kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
+
+    if preserve_range is None and np.issubdtype(image.dtype, np.integer):
+        warn('Image dtype is not float. By default denoise_nl_means will '
+             'assume you want to preserve the range of your image '
+             '(preserve_range=True). In scikit-image 0.19 this behavior will '
+             'change to preserve_range=False. To avoid this warning, '
+             'explicitly specify the preserve_range parameter.',
+             stacklevel=2)
+        preserve_range = True
+
+    image = convert_to_float(image, preserve_range)
+
+    kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if multichannel:  # 2-D images
         if fast_mode:
-            return np.squeeze(
-                np.asarray(_fast_nl_means_denoising_2d(image, **nlm_kwargs)))
+            return _fast_nl_means_denoising_2d(image, **kwargs)
         else:
-            return np.squeeze(
-                np.asarray(_nl_means_denoising_2d(image, **nlm_kwargs)))
+            return _nl_means_denoising_2d(image, **kwargs)
     else:  # 3-D grayscale
         if fast_mode:
-            return np.asarray(_fast_nl_means_denoising_3d(image, **nlm_kwargs))
+            return _fast_nl_means_denoising_3d(image, **kwargs)
         else:
-            return np.asarray(_nl_means_denoising_3d(image, **nlm_kwargs))
+            return _nl_means_denoising_3d(image, **kwargs)
