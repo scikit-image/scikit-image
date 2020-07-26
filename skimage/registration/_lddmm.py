@@ -50,8 +50,7 @@ r'''
 #TODO: add attributes used to docstrings, check for natural groupings.
 class _Lddmm:
     """
-    Class for storing shared values and objects used in registration and performing the registration via methods.
-    Accessed in a functional manner via the lddmm_register function; it instantiates an _Lddmm object and calls its register method.
+    Class for storing shared values and objects used in learning a registration at a single scale.
     """
 
     def __init__(
@@ -95,10 +94,13 @@ class _Lddmm:
         initial_affine=None,
         initial_contrast_coefficients=None,
         initial_velocity_fields=None,
-        # Diagnostic outputs.
+        # Diagnostic accumulators.
+        affines=None,
+        maximum_velocities=None,
+        matching_energies=None,
+        regularization_energies=None,
+        total_energies=None,
         track_progress_every_n=None,
-        # Output specifiers.
-        map_coordinates_ify=None,
     ):
 
         # Constant inputs.
@@ -150,11 +152,14 @@ class _Lddmm:
         if self.artifact_prior + self.background_prior >= 1:
             raise ValueError(f"artifact_prior and background_prior must sum to less than 1.")
 
-        # Diagnostic outputs.
+        # Diagnostic accumulators.
+        self.affines = list(affines) if affines is not None else []
+        self.maximum_velocities = list(maximum_velocities) if maximum_velocities is not None else []
+        self.maximum_velocities += [0] * self.num_affine_only_iterations
+        self.matching_energies = list(matching_energies) if matching_energies is not None else []
+        self.regularization_energies = list(regularization_energies) if regularization_energies is not None else []
+        self.total_energies = list(total_energies) if total_energies is not None else []
         self.track_progress_every_n = int(track_progress_every_n) if track_progress_every_n is not None else 0
-
-        # Output specifiers.
-        self.map_coordinates_ify = bool(map_coordinates_ify) if map_coordinates_ify is not None else True
 
         # Constructions.
 
@@ -201,9 +206,17 @@ class _Lddmm:
             self.velocity_fields = _validate_ndarray(initial_velocity_fields, required_shape=(*self.template.shape, self.num_timesteps, self.template.ndim))
         else:
             self.velocity_fields = np.zeros((*self.template.shape, self.num_timesteps, self.template.ndim))
+        # Note: If a transformation T maps a point in the space of the template to a point in the space of the target, as affine_phi, 
+        # the template image is deformed using T_inv, or phi_inv_affine_inv via interpolation of the target at phi_inv_affine_inv.
+        # phi: A position-field that describes change in shape, or deformation, of the template but not change in scale or orientation. Stored in template-space.
         self.phi = np.copy(self.template_coords)
+        # affine_phi: A position-field that composes of phi then affine that describes change in shape, i.e. deformation, and change in scale and orientation. Stored in template-space.
+        # This is used for transforming images in target-space to template-space by interpolation.
         self.affine_phi = np.copy(self.template_coords)
+        # phi_inv: A position-field that describes the inverse change in shape, or deformation, of the template but not change in scale or orientation. Stored in template-space.
         self.phi_inv = np.copy(self.template_coords)
+        # phi_inv_affine_inv: A position-field that composes affine_inv then phi_inv that describes change in shape, i.e. deformation, and change in scale and orientation. Stored in target-space.
+        # This is used for transforming images in template-space to target-space by interpolation.
         self.phi_inv_affine_inv = np.copy(self.target_coords)
         self.fourier_velocity_fields = np.zeros_like(self.velocity_fields, np.complex128)
         self.matching_weights = np.ones_like(self.target)
@@ -231,13 +244,6 @@ class _Lddmm:
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = self.deformed_template**power
         self.contrast_deformed_template = np.sum(self.contrast_polynomial_basis * self.contrast_coefficients, axis=-1) # Initialized value not used.
-
-        # Accumulators.
-        self.matching_energies = []
-        self.regularization_energies = []
-        self.total_energies = []
-        self.affines = []
-        self.maximum_velocities = [0] * self.num_affine_only_iterations
 
         # Preempt known error.
         if np.any(np.array(self.template.shape) == 1) or np.any(np.array(self.target.shape) == 1):
@@ -294,51 +300,24 @@ class _Lddmm:
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
 
-        # Unless requested in physical-space, convert centered, physical-space position fields to voxel-space position fields.
-        if self.map_coordinates_ify:
-            # Subtract the vector at spatial indices 0, divide by the resolution of the coordinates, and move the coordinate axis to the front.
-            self.phi = np.moveaxis((self.phi - self.phi.reshape(-1, self.template.ndim)[0]) / self.target_resolution, -1, 0)
-            self.phi_inv = np.moveaxis((self.phi_inv - self.phi_inv.reshape(-1, self.template.ndim)[0]) / self.template_resolution, -1, 0)
-            self.affine_phi = np.moveaxis((self.affine_phi - self.affine_phi.reshape(-1, self.template.ndim)[0]) / self.target_resolution, -1, 0)
-            self.phi_inv_affine_inv = np.moveaxis((self.phi_inv_affine_inv - self.phi_inv_affine_inv.reshape(-1, self.template.ndim)[0]) / self.template_resolution, -1, 0)
-        
-        # Define namedtuple objects for lddmm output.
-        Lddmm = namedtuple('Lddmm', ('target_to_template_transform', 'template_to_target_transform', 'transform_components', 'diagnostics'))
-        Transform_components = namedtuple('Transform_components', ('template_to_target_affine', 'target_to_template_deformation', 'template_to_target_deformation'))
-        Diagnostics = namedtuple('Diagnostics', ('matching_energies, regularization_energies, total_energies'))
+        # Note: this dictionary output is not strictly the same as the output of the user-level lddmm_register function.
+        # return dict(
+        #     # Core.
+        #     affine=self.affine,
+        #     phi=self.phi,
+        #     phi_inv=self.phi_inv,
+        #     affine_phi=self.affine_phi,
+        #     phi_inv_affine_inv=self.phi_inv_affine_inv,
+        #     contrast_coefficients=self.contrast_coefficients,
+        #     velocity_fields=self.velocity_fields,
 
-        # Construct lddmm output.
-        transform_components = Transform_components(self.affine, self.phi, self.phi_inv)
-        diagnostics = Diagnostics(self.matching_energies, self.regularization_energies, self.total_energies)
-        lddmm = Lddmm(self.affine_phi, self.phi_inv_affine_inv, transform_components, diagnostics)
-
-        # Return constructed lddmm output.
-        return lddmm
-
-        # Note: the user-level lddmm_transform_image function relies on many of these specific outputs with these specific keys to function. 
-        # ----> Check the lddmm_transform_image function signature before adjusting these outputs.
-        return dict(
-            # Core.
-            affine=self.affine,
-            phi=self.phi,
-            phi_inv=self.phi_inv,
-            affine_phi=self.affine_phi,
-            phi_inv_affine_inv=self.phi_inv_affine_inv,
-            contrast_coefficients=self.contrast_coefficients,
-            velocity_fields=self.velocity_fields,
-
-            # Helpers.
-            template_resolution=self.template_resolution,
-            target_resolution=self.target_resolution,
-
-            # Accumulators.
-            matching_energies=self.matching_energies,
-            regularization_energies=self.regularization_energies,
-            total_energies=self.total_energies,
-
-            # Debuggers.
-            lddmm=self,
-        )
+        #     # Accumulators.
+        #     affines=self.affines,
+        #     maximum_velocities=self.maximum_velocities,
+        #     matching_energies=self.matching_energies,
+        #     regularization_energies=self.regularization_energies,
+        #     total_energies=self.total_energies,
+        # )
         # TODO:
         '''
         a new take on the return 'value':
@@ -1006,10 +985,10 @@ def lddmm_register(
     initial_affine=None,
     initial_contrast_coefficients=None,
     initial_velocity_fields=None,
-    # Diagnostic outputs.
+    # Diagnostic accumulators.
     track_progress_every_n=None,
     # Output specifiers.
-    map_coordinates_ify=None,
+    map_coordinates_ify=True,
 ):
     """
     Compute a registration between grayscale images template and target, to be applied with scipy.ndimage.map_coordinates.
@@ -1049,6 +1028,7 @@ def lddmm_register(
         sigma_regularization: float, optional
             A scalar indicating the freedom to deform. Small values put harsher constraints on the smoothness of a deformation. 
             With sufficiently large values, the registration will overfit any noise in the target, leading to unrealistic deformations. However, this may still be appropriate with a small num_iterations. 
+            Note that if deformative_stepsize / sigma_regularization**2 is not much less than 1, an error may occur.
             Overrides 0 input. By default np.inf.
         velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical units. Affects the optimum velocity_fields smoothness. By default 2 * np.max(self.template_resolution).
@@ -1197,14 +1177,19 @@ def lddmm_register(
         # initial_affine=initial_affine,
         # initial_contrast_coefficients=initial_contrast_coefficients,
         # initial_velocity_fields=initial_velocity_fields,
-        # Diagnostic outputs.
+        # Diagnostic outputs. TODO: deprecate track_progress_every_n.
         track_progress_every_n=track_progress_every_n,
-        # Output specifiers.
-        map_coordinates_ify=map_coordinates_ify,
     )
     for multiscale_kwarg_name, multiscale_kwarg_value in multiscale_lddmm_kwargs.items():
         multiscale_lddmm_kwargs[multiscale_kwarg_name] = _validate_scalar_to_multi(multiscale_kwarg_value, size=len(multiscales), dtype=None)
     # Each value in the multiscale_lddmm_kwargs dictionary is an array with shape (len(multiscales)).
+
+    # Initialize diagnostic accumulators to None.
+    affines = None
+    maximum_velocities = None
+    matching_energies = None
+    regularization_energies = None
+    total_energies = None
 
     for scale_index, scale in enumerate(multiscales):
 
@@ -1222,6 +1207,7 @@ def lddmm_register(
         scaled_target_resolution = target_resolution / target_scale
 
         # Collect non-multiscale_lddmm_kwargs
+        # Note: user arguments initial_affine, initial_contrast_coefficients, and initial_velocity_fields are overwritten in this loop.
         multiscale_exempt_lddmm_kwargs = dict(
             # Images.
             template=scaled_template,
@@ -1229,11 +1215,16 @@ def lddmm_register(
             # Image resolutions.
             template_resolution=scaled_template_resolution,
             target_resolution=scaled_target_resolution,
-
             # Initial values.
             initial_affine=initial_affine,
             initial_contrast_coefficients=initial_contrast_coefficients,
             initial_velocity_fields=initial_velocity_fields,
+            # Diagnostic accumulators.
+            affines=affines,
+            maximum_velocities=maximum_velocities,
+            matching_energies=matching_energies,
+            regularization_energies=regularization_energies,
+            total_energies=total_energies,
         )
 
         # Perform registration.
@@ -1241,32 +1232,63 @@ def lddmm_register(
         # Set up _Lddmm instance.
         lddmm = _Lddmm(**this_scale_lddmm_kwargs, **multiscale_exempt_lddmm_kwargs)
 
-        lddmm_dict = lddmm.register()
+        lddmm.register()
 
         # Overwrite initials for next scale if applicable.
         if scale_index < len(multiscales) - 1:
+            # Initial diagnostic accumulators.
+            affines = lddmm.affines
+            maximum_velocities = lddmm.maximum_velocities
+            matching_energies = lddmm.matching_energies
+            regularization_energies = lddmm.regularization_energies
+            total_energies = lddmm.total_energies
             # initial_affine.
-            initial_affine = lddmm_dict['affine']
+            initial_affine = lddmm.affine
             # initial_contrast_coefficients.
             if multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1] and multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
                 # If spatially_varying_contrast_map at next scale and at this scale, resize contrast_coefficients.
                 next_target_shape = np.round(multiscales[scale_index + 1] * target.shape)
-                initial_contrast_coefficients = resize(lddmm_dict['contrast_coefficients'], (*next_target_shape, multiscale_lddmm_kwargs['contrast_order'][scale_index + 1] + 1))
+                initial_contrast_coefficients = resize(lddmm.contrast_coefficients, (*next_target_shape, multiscale_lddmm_kwargs['contrast_order'][scale_index + 1] + 1))
             elif not multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index + 1] and multiscale_lddmm_kwargs['spatially_varying_contrast_map'][scale_index]:
                     # If spatially_varying_contrast_map at this scale but not at next scale, average contrast_coefficients.
-                    initial_contrast_coefficients = np.mean(lddmm_dict['contrast_coefficients'], axis=np.arange(template.ndim))
+                    initial_contrast_coefficients = np.mean(lddmm.contrast_coefficients, axis=np.arange(template.ndim))
             else:
                 # If spatially_varying_contrast_map at next scale but not this scale or at neither scale, initialize directly.
-                initial_contrast_coefficients = lddmm_dict['contrast_coefficients']
+                initial_contrast_coefficients = lddmm.contrast_coefficients
             # initial_velocity_fields.
             next_template_shape = np.round(multiscales[scale_index + 1] * template.shape)
-            initial_velocity_fields = sinc_resample(lddmm_dict['velocity_fields'], new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
+            initial_velocity_fields = sinc_resample(lddmm.velocity_fields, new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
         
         # End multiscales loop.
     
-    return lddmm_dict
+    # If map_coordinates_ify, convert centered, physical-space position-fields to voxel-space position-fields.
+    if map_coordinates_ify:
+        temp_to_tar = lddmm.phi_inv_affine_inv.copy()
+        tar_to_temp = lddmm.affine_phi.copy()
+        # resize to match the shape of the appropriate image, 
+        # subtract the identity coordinate vector at spatial indices 0, 
+            # (assuming centered coordinates)
+        # divide by the original resolution of the image, 
+        # and move the coordinate axis to the front.
+        lddmm.phi = np.moveaxis((resize(lddmm.phi, (*template.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+        lddmm.phi_inv = np.moveaxis((resize(lddmm.phi_inv, (*template.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+        lddmm.affine_phi = np.moveaxis((resize(lddmm.affine_phi, (*template.shape, 3)) - (-np.subtract(target.shape, 1) / 2 * target_resolution)) / target_resolution, -1, 0)
+        lddmm.phi_inv_affine_inv = np.moveaxis((resize(lddmm.phi_inv_affine_inv, (*target.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+
+    # Define namedtuple objects for lddmm_output.
+    Lddmm_output = namedtuple('Lddmm_output', ('target_to_template_transform', 'template_to_target_transform', 'internals', 'diagnostics', 'temp_to_tar', 'tar_to_temp'))
+    Internals = namedtuple('Internals', ('affine', 'contrast_coefficients', 'velocity_fields', 'template_deformation', 'template_deformation_inverse'))
+    Diagnostics = namedtuple('Diagnostics', ('affines', 'maximum_velocities', 'matching_energies', 'regularization_energies', 'total_energies'))
+
+    # Construct lddmmoutput.
+    internals = Internals(lddmm.affine, lddmm.contrast_coefficients, lddmm.velocity_fields, lddmm.phi, lddmm.phi_inv)
+    diagnostics = Diagnostics(lddmm.affines, lddmm.maximum_velocities, lddmm.matching_energies, lddmm.regularization_energies, lddmm.total_energies)
+    lddmm_output = Lddmm_output(lddmm.affine_phi, lddmm.phi_inv_affine_inv, internals, diagnostics, temp_to_tar, tar_to_temp)
+
+    return lddmm_output
 
 
+# TODO: Move into _lddmm_utilities.py.
 def generate_position_field(
     affine,
     velocity_fields,
