@@ -117,12 +117,14 @@ generate_calibration_plots(
 
 # Apply registration to template and target.
 """
-The registration can be reasonably applied to any image in the template or target space
+The registration can be reasonably applied to any image in the template or target space 
     by substituting it for the corresponding image (template or target) as the input argument of map_coordinates 
-    and multiplying the coordinates by different_image.shape / replaced_image.shape.
+    and multiplying the coordinates by different_image.shape / replaced_image.shape. 
+    We demonstrate this by using rescaled versions of template and target to imitate different images in the same spaces.
 
 The registration can be applied at arbitrary resolution by first multiplying the coordinates by the factor change in resolution 
-    and then resampling the coordinates to the desired resolution.
+    and then resampling the coordinates to the desired resolution. 
+    We demonstrate this by applying at the same resolution as our rescaled template and target to get deformed images of the same shape.
     
 The position-fields (transforms) output by the registration have the same shape as (are at the resolution of) the template and target 
     regardless of the scale the registration was computed at, see the multiscales parameter.
