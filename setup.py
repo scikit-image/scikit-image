@@ -7,6 +7,7 @@ import shutil
 import builtins
 import textwrap
 
+from numpy.distutils.command.build_ext import build_ext
 import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
