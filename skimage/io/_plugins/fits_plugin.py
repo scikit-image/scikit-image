@@ -32,7 +32,6 @@ def imread(fname):
 
     Notes
     -----
-
     Currently FITS ``imread()`` always returns the first image extension when
     given a Multi-Extension FITS file; use ``imread_collection()`` (which does
     lazy loading) to get all the extensions at once.
@@ -58,20 +57,19 @@ def imread(fname):
 def imread_collection(load_pattern, conserve_memory=True):
     """Load a collection of images from one or more FITS files
 
-       Parameters
-       ----------
-       load_pattern : str or list
-           List of extensions to load. Filename globbing is currently
-           unsupported.
-       converve_memory : bool
-           If True, never keep more than one in memory at a specific
-           time. Otherwise, images will be cached once they are loaded.
+    Parameters
+    ----------
+    load_pattern : str or list
+        List of extensions to load. Filename globbing is currently
+        unsupported.
+    converve_memory : bool
+        If True, never keep more than one in memory at a specific
+        time. Otherwise, images will be cached once they are loaded.
 
-       Returns
-       -------
-
-       ic : ImageCollection
-           Collection of images.
+    Returns
+    -------
+    ic : ImageCollection
+        Collection of images.
 
     """
 
@@ -110,7 +108,6 @@ def FITSFactory(image_ext):
 
     Parameters
     ----------
-
     image_ext : tuple
         FITS extension to load, in the format ``(filename, ext_num)``.
         The FITS ``(extname, extver)`` format is unsupported, since this

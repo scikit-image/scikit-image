@@ -25,6 +25,7 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
 
     """
     grid = np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij')
+    grid = np.stack(grid)
     gt_flow = np.zeros_like(grid)
     gt_flow[0, ...] = max_motion * np.sin(grid[0]/grid[0].max()*npics*np.pi)
     image1 = warp(image0, grid-gt_flow, mode='nearest')

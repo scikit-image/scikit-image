@@ -47,11 +47,11 @@ class LineModelND(BaseModel):
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
-    >>> lm.estimate(np.array([x, y]).T)
+    >>> lm.estimate(np.stack([x, y], axis=-1))
     True
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
-    >>> res = lm.residuals(np.array([x, y]).T)
+    >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -277,12 +277,12 @@ class CircleModel(BaseModel):
         sum_x = np.sum(x)
         sum_y = np.sum(y)
         sum_xy = np.sum(x * y)
-        m1 = np.array([[np.sum(x ** 2), sum_xy, sum_x],
+        m1 = np.stack([[np.sum(x ** 2), sum_xy, sum_x],
                        [sum_xy, np.sum(y ** 2), sum_y],
                        [sum_x, sum_y, float(len(x))]])
-        m2 = np.array([[np.sum(x * x2y2),
+        m2 = np.stack([[np.sum(x * x2y2),
                         np.sum(y * x2y2),
-                        np.sum(x2y2)]]).T
+                        np.sum(x2y2)]], axis=-1)
         a, b, c = pinv(m1) @ m2
         a, b, c = a[0], b[0], c[0]
         xc = a / 2

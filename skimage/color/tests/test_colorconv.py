@@ -728,7 +728,6 @@ def test_gray2rgba_alpha():
                                     (4, 5, 4, 5, 3)]))
 def test_nD_gray_conversion(func, shape):
     img = np.random.rand(*shape)
-    out = func(img)
 
     msg_list = []
     if img.ndim == 3 and func == gray2rgb:

@@ -45,7 +45,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     # Temporarily set background color; it will be removed later.
     if bg_color is None:
         bg_color = (0, 0, 0)
-    bg_color = _rgb_vector([bg_color])
+    bg_color = _rgb_vector(bg_color)
 
     # map labels to their ranks among all labels from small to large
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
@@ -66,7 +66,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
     # Modify labels and color cycle so background color is used only once.
     color_cycle = itertools.cycle(colors)
-    color_cycle = itertools.chain(bg_color, color_cycle)
+    color_cycle = itertools.chain([bg_color], color_cycle)
 
     return mapped_labels, color_cycle
 
@@ -190,7 +190,7 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
 
     dense_labels = range(max(mapped_labels_flat) + 1)
 
-    label_to_color = np.array([c for i, c in zip(dense_labels, color_cycle)])
+    label_to_color = np.stack([c for i, c in zip(dense_labels, color_cycle)])
 
     mapped_labels = label
     mapped_labels.flat = mapped_labels_flat
@@ -223,7 +223,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     out : array, same shape and type as `image`
         The output visualization.
     """
-    out = np.zeros_like(image)
+    out = np.zeros(label_field.shape + (3,))
     labels = np.unique(label_field)
     bg = (labels == bg_label)
     if bg.any():

@@ -2,6 +2,8 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 from .. import measure
+from ..filters import rank_order
+from .._shared.utils import remove_arg
 
 
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
@@ -121,6 +123,7 @@ def _get_excluded_border_width(image, min_distance, exclude_border):
     return border_width
 
 
+@remove_arg("indices", changed_version="0.20")
 def peak_local_max(image, min_distance=1, threshold_abs=None,
                    threshold_rel=None, exclude_border=True, indices=True,
                    num_peaks=np.inf, footprint=None, labels=None,
@@ -166,7 +169,10 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
         coordinates. The coordinates are sorted according to peaks
         values (Larger first). If False, the output will be a boolean
         array shaped as `image.shape` with peaks present at True
-        elements.
+        elements. ``indices`` is deprecated and will be removed in
+        version 0.20. Default behavior will be to always return peak
+        coordinates. You can obtain a mask as shown in the example
+        below.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
@@ -228,8 +234,12 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
-    >>> peak_local_max(img2, exclude_border=0)
+    >>> peak_idx = peak_local_max(img2, exclude_border=0)
+    >>> peak_idx
     array([[10, 10, 10]])
+
+    >>> peak_mask = np.zeros_like(img2, dtype=bool)
+    >>> peak_mask[peak_idx] = True
 
     """
     border_width = _get_excluded_border_width(image, min_distance,

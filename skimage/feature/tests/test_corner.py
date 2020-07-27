@@ -15,6 +15,7 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_kitchen_rosenfeld, corner_foerstner,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
+                             structure_tensor_eigenvalues,
                              hessian_matrix, hessian_matrix_eigvals,
                              hessian_matrix_det, shape_index)
 
@@ -31,22 +32,33 @@ def im3d():
 def test_structure_tensor():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    assert_array_equal(Axx, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  0,  1,  0],
-                                      [ 0,  4,  0,  4,  0],
-                                      [ 0,  1,  0,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Axy, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  0, -1,  0],
-                                      [ 0,  0,  0, -0,  0],
-                                      [ 0, -1, -0,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
-    assert_array_equal(Ayy, np.array([[ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  4,  1,  0],
-                                      [ 0,  0,  0,  0,  0],
-                                      [ 0,  1,  4,  1,  0],
-                                      [ 0,  0,  0,  0,  0]]))
+    Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
+    assert_array_equal(Acc, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 0, 1, 0],
+                                      [0, 4, 0, 4, 0],
+                                      [0, 1, 0, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Arc, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 0, -1, 0],
+                                      [0, 0, 0, -0, 0],
+                                      [0, -1, -0, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Arr, np.array([[0, 0, 0, 0, 0],
+                                      [0, 1, 4, 1, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 1, 4, 1, 0],
+                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_orders():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    with expected_warnings(['the default order of the structure']):
+        A_elems_default = structure_tensor(square, sigma=0.1)
+    A_elems_xy = structure_tensor(square, sigma=0.1, order='xy')
+    A_elems_rc = structure_tensor(square, sigma=0.1, order='rc')
+    assert_array_equal(A_elems_xy, A_elems_default)
+    assert_array_equal(A_elems_xy, A_elems_rc[::-1])
 
 
 def test_hessian_matrix():
@@ -85,11 +97,11 @@ def test_hessian_matrix_3d():
                                                   [0,  0,  0,  0,  0]]))
 
 
-def test_structure_tensor_eigvals():
+def test_structure_tensor_eigenvalues():
     square = np.zeros((5, 5))
     square[2, 2] = 1
-    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
-    l1, l2 = structure_tensor_eigvals(Axx, Axy, Ayy)
+    A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    l1, l2 = structure_tensor_eigenvalues(A_elems)
     assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
                                      [0, 2, 4, 2, 0],
                                      [0, 4, 0, 4, 0],
@@ -100,6 +112,16 @@ def test_structure_tensor_eigvals():
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigvals():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    A_elems = structure_tensor(square, sigma=0.1, order='rc')
+    with expected_warnings(['structure_tensor_eigvals is deprecated']):
+        eigvals = structure_tensor_eigvals(*A_elems)
+    eigenvalues = structure_tensor_eigenvalues(A_elems)
+    assert_array_equal(eigvals, eigenvalues)
 
 
 def test_hessian_matrix_eigvals():

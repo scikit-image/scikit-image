@@ -41,8 +41,6 @@ sigma = 0.2
 noisy = random_noise(image, var=sigma ** 2)
 
 # Parameters to test when calibrating the denoising algorithm
-sigma_range = np.arange(0.05, 0.5, 0.05)
-
 parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
                     'wavelet': ['db1', 'db2'],
                     'convert2ycbcr': [True, False],
