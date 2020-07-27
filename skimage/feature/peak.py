@@ -281,7 +281,7 @@ def peak_local_max(image, min_distance=1, threshold_abs=None,
                                                     min_distance,
                                                     p_norm)
 
-            # transform the coordinate in gloal image indices space
+            # transform coordinates in global image indices space
             for idx, s in enumerate(obj):
                 coordinates[:, idx] += s.start
 
