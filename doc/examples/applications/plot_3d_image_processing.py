@@ -266,10 +266,16 @@ plot_hist(f, gamma_high)
 
 equalized_data = exposure.equalize_hist(data)
 
+display(equalized_data)
+
+#####################################################################
+# As before, if we have a Jupyter kernel running, we can explore the above
+# slices interactively.
+
 explore_slices(equalized_data);
 
 #####################################################################
-# Let us plot the image histogram before and after histogram equalization.
+# Let us now plot the image histogram before and after histogram equalization.
 # Below, we plot the respective cumulative distribution functions (CDF).
 
 _, ((a, b), (c, d)) = plt.subplots(nrows=2, ncols=2, figsize=(16, 8))
@@ -300,4 +306,4 @@ clipped_data = exposure.rescale_intensity(
     out_range=np.float32
 )
 
-explore_slices(clipped_data);
+display(clipped_data)
