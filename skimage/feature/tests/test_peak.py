@@ -195,7 +195,9 @@ class TestPeakLocalMax():
         nd_image[2, 2, 2] = 1
         expected = np.zeros_like(nd_image, dtype=np.bool)
         expected[2, 2, 2] = True
-        expectedNoBorder = nd_image > 0
+        expectedNoBorder = np.zeros_like(nd_image, dtype=bool)
+        expectedNoBorder[0, 0, 1] = True
+        expectedNoBorder[3, 0, 0] = True
         with expected_warnings(["indices argument is deprecated"]):
             result = peak.peak_local_max(nd_image, min_distance=2,
                                          exclude_border=2, indices=False)
@@ -219,7 +221,8 @@ class TestPeakLocalMax():
                                     exclude_border=0, indices=False),
                 expectedNoBorder,
             )
-            assert_equal(
+        expectedNoBorder[2, 2, 2] = True
+        assert_equal(
                 peak.peak_local_max(nd_image,
                                     exclude_border=False, indices=False),
                 expectedNoBorder,
@@ -238,8 +241,8 @@ class TestPeakLocalMax():
     def test_empty_non2d_indices(self):
         image = np.zeros((10, 10, 10))
         result = peak.peak_local_max(image,
-                                     footprint=np.ones((3, 3), bool),
-                                     min_distance=1, threshold_rel=0,
+                                     footprint=np.ones((3, 3, 3), bool),
+                                     min_distance=0, threshold_rel=0,
                                      exclude_border=False)
         assert result.shape == (0, image.ndim)
 
@@ -358,14 +361,16 @@ class TestPeakLocalMax():
         image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
         with expected_warnings(["indices argument is deprecated"]):
-            result = peak.peak_local_max(image, labels=np.ones((10, 20)),
+            result = peak.peak_local_max(image,
+                                         labels=np.ones((10, 20), dtype=int),
                                          footprint=footprint,
-                                         min_distance=1, threshold_rel=0,
+                                         min_distance=0, threshold_rel=0,
                                          threshold_abs=-1, indices=False,
                                          exclude_border=False)
         assert np.all(result)
         with expected_warnings(["indices argument is deprecated"]):
-            result = peak.peak_local_max(image, footprint=footprint,
+            result = peak.peak_local_max(image, min_distance=0,
+                                         footprint=footprint,
                                          threshold_abs=-1,
                                          indices=False,
                                          exclude_border=False)
@@ -373,33 +378,33 @@ class TestPeakLocalMax():
 
     def test_3D(self):
         image = np.zeros((30, 30, 30))
-        image[15, 15, 15] = 1
+        image[16, 16, 16] = 1
         image[5, 5, 5] = 1
         assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[15, 15, 15]])
+                     [[16, 16, 16]])
         assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[15, 15, 15]])
+                     [[16, 16, 16]])
         assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                           exclude_border=False).tolist()) == \
-            [[5, 5, 5], [15, 15, 15]]
+            [[5, 5, 5], [16, 16, 16]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
-            [[5, 5, 5], [15, 15, 15]]
+            [[5, 5, 5], [16, 16, 16]]
 
     def test_4D(self):
         image = np.zeros((30, 30, 30, 30))
-        image[15, 15, 15, 15] = 1
+        image[16, 16, 16, 16] = 1
         image[5, 5, 5, 5] = 1
         assert_equal(peak.peak_local_max(image, min_distance=10, threshold_rel=0),
-                     [[15, 15, 15, 15]])
+                     [[16, 16, 16, 16]])
         assert_equal(peak.peak_local_max(image, min_distance=6, threshold_rel=0),
-                     [[15, 15, 15, 15]])
+                     [[16, 16, 16, 16]])
         assert sorted(peak.peak_local_max(image, min_distance=10, threshold_rel=0,
                                           exclude_border=False).tolist()) == \
-            [[5, 5, 5, 5], [15, 15, 15, 15]]
+            [[5, 5, 5, 5], [16, 16, 16, 16]]
         assert sorted(peak.peak_local_max(image, min_distance=5,
                                           threshold_rel=0).tolist()) == \
-            [[5, 5, 5, 5], [15, 15, 15, 15]]
+            [[5, 5, 5, 5], [16, 16, 16, 16]]
 
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))

@@ -2,7 +2,6 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 from .. import measure
-from ..filters import rank_order
 from .._shared.utils import remove_arg
 
 
