@@ -126,6 +126,11 @@ display(data)
 # Alternatively, we can explore these planes (slices) interactively using
 # Jupyter widgets. Let the user select which slice to display and show the
 # position of this slice in the 3D dataset.
+# Note that you cannot see the Jupyter widget at work in a static HTML page,
+# as is the case in the scikit-image gallery. For the following piece of
+# code to work, you need a Jupyter kernel running either locally or in the
+# cloud: see the bottom of this page to either download the Jupyter notebook
+# and run it on your computer, or open it directly in Binder.
 
 
 def slice_in_3D(ax, i):
