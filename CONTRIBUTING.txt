@@ -222,7 +222,7 @@ Guidelines
 * All code should be documented, to the same
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
-  sphinx_gallery_ below for more details).
+  :ref:`sphinx_gallery` below for more details).
 * No changes are ever committed without review and approval by two core
   team members.  Ask on the
   `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org/>`_ if
