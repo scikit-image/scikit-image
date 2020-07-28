@@ -398,9 +398,9 @@ can be installed using: ``scikit-image/requirements/docs.txt`` file.
 
 **Sphinx-Gallery:**
 
-The above-mentioned command includes the installation of Sphinx-Gallery.
-The gallery of :ref:`examples_gallery`
-is created using `Sphinx-Gallery <https://sphinx-gallery.github.io>`_.
+The above install command includes the installation of
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_, which we use to create
+the :ref:`examples_gallery`.
 Refer to that page for complete instructions on syntax and usage.
 
 If you are contributing an example to the gallery or editing an existing one,
