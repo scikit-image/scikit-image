@@ -66,3 +66,34 @@ class Skeletonize3d(object):
 
     def peakmem_skeletonize_3d(self):
         morphology.skeletonize(self.image)
+
+
+class RollingBall(object):
+    """Benchmark for Rolling Ball algorithm in scikit-image."""
+    params = [25, 50, 75, 100, 150, 200]
+    param_names = ["radius"]
+
+    def setup(self):
+        self.black_bg = data.coins()
+
+    def time_rollingball(self, radius):
+        rolling_ball(self.black_bg, radius=radius)
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        Peakmem benchmarks measure the maximum amount of RAM used by a
+        function. However, this maximum also includes the memory used
+        during the setup routine (as of asv 0.2.1; see [1]_).
+        Measuring an empty peakmem function might allow us to disambiguate
+        between the memory used by setup and the memory used by target (see
+        other ``peakmem_`` functions below).
+
+        References
+        ----------
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_rollingball(self, radius):
+        rolling_ball(self.black_bg, radius=radius)
