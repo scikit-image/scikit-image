@@ -84,7 +84,7 @@ except TypeError as e:
     print(str(e))
 
 #####################################################################
-# Function `io.imshow` can only display grayscale and RGB(A) 2D images.
+# The `io.imshow` function can only display grayscale and RGB(A) 2D images.
 # We can thus use it to visualize 2D planes. By fixing one axis, we can
 # observe three different views of the image.
 
