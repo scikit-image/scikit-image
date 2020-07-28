@@ -77,24 +77,24 @@ def test_ndim():
         regionprops(np.zeros((10, 10, 10, 2), dtype=np.int))
 
 
-def test_feret_diameter():
+def test_feret_diameter_max():
     # comparator result is based on SAMPLE from manually-inspected computations
     comparator_result = 18
-    test_result = regionprops(SAMPLE)[0].feret_diameter
+    test_result = regionprops(SAMPLE)[0].feret_diameter_max
     assert np.abs(test_result - comparator_result) < 1
-    # square, test that Feret diameter is sqrt(2) * square side
+    # square, test that maximum Feret diameter is sqrt(2) * square side
     img = np.zeros((20, 20), dtype=np.uint8)
     img[2:-2, 2:-2] = 1
-    feret_diameter = regionprops(img)[0].feret_diameter
-    assert np.abs(feret_diameter - 16 * np.sqrt(2)) < 1
+    feret_diameter_max = regionprops(img)[0].feret_diameter_max
+    assert np.abs(feret_diameter_max - 16 * np.sqrt(2)) < 1
 
 
-def test_feret_diameter_3d():
+def test_feret_diameter_max_3d():
     img = np.zeros((20, 20), dtype=np.uint8)
     img[2:-2, 2:-2] = 1
     img_3d = np.dstack((img,) * 3)
-    feret_diameter = regionprops(img_3d)[0].feret_diameter
-    assert np.abs(feret_diameter - 16 * np.sqrt(2)) < 1
+    feret_diameter_max = regionprops(img_3d)[0].feret_diameter_max
+    assert np.abs(feret_diameter_max - 16 * np.sqrt(2)) < 1
 
 
 def test_area():
