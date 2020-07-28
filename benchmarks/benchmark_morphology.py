@@ -73,11 +73,13 @@ class RollingBall(object):
     params = [25, 50, 75, 100, 150, 200]
     param_names = ["radius"]
 
-    def setup(self):
+    timeout = 120
+
+    def setup(self, radius):
         self.black_bg = data.coins()
 
     def time_rollingball(self, radius):
-        rolling_ball(self.black_bg, radius=radius)
+        morphology.rolling_ball(self.black_bg, radius=radius)
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -96,4 +98,4 @@ class RollingBall(object):
         pass
 
     def peakmem_rollingball(self, radius):
-        rolling_ball(self.black_bg, radius=radius)
+        morphology.rolling_ball(self.black_bg, radius=radius)
