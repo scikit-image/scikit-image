@@ -23,7 +23,7 @@ umbra."
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
 
-To implement this algorithm in skimage we can use the following:
+Use it with an image containing dark features on a black background
 """
 
 import numpy as np
@@ -34,48 +34,10 @@ from skimage import data
 from skimage.util import invert
 
 
-def rolling_ball(image, radius=30, white_background=False):
-    working_img = image.copy()
-    if white_background:
-        working_img = invert(working_img)
-
-    # tensor representation of the image
-    # (stacked blocks as described in the paper)
-    intensity = np.arange(np.iinfo(working_img.dtype).max)
-    background = (intensity[np.newaxis,
-                            np.newaxis, :] < working_img[..., np.newaxis])
-
-    # roll the ball around
-    # here: implemented as a sequence of small balls (B1, ..., Bk)
-    # because the current implementation of a closure with a large ball
-    # is slow and consumes a lot of memory
-    selem = morphology.ball(1)
-    for idx in range(radius):
-        background = morphology.erosion(background, selem)
-
-    for idx in range(radius):
-        background = morphology.dilation(background, selem)
-
-    # flatten the tensor
-    background = np.argmax(background == False, axis=-1)
-
-    filtered_image = working_img - background
-
-    if white_background:
-        filtered_image = invert(filtered_image)
-        background = invert(background)
-
-    return filtered_image, background
-
-
-######################################################################
-# And then test it using an image with white background
-
-
 image = data.page()
 
-filtered_image, background = rolling_ball(image, radius=30,
-                                          white_background=True)
+filtered_image, background = morphology.rolling_ball(image, radius=30,
+                                                     white_background=True)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
@@ -91,11 +53,11 @@ fig.tight_layout()
 plt.show()
 
 ######################################################################
-# And with an image with black background
+# or with an image containing white features on a black background
 
 image = data.coins()
 
-filtered_image, background = rolling_ball(image, radius=50)
+filtered_image, background = morphology.rolling_ball(image, radius=50)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
@@ -116,7 +78,7 @@ plt.show()
 # using a tophat filter and a disk element
 
 
-def rolling_ball(image, radius=50, white_background=False):
+def rolling_disk(image, radius=50, white_background=False):
     selem = morphology.disk(radius)
 
     background = morphology.opening(image, selem)
@@ -135,7 +97,7 @@ def rolling_ball(image, radius=50, white_background=False):
 
 image = data.coins()
 
-filtered_image, background = rolling_ball(image, radius=50)
+filtered_image, background = rolling_disk(image, radius=50)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
