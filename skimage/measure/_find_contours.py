@@ -9,7 +9,7 @@ _param_options = ('high', 'low')
 
 
 @deprecate_kwarg({'array': 'image'}, removed_version="0.20")
-def find_contours(image, level,
+def find_contours(image, level='average',
                   fully_connected='low', positive_orientation='low',
                   *,
                   mask=None):
@@ -139,7 +139,8 @@ def find_contours(image, level,
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
-
+    if level == 'average':
+        level = np.average(image)
     segments = _get_contour_segments(image.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
     contours = _assemble_contours(segments)
