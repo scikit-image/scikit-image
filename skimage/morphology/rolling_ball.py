@@ -73,6 +73,15 @@ def rolling_ball(input_img, radius=50, white_background=False):
             f"was {type(white_background)}"
         )
 
+    if not isinstance(input_img, np.ndarray):
+        raise ValueError(
+            f"input_img must be a np.ndarray, "
+            f"was {type(input_img)}"
+        )
+
+    if not issubclass(input_img.dtype.type, np.integer):
+        raise ValueError("Currently only integer images are supported.")
+
     img = input_img.copy()
     if white_background:
         img = invert(img)
