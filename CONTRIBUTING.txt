@@ -401,7 +401,7 @@ can be installed using: ``scikit-image/requirements/docs.txt`` file.
 The above install command includes the installation of
 `Sphinx-Gallery <https://sphinx-gallery.github.io>`_, which we use to create
 the :ref:`examples_gallery`.
-Refer to that page for complete instructions on syntax and usage.
+Refer to the Sphinx-Gallery documentation for complete instructions on syntax and usage.
 
 If you are contributing an example to the gallery or editing an existing one,
 build the docs (see above) and open a web browser to check how your edits
