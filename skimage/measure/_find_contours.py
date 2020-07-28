@@ -9,7 +9,7 @@ _param_options = ('high', 'low')
 
 
 @deprecate_kwarg({'array': 'image'}, removed_version="0.20")
-def find_contours(image, level='average',
+def find_contours(image, level='median',
                   fully_connected='low', positive_orientation='low',
                   *,
                   mask=None):
@@ -24,7 +24,8 @@ def find_contours(image, level='average',
     image : 2D ndarray of double
         Input image in which to find contours.
     level : float
-        Value along which to find contours in the array.
+        Value along which to find contours in the array. By default, the level
+        is set to the median value of the array. 
     fully_connected : str, {'low', 'high'}
          Indicates whether array elements below the given level value are to be
          considered fully-connected (and hence elements above the value will
@@ -139,8 +140,8 @@ def find_contours(image, level='average',
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
-    if level == 'average':
-        level = np.average(image)
+    if level == 'median':
+        level = (image.max() - image.min())/2
     segments = _get_contour_segments(image.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
     contours = _assemble_contours(segments)
