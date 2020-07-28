@@ -250,9 +250,9 @@ gamma_high = exposure.adjust_gamma(data, gamma=gamma_high_val)
 
 _, ((a, b, c), (d, e, f)) = plt.subplots(nrows=2, ncols=3, figsize=(12, 8))
 
-show_plane(a, data[32], title="Original")
-show_plane(b, gamma_low[32], title="Gamma = {}".format(gamma_low_val))
-show_plane(c, gamma_high[32], title="Gamma = {}".format(gamma_high_val))
+show_plane(a, data[32], title='Original')
+show_plane(b, gamma_low[32], title=f'Gamma = {gamma_low_val}')
+show_plane(c, gamma_high[32], title=f'Gamma = {gamma_high_val}')
 
 plot_hist(d, data)
 plot_hist(e, gamma_low)
