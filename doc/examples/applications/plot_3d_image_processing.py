@@ -224,7 +224,10 @@ explore_slices(data);
 # ===============
 # Scikit-image's `exposure` module contains a number of functions for
 # adjusting image contrast. These functions operate on pixel values.
-# Generally, image dimensionality or pixel spacing needn't be considered.
+# Generally, image dimensionality or pixel spacing doesn't need to be
+# considered. In local exposure correction, though, one might want to
+# adjust the window size to ensure equal size in *real* coordinates along
+# each axis.
 
 #####################################################################
 # `Gamma correction <https://en.wikipedia.org/wiki/Gamma_correction>`_
