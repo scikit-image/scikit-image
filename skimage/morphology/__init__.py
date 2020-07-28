@@ -15,6 +15,7 @@ from .max_tree import (max_tree, area_opening, area_closing,
                        diameter_opening, diameter_closing,
                        max_tree_local_maxima)
 from ._deprecated import watershed
+from .rolling_ball import rolling_ball
 
 __all__ = ['binary_erosion',
            'binary_dilation',
@@ -57,4 +58,5 @@ __all__ = ['binary_erosion',
            'area_closing',
            'diameter_opening',
            'diameter_closing',
-           'max_tree_local_maxima']
+           'max_tree_local_maxima',
+           'rolling_ball']

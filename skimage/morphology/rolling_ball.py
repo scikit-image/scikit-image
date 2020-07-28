@@ -127,7 +127,7 @@ def rolling_ball(input_img, radius=50, white_background=False):
     # large images or kernel sizes don't fit into memory
     # do it in batches instead
     background = np.zeros(img_original.size)
-    batch_size = int(2 ** 8)
+    batch_size = int(2 ** 10)
     flat_img = img.flatten()
     flat_sagitta = sagitta.flatten()
     for low in range(0, len(ancor_offsets), batch_size):
