@@ -195,7 +195,7 @@ def slice_in_3D(ax, i):
 
     # Autoscale plot axes
     scaling = np.array([getattr(ax,
-                                "get_{}lim".format(dim))() for dim in "xyz"])
+                                f'get_{dim}lim')() for dim in "xyz"])
     ax.auto_scale_xyz(* [[np.min(scaling), np.max(scaling)]] * 3)
 
 
