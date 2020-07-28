@@ -267,7 +267,8 @@ plot_hist(f, gamma_high)
 # equalization <https://en.wikipedia.org/wiki/Histogram_equalization>`_
 # improves contrast in an image by redistributing pixel intensities. The most
 # common pixel intensities get spread out, increasing contrast in low-contrast
-# areas. One downside of this approach is that it may enhance background noise.
+# areas. One downside of this approach is that it may enhance background
+# noise.
 
 equalized_data = exposure.equalize_hist(data)
 
