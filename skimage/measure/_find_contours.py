@@ -141,7 +141,7 @@ def find_contours(image, level='median',
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
     if level == 'median':
-        level = (image.max() - image.min()) / 2
+        level = np.median(image)
     segments = _get_contour_segments(image.astype(np.double), float(level),
                                      fully_connected == 'high', mask=mask)
     contours = _assemble_contours(segments)
