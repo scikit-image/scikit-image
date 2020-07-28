@@ -33,48 +33,18 @@ def rolling_ball(input_img, radius=50, white_background=False):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import reconstruction
+    >>> from skimage import data
+    >>> from skimage.morphology import rolling_ball
 
-    First, we create a sinusoidal mask image with peaks at middle and ends.
+    Subtract a black background from an example image
 
-    >>> x = np.linspace(0, 4 * np.pi)
-    >>> y_mask = np.cos(x)
+    >>> image = data.coins()
+    >>> result, bg = rolling_ball(image, radius=100)
 
-    Then, we create a seed image initialized to the minimum mask value (for
-    reconstruction by dilation, min-intensity values don't spread) and add
-    "seeds" to the left and right peak, but at a fraction of peak value (1).
+    Subtract a white background from an example image
 
-    >>> y_seed = y_mask.min() * np.ones_like(x)
-    >>> y_seed[0] = 0.5
-    >>> y_seed[-1] = 0
-    >>> y_rec = reconstruction(y_seed, y_mask)
-
-    The reconstructed image (or curve, in this case) is exactly the same as the
-    mask image, except that the peaks are truncated to 0.5 and 0. The middle
-    peak disappears completely: Since there were no seed values in this peak
-    region, its reconstructed value is truncated to the surrounding value (-1).
-
-    As a more practical example, we try to extract the bright features of an
-    image by subtracting a background image created by reconstruction.
-
-    >>> y, x = np.mgrid[:20:0.5, :20:0.5]
-    >>> bumps = np.sin(x) + np.sin(y)
-
-    To create the background image, set the mask image to the original image,
-    and the seed image to the original image with an intensity offset, `h`.
-
-    >>> h = 0.3
-    >>> seed = bumps - h
-    >>> background = reconstruction(seed, bumps)
-
-    The resulting reconstructed image looks exactly like the original image,
-    but with the peaks of the bumps cut off. Subtracting this reconstructed
-    image from the original image leaves just the peaks of the bumps
-
-    >>> hdome = bumps - background
-
-    This operation is known as the h-dome of the image and leaves features
-    of height `h` in the subtracted image.
+    >>> image = data.page()
+    >>> result, bg = rolling_ball(image, radius=100, white_background=True)
 
     Notes
     -----
