@@ -173,7 +173,7 @@ Once you've fixed all merge conflicts, do::
 Build environment setup
 -----------------------
 
-Please refer to :ref:`installing_scikit-image` for development installation
+Please refer to :ref:`installing-scikit-image` for development installation
 instructions.
 
 Guidelines

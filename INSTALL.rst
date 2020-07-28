@@ -1,3 +1,5 @@
+.. _installing-scikit-image:
+
 Installing scikit-image
 =======================
 
