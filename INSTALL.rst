@@ -313,7 +313,7 @@ ask us questions pertaining to your specific use case.
 
 .. tip::
 
-    If you need to install ``scikit-image`` one these platforms today, we hope
+    If you need to install ``scikit-image`` on these platforms today, we hope
     the developer instructions below can help get you started.
 
 
