@@ -93,7 +93,7 @@ appropriate documentation version.
 
 Now that you have found the Python executable on your machine, use the commands
 below to install ``scikit-image``.
-The instructions below use the ``python`` command for simplificy. Make sure you
+The instructions below use the ``python`` command for simplicity. Make sure you
 use the command that you found calls the appropriate Python executable on your
 particular machine.
 
