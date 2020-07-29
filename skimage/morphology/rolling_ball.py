@@ -131,14 +131,14 @@ def rolling_ball(input_img, radius=50, white_background=False):
     flat_img = img.flatten()
     flat_sagitta = sagitta.flatten()
     for low in range(0, len(ancor_offsets), batch_size):
-        high = np.minimum(low + batch_size, len(ancor_offsets)-1)
+        high = np.minimum(low + batch_size, len(ancor_offsets))
         filter_idx = ancor_offsets[low:high,
                                    np.newaxis] + kernel_idx[np.newaxis, :]
         background_partial = np.min(
             flat_img[filter_idx] + flat_sagitta[np.newaxis, :], axis=1)
         background[low:high] = background_partial
 
-    background = background.reshape(img_size)
+    background = background.reshape(img_size).astype(img_original.dtype)
     filtered_image = img_original - background
 
     if white_background:
