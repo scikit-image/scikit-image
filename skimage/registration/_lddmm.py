@@ -1270,10 +1270,10 @@ def lddmm_register(
             # (assuming centered coordinates)
         # divide by the original resolution of the image, 
         # and move the coordinate axis to the front.
-        lddmm.phi = np.moveaxis((resize(lddmm.phi, (*template.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
-        lddmm.phi_inv = np.moveaxis((resize(lddmm.phi_inv, (*template.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
-        lddmm.affine_phi = np.moveaxis((resize(lddmm.affine_phi, (*template.shape, 3)) - (-np.subtract(target.shape, 1) / 2 * target_resolution)) / target_resolution, -1, 0)
-        lddmm.phi_inv_affine_inv = np.moveaxis((resize(lddmm.phi_inv_affine_inv, (*target.shape, 3)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+        lddmm.phi = np.moveaxis((resize(lddmm.phi, (*template.shape, template.ndim)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+        lddmm.phi_inv = np.moveaxis((resize(lddmm.phi_inv, (*template.shape, template.ndim)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
+        lddmm.affine_phi = np.moveaxis((resize(lddmm.affine_phi, (*template.shape, template.ndim)) - (-np.subtract(target.shape, 1) / 2 * target_resolution)) / target_resolution, -1, 0)
+        lddmm.phi_inv_affine_inv = np.moveaxis((resize(lddmm.phi_inv_affine_inv, (*target.shape, template.ndim)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
 
     # Define namedtuple objects for lddmm_output.
     Lddmm_output = namedtuple('Lddmm_output', ('target_to_template_transform', 'template_to_target_transform', 'internals', 'diagnostics', 'temp_to_tar', 'tar_to_temp'))
