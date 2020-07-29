@@ -240,7 +240,7 @@ Stylistic Guidelines
 Testing
 -------
 
-See the testing section of the Installtion guide.
+See the testing section of the Installation guide.
 
 Test coverage
 -------------
