@@ -277,7 +277,7 @@ Since Windows 32 bit on x86 processors remains a popular platform, we continue
 to support it for the time being. However, we strongly recommend all users of
 Windows 32 bit begin to switch over to Windows 64 bit if they can.
 
-We are very insterested in learning how ``scikit-image`` is
+We are very interested in learning how ``scikit-image`` is
 `used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
 Help us learn on which other platforms you would like to install scikit-image!
 
