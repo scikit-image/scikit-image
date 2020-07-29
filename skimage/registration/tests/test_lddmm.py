@@ -1,8 +1,7 @@
 import pytest
 from itertools import product
-
 import numpy as np
-from scipy.linalg import inv
+
 from scipy.ndimage import rotate
 from scipy.ndimage import map_coordinates
 

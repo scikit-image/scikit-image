@@ -1,6 +1,7 @@
 import pytest
-
 import numpy as np
+
+from scipy.linalg import inv
 
 from skimage.registration._lddmm_utilities import _validate_scalar_to_multi
 from skimage.registration._lddmm_utilities import _validate_ndarray
@@ -639,9 +640,9 @@ class Test_generate_position_field:
         affine = np.eye(4)
 
         if deform_to == 'template':
-            expected_output = _lddmm_utilities._compute_coords(template_shape, template_resolution)
+            expected_output = _compute_coords(template_shape, template_resolution)
         elif deform_to == 'target':
-            expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution)
+            expected_output = _compute_coords(target_shape, target_resolution)
 
         position_field = generate_position_field(
             affine=affine,
@@ -669,9 +670,9 @@ class Test_generate_position_field:
         affine = np.eye(4)
 
         if deform_to == 'template':
-            expected_output = _lddmm_utilities._compute_coords(template_shape, template_resolution) + 1
+            expected_output = _compute_coords(template_shape, template_resolution) + 1
         elif deform_to == 'target':
-            expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution) - 1
+            expected_output = _compute_coords(target_shape, target_resolution) - 1
 
         position_field = generate_position_field(
             affine=affine,
@@ -705,11 +706,11 @@ class Test_generate_position_field:
         ])
 
         if deform_to == 'template':
-            expected_output = _lddmm_utilities._multiply_coords_by_affine(affine, 
-                _lddmm_utilities._compute_coords(template_shape, template_resolution))
+            expected_output = _multiply_coords_by_affine(affine, 
+                _compute_coords(template_shape, template_resolution))
         elif deform_to == 'target':
-            expected_output = _lddmm_utilities._multiply_coords_by_affine(inv(affine), 
-                _lddmm_utilities._compute_coords(target_shape, target_resolution))
+            expected_output = _multiply_coords_by_affine(inv(affine), 
+                _compute_coords(target_shape, target_resolution))
 
         position_field = generate_position_field(
             affine=affine,

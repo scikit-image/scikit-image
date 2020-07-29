@@ -20,6 +20,7 @@ Defines:
 import numpy as np
 import warnings
 
+from scipy.linalg import inv
 from scipy.interpolate import interpn
 from scipy.ndimage import gaussian_filter
 
