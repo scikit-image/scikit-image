@@ -85,8 +85,9 @@ def rolling_ball(image, radius=50, white_background=False):
     L = np.arange(-radius, radius + 1)
     X, Y = np.meshgrid(L, L)
     distance = np.sqrt(X ** 2 + Y ** 2)
-    sagitta = radius - np.sqrt(radius ** 2 - distance ** 2)
-    sagitta[np.isnan(sagitta)] = np.Inf
+    sagitta = radius - np.sqrt(
+        np.clip(radius ** 2 - distance ** 2, 0, None)
+    )
 
     kernel = np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=float)
     kernel[kernel == 0] = np.Inf
@@ -124,12 +125,12 @@ def rolling_ball(image, radius=50, white_background=False):
     batch_size = int(2 ** 10)
     flat_img = img.flatten()
     flat_sagitta = sagitta.flatten()
+    flat_kernel = kernel.flatten()
     for low in range(0, len(ancor_offsets), batch_size):
         high = np.minimum(low + batch_size, len(ancor_offsets))
         filter_idx = ancor_offsets[low:high,
                                    np.newaxis] + kernel_idx[np.newaxis, :]
-        background_partial = np.min(
-            flat_img[filter_idx] + flat_sagitta[np.newaxis, :], axis=1)
+        background_partial = np.min((flat_img[filter_idx] + flat_sagitta[np.newaxis, :]) * flat_kernel[np.newaxis, :], axis=1)
         background[low:high] = background_partial
 
     background = background.reshape(img_size).astype(img_original.dtype)
