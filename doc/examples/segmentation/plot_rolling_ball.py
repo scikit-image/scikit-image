@@ -73,7 +73,7 @@ fig.tight_layout()
 plt.show()
 
 ######################################################################
-# As you may have noticed, above implementation is rather slow.
+# As you may have noticed, the above implementation is rather slow.
 # If runtime is a concern, we can implement an efficient approximation
 # using a tophat filter and a disk element
 
@@ -91,8 +91,8 @@ def rolling_disk(image, radius=50, white_background=False):
     return filtered_image, background
 
 ######################################################################
-# Which produces almost identical results to the original algorithm
-# albeit being much faster.
+# This produces almost identical results to the original algorithm
+# but is much faster.
 
 
 image = data.coins()
