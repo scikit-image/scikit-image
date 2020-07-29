@@ -89,7 +89,7 @@ def rolling_ball(image, radius=50, white_background=False):
         np.clip(radius ** 2 - distance ** 2, 0, None)
     )
 
-    kernel = np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=float)
+    kernel = np.array(distance <= radius, dtype=float)
     kernel[kernel == 0] = np.Inf
 
     kernel_size = np.array(kernel.shape)
