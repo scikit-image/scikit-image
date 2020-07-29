@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-
 import numpy as np
 
 from skimage.util import invert
 
 
-def rolling_ball(input_img, radius=50, white_background=False):
+def rolling_ball(image, radius=50, white_background=False):
     """Perform background subtraction using the rolling ball method.
 
     The rolling ball filter is a segmentation method that aims to separate the
@@ -17,16 +15,16 @@ def rolling_ball(input_img, radius=50, white_background=False):
     ----------
     image : ndarray
         The image to be filtered.
-    radius : float
+    radius : float, optional
         The radius of the ball that is used as the structuring element.
-    white_background : bool
+    white_background : bool, optional
         If true, the algorithm separates dark features from a bright
         background.
 
     Returns
     -------
     filtered_image : ndarray
-        The image with background removes
+        The image with background removed.
     background : ndarray
         The background that was removed.
 
@@ -45,10 +43,6 @@ def rolling_ball(input_img, radius=50, white_background=False):
 
     >>> image = data.page()
     >>> result, bg = rolling_ball(image, radius=100, white_background=True)
-
-    Notes
-    -----
-    Check out the gallery example of this function (TODO: link)
 
     References
     ----------
@@ -73,16 +67,16 @@ def rolling_ball(input_img, radius=50, white_background=False):
             f"was {type(white_background)}"
         )
 
-    if not isinstance(input_img, np.ndarray):
+    if not isinstance(image, np.ndarray):
         raise ValueError(
             f"input_img must be a np.ndarray, "
-            f"was {type(input_img)}"
+            f"was {type(image)}"
         )
 
-    if not issubclass(input_img.dtype.type, np.integer):
+    if not issubclass(image.dtype.type, np.integer):
         raise ValueError("Currently only integer images are supported.")
 
-    img = input_img.copy()
+    img = image.copy()
     if white_background:
         img = invert(img)
 

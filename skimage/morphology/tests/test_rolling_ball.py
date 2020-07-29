@@ -1,8 +1,6 @@
 """
 Tests for Rolling Ball Filter
 (skimage.morphology.rolling_ball)
-
-Author: Sebastian Wallkötter
 """
 
 import numpy as np
@@ -20,7 +18,7 @@ class TestRollingBall(object):
         img = 23 * np.ones((100, 100), dtype=np.uint8)
         img = invert(img)
         result, bg = rolling_ball(img, radius=1, white_background=True)
-        assert np.allclose(result, 255 *np.ones_like(img))
+        assert np.allclose(result, 255 * np.ones_like(img))
         assert np.allclose(bg, img)
 
     def test_black_background(self):
