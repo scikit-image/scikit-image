@@ -8,117 +8,7 @@ from scipy.ndimage import map_coordinates
 
 from skimage.registration import _lddmm_utilities
 
-from skimage.registration._lddmm import generate_position_field
-# from skimage.registration._lddmm import _transform_image
-# from skimage.registration._lddmm import lddmm_transform_image
 from skimage.registration._lddmm import lddmm_register
-# from skimage.registration._lddmm import _transform_points
-# from skimage.registration._lddmm import lddmm_transform_points
-
-"""
-Test generate_position_field.
-"""
-
-@pytest.mark.parametrize('deform_to', ['template', 'target'])
-class Test_generate_position_field:
-
-    def test_identity_affine_identity_velocity_fields(self, deform_to):
-
-        num_timesteps = 10
-
-        template_shape = (3,4,5)
-        template_resolution = 1
-        target_shape = (2,4,6)
-        target_resolution = 1
-        velocity_fields = np.zeros((*template_shape, num_timesteps, len(template_shape)))
-        velocity_field_resolution = 1
-        affine = np.eye(4)
-
-        if deform_to == 'template':
-            expected_output = _lddmm_utilities._compute_coords(template_shape, template_resolution)
-        elif deform_to == 'target':
-            expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution)
-
-        position_field = generate_position_field(
-            affine=affine,
-            velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
-            deform_to=deform_to,
-        )
-
-        assert np.array_equal(position_field, expected_output)
-
-    def test_identity_affine_constant_velocity_fields(self, deform_to):
-
-        num_timesteps = 10
-
-        template_shape = (3,4,5)
-        template_resolution = 1
-        target_shape = (2,4,6)
-        target_resolution = 1
-        velocity_fields = np.ones((*template_shape, num_timesteps, len(template_shape)))
-        velocity_field_resolution = 1
-        affine = np.eye(4)
-
-        if deform_to == 'template':
-            expected_output = _lddmm_utilities._compute_coords(template_shape, template_resolution) + 1
-        elif deform_to == 'target':
-            expected_output = _lddmm_utilities._compute_coords(target_shape, target_resolution) - 1
-
-        position_field = generate_position_field(
-            affine=affine,
-            velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
-            deform_to=deform_to,
-        )
-
-        assert np.allclose(position_field, expected_output)
-
-    def test_rotational_affine_identity_velocity_fields(self, deform_to):
-
-        num_timesteps = 10
-
-        template_shape = (3,4,5)
-        template_resolution = 1
-        target_shape = (2,4,6)
-        target_resolution = 1
-        velocity_fields = np.zeros((*template_shape, num_timesteps, len(template_shape)))
-        velocity_field_resolution = 1
-        # Indicates a 90 degree rotation to the right.
-        affine = np.array([
-            [0,1,0,0], 
-            [-1,0,0,0], 
-            [0,0,1,0], 
-            [0,0,0,1], 
-        ])
-
-        if deform_to == 'template':
-            expected_output = _lddmm_utilities._multiply_coords_by_affine(affine, 
-                _lddmm_utilities._compute_coords(template_shape, template_resolution))
-        elif deform_to == 'target':
-            expected_output = _lddmm_utilities._multiply_coords_by_affine(inv(affine), 
-                _lddmm_utilities._compute_coords(target_shape, target_resolution))
-
-        position_field = generate_position_field(
-            affine=affine,
-            velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
-            deform_to=deform_to,
-        )
-        
-        assert np.allclose(position_field, expected_output)
 
 """
 Test lddmm_register.
@@ -329,6 +219,4 @@ class Test_lddmm_register:
 
 
 if __name__ == "__main__":
-    test_generate_position_field(deform_to='template')
-    test_generate_position_field(deform_to='target')
     test_lddmm_register()

@@ -14,6 +14,7 @@ Defines:
             err_to_larger=True, extrapolation_fill_value=None, 
             origin='center', method='linear', image_is_coords=False)
         sinc_resample(array, new_shape)
+        generate_position_field(affine, velocity_fields, velocity_field_resolution, template_shape, template_resolution, target_shape, target_resolution, deform_to="template")
 """
 
 import numpy as np
@@ -462,3 +463,130 @@ def sinc_resample(array, new_shape):
     resampled_array *= resampled_array.size / array.size
 
     return resampled_array
+
+
+def generate_position_field(
+    affine,
+    velocity_fields,
+    velocity_field_resolution,
+    template_shape,
+    template_resolution,
+    target_shape,
+    target_resolution,
+    deform_to="template",
+):
+    """
+    Integrate velocity_fields and apply affine to produce a position field.
+
+    Parameters
+    ----------
+    affine : np.ndarray
+        The affine array to be incorporated into the returned position field.
+    velocity_fields : np.ndarray
+        The velocity_fields defining the diffeomorphic flow. The leading dimensions are spatial, and the last two dimensions are the number of time steps and the coordinates.
+    velocity_field_resolution : float, seq
+        The resolution of velocity_fields, with multiple values given to specify anisotropy.
+    template_shape : seq
+        The shape of the template.
+    template_resolution : float, seq
+        The resolution of the template, with multiple values given to specify anisotropy.
+    target_shape : seq
+        The shape of the target.
+    target_resolution : float, seq
+        The resolution of the target, with multiple values given to specify anisotropy.
+    deform_to : str, optional
+        The direction of the deformation. By default "template".
+
+    Returns
+    -------
+    np.ndarray
+        The position field for the registration in the space of the image specified by deform_to.
+
+    Raises
+    ------
+    ValueError
+        Raised if the leading dimensions of velocity_fields fail to match template_shape.
+    TypeError
+        Raised if deform_to is not of type str.
+    ValueError
+        Raised if deform_to is neither 'template' nor 'target'.
+    """
+
+    # Validate inputs.
+    # Validate template_shape. Not rigorous.
+    template_shape = _validate_ndarray(template_shape)
+    # Validate target_shape. Not rigorous.
+    target_shape = _validate_ndarray(target_shape)
+    # Validate velocity_fields.
+    velocity_fields = _validate_ndarray(velocity_fields, required_ndim=len(template_shape) + 2)
+    if not np.all(velocity_fields.shape[:-2] == template_shape):
+        raise ValueError(f"velocity_fields' initial dimensions must equal template_shape.\n"
+            f"velocity_fields.shape: {velocity_fields.shape}, template_shape: {template_shape}.")
+    # Validate velocity_field_resolution.
+    velocity_field_resolution = _validate_resolution(velocity_field_resolution, velocity_fields.ndim - 2)
+    # Validate affine.
+    affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1))
+    # Verify deform_to.
+    if not isinstance(deform_to, str):
+        raise TypeError(f"deform_to must be of type str.\n"
+            f"type(deform_to): {type(deform_to)}.")
+    elif deform_to not in ["template", "target"]:
+        raise ValueError(f"deform_to must be either 'template' or 'target'.")
+
+    # Compute intermediates.
+    num_timesteps = velocity_fields.shape[-2]
+    delta_t = 1 / num_timesteps
+    template_axes = _compute_axes(template_shape, template_resolution)
+    template_coords = _compute_coords(template_shape, template_resolution)
+    target_axes = _compute_axes(target_shape, target_resolution)
+    target_coords = _compute_coords(target_shape, target_resolution)
+
+    # Create position field.
+    if deform_to == "template":
+        phi = np.copy(template_coords)
+    elif deform_to == "target":
+        phi_inv = np.copy(template_coords)
+
+    # Integrate velocity field.
+    for timestep in (reversed(range(num_timesteps)) if deform_to == "template" else range(num_timesteps)):
+        if deform_to == "template":
+            sample_coords = template_coords + velocity_fields[..., timestep, :] * delta_t
+            phi = interpn(
+                points=template_axes,
+                values=phi - template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
+            ) + sample_coords
+        elif deform_to == "target":
+            sample_coords = template_coords - velocity_fields[..., timestep, :] * delta_t
+            phi_inv = interpn(
+                points=template_axes,
+                values=phi_inv - template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
+            ) + sample_coords
+
+    # Apply the affine transform to the position field.
+    if deform_to == "template":
+        # Apply the affine by multiplication.
+        affine_phi = _multiply_coords_by_affine(affine, phi)
+        # affine_phi has the resolution of the template.
+    elif deform_to == "target":
+        # Apply the affine by interpolation.
+        sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)
+        phi_inv_affine_inv = interpn(
+            points=template_axes,
+            values=phi_inv - template_coords,
+            xi=sample_coords,
+            bounds_error=False,
+            fill_value=None,
+        ) + sample_coords
+        # phi_inv_affine_inv has the resolution of the target.
+
+    # return appropriate position field.
+    if deform_to == "template":
+        return affine_phi
+    elif deform_to == "target":
+        return phi_inv_affine_inv
