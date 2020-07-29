@@ -17,15 +17,13 @@ class TestRollingBall(object):
     def test_white_background(self):
         img = 23 * np.ones((100, 100), dtype=np.uint8)
         img = invert(img)
-        result, bg = rolling_ball(img, radius=1, white_background=True)
+        result = rolling_ball(img, radius=1, white_background=True)
         assert np.allclose(result, 255 * np.ones_like(img))
-        assert np.allclose(bg, img)
 
     def test_black_background(self):
         img = 23 * np.ones((100, 100), dtype=np.uint8)
-        result, bg = rolling_ball(img, radius=1)
+        result = rolling_ball(img, radius=1)
         assert np.allclose(result, np.zeros_like(img))
-        assert np.allclose(bg, img)
 
     def test_float_img(self):
         img = data.coins().astype(np.float32)

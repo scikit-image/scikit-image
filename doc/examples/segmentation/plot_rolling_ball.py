@@ -36,14 +36,14 @@ from skimage.util import invert
 
 image = data.page()
 
-filtered_image, background = morphology.rolling_ball(image, radius=30,
-                                                     white_background=True)
+filtered_image = morphology.rolling_ball(image, radius=150,
+                                         white_background=True)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
 ax[0].set_title('Original image')
 
-ax[1].imshow(background, cmap='gray')
+ax[1].imshow(image - filtered_image, cmap='gray')
 ax[1].set_title('Background')
 
 ax[2].imshow(filtered_image, cmap='gray')
@@ -57,13 +57,13 @@ plt.show()
 
 image = data.coins()
 
-filtered_image, background = morphology.rolling_ball(image, radius=50)
+filtered_image = morphology.rolling_ball(image, radius=50)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
 ax[0].set_title('Original image')
 
-ax[1].imshow(background, cmap='gray')
+ax[1].imshow(image - filtered_image, cmap='gray')
 ax[1].set_title('Background')
 
 ax[2].imshow(filtered_image, cmap='gray')
@@ -88,7 +88,7 @@ def rolling_disk(image, radius=50, white_background=False):
     else:
         filtered_image = morphology.white_tophat(image, selem)
 
-    return filtered_image, background
+    return filtered_image
 
 ######################################################################
 # Which produces almost identical results to the original algorithm
@@ -97,17 +97,34 @@ def rolling_disk(image, radius=50, white_background=False):
 
 image = data.coins()
 
-filtered_image, background = rolling_disk(image, radius=50)
+disk_filtered_image = rolling_disk(image, radius=50)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
 ax[0].imshow(image, cmap='gray')
 ax[0].set_title('Original image')
 
-ax[1].imshow(background, cmap='gray')
+ax[1].imshow(image - disk_filtered_image, cmap='gray')
 ax[1].set_title('Background')
 
-ax[2].imshow(filtered_image, cmap='gray')
+ax[2].imshow(disk_filtered_image, cmap='gray')
 ax[2].set_title('Result')
+
+fig.tight_layout()
+plt.show()
+
+######################################################################
+# For comparison, here is the difference between the two methods:
+
+fig, ax = plt.subplots(nrows=1, ncols=3)
+
+ax[0].imshow(image, cmap='gray')
+ax[0].set_title('Rolling Ball Result')
+
+ax[1].imshow(np.abs(filtered_image - disk_filtered_image), cmap='prism')
+ax[1].set_title('Difference')
+
+ax[2].imshow(disk_filtered_image, cmap='gray')
+ax[2].set_title('Rolling Disk Result')
 
 fig.tight_layout()
 plt.show()

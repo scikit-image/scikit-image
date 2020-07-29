@@ -112,11 +112,11 @@ def rolling_ball(image, radius=50, white_background=False):
 
     # indices corresponding to each ancor of the kernel
     # (top left corner instead of center)
-    x_ancors = np.arange(
+    x_anchors = np.arange(
         large_img_size[1] - kernel_size[1] + 1, step=stride[1])
     y_ancors = large_img_size[1] * \
         np.arange(large_img_size[0] - kernel_size[0] + 1, step=stride[0])
-    ancor_offsets = (x_ancors[np.newaxis, :] +
+    anchor_offsets = (x_anchors[np.newaxis, :] +
                      y_ancors[:, np.newaxis]).flatten()
 
     # large images or kernel sizes don't fit into memory
@@ -126,9 +126,9 @@ def rolling_ball(image, radius=50, white_background=False):
     flat_img = img.flatten()
     flat_sagitta = sagitta.flatten()
     flat_kernel = kernel.flatten()
-    for low in range(0, len(ancor_offsets), batch_size):
-        high = np.minimum(low + batch_size, len(ancor_offsets))
-        filter_idx = ancor_offsets[low:high,
+    for low in range(0, len(anchor_offsets), batch_size):
+        high = np.minimum(low + batch_size, len(anchor_offsets))
+        filter_idx = anchor_offsets[low:high,
                                    np.newaxis] + kernel_idx[np.newaxis, :]
         background_partial = np.min((flat_img[filter_idx] + flat_sagitta[np.newaxis, :]) * flat_kernel[np.newaxis, :], axis=1)
         background[low:high] = background_partial
@@ -138,6 +138,5 @@ def rolling_ball(image, radius=50, white_background=False):
 
     if white_background:
         filtered_image = invert(filtered_image)
-        background = invert(background)
 
-    return filtered_image, background
+    return filtered_image
