@@ -19,7 +19,7 @@ from a Python console or Jupyter notebook:
   import skimage
   print("scikit-image installed with version " + skimage.__version__)
 
-For those attempting to build scikit-image from source, or trying contribute
+For those attempting to build scikit-image from source, or trying to contribute
 code back to scikit-image, we've provided instructions under the heading
 `Installing scikit-image for contributors`_.
 
@@ -591,4 +591,3 @@ a seperate list for more advanced members of our community to install.
 
 .. include:: ../../requirements/extras.txt
   :literal:
-
