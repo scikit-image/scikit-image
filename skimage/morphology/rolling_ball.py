@@ -15,8 +15,14 @@ def rolling_ball(image, radius=50, white_background=False):
     ----------
     image : ndarray
         The image to be filtered.
-    radius : float, optional
-        The radius of the ball that is used as the structuring element.
+    radius : float or tuple, optional
+        The radius of the ball that is used as the structuring element. If
+        ``radius`` is a tuple it must be of the form
+        ``(space_radius, intensity_radius)``, where `space_radius` indicates
+        the radius of the ball along the spacial axis of the image and
+        ``intensity_radius`` indicates the radius along the intensity axis.
+        This is equivalent to rolling a a spheroid in the image (as opposed to
+        a ball).
     white_background : bool, optional
         If true, the algorithm separates dark features from a bright
         background.
@@ -50,14 +56,36 @@ def rolling_ball(image, radius=50, white_background=False):
            (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
-    if not isinstance(radius, float):
-        try:
-            radius = float(radius)
-        except ValueError:
-            raise ValueError(f"Radius should be float, was {type(radius)}")
+    # TODO: list and other iterables
+    if isinstance(radius, tuple):
+        if not len(radius) == 2:
+            raise ValueError(f"Radius as typle needs to have length 2.")
+        space_vertex = radius[0]
+        intensity_vertex = radius[1]
+    else:
+        space_vertex = radius
+        intensity_vertex = radius
 
-    if radius <= 0:
-        raise ValueError(f"Radius must be greater zeros, was {radius}")
+    try:
+        space_vertex = float(space_vertex)
+    except ValueError:
+        raise ValueError(
+            f"Radius should be float or float tuple, was {type(space_vertex)}")
+
+    try:
+        intensity_vertex = float(intensity_vertex)
+    except ValueError:
+        raise ValueError(
+            f"Radius should be float or float tuple, "
+            f"was {type(intensity_vertex)}")
+
+    if space_vertex <= 0:
+        raise ValueError(
+            f"Spacial radius must be greater zeros, was {space_vertex}")
+
+    if intensity_vertex <= 0:
+        raise ValueError(
+            f"Intensity radius must be greater zeros, was {intensity_vertex}")
 
     try:
         white_background = bool(white_background)
@@ -80,16 +108,17 @@ def rolling_ball(image, radius=50, white_background=False):
     if white_background:
         img = invert(img)
 
-    # sagitta assuming the position is where the ball touches
-    # the image umbra
-    L = np.arange(-radius, radius + 1)
+    # assuming selem touches the umbra at (x,y) pre-compute the
+    # (relative) height of selem at the center
+    # (selem is a ball/spheroid)
+    L = np.arange(-space_vertex, space_vertex + 1)
     X, Y = np.meshgrid(L, L)
     distance = np.sqrt(X ** 2 + Y ** 2)
-    sagitta = radius - np.sqrt(
-        np.clip(radius ** 2 - distance ** 2, 0, None)
+    sagitta = space_vertex - space_vertex * np.sqrt(
+        np.clip(1 - (distance ** 2 / intensity_vertex ** 2), 0, None)
     )
 
-    kernel = np.array(distance <= radius, dtype=float)
+    kernel = np.array(distance <= space_vertex, dtype=float)
     kernel[kernel == 0] = np.Inf
 
     kernel_size = np.array(kernel.shape)
@@ -105,20 +134,26 @@ def rolling_ball(image, radius=50, white_background=False):
     img[half_pad[0]:-half_pad[0], half_pad[1]:-half_pad[1]] = x
     large_img_size = img.shape
 
-    # indices of kernel in image coords
+    # the following three blocks implement a variant of 2d convolution
+    # in python. Each time a kernel is applied to a window, sagitta is added
+    # to the respective pixel values and the reduction is done using `min` instead
+    # of `sum`
+
+    # window of affected pixel indices relative to anchor
     x_idx = np.arange(kernel_size[1])
     y_idx = large_img_size[1] * np.arange(kernel_size[0])
     kernel_idx = (x_idx[np.newaxis, :] + y_idx[:, np.newaxis]).flatten()
 
-    # indices corresponding to each ancor of the kernel
+    # indices of each ancor for a kernel
     # (top left corner instead of center)
     x_anchors = np.arange(
         large_img_size[1] - kernel_size[1] + 1, step=stride[1])
-    y_ancors = large_img_size[1] * \
+    y_anchors = large_img_size[1] * \
         np.arange(large_img_size[0] - kernel_size[0] + 1, step=stride[0])
     anchor_offsets = (x_anchors[np.newaxis, :] +
-                     y_ancors[:, np.newaxis]).flatten()
+                      y_anchors[:, np.newaxis]).flatten()
 
+    # compute px indices in the image and apply the function/kernel
     # large images or kernel sizes don't fit into memory
     # do it in batches instead
     background = np.zeros(img_original.size)
@@ -129,8 +164,9 @@ def rolling_ball(image, radius=50, white_background=False):
     for low in range(0, len(anchor_offsets), batch_size):
         high = np.minimum(low + batch_size, len(anchor_offsets))
         filter_idx = anchor_offsets[low:high,
-                                   np.newaxis] + kernel_idx[np.newaxis, :]
-        background_partial = np.min((flat_img[filter_idx] + flat_sagitta[np.newaxis, :]) * flat_kernel[np.newaxis, :], axis=1)
+                                    np.newaxis] + kernel_idx[np.newaxis, :]
+        background_partial = np.min(
+            (flat_img[filter_idx] + flat_sagitta[np.newaxis, :]) * flat_kernel[np.newaxis, :], axis=1)
         background[low:high] = background_partial
 
     background = background.reshape(img_size).astype(img_original.dtype)

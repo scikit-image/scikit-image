@@ -36,7 +36,7 @@ from skimage.util import invert
 
 image = data.page()
 
-filtered_image = morphology.rolling_ball(image, radius=150,
+filtered_image = morphology.rolling_ball(image, radius=100,
                                          white_background=True)
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
