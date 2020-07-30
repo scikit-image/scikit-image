@@ -104,7 +104,7 @@ def rolling_ball(image, radius=50, white_background=False):
 
     if not isinstance(image, np.ndarray):
         raise ValueError(
-            f"input_img must be a np.ndarray, "
+            f"image must be a np.ndarray, "
             f"was {type(image)}"
         )
 
@@ -123,7 +123,7 @@ def rolling_ball(image, radius=50, white_background=False):
     X, Y = np.meshgrid(L, L)
     distance = np.sqrt(X ** 2 + Y ** 2)
     sagitta = spacial_radius - spacial_radius * np.sqrt(
-        np.clip(1 - (distance ** 2 / intensity_vertex ** 2), 0, None)
+        np.clip(1 - (distance / intensity_vertex) ** 2, 0, None)
     )
 
     kernel = np.array(distance <= spacial_radius, dtype=float)
