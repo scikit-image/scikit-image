@@ -169,7 +169,9 @@ sphinx_gallery_conf = {
     # Optimization level between 0-7
     # sphinx-gallery default: -o7
     # optipng default: -o2
-    'compress_images': ('images', 'thumbnails', '-o2'),
+    # We choose -o1 as it produces a sufficient optimization
+    # See #4800
+    'compress_images': ('images', 'thumbnails', '-o1'),
     'subsection_order': ExplicitOrder([
         '../examples/data',
         '../examples/numpy_operations',
