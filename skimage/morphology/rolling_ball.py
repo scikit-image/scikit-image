@@ -1,11 +1,12 @@
 import numpy as np
 from itertools import product
+from scipy.ndimage import generic_filter
 
 from skimage.util import invert, view_as_windows
+from ._rolling_ball_cy import apply_kernel
 
 
-def rolling_ball(image, radius=50, white_background=False,
-                 chunk_size=(100, 100)):
+def rolling_ball(image, radius=50, white_background=False):
     """Perform background subtraction using the rolling ball method.
 
     The rolling ball algorithm estimates background intensity for a grayscale
@@ -28,10 +29,6 @@ def rolling_ball(image, radius=50, white_background=False,
     white_background : bool, optional
         If true, the algorithm separates dark features from a bright
         background.
-    chunk_size : tuple, optional
-        To reduce memory usage the image is processed in chunks of
-        `chunk_size`. Larger values will make processing faster, but will also
-        consume more memory.
 
     Returns
     -------
@@ -135,24 +132,12 @@ def rolling_ball(image, radius=50, white_background=False,
     img = np.pad(img, spacial_upper_bound,
                  constant_values=np.iinfo(img.dtype).max)
 
-    background = np.zeros_like(image)
-    flat_img = img.flatten()
-    flat_sagitta = sagitta.flatten()[np.newaxis, :]
-    flat_kernel = kernel.flatten()[np.newaxis, :]
+    windowed = view_as_windows(img.astype(float), kernel.shape)
 
-    windowed = view_as_windows(img, kernel.shape)
-    chunk_anchors = [range(0, shape, step)
-                     for shape, step in zip(image.shape, chunk_size)]
-    y_step, x_step = chunk_size
+    # the implementation is very naive, but still surprisingly fast
+    background = apply_kernel(windowed, kernel, sagitta)
 
-    for y, x in product(*chunk_anchors):
-        chunk = windowed[y:y+y_step, x:x+x_step]
-        chunk_shape = chunk.shape[:2]
-        chunk = chunk.reshape((-1, kernel.size))
-        background_partial = np.min(
-            (chunk + flat_sagitta) * flat_kernel, axis=-1)
-        background_partial = background_partial.reshape(chunk_shape)
-        background[y:y+y_step, x:x+x_step] = background_partial
+    background = np.round(background).astype(image.dtype)
 
     if white_background:
         filtered_image = invert(image) - background

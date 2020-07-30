@@ -20,6 +20,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_extrema_cy.pyx'], working_path=base_path)
     cython(['_flood_fill_cy.pyx'], working_path=base_path)
     cython(['_max_tree.pyx'], working_path=base_path)
+    cython(['_rolling_ball_cy.pyx'], working_path=base_path)
 
     config.add_extension('_skeletonize_cy', sources=['_skeletonize_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -36,6 +37,8 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_extrema_cy', sources=['_extrema_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_flood_fill_cy', sources=['_flood_fill_cy.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_rolling_ball_cy', sources=['_rolling_ball_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
