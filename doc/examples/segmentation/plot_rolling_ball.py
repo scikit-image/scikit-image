@@ -1,7 +1,7 @@
 """
-======================================================
-Background Subtraction using the Rolling Ball Method
-======================================================
+=======================================================
+Use the Rolling Ball Method for Background Subtraction
+=======================================================
 
 The rolling ball filter is a segmentation method that aims to separate the
 background from a grayscale image in case of uneven exposure. It is frequently
@@ -26,8 +26,8 @@ umbra."
 Use it with an image containing dark features on a black background
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from skimage import morphology
 from skimage import data
