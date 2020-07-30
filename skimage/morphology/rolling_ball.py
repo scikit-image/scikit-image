@@ -56,15 +56,17 @@ def rolling_ball(image, radius=50, white_background=False):
            (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
-    # TODO: list and other iterables
-    if isinstance(radius, tuple):
-        if not len(radius) == 2:
-            raise ValueError(f"Radius as typle needs to have length 2.")
-        space_vertex = radius[0]
-        intensity_vertex = radius[1]
-    else:
+    try:
+        if len(radius) == 2:
+            space_vertex = radius[0]
+            intensity_vertex = radius[1]
+    except TypeError:
         space_vertex = radius
         intensity_vertex = radius
+    except IndexError:
+        # essentially radius need to have __len__ and __getitem__
+        # so that we can extract the values
+        raise ValueError(f"Radius must be a scalar or tuple-like.")
 
     try:
         space_vertex = float(space_vertex)
@@ -81,11 +83,11 @@ def rolling_ball(image, radius=50, white_background=False):
 
     if space_vertex <= 0:
         raise ValueError(
-            f"Spacial radius must be greater zeros, was {space_vertex}")
+            f"Spacial radius must be greater zero, was {space_vertex}")
 
     if intensity_vertex <= 0:
         raise ValueError(
-            f"Intensity radius must be greater zeros, was {intensity_vertex}")
+            f"Intensity radius must be greater zero, was {intensity_vertex}")
 
     try:
         white_background = bool(white_background)
