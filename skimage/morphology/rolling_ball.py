@@ -107,7 +107,7 @@ def rolling_ball(image, radius=50, white_background=False,
 
     if not isinstance(image, np.ndarray):
         raise ValueError(
-            f"input_img must be a np.ndarray, "
+            f"image must be a np.ndarray, "
             f"was {type(image)}"
         )
 
