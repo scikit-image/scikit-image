@@ -1,9 +1,11 @@
 import numpy as np
+from itertools import product
 
-from skimage.util import invert
+from skimage.util import invert, view_as_windows
 
 
-def rolling_ball(image, radius=50, white_background=False):
+def rolling_ball(image, radius=50, white_background=False,
+                 chunk_size=(100, 100)):
     """Perform background subtraction using the rolling ball method.
 
     The rolling ball algorithm estimates background intensity for a grayscale
@@ -26,6 +28,10 @@ def rolling_ball(image, radius=50, white_background=False):
     white_background : bool, optional
         If true, the algorithm separates dark features from a bright
         background.
+    chunk_size : tuple, optional
+        To reduce memory usage the image is processed in chunks of
+        `chunk_size`. Larger values will make processing faster, but will also
+        consume more memory.
 
     Returns
     -------
@@ -58,10 +64,10 @@ def rolling_ball(image, radius=50, white_background=False):
 
     try:
         if len(radius) == 2:
-            space_vertex = radius[0]
+            spacial_radius = radius[0]
             intensity_vertex = radius[1]
     except TypeError:
-        space_vertex = radius
+        spacial_radius = radius
         intensity_vertex = radius
     except IndexError:
         # essentially radius need to have __len__ and __getitem__
@@ -69,10 +75,12 @@ def rolling_ball(image, radius=50, white_background=False):
         raise ValueError(f"Radius must be a scalar or tuple-like.")
 
     try:
-        space_vertex = float(space_vertex)
+        spacial_radius = float(spacial_radius)
     except ValueError:
         raise ValueError(
-            f"Radius should be float or float tuple, was {type(space_vertex)}")
+            f"Radius should be float or float tuple, "
+            f"was {type(spacial_radius)}"
+        )
 
     try:
         intensity_vertex = float(intensity_vertex)
@@ -81,9 +89,9 @@ def rolling_ball(image, radius=50, white_background=False):
             f"Radius should be float or float tuple, "
             f"was {type(intensity_vertex)}")
 
-    if space_vertex <= 0:
+    if spacial_radius <= 0:
         raise ValueError(
-            f"Spacial radius must be greater zero, was {space_vertex}")
+            f"Spacial radius must be greater zero, was {spacial_radius}")
 
     if intensity_vertex <= 0:
         raise ValueError(
@@ -113,68 +121,43 @@ def rolling_ball(image, radius=50, white_background=False):
     # assuming selem touches the umbra at (x,y) pre-compute the
     # (relative) height of selem at the center
     # (selem is a ball/spheroid)
-    L = np.arange(-space_vertex, space_vertex + 1)
+    spacial_upper_bound = int(np.ceil(spacial_radius))
+    L = np.arange(-spacial_upper_bound, spacial_upper_bound + 1)
     X, Y = np.meshgrid(L, L)
     distance = np.sqrt(X ** 2 + Y ** 2)
-    sagitta = space_vertex - space_vertex * np.sqrt(
+    sagitta = spacial_radius - spacial_radius * np.sqrt(
         np.clip(1 - (distance ** 2 / intensity_vertex ** 2), 0, None)
     )
 
-    kernel = np.array(distance <= space_vertex, dtype=float)
+    kernel = np.array(distance <= spacial_radius, dtype=float)
     kernel[kernel == 0] = np.Inf
 
-    kernel_size = np.array(kernel.shape)
-    img_original = img.copy()
-    img_size = img.shape
-    x = img
-    stride = (1, 1)
+    img = np.pad(img, spacial_upper_bound,
+                 constant_values=np.iinfo(img.dtype).max)
 
-    # pad the image
-    padding_amount = kernel_size // 2 * 2
-    half_pad = padding_amount // 2
-    img = np.Inf * np.ones(x.shape + padding_amount, dtype=x.dtype)
-    img[half_pad[0]:-half_pad[0], half_pad[1]:-half_pad[1]] = x
-    large_img_size = img.shape
-
-    # the following three blocks implement a variant of 2d convolution
-    # in python. Each time a kernel is applied to a window, sagitta is added
-    # to the respective pixel values and the reduction is done using `min` instead
-    # of `sum`
-
-    # window of affected pixel indices relative to anchor
-    x_idx = np.arange(kernel_size[1])
-    y_idx = large_img_size[1] * np.arange(kernel_size[0])
-    kernel_idx = (x_idx[np.newaxis, :] + y_idx[:, np.newaxis]).flatten()
-
-    # indices of each ancor for a kernel
-    # (top left corner instead of center)
-    x_anchors = np.arange(
-        large_img_size[1] - kernel_size[1] + 1, step=stride[1])
-    y_anchors = large_img_size[1] * \
-        np.arange(large_img_size[0] - kernel_size[0] + 1, step=stride[0])
-    anchor_offsets = (x_anchors[np.newaxis, :] +
-                      y_anchors[:, np.newaxis]).flatten()
-
-    # compute px indices in the image and apply the function/kernel
-    # large images or kernel sizes don't fit into memory
-    # do it in batches instead
-    background = np.zeros(img_original.size)
-    batch_size = int(2 ** 10)
+    background = np.zeros_like(image)
     flat_img = img.flatten()
-    flat_sagitta = sagitta.flatten()
-    flat_kernel = kernel.flatten()
-    for low in range(0, len(anchor_offsets), batch_size):
-        high = np.minimum(low + batch_size, len(anchor_offsets))
-        filter_idx = anchor_offsets[low:high,
-                                    np.newaxis] + kernel_idx[np.newaxis, :]
-        background_partial = np.min(
-            (flat_img[filter_idx] + flat_sagitta[np.newaxis, :]) * flat_kernel[np.newaxis, :], axis=1)
-        background[low:high] = background_partial
+    flat_sagitta = sagitta.flatten()[np.newaxis, :]
+    flat_kernel = kernel.flatten()[np.newaxis, :]
 
-    background = background.reshape(img_size).astype(img_original.dtype)
-    filtered_image = img_original - background
+    windowed = view_as_windows(img, kernel.shape)
+    chunk_anchors = [range(0, shape, step)
+                     for shape, step in zip(image.shape, chunk_size)]
+    y_step, x_step = chunk_size
+
+    for y, x in product(*chunk_anchors):
+        chunk = windowed[y:y+y_step, x:x+x_step]
+        chunk_shape = chunk.shape[:2]
+        chunk = chunk.reshape((-1, kernel.size))
+        background_partial = np.min(
+            (chunk + flat_sagitta) * flat_kernel, axis=-1)
+        background_partial = background_partial.reshape(chunk_shape)
+        background[y:y+y_step, x:x+x_step] = background_partial
 
     if white_background:
+        filtered_image = invert(image) - background
         filtered_image = invert(filtered_image)
+    else:
+        filtered_image = image - background
 
     return filtered_image
