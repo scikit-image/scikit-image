@@ -66,8 +66,8 @@ access), specifically to:
   to the next ``.dev0`` version, commit, and push. This should follow PEP440
   meaning that the appropriate version number would look something like
   ``0.20.dev0`` with the period between ``20`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``.  
-  
+  ``0`` immediately after ``dev``.
+
  - On the master branch, edit ``doc/source/_static/docversions.js``,
   add the release, e.g., `0.15.x`, and commit.  Cherry-pick this
   change back to the release branch.
@@ -188,20 +188,13 @@ access), specifically to:
       - Upload the docs: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Update the web frontpage:
-  The webpage source is kept in a separate repo: scikit-image-web. The
-  live webpage lives in a second repo, scikit-image.github.com, that you only
-  interact with via the ``make`` command within scikit-image-web.
 
-  - Sync your branch with the remote repo: ``git pull``.
-    If you try to ``make gh-pages`` when your branch is out of sync, it
-    creates headaches.
+  The webpage source is kept in a separate repo: `scikit-image-web`.
+
   - Add release date to ``index.rst`` under "News".
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
-  - Commit and push back to master. (Nothing is being served at this stage.)
-  - Build using ``make gh-pages``. (This checks out a copy of the
-    scikit-image.github.com repository in the ``gh-pages`` directory.)
-  - Push the built site: ``cd gh-pages`` and ``git push origin master``.
+  - Commit and push (this will also build and update the website).
 
 - Post release notes on mailing lists, blog, Twitter, etc.
 
