@@ -1,12 +1,12 @@
 """
-=======================================================
-Use the Rolling Ball Method for Background Subtraction
-=======================================================
+================================================================
+Use the Rolling Ball Method for Background Intensity Estimation
+================================================================
 
-The rolling ball filter is a segmentation method that aims to separate the
-background from a grayscale image in case of uneven exposure. It is frequently
-used in biomedical image processing and was first proposed by Stanley R.
-Sternberg (1983) in the paper Biomedical Image Processing [1]_.
+The rolling ball algorithm estimates background intensity for a grayscale
+image in case of uneven exposure. It is frequently used in biomedical
+image processing and was first proposed by Stanley R. Sternberg (1983) in
+the paper Biomedical Image Processing [1]_.
 
 The idea of the algorithm is quite intuitive. We think of the image as a
 surface that has unit-sized blocks stacked on top of each other for each
@@ -23,7 +23,7 @@ umbra."
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
 
-Use it with an image containing dark features on a black background
+Use it with an image containing dark features on a white background
 """
 
 import matplotlib.pyplot as plt

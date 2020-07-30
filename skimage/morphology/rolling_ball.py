@@ -6,10 +6,10 @@ from skimage.util import invert
 def rolling_ball(image, radius=50, white_background=False):
     """Perform background subtraction using the rolling ball method.
 
-    The rolling ball filter is a segmentation method that aims to separate the
-    background from a grayscale image in case of uneven exposure. It is
-    frequently used in biomedical image processing and was first proposed by
-    Stanley R. Sternberg (1983) in the paper Biomedical Image Processing [1]_.
+    The rolling ball algorithm estimates background intensity for a grayscale
+    image in case of uneven exposure. It is frequently used in biomedical
+    image processing and was first proposed by Stanley R. Sternberg (1983) in
+    the paper Biomedical Image Processing [1]_.
 
     Parameters
     ----------
