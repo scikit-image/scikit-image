@@ -115,15 +115,14 @@ def rolling_ball(image, radius=50, white_background=False):
     if white_background:
         img = invert(img)
 
-    # assuming selem touches the umbra at (x,y) pre-compute the
+    # assuming selem touches the umbra at (x,y), pre-compute the
     # (relative) height of selem at the center
-    # (selem is a ball/spheroid)
     spacial_upper_bound = int(np.ceil(spacial_radius))
     L = np.arange(-spacial_upper_bound, spacial_upper_bound + 1)
     X, Y = np.meshgrid(L, L)
     distance = np.sqrt(X ** 2 + Y ** 2)
-    sagitta = spacial_radius - spacial_radius * np.sqrt(
-        np.clip(1 - (distance / intensity_vertex) ** 2, 0, None)
+    sagitta = intensity_vertex - intensity_vertex * np.sqrt(
+        np.clip(1 - (distance / spacial_radius) ** 2, 0, None)
     )
 
     kernel = np.array(distance <= spacial_radius, dtype=float)
