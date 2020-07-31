@@ -35,7 +35,7 @@ def marching_cubes_classic(volume, level=None, spacing=(1., 1., 1.),
         Spatial coordinates for V unique mesh vertices. Coordinate order
         matches input `volume` (M, N, P). If ``allow_degenerate`` is set to
         True, then the presence of degenerate triangles in the mesh can make
-        this array appear to have duplicate vertices.
+        this array have duplicate vertices.
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
