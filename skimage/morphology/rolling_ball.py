@@ -86,8 +86,12 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
         raise ValueError("Image must be a three dimensional array.")
     img = image.copy().astype(float)
 
-    # precompute ellipsoid intensity
-    kernel_size_y, kernel_size_x = np.round(kernel_size)
+    kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
+
+    pad_amount = ((kernel_size_x, kernel_size_x),
+                  (kernel_size_y, kernel_size_y))
+    img = np.pad(img, pad_amount,  constant_values=np.Inf)
+
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
     x, y = np.meshgrid(tmp_x, tmp_y)
@@ -99,10 +103,6 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
 
     kernel = np.array(tmp <= 1, dtype=float)
     kernel[kernel == 0] = np.Inf
-
-    pad_amount = ((kernel.shape[0] // 2, kernel.shape[0] // 2),
-                  (kernel.shape[1] // 2, kernel.shape[1] // 2))
-    img = np.pad(img, pad_amount,  constant_values=np.Inf)
 
     windowed = view_as_windows(img, kernel.shape)
 
