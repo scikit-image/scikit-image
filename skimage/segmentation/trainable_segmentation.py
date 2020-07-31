@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 from skimage import filters, feature
 from skimage import img_as_float32
-from concurrent.futures import ThreadPoolExecutor
+from joblib import Parallel, delayed
 
 try:
     from sklearn.exceptions import NotFittedError
@@ -27,8 +27,7 @@ def _texture_filter(gaussian_filtered):
 
 
 def _mutiscale_basic_features_singlechannel(
-    img, intensity=True, edges=True, texture=True, sigma_min=0.5, sigma_max=16,
-    num_workers=None
+    img, intensity=True, edges=True, texture=True, sigma_min=0.5, sigma_max=16
 ):
     """Features for a single channel nd image.
 
@@ -44,17 +43,18 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    with ThreadPoolExecutor(max_workers=num_workers) as ex:
-        all_filtered = list(ex.map(lambda s: filters.gaussian(img, s), sigmas))
-        features = []
-        if intensity:
-            features += all_filtered
-        if edges:
-            all_edges = list(ex.map(filters.sobel, all_filtered))
-            features += all_edges
-        if texture:
-            all_texture = list(ex.map(_texture_filter, all_filtered))
-            features += itertools.chain.from_iterable(all_texture)
+    all_filtered = Parallel(n_jobs=-1, prefer='threads')(delayed(filters.gaussian)(img, sigma) for sigma in sigmas)
+    features = []
+    if intensity:
+        features += all_filtered
+    if edges:
+        all_edges = Parallel(n_jobs=-1, prefer='threads')(delayed(filters.sobel)(filtered_img)
+                                for filtered_img in all_filtered)
+        features += all_edges
+    if texture:
+        all_texture = Parallel(n_jobs=-1, prefer='threads')(delayed(_texture_filter)(filtered_img)
+                                for filtered_img in all_filtered)
+        features += itertools.chain.from_iterable(all_texture)
     return features
 
 
@@ -66,7 +66,6 @@ def multiscale_basic_features(
     texture=True,
     sigma_min=0.5,
     sigma_max=16,
-    num_workers=None
 ):
     """Local features for a single- or multi-channel nd image.
 
@@ -109,7 +108,6 @@ def multiscale_basic_features(
                 texture=texture,
                 sigma_min=sigma_min,
                 sigma_max=sigma_max,
-                num_workers=num_workers
             )
             for dim in range(image.shape[-1])
         )
@@ -122,7 +120,6 @@ def multiscale_basic_features(
             texture=texture,
             sigma_min=sigma_min,
             sigma_max=sigma_max,
-            num_workers=num_workers
         )
     return np.array(features)
 
