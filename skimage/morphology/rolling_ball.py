@@ -41,7 +41,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
 
     Returns
     -------
-    filtered_image : ndarray of rank 3
+    filtered_image : ndarray
         The image with background removed.
 
     Examples
@@ -49,8 +49,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ball
-    >>> image = data.coins()
-    >>> result = rolling_ball(image, radius=100)
+    >>> result = rolling_ball(data.coins())
 
     References
     ----------
@@ -79,7 +78,6 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     if np.any(intensity_vertex <= 0):
         raise ValueError(f"Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
-
 
     image = np.array(image)
     if not np.issubdtype(image.dtype, np.number):
@@ -152,8 +150,7 @@ def rolling_ball(image, radius=50):
     >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ball
-    >>> image = data.coins()
-    >>> result = rolling_ball(image, radius=100)
+    >>> result = rolling_ball(data.coins(), radius=200)
 
     References
     ----------
