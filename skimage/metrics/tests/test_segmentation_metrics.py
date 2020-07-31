@@ -1,12 +1,12 @@
 import numpy as np
-import scipy.sparse as sparse
 
 from skimage.metrics import (adapted_rand_error,
                              variation_of_information,
                              contingency_table)
 
 from skimage._shared.testing import (assert_equal,
-                                     assert_almost_equal, assert_array_equal)
+                                     assert_almost_equal,
+                                     assert_array_equal)
 
 
 def test_contingency_table():
@@ -38,7 +38,7 @@ def test_vi_ignore_labels():
 
     false_splits, false_merges = variation_of_information(im1, im2,
                                                           ignore_labels=[0])
-    assert (false_splits, false_merges) == (0, 2/3)
+    assert (false_splits, false_merges) == (0, 2 / 3)
 
 
 def test_are():
