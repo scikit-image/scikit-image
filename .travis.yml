@@ -136,6 +136,8 @@ before_install:
     - python setup.py sdist
     - SDIST_NAME=dist/`python setup.py --fullname`.tar.gz
     - tools/check_sdist.py $SDIST_NAME
+    - pip install pre-commit
+    - pre-commit run -a
 
 install:
     - ccache --show-stats

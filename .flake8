@@ -1,0 +1,16 @@
+# See:
+#
+# https://pycodestyle.readthedocs.io/en/latest/intro.html#error-codes  (E, W)
+# https://flake8.pycqa.org/en/latest/user/error-codes.html (F)
+# https://github.com/PyCQA/flake8-bugbear
+#
+# for error codes.  And
+#
+# https://flake8.pycqa.org/en/latest/user/violations.html#selecting-violations-with-flake8
+#
+# for error classes selected below.
+
+[flake8]
+max-line-length = 80
+select = C,E,F,W,B,B950
+ignore = E501, W503

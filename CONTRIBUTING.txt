@@ -46,7 +46,12 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
-2. Develop your contribution:
+2. Install our pre-commit checker (this will verify that your commits
+   comply with PEP8)::
+
+     pip install pre-commit
+
+3. Develop your contribution:
 
    * Pull the latest changes from upstream::
 
@@ -61,7 +66,7 @@ Here's the long and short of it:
 
    * Commit locally as you progress (``git add`` and ``git commit``)
 
-3. To submit your contribution:
+4. To submit your contribution:
 
    * Push your changes back to your fork on GitHub::
 
@@ -81,7 +86,7 @@ Here's the long and short of it:
 For a more detailed discussion, read these :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
-4. Review process:
+5. Review process:
 
    * Reviewers (the other developers and interested community members) will
      write inline and/or general comments on your Pull Request (PR) to help
@@ -106,7 +111,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
    * A pull request must be approved by two core team members before merging.
 
-5. Document changes
+6. Document changes
 
    If your change introduces any API modifications, please update
    ``doc/source/api_changes.txt``.
