@@ -94,12 +94,14 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
 
     kernel_size_y, kernel_size_x = kernel_size
     tmp = (x / kernel_size_x) ** 2 + (y / kernel_size_y) ** 2
-    cap_height = intensity_vertex - intensity_vertex * np.sqrt(np.clip(1 - tmp, 0, None))
+    cap_height = intensity_vertex - intensity_vertex * \
+        np.sqrt(np.clip(1 - tmp, 0, None))
 
     kernel = np.array(tmp <= 1, dtype=float)
     kernel[kernel == 0] = np.Inf
 
-    pad_amount = ((kernel.shape[0] // 2, kernel.shape[0] // 2),(kernel.shape[1] // 2, kernel.shape[1] // 2))
+    pad_amount = ((kernel.shape[0] // 2, kernel.shape[0] // 2),
+                  (kernel.shape[1] // 2, kernel.shape[1] // 2))
     img = np.pad(img, pad_amount,  constant_values=np.Inf)
 
     windowed = view_as_windows(img, kernel.shape)
