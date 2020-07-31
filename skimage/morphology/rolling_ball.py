@@ -60,10 +60,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     kernel_size = np.array(kernel_size)
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(
-            f"kernel_size must be convertibale to a numeric array.")
+            "kernel_size must be convertibale to a numeric array.")
     if not kernel_size.size == 2 and len(kernel_size.shape) == 2:
         raise ValueError(
-            f"kernel_size must be a one dimensional array_like of size 2.")
+            "kernel_size must be a one dimensional array_like of size 2.")
     if np.any(kernel_size <= 0):
         raise ValueError(f"All elements of kernel_size must be greater zero.")
     kernel_size = kernel_size / 2
@@ -71,10 +71,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     intensity_vertex = np.array(intensity_vertex)
     if not np.issubdtype(intensity_vertex.dtype, np.number):
         raise ValueError(
-            f"Intensity_vertex must be convertibale to a numeric array.")
+            "Intensity_vertex must be convertibale to a numeric array.")
     if not intensity_vertex.size == 1 and len(intensity_vertex.shape) == 1:
         raise ValueError(
-            f"Intensity_vertex must be a scalar.")
+            "Intensity_vertex must be a scalar.")
     if np.any(intensity_vertex <= 0):
         raise ValueError(f"Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
