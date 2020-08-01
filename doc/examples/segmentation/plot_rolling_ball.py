@@ -48,21 +48,30 @@ from skimage import morphology
 from skimage import data
 from skimage import util
 
+
+def plot_result(image, filtered_image):
+    fig, ax = plt.subplots(nrows=1, ncols=3)
+
+    ax[0].imshow(image, cmap='gray')
+    ax[0].set_title('Original image')
+    ax[0].axis('off')
+
+    ax[1].imshow(image - filtered_image, cmap='gray')
+    ax[1].set_title('Background')
+    ax[1].axis('off')
+
+    ax[2].imshow(filtered_image, cmap='gray')
+    ax[2].set_title('Result')
+    ax[2].axis('off')
+
+    fig.tight_layout()
+
+
 image = data.coins()
 
 filtered_image = morphology.rolling_ball(image, radius=70.5)
-fig, ax = plt.subplots(nrows=1, ncols=3)
 
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -79,18 +88,7 @@ image_inverted = util.invert(image)
 filtered_image = morphology.rolling_ball(image_inverted, radius=45)
 filtered_image = util.invert(filtered_image)
 
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -103,18 +101,7 @@ plt.show()
 image = data.coins().astype(np.uint16)
 
 filtered_image = morphology.rolling_ball(image, radius=70.5)
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -126,18 +113,7 @@ plt.show()
 image = data.coins().astype(np.float) / 255
 
 filtered_image = morphology.rolling_ball(image, radius=70.5)
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -162,18 +138,7 @@ filtered_image = morphology.rolling_ellipsoid(
     kernel_size=(70.5 * 2, 70.5 * 2),
     intensity_vertex=normalized_radius * 2
 )
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -204,18 +169,7 @@ filtered_image = morphology.rolling_ellipsoid(
     kernel_size=(70.5 * 2, 70.5 * 2),
     intensity_vertex=70.5 * 2
 )
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
@@ -230,107 +184,5 @@ filtered_image = morphology.rolling_ellipsoid(
     kernel_size=(10 * 2, 10 * 2),
     intensity_vertex=255 * 2
 )
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-
-ax[1].imshow(image - filtered_image, cmap='gray')
-ax[1].set_title('Background')
-
-ax[2].imshow(filtered_image, cmap='gray')
-ax[2].set_title('Result')
-
-fig.tight_layout()
+plot_result(image, filtered_image)
 plt.show()
-
-######################################################################
-# A Fast Approximation
-# --------------------
-#
-# If you have run any of the snippets above, you may have noticed, that
-# ``rolling_ball`` is rather slow (it is expensive to compute for large
-# balls). If runtime is a concern, you can implement an efficient
-# approximation using a tophat filter and a disk as structuring element.
-
-
-def rolling_disk(image, radius=50, white_background=False):
-    selem = morphology.disk(radius)
-
-    background = morphology.opening(image, selem)
-
-    if white_background:
-        filtered_image = morphology.black_tophat(image, selem)
-    else:
-        filtered_image = morphology.white_tophat(image, selem)
-
-    return filtered_image
-
-
-######################################################################
-# This produces similar results to the original algorithm but is much
-# faster.
-
-image = data.coins()
-
-disk_filtered_image = rolling_disk(image, radius=71)
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Original image')
-ax[0].axis('off')
-
-ax[1].imshow(image - disk_filtered_image, cmap='gray')
-ax[1].set_title('Background')
-ax[1].axis('off')
-
-ax[2].imshow(disk_filtered_image, cmap='gray')
-ax[2].set_title('Result')
-ax[2].axis('off')
-
-fig.tight_layout()
-plt.show()
-
-######################################################################
-# For comparison, here is the difference between the two methods:
-
-ball_filtered_image = morphology.rolling_ball(image, radius=71)
-disk_filtered_image = rolling_disk(image, radius=71)
-
-fig, ax = plt.subplots(nrows=1, ncols=3)
-
-ax[0].imshow(image, cmap='gray')
-ax[0].set_title('Rolling Ball Result')
-ax[0].axis('off')
-
-ax[1].imshow(np.abs(filtered_image - disk_filtered_image), cmap='prism')
-ax[1].set_title('Difference')
-ax[1].axis('off')
-
-ax[2].imshow(disk_filtered_image, cmap='gray')
-ax[2].set_title('Rolling Disk Result')
-ax[2].axis('off')
-
-fig.tight_layout()
-plt.show()
-
-######################################################################
-# and the timings
-
-num_runs = 5
-t0 = time.time()
-for _ in range(num_runs):
-    morphology.rolling_ball(image, radius=71)
-t1 = time.time()
-avg_rolling_ball = (t1-t0)/num_runs
-
-t0 = time.time()
-for _ in range(num_runs):
-    disk_filtered_image = rolling_disk(image, radius=71)
-t1 = time.time()
-avg_rolling_disk = (t1-t0)/num_runs
-
-print(
-    f"Rolling Ball took {avg_rolling_ball:.2f}s, "
-    f"and rolling disk took {avg_rolling_disk:.2f}s."
-)
