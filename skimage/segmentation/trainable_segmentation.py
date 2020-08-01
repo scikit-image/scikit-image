@@ -179,7 +179,7 @@ def multiscale_basic_features(
         )
         features = list(itertools.chain.from_iterable(all_results))
     else:
-        features = _mutiscale_basic_features_singlechannel(
+        features = list(_mutiscale_basic_features_singlechannel(
             image,
             intensity=intensity,
             edges=edges,
@@ -187,7 +187,7 @@ def multiscale_basic_features(
             sigma_min=sigma_min,
             sigma_max=sigma_max,
             num_workers=num_workers,
-        )
+        ))
     return np.array(features, dtype=np.float32)
 
 
