@@ -164,6 +164,11 @@ def multiscale_basic_features(
     features : np.ndarray
         Array of shape ``(n_features,) + image.shape``
     """
+    if not any([intensity, edges, texture]):
+        raise ValueError(
+                "At least one of ``intensity``, ``edges`` or ``textures``"
+                "must be True for features to be computed."
+                )
     if image.ndim >= 3 and multichannel:
         all_results = (
             _mutiscale_basic_features_singlechannel(
