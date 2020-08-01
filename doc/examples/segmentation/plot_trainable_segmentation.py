@@ -43,7 +43,7 @@ features_func = partial(segmentation.multiscale_basic_features,
                         intensity=True, edges=False, texture=True,
                         sigma_min=sigma_min, sigma_max=sigma_max)
 features = features_func(img)
-clf = RandomForestClassifier(n_estimators=50, n_jobs=-1, 
+clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
                              max_depth=10, max_samples=0.05)
 result, clf = segmentation.fit_segmenter(
         training_labels, features, clf,
@@ -54,7 +54,7 @@ ax[0].imshow(segmentation.mark_boundaries(img, result, mode='thick'))
 ax[0].contour(training_labels)
 ax[0].set_title('Image, mask and segmentation boundaries')
 ax[1].imshow(result)
-ax[1].set_title('Segmentation') 
+ax[1].set_title('Segmentation')
 fig.tight_layout()
 
 ##############################################################################

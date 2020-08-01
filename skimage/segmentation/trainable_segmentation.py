@@ -3,10 +3,18 @@ import itertools
 import numpy as np
 from skimage import filters, feature
 from skimage import img_as_float32
-from joblib import Parallel, delayed, parallel_backend
+from concurrent.futures import ThreadPoolExecutor
+
+try:
+    import dask
+
+    has_dask = True
+except ImportError:
+    has_dask = False
 
 try:
     from sklearn.exceptions import NotFittedError
+
     has_sklearn = True
 except ImportError:
     has_sklearn = False
@@ -15,25 +23,67 @@ except ImportError:
         pass
 
 
-
 def _texture_filter(gaussian_filtered):
     H_elems = [
-            np.gradient(np.gradient(gaussian_filtered)[ax0], axis=ax1)
-            for ax0, ax1 in combinations_with_replacement(range(gaussian_filtered.ndim), 2)
-        ]
+        np.gradient(np.gradient(gaussian_filtered)[ax0], axis=ax1)
+        for ax0, ax1 in combinations_with_replacement(range(gaussian_filtered.ndim), 2)
+    ]
     eigvals = feature.hessian_matrix_eigvals(H_elems)
     return eigvals
 
 
+def _singlescale_basic_features_singlechannel(
+    img, sigma, intensity=True, edges=True, texture=True
+):
+    results = ()
+    gaussian_filtered = filters.gaussian(img, sigma)
+    if intensity:
+        results += (gaussian_filtered,)
+    if edges:
+        results += (filters.sobel(gaussian_filtered),)
+    if texture:
+        results += (*_texture_filter(gaussian_filtered),)
+    return results
+
 
 def _mutiscale_basic_features_singlechannel(
-    img, intensity=True, edges=True, texture=True, sigma_min=0.5, sigma_max=16,
-    num_workers=-1
+    img,
+    intensity=True,
+    edges=True,
+    texture=True,
+    sigma_min=0.5,
+    sigma_max=16,
+    num_workers=None,
 ):
     """Features for a single channel nd image.
 
     Parameters
     ----------
+    img : ndarray
+        Input image, which can be grayscale or multichannel.
+    intensity : bool, default True
+        If True, pixel intensities averaged over the different scales
+        are added to the feature set.
+    edges : bool, default True
+        If True, intensities of local gradients averaged over the different
+        scales are added to the feature set.
+    texture : bool, default True
+        If True, eigenvalues of the Hessian matrix after Gaussian blurring
+        at different scales are added to the feature set.
+    sigma_min : float, optional
+        Smallest value of the Gaussian kernel used to average local
+        neighbourhoods before extracting features.
+    sigma_max : float, optional
+        Largest value of the Gaussian kernel used to average local
+        neighbourhoods before extracting features.
+    num_workers : int or None, optional
+        The number of parallel threads to use. If set to ``None``, the full
+        set of available cores are used
+
+    Returns
+    -------
+    features : list
+        List of features, each element of the list is an array of shape as img.
     """
     # computations are faster as float32
     img = np.ascontiguousarray(img_as_float32(img))
@@ -43,20 +93,28 @@ def _mutiscale_basic_features_singlechannel(
         num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
         base=2,
         endpoint=True,
-    )
-    with parallel_backend('threading', n_jobs=num_workers):
-        all_filtered = Parallel()(delayed(filters.gaussian)(img, sigma) for sigma in sigmas)
-        features = []
-        if intensity:
-            features += all_filtered
-        if edges:
-            all_edges = Parallel()(delayed(filters.sobel)(filtered_img)
-                                    for filtered_img in all_filtered)
-            features += all_edges
-        if texture:
-            all_texture = Parallel()(delayed(_texture_filter)(filtered_img)
-                                    for filtered_img in all_filtered)
-            features += itertools.chain.from_iterable(all_texture)
+    )[::-1]
+    if has_dask:
+        out_sigmas = [
+            dask.delayed(_singlescale_basic_features_singlechannel)(
+                img, s, intensity=intensity, edges=edges, texture=texture
+            )
+            for s in sigmas
+        ]
+        features = itertools.chain.from_iterable(
+            dask.compute(*out_sigmas, num_workers=num_workers)
+        )
+    else:
+        with ThreadPoolExecutor(max_workers=num_workers) as ex:
+            out_sigmas = list(
+                ex.map(
+                    lambda s: _singlescale_basic_features_singlechannel(
+                        img, s, intensity=intensity, edges=edges, texture=texture
+                    ),
+                    sigmas,
+                )
+            )
+        features = itertools.chain.from_iterable(out_sigmas)
     return features
 
 
@@ -68,7 +126,7 @@ def multiscale_basic_features(
     texture=True,
     sigma_min=0.5,
     sigma_max=16,
-    num_workers=-1
+    num_workers=None,
 ):
     """Local features for a single- or multi-channel nd image.
 
@@ -96,6 +154,10 @@ def multiscale_basic_features(
     sigma_max : float, optional
         Largest value of the Gaussian kernel used to average local
         neighbourhoods before extracting features.
+    num_workers : int or None, optional
+        The number of parallel threads to use. If set to ``None``, the full
+        set of available cores are used
+
 
     Returns
     -------
@@ -111,7 +173,7 @@ def multiscale_basic_features(
                 texture=texture,
                 sigma_min=sigma_min,
                 sigma_max=sigma_max,
-                num_workers=num_workers
+                num_workers=num_workers,
             )
             for dim in range(image.shape[-1])
         )
@@ -124,7 +186,7 @@ def multiscale_basic_features(
             texture=texture,
             sigma_min=sigma_min,
             sigma_max=sigma_max,
-            num_workers=num_workers
+            num_workers=num_workers,
         )
     return np.array(features, dtype=np.float32)
 
@@ -156,12 +218,13 @@ class TrainableSegmenter(object):
         if clf is None:
             try:
                 from sklearn.ensemble import RandomForestClassifier
+
                 self.clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
             except ImportError:
                 raise ImportError(
                     "Please install scikit-learn or pass a classifier instance"
                     "to TrainableSegmenter."
-                        )
+                )
         else:
             self.clf = clf
         self.features_func = features_func
@@ -190,7 +253,6 @@ class TrainableSegmenter(object):
             self.compute_features(image)
         output, clf = fit_segmenter(labels, self.features, self.clf)
         self.segmented_image = output
-
 
     def predict(self, image):
         """
@@ -228,7 +290,7 @@ def fit_segmenter(labels, features, clf):
         classifier object, exposing a ``fit`` and a ``predict`` method as in
         scikit-learn's API, for example an instance of
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier.
-    
+
     Returns
     -------
     output : ndarray
@@ -259,7 +321,7 @@ def predict_segmenter(features, clf):
     ----------
     features : ndarray
         Array of features, with the first dimension corresponding to the number
-        of features, and the other dimensions are compatible with the shape of 
+        of features, and the other dimensions are compatible with the shape of
         the image to segment.
     clf : classifier object
         trained classifier object, exposing a ``predict`` method as in
@@ -284,8 +346,8 @@ def predict_segmenter(features, clf):
         predicted_labels = clf.predict(features)
     except NotFittedError:
         raise NotFittedError(
-                "You must train the classifier `clf` first"
-                "for example with the `fit_segmenter` function."
-                            )
+            "You must train the classifier `clf` first"
+            "for example with the `fit_segmenter` function."
+        )
     output = predicted_labels.reshape(sh[1:])
     return output
