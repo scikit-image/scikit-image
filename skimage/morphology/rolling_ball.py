@@ -104,9 +104,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     kernel = np.array(tmp <= 1, dtype=float)
     kernel[kernel == 0] = np.Inf
 
-    windowed = view_as_windows(img, kernel.shape)
-
     # the implementation is very naive, but still surprisingly fast
+    windowed = view_as_windows(img, kernel.shape)
     background = apply_kernel(windowed, kernel, cap_height)
     background = background.astype(image.dtype)
 
