@@ -1,5 +1,5 @@
 name: Doc build
-on: [status]
+on: [push, pull request]
 jobs:
   circleci_artifacts_redirector_job:
     runs-on: ubuntu-latest
