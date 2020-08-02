@@ -352,8 +352,8 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
 
     Examples
     --------
-    >>> from skimage import color, data, restoration
-    >>> camera = color.rgb2gray(data.camera())
+    >>> from skimage import img_as_float, data, restoration
+    >>> camera = img_as_float(data.camera())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
