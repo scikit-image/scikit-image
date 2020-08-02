@@ -364,9 +364,10 @@ def richardson_lucy(image, psf, iterations=50, clip=True, filter_epsilon=None):
     ----------
     .. [1] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
     """
-    image = image.astype(np.float)
-    psf = psf.astype(np.float)
-    im_deconv = np.full(image.shape, 0.5)
+    float_type = np.promote_types(image.dtype, np.float32)
+    image = image.astype(float_type, copy=False)
+    psf = psf.astype(float_type, copy=False)
+    im_deconv = np.full(image.shape, 0.5, dtype=float_type)
     psf_mirror = np.flip(psf)
 
     for _ in range(iterations):
