@@ -50,32 +50,6 @@ pip based installation
 This is the easiest way of obtaining the latest released version of
 ``scikit-image`` if Python is already available on your system.
 
-
-**Finding your Python command**
-
-To install ``scikit-image`` with `pip <https://pip.pypa.io/en/stable/>`_, you
-may use the following commands from a command prompt. Note that this command
-prompt is not the Python command prompt, but, depending on your operating
-system, this is called:
-
-- A linux terminal window
-- A MacOSX terminal window
-- A Windows Command Prompt
-
-In that window, execute the command:
-
-.. code-block:: sh
-
-  # For linux or mac
-  which python
-  # Linux and Mac might not have the command python point to python3
-  which python3
-  # For windows
-  where python
-
-Once you have found your Python command, use one of the commands to establish
-the version of Python you are using:
-
 .. code-block:: sh
 
   python --version
@@ -117,6 +91,11 @@ the command:
     Please do not use the command ``sudo`` and ``pip`` together as ``pip`` may
     overwrite critical system libraries which may require you to reinstall your
     operating system.
+
+.. tip::
+    
+    If the ``python`` command doesn't work for you, try to use the ``python3`` 
+    command.
 
 conda based installation
 ------------------------
@@ -185,7 +164,7 @@ The following are a few common challenges encountered in install
 
 **Multiple Python installations**
 
-Different python installations can cause confusion. The default command
+Different Python installations can cause confusion. The default command
 ``python`` you type may not be the one you expect. To check which python
 executable you are using, use the commands:
 
@@ -200,6 +179,14 @@ executable you are using, use the commands:
     where python
     # or
     where python3
+    
+Once you've found your Python command, use 
+
+.. code-block:: sh
+   python --version
+   python3 --version
+   
+To ensure you are using the Python version you expect.
 
 From your python console or Jupyter notebook, you may use the python commands:
 
