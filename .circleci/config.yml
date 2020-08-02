@@ -11,6 +11,7 @@ jobs:
           command: |
               python -m pip install --upgrade pip
               python -m pip install -r requirements/default.txt
+              python -m pip install -r requirements/build.txt
               python -m pip install -r requirements/docs.txt
               python -m pip install -e .
               export
