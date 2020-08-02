@@ -20,7 +20,7 @@ jobs:
           command: |
               cd doc
               make clean
-              make html
+              make -j 4 html
       - store_artifacts:
           path: doc/build/html
           destination: doc/build/html
