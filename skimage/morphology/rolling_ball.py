@@ -6,7 +6,8 @@ from skimage.util import invert, view_as_windows
 from ._rolling_ball_cy import apply_kernel
 
 
-def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
+def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
+                      max_intensity=500):
     """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
@@ -90,7 +91,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
 
     pad_amount = ((kernel_size_x, kernel_size_x),
                   (kernel_size_y, kernel_size_y))
-    img = np.pad(img, pad_amount,  constant_values=np.Inf)
+    img = np.pad(img, pad_amount,  constant_values=max_intensity)
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
@@ -102,11 +103,11 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
         np.sqrt(np.clip(1 - tmp, 0, None))
 
     kernel = np.array(tmp <= 1, dtype=float)
-    kernel[kernel == 0] = np.Inf
+    kernel[kernel == 0] = max_intensity
 
     # the implementation is very naive, but still surprisingly fast
     windowed = view_as_windows(img, kernel.shape)
-    background = apply_kernel(windowed, kernel, cap_height)
+    background = apply_kernel(windowed, kernel, cap_height, max_intensity)
     background = background.astype(image.dtype)
 
     filtered_image = image - background
@@ -114,7 +115,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,)):
     return filtered_image
 
 
-def rolling_ball(image, radius=50):
+def rolling_ball(image, radius=50, max_intensity=255):
     """Perform background subtraction using the rolling ball method.
 
     The rolling ball algorithm estimates background intensity of a grayscale
@@ -165,4 +166,7 @@ def rolling_ball(image, radius=50):
 
     kernel = (radius * 2, radius * 2)
     intensity_vertex = radius * 2
-    return rolling_ellipsoid(image, kernel, intensity_vertex)
+    return rolling_ellipsoid(
+        image, kernel, intensity_vertex,
+        max_intensity=max_intensity
+    )
