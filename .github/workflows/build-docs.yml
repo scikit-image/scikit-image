@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - dev/github-action-doc-build
+      - master
 
 name: Build docs
 
