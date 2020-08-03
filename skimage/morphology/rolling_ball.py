@@ -23,8 +23,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     intensity_vertex : array_like of rank 1, numeric, optional
         The length of the intensity vertex of the ellipsoid.
     has_nan: bool, optional
-        If ``False`` (default) assumes that none of the values in image are
-        ``np.nan``, and uses a faster implementation.
+        If ``False`` (default) assumes that none of the values in ``image``
+        are ``np.nan``, and uses a faster implementation.
 
     Notes
     -----
@@ -140,8 +140,8 @@ def rolling_ball(image, radius=50, has_nan=False):
     radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
     has_nan: bool, optional
-        If ``False`` (default) assumes that none of the values in image are
-        ``np.nan``, and uses a faster implementation.
+        If ``False`` (default) assumes that none of the values in ``image`` 
+        are ``np.nan``, and uses a faster implementation.
 
     Notes
     -----
