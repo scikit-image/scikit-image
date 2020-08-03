@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - master
+      - dev/github-action-doc-build
 
 name: Build docs
 
@@ -25,13 +25,14 @@ jobs:
           python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
-          python setup.py install
+          python -m pip install .
       - name: Push docs
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${DEPLOY_KEY}"
-          git config --global user.email "travis@travis-ci.com"
-          git config --global user.name "Travis Bot"
+          # See https://github.community/t/github-actions-bot-email-address/17204/5
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions"
           (cd doc && make html)
           git clone --quiet --branch=gh-pages "${GH_REF}" doc_build
           cd doc_build
