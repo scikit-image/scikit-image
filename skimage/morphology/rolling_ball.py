@@ -32,9 +32,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     (``image[*pos]``) plus the difference of ``intensity_vertex`` and the
     intensity of the ellipsoid at ``pos``. The intensity of the ellipsoid
     is computed using the canonical ellipsis equation:
-        ``semi_spacial = kernel_size / 2``
-        ``semi_vertex = intensity_vertex / 2``
-        ``np.sum((pos/semi_spacial)**2) + (intensity/semi_vertex)**2 = 1``
+
+    |    ``semi_spacial = kernel_size / 2``
+    |    ``semi_vertex = intensity_vertex / 2``
+    |    ``np.sum((pos/semi_spacial)**2) + (intensity/semi_vertex)**2 = 1``
 
     This algorithm assums that low intensity values (black) corresponds to the
     background. If you have a light background, invert the image before passing
@@ -116,7 +117,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
 
 
 def rolling_ball(image, radius=50, max_intensity=255):
-    """Perform background subtraction using the rolling ball method.
+    """
+    Estimate background intensity using a rolling ball.
 
     The rolling ball algorithm estimates background intensity of a grayscale
     image in case of uneven exposure. It is frequently used in biomedical
