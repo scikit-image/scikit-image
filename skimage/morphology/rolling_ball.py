@@ -7,7 +7,7 @@ from ._rolling_ball_cy import apply_kernel
 
 
 def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
-                      max_intensity=500):
+                      max_intensity=np.Inf):
     """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
@@ -20,8 +20,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         The gray image to be filtered.
     kernel_size: array_like of rank 2, numeric
         The length of the spacial vertices of the ellipsoid.
-    vertex : scalar, numeric
+    intensity_vertex : array_like of rank 1, numeric
         The length of the intensity vertex of the ellipsoid.
+    max_intensity : scalar, numeric
+        Upper bound of the image intensity.
 
     Notes
     -----
@@ -131,6 +133,8 @@ def rolling_ball(image, radius=50, max_intensity=255):
         The gray image to be filtered.
     radius: scalar, numeric
         The radius of the ball/sphere rolled in the image.
+    max_intensity : scalar, numeric
+        Upper bound of the image intensity.
 
     Notes
     -----
