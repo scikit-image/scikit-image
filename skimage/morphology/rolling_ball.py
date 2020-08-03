@@ -140,7 +140,7 @@ def rolling_ball(image, radius=50, has_nan=False):
     radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
     has_nan: bool, optional
-        If ``False`` (default) assumes that none of the values in ``image`` 
+        If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
 
     Notes

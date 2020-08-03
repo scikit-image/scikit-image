@@ -16,17 +16,18 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
     cdef int im_x, im_y, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
 
-    for im_y in range(windows.shape[0]):
-        for im_x in range(windows.shape[1]):
-            min_value = INFINITY
-            for kern_y in range(kernel.shape[0]):
-                for kern_x in range(kernel.shape[1]):
-                    tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
-                    if min_value > tmp:
-                        min_value = tmp
-                    elif isnan(tmp):
-                        min_value = tmp
-            out_data[im_y, im_x] = min_value
+    with nogil:
+        for im_y in range(windows.shape[0]):
+            for im_x in range(windows.shape[1]):
+                min_value = INFINITY
+                for kern_y in range(kernel.shape[0]):
+                    for kern_x in range(kernel.shape[1]):
+                        tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
+                        if min_value > tmp:
+                            min_value = tmp
+                        elif isnan(tmp):
+                            min_value = tmp
+                out_data[im_y, im_x] = min_value
 
     return out_data.base
 
@@ -41,14 +42,15 @@ def apply_kernel(DTYPE_FLOAT[:,:,:,:] windows,
     cdef int im_x, im_y, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
 
-    for im_y in range(windows.shape[0]):
-        for im_x in range(windows.shape[1]):
-            min_value = INFINITY
-            for kern_y in range(kernel.shape[0]):
-                for kern_x in range(kernel.shape[1]):
-                    tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
-                    if min_value > tmp:
-                        min_value = tmp
-            out_data[im_y, im_x] = min_value
+    with nogil:
+        for im_y in range(windows.shape[0]):
+            for im_x in range(windows.shape[1]):
+                min_value = INFINITY
+                for kern_y in range(kernel.shape[0]):
+                    for kern_x in range(kernel.shape[1]):
+                        tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
+                        if min_value > tmp:
+                            min_value = tmp
+                out_data[im_y, im_x] = min_value
 
     return out_data.base
