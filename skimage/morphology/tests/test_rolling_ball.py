@@ -10,7 +10,7 @@ from skimage import data
 from skimage.morphology import rolling_ball
 
 
-@pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50, 100])
+@pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50])
 def test_const_image(radius):
     # infinite plane light source at top left corner
     img = 23 * np.ones((100, 100), dtype=np.uint8)
@@ -40,7 +40,7 @@ def test_linear_gradient():
     assert np.allclose(result, expected_img)
 
 
-@pytest.mark.parametrize("radius", [2, 10, 12.5, 50, 100])
+@pytest.mark.parametrize("radius", [2, 10, 12.5, 50])
 def test_preserve_peaks(radius):
     x, y = np.meshgrid(range(100), range(100))
     img = 0 * x + 0 * y + 10
