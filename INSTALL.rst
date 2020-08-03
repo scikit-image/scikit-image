@@ -144,7 +144,7 @@ or other Python packages is not your best option:
 
 - There's an added risk because operating systems use Python, so if you
   make system-wide Python changes (installing as root or using sudo),
-  you can break the OS.
+  you can break the operating system.
 
 Other platforms
 ------------------------------------------------------------------------------
