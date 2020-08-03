@@ -3,11 +3,11 @@ from itertools import product
 from scipy.ndimage import generic_filter
 
 from skimage.util import invert, view_as_windows
-from ._rolling_ball_cy import apply_kernel
+from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
-                      max_intensity=np.Inf):
+                      has_nan=False):
     """Estimate background intensity using a rolling ellipsoid.
 
     The rolling ellipsoid algorithm estimates background intensity for a
@@ -18,12 +18,13 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     ----------
     image : array_like of rank 2, numeric
         The gray image to be filtered.
-    kernel_size: array_like of rank 2, numeric
+    kernel_size: array_like of rank 2, numeric, optional
         The length of the spacial vertices of the ellipsoid.
-    intensity_vertex : array_like of rank 1, numeric
+    intensity_vertex : array_like of rank 1, numeric, optional
         The length of the intensity vertex of the ellipsoid.
-    max_intensity : scalar, numeric
-        Upper bound of the image intensity.
+    has_nan: bool, optional
+        If ``False`` (default) assumes that none of the values in image are
+        ``np.nan``, and uses a faster implementation.
 
     Notes
     -----
@@ -87,14 +88,14 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     if not np.issubdtype(image.dtype, np.number):
         raise ValueError("Image must be of numeric type.")
     if not len(image.shape) == 2:
-        raise ValueError("Image must be a three dimensional array.")
-    img = image.copy().astype(float)
+        raise ValueError("Image must be a two dimensional array.")
+    img = image.copy().astype(np.float_)
 
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
     pad_amount = ((kernel_size_x, kernel_size_x),
                   (kernel_size_y, kernel_size_y))
-    img = np.pad(img, pad_amount,  constant_values=max_intensity)
+    img = np.pad(img, pad_amount,  constant_values=np.Inf)
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
@@ -104,13 +105,18 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     tmp = (x / kernel_size_x) ** 2 + (y / kernel_size_y) ** 2
     cap_height = intensity_vertex - intensity_vertex * \
         np.sqrt(np.clip(1 - tmp, 0, None))
+    cap_height = cap_height.astype(np.float_)
 
-    kernel = np.array(tmp <= 1, dtype=float)
-    kernel[kernel == 0] = max_intensity
+    kernel = np.array(tmp <= 1, dtype=np.float_)
+    kernel[kernel == 0] = np.Inf
 
-    # the implementation is very naive, but still surprisingly fast
     windowed = view_as_windows(img, kernel.shape)
-    background = apply_kernel(windowed, kernel, cap_height, max_intensity)
+    if has_nan:
+        background = apply_kernel_nan(
+            windowed, kernel, cap_height)
+    else:
+        background = apply_kernel(windowed, kernel, cap_height)
+
     background = background.astype(image.dtype)
 
     filtered_image = image - background
@@ -118,7 +124,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     return filtered_image
 
 
-def rolling_ball(image, radius=50, max_intensity=255):
+def rolling_ball(image, radius=50, has_nan=False):
     """
     Estimate background intensity using a rolling ball.
 
@@ -131,10 +137,11 @@ def rolling_ball(image, radius=50, max_intensity=255):
     ----------
     image : array_like of rank 2, numeric
         The gray image to be filtered.
-    radius: scalar, numeric
+    radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
-    max_intensity : scalar, numeric
-        Upper bound of the image intensity.
+    has_nan: bool, optional
+        If ``False`` (default) assumes that none of the values in image are
+        ``np.nan``, and uses a faster implementation.
 
     Notes
     -----
@@ -172,7 +179,4 @@ def rolling_ball(image, radius=50, max_intensity=255):
 
     kernel = (radius * 2, radius * 2)
     intensity_vertex = radius * 2
-    return rolling_ellipsoid(
-        image, kernel, intensity_vertex,
-        max_intensity=max_intensity
-    )
+    return rolling_ellipsoid(image, kernel, intensity_vertex, has_nan)

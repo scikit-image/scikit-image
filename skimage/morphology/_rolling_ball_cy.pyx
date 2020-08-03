@@ -1,25 +1,49 @@
 import numpy as np
-cimport numpy as np
 cimport cython
-from scipy.linalg cimport cython_blas as blas
+from libc.math cimport isnan, INFINITY
 
+from .._shared.fused_numerics cimport np_floats
 
-ctypedef np.double_t DTYPE
+ctypedef np_floats DTYPE_FLOAT
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def apply_kernel(DTYPE[:,:,:,:] windows,
-                     DTYPE[:,:] kernel,
-                     DTYPE[:,:] cap_height,
-                     DTYPE max_value=255):
+def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
+                     DTYPE_FLOAT[:,:] kernel,
+                     DTYPE_FLOAT[:,:] cap_height):
     
-    cdef DTYPE[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]))
+    cdef DTYPE_FLOAT[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
     cdef int im_x, im_y, kern_x, kern_y
-    cdef DTYPE min_value, tmp
+    cdef DTYPE_FLOAT min_value, tmp
 
     for im_y in range(windows.shape[0]):
         for im_x in range(windows.shape[1]):
-            min_value = max_value
+            min_value = INFINITY
+            for kern_y in range(kernel.shape[0]):
+                for kern_x in range(kernel.shape[1]):
+                    tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
+                    if min_value > tmp:
+                        min_value = tmp
+                    elif isnan(tmp):
+                        min_value = tmp
+            out_data[im_y, im_x] = min_value
+
+    return out_data.base
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def apply_kernel(DTYPE_FLOAT[:,:,:,:] windows,
+                 DTYPE_FLOAT[:,:] kernel,
+                 DTYPE_FLOAT[:,:] cap_height):
+    
+    cdef DTYPE_FLOAT[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
+    cdef int im_x, im_y, kern_x, kern_y
+    cdef DTYPE_FLOAT min_value, tmp
+
+    for im_y in range(windows.shape[0]):
+        for im_x in range(windows.shape[1]):
+            min_value = INFINITY
             for kern_y in range(kernel.shape[0]):
                 for kern_x in range(kernel.shape[1]):
                     tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
