@@ -41,7 +41,8 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
             size = int(size)
         except (TypeError, ValueError) as exception:
             raise TypeError(
-                f"size must be either None or interpretable as an integer.\n" f"type(size): {type(size)}."
+                f"size must be either None or interpretable as an integer.\n"
+                f"type(size): {type(size)}."
             ) from exception
 
         if size < 0:
@@ -51,7 +52,9 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
     try:
         value = np.array(value, dtype=dtype)
     except ValueError as exception:
-        raise ValueError(f"value and dtype are incompatible with one another.") from exception
+        raise ValueError(
+            f"value and dtype are incompatible with one another."
+        ) from exception
 
     # Validate value's dimensionality and length.
     if value.ndim == 0:
@@ -63,19 +66,22 @@ def _validate_scalar_to_multi(value, size=None, dtype=None):
         elif size is not None and len(value) != size:
             # value's length is incompatible with size.
             raise ValueError(
-                f"The length of value must either be 1 or it must match size if size is provided.\n"
+                "The length of value must either be 1 or it must match size "
+                "if size is provided.\n"
                 f"len(value): {len(value)}, size: {size}."
             )
     else:
         # value.ndim > 1.
         raise ValueError(
-            f"value must not have more than 1 dimension.\n" f"value.ndim: {value.ndim}."
+            "value must not have more than 1 dimension.\n"
+            f"value.ndim: {value.ndim}."
         )
 
     # Check for np.nan values if the dtype is not object.
-    if value.dtype != 'object' and np.any(np.isnan(value)):
+    if value.dtype != "object" and np.any(np.isnan(value)):
         raise NotImplementedError(
-            "np.nan values encountered for a value not cast to dtype object. What input led to this result?\n"
+            "np.nan values encountered for a value not cast to dtype object."
+            "What input led to this result?\n"
             "Write in an exception as appropriate."
         )
         raise ValueError(
@@ -106,17 +112,23 @@ def _validate_ndarray(
 
     array is cast to an np.ndarray of type dtype.
 
-    If minimum_ndim is provided and array.ndim < minimum_ndim, array.shape is left-padded by 1's until minimum_ndim is satisfied.
+    If minimum_ndim is provided and array.ndim < minimum_ndim, array.shape is
+    left-padded by 1's until minimum_ndim is satisfied.
 
-    If required_ndim is provided and array.ndim != required_ndim, an exception is raised.
+    If required_ndim is provided and array.ndim != required_ndim, an exception
+    is raised.
 
-    If forbid_object_dtype == True and array.dtype == object, an exception is raised, unless dtype is provided as object.
+    If forbid_object_dtype == True and array.dtype == object, an exception is
+    raised, unless dtype is provided as object.
 
-    If a shape is provided to broadcast_to_shape, array is broadcasted to that shape.
+    If a shape is provided to broadcast_to_shape, array is broadcasted to that
+    shape.
 
-    If a shape is provided to reshape_to_shape, array is reshaped to that shape.
+    If a shape is provided to reshape_to_shape, array is reshaped to that
+    shape.
 
-    If a shape is provided to required_shape, if the shape does not match this shape then an exception is raised.
+    If a shape is provided to required_shape, if the shape does not match this
+    shape then an exception is raised.
     """
 
     # Verify arguments.
@@ -129,7 +141,8 @@ def _validate_ndarray(
         )
     if minimum_ndim < 0:
         raise ValueError(
-            f"minimum_ndim must be non-negative.\n" f"minimum_ndim: {minimum_ndim}."
+            "minimum_ndim must be non-negative.\n"
+            f"minimum_ndim: {minimum_ndim}."
         )
 
     # Verify required_ndim.
@@ -158,7 +171,7 @@ def _validate_ndarray(
     # Cast array to np.ndarray.
     # Validate compliance with dtype.
     try:
-        array = np.array(array, dtype) # Side effect: breaks alias.
+        array = np.array(array, dtype)  # Side effect: breaks alias.
     except TypeError as exception:
         raise TypeError(
             f"array is of a type that is incompatible with dtype.\n"
@@ -174,24 +187,29 @@ def _validate_ndarray(
     if forbid_object_dtype:
         if array.dtype == object and dtype != object:
             raise TypeError(
-                f"Casting array to a np.ndarray produces an array of dtype object \n"
-                f"while forbid_object_dtype == True and dtype != object."
+                "Casting array to a np.ndarray produces an array of dtype "
+                "object while forbid_object_dtype == True and dtype != "
+                "object."
             )
 
-    # Validate compliance with minimum_ndim by left-padding the shape with 1's as necessary.
+    # Validate compliance with minimum_ndim by left-padding the shape with 1's
+    # as necessary.
     if array.ndim < minimum_ndim:
         array = array.reshape(*[1] * (minimum_ndim - array.ndim), *array.shape)
 
     # Validate compliance with required_ndim.
     if required_ndim is not None and array.ndim != required_ndim:
         raise ValueError(
-            f"If required_ndim is not None, array.ndim must be made to equal it.\n"
+            "If required_ndim is not None, array.ndim must be made to equal "
+            "it.\n"
             f"array.ndim: {array.ndim}, required_ndim: {required_ndim}."
         )
 
     # Broadcast array if appropriate.
     if broadcast_to_shape is not None:
-        array = np.copy(np.broadcast_to(array=array, shape=broadcast_to_shape))
+        array = np.copy(
+            np.broadcast_to(array=array, shape=broadcast_to_shape,)
+        )
 
     # Reshape array if appropriate.
     if reshape_to_shape is not None:
@@ -200,21 +218,31 @@ def _validate_ndarray(
     # Verify compliance with required_shape if appropriate.
     if required_shape is not None:
         try:
-            required_shape_satisfied = np.array_equal(array.reshape(required_shape).shape, array.shape)
+            required_shape_satisfied = np.array_equal(
+                array.reshape(required_shape).shape, array.shape,
+            )
         except ValueError as exception:
             raise ValueError(
                 f"array is incompatible with required_shape.\n"
-                f"array.shape: {array.shape}, required_shape: {required_shape}."
+                f"array.shape: {array.shape}, "
+                f"required_shape: {required_shape}."
             ) from exception
         if not required_shape_satisfied:
-            raise ValueError(f"array is compatible with required_shape but does not match required_shape.\n"
-                             f"array.shape: {array.shape}, required_shape: {required_shape}.")
+            raise ValueError(
+                f"array is compatible with required_shape but "
+                "does not match required_shape.\n"
+                f"array.shape: {array.shape}, "
+                f"required_shape: {required_shape}."
+            )
 
     return array
 
 
 def _validate_resolution(resolution, ndim, dtype=float):
-    """Validate resolution to assure its length matches the dimensionality of image."""
+    """
+    Validate resolution to assure its length matches the dimensionality of
+    image.
+    """
 
     resolution = _validate_scalar_to_multi(resolution, size=ndim, dtype=dtype)
 
@@ -241,9 +269,11 @@ def _compute_axes(shape, resolution=1, origin="center"):
 
     # Create axes.
 
-    # axes is a list of arrays matching each shape element from shape, spaced by the corresponding resolution.
+    # axes is a list of arrays matching each shape element from shape, spaced
+    # by the corresponding resolution.
     axes = [
-        np.arange(dim_size) * dim_res for dim_size, dim_res in zip(shape, resolution)
+        np.arange(dim_size) * dim_res
+        for dim_size, dim_res in zip(shape, resolution)
     ]
 
     # List all presently recognized origin values.
@@ -267,8 +297,8 @@ def _compute_axes(shape, resolution=1, origin="center"):
 
 def _compute_coords(shape, resolution=1, origin="center"):
     """
-    Returns the real_coordinates of an image with the given shape
-    at the given resolution as a single numpy array of shape (*shape, len(shape)).
+    Returns the real_coordinates of an image with the given shape at the given
+    resolution as a single numpy array of shape (*shape, len(shape)).
     """
 
     axes = _compute_axes(shape, resolution, origin)
@@ -279,35 +309,44 @@ def _compute_coords(shape, resolution=1, origin="center"):
 
 
 def _multiply_coords_by_affine(affine, array):
-    """Applies affine to the elements of array at each spatial position and returns the result."""
+    """
+    Applies affine to the elements of array at each spatial position and
+    returns the result.
+    """
 
     # Validate inputs.
 
     # Verify that affine is square.
     if affine.ndim != 2:
         raise ValueError(
-            f"affine must be a 2-dimensional matrix.\n" f"affine.ndim: {affine.ndim}."
+            f"affine must be a 2-dimensional matrix.\n"
+            f"affine.ndim: {affine.ndim}."
         )
     # affine is 2-dimensional.
     if affine.shape[0] != affine.shape[1]:
         raise ValueError(
-            f"affine must be a square matrix.\n" f"affine.shape: {affine.shape}."
+            f"affine must be a square matrix.\n"
+            f"affine.shape: {affine.shape}."
         )
     # affine is square.
 
     # Verify compatibility between affine and array.
     if array.shape[-1] != len(affine) - 1:
         raise ValueError(
-            f"array is incompatible with affine. The length of the last dimension of array should be 1 less than the length of affine.\n"
+            "array is incompatible with affine. The length of the last "
+            "dimension of array should be 1 less than the length of affine.\n"
             f"array.shape: {array.shape}, affine.shape: {affine.shape}."
         )
 
     # Raise warning if affine is not in homogenous coordinates.
-    if not np.array_equal(affine[-1], np.array([0] * (len(affine) - 1) + [1])):
+    if not np.array_equal(
+        affine[-1],
+        np.array([0] * (len(affine) - 1) + [1]),
+    ):
         warnings.warn(
             message=f"affine is not in homogenous coordinates.\n"
-                    f"affine[-1] should be zeros with a 1 on the right.\n"
-                    f"affine[-1]: {affine[-1]}.",
+            f"affine[-1] should be zeros with a 1 on the right.\n"
+            f"affine[-1]: {affine[-1]}.",
             category=RuntimeWarning,
         )
 
@@ -321,25 +360,36 @@ def _multiply_coords_by_affine(affine, array):
 
 
 def _compute_tail_determinant(array):
-    """Computes and returns the determinant of array along its last 2 dimensions."""
+    """
+    Computes and returns the determinant of array along its last 2 dimensions.
+    """
 
     # Validate that array is square on its last 2 dimensions.
     if array.shape[-1] != array.shape[-2]:
-        raise ValueError(f"array must be square on its last 2 dimensions.\n"
-                         f"array.shape[-2:]: {array.shape[-2:]}.")
+        raise ValueError(
+            f"array must be square on its last 2 dimensions.\n"
+            f"array.shape[-2:]: {array.shape[-2:]}."
+        )
 
     # Compute the determinant recursively.
 
     if array.shape[-1] == 2:
         # Handle 2-dimensional base case.
-        determinant = array[...,0,0] * array[...,1,1] - array[...,0,1] * array[...,1,0]
+        determinant = (
+            array[..., 0, 0] * array[..., 1, 1]
+            - array[..., 0, 1] * array[..., 1, 0]
+        )
     else:
         # Handle more than 2-dimensional recursive case.
         determinant = 0
         for dim in range(array.shape[-1]):
             recursive_indices = list(range(array.shape[-1]))
             recursive_indices.remove(dim)
-            determinant += (-1)**dim * array[...,0,dim] * _compute_tail_determinant(array[...,1:,recursive_indices])
+            determinant += (
+                (-1) ** dim
+                * array[..., 0, dim]
+                * _compute_tail_determinant(array[..., 1:, recursive_indices])
+            )
 
     return determinant
 
@@ -367,17 +417,23 @@ def resample(
         old_resolution: float, seq, optional
             The resolution of the input image. By default 1.
         err_to_larger: bool, optional
-            Determines whether to round the new shape up or down. By default True.
+            Determines whether to round the new shape up or down.
+            By default True.
         extrapolation_fill_value: float, optional
             The fill_value kwarg passed to interpn. By default None.
         origin: str, optional
-            The origin to use for the image axes and coordinates used internally. By default 'center'.
+            The origin to use for the image axes and coordinates used
+            internally. By default 'center'.
         method: str, optional
-            The method of interpolation, passed as the method kwarg in interpn. By default 'linear'.
+            The method of interpolation, passed as the method kwarg in
+            interpn. By default 'linear'.
         image_is_coords: bool, optional
-            If True, this implies that the last dimension of image is not a spatial dimension and not subject to interpolation. By default False.
+            If True, this implies that the last dimension of image is not a
+            spatial dimension and not subject to interpolation.
+            By default False.
         anti_aliasing: bool, optional
-            If True, applies a gaussian filter across dimensions to be downsampled before interpolating. By default True.
+            If True, applies a gaussian filter across dimensions to be
+            downsampled before interpolating. By default True.
 
     Returns
     -------
@@ -386,7 +442,7 @@ def resample(
     """
 
     # Validate inputs and define ndim & old_shape based on image_is_coords.
-    image = _validate_ndarray(image) # Breaks alias.
+    image = _validate_ndarray(image)  # Breaks alias.
     if image_is_coords:
         ndim = image.ndim - 1
         old_shape = image.shape[:-1]
@@ -398,9 +454,8 @@ def resample(
 
     # Handle trivial case.
     if np.array_equal(new_resolution, old_resolution):
-        return (
-            image # Note: this is a copy of the input image and is not the same object.
-        )
+        # Note: this is a copy of the input image and is not the same object.
+        return image 
 
     # Compute new_coords and old_axes.
     if err_to_larger:
@@ -437,7 +492,8 @@ def resample(
 
 def sinc_resample(array, new_shape):
     """
-    Resample array to new_shape by padding and truncating at high frequencies in the fourier domain.
+    Resample array to new_shape by padding and truncating at high frequencies
+    in the fourier domain.
 
     Parameters
     ----------
@@ -454,13 +510,17 @@ def sinc_resample(array, new_shape):
 
     # Validate inputs.
     array = _validate_ndarray(array)
-    new_shape = _validate_ndarray(new_shape, dtype=int, required_ndim=1, required_shape=array.ndim)
+    new_shape = _validate_ndarray(
+        new_shape, dtype=int, required_ndim=1, required_shape=array.ndim
+    )
 
     resampled_array = np.copy(array)
 
     for dim in range(array.ndim):
         fourier_transformed_array = np.fft.rfft(resampled_array, axis=dim)
-        resampled_array = np.fft.irfft(fourier_transformed_array, axis=dim, n=new_shape[dim])
+        resampled_array = np.fft.irfft(
+            fourier_transformed_array, axis=dim, n=new_shape[dim]
+        )
     resampled_array *= resampled_array.size / array.size
 
     return resampled_array
@@ -484,29 +544,36 @@ def generate_position_field(
     affine : np.ndarray
         The affine array to be incorporated into the returned position field.
     velocity_fields : np.ndarray
-        The velocity_fields defining the diffeomorphic flow. The leading dimensions are spatial, and the last two dimensions are the number of time steps and the coordinates.
+        The velocity_fields defining the diffeomorphic flow. The leading
+        dimensions are spatial, and the last two dimensions are the number of
+        time steps and the coordinates.
     velocity_field_resolution : float, seq
-        The resolution of velocity_fields, with multiple values given to specify anisotropy.
+        The resolution of velocity_fields, with multiple values given to
+        specify anisotropy.
     template_shape : seq
         The shape of the template.
     template_resolution : float, seq
-        The resolution of the template, with multiple values given to specify anisotropy.
+        The resolution of the template, with multiple values given to specify
+        anisotropy.
     target_shape : seq
         The shape of the target.
     target_resolution : float, seq
-        The resolution of the target, with multiple values given to specify anisotropy.
+        The resolution of the target, with multiple values given to specify
+        anisotropy.
     deform_to : str, optional
         The direction of the deformation. By default "template".
 
     Returns
     -------
     np.ndarray
-        The position field for the registration in the space of the image specified by deform_to.
+        The position field for the registration in the space of the image
+        specified by deform_to.
 
     Raises
     ------
     ValueError
-        Raised if the leading dimensions of velocity_fields fail to match template_shape.
+        Raised if the leading dimensions of velocity_fields fail to match
+        template_shape.
     TypeError
         Raised if deform_to is not of type str.
     ValueError
@@ -519,18 +586,32 @@ def generate_position_field(
     # Validate target_shape. Not rigorous.
     target_shape = _validate_ndarray(target_shape)
     # Validate velocity_fields.
-    velocity_fields = _validate_ndarray(velocity_fields, required_ndim=len(template_shape) + 2)
+    velocity_fields = _validate_ndarray(
+        velocity_fields, required_ndim=len(template_shape) + 2
+    )
     if not np.all(velocity_fields.shape[:-2] == template_shape):
-        raise ValueError(f"velocity_fields' initial dimensions must equal template_shape.\n"
-            f"velocity_fields.shape: {velocity_fields.shape}, template_shape: {template_shape}.")
+        raise ValueError(
+            "velocity_fields' initial dimensions must equal "
+            "template_shape.\n"
+            f"velocity_fields.shape: {velocity_fields.shape}, "
+            f"template_shape: {template_shape}."
+        )
     # Validate velocity_field_resolution.
-    velocity_field_resolution = _validate_resolution(velocity_field_resolution, velocity_fields.ndim - 2)
+    velocity_field_resolution = _validate_resolution(
+        velocity_field_resolution, velocity_fields.ndim - 2
+    )
     # Validate affine.
-    affine = _validate_ndarray(affine, required_ndim=2, reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1))
+    affine = _validate_ndarray(
+        affine,
+        required_ndim=2,
+        reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1),
+    )
     # Verify deform_to.
     if not isinstance(deform_to, str):
-        raise TypeError(f"deform_to must be of type str.\n"
-            f"type(deform_to): {type(deform_to)}.")
+        raise TypeError(
+            f"deform_to must be of type str.\n"
+            f"type(deform_to): {type(deform_to)}."
+        )
     elif deform_to not in ["template", "target"]:
         raise ValueError(f"deform_to must be either 'template' or 'target'.")
 
@@ -549,25 +630,39 @@ def generate_position_field(
         phi_inv = np.copy(template_coords)
 
     # Integrate velocity field.
-    for timestep in (reversed(range(num_timesteps)) if deform_to == "template" else range(num_timesteps)):
+    for timestep in (
+        reversed(range(num_timesteps))
+        if deform_to == "template"
+        else range(num_timesteps)
+    ):
         if deform_to == "template":
-            sample_coords = template_coords + velocity_fields[..., timestep, :] * delta_t
-            phi = interpn(
-                points=template_axes,
-                values=phi - template_coords,
-                xi=sample_coords,
-                bounds_error=False,
-                fill_value=None,
-            ) + sample_coords
+            sample_coords = (
+                template_coords + velocity_fields[..., timestep, :] * delta_t
+            )
+            phi = (
+                interpn(
+                    points=template_axes,
+                    values=phi - template_coords,
+                    xi=sample_coords,
+                    bounds_error=False,
+                    fill_value=None,
+                )
+                + sample_coords
+            )
         elif deform_to == "target":
-            sample_coords = template_coords - velocity_fields[..., timestep, :] * delta_t
-            phi_inv = interpn(
-                points=template_axes,
-                values=phi_inv - template_coords,
-                xi=sample_coords,
-                bounds_error=False,
-                fill_value=None,
-            ) + sample_coords
+            sample_coords = (
+                template_coords - velocity_fields[..., timestep, :] * delta_t
+            )
+            phi_inv = (
+                interpn(
+                    points=template_axes,
+                    values=phi_inv - template_coords,
+                    xi=sample_coords,
+                    bounds_error=False,
+                    fill_value=None,
+                )
+                + sample_coords
+            )
 
     # Apply the affine transform to the position field.
     if deform_to == "template":
@@ -577,13 +672,16 @@ def generate_position_field(
     elif deform_to == "target":
         # Apply the affine by interpolation.
         sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)
-        phi_inv_affine_inv = interpn(
-            points=template_axes,
-            values=phi_inv - template_coords,
-            xi=sample_coords,
-            bounds_error=False,
-            fill_value=None,
-        ) + sample_coords
+        phi_inv_affine_inv = (
+            interpn(
+                points=template_axes,
+                values=phi_inv - template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
+            )
+            + sample_coords
+        )
         # phi_inv_affine_inv has the resolution of the target.
 
     # return appropriate position field.
