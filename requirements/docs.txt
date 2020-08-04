@@ -13,3 +13,4 @@ seaborn>=0.7.1
 pooch>=0.5.2
 tifffile>=2020.5.30
 myst-parser
+ipywidgets
