@@ -1,7 +1,7 @@
 """
-This is an implementation of the LDDMM algorithm with modifications, written by Devin Crowley and based on 
-"Diffeomorphic registration with intensity transformation and missing data: Application to 3D digital pathology of Alzheimer's disease." 
-This paper extends on an older LDDMM paper, 
+This is an implementation of the LDDMM algorithm with modifications, written by Devin Crowley and based on
+"Diffeomorphic registration with intensity transformation and missing data: Application to 3D digital pathology of Alzheimer's disease."
+This paper extends on an older LDDMM paper,
 "Computing large deformation metric mappings via geodesic flows of diffeomorphisms."
 
 This is the more recent paper:
@@ -34,13 +34,13 @@ from ._lddmm_utilities import resample
 from ._lddmm_utilities import sinc_resample
 
 r'''
-  _            _       _                         
- | |          | |     | |                        
- | |        __| |   __| |  _ __ ___    _ __ ___  
- | |       / _` |  / _` | | '_ ` _ \  | '_ ` _ \ 
+  _            _       _
+ | |          | |     | |
+ | |        __| |   __| |  _ __ ___    _ __ ___
+ | |       / _` |  / _` | | '_ ` _ \  | '_ ` _ \
  | |____  | (_| | | (_| | | | | | | | | | | | | |
  |______|  \__,_|  \__,_| |_| |_| |_| |_| |_| |_|
-                                                 
+
 '''
 
 #TODO: resolution --> spacing, template_resolution --> template_spacing.
@@ -174,7 +174,7 @@ class _Lddmm:
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
         self.fourier_high_pass_filter = (
-            1 - self.velocity_smooth_length**2 
+            1 - self.velocity_smooth_length**2
             * np.sum((-2 + 2 * np.cos(2 * np.pi * fourier_velocity_fields_coords * self.template_resolution)) / self.template_resolution**2, axis=-1)
         )**self.fourier_filter_power
         fourier_template_coords = _compute_coords(self.template.shape, 1 / (self.template_resolution * self.template.shape), origin='zero')
@@ -206,7 +206,7 @@ class _Lddmm:
             self.velocity_fields = _validate_ndarray(initial_velocity_fields, required_shape=(*self.template.shape, self.num_timesteps, self.template.ndim))
         else:
             self.velocity_fields = np.zeros((*self.template.shape, self.num_timesteps, self.template.ndim))
-        # Note: If a transformation T maps a point in the space of the template to a point in the space of the target, as affine_phi, 
+        # Note: If a transformation T maps a point in the space of the template to a point in the space of the target, as affine_phi,
         # the template image is deformed using T_inv, or phi_inv_affine_inv via interpolation of the target at phi_inv_affine_inv.
         # phi: A position-field that describes change in shape, or deformation, of the template but not change in scale or orientation. Stored in template-space.
         self.phi = np.copy(self.template_coords)
@@ -222,11 +222,11 @@ class _Lddmm:
         self.matching_weights = np.ones_like(self.target)
         self.deformed_template_to_time = []
         self.deformed_template = interpn(
-            points=self.template_axes, 
-            values=self.template, 
-            xi=self.phi_inv_affine_inv, 
-            bounds_error=False, 
-            fill_value=None, 
+            points=self.template_axes,
+            values=self.template,
+            xi=self.phi_inv_affine_inv,
+            bounds_error=False,
+            fill_value=None,
         )
         if spatially_varying_contrast_map:
             if initial_contrast_coefficients is None:
@@ -254,7 +254,7 @@ class _Lddmm:
     def register(self):
         """
         Register the template to the target using the current state of the attributes.
-        
+
         Return a dictionary of relevant quantities most notably including the transformations:
             phi_inv_affine_inv is the position field that maps the template to the target.
             affine_phi is the position field that maps the target to the template.
@@ -276,14 +276,14 @@ class _Lddmm:
             self._update_and_apply_position_field()
             # Contrast transform the deformed_template.
             self._apply_contrast_map()
-            # Compute weights. 
+            # Compute weights.
             # This is the expectation step of the expectation maximization algorithm.
             if self.classify_and_weight_voxels and iteration % 1 == 0: self._compute_weights()
             # Compute cost.
             self._compute_cost()
 
             # Backward pass: update contrast map, affine, & velocity_fields.
-            
+
             # Compute contrast map.
             self._compute_contrast_map()
 
@@ -323,7 +323,7 @@ class _Lddmm:
         a new take on the return 'value':
 
         affine_phi, phi_inv_affine_inv, position_field_components, diagnostics (everything else)
-        
+
         position_field --> map_coordinates coords: subtract coordinate of the first pixel and divide by pixel size in each dimension
         '''
         # return dict(**params) --> transform_necessary_values, just_cuz_values, calibration_accumulators
@@ -357,31 +357,31 @@ class _Lddmm:
 
         # Set self.phi_inv to identity.
         self.phi_inv = np.copy(self.template_coords)
-        
+
         # Reset self.deformed_template_to_time.
         self.deformed_template_to_time = []
         for timestep in range(self.num_timesteps):
             # Compute phi_inv.
             sample_coords = self.template_coords - self.velocity_fields[..., timestep, :] * self.delta_t
             self.phi_inv = interpn(
-                points=self.template_axes, 
-                values=self.phi_inv - self.template_coords, 
-                xi=sample_coords, 
-                bounds_error=False, 
-                fill_value=None, 
+                points=self.template_axes,
+                values=self.phi_inv - self.template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
             ) + sample_coords
 
             # Compute deformed_template_to_time
             self.deformed_template_to_time.append(
                 interpn(
-                    points=self.template_axes, 
-                    values=self.template, 
-                    xi=self.phi_inv, 
-                    bounds_error=False, 
-                    fill_value=None, 
+                    points=self.template_axes,
+                    values=self.template,
+                    xi=self.phi_inv,
+                    bounds_error=False,
+                    fill_value=None,
                 )
             )
-            
+
             # End time loop.
 
         # Apply affine_inv to target_coords by multiplication.
@@ -389,21 +389,21 @@ class _Lddmm:
 
         # Apply phi_inv to affine_inv_target_coords.
         self.phi_inv_affine_inv = interpn(
-            points=self.template_axes, 
-            values=self.phi_inv - self.template_coords, 
-            xi=affine_inv_target_coords, 
-            bounds_error=False, 
-            fill_value=None, 
+            points=self.template_axes,
+            values=self.phi_inv - self.template_coords,
+            xi=affine_inv_target_coords,
+            bounds_error=False,
+            fill_value=None,
         ) + affine_inv_target_coords
 
         # Apply phi_inv_affine_inv to template.
         # deformed_template is sampled at the coordinates of the target.
         self.deformed_template = interpn(
-            points=self.template_axes, 
-            values=self.template, 
-            xi=self.phi_inv_affine_inv, 
-            bounds_error=False, 
-            fill_value=None, 
+            points=self.template_axes,
+            values=self.template,
+            xi=self.phi_inv_affine_inv,
+            bounds_error=False,
+            fill_value=None,
         )
 
 
@@ -445,7 +445,7 @@ class _Lddmm:
             background_mean_value
             matching_weights
         """
-        
+
         likelihood_matching = np.exp((self.contrast_deformed_template - self.target)**2 * (-1/(2 * self.sigma_matching**2))) / np.sqrt(2 * np.pi * self.sigma_matching**2)
         likelihood_artifact = np.exp((self.artifact_mean_value - self.target)**2 * (-1/(2 * self.sigma_artifact**2))) / np.sqrt(2 * np.pi * self.sigma_artifact**2)
         likelihood_background = np.exp((self.background_mean_value - self.target)**2 * (-1/(2 * self.sigma_background**2))) / np.sqrt(2 * np.pi * self.sigma_background**2)
@@ -495,12 +495,12 @@ class _Lddmm:
         """
 
         matching_energy = (
-            np.sum((self.contrast_deformed_template - self.target)**2 * self.matching_weights) * 
+            np.sum((self.contrast_deformed_template - self.target)**2 * self.matching_weights) *
             1/(2 * self.sigma_matching**2) * np.prod(self.target_resolution)
         )
 
         regularization_energy = (
-            np.sum(np.sum(np.abs(self.fourier_velocity_fields)**2, axis=(-1,-2)) * self.fourier_high_pass_filter**2) * 
+            np.sum(np.sum(np.abs(self.fourier_velocity_fields)**2, axis=(-1,-2)) * self.fourier_high_pass_filter**2) *
             (np.prod(self.template_resolution) * self.delta_t / (2 * self.sigma_regularization**2) / self.template.size)
         )
 
@@ -567,7 +567,7 @@ class _Lddmm:
                 for _ in range(self.contrast_iterations):
                     linear_operator_high_pass_contrast_coefficients = np.fft.ifftn(np.fft.fftn((
                         np.sum(
-                            np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
+                            np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis,
                             axis=-1,
                         ) * weights**2
                     )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + high_pass_contrast_coefficients
@@ -575,14 +575,14 @@ class _Lddmm:
                     # Compute the optimal step size.
                     linear_operator_residual = np.fft.ifftn(np.fft.fftn((
                         np.sum(
-                            np.fft.ifftn(np.fft.fftn(residual, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis, 
+                            np.fft.ifftn(np.fft.fftn(residual, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real * self.contrast_polynomial_basis,
                             axis=-1,
                         ) * weights**2
                     )[..., None] * self.contrast_polynomial_basis, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real + residual
                     optimal_stepsize = np.sum(residual**2) / np.sum(linear_operator_residual * residual)
                     # Take gradient descent step at half the optimal step size.
                     high_pass_contrast_coefficients -= optimal_stepsize * residual / 2
-                
+
                 self.contrast_coefficients = np.fft.ifftn(np.fft.fftn(high_pass_contrast_coefficients, axes=range(spatial_ndim)) / self.contrast_high_pass_filter[..., None], axes=range(spatial_ndim)).real
 
             else:
@@ -635,11 +635,11 @@ class _Lddmm:
 
         # Generate the template image deformed by phi_inv but not affected by the affine.
         non_affine_deformed_template = interpn(
-            points=self.template_axes, 
-            values=self.template, 
-            xi=self.phi_inv, 
-            bounds_error=False, 
-            fill_value=None, 
+            points=self.template_axes,
+            values=self.template,
+            xi=self.phi_inv,
+            bounds_error=False,
+            fill_value=None,
         )
 
         # Compute the gradient of non_affine_deformed_template.
@@ -661,13 +661,13 @@ class _Lddmm:
         # Construct homogenous_target_coords by appending 1's at the end of the last dimension throughout self.target_coords.
         ones = np.ones((*self.target.shape, 1))
         homogenous_target_coords = np.concatenate((self.target_coords, ones), -1)
-        
+
         # For a 3D example:
 
         # deformed_template_gradient_broadcast has shape (x,y,z,3,4).
         # homogenous_target_coords has shape (x,y,z,4).
 
-        # To repeat homogenous_target_coords along the 2nd-last dimension of deformed_template_gradient_broadcast, 
+        # To repeat homogenous_target_coords along the 2nd-last dimension of deformed_template_gradient_broadcast,
         # we reshape homogenous_target_coords from shape (x,y,z,4) to shape (x,y,z,1,4) and let that broadcast to shape (x,y,z,3,4).
 
         matching_affine_inv_gradient = deformed_template_gradient_broadcast * np.expand_dims(homogenous_target_coords, -2)
@@ -689,7 +689,7 @@ class _Lddmm:
         affine_inv_gradient_reduction = affine_inv_gradient_reduction.ravel()
 
         # For a 3D case, matching_affine_inv_gradient has shape (x,y,z,3,4).
-        # For a 3D case, affine_inv_hessian_approx is matching_affine_inv_gradient reshaped to shape (x,y,z,12,1), 
+        # For a 3D case, affine_inv_hessian_approx is matching_affine_inv_gradient reshaped to shape (x,y,z,12,1),
         # then matrix multiplied by itself transposed on the last two dimensions, then summed over the spatial dimensions
         # to resultant shape (12,12).
         affine_inv_hessian_approx = matching_affine_inv_gradient * ((contrast_map_prime * np.sqrt(self.matching_weights) / self.sigma_matching)[...,None,None])
@@ -736,7 +736,7 @@ class _Lddmm:
             affine
             affines
         """
-        
+
         affine_inv = inv(self.affine)
 
         affine_inv -= affine_inv_gradient * self.affine_stepsize
@@ -796,7 +796,7 @@ class _Lddmm:
         d_matching_d_deformed_template = matching_error_prime * contrast_map_prime
         d_matching_d_deformed_template_padded = np.pad(d_matching_d_deformed_template, 2, mode='constant', constant_values=0)
 
-        # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
+        # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop
         # it will be phi_10_inv = phi_01 = phi.
         self.phi = np.copy(self.template_coords)
 
@@ -807,11 +807,11 @@ class _Lddmm:
             # Update phi.
             sample_coords = self.template_coords + self.velocity_fields[..., timestep, :] * self.delta_t
             self.phi = interpn(
-                points=self.template_axes, 
-                values=self.phi - self.template_coords, 
-                xi=sample_coords, 
-                bounds_error=False, 
-                fill_value=None, 
+                points=self.template_axes,
+                values=self.phi - self.template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
             ) + sample_coords
 
             # Apply affine by multiplication.
@@ -835,9 +835,9 @@ class _Lddmm:
             deformed_template_to_time_gradient = np.stack(np.gradient(self.deformed_template_to_time[timestep], *self.template_resolution, axis=tuple(range(self.template.ndim))), -1)
 
             # The derivative of the matching cost with respect to the velocity at time t
-            # is the product of 
-            # (the error deformed to time t), 
-            # (the template gradient deformed to time t), 
+            # is the product of
+            # (the error deformed to time t),
+            # (the template gradient deformed to time t),
             # & (the determinant of the jacobian of the transformation).
             d_matching_d_velocity_at_t = np.expand_dims(error_at_t * det_grad_phi, -1) * deformed_template_to_time_gradient * (-1.0) * det(self.affine)
 
@@ -854,7 +854,7 @@ class _Lddmm:
 
         return d_matching_d_velocities
 
-    
+
     def _update_velocity_fields(self, velocity_fields_gradients):
         """
         Update self.velocity_fields based on velocity_fields_gradient.
@@ -879,18 +879,18 @@ class _Lddmm:
             # When the norm is 0 the update is zero so we can change the norm to 1 and avoid division by 0.
             velocity_fields_update_norm[velocity_fields_update_norm == 0] = 1
             velocity_fields_update = (
-                velocity_fields_update / velocity_fields_update_norm[..., None] * 
-                np.arctan(velocity_fields_update_norm[..., None] * np.pi / 2 / self.maximum_velocity_fields_update) * 
+                velocity_fields_update / velocity_fields_update_norm[..., None] *
+                np.arctan(velocity_fields_update_norm[..., None] * np.pi / 2 / self.maximum_velocity_fields_update) *
                 self.maximum_velocity_fields_update * 2 / np.pi
             )
 
             self.velocity_fields[...,timestep,:] -= velocity_fields_update
-            
+
         # Compute and save maximum velocity for diagnostics.
         maximum_velocity = np.sqrt(np.sum(self.velocity_fields**2, axis=-1)).max()
         self.maximum_velocities.append(maximum_velocity)
 
-    
+
     def _compute_affine_phi(self):
         """
         Compute and set self.affine_phi. Called once in case there were no deformative iterations to set it.
@@ -910,7 +910,7 @@ class _Lddmm:
             affine_phi
         """
 
-        # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop 
+        # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the end of the loop
         # it will be phi_10_inv = phi_01 = phi.
         self.phi = np.copy(self.template_coords)
 
@@ -920,11 +920,11 @@ class _Lddmm:
             # Update phi.
             sample_coords = self.template_coords + self.velocity_fields[..., timestep, :] * self.delta_t
             self.phi = interpn(
-                points=self.template_axes, 
-                values=self.phi - self.template_coords, 
-                xi=sample_coords, 
-                bounds_error=False, 
-                fill_value=None, 
+                points=self.template_axes,
+                values=self.phi - self.template_coords,
+                xi=sample_coords,
+                bounds_error=False,
+                fill_value=None,
             ) + sample_coords
 
             # Apply affine by multiplication.
@@ -934,13 +934,13 @@ class _Lddmm:
     # End _Lddmm.
 
 r'''
-  _    _                          __                          _     _                       
- | |  | |                        / _|                        | |   (_)                      
- | |  | |  ___    ___   _ __    | |_   _   _   _ __     ___  | |_   _    ___    _ __    ___ 
+  _    _                          __                          _     _
+ | |  | |                        / _|                        | |   (_)
+ | |  | |  ___    ___   _ __    | |_   _   _   _ __     ___  | |_   _    ___    _ __    ___
  | |  | | / __|  / _ \ | '__|   |  _| | | | | | '_ \   / __| | __| | |  / _ \  | '_ \  / __|
  | |__| | \__ \ |  __/ | |      | |   | |_| | | | | | | (__  | |_  | | | (_) | | | | | \__ \
   \____/  |___/  \___| |_|      |_|    \__,_| |_| |_|  \___|  \__| |_|  \___/  |_| |_| |___/
-                                                                                            
+
 '''
 
 def lddmm_register(
@@ -992,7 +992,7 @@ def lddmm_register(
 ):
     """
     Compute a registration between grayscale images template and target, to be applied with scipy.ndimage.map_coordinates.
-    
+
     Parameters
     ----------
         template: np.ndarray
@@ -1004,12 +1004,12 @@ def lddmm_register(
         target_resolution: float, seq, optional
             A scalar or list of scalars indicating the resolution of the target. Overrides 0 input. By default 1.
         multiscales: float, seq, optional
-            A scalar, list of scalars, or list of lists or np.ndarray of scalars, determining the levels of downsampling at which the registration should be performed before moving on to the next. 
-            Values must be either all at least 1, or all at most 1. Both options are interpreted as downsampling. For example, multiscales=[10, 3, 1] will result in the template and target being downsampled by a factor of 10 and registered. 
-            This registration will be upsampled and used to initialize another registration of the template and target downsampled by 3, and then again on the undownsampled data. multiscales=[1/10, 1/3, 1] is equivalent. 
-            Alternatively, the scale for each dimension can be specified, e.g. multiscales=[ [10, 5, 5], [3, 3, 3], 1] for a 3D registration will result in the template and target downsampled by [10, 5, 5], then [3, 3, 3], then [1, 1, 1]. 
-            If provided with more than 1 value, all following arguments with the exceptions of initial_affine, initial_velocity_fields, and initial_contrast_coefficients, 
-            which may be provided for the first value in multiscales, may optionally be provided as sequences with length equal to the number of values provided to multiscales. Each such value is used at the corresponding scale. 
+            A scalar, list of scalars, or list of lists or np.ndarray of scalars, determining the levels of downsampling at which the registration should be performed before moving on to the next.
+            Values must be either all at least 1, or all at most 1. Both options are interpreted as downsampling. For example, multiscales=[10, 3, 1] will result in the template and target being downsampled by a factor of 10 and registered.
+            This registration will be upsampled and used to initialize another registration of the template and target downsampled by 3, and then again on the undownsampled data. multiscales=[1/10, 1/3, 1] is equivalent.
+            Alternatively, the scale for each dimension can be specified, e.g. multiscales=[ [10, 5, 5], [3, 3, 3], 1] for a 3D registration will result in the template and target downsampled by [10, 5, 5], then [3, 3, 3], then [1, 1, 1].
+            If provided with more than 1 value, all following arguments with the exceptions of initial_affine, initial_velocity_fields, and initial_contrast_coefficients,
+            which may be provided for the first value in multiscales, may optionally be provided as sequences with length equal to the number of values provided to multiscales. Each such value is used at the corresponding scale.
             Additionally, template_resolution and target_resolution cannot be provided for each scale in multiscales. Rather, they are given once to indicate the resolution of the template and target as input.
             multiscales should be provided as descending values. By default 1.
         num_iterations: int, optional
@@ -1021,13 +1021,13 @@ def lddmm_register(
         affine_stepsize: float, optional
             The unitless stepsize for affine adjustments. Should be between 0 and 1. By default 0.3.
         deformative_stepsize: float, optional
-            The stepsize for deformative adjustments. Optimal values are problem-specific. Setting preconditioner_velocity_smooth_length increases the appropriate value of deformative_stepsize. 
+            The stepsize for deformative adjustments. Optimal values are problem-specific. Setting preconditioner_velocity_smooth_length increases the appropriate value of deformative_stepsize.
             If equal to 0 then the result is affine-only registration. By default 0.
         fixed_affine_scale: float, optional
             The scale to impose on the affine at all iterations. If None, no scale is imposed. Otherwise, this has the effect of making the affine always rigid. By default None.
         sigma_regularization: float, optional
-            A scalar indicating the freedom to deform. Small values put harsher constraints on the smoothness of a deformation. 
-            With sufficiently large values, the registration will overfit any noise in the target, leading to unrealistic deformations. However, this may still be appropriate with a small num_iterations. 
+            A scalar indicating the freedom to deform. Small values put harsher constraints on the smoothness of a deformation.
+            With sufficiently large values, the registration will overfit any noise in the target, leading to unrealistic deformations. However, this may still be appropriate with a small num_iterations.
             Note that if deformative_stepsize / sigma_regularization**2 is not much less than 1, an error may occur.
             Overrides 0 input. By default np.inf.
         velocity_smooth_length: float, optional
@@ -1049,11 +1049,11 @@ def lddmm_register(
         contrast_smooth_length: float, optional
             The length scale of smoothing of the contrast_coefficients if spatially_varying_contrast_map == True. Overrides 0 input. By default 2 * np.max(self.target_resolution).
         sigma_matching: float, optional
-            An estimate of the spread of the noise in the target, 
-            representing the tradeoff between the regularity and accuracy of the registration, where a smaller value should result in a less smooth, more accurate result. 
+            An estimate of the spread of the noise in the target,
+            representing the tradeoff between the regularity and accuracy of the registration, where a smaller value should result in a less smooth, more accurate result.
             Typically it should be set to an estimate of the standard deviation of the noise in the image, particularly with artifacts. Overrides 0 input. By default the standard deviation of the target.
         classify_and_weight_voxels: bool, optional
-            If True, artifacts and background are jointly classified with registration using sigma_artifact, artifact_prior, sigma_background, and background_prior. 
+            If True, artifacts and background are jointly classified with registration using sigma_artifact, artifact_prior, sigma_background, and background_prior.
             Artifacts refer to excessively bright voxels while background refers to excessively dim voxels. By default False.
         sigma_artifact: float, optional
             The level of expected variation between artifact and non-artifact intensities. Overrides 0 input. By default 5 * sigma_matching.
@@ -1066,33 +1066,33 @@ def lddmm_register(
         initial_affine: np.ndarray, optional
             The affine array that the registration will begin with. By default np.eye(template.ndim + 1).
         initial_contrast_coefficients: np.ndarray, optional
-            The contrast coefficients that the registration will begin with. 
-            If None, the 0th order coefficient(s) are set to np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template), 
-            if self.contrast_order > 1, the 1st order coefficient(s) are set to np.std(self.target) / np.std(self.template), 
+            The contrast coefficients that the registration will begin with.
+            If None, the 0th order coefficient(s) are set to np.mean(self.target) - np.mean(self.template) * np.std(self.target) / np.std(self.template),
+            if self.contrast_order > 1, the 1st order coefficient(s) are set to np.std(self.target) / np.std(self.template),
             and all others are set to zero. By default None.
         initial_velocity_fields: np.ndarray, optional
             The velocity fields that the registration will begin with. By default all zeros.
         track_progress_every_n: int, optional
             If positive, a progress update will be printed every track_progress_every_n iterations of registration. By default 0.
         map_coordinates_ify: bool, optional
-            If True, the position fields encoding the transformation will be converted to units of voxels in the expected format of scipy.ndimage.map_coordinates. 
+            If True, the position fields encoding the transformation will be converted to units of voxels in the expected format of scipy.ndimage.map_coordinates.
             If False, they are left centered and in physical units with the coordinates exising in the last dimension. By default True.
-    
+
     Example:
         >>> import numpy as np
         >>> from scipy.ndimage import rotate
         >>> from skimage.registration import lddmm_register
         >>> from scipy.ndimage import map_coordinates
-        >>> # 
+        >>> #
         >>> # Define images. The template is registered to the target image but both transformations are returned.
         >>> # template is a binary ellipse with semi-radii 5 and 8 in dimensions 0 and 1. The overall shape is (19, 25).
         >>> # target is a 30 degree rotation of template in the (1,2) plane.
-        >>> # 
+        >>> #
         >>> template = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2 <= 1 for col in range(25)] for row in range(19)]]*2, float)
         >>> target = rotate(template, 30, (1,2))
-        >>> # 
+        >>> #
         >>> # Register the template to the target, then deform the template and target to match the other.
-        >>> # 
+        >>> #
         >>> lddmm_output = lddmm_register(template, target, deformative_stepsize=0.5)
         >>> deformed_target = map_coordinates(target, lddmm_output.target_to_template_transform)
         >>> deformed_template = map_coordinates(template, lddmm_output.template_to_target_transform)
@@ -1100,9 +1100,9 @@ def lddmm_register(
     Returns
     -------
     namedtuple
-        A namedtuple containing the position-fields for transforming an image from target-space to template-space 
-        and for transforming an image from template-space to target-space, 
-        respectively called target_to_template_transform and template_to_target_transform, 
+        A namedtuple containing the position-fields for transforming an image from target-space to template-space
+        and for transforming an image from template-space to target-space,
+        respectively called target_to_template_transform and template_to_target_transform,
         and two other namedtuples called Internals and Diagnostics.
         Internals contains affine, contrast_coefficients, velocity_fields, template_deformation, and template_deformation_inverse.
         Diagnostics contains affines, maximum_velocities, matching_energies, regularization_energies, and total_energies.
@@ -1264,17 +1264,17 @@ def lddmm_register(
             # initial_velocity_fields.
             next_template_shape = np.round(multiscales[scale_index + 1] * template.shape)
             initial_velocity_fields = sinc_resample(lddmm.velocity_fields, new_shape=(*next_template_shape, multiscale_lddmm_kwargs['num_timesteps'][scale_index + 1] or lddmm.num_timesteps, template.ndim))
-        
+
         # End multiscales loop.
-    
+
     # If map_coordinates_ify, convert centered, physical-space position-fields to voxel-space position-fields.
     if map_coordinates_ify:
         temp_to_tar = lddmm.phi_inv_affine_inv.copy()
         tar_to_temp = lddmm.affine_phi.copy()
-        # resize to match the shape of the appropriate image, 
-        # subtract the identity coordinate vector at spatial indices 0, 
+        # resize to match the shape of the appropriate image,
+        # subtract the identity coordinate vector at spatial indices 0,
             # (assuming centered coordinates)
-        # divide by the original resolution of the image, 
+        # divide by the original resolution of the image,
         # and move the coordinate axis to the front.
         lddmm.phi = np.moveaxis((resize(lddmm.phi, (*template.shape, template.ndim)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)
         lddmm.phi_inv = np.moveaxis((resize(lddmm.phi_inv, (*template.shape, template.ndim)) - (-np.subtract(template.shape, 1) / 2 * template_resolution)) / template_resolution, -1, 0)

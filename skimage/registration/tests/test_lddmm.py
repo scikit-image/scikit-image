@@ -183,7 +183,7 @@ class Test_lddmm_register:
             affine_stepsize=0,
             deformative_stepsize=0.5,
         )
-        
+
         self._test_lddmm_register(**lddmm_register_kwargs)
 
     def test_general_ellipsoid_to_ellipsoid_registration(self):
