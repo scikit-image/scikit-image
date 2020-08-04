@@ -99,3 +99,9 @@ class RollingBall(object):
 
     def peakmem_rollingball(self, radius):
         morphology.rolling_ball(self.black_bg, radius=radius)
+
+    def time_rollingball_nan(self, radius):
+        image = self.black_bg.copy().astype(np.float_)
+        pos = np.arange(np.min(image.shape))
+        image[pos, pos] = np.NaN
+        morphology.rolling_ball(image, radius=radius, has_nan=True)
