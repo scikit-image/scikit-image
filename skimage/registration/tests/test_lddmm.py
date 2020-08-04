@@ -25,34 +25,40 @@ class Test_lddmm_register:
 
         lddmm_output = lddmm_register(**lddmm_register_kwargs)
 
-        template = lddmm_register_kwargs["template"].astype(float)
-        target = lddmm_register_kwargs["target"].astype(float)
-        template_resolution = (
-            lddmm_register_kwargs["template_resolution"]
-            if "template_resolution" in lddmm_register_kwargs.keys()
+        reference_image = lddmm_register_kwargs["reference_image"].astype(
+            float
+        )
+        moving_image = lddmm_register_kwargs["moving_image"].astype(float)
+        reference_image_resolution = (
+            lddmm_register_kwargs["reference_image_resolution"]
+            if "reference_image_resolution" in lddmm_register_kwargs.keys()
             else 1
         )
-        target_resolution = (
-            lddmm_register_kwargs["target_resolution"]
-            if "target_resolution" in lddmm_register_kwargs.keys()
+        moving_image_resolution = (
+            lddmm_register_kwargs["moving_image_resolution"]
+            if "moving_image_resolution" in lddmm_register_kwargs.keys()
             else 1
         )
 
         # Applying the transforms using map_coordinates assumes
         # map_coordinates_ify was left as True.
 
-        deformed_target = map_coordinates(
-            input=target,
-            coordinates=lddmm_output.target_to_template_transform,
+        deformed_moving_image = map_coordinates(
+            input=moving_image,
+            coordinates=lddmm_output.moving_image_to_reference_image_transform,
         )
 
-        deformed_template = map_coordinates(
-            input=template,
-            coordinates=lddmm_output.template_to_target_transform,
+        deformed_reference_image = map_coordinates(
+            input=reference_image,
+            coordinates=lddmm_output.reference_image_to_moving_image_transform,
         )
 
-        assert np.allclose(deformed_template, target, rtol=rtol, atol=atol)
-        assert np.allclose(deformed_target, template, rtol=rtol, atol=atol)
+        assert np.allclose(
+            deformed_reference_image, moving_image, rtol=rtol, atol=atol
+        )
+        assert np.allclose(
+            deformed_moving_image, reference_image, rtol=rtol, atol=atol
+        )
 
     def test_2D_identity_registration(self):
 
@@ -60,10 +66,10 @@ class Test_lddmm_register:
         radius = 3
         zero_space = 2
         center_pixel = True
-        template = np.zeros(
+        reference_image = np.zeros(
             tuple([(radius + zero_space) * 2 + center_pixel] * ndims)
         )
-        for indices in product(*map(range, template.shape)):
+        for indices in product(*map(range, reference_image.shape)):
             indices = np.array(indices)
             if (
                 np.sqrt(
@@ -78,11 +84,13 @@ class Test_lddmm_register:
                 )
                 <= radius
             ):
-                template[tuple(indices)] = 1
-        target = np.copy(template)
+                reference_image[tuple(indices)] = 1
+        moving_image = np.copy(reference_image)
 
         lddmm_register_kwargs = dict(
-            template=template, target=target, num_iterations=1,
+            reference_image=reference_image,
+            moving_image=moving_image,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
@@ -93,10 +101,10 @@ class Test_lddmm_register:
         radius = 3
         zero_space = 2
         center_pixel = True
-        template = np.zeros(
+        reference_image = np.zeros(
             tuple([(radius + zero_space) * 2 + center_pixel] * ndims)
         )
-        for indices in product(*map(range, template.shape)):
+        for indices in product(*map(range, reference_image.shape)):
             indices = np.array(indices)
             if (
                 np.sqrt(
@@ -111,11 +119,13 @@ class Test_lddmm_register:
                 )
                 <= radius
             ):
-                template[tuple(indices)] = 1
-        target = np.copy(template)
+                reference_image[tuple(indices)] = 1
+        moving_image = np.copy(reference_image)
 
         lddmm_register_kwargs = dict(
-            template=template, target=target, num_iterations=1,
+            reference_image=reference_image,
+            moving_image=moving_image,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
@@ -126,10 +136,10 @@ class Test_lddmm_register:
         radius = 3
         zero_space = 2
         center_pixel = True
-        template = np.zeros(
+        reference_image = np.zeros(
             tuple([(radius + zero_space) * 2 + center_pixel] * ndims)
         )
-        for indices in product(*map(range, template.shape)):
+        for indices in product(*map(range, reference_image.shape)):
             indices = np.array(indices)
             if (
                 np.sqrt(
@@ -144,40 +154,41 @@ class Test_lddmm_register:
                 )
                 <= radius
             ):
-                template[tuple(indices)] = 1
-        target = np.copy(template)
+                reference_image[tuple(indices)] = 1
+        moving_image = np.copy(reference_image)
 
         lddmm_register_kwargs = dict(
-            template=template, target=target, num_iterations=1,
+            reference_image=reference_image,
+            moving_image=moving_image,
+            num_iterations=1,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
 
     def test_identity_disk_to_disk_registration(self):
 
-        template = np.array(
+        reference_image = np.array(
             [
-                [
-                    (col - 4) ** 2 + (row - 4) ** 2 <= 4 ** 2
-                    for col in range(9)
-                ]
+                [(col - 4) ** 2 + (row - 4) ** 2 <= 4 ** 2 for col in range(9)]
                 for row in range(9)
             ],
             int,
         )
-        target = np.copy(template)
+        moving_image = np.copy(reference_image)
 
         lddmm_register_kwargs = dict(
-            template=template, target=target, num_affine_only_iterations=0,
+            reference_image=reference_image,
+            moving_image=moving_image,
+            num_affine_only_iterations=0,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
 
     def test_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
-        # template (before padding) has shape (21, 29)
+        # reference_image (before padding) has shape (21, 29)
         # and semi-radii 4 and 10.
-        template = np.array(
+        reference_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 10 ** 2 + (row - 8) ** 2 / 4 ** 2 <= 1
@@ -187,14 +198,14 @@ class Test_lddmm_register:
             ],
             int,
         )
-        # templata and target are opposite rotations of an unrotated ellipsoid
-        # for symmetry.
-        target = rotate(template, 45 / 2)
-        template = rotate(template, -45 / 2)
+        # templata and moving_image are opposite rotations of an unrotated
+        # ellipsoid for symmetry.
+        moving_image = rotate(reference_image, 45 / 2)
+        reference_image = rotate(reference_image, -45 / 2)
 
         lddmm_register_kwargs = dict(
-            template=template,
-            target=target,
+            reference_image=reference_image,
+            moving_image=moving_image,
             num_iterations=50,
             num_affine_only_iterations=50,
             num_rigid_affine_iterations=50,
@@ -204,9 +215,9 @@ class Test_lddmm_register:
 
     def test_non_rigid_affine_only_ellipsoid_to_ellipsoid_registration(self):
 
-        # template (before padding) has shape (21, 29)
+        # reference_image (before padding) has shape (21, 29)
         # and semi-radii 6 and 10.
-        template = np.array(
+        reference_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 10 ** 2 + (row - 10) ** 2 / 6 ** 2 <= 1
@@ -216,12 +227,12 @@ class Test_lddmm_register:
             ],
             int,
         )
-        # target is a rotation of template.
-        target = rotate(template, 30)
+        # moving_image is a rotation of reference_image.
+        moving_image = rotate(reference_image, 30)
 
         lddmm_register_kwargs = dict(
-            template=template,
-            target=target,
+            reference_image=reference_image,
+            moving_image=moving_image,
             num_iterations=50,
             num_affine_only_iterations=50,
             num_rigid_affine_iterations=0,
@@ -233,9 +244,9 @@ class Test_lddmm_register:
         self,
     ):
 
-        # template (before padding) has shape (21, 29)
+        # reference_image (before padding) has shape (21, 29)
         # and semi-radii 6 and 10.
-        template = np.array(
+        reference_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 10 ** 2 + (row - 10) ** 2 / 6 ** 2 <= 1
@@ -245,12 +256,12 @@ class Test_lddmm_register:
             ],
             int,
         )
-        # target is a rotation of template.
-        target = rotate(template, 30)
+        # moving_image is a rotation of reference_image.
+        moving_image = rotate(reference_image, 30)
 
         lddmm_register_kwargs = dict(
-            template=template,
-            target=target,
+            reference_image=reference_image,
+            moving_image=moving_image,
             num_iterations=100,
             num_affine_only_iterations=100,
             num_rigid_affine_iterations=50,
@@ -260,8 +271,8 @@ class Test_lddmm_register:
 
     def test_deformative_only_disk_to_ellipsoid_registration(self):
 
-        # template has shape (25, 25) and radius 8.
-        template = np.array(
+        # reference_image has shape (25, 25) and radius 8.
+        reference_image = np.array(
             [
                 [
                     (col - 12) ** 2 + (row - 12) ** 2 <= 8 ** 2
@@ -271,8 +282,8 @@ class Test_lddmm_register:
             ],
             int,
         )
-        # target has shape (21, 29) and semi-radii 6 and 10.
-        target = np.array(
+        # moving_image has shape (21, 29) and semi-radii 6 and 10.
+        moving_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 10 ** 2 + (row - 10) ** 2 / 6 ** 2 <= 1
@@ -284,8 +295,8 @@ class Test_lddmm_register:
         )
 
         lddmm_register_kwargs = dict(
-            template=template,
-            target=target,
+            reference_image=reference_image,
+            moving_image=moving_image,
             num_iterations=150,
             num_affine_only_iterations=0,
             affine_stepsize=0,
@@ -296,8 +307,8 @@ class Test_lddmm_register:
 
     def test_general_ellipsoid_to_ellipsoid_registration(self):
 
-        # target has shape (21, 29) and semi-radii 6 and 10.
-        template = np.array(
+        # moving_image has shape (21, 29) and semi-radii 6 and 10.
+        reference_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 10 ** 2 + (row - 10) ** 2 / 6 ** 2 <= 1
@@ -307,19 +318,21 @@ class Test_lddmm_register:
             ],
             int,
         )
-        # target has shape (21, 29) and semi-radii 6 and 10.
-        target = rotate(template, 30)
+        # moving_image has shape (21, 29) and semi-radii 6 and 10.
+        moving_image = rotate(reference_image, 30)
 
         lddmm_register_kwargs = dict(
-            template=template, target=target, deformative_stepsize=0.5,
+            reference_image=reference_image,
+            moving_image=moving_image,
+            deformative_stepsize=0.5,
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
 
     def test_identity_multiscale_registration(self):
 
-        # target has shape (21, 29) and semi-radii 6 and 10.
-        template = np.array(
+        # moving_image has shape (21, 29) and semi-radii 6 and 10.
+        reference_image = np.array(
             [
                 [
                     (col - 14) ** 2 / 12 ** 2 + (row - 10) ** 2 / 8 ** 2 <= 1
@@ -329,11 +342,11 @@ class Test_lddmm_register:
             ],
             int,
         )
-        target = np.copy(template)
+        moving_image = np.copy(reference_image)
 
         lddmm_register_kwargs = dict(
-            template=template,
-            target=target,
+            reference_image=reference_image,
+            moving_image=moving_image,
             num_iterations=1,
             multiscales=[5, (2, 3), [3, 2], 1],
         )

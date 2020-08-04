@@ -14,7 +14,7 @@ Defines:
             err_to_larger=True, extrapolation_fill_value=None,
             origin='center', method='linear', image_is_coords=False)
         sinc_resample(array, new_shape)
-        generate_position_field(affine, velocity_fields, velocity_field_resolution, template_shape, template_resolution, target_shape, target_resolution, deform_to="template")
+        generate_position_field(affine, velocity_fields, velocity_field_resolution, reference_image_shape, reference_image_resolution, moving_image_shape, moving_image_resolution, deform_to="reference_image")
 """
 
 import numpy as np
@@ -530,11 +530,11 @@ def generate_position_field(
     affine,
     velocity_fields,
     velocity_field_resolution,
-    template_shape,
-    template_resolution,
-    target_shape,
-    target_resolution,
-    deform_to="template",
+    reference_image_shape,
+    reference_image_resolution,
+    moving_image_shape,
+    moving_image_resolution,
+    deform_to="reference_image",
 ):
     """
     Integrate velocity_fields and apply affine to produce a position field.
@@ -550,18 +550,18 @@ def generate_position_field(
     velocity_field_resolution : float, seq
         The resolution of velocity_fields, with multiple values given to
         specify anisotropy.
-    template_shape : seq
-        The shape of the template.
-    template_resolution : float, seq
-        The resolution of the template, with multiple values given to specify
-        anisotropy.
-    target_shape : seq
-        The shape of the target.
-    target_resolution : float, seq
-        The resolution of the target, with multiple values given to specify
-        anisotropy.
+    reference_image_shape : seq
+        The shape of the reference_image.
+    reference_image_resolution : float, seq
+        The resolution of the reference_image, with multiple values given to
+        specify anisotropy.
+    moving_image_shape : seq
+        The shape of the moving_image.
+    moving_image_resolution : float, seq
+        The resolution of the moving_image, with multiple values given to
+        specify anisotropy.
     deform_to : str, optional
-        The direction of the deformation. By default "template".
+        The direction of the deformation. By default "reference_image".
 
     Returns
     -------
@@ -573,28 +573,28 @@ def generate_position_field(
     ------
     ValueError
         Raised if the leading dimensions of velocity_fields fail to match
-        template_shape.
+        reference_image_shape.
     TypeError
         Raised if deform_to is not of type str.
     ValueError
-        Raised if deform_to is neither 'template' nor 'target'.
+        Raised if deform_to is neither 'reference_image' nor 'moving_image'.
     """
 
     # Validate inputs.
-    # Validate template_shape. Not rigorous.
-    template_shape = _validate_ndarray(template_shape)
-    # Validate target_shape. Not rigorous.
-    target_shape = _validate_ndarray(target_shape)
+    # Validate reference_image_shape. Not rigorous.
+    reference_image_shape = _validate_ndarray(reference_image_shape)
+    # Validate moving_image_shape. Not rigorous.
+    moving_image_shape = _validate_ndarray(moving_image_shape)
     # Validate velocity_fields.
     velocity_fields = _validate_ndarray(
-        velocity_fields, required_ndim=len(template_shape) + 2
+        velocity_fields, required_ndim=len(reference_image_shape) + 2
     )
-    if not np.all(velocity_fields.shape[:-2] == template_shape):
+    if not np.all(velocity_fields.shape[:-2] == reference_image_shape):
         raise ValueError(
             "velocity_fields' initial dimensions must equal "
-            "template_shape.\n"
+            "reference_image_shape.\n"
             f"velocity_fields.shape: {velocity_fields.shape}, "
-            f"template_shape: {template_shape}."
+            f"reference_image_shape: {reference_image_shape}."
         )
     # Validate velocity_field_resolution.
     velocity_field_resolution = _validate_resolution(
@@ -604,7 +604,10 @@ def generate_position_field(
     affine = _validate_ndarray(
         affine,
         required_ndim=2,
-        reshape_to_shape=(len(template_shape) + 1, len(template_shape) + 1),
+        reshape_to_shape=(
+            len(reference_image_shape) + 1,
+            len(reference_image_shape) + 1
+        ),
     )
     # Verify deform_to.
     if not isinstance(deform_to, str):
@@ -612,51 +615,66 @@ def generate_position_field(
             f"deform_to must be of type str.\n"
             f"type(deform_to): {type(deform_to)}."
         )
-    elif deform_to not in ["template", "target"]:
-        raise ValueError(f"deform_to must be either 'template' or 'target'.")
+    elif deform_to not in ["reference_image", "moving_image"]:
+        raise ValueError("deform_to must be either 'reference_image'"
+            "or 'moving_image'.")
 
     # Compute intermediates.
     num_timesteps = velocity_fields.shape[-2]
     delta_t = 1 / num_timesteps
-    template_axes = _compute_axes(template_shape, template_resolution)
-    template_coords = _compute_coords(template_shape, template_resolution)
-    target_axes = _compute_axes(target_shape, target_resolution)
-    target_coords = _compute_coords(target_shape, target_resolution)
+    reference_image_axes = _compute_axes(
+        reference_image_shape,
+        reference_image_resolution,
+    )
+    reference_image_coords = _compute_coords(
+        reference_image_shape,
+        reference_image_resolution,
+    )
+    moving_image_axes = _compute_axes(
+        moving_image_shape,
+        moving_image_resolution,
+    )
+    moving_image_coords = _compute_coords(
+        moving_image_shape,
+        moving_image_resolution,
+    )
 
     # Create position field.
-    if deform_to == "template":
-        phi = np.copy(template_coords)
-    elif deform_to == "target":
-        phi_inv = np.copy(template_coords)
+    if deform_to == "reference_image":
+        phi = np.copy(reference_image_coords)
+    elif deform_to == "moving_image":
+        phi_inv = np.copy(reference_image_coords)
 
     # Integrate velocity field.
     for timestep in (
         reversed(range(num_timesteps))
-        if deform_to == "template"
+        if deform_to == "reference_image"
         else range(num_timesteps)
     ):
-        if deform_to == "template":
+        if deform_to == "reference_image":
             sample_coords = (
-                template_coords + velocity_fields[..., timestep, :] * delta_t
+                reference_image_coords + velocity_fields[..., timestep, :]
+                * delta_t
             )
             phi = (
                 interpn(
-                    points=template_axes,
-                    values=phi - template_coords,
+                    points=reference_image_axes,
+                    values=phi - reference_image_coords,
                     xi=sample_coords,
                     bounds_error=False,
                     fill_value=None,
                 )
                 + sample_coords
             )
-        elif deform_to == "target":
+        elif deform_to == "moving_image":
             sample_coords = (
-                template_coords - velocity_fields[..., timestep, :] * delta_t
+                reference_image_coords - velocity_fields[..., timestep, :]
+                * delta_t
             )
             phi_inv = (
                 interpn(
-                    points=template_axes,
-                    values=phi_inv - template_coords,
+                    points=reference_image_axes,
+                    values=phi_inv - reference_image_coords,
                     xi=sample_coords,
                     bounds_error=False,
                     fill_value=None,
@@ -665,27 +683,30 @@ def generate_position_field(
             )
 
     # Apply the affine transform to the position field.
-    if deform_to == "template":
+    if deform_to == "reference_image":
         # Apply the affine by multiplication.
         affine_phi = _multiply_coords_by_affine(affine, phi)
-        # affine_phi has the resolution of the template.
-    elif deform_to == "target":
+        # affine_phi has the resolution of the reference_image.
+    elif deform_to == "moving_image":
         # Apply the affine by interpolation.
-        sample_coords = _multiply_coords_by_affine(inv(affine), target_coords)
+        sample_coords = _multiply_coords_by_affine(
+            inv(affine),
+            moving_image_coords,
+        )
         phi_inv_affine_inv = (
             interpn(
-                points=template_axes,
-                values=phi_inv - template_coords,
+                points=reference_image_axes,
+                values=phi_inv - reference_image_coords,
                 xi=sample_coords,
                 bounds_error=False,
                 fill_value=None,
             )
             + sample_coords
         )
-        # phi_inv_affine_inv has the resolution of the target.
+        # phi_inv_affine_inv has the resolution of the moving_image.
 
     # return appropriate position field.
-    if deform_to == "template":
+    if deform_to == "reference_image":
         return affine_phi
-    elif deform_to == "target":
+    elif deform_to == "moving_image":
         return phi_inv_affine_inv

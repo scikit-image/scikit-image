@@ -73,9 +73,7 @@ class Test__validate_scalar_to_multi:
 
     def test_multi_value_with_size_None(self):
         kwargs = dict(
-            value=np.array([1, 2, 3], float),
-            size=None,
-            dtype=float,
+            value=np.array([1, 2, 3], float), size=None, dtype=float,
         )
         correct_output = np.array([1, 2, 3], float)
         assert np.array_equal(
@@ -93,9 +91,7 @@ class Test__validate_scalar_to_multi:
 
     def test_non_int_size(self):
         kwargs = dict(
-            value=[1, 2, 3, 4],
-            size="size: not an int",
-            dtype=float,
+            value=[1, 2, 3, 4], size="size: not an int", dtype=float,
         )
         expected_exception = TypeError
         match = "size must be either None or interpretable as an integer."
@@ -366,9 +362,7 @@ class Test__compute_axes:
 
     def test_anisotropic_resolution(self):
         kwargs = dict(
-            shape=(2, 3, 4),
-            resolution=[1, 1.5, 2],
-            origin="center",
+            shape=(2, 3, 4), resolution=[1, 1.5, 2], origin="center",
         )
         correct_output = [
             np.arange(dim_size) * dim_res
@@ -711,37 +705,39 @@ Test generate_position_field.
 """
 
 
-@pytest.mark.parametrize("deform_to", ["template", "target"])
+@pytest.mark.parametrize("deform_to", ["reference_image", "moving_image"])
 class Test_generate_position_field:
     def test_identity_affine_identity_velocity_fields(self, deform_to):
 
         num_timesteps = 10
 
-        template_shape = (3, 4, 5)
-        template_resolution = 1
-        target_shape = (2, 4, 6)
-        target_resolution = 1
+        reference_image_shape = (3, 4, 5)
+        reference_image_resolution = 1
+        moving_image_shape = (2, 4, 6)
+        moving_image_resolution = 1
         velocity_fields = np.zeros(
-            (*template_shape, num_timesteps, len(template_shape))
+            (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
         velocity_field_resolution = 1
         affine = np.eye(4)
 
-        if deform_to == "template":
+        if deform_to == "reference_image":
             expected_output = _compute_coords(
-                template_shape, template_resolution
+                reference_image_shape, reference_image_resolution
             )
-        elif deform_to == "target":
-            expected_output = _compute_coords(target_shape, target_resolution)
+        elif deform_to == "moving_image":
+            expected_output = _compute_coords(
+                moving_image_shape, moving_image_resolution
+            )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
             velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
+            reference_image_shape=reference_image_shape,
+            reference_image_resolution=reference_image_resolution,
+            moving_image_shape=moving_image_shape,
+            moving_image_resolution=moving_image_resolution,
             deform_to=deform_to,
         )
 
@@ -751,33 +747,37 @@ class Test_generate_position_field:
 
         num_timesteps = 10
 
-        template_shape = (3, 4, 5)
-        template_resolution = 1
-        target_shape = (2, 4, 6)
-        target_resolution = 1
+        reference_image_shape = (3, 4, 5)
+        reference_image_resolution = 1
+        moving_image_shape = (2, 4, 6)
+        moving_image_resolution = 1
         velocity_fields = np.ones(
-            (*template_shape, num_timesteps, len(template_shape))
+            (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
         velocity_field_resolution = 1
         affine = np.eye(4)
 
-        if deform_to == "template":
+        if deform_to == "reference_image":
             expected_output = (
-                _compute_coords(template_shape, template_resolution) + 1
+                _compute_coords(
+                    reference_image_shape, reference_image_resolution
+                )
+                + 1
             )
-        elif deform_to == "target":
+        elif deform_to == "moving_image":
             expected_output = (
-                _compute_coords(target_shape, target_resolution) - 1
+                _compute_coords(moving_image_shape, moving_image_resolution)
+                - 1
             )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
             velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
+            reference_image_shape=reference_image_shape,
+            reference_image_resolution=reference_image_resolution,
+            moving_image_shape=moving_image_shape,
+            moving_image_resolution=moving_image_resolution,
             deform_to=deform_to,
         )
 
@@ -787,12 +787,12 @@ class Test_generate_position_field:
 
         num_timesteps = 10
 
-        template_shape = (3, 4, 5)
-        template_resolution = 1
-        target_shape = (2, 4, 6)
-        target_resolution = 1
+        reference_image_shape = (3, 4, 5)
+        reference_image_resolution = 1
+        moving_image_shape = (2, 4, 6)
+        moving_image_resolution = 1
         velocity_fields = np.zeros(
-            (*template_shape, num_timesteps, len(template_shape))
+            (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
         velocity_field_resolution = 1
         # Indicates a 90 degree rotation to the right.
@@ -800,23 +800,27 @@ class Test_generate_position_field:
             [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1],]
         )
 
-        if deform_to == "template":
+        if deform_to == "reference_image":
             expected_output = _multiply_coords_by_affine(
-                affine, _compute_coords(template_shape, template_resolution)
+                affine,
+                _compute_coords(
+                    reference_image_shape, reference_image_resolution
+                ),
             )
-        elif deform_to == "target":
+        elif deform_to == "moving_image":
             expected_output = _multiply_coords_by_affine(
-                inv(affine), _compute_coords(target_shape, target_resolution)
+                inv(affine),
+                _compute_coords(moving_image_shape, moving_image_resolution),
             )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
             velocity_field_resolution=velocity_field_resolution,
-            template_shape=template_shape,
-            template_resolution=template_resolution,
-            target_shape=target_shape,
-            target_resolution=target_resolution,
+            reference_image_shape=reference_image_shape,
+            reference_image_resolution=reference_image_resolution,
+            moving_image_shape=moving_image_shape,
+            moving_image_resolution=moving_image_resolution,
             deform_to=deform_to,
         )
 

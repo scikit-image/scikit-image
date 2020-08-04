@@ -50,8 +50,8 @@ r"""
 
 """
 
-# TODO: resolution --> spacing, template_resolution --> template_spacing.
-# TODO: template --> reference_image, target --> moving_image.
+# TODO: resolution --> spacing, reference_image_resolution --> reference_image_spacing.
+# TODO: reference_image --> reference_image, moving_image --> moving_image.
 # TODO: create issue that moving_image rudely implies one of two equal uses of a registration.
 # TODO: explore replacing my lddmm_transform_[image/points] with scipy.ndimage.map_coordinates, allowable by converting position_fields to relative vector fields and putting the coordinates at the front of the shape.
 # TODO: add attributes used to docstrings, check for natural groupings.
@@ -64,11 +64,11 @@ class _Lddmm:
     def __init__(
         self,
         # Images.
-        template,
-        target,
+        reference_image,
+        moving_image,
         # Image resolutions.
-        template_resolution=None,
-        target_resolution=None,
+        reference_image_resolution=None,
+        moving_image_resolution=None,
         # Iterations.
         num_iterations=None,
         num_affine_only_iterations=None,
@@ -113,20 +113,24 @@ class _Lddmm:
         # Constant inputs.
 
         # Images.
-        self.template = _validate_ndarray(template, dtype=float)
-        self.target = _validate_ndarray(
-            target, dtype=float, required_ndim=self.template.ndim
+        self.reference_image = _validate_ndarray(reference_image, dtype=float)
+        self.moving_image = _validate_ndarray(
+            moving_image, dtype=float, required_ndim=self.reference_image.ndim
         )
 
         # Resolution.
-        self.template_resolution = _validate_scalar_to_multi(
-            template_resolution if template_resolution is not None else 1,
-            self.template.ndim,
+        self.reference_image_resolution = _validate_scalar_to_multi(
+            reference_image_resolution
+            if reference_image_resolution is not None
+            else 1,
+            self.reference_image.ndim,
             float,
         )
-        self.target_resolution = _validate_scalar_to_multi(
-            target_resolution if target_resolution is not None else 1,
-            self.target.ndim,
+        self.moving_image_resolution = _validate_scalar_to_multi(
+            moving_image_resolution
+            if moving_image_resolution is not None
+            else 1,
+            self.moving_image.ndim,
             float,
         )
 
@@ -171,7 +175,7 @@ class _Lddmm:
         self.velocity_smooth_length = (
             float(velocity_smooth_length)
             if velocity_smooth_length is not None
-            else 2 * np.max(self.template_resolution)
+            else 2 * np.max(self.reference_image_resolution)
         )
         self.preconditioner_velocity_smooth_length = (
             float(preconditioner_velocity_smooth_length)
@@ -181,7 +185,9 @@ class _Lddmm:
         self.maximum_velocity_fields_update = (
             float(maximum_velocity_fields_update)
             if maximum_velocity_fields_update is not None
-            else np.max(self.template.shape * self.template_resolution)
+            else np.max(
+                self.reference_image.shape * self.reference_image_resolution
+            )
         )  # Default is effectively inactive.
         self.num_timesteps = (
             int(num_timesteps) if num_timesteps is not None else 5
@@ -206,12 +212,14 @@ class _Lddmm:
         self.contrast_smooth_length = (
             float(contrast_smooth_length)
             if contrast_smooth_length
-            else 10 * np.max(self.target_resolution)
+            else 10 * np.max(self.moving_image_resolution)
         )
 
         # Smoothness vs. accuracy tradeoff.
         self.sigma_matching = (
-            float(sigma_matching) if sigma_matching else np.std(self.target)
+            float(sigma_matching)
+            if sigma_matching
+            else np.std(self.moving_image)
         )
 
         # Classification specifiers.
@@ -262,25 +270,25 @@ class _Lddmm:
         # Constructions.
 
         # Constants.
-        self.template_axes = _compute_axes(
-            self.template.shape, self.template_resolution
+        self.reference_image_axes = _compute_axes(
+            self.reference_image.shape, self.reference_image_resolution
         )
-        self.template_coords = _compute_coords(
-            self.template.shape, self.template_resolution
+        self.reference_image_coords = _compute_coords(
+            self.reference_image.shape, self.reference_image_resolution
         )
-        self.target_axes = _compute_axes(
-            self.target.shape, self.target_resolution
+        self.moving_image_axes = _compute_axes(
+            self.moving_image.shape, self.moving_image_resolution
         )
-        self.target_coords = _compute_coords(
-            self.target.shape, self.target_resolution
+        self.moving_image_coords = _compute_coords(
+            self.moving_image.shape, self.moving_image_resolution
         )
-        self.artifact_mean_value = np.max(self.target)
-        self.background_mean_value = np.min(self.target)
+        self.artifact_mean_value = np.max(self.moving_image)
+        self.background_mean_value = np.min(self.moving_image)
         self.delta_t = 1 / self.num_timesteps
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(
-            self.template.shape,
-            1 / (self.template_resolution * self.template.shape),
+            self.reference_image.shape,
+            1 / (self.reference_image_resolution * self.reference_image.shape),
             origin="zero",
         )
         self.fourier_high_pass_filter = (
@@ -294,16 +302,16 @@ class _Lddmm:
                         2
                         * np.pi
                         * fourier_velocity_fields_coords
-                        * self.template_resolution
+                        * self.reference_image_resolution
                     )
                 )
-                / self.template_resolution ** 2,
+                / self.reference_image_resolution ** 2,
                 axis=-1,
             )
         ) ** self.fourier_filter_power
-        fourier_template_coords = _compute_coords(
-            self.template.shape,
-            1 / (self.template_resolution * self.template.shape),
+        fourier_reference_image_coords = _compute_coords(
+            self.reference_image.shape,
+            1 / (self.reference_image_resolution * self.reference_image.shape),
             origin="zero",
         )
         self.low_pass_filter = 1 / (
@@ -318,11 +326,11 @@ class _Lddmm:
                             * np.cos(
                                 2
                                 * np.pi
-                                * self.template_resolution
-                                * fourier_template_coords
+                                * self.reference_image_resolution
+                                * fourier_reference_image_coords
                             )
                         )
-                        / self.template_resolution ** 2,
+                        / self.reference_image_resolution ** 2,
                         -1,
                     )
                 )
@@ -342,20 +350,20 @@ class _Lddmm:
                             * np.cos(
                                 2
                                 * np.pi
-                                * self.template_resolution
-                                * fourier_template_coords
+                                * self.reference_image_resolution
+                                * fourier_reference_image_coords
                             )
                         )
-                        / self.template_resolution ** 2,
+                        / self.reference_image_resolution ** 2,
                         -1,
                     )
                 )
             )
             ** (2 * self.fourier_filter_power)
         )
-        fourier_target_coords = _compute_coords(
-            self.target.shape,
-            1 / (self.target_resolution * self.target.shape),
+        fourier_moving_image_coords = _compute_coords(
+            self.moving_image.shape,
+            1 / (self.moving_image_resolution * self.moving_image.shape),
             origin="zero",
         )
         self.contrast_high_pass_filter = (
@@ -369,11 +377,11 @@ class _Lddmm:
                         * np.cos(
                             2
                             * np.pi
-                            * self.target_resolution
-                            * fourier_target_coords
+                            * self.moving_image_resolution
+                            * fourier_moving_image_coords
                         )
                     )
-                    / self.target_resolution ** 2,
+                    / self.moving_image_resolution ** 2,
                     -1,
                 )
             )
@@ -381,57 +389,64 @@ class _Lddmm:
 
         # Dynamics.
         if initial_affine is None:
-            initial_affine = np.eye(template.ndim + 1)
+            initial_affine = np.eye(reference_image.ndim + 1)
         self.affine = _validate_ndarray(
             initial_affine,
-            required_shape=(self.template.ndim + 1, self.template.ndim + 1),
+            required_shape=(
+                self.reference_image.ndim + 1,
+                self.reference_image.ndim + 1,
+            ),
         )
         if initial_velocity_fields is not None:
             self.velocity_fields = _validate_ndarray(
                 initial_velocity_fields,
                 required_shape=(
-                    *self.template.shape,
+                    *self.reference_image.shape,
                     self.num_timesteps,
-                    self.template.ndim,
+                    self.reference_image.ndim,
                 ),
             )
         else:
             self.velocity_fields = np.zeros(
-                (*self.template.shape, self.num_timesteps, self.template.ndim)
+                (
+                    *self.reference_image.shape,
+                    self.num_timesteps,
+                    self.reference_image.ndim,
+                )
             )
         # Note: If a transformation T maps a point in the space of the
-            # template to a point in the space of the target, as affine_phi,
-            # the template image is deformed using T_inv, or
-            # phi_inv_affine_inv via interpolation of the target at
-            # phi_inv_affine_inv.
+        # reference_image to a point in the space of the moving_image, as
+        # affine_phi, the reference_image image is deformed using T_inv, or
+        # phi_inv_affine_inv via interpolation of the moving_image at
+        # phi_inv_affine_inv.
         # phi: A position-field that describes change in shape, or
-            # deformation, of the template but not change in scale or
-            # orientation. Stored in template-space.
-        self.phi = np.copy(self.template_coords)
+        # deformation, of the reference_image but not change in scale or
+        # orientation. Stored in reference_image-space.
+        self.phi = np.copy(self.reference_image_coords)
         # affine_phi: A position-field that composes of phi then affine that
-            # describes change in shape, i.e. deformation, and change in scale
-            # and orientation. Stored in template-space. This is used for
-            # transforming images in target-space to template-space by
-            # interpolation.
-        self.affine_phi = np.copy(self.template_coords)
+        # describes change in shape, i.e. deformation, and change in scale
+        # and orientation. Stored in reference_image-space. This is used for
+        # transforming images in moving_image-space to reference_image-space by
+        # interpolation.
+        self.affine_phi = np.copy(self.reference_image_coords)
         # phi_inv: A position-field that describes the inverse change in
-            # shape, or deformation, of the template but not change in scale
-            # or orientation. Stored in template-space.
-        self.phi_inv = np.copy(self.template_coords)
+        # shape, or deformation, of the reference_image but not change in scale
+        # or orientation. Stored in reference_image-space.
+        self.phi_inv = np.copy(self.reference_image_coords)
         # phi_inv_affine_inv: A position-field that composes affine_inv then
-            # phi_inv that describes change in shape, i.e. deformation, and
-            # change in scale and orientation. Stored in target-space. This is
-            # used for transforming images in template-space to target-space
-            # by interpolation.
-        self.phi_inv_affine_inv = np.copy(self.target_coords)
+        # phi_inv that describes change in shape, i.e. deformation, and
+        # change in scale and orientation. Stored in moving_image-space. This
+        # is used for transforming images in reference_image-space to
+        # moving_image-space by interpolation.
+        self.phi_inv_affine_inv = np.copy(self.moving_image_coords)
         self.fourier_velocity_fields = np.zeros_like(
             self.velocity_fields, np.complex128
         )
-        self.matching_weights = np.ones_like(self.target)
-        self.deformed_template_to_time = []
-        self.deformed_template = interpn(
-            points=self.template_axes,
-            values=self.template,
+        self.matching_weights = np.ones_like(self.moving_image)
+        self.deformed_reference_image_to_time = []
+        self.deformed_reference_image = interpn(
+            points=self.reference_image_axes,
+            values=self.reference_image,
             xi=self.phi_inv_affine_inv,
             bounds_error=False,
             fill_value=None,
@@ -439,13 +454,13 @@ class _Lddmm:
         if spatially_varying_contrast_map:
             if initial_contrast_coefficients is None:
                 self.contrast_coefficients = np.zeros(
-                    (*self.target.shape, self.contrast_order + 1)
+                    (*self.moving_image.shape, self.contrast_order + 1)
                 )
             else:
                 self.contrast_coefficients = _validate_ndarray(
                     initial_contrast_coefficients,
                     broadcast_to_shape=(
-                        *self.target.shape,
+                        *self.moving_image.shape,
                         self.contrast_order + 1,
                     ),
                 )
@@ -457,62 +472,64 @@ class _Lddmm:
                     initial_contrast_coefficients,
                     required_shape=(self.contrast_order + 1),
                 )
-        self.contrast_coefficients[..., 0] = np.mean(self.target) - np.mean(
-            self.template
-        ) * np.std(self.target) / np.std(self.template)
+        self.contrast_coefficients[..., 0] = np.mean(
+            self.moving_image
+        ) - np.mean(self.reference_image) * np.std(self.moving_image) / np.std(
+            self.reference_image
+        )
         if self.contrast_order > 0:
-            self.contrast_coefficients[..., 1] = np.std(self.target) / np.std(
-                self.template
-            )
+            self.contrast_coefficients[..., 1] = np.std(
+                self.moving_image
+            ) / np.std(self.reference_image)
         self.contrast_polynomial_basis = np.empty(
-            (*self.target.shape, self.contrast_order + 1)
+            (*self.moving_image.shape, self.contrast_order + 1)
         )
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = (
-                self.deformed_template ** power
+                self.deformed_reference_image ** power
             )
-        self.contrast_deformed_template = np.sum(
+        self.contrast_deformed_reference_image = np.sum(
             self.contrast_polynomial_basis * self.contrast_coefficients,
             axis=-1,
         )  # Initialized value not used.
 
         # Preempt known error.
-        if np.any(np.array(self.template.shape) == 1) or np.any(
-            np.array(self.target.shape) == 1
+        if np.any(np.array(self.reference_image.shape) == 1) or np.any(
+            np.array(self.moving_image.shape) == 1
         ):
             raise RuntimeError(
                 "Known issue: Images with a 1 in their shape are not "
                 "supported by scipy.interpolate.interpn.\n"
-                f"self.template.shape: {self.template.shape},"
-                f"self.target.shape: {self.target.shape}.\n"
+                f"self.reference_image.shape: {self.reference_image.shape},"
+                f"self.moving_image.shape: {self.moving_image.shape}.\n"
             )
 
     def register(self):
         """
-        Register the template to the target using the current state of the
-        attributes.
+        Register the reference_image to the moving_image using the current
+        state of the attributes.
 
         Return a dictionary of relevant quantities most notably including the
         transformations:
-            phi_inv_affine_inv is the position field that maps the template to
-                the target.
-            affine_phi is the position field that maps the target to the
-                template.
+            phi_inv_affine_inv is the position field that maps the
+            reference_image to the moving_image.
+            affine_phi is the position field that maps the moving_image to the
+                reference_image.
         """
 
         # Iteratively perform each step of the registration.
         for iteration in range(self.num_iterations):
 
-            # Forward pass: apply transforms to the template and compute the
-                # costs.
+            # Forward pass: apply transforms to the reference_image and
+            # compute the costs.
 
             # Compute position_field from velocity_fields.
             self._update_and_apply_position_field()
-            # Contrast transform the deformed_template.
+            # Contrast transform the deformed_reference_image.
             self._apply_contrast_map()
             # Compute weights.
             # This is the expectation step of the expectation maximization
-                # algorithm.
+            # algorithm.
             if self.classify_and_weight_voxels and iteration % 1 == 0:
                 self._compute_weights()
             # Compute cost.
@@ -574,44 +591,44 @@ class _Lddmm:
         """
         Calculate phi_inv from v
         Compose on the right with Ainv
-        Apply phi_inv_affine_inv to template
+        Apply phi_inv_affine_inv to reference_image
 
         Accesses attributes:
-            template
-            template_axes
-            template_coords
-            target_coords
+            reference_image
+            reference_image_axes
+            reference_image_coords
+            moving_image_coords
             num_timesteps
             delta_t
             affine
             velocity_fields
             phi_inv
             phi_inv_affine_inv
-            deformed_template_to_time
-            deformed_template
+            deformed_reference_image_to_time
+            deformed_reference_image
 
         Updates attributes:
             phi_inv
             phi_inv_affine_inv
-            deformed_template_to_time
-            deformed_template
+            deformed_reference_image_to_time
+            deformed_reference_image
         """
 
         # Set self.phi_inv to identity.
-        self.phi_inv = np.copy(self.template_coords)
+        self.phi_inv = np.copy(self.reference_image_coords)
 
-        # Reset self.deformed_template_to_time.
-        self.deformed_template_to_time = []
+        # Reset self.deformed_reference_image_to_time.
+        self.deformed_reference_image_to_time = []
         for timestep in range(self.num_timesteps):
             # Compute phi_inv.
             sample_coords = (
-                self.template_coords
+                self.reference_image_coords
                 - self.velocity_fields[..., timestep, :] * self.delta_t
             )
             self.phi_inv = (
                 interpn(
-                    points=self.template_axes,
-                    values=self.phi_inv - self.template_coords,
+                    points=self.reference_image_axes,
+                    values=self.phi_inv - self.reference_image_coords,
                     xi=sample_coords,
                     bounds_error=False,
                     fill_value=None,
@@ -619,11 +636,11 @@ class _Lddmm:
                 + sample_coords
             )
 
-            # Compute deformed_template_to_time
-            self.deformed_template_to_time.append(
+            # Compute deformed_reference_image_to_time
+            self.deformed_reference_image_to_time.append(
                 interpn(
-                    points=self.template_axes,
-                    values=self.template,
+                    points=self.reference_image_axes,
+                    values=self.reference_image,
                     xi=self.phi_inv,
                     bounds_error=False,
                     fill_value=None,
@@ -632,28 +649,29 @@ class _Lddmm:
 
             # End time loop.
 
-        # Apply affine_inv to target_coords by multiplication.
-        affine_inv_target_coords = _multiply_coords_by_affine(
-            inv(self.affine), self.target_coords
+        # Apply affine_inv to moving_image_coords by multiplication.
+        affine_inv_moving_image_coords = _multiply_coords_by_affine(
+            inv(self.affine), self.moving_image_coords
         )
 
-        # Apply phi_inv to affine_inv_target_coords.
+        # Apply phi_inv to affine_inv_moving_image_coords.
         self.phi_inv_affine_inv = (
             interpn(
-                points=self.template_axes,
-                values=self.phi_inv - self.template_coords,
-                xi=affine_inv_target_coords,
+                points=self.reference_image_axes,
+                values=self.phi_inv - self.reference_image_coords,
+                xi=affine_inv_moving_image_coords,
                 bounds_error=False,
                 fill_value=None,
             )
-            + affine_inv_target_coords
+            + affine_inv_moving_image_coords
         )
 
-        # Apply phi_inv_affine_inv to template.
-        # deformed_template is sampled at the coordinates of the target.
-        self.deformed_template = interpn(
-            points=self.template_axes,
-            values=self.template,
+        # Apply phi_inv_affine_inv to reference_image.
+        # deformed_reference_image is sampled at the coordinates of the
+        # moving_image.
+        self.deformed_reference_image = interpn(
+            points=self.reference_image_axes,
+            values=self.reference_image,
             xi=self.phi_inv_affine_inv,
             bounds_error=False,
             fill_value=None,
@@ -661,37 +679,37 @@ class _Lddmm:
 
     def _apply_contrast_map(self):
         """
-        Apply contrast_coefficients to deformed_template to produce
-        contrast_deformed_template.
+        Apply contrast_coefficients to deformed_reference_image to produce
+        contrast_deformed_reference_image.
 
         Accsses attributes:
             contrast_polynomial_basis
             contrast_coefficients
-            contrast_deformed_template
+            contrast_deformed_reference_image
 
 
         Updates attributes:
-            contrast_deformed_template
+            contrast_deformed_reference_image
         """
 
-        self.contrast_deformed_template = np.sum(
+        self.contrast_deformed_reference_image = np.sum(
             self.contrast_polynomial_basis * self.contrast_coefficients,
             axis=-1,
         )
 
     def _compute_weights(self):
         """
-        Compute the matching_weights between the contrast_deformed_template
-        and the target.
+        Compute the matching_weights between the
+        contrast_deformed_reference_image and the moving_image.
 
         Accsses attributes:
-            target
+            moving_image
             sigma_matching
             sigma_artifact
             sigma_background
             artifact_prior
             background_prior
-            contrast_deformed_template
+            contrast_deformed_reference_image
             artifact_mean_value
             background_mean_value
             matching_weights
@@ -703,15 +721,15 @@ class _Lddmm:
         """
 
         likelihood_matching = np.exp(
-            (self.contrast_deformed_template - self.target) ** 2
+            (self.contrast_deformed_reference_image - self.moving_image) ** 2
             * (-1 / (2 * self.sigma_matching ** 2))
         ) / np.sqrt(2 * np.pi * self.sigma_matching ** 2)
         likelihood_artifact = np.exp(
-            (self.artifact_mean_value - self.target) ** 2
+            (self.artifact_mean_value - self.moving_image) ** 2
             * (-1 / (2 * self.sigma_artifact ** 2))
         ) / np.sqrt(2 * np.pi * self.sigma_artifact ** 2)
         likelihood_background = np.exp(
-            (self.background_mean_value - self.target) ** 2
+            (self.background_mean_value - self.moving_image) ** 2
             * (-1 / (2 * self.sigma_background ** 2))
         ) / np.sqrt(2 * np.pi * self.sigma_background ** 2)
 
@@ -735,10 +753,10 @@ class _Lddmm:
         background_weights = likelihood_background / likelihood_sum
 
         self.artifact_mean_value = np.mean(
-            self.target * artifact_weights
+            self.moving_image * artifact_weights
         ) / np.mean(artifact_weights)
         self.background_mean_value = np.mean(
-            self.target * background_weights
+            self.moving_image * background_weights
         ) / np.mean(background_weights)
 
     def _compute_cost(self):
@@ -746,11 +764,11 @@ class _Lddmm:
         Compute the matching cost using a weighted sum of square error.
 
         Accsses attributes:
-            target
-            template
-            template_resolution
-            target_resolution
-            contrast_deformed_template
+            moving_image
+            reference_image
+            reference_image_resolution
+            moving_image_resolution
+            contrast_deformed_reference_image
             sigma_regularization
             sigma_matching
             delta_t
@@ -769,22 +787,23 @@ class _Lddmm:
 
         matching_energy = (
             np.sum(
-                (self.contrast_deformed_template - self.target) ** 2
+                (self.contrast_deformed_reference_image - self.moving_image)
+                ** 2
                 * self.matching_weights
             )
             * 1
             / (2 * self.sigma_matching ** 2)
-            * np.prod(self.target_resolution)
+            * np.prod(self.moving_image_resolution)
         )
 
         regularization_energy = np.sum(
             np.sum(np.abs(self.fourier_velocity_fields) ** 2, axis=(-1, -2))
             * self.fourier_high_pass_filter ** 2
         ) * (
-            np.prod(self.template_resolution)
+            np.prod(self.reference_image_resolution)
             * self.delta_t
             / (2 * self.sigma_regularization ** 2)
-            / self.template.size
+            / self.reference_image.size
         )
 
         total_energy = matching_energy + regularization_energy
@@ -796,12 +815,13 @@ class _Lddmm:
 
     def _compute_contrast_map(self):
         """
-            Compute contrast_coefficients mapping deformed_template to target.
+            Compute contrast_coefficients mapping deformed_reference_image to
+            moving_image.
 
             Accesses attributes:
-                target
-                target_resolution
-                deformed_template
+                moving_image
+                moving_image_resolution
+                deformed_reference_image
                 spatially_varying_contrast_map
                 sigma_matching
                 contrast_order
@@ -819,7 +839,7 @@ class _Lddmm:
         # Update self.contrast_polynomial_basis.
         for power in range(self.contrast_order + 1):
             self.contrast_polynomial_basis[..., power] = (
-                self.deformed_template ** power
+                self.deformed_reference_image ** power
             )
 
         if self.spatially_varying_contrast_map:
@@ -831,20 +851,20 @@ class _Lddmm:
             # W is weights.
             # L is contrast_high_pass_filter.
             # This is the minimization problem:
-                # sum(|BC - J|^2 W^2 / 2) + sum(|LC|^2 / 2).
+            # sum(|BC - J|^2 W^2 / 2) + sum(|LC|^2 / 2).
             # The linear equation we need to solve for C is this:
-                # W^2 B^T B C  + L^T L C = W^2 B^T J.
+            # W^2 B^T B C  + L^T L C = W^2 B^T J.
             # Where W acts by pointwise multiplication, B acts by matrix
             # multiplication at every point, and L acts by filtering in the
             # Fourier domain.
             # Let L C = D. --> C = L^{-1} D.
             # This reformulates the problem to:
-                # W^2 B^T B L^{-1} D + L^T D = W^2 B^T J.
+            # W^2 B^T B L^{-1} D + L^T D = W^2 B^T J.
             # Then, to make it nicer we act on both sides with L^{-T},
             # yielding:
-                # L^{-T}(B^T B) L^{-1}D + D = L^{-T} W^2 B^t J.
+            # L^{-T}(B^T B) L^{-1}D + D = L^{-T} W^2 B^t J.
             # Then we factor the left side:
-                # [L^{-T} B^T  B L^{-1} + identity]D = L^{-T}W^2 B^T J
+            # [L^{-T} B^T  B L^{-1} + identity]D = L^{-T}W^2 B^T J
 
             spatial_ndim = self.contrast_polynomial_basis.ndim - 1
 
@@ -854,7 +874,7 @@ class _Lddmm:
             # Represents the right hand side of the equation.
             right_hand_side = (
                 self.contrast_polynomial_basis
-                * (weights ** 2 * self.target)[..., None]
+                * (weights ** 2 * self.moving_image)[..., None]
             )
 
             # Reformulate with block elimination.
@@ -952,11 +972,13 @@ class _Lddmm:
             # self.spatially_varying_contrast_map == False.
 
             # Ravel necessary components for convenient matrix multiplication.
-            deformed_template_ravel = np.ravel(self.deformed_template)
-            target_ravel = np.ravel(self.target)
+            deformed_reference_image_ravel = np.ravel(
+                self.deformed_reference_image
+            )
+            moving_image_ravel = np.ravel(self.moving_image)
             matching_weights_ravel = np.ravel(self.matching_weights)
             contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(
-                self.target.size, -1
+                self.moving_image.size, -1
             )  # A view, not a copy.
 
             # Create intermediate composites.
@@ -965,10 +987,10 @@ class _Lddmm:
                 * matching_weights_ravel,
                 contrast_polynomial_basis_semi_ravel,
             )
-            basis_transpose_target = np.matmul(
+            basis_transpose_moving_image = np.matmul(
                 contrast_polynomial_basis_semi_ravel.T
                 * matching_weights_ravel,
-                target_ravel,
+                moving_image_ravel,
             )
 
             # Solve for contrast_coefficients.
@@ -979,14 +1001,14 @@ class _Lddmm:
                 try:
                     self.contrast_coefficients = solve(
                         basis_transpose_basis,
-                        basis_transpose_target,
+                        basis_transpose_moving_image,
                         assume_a="pos",
                     )
                 except np.linalg.LinAlgError as e:
                     raise np.linalg.LinAlgError(
                         "This exception may have been raised because the"
                         "contrast_polynomial_basis vectors were not"
-                        "independent, i.e. the template is constant."
+                        "independent, i.e. the reference_image is constant."
                     ) from e
 
     def _compute_affine_inv_gradient(self):
@@ -994,13 +1016,13 @@ class _Lddmm:
         Compute and return the affine_inv gradient.
 
         Accesss attributes:
-            template
-            target
-            template_resolution
-            template_axes
-            target_coords
-            deformed_template
-            contrast_deformed_template
+            reference_image
+            moving_image
+            reference_image_resolution
+            reference_image_axes
+            moving_image_coords
+            deformed_reference_image
+            contrast_deformed_reference_image
             sigma_matching
             contrast_order
             phi_inv
@@ -1015,87 +1037,88 @@ class _Lddmm:
             affine_inv_gradient
         """
 
-        # Generate the template image deformed by phi_inv but not affected by
-        # the affine.
-        non_affine_deformed_template = interpn(
-            points=self.template_axes,
-            values=self.template,
+        # Generate the reference_image image deformed by phi_inv but not
+        # affected by the affine.
+        non_affine_deformed_reference_image = interpn(
+            points=self.reference_image_axes,
+            values=self.reference_image,
             xi=self.phi_inv,
             bounds_error=False,
             fill_value=None,
         )
 
-        # Compute the gradient of non_affine_deformed_template.
-        non_affine_deformed_template_gradient = np.stack(
+        # Compute the gradient of non_affine_deformed_reference_image.
+        non_affine_deformed_reference_image_gradient = np.stack(
             np.gradient(
-                non_affine_deformed_template, *self.template_resolution
+                non_affine_deformed_reference_image,
+                *self.reference_image_resolution,
             ),
             -1,
         )
 
-        # Apply the affine to each component of non_affine_deformed_template
-        # gradient.
+        # Apply the affine to each component of
+        # non_affine_deformed_reference_image gradient.
         sample_coords = _multiply_coords_by_affine(
-            inv(self.affine), self.target_coords
+            inv(self.affine), self.moving_image_coords
         )
-        deformed_template_gradient = interpn(
-            points=self.template_axes,
-            values=non_affine_deformed_template_gradient,
+        deformed_reference_image_gradient = interpn(
+            points=self.reference_image_axes,
+            values=non_affine_deformed_reference_image_gradient,
             xi=sample_coords,
             bounds_error=False,
             fill_value=None,
         )
 
-        # Reshape and broadcast deformed_template_gradient from shape
+        # Reshape and broadcast deformed_reference_image_gradient from shape
         # (x,y,z,3) to (x,y,z,3,1) to (x,y,z,3,4) - for a 3D example.
-        deformed_template_gradient_broadcast = np.repeat(
-            np.expand_dims(deformed_template_gradient, -1),
-            repeats=self.target.ndim + 1,
+        deformed_reference_image_gradient_broadcast = np.repeat(
+            np.expand_dims(deformed_reference_image_gradient, -1),
+            repeats=self.moving_image.ndim + 1,
             axis=-1,
         )
 
-        # Construct homogenous_target_coords by appending 1's at the end of
-        # the last dimension throughout self.target_coords.
-        ones = np.ones((*self.target.shape, 1))
-        homogenous_target_coords = np.concatenate(
-            (self.target_coords, ones), -1
+        # Construct homogenous_moving_image_coords by appending 1's at the end
+        # of the last dimension throughout self.moving_image_coords.
+        ones = np.ones((*self.moving_image.shape, 1))
+        homogenous_moving_image_coords = np.concatenate(
+            (self.moving_image_coords, ones), -1
         )
 
         # For a 3D example:
 
-        # deformed_template_gradient_broadcast has shape (x,y,z,3,4).
-        # homogenous_target_coords has shape (x,y,z,4).
+        # deformed_reference_image_gradient_broadcast has shape (x,y,z,3,4).
+        # homogenous_moving_image_coords has shape (x,y,z,4).
 
-        # To repeat homogenous_target_coords along the 2nd-last dimension of
-        # deformed_template_gradient_broadcast, we reshape
-        # homogenous_target_coords from shape (x,y,z,4) to shape (x,y,z,1,4)
-        # and let that broadcast to shape (x,y,z,3,4).
+        # To repeat homogenous_moving_image_coords along the 2nd-last
+        # dimension of deformed_reference_image_gradient_broadcast, we reshape
+        # homogenous_moving_image_coords from shape (x,y,z,4)
+        # to shape (x,y,z,1,4) and let that broadcast to shape (x,y,z,3,4).
 
         matching_affine_inv_gradient = (
-            deformed_template_gradient_broadcast
-            * np.expand_dims(homogenous_target_coords, -2)
+            deformed_reference_image_gradient_broadcast
+            * np.expand_dims(homogenous_moving_image_coords, -2)
         )
 
         # Get error term.
         matching_error_prime = (
-            (self.contrast_deformed_template - self.target)
+            (self.contrast_deformed_reference_image - self.moving_image)
             * self.matching_weights
             / self.sigma_matching ** 2
         )
-        contrast_map_prime = np.zeros_like(self.target, float)
+        contrast_map_prime = np.zeros_like(self.moving_image, float)
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += (
                 power
-                * self.deformed_template ** (power - 1)
+                * self.deformed_reference_image ** (power - 1)
                 * self.contrast_coefficients[..., power]
             )
-        d_matching_d_deformed_template = (
+        d_matching_d_deformed_reference_image = (
             matching_error_prime * contrast_map_prime
         )
 
         affine_inv_gradient = (
             matching_affine_inv_gradient
-            * d_matching_d_deformed_template[..., None, None]
+            * d_matching_d_deformed_reference_image[..., None, None]
         )
 
         # Note: before implementing Gauss Newton below,
@@ -1103,7 +1126,7 @@ class _Lddmm:
         # returned value for the affine_inv_gradient.
         # For 3D case, this has shape (3,4).
         affine_inv_gradient_reduction = np.sum(
-            affine_inv_gradient, tuple(range(self.target.ndim))
+            affine_inv_gradient, tuple(range(self.moving_image.ndim))
         )
 
         # Reshape to a single vector. For a 3D case this becomes shape (12,).
@@ -1132,7 +1155,7 @@ class _Lddmm:
             )
         )
         affine_inv_hessian_approx = np.sum(
-            affine_inv_hessian_approx, tuple(range(self.target.ndim))
+            affine_inv_hessian_approx, tuple(range(self.moving_image.ndim))
         )
 
         # Solve for affine_inv_gradient.
@@ -1154,7 +1177,7 @@ class _Lddmm:
                 "be of use in determining optimal parameter values."
             ) from exception
         # Append a row of zeros at the end of the 0th dimension.
-        zeros = np.zeros((1, self.target.ndim + 1))
+        zeros = np.zeros((1, self.moving_image.ndim + 1))
         affine_inv_gradient = np.concatenate((affine_inv_gradient, zeros), 0)
 
         return affine_inv_gradient
@@ -1210,15 +1233,15 @@ class _Lddmm:
         Compute and return the gradients of the self.velocity_fields.
 
         Accesses attributes:
-            template
-            target
-            template_axes
-            target_axes
-            template_coords
-            template_resolution
-            deformed_template_to_time
-            deformed_template
-            contrast_deformed_template
+            reference_image
+            moving_image
+            reference_image_axes
+            moving_image_axes
+            reference_image_coords
+            reference_image_resolution
+            deformed_reference_image_to_time
+            deformed_reference_image
+            contrast_deformed_reference_image
             sigma_regularization
             sigma_matching
             contrast_order
@@ -1239,22 +1262,22 @@ class _Lddmm:
         """
 
         matching_error_prime = (
-            (self.contrast_deformed_template - self.target)
+            (self.contrast_deformed_reference_image - self.moving_image)
             * self.matching_weights
             / self.sigma_matching ** 2
         )
-        contrast_map_prime = np.zeros_like(self.target, float)
+        contrast_map_prime = np.zeros_like(self.moving_image, float)
         for power in range(1, self.contrast_order + 1):
             contrast_map_prime += (
                 power
-                * self.deformed_template ** (power - 1)
+                * self.deformed_reference_image ** (power - 1)
                 * self.contrast_coefficients[..., power]
             )
-        d_matching_d_deformed_template = (
+        d_matching_d_deformed_reference_image = (
             matching_error_prime * contrast_map_prime
         )
-        d_matching_d_deformed_template_padded = np.pad(
-            d_matching_d_deformed_template,
+        d_matching_d_deformed_reference_image_padded = np.pad(
+            d_matching_d_deformed_reference_image,
             2,
             mode="constant",
             constant_values=0,
@@ -1262,7 +1285,7 @@ class _Lddmm:
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the
         # end of the loop it will be phi_10_inv = phi_01 = phi.
-        self.phi = np.copy(self.template_coords)
+        self.phi = np.copy(self.reference_image_coords)
 
         # Loop backwards across time.
         d_matching_d_velocities = []
@@ -1270,13 +1293,13 @@ class _Lddmm:
 
             # Update phi.
             sample_coords = (
-                self.template_coords
+                self.reference_image_coords
                 + self.velocity_fields[..., timestep, :] * self.delta_t
             )
             self.phi = (
                 interpn(
-                    points=self.template_axes,
-                    values=self.phi - self.template_coords,
+                    points=self.reference_image_axes,
+                    values=self.phi - self.reference_image_coords,
                     xi=sample_coords,
                     bounds_error=False,
                     fill_value=None,
@@ -1285,41 +1308,40 @@ class _Lddmm:
             )
 
             # Apply affine by multiplication.
-            # This transforms error in the target space back to time t.
+            # This transforms error in the moving_image space back to time t.
             self.affine_phi = _multiply_coords_by_affine(
-                self.affine,
-                self.phi,
+                self.affine, self.phi,
             )
 
             # Compute the determinant of the gradient of self.phi.
             grad_phi = np.stack(
                 np.gradient(
                     self.phi,
-                    *self.template_resolution,
-                    axis=tuple(range(self.template.ndim)),
+                    *self.reference_image_resolution,
+                    axis=tuple(range(self.reference_image.ndim)),
                 ),
                 -1,
             )
             det_grad_phi = _compute_tail_determinant(grad_phi)
 
-            # Transform error in target space back to time t.
+            # Transform error in moving_image space back to time t.
             error_at_t = interpn(
                 points=_compute_axes(
-                    d_matching_d_deformed_template_padded.shape,
-                    self.target_resolution,
+                    d_matching_d_deformed_reference_image_padded.shape,
+                    self.moving_image_resolution,
                 ),
-                values=d_matching_d_deformed_template_padded,
+                values=d_matching_d_deformed_reference_image_padded,
                 xi=self.affine_phi,
                 bounds_error=False,
                 fill_value=None,
             )
 
-            # The gradient of the template image deformed to time t.
-            deformed_template_to_time_gradient = np.stack(
+            # The gradient of the reference_image image deformed to time t.
+            deformed_reference_image_to_time_gradient = np.stack(
                 np.gradient(
-                    self.deformed_template_to_time[timestep],
-                    *self.template_resolution,
-                    axis=tuple(range(self.template.ndim)),
+                    self.deformed_reference_image_to_time[timestep],
+                    *self.reference_image_resolution,
+                    axis=tuple(range(self.reference_image.ndim)),
                 ),
                 -1,
             )
@@ -1327,11 +1349,11 @@ class _Lddmm:
             # The derivative of the matching cost with respect to the velocity
             # at time t is the product of
             # (the error deformed to time t),
-            # (the template gradient deformed to time t),
+            # (the reference_image gradient deformed to time t),
             # & (the determinant of the jacobian of the transformation).
             d_matching_d_velocity_at_t = (
                 np.expand_dims(error_at_t * det_grad_phi, -1)
-                * deformed_template_to_time_gradient
+                * deformed_reference_image_to_time_gradient
                 * (-1.0)
                 * det(self.affine)
             )
@@ -1340,13 +1362,13 @@ class _Lddmm:
             # physical-unit low-pass filter in the frequency domain.
             matching_cost_at_t_gradient = np.fft.fftn(
                 d_matching_d_velocity_at_t,
-                axes=tuple(range(self.template.ndim)),
+                axes=tuple(range(self.reference_image.ndim)),
             ) * np.expand_dims(self.low_pass_filter, -1)
             # Add the gradient of the regularization term.
             matching_cost_at_t_gradient += (
                 np.fft.fftn(
                     self.velocity_fields[..., timestep, :],
-                    axes=tuple(range(self.template.ndim)),
+                    axes=tuple(range(self.reference_image.ndim)),
                 )
                 / self.sigma_regularization ** 2
             )
@@ -1357,7 +1379,7 @@ class _Lddmm:
             # Invert fourier transform back to the spatial domain.
             d_matching_d_velocity_at_t = np.fft.ifftn(
                 matching_cost_at_t_gradient,
-                axes=tuple(range(self.template.ndim)),
+                axes=tuple(range(self.reference_image.ndim)),
             ).real
 
             d_matching_d_velocities.insert(0, d_matching_d_velocity_at_t)
@@ -1384,8 +1406,7 @@ class _Lddmm:
 
         for timestep in range(self.num_timesteps):
             velocity_fields_update = (
-                velocity_fields_gradients[timestep]
-                * self.deformative_stepsize
+                velocity_fields_gradients[timestep] * self.deformative_stepsize
             )
             # Apply a sigmoid squashing function to the velocity_fields_update
             # to ensure they yield an update of less than
@@ -1425,8 +1446,8 @@ class _Lddmm:
         deformative iterations to set it.
 
         Accesses attributes:
-            template_axes
-            template_coords
+            reference_image_axes
+            reference_image_coords
             delta_t
             num_timesteps
             velocity_fields
@@ -1441,20 +1462,20 @@ class _Lddmm:
 
         # Set self.phi to identity. self.phi is secretly phi_1t_inv but at the
         # end of the loop it will be phi_10_inv = phi_01 = phi.
-        self.phi = np.copy(self.template_coords)
+        self.phi = np.copy(self.reference_image_coords)
 
         # Loop backwards across time.
         for timestep in reversed(range(self.num_timesteps)):
 
             # Update phi.
             sample_coords = (
-                self.template_coords
+                self.reference_image_coords
                 + self.velocity_fields[..., timestep, :] * self.delta_t
             )
             self.phi = (
                 interpn(
-                    points=self.template_axes,
-                    values=self.phi - self.template_coords,
+                    points=self.reference_image_axes,
+                    values=self.phi - self.reference_image_coords,
                     xi=sample_coords,
                     bounds_error=False,
                     fill_value=None,
@@ -1463,11 +1484,8 @@ class _Lddmm:
             )
 
             # Apply affine by multiplication.
-            # This transforms error in the target space back to time t.
-            self.affine_phi = _multiply_coords_by_affine(
-                self.affine,
-                self.phi
-            )
+            # This transforms error in the moving_image space back to time t.
+            self.affine_phi = _multiply_coords_by_affine(self.affine, self.phi)
 
     # End _Lddmm.
 
@@ -1485,11 +1503,11 @@ r"""
 
 def lddmm_register(
     # Images.
-    template,
-    target,
+    reference_image,
+    moving_image,
     # Image resolutions.
-    template_resolution=None,
-    target_resolution=None,
+    reference_image_resolution=None,
+    moving_image_resolution=None,
     # Multiscale.
     multiscales=None,
     # Iterations.
@@ -1529,47 +1547,48 @@ def lddmm_register(
     map_coordinates_ify=True,
 ):
     """
-    Compute a registration between grayscale images template and target, to be
-    applied with scipy.ndimage.map_coordinates.
+    Compute a registration between grayscale images reference_image and
+    moving_image, to be applied with scipy.ndimage.map_coordinates.
 
     Parameters
     ----------
-        template: np.ndarray
-            The ideally clean template image being registered to the target.
-        target: np.ndarray
-            The potentially messier target image being registered to.
-        template_resolution: float, seq, optional
+        reference_image: np.ndarray
+            The ideally clean reference_image image being registered to the
+            moving_image.
+        moving_image: np.ndarray
+            The potentially messier moving_image image being registered to.
+        reference_image_resolution: float, seq, optional
             A scalar or list of scalars indicating the resolution of the
-            template. Overrides 0 input. By default 1.
-        target_resolution: float, seq, optional
+            reference_image. Overrides 0 input. By default 1.
+        moving_image_resolution: float, seq, optional
             A scalar or list of scalars indicating the resolution of the
-            target. Overrides 0 input. By default 1.
+            moving_image. Overrides 0 input. By default 1.
         multiscales: float, seq, optional
             A scalar, list of scalars, or list of lists or np.ndarray of
             scalars, determining the levels of downsampling at which the
             registration should be performed before moving on to the next.
             Values must be either all at least 1, or all at most 1. Both
             options are interpreted as downsampling. For example,
-            multiscales=[10, 3, 1] will result in the template and target
-            being downsampled by a factor of 10 and registered.
+            multiscales=[10, 3, 1] will result in the reference_image and
+            moving_image being downsampled by a factor of 10 and registered.
             This registration will be upsampled and used to initialize another
-            registration of the template and target downsampled by 3, and then
-            again on the undownsampled data. multiscales=[1/10, 1/3, 1] is
-            equivalent.
+            registration of the reference_image and moving_image downsampled
+            by 3, and then again on the undownsampled data.
+            multiscales=[1/10, 1/3, 1] is equivalent.
             Alternatively, the scale for each dimension can be specified, e.g.
             multiscales=[ [10, 5, 5], [3, 3, 3], 1] for a 3D registration will
-            result in the template and target downsampled by [10, 5, 5], then
-            [3, 3, 3], then [1, 1, 1].
+            result in the reference_image and moving_image downsampled by
+            [10, 5, 5], then [3, 3, 3], then [1, 1, 1].
             If provided with more than 1 value, all following arguments with
             the exceptions of initial_affine, initial_velocity_fields, and
             initial_contrast_coefficients, which may be provided for the first
             value in multiscales, may optionally be provided as sequences with
             length equal to the number of values provided to multiscales. Each
             such value is used at the corresponding scale.
-            Additionally, template_resolution and target_resolution cannot be
-            provided for each scale in multiscales. Rather, they are given
-            once to indicate the resolution of the template and target as
-            input.
+            Additionally, reference_image_resolution and
+            moving_image_resolution cannot be provided for each scale in
+            multiscales. Rather, they are given once to indicate the
+            resolution of the reference_image and moving_image as input.
             multiscales should be provided as descending values. By default 1.
         num_iterations: int, optional
             The total number of iterations. By default 300.
@@ -1596,15 +1615,16 @@ def lddmm_register(
             A scalar indicating the freedom to deform. Small values put
             harsher constraints on the smoothness of a deformation.
             With sufficiently large values, the registration will overfit any
-            noise in the target, leading to unrealistic deformations. However,
-            this may still be appropriate with a small num_iterations.
+            noise in the moving_image, leading to unrealistic deformations.
+            However, this may still be appropriate with a small
+            num_iterations.
             Note that if deformative_stepsize / sigma_regularization**2 is not
             much less than 1, an error may occur.
             Overrides 0 input. By default np.inf.
         velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical
             units. Affects the optimum velocity_fields smoothness.
-            By default 2 * np.max(self.template_resolution).
+            By default 2 * np.max(self.reference_image_resolution).
         preconditioner_velocity_smooth_length: float, optional
             The length of preconditioner smoothing of the velocity_fields in
             physical units. Affects the optimization of the velocity_fields,
@@ -1613,15 +1633,17 @@ def lddmm_register(
             The maximum allowed update to the velocity_fields in physical
             units. Affects the optimization of the velocity_fields, but not
             the optimum. Overrides 0 input.
-            By default np.max(self.template.shape * self.template_resolution).
+            By default np.max(self.reference_image.shape
+            * self.reference_image_resolution).
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism.
             Overrides 0 input. By default 5.
         contrast_order: int, optional
             The order of the polynomial fit between the contrasts of the
-            template and target. This is important to set greater than 1 if
-            template and target are cross-modal. 3 is generally good for
-            histology. Overrides 0 input. By default 1.
+            reference_image and moving_image. This is important to set greater
+            than 1 if reference_image and moving_image are cross-modal.
+            3 is generally good for histology. Overrides 0 input.
+            By default 1.
         spatially_varying_contrast_map: bool, optional
             If True, uses a polynomial per voxel to compute the contrast map
             rather than a single polynomial. By default False.
@@ -1637,16 +1659,15 @@ def lddmm_register(
         contrast_smooth_length: float, optional
             The length scale of smoothing of the contrast_coefficients if
             spatially_varying_contrast_map == True. Overrides 0 input.
-            By default 2 * np.max(self.target_resolution).
+            By default 2 * np.max(self.moving_image_resolution).
         sigma_matching: float, optional
-            An estimate of the spread of the noise in the target, representing
-            the tradeoff between the regularity and accuracy of the
-            registration, where a smaller value should result in a less
-            smooth, more accurate result.
-            Typically it should be set to an estimate of the standard
-            deviation of the noise in the image, particularly with artifacts.
-            Overrides 0 input.
-            By default the standard deviation of the target.
+            An estimate of the spread of the noise in the moving_image,
+            representing the tradeoff between the regularity and accuracy of
+            the registration, where a smaller value should result in a less
+            smooth, more accurate result. Typically it should be set to an
+            estimate of the standard deviation of the noise in the image,
+            particularly with artifacts. Overrides 0 input.
+            By default the standard deviation of the moving_image.
         classify_and_weight_voxels: bool, optional
             If True, artifacts and background are jointly classified with
             registration using sigma_artifact, artifact_prior,
@@ -1668,15 +1689,15 @@ def lddmm_register(
             voxel is background. By default 1/3.
         initial_affine: np.ndarray, optional
             The affine array that the registration will begin with.
-            By default np.eye(template.ndim + 1).
+            By default np.eye(reference_image.ndim + 1).
         initial_contrast_coefficients: np.ndarray, optional
             The contrast coefficients that the registration will begin with.
             If None, the 0th order coefficient(s) are set to
-            np.mean(self.target) - np.mean(self.template)
-            * np.std(self.target) / np.std(self.template),
+            np.mean(self.moving_image) - np.mean(self.reference_image)
+            * np.std(self.moving_image) / np.std(self.reference_image),
             if self.contrast_order > 1, the 1st order coefficient(s) are set
-            to np.std(self.target) / np.std(self.template), and all others are
-            set to zero. By default None.
+            to np.std(self.moving_image) / np.std(self.reference_image), and
+            all others are set to zero. By default None.
         initial_velocity_fields: np.ndarray, optional
             The velocity fields that the registration will begin with.
             By default all zeros.
@@ -1693,39 +1714,44 @@ def lddmm_register(
         >>> from skimage.registration import lddmm_register
         >>> from scipy.ndimage import map_coordinates
         >>> #
-        >>> # Define images. The template is registered to the target image
+        >>> # Define images.
+        >>> # The reference_image is registered to the moving_image image
         >>> # but both transformations are returned.
-        >>> # template is a binary ellipse with semi-radii 5 and 8 in
+        >>> #
+        >>> # reference_image is a binary ellipse with semi-radii 5 and 8 in
         >>> # dimensions 0 and 1. The overall shape is (19, 25).
-        >>> # target is a 30 degree rotation of template in the (1,2) plane.
+        >>> # moving_image is a 30 degree rotation of reference_image
+        >>> # in the (1,2) plane.
         >>> #
-        >>> template = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2 <= 1
-        >>> for col in range(25)] for row in range(19)]]*2, float)
-        >>> target = rotate(template, 30, (1,2))
+        >>> reference_image = np.array([[[(col-12)**2/8**2 + (row-9)**2/5**2
+        >>> <= 1 for col in range(25)] for row in range(19)]]*2, float)
+        >>> moving_image = rotate(reference_image, 30, (1,2))
         >>> #
-        >>> # Register the template to the target, then deform the template
-        >>> # and target to match the other.
+        >>> # Register the reference_image to the moving_image,
+        >>> # then deform the reference_image and moving_image
+        >>> # to match the other.
         >>> #
-        >>> lddmm_output = lddmm_register(template, target,
+        >>> lddmm_output = lddmm_register(reference_image, moving_image,
         >>> deformative_stepsize=0.5)
         >>> #
-        >>> deformed_target = map_coordinates(target,
-        >>> lddmm_output.target_to_template_transform)
+        >>> deformed_moving_image = map_coordinates(moving_image,
+        >>> lddmm_output.moving_image_to_reference_image_transform)
         >>> #
-        >>> deformed_template = map_coordinates(template,
-        >>> lddmm_output.template_to_target_transform)
+        >>> deformed_reference_image = map_coordinates(reference_image,
+        >>> lddmm_output.reference_image_to_moving_image_transform)
 
     Returns
     -------
     namedtuple
         A namedtuple containing the position-fields for transforming an image
-        from target-space to template-space
-        and for transforming an image from template-space to target-space,
-        respectively called target_to_template_transform and
-        template_to_target_transform, and two other namedtuples called
-        Internals and Diagnostics.
+        from moving_image-space to reference_image-space
+        and for transforming an image from reference_image-space to
+        moving_image-space, respectively called
+        moving_image_to_reference_image_transform and
+        reference_image_to_moving_image_transform, and two other namedtuples
+        called Internals and Diagnostics.
         Internals contains affine, contrast_coefficients, velocity_fields,
-        template_deformation, and template_deformation_inverse.
+        reference_image_deformation, and reference_image_deformation_inverse.
         Diagnostics contains affines, maximum_velocities, matching_energies,
         regularization_energies, and total_energies.
 
@@ -1737,19 +1763,21 @@ def lddmm_register(
 
     # Validate images and resolutions.
     # Images.
-    template = _validate_ndarray(template, dtype=float)
-    target = _validate_ndarray(
-        target, dtype=float, required_ndim=template.ndim
+    reference_image = _validate_ndarray(reference_image, dtype=float)
+    moving_image = _validate_ndarray(
+        moving_image, dtype=float, required_ndim=reference_image.ndim
     )
     # Resolution.
-    template_resolution = _validate_scalar_to_multi(
-        template_resolution if template_resolution is not None else 1,
-        template.ndim,
+    reference_image_resolution = _validate_scalar_to_multi(
+        reference_image_resolution
+        if reference_image_resolution is not None
+        else 1,
+        reference_image.ndim,
         float,
     )
-    target_resolution = _validate_scalar_to_multi(
-        target_resolution if target_resolution is not None else 1,
-        target.ndim,
+    moving_image_resolution = _validate_scalar_to_multi(
+        moving_image_resolution if moving_image_resolution is not None else 1,
+        moving_image.ndim,
         float,
     )
 
@@ -1764,12 +1792,12 @@ def lddmm_register(
     # multiscales is a list.
     for index, scale in enumerate(multiscales):
         multiscales[index] = _validate_scalar_to_multi(
-            scale, size=template.ndim, dtype=float
+            scale, size=reference_image.ndim, dtype=float
         )
     multiscales = _validate_ndarray(
-        multiscales, required_shape=(-1, template.ndim)
+        multiscales, required_shape=(-1, reference_image.ndim)
     )
-    # Each scale in multiscales has length template.ndim.
+    # Each scale in multiscales has length reference_image.ndim.
     if np.all(multiscales >= 1):
         multiscales = 1 / multiscales
     elif not np.all(multiscales <= 1):
@@ -1787,11 +1815,11 @@ def lddmm_register(
     # length of multiscales.
     multiscale_lddmm_kwargs = dict(
         # # Images.
-        # template=template,
-        # target=target,
+        # reference_image=reference_image,
+        # moving_image=moving_image,
         # # Image resolutions.
-        # template_resolution=template_resolution,
-        # target_resolution=target_resolution,
+        # reference_image_resolution=reference_image_resolution,
+        # moving_image_resolution=moving_image_resolution,
         # Iterations.
         num_iterations=num_iterations,
         num_affine_only_iterations=num_affine_only_iterations,
@@ -1859,25 +1887,35 @@ def lddmm_register(
         )
 
         # rescale images and resolutions.
-        # template.
-        template_scale = np.round(scale * template.shape) / template.shape
-        scaled_template = rescale(template, template_scale)
-        scaled_template_resolution = template_resolution / template_scale
-        # target.
-        target_scale = np.round(scale * target.shape) / target.shape
-        scaled_target = rescale(target, target_scale)
-        scaled_target_resolution = target_resolution / target_scale
+        # reference_image.
+        reference_image_scale = (
+            np.round(scale * reference_image.shape) / reference_image.shape
+        )
+        scaled_reference_image = rescale(
+            reference_image, reference_image_scale
+        )
+        scaled_reference_image_resolution = (
+            reference_image_resolution / reference_image_scale
+        )
+        # moving_image.
+        moving_image_scale = (
+            np.round(scale * moving_image.shape) / moving_image.shape
+        )
+        scaled_moving_image = rescale(moving_image, moving_image_scale)
+        scaled_moving_image_resolution = (
+            moving_image_resolution / moving_image_scale
+        )
 
         # Collect non-multiscale_lddmm_kwargs
         # Note: user arguments initial_affine, initial_contrast_coefficients,
-            # and initial_velocity_fields are overwritten in this loop.
+        # and initial_velocity_fields are overwritten in this loop.
         multiscale_exempt_lddmm_kwargs = dict(
             # Images.
-            template=scaled_template,
-            target=scaled_target,
+            reference_image=scaled_reference_image,
+            moving_image=scaled_moving_image,
             # Image resolutions.
-            template_resolution=scaled_template_resolution,
-            target_resolution=scaled_target_resolution,
+            reference_image_resolution=scaled_reference_image_resolution,
+            moving_image_resolution=scaled_moving_image_resolution,
             # Initial values.
             initial_affine=initial_affine,
             initial_contrast_coefficients=initial_contrast_coefficients,
@@ -1920,13 +1958,13 @@ def lddmm_register(
             ):
                 # If spatially_varying_contrast_map at next scale and at this
                 # scale, resize contrast_coefficients.
-                next_target_shape = np.round(
-                    multiscales[scale_index + 1] * target.shape
+                next_moving_image_shape = np.round(
+                    multiscales[scale_index + 1] * moving_image.shape
                 )
                 initial_contrast_coefficients = resize(
                     lddmm.contrast_coefficients,
                     (
-                        *next_target_shape,
+                        *next_moving_image_shape,
                         multiscale_lddmm_kwargs["contrast_order"][
                             scale_index + 1
                         ]
@@ -1944,23 +1982,24 @@ def lddmm_register(
                 # If spatially_varying_contrast_map at this scale but not at
                 # next scale, average contrast_coefficients.
                 initial_contrast_coefficients = np.mean(
-                    lddmm.contrast_coefficients, axis=np.arange(template.ndim)
+                    lddmm.contrast_coefficients,
+                    axis=np.arange(reference_image.ndim),
                 )
             else:
                 # If spatially_varying_contrast_map at next scale but not this
                 # scale or at neither scale, initialize directly.
                 initial_contrast_coefficients = lddmm.contrast_coefficients
             # initial_velocity_fields.
-            next_template_shape = np.round(
-                multiscales[scale_index + 1] * template.shape
+            next_reference_image_shape = np.round(
+                multiscales[scale_index + 1] * reference_image.shape
             )
             initial_velocity_fields = sinc_resample(
                 lddmm.velocity_fields,
                 new_shape=(
-                    *next_template_shape,
+                    *next_reference_image_shape,
                     multiscale_lddmm_kwargs["num_timesteps"][scale_index + 1]
                     or lddmm.num_timesteps,
-                    template.ndim,
+                    reference_image.ndim,
                 ),
             )
 
@@ -1978,39 +2017,64 @@ def lddmm_register(
         # and move the coordinate axis to the front.
         lddmm.phi = np.moveaxis(
             (
-                resize(lddmm.phi, (*template.shape, template.ndim))
-                - (-np.subtract(template.shape, 1) / 2 * template_resolution)
+                resize(
+                    lddmm.phi, (*reference_image.shape, reference_image.ndim)
+                )
+                - (
+                    -np.subtract(reference_image.shape, 1)
+                    / 2
+                    * reference_image_resolution
+                )
             )
-            / template_resolution,
+            / reference_image_resolution,
             -1,
             0,
         )
         lddmm.phi_inv = np.moveaxis(
             (
-                resize(lddmm.phi_inv, (*template.shape, template.ndim))
-                - (-np.subtract(template.shape, 1) / 2 * template_resolution)
+                resize(
+                    lddmm.phi_inv,
+                    (*reference_image.shape, reference_image.ndim),
+                )
+                - (
+                    -np.subtract(reference_image.shape, 1)
+                    / 2
+                    * reference_image_resolution
+                )
             )
-            / template_resolution,
+            / reference_image_resolution,
             -1,
             0,
         )
         lddmm.affine_phi = np.moveaxis(
             (
-                resize(lddmm.affine_phi, (*template.shape, template.ndim))
-                - (-np.subtract(target.shape, 1) / 2 * target_resolution)
+                resize(
+                    lddmm.affine_phi,
+                    (*reference_image.shape, reference_image.ndim),
+                )
+                - (
+                    -np.subtract(moving_image.shape, 1)
+                    / 2
+                    * moving_image_resolution
+                )
             )
-            / target_resolution,
+            / moving_image_resolution,
             -1,
             0,
         )
         lddmm.phi_inv_affine_inv = np.moveaxis(
             (
                 resize(
-                    lddmm.phi_inv_affine_inv, (*target.shape, template.ndim)
+                    lddmm.phi_inv_affine_inv,
+                    (*moving_image.shape, reference_image.ndim),
                 )
-                - (-np.subtract(template.shape, 1) / 2 * template_resolution)
+                - (
+                    -np.subtract(reference_image.shape, 1)
+                    / 2
+                    * reference_image_resolution
+                )
             )
-            / template_resolution,
+            / reference_image_resolution,
             -1,
             0,
         )
@@ -2019,8 +2083,8 @@ def lddmm_register(
     Lddmm_output = namedtuple(
         "Lddmm_output",
         (
-            "target_to_template_transform",
-            "template_to_target_transform",
+            "moving_image_to_reference_image_transform",
+            "reference_image_to_moving_image_transform",
             "internals",
             "diagnostics",
             "temp_to_tar",
@@ -2033,8 +2097,8 @@ def lddmm_register(
             "affine",
             "contrast_coefficients",
             "velocity_fields",
-            "template_deformation",
-            "template_deformation_inverse",
+            "reference_image_deformation",
+            "reference_image_deformation_inverse",
         ),
     )
     Diagnostics = namedtuple(
