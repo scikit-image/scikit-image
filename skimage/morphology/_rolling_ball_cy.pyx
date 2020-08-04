@@ -23,10 +23,12 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
                 for kern_y in range(kernel.shape[0]):
                     for kern_x in range(kernel.shape[1]):
                         tmp = (windows[im_y, im_x, kern_y, kern_x] + cap_height[kern_y, kern_x]) * kernel[kern_y, kern_x]
-                        if min_value > tmp:
+                        if not min_value <= tmp:
                             min_value = tmp
-                        elif isnan(tmp):
-                            min_value = tmp
+                            if isnan(tmp):
+                                break
+                    if isnan(min_value):
+                        break
                 out_data[im_y, im_x] = min_value
 
     return out_data.base
