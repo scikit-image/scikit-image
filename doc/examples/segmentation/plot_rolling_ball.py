@@ -15,12 +15,7 @@ the intensity of the background at a desired position, we imagine submerging a
 ball into the blocks at the desired pixel position. Once it is completely
 covered by the blocks, the height of the ball determines the intensity of the
 background at that position. We can then *roll* this ball around below the
-surface to get the background values for the entire image. As Sternberg
-puts it:
-
-    "We can visualize a solid sphere that moves freely within the solid
-    volume of the gel image umbra but is constrained by the upper surface of
-    the umbra."
+surface to get the background values for the entire image.
 
 Scikit-image gives you convenient access to this algorithm, and also implements
 a generalized version which allows you to "roll" arbitrary ellipsoids. The
