@@ -5,7 +5,7 @@ from scipy.linalg import inv
 
 from skimage.registration._lddmm_utilities import _validate_scalar_to_multi
 from skimage.registration._lddmm_utilities import _validate_ndarray
-from skimage.registration._lddmm_utilities import _validate_resolution
+from skimage.registration._lddmm_utilities import _validate_spacing
 from skimage.registration._lddmm_utilities import _compute_axes
 from skimage.registration._lddmm_utilities import _compute_coords
 from skimage.registration._lddmm_utilities import _multiply_coords_by_affine
@@ -283,49 +283,49 @@ required_shape."
 
 
 """
-Test _validate_resolution.
+Test _validate_spacing.
 """
 
 
-class Test__validate_resolution:
+class Test__validate_spacing:
 
     # Test proper use.
 
-    def test_scalar_resolution_1D_ndim(self):
-        kwargs = dict(resolution=2, ndim=1, dtype=float)
+    def test_scalar_spacing_1D_ndim(self):
+        kwargs = dict(spacing=2, ndim=1, dtype=float)
         correct_output = np.full(1, 2, float)
-        assert np.array_equal(_validate_resolution(**kwargs), correct_output)
+        assert np.array_equal(_validate_spacing(**kwargs), correct_output)
 
-    def test_scalar_resolution_4D_ndim(self):
-        kwargs = dict(resolution=1.5, ndim=4, dtype=float)
+    def test_scalar_spacing_4D_ndim(self):
+        kwargs = dict(spacing=1.5, ndim=4, dtype=float)
         correct_output = np.full(4, 1.5, float)
-        assert np.array_equal(_validate_resolution(**kwargs), correct_output)
+        assert np.array_equal(_validate_spacing(**kwargs), correct_output)
 
-    def test_array_resolution_3D_ndim(self):
-        kwargs = dict(resolution=np.ones(3, int), ndim=3, dtype=float)
+    def test_array_spacing_3D_ndim(self):
+        kwargs = dict(spacing=np.ones(3, int), ndim=3, dtype=float)
         correct_output = np.ones(3, float)
-        assert np.array_equal(_validate_resolution(**kwargs), correct_output)
+        assert np.array_equal(_validate_spacing(**kwargs), correct_output)
 
-    def test_list_resolution_2D_ndim(self):
-        kwargs = dict(resolution=[3, 4], ndim=2, dtype=float)
+    def test_list_spacing_2D_ndim(self):
+        kwargs = dict(spacing=[3, 4], ndim=2, dtype=float)
         correct_output = np.array([3, 4], float)
-        assert np.array_equal(_validate_resolution(**kwargs), correct_output)
+        assert np.array_equal(_validate_spacing(**kwargs), correct_output)
 
         # Test improper use.
 
-    def test_negative_resolution(self):
-        kwargs = dict(resolution=[3, -4], ndim=2, dtype=float)
+    def test_negative_spacing(self):
+        kwargs = dict(spacing=[3, -4], ndim=2, dtype=float)
         expected_exception = ValueError
-        match = "All elements of resolution must be positive."
+        match = "All elements of spacing must be positive."
         with pytest.raises(expected_exception, match=match):
-            _validate_resolution(**kwargs)
+            _validate_spacing(**kwargs)
 
-    def test_zero_resolution(self):
-        kwargs = dict(resolution=[3, 0], ndim=2, dtype=float)
+    def test_zero_spacing(self):
+        kwargs = dict(spacing=[3, 0], ndim=2, dtype=float)
         expected_exception = ValueError
-        match = "All elements of resolution must be positive."
+        match = "All elements of spacing must be positive."
         with pytest.raises(expected_exception, match=match):
-            _validate_resolution(**kwargs)
+            _validate_spacing(**kwargs)
 
 
 """
@@ -341,7 +341,7 @@ class Test__compute_axes:
     # shape.
 
     def test_zero_and_one_in_shape(self):
-        kwargs = dict(shape=(0, 1, 2), resolution=1, origin="center")
+        kwargs = dict(shape=(0, 1, 2), spacing=1, origin="center")
         correct_output = [
             np.arange(dim_size) * dim_res
             - np.mean(np.arange(dim_size) * dim_res)
@@ -350,8 +350,8 @@ class Test__compute_axes:
         for dim, coord in enumerate(_compute_axes(**kwargs)):
             assert np.array_equal(coord, correct_output[dim])
 
-    def test_decimal_resolution(self):
-        kwargs = dict(shape=(1, 2, 3, 4), resolution=1.5, origin="center")
+    def test_decimal_spacing(self):
+        kwargs = dict(shape=(1, 2, 3, 4), spacing=1.5, origin="center")
         correct_output = [
             np.arange(dim_size) * dim_res
             - np.mean(np.arange(dim_size) * dim_res)
@@ -360,9 +360,9 @@ class Test__compute_axes:
         for dim, coord in enumerate(_compute_axes(**kwargs)):
             assert np.array_equal(coord, correct_output[dim])
 
-    def test_anisotropic_resolution(self):
+    def test_anisotropic_spacing(self):
         kwargs = dict(
-            shape=(2, 3, 4), resolution=[1, 1.5, 2], origin="center",
+            shape=(2, 3, 4), spacing=[1, 1.5, 2], origin="center",
         )
         correct_output = [
             np.arange(dim_size) * dim_res
@@ -373,7 +373,7 @@ class Test__compute_axes:
             assert np.array_equal(coord, correct_output[dim])
 
     def test_1D_shape(self):
-        kwargs = dict(shape=5, resolution=1, origin="center")
+        kwargs = dict(shape=5, spacing=1, origin="center")
         correct_output = [
             np.arange(dim_size) * dim_res
             - np.mean(np.arange(dim_size) * dim_res)
@@ -383,7 +383,7 @@ class Test__compute_axes:
             assert np.array_equal(coord, correct_output[dim])
 
     def test_zero_origin(self):
-        kwargs = dict(shape=5, resolution=1, origin="zero")
+        kwargs = dict(shape=5, spacing=1, origin="zero")
         correct_output = [
             np.arange(dim_size) * dim_res
             for dim_size, dim_res in zip((5,), (1,))
@@ -402,12 +402,12 @@ class Test__compute_coords:
     # Test proper use.
 
     def test_1D_shape_center_origin(self):
-        kwargs = dict(shape=5, resolution=1, origin="center")
+        kwargs = dict(shape=5, spacing=1, origin="center")
         correct_output = np.array([[-2], [-1], [0], [1], [2]])
         assert np.array_equal(_compute_coords(**kwargs), correct_output)
 
     def test_2D_shape_zero_origin(self):
-        kwargs = dict(shape=(3, 4), resolution=1, origin="zero")
+        kwargs = dict(shape=(3, 4), spacing=1, origin="zero")
         correct_output = np.array(
             [
                 [[0, 0], [0, 1], [0, 2], [0, 3]],
@@ -494,8 +494,8 @@ class Test_resample:
     def test_zero_origin_upsample(self):
         kwargs = dict(
             image=np.array([[0, 1, 2], [3, 4, 5],]),
-            new_resolution=1 / 2,
-            old_resolution=1,
+            new_spacing=1 / 2,
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="zero",
@@ -515,8 +515,8 @@ class Test_resample:
     def test_center_origin_upsample(self):
         kwargs = dict(
             image=np.array([[0, 1, 2], [3, 4, 5],]),
-            new_resolution=1 / 2,
-            old_resolution=1,
+            new_spacing=1 / 2,
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="center",
@@ -543,8 +543,8 @@ class Test_resample:
                     [15, 16, 17, 18, 19],
                 ]
             ),
-            new_resolution=2,
-            old_resolution=1,
+            new_spacing=2,
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="zero",
@@ -564,8 +564,8 @@ class Test_resample:
                     [15, 16, 17, 18, 19],
                 ]
             ),
-            new_resolution=2,
-            old_resolution=1,
+            new_spacing=2,
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="center",
@@ -578,8 +578,8 @@ class Test_resample:
     def test_zero_origin_joint_upsample_and_downsample(self):
         kwargs = dict(
             image=np.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9],]),
-            new_resolution=[1 / 2, 2],
-            old_resolution=1,
+            new_spacing=[1 / 2, 2],
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="zero",
@@ -594,8 +594,8 @@ class Test_resample:
     def test_center_origin_joint_upsample_and_downsample(self):
         kwargs = dict(
             image=np.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9],]),
-            new_resolution=[1 / 2, 2],
-            old_resolution=1,
+            new_spacing=[1 / 2, 2],
+            old_spacing=1,
             err_to_larger=True,
             extrapolation_fill_value=None,
             origin="center",
@@ -619,8 +619,8 @@ class Test_resample:
             image=np.array(
                 [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],]
             ),
-            new_resolution=[1 / 2, 2],
-            old_resolution=1,
+            new_spacing=[1 / 2, 2],
+            old_spacing=1,
             err_to_larger=False,
             extrapolation_fill_value=None,
             origin="zero",
@@ -712,32 +712,32 @@ class Test_generate_position_field:
         num_timesteps = 10
 
         reference_image_shape = (3, 4, 5)
-        reference_image_resolution = 1
+        reference_image_spacing = 1
         moving_image_shape = (2, 4, 6)
-        moving_image_resolution = 1
+        moving_image_spacing = 1
         velocity_fields = np.zeros(
             (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
-        velocity_field_resolution = 1
+        velocity_field_spacing = 1
         affine = np.eye(4)
 
         if deform_to == "reference_image":
             expected_output = _compute_coords(
-                reference_image_shape, reference_image_resolution
+                reference_image_shape, reference_image_spacing
             )
         elif deform_to == "moving_image":
             expected_output = _compute_coords(
-                moving_image_shape, moving_image_resolution
+                moving_image_shape, moving_image_spacing
             )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
+            velocity_field_spacing=velocity_field_spacing,
             reference_image_shape=reference_image_shape,
-            reference_image_resolution=reference_image_resolution,
+            reference_image_spacing=reference_image_spacing,
             moving_image_shape=moving_image_shape,
-            moving_image_resolution=moving_image_resolution,
+            moving_image_spacing=moving_image_spacing,
             deform_to=deform_to,
         )
 
@@ -748,36 +748,36 @@ class Test_generate_position_field:
         num_timesteps = 10
 
         reference_image_shape = (3, 4, 5)
-        reference_image_resolution = 1
+        reference_image_spacing = 1
         moving_image_shape = (2, 4, 6)
-        moving_image_resolution = 1
+        moving_image_spacing = 1
         velocity_fields = np.ones(
             (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
-        velocity_field_resolution = 1
+        velocity_field_spacing = 1
         affine = np.eye(4)
 
         if deform_to == "reference_image":
             expected_output = (
                 _compute_coords(
-                    reference_image_shape, reference_image_resolution
+                    reference_image_shape, reference_image_spacing
                 )
                 + 1
             )
         elif deform_to == "moving_image":
             expected_output = (
-                _compute_coords(moving_image_shape, moving_image_resolution)
+                _compute_coords(moving_image_shape, moving_image_spacing)
                 - 1
             )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
+            velocity_field_spacing=velocity_field_spacing,
             reference_image_shape=reference_image_shape,
-            reference_image_resolution=reference_image_resolution,
+            reference_image_spacing=reference_image_spacing,
             moving_image_shape=moving_image_shape,
-            moving_image_resolution=moving_image_resolution,
+            moving_image_spacing=moving_image_spacing,
             deform_to=deform_to,
         )
 
@@ -788,13 +788,13 @@ class Test_generate_position_field:
         num_timesteps = 10
 
         reference_image_shape = (3, 4, 5)
-        reference_image_resolution = 1
+        reference_image_spacing = 1
         moving_image_shape = (2, 4, 6)
-        moving_image_resolution = 1
+        moving_image_spacing = 1
         velocity_fields = np.zeros(
             (*reference_image_shape, num_timesteps, len(reference_image_shape))
         )
-        velocity_field_resolution = 1
+        velocity_field_spacing = 1
         # Indicates a 90 degree rotation to the right.
         affine = np.array(
             [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1],]
@@ -804,23 +804,23 @@ class Test_generate_position_field:
             expected_output = _multiply_coords_by_affine(
                 affine,
                 _compute_coords(
-                    reference_image_shape, reference_image_resolution
+                    reference_image_shape, reference_image_spacing
                 ),
             )
         elif deform_to == "moving_image":
             expected_output = _multiply_coords_by_affine(
                 inv(affine),
-                _compute_coords(moving_image_shape, moving_image_resolution),
+                _compute_coords(moving_image_shape, moving_image_spacing),
             )
 
         position_field = generate_position_field(
             affine=affine,
             velocity_fields=velocity_fields,
-            velocity_field_resolution=velocity_field_resolution,
+            velocity_field_spacing=velocity_field_spacing,
             reference_image_shape=reference_image_shape,
-            reference_image_resolution=reference_image_resolution,
+            reference_image_spacing=reference_image_spacing,
             moving_image_shape=moving_image_shape,
-            moving_image_resolution=moving_image_resolution,
+            moving_image_spacing=moving_image_spacing,
             deform_to=deform_to,
         )
 
@@ -834,7 +834,7 @@ Perform tests.
 if __name__ == "__main__":
     test__validate_scalar_to_multi()
     test__validate_ndarray()
-    test__validate_resolution()
+    test__validate_spacing()
     test__compute_axes()
     test__compute_coords()
     test__multiply_coords_by_affine()

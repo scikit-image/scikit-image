@@ -4,17 +4,17 @@ Defines:
         _validate_scalar_to_multi(value, size=None, dtype=None)
         _validate_ndarray(array, dtype=None, minimum_ndim=0, required_ndim=None,
             forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None, required_shape=None)
-        _validate_resolution(resolution, ndim)
-        _compute_axes(shape, resolution=1, origin='center')
-        _compute_coords(shape, resolution=1, origin='center')
+        _validate_spacing(spacing, ndim)
+        _compute_axes(shape, spacing=1, origin='center')
+        _compute_coords(shape, spacing=1, origin='center')
         _multiply_coords_by_affine(array, affine)
         _compute_tail_determinant(array)
     User functions:
-        resample(image, new_resolution, old_resolution=1,
+        resample(image, new_spacing, old_spacing=1,
             err_to_larger=True, extrapolation_fill_value=None,
             origin='center', method='linear', image_is_coords=False)
         sinc_resample(array, new_shape)
-        generate_position_field(affine, velocity_fields, velocity_field_resolution, reference_image_shape, reference_image_resolution, moving_image_shape, moving_image_resolution, deform_to="reference_image")
+        generate_position_field(affine, velocity_fields, velocity_field_spacing, reference_image_shape, reference_image_spacing, moving_image_shape, moving_image_spacing, deform_to="reference_image")
 """
 
 import numpy as np
@@ -238,42 +238,42 @@ def _validate_ndarray(
     return array
 
 
-def _validate_resolution(resolution, ndim, dtype=float):
+def _validate_spacing(spacing, ndim, dtype=float):
     """
-    Validate resolution to assure its length matches the dimensionality of
+    Validate spacing to assure its length matches the dimensionality of
     image.
     """
 
-    resolution = _validate_scalar_to_multi(resolution, size=ndim, dtype=dtype)
+    spacing = _validate_scalar_to_multi(spacing, size=ndim, dtype=dtype)
 
-    if np.any(resolution <= 0):
+    if np.any(spacing <= 0):
         raise ValueError(
-            f"All elements of resolution must be positive.\n"
-            f"np.min(resolution): {np.min(resolution)}."
+            f"All elements of spacing must be positive.\n"
+            f"np.min(spacing): {np.min(spacing)}."
         )
 
-    return resolution
+    return spacing
 
 
-def _compute_axes(shape, resolution=1, origin="center"):
+def _compute_axes(shape, spacing=1, origin="center"):
     """
     Returns the real_axes defining an image with the given shape
-    at the given resolution as a list of numpy arrays.
+    at the given spacing as a list of numpy arrays.
     """
 
     # Validate shape.
     shape = _validate_ndarray(shape, dtype=int, required_ndim=1)
 
-    # Validate resolution.
-    resolution = _validate_resolution(resolution, len(shape))
+    # Validate spacing.
+    spacing = _validate_spacing(spacing, len(shape))
 
     # Create axes.
 
     # axes is a list of arrays matching each shape element from shape, spaced
-    # by the corresponding resolution.
+    # by the corresponding spacing.
     axes = [
         np.arange(dim_size) * dim_res
-        for dim_size, dim_res in zip(shape, resolution)
+        for dim_size, dim_res in zip(shape, spacing)
     ]
 
     # List all presently recognized origin values.
@@ -295,13 +295,13 @@ def _compute_axes(shape, resolution=1, origin="center"):
     return axes
 
 
-def _compute_coords(shape, resolution=1, origin="center"):
+def _compute_coords(shape, spacing=1, origin="center"):
     """
     Returns the real_coordinates of an image with the given shape at the given
-    resolution as a single numpy array of shape (*shape, len(shape)).
+    spacing as a single numpy array of shape (*shape, len(shape)).
     """
 
-    axes = _compute_axes(shape, resolution, origin)
+    axes = _compute_axes(shape, spacing, origin)
 
     meshes = np.meshgrid(*axes, indexing="ij")
 
@@ -396,8 +396,8 @@ def _compute_tail_determinant(array):
 
 def resample(
     image,
-    new_resolution,
-    old_resolution=1,
+    new_spacing,
+    old_spacing=1,
     err_to_larger=True,
     extrapolation_fill_value=None,
     origin="center",
@@ -406,16 +406,16 @@ def resample(
     anti_aliasing=True,
 ):
     """
-    Resamples image from an old resolution to a new resolution.
+    Resamples image from an old spacing to a new spacing.
 
     Parameters
     ----------
         image: np.ndarray
             The image to be resampled
-        new_resolution: float, seq
-            The resolution of the resampled image.
-        old_resolution: float, seq, optional
-            The resolution of the input image. By default 1.
+        new_spacing: float, seq
+            The spacing of the resampled image.
+        old_spacing: float, seq, optional
+            The spacing of the input image. By default 1.
         err_to_larger: bool, optional
             Determines whether to round the new shape up or down.
             By default True.
@@ -438,7 +438,7 @@ def resample(
     Returns
     -------
     np.ndarray
-        The result of resampling image at new_resolution.
+        The result of resampling image at new_spacing.
     """
 
     # Validate inputs and define ndim & old_shape based on image_is_coords.
@@ -449,21 +449,21 @@ def resample(
     else:
         ndim = image.ndim
         old_shape = image.shape
-    new_resolution = _validate_resolution(new_resolution, ndim)
-    old_resolution = _validate_resolution(old_resolution, ndim)
+    new_spacing = _validate_spacing(new_spacing, ndim)
+    old_spacing = _validate_spacing(old_spacing, ndim)
 
     # Handle trivial case.
-    if np.array_equal(new_resolution, old_resolution):
+    if np.array_equal(new_spacing, old_spacing):
         # Note: this is a copy of the input image and is not the same object.
         return image 
 
     # Compute new_coords and old_axes.
     if err_to_larger:
-        new_shape = np.ceil(old_shape * old_resolution / new_resolution)
+        new_shape = np.ceil(old_shape * old_spacing / new_spacing)
     else:
-        new_shape = np.floor(old_shape * old_resolution / new_resolution)
-    new_coords = _compute_coords(new_shape, new_resolution, origin)
-    old_axes = _compute_axes(old_shape, old_resolution, origin)
+        new_shape = np.floor(old_shape * old_spacing / new_spacing)
+    new_coords = _compute_coords(new_shape, new_spacing, origin)
+    old_axes = _compute_axes(old_shape, old_spacing, origin)
 
     # Apply anti-aliasing gaussian filter if downsampling.
     if anti_aliasing:
@@ -529,11 +529,11 @@ def sinc_resample(array, new_shape):
 def generate_position_field(
     affine,
     velocity_fields,
-    velocity_field_resolution,
+    velocity_field_spacing,
     reference_image_shape,
-    reference_image_resolution,
+    reference_image_spacing,
     moving_image_shape,
-    moving_image_resolution,
+    moving_image_spacing,
     deform_to="reference_image",
 ):
     """
@@ -547,18 +547,18 @@ def generate_position_field(
         The velocity_fields defining the diffeomorphic flow. The leading
         dimensions are spatial, and the last two dimensions are the number of
         time steps and the coordinates.
-    velocity_field_resolution : float, seq
-        The resolution of velocity_fields, with multiple values given to
+    velocity_field_spacing : float, seq
+        The spacing of velocity_fields, with multiple values given to
         specify anisotropy.
     reference_image_shape : seq
         The shape of the reference_image.
-    reference_image_resolution : float, seq
-        The resolution of the reference_image, with multiple values given to
+    reference_image_spacing : float, seq
+        The spacing of the reference_image, with multiple values given to
         specify anisotropy.
     moving_image_shape : seq
         The shape of the moving_image.
-    moving_image_resolution : float, seq
-        The resolution of the moving_image, with multiple values given to
+    moving_image_spacing : float, seq
+        The spacing of the moving_image, with multiple values given to
         specify anisotropy.
     deform_to : str, optional
         The direction of the deformation. By default "reference_image".
@@ -596,9 +596,9 @@ def generate_position_field(
             f"velocity_fields.shape: {velocity_fields.shape}, "
             f"reference_image_shape: {reference_image_shape}."
         )
-    # Validate velocity_field_resolution.
-    velocity_field_resolution = _validate_resolution(
-        velocity_field_resolution, velocity_fields.ndim - 2
+    # Validate velocity_field_spacing.
+    velocity_field_spacing = _validate_spacing(
+        velocity_field_spacing, velocity_fields.ndim - 2
     )
     # Validate affine.
     affine = _validate_ndarray(
@@ -624,19 +624,19 @@ def generate_position_field(
     delta_t = 1 / num_timesteps
     reference_image_axes = _compute_axes(
         reference_image_shape,
-        reference_image_resolution,
+        reference_image_spacing,
     )
     reference_image_coords = _compute_coords(
         reference_image_shape,
-        reference_image_resolution,
+        reference_image_spacing,
     )
     moving_image_axes = _compute_axes(
         moving_image_shape,
-        moving_image_resolution,
+        moving_image_spacing,
     )
     moving_image_coords = _compute_coords(
         moving_image_shape,
-        moving_image_resolution,
+        moving_image_spacing,
     )
 
     # Create position field.
@@ -686,7 +686,7 @@ def generate_position_field(
     if deform_to == "reference_image":
         # Apply the affine by multiplication.
         affine_phi = _multiply_coords_by_affine(affine, phi)
-        # affine_phi has the resolution of the reference_image.
+        # affine_phi has the spacing of the reference_image.
     elif deform_to == "moving_image":
         # Apply the affine by interpolation.
         sample_coords = _multiply_coords_by_affine(
@@ -703,7 +703,7 @@ def generate_position_field(
             )
             + sample_coords
         )
-        # phi_inv_affine_inv has the resolution of the moving_image.
+        # phi_inv_affine_inv has the spacing of the moving_image.
 
     # return appropriate position field.
     if deform_to == "reference_image":

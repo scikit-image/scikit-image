@@ -32,7 +32,7 @@ from matplotlib import pyplot as plt
 
 from ._lddmm_utilities import _validate_ndarray
 from ._lddmm_utilities import _validate_scalar_to_multi
-from ._lddmm_utilities import _validate_resolution
+from ._lddmm_utilities import _validate_spacing
 from ._lddmm_utilities import _compute_axes
 from ._lddmm_utilities import _compute_coords
 from ._lddmm_utilities import _multiply_coords_by_affine
@@ -50,11 +50,6 @@ r"""
 
 """
 
-# TODO: resolution --> spacing, reference_image_resolution --> reference_image_spacing.
-# TODO: reference_image --> reference_image, moving_image --> moving_image.
-# TODO: create issue that moving_image rudely implies one of two equal uses of a registration.
-# TODO: explore replacing my lddmm_transform_[image/points] with scipy.ndimage.map_coordinates, allowable by converting position_fields to relative vector fields and putting the coordinates at the front of the shape.
-# TODO: add attributes used to docstrings, check for natural groupings.
 class _Lddmm:
     """
     Class for storing shared values and objects used in learning a
@@ -66,9 +61,9 @@ class _Lddmm:
         # Images.
         reference_image,
         moving_image,
-        # Image resolutions.
-        reference_image_resolution=None,
-        moving_image_resolution=None,
+        # Image spacings.
+        reference_image_spacing=None,
+        moving_image_spacing=None,
         # Iterations.
         num_iterations=None,
         num_affine_only_iterations=None,
@@ -118,17 +113,17 @@ class _Lddmm:
             moving_image, dtype=float, required_ndim=self.reference_image.ndim
         )
 
-        # Resolution.
-        self.reference_image_resolution = _validate_scalar_to_multi(
-            reference_image_resolution
-            if reference_image_resolution is not None
+        # spacing.
+        self.reference_image_spacing = _validate_scalar_to_multi(
+            reference_image_spacing
+            if reference_image_spacing is not None
             else 1,
             self.reference_image.ndim,
             float,
         )
-        self.moving_image_resolution = _validate_scalar_to_multi(
-            moving_image_resolution
-            if moving_image_resolution is not None
+        self.moving_image_spacing = _validate_scalar_to_multi(
+            moving_image_spacing
+            if moving_image_spacing is not None
             else 1,
             self.moving_image.ndim,
             float,
@@ -175,7 +170,7 @@ class _Lddmm:
         self.velocity_smooth_length = (
             float(velocity_smooth_length)
             if velocity_smooth_length is not None
-            else 2 * np.max(self.reference_image_resolution)
+            else 2 * np.max(self.reference_image_spacing)
         )
         self.preconditioner_velocity_smooth_length = (
             float(preconditioner_velocity_smooth_length)
@@ -186,7 +181,7 @@ class _Lddmm:
             float(maximum_velocity_fields_update)
             if maximum_velocity_fields_update is not None
             else np.max(
-                self.reference_image.shape * self.reference_image_resolution
+                self.reference_image.shape * self.reference_image_spacing
             )
         )  # Default is effectively inactive.
         self.num_timesteps = (
@@ -212,7 +207,7 @@ class _Lddmm:
         self.contrast_smooth_length = (
             float(contrast_smooth_length)
             if contrast_smooth_length
-            else 10 * np.max(self.moving_image_resolution)
+            else 10 * np.max(self.moving_image_spacing)
         )
 
         # Smoothness vs. accuracy tradeoff.
@@ -271,16 +266,16 @@ class _Lddmm:
 
         # Constants.
         self.reference_image_axes = _compute_axes(
-            self.reference_image.shape, self.reference_image_resolution
+            self.reference_image.shape, self.reference_image_spacing
         )
         self.reference_image_coords = _compute_coords(
-            self.reference_image.shape, self.reference_image_resolution
+            self.reference_image.shape, self.reference_image_spacing
         )
         self.moving_image_axes = _compute_axes(
-            self.moving_image.shape, self.moving_image_resolution
+            self.moving_image.shape, self.moving_image_spacing
         )
         self.moving_image_coords = _compute_coords(
-            self.moving_image.shape, self.moving_image_resolution
+            self.moving_image.shape, self.moving_image_spacing
         )
         self.artifact_mean_value = np.max(self.moving_image)
         self.background_mean_value = np.min(self.moving_image)
@@ -288,7 +283,7 @@ class _Lddmm:
         self.fourier_filter_power = 2
         fourier_velocity_fields_coords = _compute_coords(
             self.reference_image.shape,
-            1 / (self.reference_image_resolution * self.reference_image.shape),
+            1 / (self.reference_image_spacing * self.reference_image.shape),
             origin="zero",
         )
         self.fourier_high_pass_filter = (
@@ -302,16 +297,16 @@ class _Lddmm:
                         2
                         * np.pi
                         * fourier_velocity_fields_coords
-                        * self.reference_image_resolution
+                        * self.reference_image_spacing
                     )
                 )
-                / self.reference_image_resolution ** 2,
+                / self.reference_image_spacing ** 2,
                 axis=-1,
             )
         ) ** self.fourier_filter_power
         fourier_reference_image_coords = _compute_coords(
             self.reference_image.shape,
-            1 / (self.reference_image_resolution * self.reference_image.shape),
+            1 / (self.reference_image_spacing * self.reference_image.shape),
             origin="zero",
         )
         self.low_pass_filter = 1 / (
@@ -326,11 +321,11 @@ class _Lddmm:
                             * np.cos(
                                 2
                                 * np.pi
-                                * self.reference_image_resolution
+                                * self.reference_image_spacing
                                 * fourier_reference_image_coords
                             )
                         )
-                        / self.reference_image_resolution ** 2,
+                        / self.reference_image_spacing ** 2,
                         -1,
                     )
                 )
@@ -350,11 +345,11 @@ class _Lddmm:
                             * np.cos(
                                 2
                                 * np.pi
-                                * self.reference_image_resolution
+                                * self.reference_image_spacing
                                 * fourier_reference_image_coords
                             )
                         )
-                        / self.reference_image_resolution ** 2,
+                        / self.reference_image_spacing ** 2,
                         -1,
                     )
                 )
@@ -363,7 +358,7 @@ class _Lddmm:
         )
         fourier_moving_image_coords = _compute_coords(
             self.moving_image.shape,
-            1 / (self.moving_image_resolution * self.moving_image.shape),
+            1 / (self.moving_image_spacing * self.moving_image.shape),
             origin="zero",
         )
         self.contrast_high_pass_filter = (
@@ -377,11 +372,11 @@ class _Lddmm:
                         * np.cos(
                             2
                             * np.pi
-                            * self.moving_image_resolution
+                            * self.moving_image_spacing
                             * fourier_moving_image_coords
                         )
                     )
-                    / self.moving_image_resolution ** 2,
+                    / self.moving_image_spacing ** 2,
                     -1,
                 )
             )
@@ -560,34 +555,6 @@ class _Lddmm:
 
         # Compute affine_phi in case there were only affine-only iterations.
         self._compute_affine_phi()
-
-        # Note: this dictionary output is not strictly the same as the output of the user-level lddmm_register function.
-        # return dict(
-        #     # Core.
-        #     affine=self.affine,
-        #     phi=self.phi,
-        #     phi_inv=self.phi_inv,
-        #     affine_phi=self.affine_phi,
-        #     phi_inv_affine_inv=self.phi_inv_affine_inv,
-        #     contrast_coefficients=self.contrast_coefficients,
-        #     velocity_fields=self.velocity_fields,
-
-        #     # Accumulators.
-        #     affines=self.affines,
-        #     maximum_velocities=self.maximum_velocities,
-        #     matching_energies=self.matching_energies,
-        #     regularization_energies=self.regularization_energies,
-        #     total_energies=self.total_energies,
-        # )
-        # TODO:
-        """
-        a new take on the return 'value':
-
-        affine_phi, phi_inv_affine_inv, position_field_components, diagnostics (everything else)
-
-        position_field --> map_coordinates coords: subtract coordinate of the first pixel and divide by pixel size in each dimension
-        """
-        # return dict(**params) --> transform_necessary_values, just_cuz_values, calibration_accumulators
 
     def _update_and_apply_position_field(self):
         """
@@ -768,8 +735,8 @@ class _Lddmm:
         Accsses attributes:
             moving_image
             reference_image
-            reference_image_resolution
-            moving_image_resolution
+            reference_image_spacing
+            moving_image_spacing
             contrast_deformed_reference_image
             sigma_regularization
             sigma_matching
@@ -795,14 +762,14 @@ class _Lddmm:
             )
             * 1
             / (2 * self.sigma_matching ** 2)
-            * np.prod(self.moving_image_resolution)
+            * np.prod(self.moving_image_spacing)
         )
 
         regularization_energy = np.sum(
             np.sum(np.abs(self.fourier_velocity_fields) ** 2, axis=(-1, -2))
             * self.fourier_high_pass_filter ** 2
         ) * (
-            np.prod(self.reference_image_resolution)
+            np.prod(self.reference_image_spacing)
             * self.delta_t
             / (2 * self.sigma_regularization ** 2)
             / self.reference_image.size
@@ -822,7 +789,7 @@ class _Lddmm:
 
             Accesses attributes:
                 moving_image
-                moving_image_resolution
+                moving_image_spacing
                 deformed_reference_image
                 spatially_varying_contrast_map
                 sigma_matching
@@ -1020,7 +987,7 @@ class _Lddmm:
         Accesss attributes:
             reference_image
             moving_image
-            reference_image_resolution
+            reference_image_spacing
             reference_image_axes
             moving_image_coords
             deformed_reference_image
@@ -1053,7 +1020,7 @@ class _Lddmm:
         non_affine_deformed_reference_image_gradient = np.stack(
             np.gradient(
                 non_affine_deformed_reference_image,
-                *self.reference_image_resolution,
+                *self.reference_image_spacing,
             ),
             -1,
         )
@@ -1240,7 +1207,7 @@ class _Lddmm:
             reference_image_axes
             moving_image_axes
             reference_image_coords
-            reference_image_resolution
+            reference_image_spacing
             deformed_reference_image_to_time
             deformed_reference_image
             contrast_deformed_reference_image
@@ -1319,7 +1286,7 @@ class _Lddmm:
             grad_phi = np.stack(
                 np.gradient(
                     self.phi,
-                    *self.reference_image_resolution,
+                    *self.reference_image_spacing,
                     axis=tuple(range(self.reference_image.ndim)),
                 ),
                 -1,
@@ -1330,7 +1297,7 @@ class _Lddmm:
             error_at_t = interpn(
                 points=_compute_axes(
                     d_matching_d_deformed_reference_image_padded.shape,
-                    self.moving_image_resolution,
+                    self.moving_image_spacing,
                 ),
                 values=d_matching_d_deformed_reference_image_padded,
                 xi=self.affine_phi,
@@ -1342,7 +1309,7 @@ class _Lddmm:
             deformed_reference_image_to_time_gradient = np.stack(
                 np.gradient(
                     self.deformed_reference_image_to_time[timestep],
-                    *self.reference_image_resolution,
+                    *self.reference_image_spacing,
                     axis=tuple(range(self.reference_image.ndim)),
                 ),
                 -1,
@@ -1507,9 +1474,9 @@ def lddmm_register(
     # Images.
     reference_image,
     moving_image,
-    # Image resolutions.
-    reference_image_resolution=None,
-    moving_image_resolution=None,
+    # Image spacings.
+    reference_image_spacing=None,
+    moving_image_spacing=None,
     # Multiscale.
     multiscales=None,
     # Iterations.
@@ -1559,11 +1526,11 @@ def lddmm_register(
             moving_image.
         moving_image: np.ndarray
             The potentially messier moving_image image being registered to.
-        reference_image_resolution: float, seq, optional
-            A scalar or list of scalars indicating the resolution of the
+        reference_image_spacing: float, seq, optional
+            A scalar or list of scalars indicating the spacing of the
             reference_image. Overrides 0 input. By default 1.
-        moving_image_resolution: float, seq, optional
-            A scalar or list of scalars indicating the resolution of the
+        moving_image_spacing: float, seq, optional
+            A scalar or list of scalars indicating the spacing of the
             moving_image. Overrides 0 input. By default 1.
         multiscales: float, seq, optional
             A scalar, list of scalars, or list of lists or np.ndarray of
@@ -1587,10 +1554,10 @@ def lddmm_register(
             value in multiscales, may optionally be provided as sequences with
             length equal to the number of values provided to multiscales. Each
             such value is used at the corresponding scale.
-            Additionally, reference_image_resolution and
-            moving_image_resolution cannot be provided for each scale in
+            Additionally, reference_image_spacing and
+            moving_image_spacing cannot be provided for each scale in
             multiscales. Rather, they are given once to indicate the
-            resolution of the reference_image and moving_image as input.
+            spacing of the reference_image and moving_image as input.
             multiscales should be provided as descending values. By default 1.
         num_iterations: int, optional
             The total number of iterations. By default 300.
@@ -1626,7 +1593,7 @@ def lddmm_register(
         velocity_smooth_length: float, optional
             The length scale of smoothing of the velocity_fields in physical
             units. Affects the optimum velocity_fields smoothness.
-            By default 2 * np.max(self.reference_image_resolution).
+            By default 2 * np.max(self.reference_image_spacing).
         preconditioner_velocity_smooth_length: float, optional
             The length of preconditioner smoothing of the velocity_fields in
             physical units. Affects the optimization of the velocity_fields,
@@ -1636,7 +1603,7 @@ def lddmm_register(
             units. Affects the optimization of the velocity_fields, but not
             the optimum. Overrides 0 input.
             By default np.max(self.reference_image.shape
-            * self.reference_image_resolution).
+            * self.reference_image_spacing).
         num_timesteps: int, optional
             The number of composed sub-transformations in the diffeomorphism.
             Overrides 0 input. By default 5.
@@ -1661,7 +1628,7 @@ def lddmm_register(
         contrast_smooth_length: float, optional
             The length scale of smoothing of the contrast_coefficients if
             spatially_varying_contrast_map == True. Overrides 0 input.
-            By default 2 * np.max(self.moving_image_resolution).
+            By default 2 * np.max(self.moving_image_spacing).
         sigma_matching: float, optional
             An estimate of the spread of the noise in the moving_image,
             representing the tradeoff between the regularity and accuracy of
@@ -1763,22 +1730,22 @@ def lddmm_register(
         Raised if multiscales is provided with values both above and below 1.
     """
 
-    # Validate images and resolutions.
+    # Validate images and spacings.
     # Images.
     reference_image = _validate_ndarray(reference_image, dtype=float)
     moving_image = _validate_ndarray(
         moving_image, dtype=float, required_ndim=reference_image.ndim
     )
-    # Resolution.
-    reference_image_resolution = _validate_scalar_to_multi(
-        reference_image_resolution
-        if reference_image_resolution is not None
+    # spacing.
+    reference_image_spacing = _validate_scalar_to_multi(
+        reference_image_spacing
+        if reference_image_spacing is not None
         else 1,
         reference_image.ndim,
         float,
     )
-    moving_image_resolution = _validate_scalar_to_multi(
-        moving_image_resolution if moving_image_resolution is not None else 1,
+    moving_image_spacing = _validate_scalar_to_multi(
+        moving_image_spacing if moving_image_spacing is not None else 1,
         moving_image.ndim,
         float,
     )
@@ -1819,9 +1786,9 @@ def lddmm_register(
         # # Images.
         # reference_image=reference_image,
         # moving_image=moving_image,
-        # # Image resolutions.
-        # reference_image_resolution=reference_image_resolution,
-        # moving_image_resolution=moving_image_resolution,
+        # # Image spacings.
+        # reference_image_spacing=reference_image_spacing,
+        # moving_image_spacing=moving_image_spacing,
         # Iterations.
         num_iterations=num_iterations,
         num_affine_only_iterations=num_affine_only_iterations,
@@ -1888,7 +1855,7 @@ def lddmm_register(
             )
         )
 
-        # rescale images and resolutions.
+        # rescale images and spacings.
         # reference_image.
         reference_image_scale = (
             np.round(scale * reference_image.shape) / reference_image.shape
@@ -1896,16 +1863,16 @@ def lddmm_register(
         scaled_reference_image = rescale(
             reference_image, reference_image_scale
         )
-        scaled_reference_image_resolution = (
-            reference_image_resolution / reference_image_scale
+        scaled_reference_image_spacing = (
+            reference_image_spacing / reference_image_scale
         )
         # moving_image.
         moving_image_scale = (
             np.round(scale * moving_image.shape) / moving_image.shape
         )
         scaled_moving_image = rescale(moving_image, moving_image_scale)
-        scaled_moving_image_resolution = (
-            moving_image_resolution / moving_image_scale
+        scaled_moving_image_spacing = (
+            moving_image_spacing / moving_image_scale
         )
 
         # Collect non-multiscale_lddmm_kwargs
@@ -1915,9 +1882,9 @@ def lddmm_register(
             # Images.
             reference_image=scaled_reference_image,
             moving_image=scaled_moving_image,
-            # Image resolutions.
-            reference_image_resolution=scaled_reference_image_resolution,
-            moving_image_resolution=scaled_moving_image_resolution,
+            # Image spacings.
+            reference_image_spacing=scaled_reference_image_spacing,
+            moving_image_spacing=scaled_moving_image_spacing,
             # Initial values.
             initial_affine=initial_affine,
             initial_contrast_coefficients=initial_contrast_coefficients,
@@ -2015,7 +1982,7 @@ def lddmm_register(
         # resize to match the shape of the appropriate image,
         # subtract the identity coordinate vector at spatial indices 0,
         # (assuming centered coordinates)
-        # divide by the original resolution of the image,
+        # divide by the original spacing of the image,
         # and move the coordinate axis to the front.
         lddmm.phi = np.moveaxis(
             (
@@ -2025,10 +1992,10 @@ def lddmm_register(
                 - (
                     -np.subtract(reference_image.shape, 1)
                     / 2
-                    * reference_image_resolution
+                    * reference_image_spacing
                 )
             )
-            / reference_image_resolution,
+            / reference_image_spacing,
             -1,
             0,
         )
@@ -2041,10 +2008,10 @@ def lddmm_register(
                 - (
                     -np.subtract(reference_image.shape, 1)
                     / 2
-                    * reference_image_resolution
+                    * reference_image_spacing
                 )
             )
-            / reference_image_resolution,
+            / reference_image_spacing,
             -1,
             0,
         )
@@ -2057,10 +2024,10 @@ def lddmm_register(
                 - (
                     -np.subtract(moving_image.shape, 1)
                     / 2
-                    * moving_image_resolution
+                    * moving_image_spacing
                 )
             )
-            / moving_image_resolution,
+            / moving_image_spacing,
             -1,
             0,
         )
@@ -2073,10 +2040,10 @@ def lddmm_register(
                 - (
                     -np.subtract(reference_image.shape, 1)
                     / 2
-                    * reference_image_resolution
+                    * reference_image_spacing
                 )
             )
-            / reference_image_resolution,
+            / reference_image_spacing,
             -1,
             0,
         )

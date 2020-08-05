@@ -29,14 +29,14 @@ class Test_lddmm_register:
             float
         )
         moving_image = lddmm_register_kwargs["moving_image"].astype(float)
-        reference_image_resolution = (
-            lddmm_register_kwargs["reference_image_resolution"]
-            if "reference_image_resolution" in lddmm_register_kwargs.keys()
+        reference_image_spacing = (
+            lddmm_register_kwargs["reference_image_spacing"]
+            if "reference_image_spacing" in lddmm_register_kwargs.keys()
             else 1
         )
-        moving_image_resolution = (
-            lddmm_register_kwargs["moving_image_resolution"]
-            if "moving_image_resolution" in lddmm_register_kwargs.keys()
+        moving_image_spacing = (
+            lddmm_register_kwargs["moving_image_spacing"]
+            if "moving_image_spacing" in lddmm_register_kwargs.keys()
             else 1
         )
 
