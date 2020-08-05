@@ -1,5 +1,3 @@
-import itertools
-
 import numpy as np
 import pytest
 from scipy.signal import convolve2d
@@ -91,13 +89,8 @@ def test_richardson_lucy():
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
-@pytest.mark.parametrize(
-    'dtype_image, dtype_psf',
-    itertools.product(
-        [np.float32, np.float64],
-        [np.float32, np.float64],
-    )
-)
+@pytest.mark.parametrize('dtype_image', [np.float32, np.float64])
+@pytest.mark.parametrize('dtype_psf', [np.float32, np.float64])
 def test_richardson_lucy_filtered(dtype_image, dtype_psf):
     if dtype_image == np.float64:
         atol = 1e-8
