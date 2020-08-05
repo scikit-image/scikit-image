@@ -18,9 +18,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     ----------
     image : (N, M) ndarray
         The gray image to be filtered.
-    kernel_size: array_like of rank 2, numeric, optional
+    kernel_size: two-element tuple, numeric, optional
         The length of the spatial vertices of the ellipsoid.
-    intensity_vertex : array_like of rank 1, numeric, optional
+    intensity_vertex : scalar, numeric, optional
         The length of the intensity vertex of the ellipsoid.
     has_nan: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
@@ -66,9 +66,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(
             "kernel_size must be convertible to a numeric array.")
-    if not kernel_size.size == 2 and len(kernel_size.shape) == 2:
+    if not kernel_size.size == 2 and not len(kernel_size.shape) == 1:
         raise ValueError(
-            "kernel_size must be a one dimensional array_like of size 2.")
+            "kernel_size must be a two element tuple.")
     if np.any(kernel_size <= 0):
         raise ValueError(f"All elements of kernel_size must be greater zero.")
     kernel_size = kernel_size / 2
