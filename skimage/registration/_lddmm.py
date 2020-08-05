@@ -93,7 +93,7 @@ class _Lddmm:
         # Smoothness vs. accuracy tradeoff.
         sigma_matching=None,
         # Classification specifiers.
-        classify_and_weight_voxels=None,
+        artifact_and_background_classification=None,
         sigma_artifact=None,
         sigma_background=None,
         artifact_prior=None,
@@ -223,9 +223,9 @@ class _Lddmm:
         )
 
         # Classification specifiers.
-        self.classify_and_weight_voxels = (
-            bool(classify_and_weight_voxels)
-            if classify_and_weight_voxels is not None
+        self.artifact_and_background_classification = (
+            bool(artifact_and_background_classification)
+            if artifact_and_background_classification is not None
             else False
         )
         self.sigma_artifact = (
@@ -530,7 +530,9 @@ class _Lddmm:
             # Compute weights.
             # This is the expectation step of the expectation maximization
             # algorithm.
-            if self.classify_and_weight_voxels and iteration % 1 == 0:
+            # Note: recomputing weights may be appropriate less frequently
+            # than every iteration.
+            if self.artifact_and_background_classification:
                 self._compute_weights()
             # Compute cost.
             self._compute_cost()
@@ -1534,7 +1536,7 @@ def lddmm_register(
     # Smoothness vs. accuracy tradeoff.
     sigma_matching=None,
     # Classification specifiers.
-    classify_and_weight_voxels=None,
+    artifact_and_background_classification=None,
     sigma_artifact=None,
     sigma_background=None,
     artifact_prior=None,
@@ -1668,7 +1670,7 @@ def lddmm_register(
             estimate of the standard deviation of the noise in the image,
             particularly with artifacts. Overrides 0 input.
             By default the standard deviation of the moving_image.
-        classify_and_weight_voxels: bool, optional
+        artifact_and_background_classification: bool, optional
             If True, artifacts and background are jointly classified with
             registration using sigma_artifact, artifact_prior,
             sigma_background, and background_prior.
@@ -1844,7 +1846,7 @@ def lddmm_register(
         # # vs. accuracy tradeoff.
         sigma_matching=sigma_matching,
         # Classification specifiers.
-        classify_and_weight_voxels=classify_and_weight_voxels,
+        artifact_and_background_classification=artifact_and_background_classification,
         sigma_artifact=sigma_artifact,
         sigma_background=sigma_background,
         artifact_prior=artifact_prior,
