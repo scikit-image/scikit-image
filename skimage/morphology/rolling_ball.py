@@ -19,7 +19,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     image : (N, M) ndarray
         The gray image to be filtered.
     kernel_size: array_like of rank 2, numeric, optional
-        The length of the spacial vertices of the ellipsoid.
+        The length of the spatial vertices of the ellipsoid.
     intensity_vertex : array_like of rank 1, numeric, optional
         The length of the intensity vertex of the ellipsoid.
     has_nan: bool, optional
@@ -36,9 +36,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     intensity of the ellipsoid at ``pos``. The intensity of the ellipsoid
     is computed using the canonical ellipsis equation:
 
-    |    ``semi_spacial = kernel_size / 2``
+    |    ``semi_spatial = kernel_size / 2``
     |    ``semi_vertex = intensity_vertex / 2``
-    |    ``np.sum((pos/semi_spacial)**2) + (intensity/semi_vertex)**2 = 1``
+    |    ``np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1``
 
     This algorithm assums that low intensity values (black) corresponds to the
     background. If you have a light background, invert the image before passing
@@ -84,7 +84,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         raise ValueError(f"Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
 
-    image = np.array(image)
+    image = np.asarray(image)
     if not np.issubdtype(image.dtype, np.number):
         raise ValueError("Image must be of numeric type.")
     if not len(image.shape) == 2:
