@@ -16,7 +16,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
 
     Parameters
     ----------
-    image : array_like of rank 2, numeric
+    image : (N, M) ndarray
         The gray image to be filtered.
     kernel_size: array_like of rank 2, numeric, optional
         The length of the spacial vertices of the ellipsoid.
@@ -62,7 +62,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
            (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
-    kernel_size = np.array(kernel_size)
+    kernel_size = np.asarray(kernel_size)
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(
             "kernel_size must be convertible to a numeric array.")
@@ -73,7 +73,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         raise ValueError(f"All elements of kernel_size must be greater zero.")
     kernel_size = kernel_size / 2
 
-    intensity_vertex = np.array(intensity_vertex)
+    intensity_vertex = np.asarray(intensity_vertex)
     if not np.issubdtype(intensity_vertex.dtype, np.number):
         raise ValueError(
             "Intensity_vertex must be convertible to a numeric array.")
@@ -107,7 +107,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         np.sqrt(np.clip(1 - tmp, 0, None))
     cap_height = cap_height.astype(np.float_)
 
-    kernel = np.array(tmp <= 1, dtype=np.float_)
+    kernel = np.asarray(tmp <= 1, dtype=np.float_)
     kernel[kernel == 0] = np.Inf
 
     windowed = view_as_windows(img, kernel.shape)
@@ -135,7 +135,7 @@ def rolling_ball(image, radius=50, has_nan=False):
 
     Parameters
     ----------
-    image : array_like of rank 2, numeric
+    image : (N, M) ndarray
         The gray image to be filtered.
     radius: scalar, numeric, optional
         The radius of the ball/sphere rolled in the image.
@@ -172,7 +172,7 @@ def rolling_ball(image, radius=50, has_nan=False):
            (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
-    if not np.issubdtype(np.array(radius).dtype, np.number):
+    if not np.issubdtype(np.asarray(radius).dtype, np.number):
         raise ValueError("Radius must be a numeric type.")
     if radius <= 0:
         raise ValueError("Radius must be greater zero.")
