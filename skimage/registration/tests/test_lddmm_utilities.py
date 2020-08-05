@@ -612,7 +612,7 @@ class Test_resample:
         )
         assert np.array_equal(resample(**kwargs), correct_output)
 
-    def test_center_origin_joint_upsample_and_downsample_with_err_to_larger_False(
+    def test_center_origin_joint_upsample_and_downsample_err_to_larger_False(
         self,
     ):
         kwargs = dict(

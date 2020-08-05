@@ -1,22 +1,3 @@
-"""
-Defines:
-    Internal functions:
-        _validate_scalar_to_multi(value, size=None, dtype=None)
-        _validate_ndarray(array, dtype=None, minimum_ndim=0, required_ndim=None,
-            forbid_object_dtype=True, broadcast_to_shape=None, reshape_to_shape=None, required_shape=None)
-        _validate_spacing(spacing, ndim)
-        _compute_axes(shape, spacing=1, origin='center')
-        _compute_coords(shape, spacing=1, origin='center')
-        _multiply_coords_by_affine(array, affine)
-        _compute_tail_determinant(array)
-    User functions:
-        resample(image, new_spacing, old_spacing=1,
-            err_to_larger=True, extrapolation_fill_value=None,
-            origin='center', method='linear', image_is_coords=False)
-        sinc_resample(array, new_shape)
-        generate_position_field(affine, velocity_fields, velocity_field_spacing, reference_image_shape, reference_image_spacing, moving_image_shape, moving_image_spacing, deform_to="reference_image")
-"""
-
 import numpy as np
 import warnings
 

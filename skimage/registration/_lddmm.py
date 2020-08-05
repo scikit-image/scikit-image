@@ -946,8 +946,10 @@ class _Lddmm:
             )
             moving_image_ravel = np.ravel(self.moving_image)
             matching_weights_ravel = np.ravel(self.matching_weights)
-            contrast_polynomial_basis_semi_ravel = self.contrast_polynomial_basis.reshape(
-                self.moving_image.size, -1
+            contrast_polynomial_basis_semi_ravel = np.reshape(
+                self.contrast_polynomial_basis,
+                self.moving_image.size,
+                -1,
             )  # A view, not a copy.
 
             # Create intermediate composites.
@@ -1458,18 +1460,6 @@ class _Lddmm:
 
     # End _Lddmm.
 
-
-r"""
-  _    _                          __                          _     _
- | |  | |                        / _|                        | |   (_)
- | |  | |  ___    ___   _ __    | |_   _   _   _ __     ___  | |_   _    ___    _ __    ___
- | |  | | / __|  / _ \ | '__|   |  _| | | | | | '_ \   / __| | __| | |  / _ \  | '_ \  / __|
- | |__| | \__ \ |  __/ | |      | |   | |_| | | | | | | (__  | |_  | | | (_) | | | | | \__ \
-  \____/  |___/  \___| |_|      |_|    \__,_| |_| |_|  \___|  \__| |_|  \___/  |_| |_| |___/
-
-"""
-
-
 def lddmm_register(
     # Images.
     reference_image,
@@ -1801,7 +1791,8 @@ def lddmm_register(
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
         velocity_smooth_length=velocity_smooth_length,
-        preconditioner_velocity_smooth_length=preconditioner_velocity_smooth_length,
+        preconditioner_velocity_smooth_length=
+            preconditioner_velocity_smooth_length,
         maximum_velocity_fields_update=maximum_velocity_fields_update,
         num_timesteps=num_timesteps,
         # Contrast map specifiers.
@@ -1813,7 +1804,8 @@ def lddmm_register(
         # # vs. accuracy tradeoff.
         sigma_matching=sigma_matching,
         # Classification specifiers.
-        artifact_and_background_classification=artifact_and_background_classification,
+        artifact_and_background_classification=
+            artifact_and_background_classification,
         sigma_artifact=sigma_artifact,
         sigma_background=sigma_background,
         artifact_prior=artifact_prior,
