@@ -95,7 +95,7 @@ plt.show()
 # Image Datatypes
 # ---------------
 #
-# ``rolling_ball`` can handle datatypes other than `np.unit8`. You can
+# ``rolling_ball`` can handle datatypes other than `np.uint8`. You can
 # pass them into the function in the same way.
 
 image = data.coins().astype(np.uint16)
@@ -127,7 +127,7 @@ plt.show()
 # ``rolling_ellipsoid`` function. It works just like ``rolling_ball``;
 # however, it gives you more control over the affected area and
 # strength of the algorithm. In particular, it has different
-# parameters for the spacial dimensions and the intensity dimension of
+# parameters for the spatial dimensions and the intensity dimension of
 # the image.
 
 image = data.coins().astype(np.float) / 255
