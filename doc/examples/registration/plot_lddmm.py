@@ -105,17 +105,17 @@ reference_image = allen_mouse_brain_atlas()
 moving_image = cleared_mouse_brain()
 
 
-# Specify resolutions.
-reference_image_resolution = np.array([100, 100, 100])
-moving_image_resolution = np.array([100, 100, 100])
+# Specify spacings.
+reference_image_spacing = np.array([100, 100, 100])
+moving_image_spacing = np.array([100, 100, 100])
 
 
 # Learn registration from reference_image to moving_image.
 lddmm_output = lddmm_register(
     reference_image=reference_image,
     moving_image=moving_image,
-    reference_image_resolution=reference_image_resolution,
-    moving_image_resolution=moving_image_resolution,
+    reference_image_spacing=reference_image_spacing,
+    moving_image_spacing=moving_image_spacing,
     multiscales=[8, 4],
     affine_stepsize=0.3,
     deformative_stepsize=2e5,
@@ -146,26 +146,26 @@ The registration can be reasonably applied to any image in the reference_image
     We demonstrate this by using rescaled versions of reference_image and
     moving_image to imitate different images in the same spaces.
 
-The registration can be applied at arbitrary resolution by first multiplying
-    the coordinates by the factor change in resolution and then resampling the
-    coordinates to the desired resolution. 
-    We demonstrate this by applying at the same resolution as our rescaled
+The registration can be applied at arbitrary spacing by first multiplying
+    the coordinates by the factor change in spacing and then resampling the
+    coordinates to the desired spacing. 
+    We demonstrate this by applying at the same spacing as our rescaled
     reference_image and moving_image to get deformed images of the same shape.
     
 The position-fields (transforms) output by the registration have the same
-    shape as (are at the resolution of) the reference_image and moving_image
+    shape as (are at the spacing of) the reference_image and moving_image
     regardless of the scale the registration was computed at, see the
     multiscales parameter.
 """
 
-apply = "at native resolution"
-# apply = "to different images at native resolution"
-# apply = "to different images at different resolution"
+apply = "at native spacing"
+# apply = "to different images at native spacing"
+# apply = "to different images at different spacing"
 
 
-# Apply registration to reference_image and moving_image at native resolution.
+# Apply registration to reference_image and moving_image at native spacing.
 
-if apply == "at native resolution":
+if apply == "at native spacing":
 
     deformed_moving_image = map_coordinates(
         input=moving_image,
@@ -183,9 +183,9 @@ if apply == "at native resolution":
 
 # Apply to different images
 # (mocked with rescaled versions of reference_image and moving_image)
-# at native resolution.
+# at native spacing.
 
-if apply == "to different images at native resolution":
+elif apply == "to different images at native spacing":
 
     rescaled_reference_image = rescale(
         reference_image, np.pi
@@ -219,16 +219,16 @@ if apply == "to different images at native resolution":
 
 # Apply to different images
 # (mocked with rescaled versions of reference_image and moving_image)
-# at a different resolution
+# at a different spacing
 # (at the exact shapes of rescaled_reference_image and rescaled_moving_image).
 
 # Note: The difference between this and the above example is that the
-# transformation is applied at higher resolution therefore produces deformed
-# images of higher resolution. In this case it is producing deformed images of
+# transformation is applied at higher spacing therefore produces deformed
+# images of higher spacing. In this case it is producing deformed images of
 # the same shape as their undeformed counterparts, rescaled_reference_image
 # and rescaled_moving_image.
 
-if apply == "to different images at different resolution":
+elif apply == "to different images at different spacing":
 
     rescaled_reference_image = rescale(reference_image, np.pi)
     rescaled_moving_image = rescale(moving_image, np.e)
