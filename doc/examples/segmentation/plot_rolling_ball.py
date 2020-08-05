@@ -42,6 +42,7 @@ import time
 from skimage import morphology
 from skimage import data
 from skimage import util
+from skimage import img_as_float
 
 
 def plot_result(image, filtered_image):
@@ -105,7 +106,7 @@ plt.show()
 # much larger than the image intensity, which can lead to unexpected
 # results.
 
-image = data.coins().astype(np.float) / 255
+image = img_as_float(data.coins())
 
 filtered_image = morphology.rolling_ball(image, radius=70.5)
 plot_result(image, filtered_image)
@@ -125,7 +126,7 @@ plt.show()
 # parameters for the spacial dimensions and the intensity dimension of
 # the image.
 
-image = data.coins().astype(np.float) / 255
+image = img_as_float(data.coins())
 
 normalized_radius = 70.5/255
 filtered_image = morphology.rolling_ellipsoid(
