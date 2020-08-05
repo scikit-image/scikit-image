@@ -99,7 +99,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
 
     pad_amount = ((kernel_size_x, kernel_size_x),
                   (kernel_size_y, kernel_size_y))
-    img = np.pad(img, pad_amount,  constant_values=np.Inf)
+    img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
