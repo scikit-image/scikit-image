@@ -126,9 +126,9 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     out : ndarray
         A labeled matrix of the same type and shape as markers
 
-    See also
+    See Also
     --------
-    skimage.segmentation.random_walker: random walker segmentation
+    skimage.segmentation.random_walker : random walker segmentation
         A segmentation algorithm based on anisotropic diffusion, usually
         slower than the watershed but with good results on noisy data and
         boundaries with holes.

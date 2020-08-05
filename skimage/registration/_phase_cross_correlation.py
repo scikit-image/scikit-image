@@ -5,6 +5,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 
 import numpy as np
 from .._shared.fft import fftmodule as fft
+from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
 def _upsampled_dft(data, upsampled_region_size,
@@ -105,8 +106,10 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
-def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
-                            space="real", return_error=True):
+def phase_cross_correlation(reference_image, moving_image, *,
+                            upsample_factor=1, space="real",
+                            return_error=True, reference_mask=None,
+                            moving_mask=None, overlap_ratio=0.3):
     """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
@@ -126,14 +129,34 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
         Upsampling factor. Images will be registered to within
         ``1 / upsample_factor`` of a pixel. For example
         ``upsample_factor == 20`` means the images will be registered
-        within 1/20th of a pixel. Default is 1 (no upsampling)
+        within 1/20th of a pixel. Default is 1 (no upsampling).
+        Not used if any of ``reference_mask`` or ``moving_mask`` is not None.
     space : string, one of "real" or "fourier", optional
-        Defines how the algorithm interprets input data. "real" means data
-        will be FFT'd to compute the correlation, while "fourier" data will
-        bypass FFT of input data. Case insensitive.
+        Defines how the algorithm interprets input data. "real" means
+        data will be FFT'd to compute the correlation, while "fourier"
+        data will bypass FFT of input data. Case insensitive. Not
+        used if any of ``reference_mask`` or ``moving_mask`` is not
+        None.
     return_error : bool, optional
         Returns error and phase difference if on, otherwise only
-        shifts are returned
+        shifts are returned. Has noeffect if any of ``reference_mask`` or
+        ``moving_mask`` is not None. In this case only shifts is returned.
+    reference_mask : ndarray
+        Boolean mask for ``reference_image``. The mask should evaluate
+        to ``True`` (or 1) on valid pixels. ``reference_mask`` should
+        have the same shape as ``reference_image``.
+    moving_mask : ndarray or None, optional
+        Boolean mask for ``moving_image``. The mask should evaluate to ``True``
+        (or 1) on valid pixels. ``moving_mask`` should have the same shape
+        as ``moving_image``. If ``None``, ``reference_mask`` will be used.
+    overlap_ratio : float, optional
+        Minimum allowed overlap ratio between images. The correlation for
+        translations corresponding with an overlap ratio lower than this
+        threshold will be ignored. A lower `overlap_ratio` leads to smaller
+        maximum translation, while a higher `overlap_ratio` leads to greater
+        robustness against spurious matches due to small overlap between
+        masked images. Used only if one of ``reference_mask`` or
+        ``moving_mask`` is None.
 
     Returns
     -------
@@ -155,8 +178,19 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
            Optics Letters 33, 156-158 (2008). :DOI:`10.1364/OL.33.000156`
     .. [2] James R. Fienup, "Invariant error metrics for image reconstruction"
            Optics Letters 36, 8352-8357 (1997). :DOI:`10.1364/AO.36.008352`
+    .. [3] Dirk Padfield. Masked Object Registration in the Fourier Domain.
+           IEEE Transactions on Image Processing, vol. 21(5),
+           pp. 2706-2718 (2012). :DOI:`10.1109/TIP.2011.2181402`
+    .. [4] D. Padfield. "Masked FFT registration". In Proc. Computer Vision and
+           Pattern Recognition, pp. 2918-2925 (2010).
+           :DOI:`10.1109/CVPR.2010.5540032`
 
     """
+    if (reference_mask is not None) or (moving_mask is not None):
+        return _masked_phase_cross_correlation(reference_image, moving_image,
+                                               reference_mask, moving_mask,
+                                               overlap_ratio)
+
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
         raise ValueError("images must be same shape")
@@ -182,7 +216,7 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
                               cross_correlation.shape)
     midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
-    shifts = np.array(maxima, dtype=np.float64)
+    shifts = np.stack(maxima).astype(np.float64)
     shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
 
     if upsample_factor == 1:
@@ -211,7 +245,7 @@ def phase_cross_correlation(reference_image, moving_image, upsample_factor=1,
                                   cross_correlation.shape)
         CCmax = cross_correlation[maxima]
 
-        maxima = np.array(maxima, dtype=np.float64) - dftshift
+        maxima = np.stack(maxima).astype(np.float64) - dftshift
 
         shifts = shifts + maxima / upsample_factor
 

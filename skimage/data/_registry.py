@@ -16,6 +16,7 @@ legacy_datasets = [
     'coffee.png',
     'coins.png',
     'color.png',
+    'cell.png',
     'grass.png',
     'gravel.png',
     'horse.png',
@@ -115,23 +116,28 @@ registry = {
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
     "data/_blobs_3d_fiji_skeleton.tif": "5182a2a94f240528985b8d15ec2aebbd5ca3c6b9214beff1eb6099c431e12b7b",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
+    "restoration/tests/astronaut_rl.npy":
+        "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "d219834415dc7094580abd975abb28bc7a6fb5ab83366e92c61ccffa66ca54fd",
     "restoration/tests/camera_unsup.npy": "6d911fd0028ee78add8c416553097f15c6c4e59723ea32bd828f71269b6ea240",
     "restoration/tests/camera_unsup2.npy": "30e81718f3cac0fc00d84518ca75a3c0fb9b246bb7748a9e20ec0b44da33734d",
     "restoration/tests/camera_wiener.npy": "71e7cab739d6d145a288ec85dd235a62ff34442ccd1488b08139bc809850772b",
-    "feature/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
-    "feature/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
-    "feature/tests/data/OriginalX75Y75.png": "c5cd58893c93140df02896df80b13ecf432f5c86eeaaf8fb311aec52a65c7016",
-    "feature/tests/data/TransformedX-130Y130.png": "1cda90ed69c921eb7605b73b76d141cf4ea03fb8ce3336445ca08080e40d7375",
-    "feature/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
-    "feature/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
+    "registration/tests/data/OriginalX-130Y130.png": "bf24a06d99ae131c97e582ef5e1cd0c648a8dad0caab31281f3564045492811f",
+    "registration/tests/data/OriginalX130Y130.png": "7fdd4c06d504fec35ee0703bd7ed2c08830b075a74c8506bae4a70d682f5a2db",
+    "registration/tests/data/OriginalX75Y75.png": "c5cd58893c93140df02896df80b13ecf432f5c86eeaaf8fb311aec52a65c7016",
+    "registration/tests/data/TransformedX-130Y130.png": "1cda90ed69c921eb7605b73b76d141cf4ea03fb8ce3336445ca08080e40d7375",
+    "registration/tests/data/TransformedX130Y130.png": "bb10c6ae3f91a313b0ac543efdb7ca69c4b95e55674c65a88472a6c4f4692a25",
+    "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
     "data/allen_mouse_brain_atlas.npy": "d93e716aee066e3415fb5d5565501773424db471bef2c091ac6b021185e76614",
     "data/cleared_mouse_brain.npy": "529ceda02030e2e1312acc865c22e6efb6040859e071f4abdefbbd6396af8327",
+    "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
 }
 
 registry_urls = {
     "data/cells.tif": "https://github.com/scikit-image/skimage-tutorials/raw/master/images/cells.tif",
+    "data/mitosis.tif": "https://gitlab.com/scikit-image/data/-/raw/master/AS_09125_050116030001_D03f00d0.tif",
+    "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/master/astronaut_rl.npy",
 }
 
 legacy_registry = {

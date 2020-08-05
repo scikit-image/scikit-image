@@ -167,8 +167,8 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     # distance between pixel centers)
     col_width = (linewidth - 1) * np.sin(-theta) / 2
     row_width = (linewidth - 1) * np.cos(theta) / 2
-    perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
+    perp_rows = np.stack([np.linspace(row_i - row_width, row_i + row_width,
                                       linewidth) for row_i in line_row])
-    perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
+    perp_cols = np.stack([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
-    return np.array([perp_rows, perp_cols])
+    return np.stack([perp_rows, perp_cols])

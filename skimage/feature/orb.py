@@ -136,6 +136,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                      self.downscale, multichannel=False))
 
     def _detect_octave(self, octave_image):
+        dtype = octave_image.dtype
         # Extract keypoints for current octave
         fast_response = corner_fast(octave_image, self.fast_n,
                                     self.fast_threshold)
@@ -143,9 +144,9 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                  threshold_rel=0)
 
         if len(keypoints) == 0:
-            return (np.zeros((0, 2), dtype=np.double),
-                    np.zeros((0, ), dtype=np.double),
-                    np.zeros((0, ), dtype=np.double))
+            return (np.zeros((0, 2), dtype=dtype),
+                    np.zeros((0, ), dtype=dtype),
+                    np.zeros((0, ), dtype=dtype))
 
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
                                       distance=16)
@@ -182,13 +183,14 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             octave_image = np.ascontiguousarray(pyramid[octave])
 
-            keypoints, orientations, responses = \
-                self._detect_octave(octave_image)
+            keypoints, orientations, responses = self._detect_octave(
+                octave_image)
 
             keypoints_list.append(keypoints * self.downscale ** octave)
             orientations_list.append(orientations)
             scales_list.append(np.full(
-                keypoints.shape[0], self.downscale ** octave, dtype='float64'))
+                keypoints.shape[0], self.downscale ** octave,
+                dtype=octave_image.dtype))
             responses_list.append(responses)
 
         keypoints = np.vstack(keypoints_list)
@@ -214,7 +216,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                       distance=20)
         keypoints = np.array(keypoints[mask], dtype=np.intp, order='C',
                              copy=False)
-        orientations = np.array(orientations[mask], dtype=np.double, order='C',
+        orientations = np.array(orientations[mask], order='C',
                                 copy=False)
 
         descriptors = _orb_loop(octave_image, keypoints, orientations)
@@ -262,7 +264,6 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
                 octave_keypoints = keypoints[octave_mask]
                 octave_keypoints /= self.downscale ** octave
-
                 octave_orientations = orientations[octave_mask]
 
                 descriptors, mask = self._extract_octave(octave_image,
@@ -301,8 +302,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             octave_image = np.ascontiguousarray(pyramid[octave])
 
-            keypoints, orientations, responses = \
-                self._detect_octave(octave_image)
+            keypoints, orientations, responses = self._detect_octave(
+                octave_image)
 
             if len(keypoints) == 0:
                 keypoints_list.append(keypoints)

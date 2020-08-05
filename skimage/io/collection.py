@@ -434,14 +434,9 @@ class MultiImage(ImageCollection):
         """Load a multi-img."""
         from ._io import imread
 
-        def load_func(fname, **kwargs):
-            if dtype is not None:
-                kwargs.setdefault('dtype', dtype)
-            return imread(fname, **kwargs)
-
         self._filename = filename
         super(MultiImage, self).__init__(filename, conserve_memory,
-                                         load_func=load_func, **imread_kwargs)
+                                         load_func=imread, **imread_kwargs)
 
     @property
     def filename(self):
