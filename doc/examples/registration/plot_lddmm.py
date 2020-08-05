@@ -1,6 +1,7 @@
 import numpy as np
-from matplotlib import pyplot as plt
 
+from matplotlib import pyplot as plt
+from scipy.ndimage import map_coordinates
 from skimage.registration import lddmm_register
 from skimage.data import allen_mouse_brain_atlas, cleared_mouse_brain
 from skimage.transform import resize, rescale
