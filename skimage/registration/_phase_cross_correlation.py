@@ -266,7 +266,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
     if return_error:
         # Redirect user to masked_phase_cross_correlation if NaNs are observed
         if np.isnan(CCmax) or np.isnan(src_amp) or np.isnan(target_amp):
-            raise ValueError("NaN values found, please remove NaNs from your "
+            raise ValueError(
+                "NaN values found, please remove NaNs from your "
                 "input data or use the `reference_mask`/`moving_mask` "
                 "keywords, eg: "
                 "phase_cross_correlation(reference_image, moving_image, "
