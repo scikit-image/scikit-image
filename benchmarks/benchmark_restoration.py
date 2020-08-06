@@ -7,7 +7,7 @@ class RetorationSuite:
     """Benchmark for restoration routines in scikit image."""
     def setup(self):
         nz = 32
-        self.volume_64 = np.stack([camera()[::2, ::2], ] * nz,
+        self.volume_f64 = np.stack([camera()[::2, ::2], ] * nz,
                                   axis=-1).astype(float) / 255
 
         self.sigma = .05
