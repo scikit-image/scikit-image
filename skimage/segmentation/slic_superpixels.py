@@ -147,6 +147,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
         and seed points are homogeneously distributed over the mask
         using a K-means clustering strategy.
 
+        .. versionadded:: 0.17
+           ``mask`` is introduced in 0.17
+
     Returns
     -------
     labels : 2D or 3D array
