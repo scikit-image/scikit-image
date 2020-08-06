@@ -33,8 +33,6 @@ class RegisterTranslation:
 
     def setup(self, ndims, image_size, upscale_factor, *args):
         shifts = (-2.3, 1.7, 5.4, -3.2)[:ndims]
-        if not have_binary_blobs:
-            raise NotImplementedError("binary_blobs not available")
         phantom = img_as_float(
             data.binary_blobs(length=image_size, n_dim=ndims))
         self.reference_image = np.fft.fftn(phantom)

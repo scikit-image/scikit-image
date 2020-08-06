@@ -15,10 +15,10 @@
     "install_timeout": 1200,
     "show_commit_url": "https://github.com/scikit-image/scikit-image/commit/",
 
-    "pythons": ["3.5"],
+    "pythons": ["3.7"],
     "matrix": {
-         "cython": ["0.24"],
-         "numpy": ["1.13"],
+         "cython": [],
+         "numpy": ["1.15"],
          "scipy": []
     },
 
