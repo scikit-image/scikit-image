@@ -1,5 +1,7 @@
 # See "Writing benchmarks" in the asv docs for more information.
 import numpy as np
+from numpy.lib import NumpyVersion as Version
+import skimage
 from skimage import segmentation
 
 
@@ -13,11 +15,16 @@ class SegmentationSuite:
         self.msk[10:-10, 10:-10, 10:-10] = 1
 
     def time_slic_basic(self):
-        segmentation.slic(self.image, enforce_connectivity=False)
+        if Version(skimage.__version__) >= Version('0.17.0'):
+            kwargs = dict(start_label=1)
+        else:
+            kwargs = {}
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          multichannel=False, **kwargs)
 
     def time_mask_slic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          mask=self.msk)
+                          mask=self.msk, multichannel=False)
 
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
@@ -37,4 +44,5 @@ class SegmentationSuite:
         pass
 
     def peakmem_slic_basic(self):
-        segmentation.slic(self.image, enforce_connectivity=False)
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          multichannel=False)
