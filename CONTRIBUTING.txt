@@ -46,6 +46,15 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
+.. note::
+
+    Although our code is hosted on `github
+    <https://github.com/scikit-image/>`_, our datadata is stored on `gitlab
+    <https://gitlab.com/scikit-image>`_. and fetched with `pooch
+    <https://github.com/fatiando/pooch>`_. New data must be submitted on
+    gitlab. Once merged, the data registry ``skimage/data/_registry.py``
+    in the main codebase on github must be updated.
+
 2. Develop your contribution:
 
    * Pull the latest changes from upstream::
