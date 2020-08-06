@@ -13,18 +13,28 @@ class SegmentationSuite:
         self.image[150:, 150:, :] += 0.5
         self.msk = np.zeros((300, 300, 100))
         self.msk[10:-10, 10:-10, 10:-10] = 1
+        self.msk_slice = self.msk[..., 50]
+        if Version(skimage.__version__) >= Version('0.17.0'):
+            self.slic_kwargs = dict(start_label=1)
+        else:
+            self.slic_kwargs = {}
 
     def time_slic_basic(self):
-        if Version(skimage.__version__) >= Version('0.17.0'):
-            kwargs = dict(start_label=1)
-        else:
-            kwargs = {}
+
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=False, **kwargs)
+                          multichannel=False, **self.slic_kwargs)
+
+    def time_slic_basic_multichannel(self):
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          multichannel=True, **self.slic_kwargs)
 
     def time_mask_slic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
                           mask=self.msk, multichannel=False)
+
+    def time_mask_slic_multichannel(self):
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          mask=self.msk_slice, multichannel=True)
 
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
@@ -45,4 +55,8 @@ class SegmentationSuite:
 
     def peakmem_slic_basic(self):
         segmentation.slic(self.image, enforce_connectivity=False,
-                          multichannel=False)
+                          multichannel=False, **self.slic_kwargs)
+
+    def peakmem_slic_basic_multichannel(self):
+        segmentation.slic(self.image, enforce_connectivity=False,
+                          multichannel=True, **self.slic_kwargs)
