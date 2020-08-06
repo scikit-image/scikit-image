@@ -23,7 +23,7 @@ def find_contours(image, level=None,
     ----------
     image : 2D ndarray of double
         Input image in which to find contours.
-    level : float
+    level : float, optional
         Value along which to find contours in the array. By default, the level
         is set to (max(image) - min(image)) / 2
     fully_connected : str, {'low', 'high'}
