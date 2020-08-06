@@ -8,10 +8,10 @@ from skimage import segmentation
 class SegmentationSuite:
     """Benchmark for segmentation routines in scikit-image."""
     def setup(self):
-        self.image = np.random.random((400, 400, 100))
-        self.image[:200, :200, :] += 1
-        self.image[300:, 300:, :] += 0.5
-        self.msk = np.zeros((400, 400, 100))
+        self.image = np.random.random((200, 200, 100))
+        self.image[:100, :100, :] += 1
+        self.image[150:, 150:, :] += 0.5
+        self.msk = np.zeros((300, 300, 100))
         self.msk[10:-10, 10:-10, 10:-10] = 1
 
     def time_slic_basic(self):
