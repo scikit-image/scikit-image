@@ -1,6 +1,10 @@
 import numpy as np
 
-from skimage import metrics
+try:
+    from skimage import metrics
+    have_metrics_module = True
+except ImportError:
+    have_metrics_module = False
 
 
 class SetMetricsSuite(object):
@@ -15,4 +19,6 @@ class SetMetricsSuite(object):
         self.coords_b[points_b] = True
 
     def time_hausdorff(self):
+        if not have_metrics_module:
+            return NotImplementedError("metrics module unavailable")
         metrics.hausdorff_distance(self.coords_a, self.coords_b)

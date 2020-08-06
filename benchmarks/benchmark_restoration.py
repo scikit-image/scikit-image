@@ -1,6 +1,6 @@
 import numpy as np
-from skimage.restoration import denoise_nl_means
 from skimage.data import camera
+from skimage import restoration
 
 
 class RetorationSuite:
@@ -18,41 +18,41 @@ class RetorationSuite:
         pass
 
     def time_denoise_nl_means_f64(self):
-        denoise_nl_means(self.volume_f64, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=False)
+        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=False)
 
     def time_denoise_nl_means_f32(self):
-        denoise_nl_means(self.volume_f32, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=False)
+        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=False)
 
     def time_denoise_nl_means_fast_f64(self):
-        denoise_nl_means(self.volume_f64, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=True)
+        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=True)
 
     def time_denoise_nl_means_fast_f32(self):
-        denoise_nl_means(self.volume_f32, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=True)
+        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=True)
 
     def peakmem_denoise_nl_means_f64(self):
-        denoise_nl_means(self.volume_f64, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=False)
+        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
+                                     patch_distance=2,  sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=False)
 
     def peakmem_denoise_nl_means_f32(self):
-        denoise_nl_means(self.volume_f32, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=False)
+        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=False)
 
     def peakmem_denoise_nl_means_fast_f64(self):
-        denoise_nl_means(self.volume_f64, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=True)
+        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=True)
 
     def peakmem_denoise_nl_means_fast_f32(self):
-        denoise_nl_means(self.volume_f32, patch_size=3, patch_distance=2,
-                         sigma=self.sigma, h=0.7 * self.sigma,
-                         fast_mode=True)
+        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
+                                     patch_distance=2, sigma=self.sigma,
+                                     h=0.7 * self.sigma, fast_mode=True)

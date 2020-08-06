@@ -1,6 +1,11 @@
-from skimage.data import stereo_motorcycle
 from skimage.color import rgb2gray
-from skimage import registration
+
+try:
+    from skimage import registration
+    from skimage.data import stereo_motorcycle
+    have_registration = True
+except ImportError:
+    have_registration = False
 
 
 class RegistrationSuite(object):

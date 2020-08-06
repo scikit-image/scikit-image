@@ -2,8 +2,7 @@
 # https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
 from scipy import ndimage as ndi
-from skimage import feature, util, img_as_float
-from skimage.data import binary_blobs
+from skimage import data, feature, util, img_as_float
 
 
 class FeatureSuite:
@@ -34,7 +33,10 @@ class RegisterTranslation:
 
     def setup(self, ndims, image_size, upscale_factor, *args):
         shifts = (-2.3, 1.7, 5.4, -3.2)[:ndims]
-        phantom = img_as_float(binary_blobs(length=image_size, n_dim=ndims))
+        if not have_binary_blobs:
+            raise NotImplementedError("binary_blobs not available")
+        phantom = img_as_float(
+            data.binary_blobs(length=image_size, n_dim=ndims))
         self.reference_image = np.fft.fftn(phantom)
         self.shifted_image = ndi.fourier_shift(self.reference_image, shifts)
 
