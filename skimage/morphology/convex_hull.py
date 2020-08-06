@@ -128,8 +128,8 @@ def convex_hull_object(image, *, connectivity=2):
     objects may overlap in the result. If this is suspected, consider using
     convex_hull_image separately on each object or adjust ``connectivity``.
     """
-    if image.ndim > 3:
-        raise ValueError("Input must be a 2D or 3D image")
+    if image.ndim > 2:
+        raise ValueError("Input must be a 2D image")
 
     if connectivity not in (1, 2):
         raise ValueError('`connectivity` must be either 1 or 2.')
