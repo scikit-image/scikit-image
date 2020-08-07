@@ -24,12 +24,6 @@ jobs:
       - store_artifacts:
           path: doc/build/html
           destination: doc/build/html
-      # Persists generated documentation so that it can be attached and deployed
-      # in the 'deploy' step.
-      # - persist_to_workspace:
-      #    root: doc/build/html
-      #    paths: .
-
 
 workflows:
   version: 2
