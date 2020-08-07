@@ -354,5 +354,11 @@ def predict_segmenter(features, clf):
             "You must train the classifier `clf` first"
             "for example with the `fit_segmenter` function."
         )
+    except ValueError as err:
+        if err.args and 'x must consist of vectors of length' in err.args[0]:
+            raise ValueError(
+                err.args[0] + '\n' +
+                "Maybe you did not use the same type of features for training the classifier."
+                )
     output = predicted_labels.reshape(sh[1:])
     return output
