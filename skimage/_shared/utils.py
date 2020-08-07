@@ -68,6 +68,48 @@ class change_default_value:
         return fixed_func
 
 
+class remove_arg:
+    """Decorator to remove an argument from function's signature.
+
+    Parameters
+    ----------
+    arg_name: str
+        The name of the argument to be removed.
+    changed_version : str
+        The package version in which the warning will be replaced by
+        an error.
+    help_msg: str
+        Optional message appended to the generic warning message.
+
+    """
+
+    def __init__(self, arg_name, *, changed_version, help_msg=None):
+        self.arg_name = arg_name
+        self.help_msg = help_msg
+        self.changed_version = changed_version
+
+    def __call__(self, func):
+        parameters = inspect.signature(func).parameters
+        arg_idx = list(parameters.keys()).index(self.arg_name)
+        warning_msg = (
+            f"{self.arg_name} argument is deprecated and will be removed "
+            f"in version {self.changed_version}. To avoid this warning, "
+            f"please do not use the {self.arg_name} argument. Please "
+            f"see {func.__name__} documentation for more details.")
+
+        if self.help_msg is not None:
+            warning_msg += f" {self.help_msg}"
+
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            if len(args) > arg_idx or self.arg_name in kwargs.keys():
+                # warn that arg_name is deprecated
+                warnings.warn(warning_msg, FutureWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return fixed_func
+
+
 class deprecate_kwarg:
     """Decorator ensuring backward compatibility when argument names are
     modified in a function definition.

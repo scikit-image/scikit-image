@@ -14,12 +14,12 @@ def imread(fname, dtype=None, img_num=None, **kwargs):
     Parameters
     ----------
     fname : str or file
-       File name or file-like-object.
+        File name or file-like-object.
     dtype : numpy dtype object or string specifier
-       Specifies data type of array elements.
+        Specifies data type of array elements.
     img_num : int, optional
-       Specifies which image to read in a file with multiple images
-       (zero-indexed).
+        Specifies which image to read in a file with multiple images
+        (zero-indexed).
     kwargs : keyword pairs, optional
         Addition keyword arguments to pass through.
 

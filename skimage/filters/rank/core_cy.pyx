@@ -70,10 +70,10 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t*, double,
     cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
-    assert centre_r >= 0
-    assert centre_c >= 0
-    assert centre_r < srows
-    assert centre_c < scols
+    assert centre_r >= 0, f'centre_r {centre_r} < 0'
+    assert centre_c >= 0, f'centre_c {centre_c} < 0'
+    assert centre_r < srows, f'centre_r {centre_r} >= srows {srows}'
+    assert centre_c < scols, f'centre_c {centre_c} >= scols {scols}'
 
     cdef Py_ssize_t mid_bin = n_bins / 2
 
