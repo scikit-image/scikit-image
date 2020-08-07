@@ -769,7 +769,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         ``([num_planes,] num_rows, num_cols)``.
         Either `end` or `extent` must be specified.
         A negative extent is valid, and will result in a rectangle
-        going along the oposite direction. If extent is negative, the
+        going along the opposite direction. If extent is negative, the
         `start` point is not included.
     shape : tuple, optional
         Image shape used to determine the maximum bounds of the output

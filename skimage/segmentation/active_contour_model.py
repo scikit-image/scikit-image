@@ -56,7 +56,7 @@ def active_contour(image, snake, alpha=0.01, beta=0.1,
         'free', respectively.
     coordinates : {'rc'}, optional
         This option remains for compatibility purpose only and has no effect.
-        It was introduced in 0.16 with the ``'xy'`` option, but since 0.18, 
+        It was introduced in 0.16 with the ``'xy'`` option, but since 0.18,
         only the ``'rc'`` option is valid.
         Coordinates must be set in a row-column format.
 

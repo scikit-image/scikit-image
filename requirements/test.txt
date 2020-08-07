@@ -5,3 +5,4 @@ pytest-cov
 pytest-localserver
 flake8
 codecov
+pooch>=0.5.2
