@@ -15,6 +15,12 @@ https://scikit-image.org
 New Features
 ------------
 
+- A new function `segmentation.expand_labels` has been added in order to dilate
+  labels without overlap ([4795](https://github.com/scikit-image/scikit-image/pull/4795))
+- It is now possible to pass extra measurement functions to
+  `measure.regionprops` and `regionprops_table`
+  ([#4810](https://github.com/scikit-image/scikit-image/pull/4810))
+
 Documentation
 -------------
 
@@ -27,6 +33,8 @@ Documentation
   gallery example 
 - automatic formatting of docstrings for improved consistency ([#4849](https://github.com/scikit-image/scikit-image/pull/4849))
 - improved docstring for `rgb2lab` ([#4839](https://github.com/scikit-image/scikit-image/pull/4839)) and `marching_cubes` [#4846](https://github.com/scikit-image/scikit-image/pull/4846)
+- improved docstring for `measure.marching_cubes`, mentioning how to decimate a
+  mesh using mayavi [4846](https://github.com/scikit-image/scikit-image/pull/4846)
 
 
 Improvements
@@ -37,6 +45,9 @@ Improvements
 API Changes
 -----------
 
+- A default value has been added to `measure.find_contours`, corresponding to
+  the half distance between the min and max values of the image 
+  [#4862](https://github.com/scikit-image/scikit-image/pull/4862)
 
 
 Bugfixes
@@ -48,7 +59,10 @@ Bugfixes
 - an error-causing bug has been corrected for the `bg_color` parameter in `label2rgb` 
   when its value is a string 
   ([#4840](https://github.com/scikit-image/scikit-image/pull/4840))
-
+- a normalization bug was fixed in `metrics.variation_of_information` 
+  ([#4875](https://github.com/scikit-image/scikit-image/pull/4875/))
+- fixed the behaviour of Richardson-Lucy deconvolution for images with 3
+  dimensions or more ([#4823](https://github.com/scikit-image/scikit-image/pull/4823))
 
 Deprecations
 ------------
