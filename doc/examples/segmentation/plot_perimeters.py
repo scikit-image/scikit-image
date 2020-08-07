@@ -27,7 +27,7 @@ square[40*scale:60*scale, 40*scale:60*scale] = 1
 R = 20 * scale
 disk = (X-50*scale)**2+(Y-50*scale)**2 <= R**2
 
-fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+fig, axes = plt.subplots(1, 2, figsize=(8, 5))
 ax = axes.flatten()
 
 # for each type of objects, the different perimeters are evaluated
@@ -46,7 +46,7 @@ for index, obj in enumerate([square, disk]):
     # 2 or 4 directions can be used by measure.perimeter_crofton
     for d in [2, 4]:
         p = []
-        angles = range(90)
+        angles = np.arange(0, 90, 2)
         for i in angles:
             # rotation and perimeter evaluation
             rotated = rotate(obj, i, order=0)
@@ -55,9 +55,11 @@ for index, obj in enumerate([square, disk]):
 
     ax[index].set_xlabel('Rotation angle')
     ax[index].legend(['N4 perimeter', 'N8 perimeter',
-                      'Crofton 2 directions', 'Crofton 4 directions'])
+                      'Crofton 2 directions', 'Crofton 4 directions'],
+                      loc='best')
     ax[index].set_ylabel('Perimeter of the rotated object')
 
 ax[0].set_title('Square')
 ax[1].set_title('Disk')
+plt.tight_layout()
 plt.show()
