@@ -9,6 +9,8 @@ cimport numpy as cnp
 from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
 
+cnp.import_array()
+
 
 def _quickshift_cython(double[:, :, ::1] image, double kernel_size,
                        double max_dist, bint return_tree, int random_seed):

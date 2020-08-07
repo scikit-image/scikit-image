@@ -251,11 +251,6 @@ def threshold_otsu(image, nbins=256):
         Upper threshold value. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
-    Raises
-    ------
-    ValueError
-         If ``image`` only contains a single grayscale value.
-
     References
     ----------
     .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
@@ -271,16 +266,15 @@ def threshold_otsu(image, nbins=256):
     -----
     The input image must be grayscale.
     """
-    if len(image.shape) > 2 and image.shape[-1] in (3, 4):
+    if image.ndim > 2 and image.shape[-1] in (3, 4):
         msg = "threshold_otsu is expected to work correctly only for " \
               "grayscale images; image shape {0} looks like an RGB image"
         warn(msg.format(image.shape))
 
     # Check if the image is multi-colored or not
-    if image.min() == image.max():
-        raise ValueError("threshold_otsu is expected to work with images "
-                         "having more than one color. The input image seems "
-                         "to have just one color {0}.".format(image.min()))
+    first_pixel = image.ravel()[0]
+    if np.all(image == first_pixel):
+        return first_pixel
 
     hist, bin_centers = histogram(image.ravel(), nbins, source_range='image')
     hist = hist.astype(float)
@@ -379,7 +373,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    return_all: bool, optional
+    return_all : bool, optional
         If False (default), return only the lowest threshold that satisfies
         the above equality. If True, return all valid thresholds.
 
@@ -659,7 +653,7 @@ def threshold_minimum(image, nbins=256, max_iter=10000):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    max_iter: int, optional
+    max_iter : int, optional
         Maximum number of iterations to smooth the histogram.
 
     Returns
@@ -930,7 +924,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -995,7 +989,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1128,7 +1122,7 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     .. [1] Liao, P-S., Chen, T-S. and Chung, P-C., "A fast algorithm for
            multilevel thresholding", Journal of Information Science and
            Engineering 17 (5): 713-727, 2001. Available at:
-           <http://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
+           <https://ftp.iis.sinica.edu.tw/JISE/2001/200109_01.pdf>
            :DOI:`10.6688/JISE.2001.17.5.1`
     .. [2] Tosa, Y., "Multi-Otsu Threshold", a java plugin for ImageJ.
            Available at:

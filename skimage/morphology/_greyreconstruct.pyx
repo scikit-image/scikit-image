@@ -10,6 +10,7 @@ Original author: Lee Kamentsky
 """
 cimport numpy as cnp
 cimport cython
+cnp.import_array()
 
 
 @cython.boundscheck(False)

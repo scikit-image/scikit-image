@@ -145,7 +145,7 @@ extreme parts of the histogram of grey values::
 
 Let us now compute the watershed transform::
 
-    >>> from skimage.morphology import watershed
+    >>> from skimage.segmentation import watershed
     >>> segmentation = watershed(elevation_map, markers)
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_008.png

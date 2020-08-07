@@ -101,7 +101,7 @@ def test_mask_shape():
 
 
 def test_mask_dtype():
-    bad_mask = np.ones((8,8), dtype=np.uint8)
+    bad_mask = np.ones((8, 8), dtype=np.uint8)
     with raises(TypeError, match='binary'):
         find_contours(a, 0, mask=bad_mask)
 
@@ -130,3 +130,40 @@ def test_invalid_input():
         find_contours(r, 0.5, 'foo', 'bar')
     with testing.raises(ValueError):
         find_contours(r[..., None], 0.5)
+
+
+def test_nodata_levelNone():
+    # Test missing data via NaNs in input array
+    b = np.copy(a)
+    b[~mask] = np.nan
+    contours = find_contours(b, level=None, positive_orientation='high')
+    assert len(contours) == 1
+    assert_array_equal(contours[0], mask_contour)
+
+
+def test_mask_levelNone():
+    # Test missing data via explicit masking
+    contours = find_contours(a, level=None, positive_orientation='high',
+                             mask=mask)
+    assert len(contours) == 1
+    assert_array_equal(contours[0], mask_contour)
+
+
+def test_mask_shape_levelNone():
+    bad_mask = np.ones((8, 7), dtype=bool)
+    with raises(ValueError, match='shape'):
+        find_contours(a, level=None, mask=bad_mask)
+
+
+def test_mask_dtype_levelNone():
+    bad_mask = np.ones((8, 8), dtype=np.uint8)
+    with raises(TypeError, match='binary'):
+        find_contours(a, level=None, mask=bad_mask)
+
+
+def test_memory_order_levelNone():
+    contours = find_contours(np.ascontiguousarray(r), level=None)
+    assert len(contours) == 1
+
+    contours = find_contours(np.asfortranarray(r), level=None)
+    assert len(contours) == 1

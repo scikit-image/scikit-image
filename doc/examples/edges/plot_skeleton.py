@@ -73,18 +73,17 @@ plt.show()
 
 import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
-from skimage.data import binary_blobs
 
+blobs = data.binary_blobs(200, blob_size_fraction=.2,
+                          volume_fraction=.35, seed=1)
 
-data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
-
-skeleton = skeletonize(data)
-skeleton_lee = skeletonize(data, method='lee')
+skeleton = skeletonize(blobs)
+skeleton_lee = skeletonize(blobs, method='lee')
 
 fig, axes = plt.subplots(1, 3, figsize=(8, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray)
+ax[0].imshow(blobs, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
@@ -119,14 +118,15 @@ plt.show()
 from skimage.morphology import medial_axis, skeletonize
 
 # Generate the data
-data = binary_blobs(200, blob_size_fraction=.2, volume_fraction=.35, seed=1)
+blobs = data.binary_blobs(200, blob_size_fraction=.2,
+                          volume_fraction=.35, seed=1)
 
 # Compute the medial axis (skeleton) and the distance transform
-skel, distance = medial_axis(data, return_distance=True)
+skel, distance = medial_axis(blobs, return_distance=True)
 
 # Compare with other skeletonization algorithms
-skeleton = skeletonize(data)
-skeleton_lee = skeletonize(data, method='lee')
+skeleton = skeletonize(blobs)
+skeleton_lee = skeletonize(blobs, method='lee')
 
 # Distance to the background for pixels of the skeleton
 dist_on_skel = distance * skel
@@ -134,12 +134,12 @@ dist_on_skel = distance * skel
 fig, axes = plt.subplots(2, 2, figsize=(8, 8), sharex=True, sharey=True)
 ax = axes.ravel()
 
-ax[0].imshow(data, cmap=plt.cm.gray)
+ax[0].imshow(blobs, cmap=plt.cm.gray)
 ax[0].set_title('original')
 ax[0].axis('off')
 
 ax[1].imshow(dist_on_skel, cmap='magma')
-ax[1].contour(data, [0.5], colors='w')
+ax[1].contour(blobs, [0.5], colors='w')
 ax[1].set_title('medial_axis')
 ax[1].axis('off')
 

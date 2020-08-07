@@ -36,10 +36,6 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   - "pip --version"
 
-  # Get stdint headers needed by tifffile.c.
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/inttypes.h -o skimage/external/tifffile/inttypes.h"
-  - "curl https://raw.githubusercontent.com/chemeris/msinttypes/master/stdint.h -o skimage/external/tifffile/stdint.h"
-
   # Install the build and runtime dependencies of the project.
   - pip install %PIP_FLAGS% --retries 3 -r requirements/default.txt
   - pip install %PIP_FLAGS% --retries 3 -r requirements/build.txt
