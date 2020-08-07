@@ -11,7 +11,7 @@ class SegmentationSuite:
         self.image = np.random.random((200, 200, 100))
         self.image[:100, :100, :] += 1
         self.image[150:, 150:, :] += 0.5
-        self.msk = np.zeros((300, 300, 100))
+        self.msk = np.zeros((200, 200, 100))
         self.msk[10:-10, 10:-10, 10:-10] = 1
         self.msk_slice = self.msk[..., 50]
         if Version(skimage.__version__) >= Version('0.17.0'):
