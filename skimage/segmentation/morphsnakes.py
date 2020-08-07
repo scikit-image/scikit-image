@@ -57,9 +57,9 @@ def sup_inf(u):
 
     erosions = []
     for P_i in P:
-        erosions.append(ndi.binary_erosion(u, P_i))
+        erosions.append(ndi.binary_erosion(u, P_i).astype(np.int8))
 
-    return np.array(erosions, dtype=np.int8).max(0)
+    return np.stack(erosions, axis=0).max(0)
 
 
 def inf_sup(u):
@@ -75,9 +75,9 @@ def inf_sup(u):
 
     dilations = []
     for P_i in P:
-        dilations.append(ndi.binary_dilation(u, P_i))
+        dilations.append(ndi.binary_dilation(u, P_i).astype(np.int8))
 
-    return np.array(dilations, dtype=np.int8).min(0)
+    return np.stack(dilations, axis=0).min(0)
 
 
 _curvop = _fcycle([lambda u: sup_inf(inf_sup(u)),   # SIoIS
@@ -141,7 +141,7 @@ def circle_level_set(image_shape, center=None, radius=None):
             This function is deprecated and will be removed in scikit-image 0.19.
             Please use the function named ``disk_level_set`` instead.
 
-    See also
+    See Also
     --------
     checkerboard_level_set
     """
@@ -172,7 +172,7 @@ def disk_level_set(image_shape, *, center=None, radius=None):
     out : array with shape `image_shape`
         Binary level set of the disk with the given `radius` and `center`.
 
-    See also
+    See Also
     --------
     checkerboard_level_set
     """
@@ -205,7 +205,7 @@ def checkerboard_level_set(image_shape, square_size=5):
     out : array with shape `image_shape`
         Binary level set of the checkerboard.
 
-    See also
+    See Also
     --------
     circle_level_set
     """
@@ -299,13 +299,12 @@ def morphological_chan_vese(image, iterations, init_level_set='checkerboard',
     out : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
-    See also
+    See Also
     --------
     circle_level_set, checkerboard_level_set
 
     Notes
     -----
-
     This is a version of the Chan-Vese algorithm that uses morphological
     operators instead of solving a partial differential equation (PDE) for the
     evolution of the contour. The set of morphological operators used in this
@@ -413,13 +412,12 @@ def morphological_geodesic_active_contour(gimage, iterations,
     out : (M, N) or (L, M, N) array
         Final segmentation (i.e., the final level set)
 
-    See also
+    See Also
     --------
     inverse_gaussian_gradient, circle_level_set, checkerboard_level_set
 
     Notes
     -----
-
     This is a version of the Geodesic Active Contours (GAC) algorithm that uses
     morphological operators instead of solving partial differential equations
     (PDEs) for the evolution of the contour. The set of morphological operators

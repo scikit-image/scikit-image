@@ -491,7 +491,7 @@ def img_as_int(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of uint16
+    out : ndarray of int16
         Output image.
 
     Notes

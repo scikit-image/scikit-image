@@ -6,6 +6,8 @@ from numpy.testing import assert_equal
 from pytest import raises, warns
 
 from skimage.morphology import extrema
+from skimage._shared.testing import expected_warnings
+
 
 eps = 1e-12
 
@@ -200,8 +202,15 @@ class TestExtrema(unittest.TestCase):
 
         h_vals = np.linspace(1.0, 2.0, 100)
         failures = 0
-        for i in range(h_vals.size):
-            maxima = extrema.h_maxima(data, h_vals[i])
+
+        for h in h_vals:
+            if h % 1 != 0:
+                msgs = ['possible precision loss converting image']
+            else:
+                msgs = []
+
+            with expected_warnings(msgs):
+                maxima = extrema.h_maxima(data, h)
 
             if (maxima[2, 2] == 0):
                 failures += 1
@@ -257,8 +266,14 @@ class TestExtrema(unittest.TestCase):
 
         h_vals = np.linspace(1.0, 2.0, 100)
         failures = 0
-        for i in range(h_vals.size):
-            minima = extrema.h_minima(data, h_vals[i])
+        for h in h_vals:
+            if h % 1 != 0:
+                msgs = ['possible precision loss converting image']
+            else:
+                msgs = []
+
+            with expected_warnings(msgs):
+                minima = extrema.h_minima(data, h)
 
             if (minima[2, 2] == 0):
                 failures += 1
