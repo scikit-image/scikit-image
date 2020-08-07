@@ -24,7 +24,7 @@ def _slic_cython(np_floats[:, :, :, ::1] image_zyx,
                  bint slic_zero,
                  Py_ssize_t start_label=1,
                  bint ignore_color=False,
-                 Py_ssize_t n_jobs
+                 Py_ssize_t n_jobs=1
                  ):
     """Helper function for SLIC segmentation.
 
