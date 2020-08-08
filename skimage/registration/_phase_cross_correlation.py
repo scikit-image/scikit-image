@@ -234,7 +234,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         upsample_factor = np.array(upsample_factor, dtype=np.float64)
-        normalization = (src_freq.size * upsample_factor ** 2)
+        normalization = (src_freq.size * upsample_factor ** src_freq.ndim)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
