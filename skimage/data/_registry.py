@@ -128,6 +128,7 @@ registry = {
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/cells.tif": "2120cfe08e0396324793a10a905c9bbcb64b117215eb63b2c24b643e1600c8c9",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
+    "data/boundary_tracing_tests.npz": "1b37154113ac3964d43ef4f1fe93f7377e85a29750a84487f8e101be388b017f",
 }
 
 registry_urls = {
