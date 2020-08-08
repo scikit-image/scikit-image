@@ -1,3 +1,33 @@
+"""
+==============================================================================
+lddmm_register - Nonlinear Registration of Smooth Images
+==============================================================================
+
+LDDMM is an image registration algorithm in which one image is optimally
+deformed, or flowed, until it aligns with another. This implementation
+(``lddmm_register``) has been enhanced with the ability to jointly learn the
+contrast of different types of images--allowing it to perform across image
+modalities--and its ability to predict and correct for artifacts--that would
+otherwise distort a registration--and a few other more experimental features.
+
+This algorithm is appropriate for smooth grayscale images.
+"""
+
+##############################################################################
+# Running a Basic 3D Example
+# --------------------------
+#
+# We begin by loading in our two images, reference_image and moving_image.
+# Note that reference image is intended to be the cleaner exemplary image,
+# while moving_image may have more roughness and idiosyncracy.
+#
+# Next, we specify the spacing of both images. The spacing is simply the
+# dimensions of the pixels, or voxels, in units of length.
+#
+# Then we run the registration. Because these images may not be of the same
+# modality, we set contrast_order=3, which is appropriate for histology.
+
+
 import numpy as np
 
 from matplotlib import pyplot as plt
@@ -7,59 +37,40 @@ from skimage.data import allen_mouse_brain_atlas, cleared_mouse_brain
 from skimage.transform import resize, rescale
 
 
-def scale_data(data, quantile_threshold=0.001):
-    """
-    Rescales data such that the central data points (ignoring the extrema) lie
-    on the interval [0, 1].
-    """
-
-    data = np.copy(data)
-
-    lower_limit = np.quantile(
-        data, min(quantile_threshold, 1 - quantile_threshold)
-    )
-    upper_limit = np.quantile(
-        data, max(quantile_threshold, 1 - quantile_threshold)
-    )
-    data_range = upper_limit - lower_limit
-
-    data -= lower_limit
-    data /= data_range
-
-    return data
+# Load images.
+reference_image = allen_mouse_brain_atlas()
+moving_image = cleared_mouse_brain()
 
 
-def imshow_on_ax(
-    axes, dim, column, image, overlaid_image=None, quantile_threshold=0.001
-):
-    """
-    Rescales image using scale_data and displays a central slice of it across
-    the given dimension on the specified element of axes.
+# Specify spacings.
+reference_image_spacing = np.array([100, 100, 100])
+moving_image_spacing = np.array([100, 100, 100])
 
-    If an overlaid_image is provided, it is likewise rescaled and an RGB
-    display is produced using image as the Red and Blue channels and
-    overlaid_image as the Green channel.
-    """
 
-    ax = axes[dim, column]
-    ax.axis(False)
+# Learn registration from reference_image to moving_image.
+lddmm_output = lddmm_register(
+    reference_image=reference_image,
+    moving_image=moving_image,
+    reference_image_spacing=reference_image_spacing,
+    moving_image_spacing=moving_image_spacing,
+    multiscales=[8, 4],
+    affine_stepsize=0.3,
+    deformative_stepsize=2e5,
+    sigma_regularization=1e4,
+    contrast_order=3,
+    num_iterations=[50, 100],
+    num_affine_only_iterations=[50, 0],
+    num_rigid_affine_iterations=[25, 0],
+)
 
-    scaled_image = scale_data(image, quantile_threshold)
-
-    display_image = scaled_image
-
-    if overlaid_image is not None:
-        scaled_overlaid_image = scale_data(overlaid_image, quantile_threshold)
-        display_image = np.stack(
-            [scaled_image, scaled_overlaid_image, scaled_image], axis=-1
-        )
-
-    ax.imshow(
-        display_image.take(display_image.shape[dim] // 2, axis=dim),
-        cmap="gray",
-        vmin=0,
-        vmax=1,
-    )
+##############################################################################
+# Assessing the Registration
+# --------------------------
+#
+# Once the registration has been performed, it may be useful to examine how
+# the process evolved across each iteration. This is particularly useful for
+# calibrating the parameters for a particular problem. The relevant values
+# are stored at each iteration in lddmm_output.diagnostics.
 
 
 def generate_calibration_plots(
@@ -101,33 +112,6 @@ def generate_calibration_plots(
     ax.set_title("Linear\ncomponents")
 
 
-# Load images.
-reference_image = allen_mouse_brain_atlas()
-moving_image = cleared_mouse_brain()
-
-
-# Specify spacings.
-reference_image_spacing = np.array([100, 100, 100])
-moving_image_spacing = np.array([100, 100, 100])
-
-
-# Learn registration from reference_image to moving_image.
-lddmm_output = lddmm_register(
-    reference_image=reference_image,
-    moving_image=moving_image,
-    reference_image_spacing=reference_image_spacing,
-    moving_image_spacing=moving_image_spacing,
-    multiscales=[8, 4],
-    affine_stepsize=0.3,
-    deformative_stepsize=2e5,
-    sigma_regularization=1e4,
-    contrast_order=3,
-    num_iterations=[50, 100],
-    num_affine_only_iterations=[50, 0],
-    num_rigid_affine_iterations=[25, 0],
-)
-
-
 # Visualize registration progression, useful for parameter tuning.
 generate_calibration_plots(
     affines=lddmm_output.diagnostics.affines,
@@ -137,27 +121,29 @@ generate_calibration_plots(
     total_energies=lddmm_output.diagnostics.total_energies,
 )
 
-# Apply registration to reference_image and moving_image.
-"""
-The registration can be reasonably applied to any image in the reference_image
-    or moving_image space by substituting it for the corresponding image
-    (reference_image or moving_image) as the input argument of map_coordinates
-    and multiplying the coordinates by
-    different_image.shape / replaced_image.shape. 
-    We demonstrate this by using rescaled versions of reference_image and
-    moving_image to imitate different images in the same spaces.
+##############################################################################
+# Apply Registration
+# ------------------
+#
+# The registration can be reasonably applied to any image in the
+# reference_image space or the moving_image space by substituting it for the
+# corresponding image (reference_image or moving_image) as the input argument
+# of map_coordinates and multiplying the coordinates by
+# different_image.shape / replaced_image.shape. We demonstrate this by using
+# rescaled versions of reference_image and moving_image to imitate different
+# images in the same spaces.
+#
+# The registration can be applied at arbitrary spacing by first multiplying
+# the coordinates by the factor change in spacing and then resampling the
+# coordinates to the desired spacing. We demonstrate this by applying at the
+# same spacing as our rescaled reference_image and moving_image to get
+# deformed images of the same shape.
+#
+# The position-fields (transforms) output by the registration have the same
+# shape as (share the spacing of) the reference_image and moving_image
+# regardless of the scale the registration was computed at, see the
+# multiscales parameter.
 
-The registration can be applied at arbitrary spacing by first multiplying
-    the coordinates by the factor change in spacing and then resampling the
-    coordinates to the desired spacing. 
-    We demonstrate this by applying at the same spacing as our rescaled
-    reference_image and moving_image to get deformed images of the same shape.
-    
-The position-fields (transforms) output by the registration have the same
-    shape as (are at the spacing of) the reference_image and moving_image
-    regardless of the scale the registration was computed at, see the
-    multiscales parameter.
-"""
 
 apply = "at native spacing"
 # apply = "to different images at native spacing"
@@ -266,6 +252,75 @@ elif apply == "to different images at different spacing":
     moving_image_vis = rescaled_moving_image
 
 
+##############################################################################
+# Visualize Results
+# -----------------
+#
+# By this point we have deformed versions of reference_image and moving_image,
+# each deformed into the space of the other. We visualize what we have done
+# by showing a central slice of six images across each axis. These different
+# views are shown across rows. The images sliced, representing the columns,
+# are: reference_image, moving_image deformed to the reference_image space,
+# deformed_moving_image overlaid with reference_image,
+# deformed_reference_image overlaid with moving_image, reference_image
+# deformed to the moving_image space, and moving_image.
+
+
+def scale_data(data, quantile_threshold=0.001):
+    """
+    Rescales data such that the central data points (ignoring the extrema) lie
+    on the interval [0, 1].
+    """
+
+    data = np.copy(data)
+
+    lower_limit = np.quantile(
+        data, min(quantile_threshold, 1 - quantile_threshold)
+    )
+    upper_limit = np.quantile(
+        data, max(quantile_threshold, 1 - quantile_threshold)
+    )
+    data_range = upper_limit - lower_limit
+
+    data -= lower_limit
+    data /= data_range
+
+    return data
+
+
+def imshow_on_ax(
+    axes, dim, column, image, overlaid_image=None, quantile_threshold=0.001
+):
+    """
+    Rescales image using scale_data and displays a central slice of it across
+    the given dimension on the specified element of axes.
+
+    If an overlaid_image is provided, it is likewise rescaled and an RGB
+    display is produced using image as the Red and Blue channels and
+    overlaid_image as the Green channel.
+    """
+
+    ax = axes[dim, column]
+    ax.axis(False)
+
+    scaled_image = scale_data(image, quantile_threshold)
+
+    display_image = scaled_image
+
+    if overlaid_image is not None:
+        scaled_overlaid_image = scale_data(overlaid_image, quantile_threshold)
+        display_image = np.stack(
+            [scaled_image, scaled_overlaid_image, scaled_image], axis=-1
+        )
+
+    ax.imshow(
+        display_image.take(display_image.shape[dim] // 2, axis=dim),
+        cmap="gray",
+        vmin=0,
+        vmax=1,
+    )
+
+
 # Visualize results.
 
 # Column 0: raw reference_image.
@@ -333,4 +388,3 @@ for ax, column_label in zip(
 for ax, row_index in zip(axes[:, 0], range(len(axes))):
     row_label = f"Dimension {row_index}"
     ax.set_ylabel(row_label, rotation="vertical")
-
