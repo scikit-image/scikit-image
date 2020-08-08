@@ -221,8 +221,10 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
     if upsample_factor == 1:
         if return_error:
-            src_amp = np.sum(np.abs(src_freq) ** 2) / src_freq.size
-            target_amp = np.sum(np.abs(target_freq) ** 2) / target_freq.size
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+            src_amp /= src_freq.size
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
+            target_amp /= target_freq.size
             CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
