@@ -250,11 +250,9 @@ def phase_cross_correlation(reference_image, moving_image, *,
         shifts = shifts + maxima / upsample_factor
 
         if return_error:
-            src_amp = _upsampled_dft(src_freq * src_freq.conj(),
-                                     1, upsample_factor)[0, 0]
+            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
             src_amp /= normalization
-            target_amp = _upsampled_dft(target_freq * target_freq.conj(),
-                                        1, upsample_factor)[0, 0]
+            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
             target_amp /= normalization
 
     # If its only one row or column the shift along that dimension has no
