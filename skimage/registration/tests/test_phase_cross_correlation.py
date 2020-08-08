@@ -105,6 +105,13 @@ def test_wrong_input():
     with testing.raises(ValueError):
         phase_cross_correlation(template, image)
 
+    # NaN values in data
+    image = np.ones((5, 5))
+    image[0][0] = np.nan
+    template = np.ones((5, 5))
+    with testing.raises(ValueError):
+        phase_cross_correlation(template, image, return_error=True)
+
 
 def test_4d_input_pixel():
     phantom = img_as_float(binary_blobs(length=32, n_dim=4))

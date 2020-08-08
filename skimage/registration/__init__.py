@@ -9,7 +9,7 @@ __all__ = [
     'optical_flow_tvl1',
     'phase_cross_correlation',
     'lddmm_register',
-    'apply_lddmm',
     'resample',
     'sinc_resample',
+    'generate_position_field',
     ]
