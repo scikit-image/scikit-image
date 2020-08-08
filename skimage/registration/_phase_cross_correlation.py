@@ -264,6 +264,16 @@ def phase_cross_correlation(reference_image, moving_image, *,
             shifts[dim] = 0
 
     if return_error:
+        # Redirect user to masked_phase_cross_correlation if NaNs are observed
+        if np.isnan(CCmax) or np.isnan(src_amp) or np.isnan(target_amp):
+            raise ValueError(
+                "NaN values found, please remove NaNs from your "
+                "input data or use the `reference_mask`/`moving_mask` "
+                "keywords, eg: "
+                "phase_cross_correlation(reference_image, moving_image, "
+                "reference_mask=~np.isnan(reference_image), "
+                "moving_mask=~np.isnan(moving_image))")
+
         return shifts, _compute_error(CCmax, src_amp, target_amp),\
             _compute_phasediff(CCmax)
     else:
