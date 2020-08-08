@@ -234,14 +234,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         upsample_factor = np.array(upsample_factor, dtype=np.float64)
-        normalization = (src_freq.size * upsample_factor ** src_freq.ndim)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shifts*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
                                            sample_region_offset).conj()
-        cross_correlation /= normalization
         # Locate maximum and map back to original pixel grid
         maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                                   cross_correlation.shape)
@@ -253,9 +251,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
         if return_error:
             src_amp = np.sum(np.real(src_freq * src_freq.conj()))
-            src_amp /= normalization
             target_amp = np.sum(np.real(target_freq * target_freq.conj()))
-            target_amp /= normalization
 
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.
