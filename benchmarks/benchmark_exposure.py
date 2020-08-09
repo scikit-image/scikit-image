@@ -31,4 +31,4 @@ class ExposureSuite:
     def time_histogram(self):
         # Running it 10 times to achieve significant performance time.
         for i in range(10):
-            result = exposure.histogram(self.image, multichannel=False)
+            result = exposure.histogram(self.image)
