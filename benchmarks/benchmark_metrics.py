@@ -16,7 +16,7 @@ class SetMetricsSuite(object):
         try:
             from skimage.metrics import hausdorff_distance
         except ImportError:
-            return NotImplementedError("hausdorff_distance unavailable")
+            raise NotImplementedError("hausdorff_distance unavailable")
         points_a = (1, 0)
         points_b = (5, 2)
         self.coords_a[points_a] = True
