@@ -12,7 +12,7 @@ from ..util import img_as_float, regular_grid
 from ..color import rgb2lab
 
 
-def _get_mask_centroids(mask, n_centroids):
+def _get_mask_centroids(mask, n_centroids, multichannel):
     """Find regularly spaced centroids on a mask.
 
     Parameters
@@ -48,7 +48,8 @@ def _get_mask_centroids(mask, n_centroids):
     # somewhat arbitrarily choose dense_factor=10 to make the samples
     # 10 times closer together along each axis than the n_centroids samples.
     dense_factor = 10
-    n_dense = (dense_factor ** mask.ndim) * n_centroids
+    ndim_spatial = mask.ndim - 1 if multichannel else mask.ndim
+    n_dense = int((dense_factor ** ndim_spatial) * n_centroids)
     if len(coord) > n_dense:
         # subset of points to use for the k-means calculation
         # (much denser than idx, but less than the full set)
@@ -274,7 +275,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
             mask = np.ascontiguousarray(mask[np.newaxis, ...])
         if mask.shape != image.shape[:3]:
             raise ValueError("image and mask should have the same shape.")
-        centroids, steps = _get_mask_centroids(mask, n_segments)
+        centroids, steps = _get_mask_centroids(mask, n_segments, multichannel)
         update_centroids = True
     else:
         centroids, steps = _get_grid_centroids(image, n_segments)
