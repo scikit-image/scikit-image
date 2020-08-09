@@ -53,9 +53,9 @@ ax2.set_title("Local entropy")
 
 fig.tight_layout()
 
-################
-# Edge detection
-# ==============
+###################
+# Texture detection
+# =================
 
 image = img_as_ubyte(data.camera())
 
