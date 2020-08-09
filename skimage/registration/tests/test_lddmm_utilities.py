@@ -825,18 +825,3 @@ class Test_generate_position_field:
         )
 
         assert np.allclose(position_field, expected_output)
-
-
-"""
-Perform tests.
-"""
-
-if __name__ == "__main__":
-    test__validate_scalar_to_multi()
-    test__validate_ndarray()
-    test__validate_spacing()
-    test__compute_axes()
-    test__compute_coords()
-    test__multiply_coords_by_affine()
-    test_resample()
-    test_sinc_resample()

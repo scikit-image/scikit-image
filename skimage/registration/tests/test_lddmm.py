@@ -352,7 +352,3 @@ class Test_lddmm_register:
         )
 
         self._test_lddmm_register(**lddmm_register_kwargs)
-
-
-if __name__ == "__main__":
-    test_lddmm_register()
