@@ -561,7 +561,7 @@ Benchmarks
 
 While not mandatory for most pull requests, we ask that performance related
 PRs include a benchmark in order to clearly depict the use-case that is being
-optimized for. A historical view of our snapshots can be found on 
+optimized for. A historical view of our snapshots can be found on
 at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
 
 In this section we will review how to setup the benchmarks,
@@ -592,7 +592,7 @@ Writing a benchmark
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
 a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
-The ``time_`` method should only contain code you wish to benchmark. 
+The ``time_`` method should only contain code you wish to benchmark.
 Therefore it is useful to move everything that prepares the benchmark scenario
 into the ``setup`` method. This function is called before calling a ``time_``
 method and its execution time is not factored into the benchmarks.
@@ -622,6 +622,31 @@ included in the reported time of the benchmark.
 It is also possible to benchmark features such as peak memory usage. To learn
 more about the features of `asv`, please refer to the official
 `airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+
+Also, the benchmark files need to be importable when benchmarking old versions
+of scikit-image. So if anything from scikit-image is imported at the top level,
+it should be done as:
+
+.. code-block:: python
+
+    try:
+        from skimage import metrics
+    except ImportError:
+        pass
+
+The benchmarks themselves don't need any guarding against missing features,
+only the top-level imports.
+
+To allow tests of newer functions to be marked as "n/a" (not available)
+rather than "failed" for older versions, the setup method itself can raise a
+NotImplemented error.  See the following example for the CWT:
+
+.. code-block:: python
+
+    try:
+        from skimage import registration
+    except ImportError:
+        raise NotImplementedError("registration module not available")
 
 Testing the benchmarks locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -675,3 +700,15 @@ The output may look something like::
 
 In this case, the differences between HEAD and master are not significant
 enough for airspeed velocity to report.
+
+It is also possible to get a comparison of results for two specific revisions
+for which benchmark results have previously been run via the `asv compare`
+command::
+
+    asv compare v0.14.5 v0.17.2
+
+Finally, one can also run ASV benchmarks only for a specific commit hash or
+release tag by appending ``^!`` to the commit or tag name. For example to run
+the skimage.filter module benchmarks on release v0.17.2:
+
+asv run -b Filter v0.17.2^!
