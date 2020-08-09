@@ -50,6 +50,7 @@ r"""
 
 """
 
+
 class _Lddmm:
     """
     Class for storing shared values and objects used in learning a
@@ -122,9 +123,7 @@ class _Lddmm:
             float,
         )
         self.moving_image_spacing = _validate_scalar_to_multi(
-            moving_image_spacing
-            if moving_image_spacing is not None
-            else 1,
+            moving_image_spacing if moving_image_spacing is not None else 1,
             self.moving_image.ndim,
             float,
         )
@@ -947,9 +946,7 @@ class _Lddmm:
             moving_image_ravel = np.ravel(self.moving_image)
             matching_weights_ravel = np.ravel(self.matching_weights)
             contrast_polynomial_basis_semi_ravel = np.reshape(
-                self.contrast_polynomial_basis,
-                self.moving_image.size,
-                -1,
+                self.contrast_polynomial_basis, (self.moving_image.size, -1),
             )  # A view, not a copy.
 
             # Create intermediate composites.
@@ -1460,6 +1457,7 @@ class _Lddmm:
 
     # End _Lddmm.
 
+
 def lddmm_register(
     # Images.
     reference_image,
@@ -1728,9 +1726,7 @@ def lddmm_register(
     )
     # spacing.
     reference_image_spacing = _validate_scalar_to_multi(
-        reference_image_spacing
-        if reference_image_spacing is not None
-        else 1,
+        reference_image_spacing if reference_image_spacing is not None else 1,
         reference_image.ndim,
         float,
     )
@@ -1791,8 +1787,7 @@ def lddmm_register(
         # Velocity field specifiers.
         sigma_regularization=sigma_regularization,
         velocity_smooth_length=velocity_smooth_length,
-        preconditioner_velocity_smooth_length=
-            preconditioner_velocity_smooth_length,
+        preconditioner_velocity_smooth_length=preconditioner_velocity_smooth_length,
         maximum_velocity_fields_update=maximum_velocity_fields_update,
         num_timesteps=num_timesteps,
         # Contrast map specifiers.
@@ -1804,8 +1799,7 @@ def lddmm_register(
         # # vs. accuracy tradeoff.
         sigma_matching=sigma_matching,
         # Classification specifiers.
-        artifact_and_background_classification=
-            artifact_and_background_classification,
+        artifact_and_background_classification=artifact_and_background_classification,
         sigma_artifact=sigma_artifact,
         sigma_background=sigma_background,
         artifact_prior=artifact_prior,
@@ -1863,9 +1857,7 @@ def lddmm_register(
             np.round(scale * moving_image.shape) / moving_image.shape
         )
         scaled_moving_image = rescale(moving_image, moving_image_scale)
-        scaled_moving_image_spacing = (
-            moving_image_spacing / moving_image_scale
-        )
+        scaled_moving_image_spacing = moving_image_spacing / moving_image_scale
 
         # Collect non-multiscale_lddmm_kwargs
         # Note: user arguments initial_affine, initial_contrast_coefficients,

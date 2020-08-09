@@ -52,6 +52,10 @@ class Test_lddmm_register:
             input=reference_image,
             coordinates=lddmm_output.reference_image_to_moving_image_transform,
         )
+        print()
+        print(deformed_reference_image.shape, moving_image.shape)
+        print(deformed_moving_image.shape, reference_image.shape)
+        print()
 
         assert np.allclose(
             deformed_reference_image, moving_image, rtol=rtol, atol=atol
