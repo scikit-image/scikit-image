@@ -49,9 +49,10 @@ plt.show()
 # 3D mouse brain images
 # =====================
 #
-# The Allen Institute's mouse brain atlas and a cleared mouse brain are displayed.
-# The two columns respectively display the allen_mouse_brain_atlas and a cleared_mouse_brain, 
-# where each row shows a central slice along that dimension.
+# The Allen Institute's mouse brain atlas and a cleared mouse brain are
+# displayed. The two columns respectively display the allen_mouse_brain_atlas
+# and a cleared_mouse_brain, where each row shows a central slice along that
+# dimension.
 
 fig, axes = plt.subplots(3, 2, figsize=(8, 12))
 
