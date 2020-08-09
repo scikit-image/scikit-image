@@ -42,11 +42,11 @@ entr_img = entropy(img, disk(10))
 fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
 
 ax0.imshow(noise_mask, cmap='gray')
-ax0.set_xlabel("Noise mask")
+ax0.set_title("Noise mask")
 ax1.imshow(img, cmap='gray')
-ax1.set_xlabel("Noisy image")
+ax1.set_title("Noisy image")
 ax2.imshow(entr_img, cmap='viridis')
-ax2.set_xlabel("Local entropy")
+ax2.set_title("Local entropy")
 
 fig.tight_layout()
 
