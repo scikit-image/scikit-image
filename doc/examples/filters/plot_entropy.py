@@ -12,8 +12,8 @@ detect subtle variations in the local gray level distribution.
 
 In the first example, the image is composed of two surfaces with two slightly
 different distributions. The image has a uniform random distribution in the
-range [-14, +14] in the middle of the image and a uniform random distribution in
-the range [-15, 15] at the image borders, both centered at a gray value of 128.
+range [-15, +15] in the middle of the image and a uniform random distribution in
+the range [-14, 14] at the image borders, both centered at a gray value of 128.
 To detect the central square, we compute the local entropy measure using a
 circular structuring element of a radius big enough to capture the local gray
 level distribution. The second example shows how to detect texture in the camera
