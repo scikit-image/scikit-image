@@ -49,7 +49,7 @@ Here's the long and short of it:
 .. note::
 
     Although our code is hosted on `github
-    <https://github.com/scikit-image/>`_, our database is stored on `gitlab
+    <https://github.com/scikit-image/>`_, our dataset is stored on `gitlab
     <https://gitlab.com/scikit-image>`_. and fetched with `pooch
     <https://github.com/fatiando/pooch>`_. New data must be submitted on
     gitlab. Once merged, the data registry ``skimage/data/_registry.py``
