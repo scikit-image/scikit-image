@@ -1,10 +1,10 @@
 import numpy as np
 
+# guard against import of a non-existant metrics module in older skimage
 try:
     from skimage import metrics
-    have_metrics_module = True
 except ImportError:
-    have_metrics_module = False
+    pass
 
 
 class SetMetricsSuite(object):
@@ -13,12 +13,14 @@ class SetMetricsSuite(object):
     coords_b = np.zeros(shape, dtype=np.bool)
 
     def setup(self):
+        try:
+            from skimage.metrics import hausdorff_distance
+        except ImportError:
+            return NotImplementedError("hausdorff_distance unavailable")
         points_a = (1, 0)
         points_b = (5, 2)
         self.coords_a[points_a] = True
         self.coords_b[points_b] = True
 
     def time_hausdorff(self):
-        if not have_metrics_module:
-            return NotImplementedError("metrics module unavailable")
         metrics.hausdorff_distance(self.coords_a, self.coords_b)
