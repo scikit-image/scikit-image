@@ -41,6 +41,12 @@ class Watershed(object):
 class Skeletonize3d(object):
 
     def setup(self, *args):
+        try:
+            # skip tests unless skeletonize supports 3d inputs
+            from skimage.morphology import skeletonize
+            skeletonize(np.ones((5, 5, 5)))
+        except (ImportError, ValueError):
+            raise NotImplementedError("3D skeltonize unavailable")
         # we stack the horse data 5 times to get an example volume
         self.image = np.stack(5 * [util.invert(data.horse())])
 
