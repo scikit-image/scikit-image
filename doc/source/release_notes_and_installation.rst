@@ -11,4 +11,4 @@ Release notes
 Installation
 ============
 
-.. include:: install.md
+.. include:: install.rst
