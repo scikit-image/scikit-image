@@ -19,12 +19,16 @@ class FiltersSuite:
     def time_sobel_3d(self):
         _ = filters.sobel(self.image3d)
 
+
 class MultiOtsu(object):
     """Benchmarks for MultiOtsu threshold."""
     param_names = ['classes']
     params = [3, 4, 5]
-
     def setup(self, *args):
+        try:
+            from skimage.filters import threshold_multiotsu
+        except ImportError:
+            raise NotImplementedError("threshold_multiotsu unavailable")
         self.image = data.camera()
 
     def time_threshold_multiotsu(self, classes):
