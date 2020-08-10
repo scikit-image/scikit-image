@@ -639,7 +639,7 @@ only the top-level imports.
 
 To allow tests of newer functions to be marked as "n/a" (not available)
 rather than "failed" for older versions, the setup method itself can raise a
-NotImplemented error.  See the following example for the CWT:
+NotImplemented error.  See the following example for the registration module:
 
 .. code-block:: python
 
