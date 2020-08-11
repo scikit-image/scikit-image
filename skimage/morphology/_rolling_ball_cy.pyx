@@ -12,7 +12,7 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
                      DTYPE_FLOAT[:,:] kernel,
                      DTYPE_FLOAT[:,:] cap_height):
     
-    cdef DTYPE_FLOAT[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
+    cdef DTYPE_FLOAT[:, ::1] out_data = np.zeros(windows.shape[:2], dtype=windows.base.dtype)
     cdef int im_x, im_y, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
 
@@ -37,8 +37,8 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def apply_kernel(DTYPE_FLOAT[:,:,:,:] windows,
-                 DTYPE_FLOAT[:,:] kernel,
-                 DTYPE_FLOAT[:,:] cap_height):
+                 DTYPE_FLOAT[:, ::1] kernel,
+                 DTYPE_FLOAT[:, ::1] cap_height):
     
     cdef DTYPE_FLOAT[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
     cdef int im_x, im_y, kern_x, kern_y
