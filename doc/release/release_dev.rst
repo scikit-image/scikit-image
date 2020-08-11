@@ -53,15 +53,15 @@ API Changes
 Bugfixes
 --------
 
-- for the ransac algorithm, improved the case where all data points are 
+- For the ransac algorithm, improved the case where all data points are 
   outliers, which was previously raising an error 
   ([4844](https://github.com/scikit-image/scikit-image/pull/4844))
-- an error-causing bug has been corrected for the `bg_color` parameter in `label2rgb` 
+- An error-causing bug has been corrected for the `bg_color` parameter in `label2rgb` 
   when its value is a string 
   ([#4840](https://github.com/scikit-image/scikit-image/pull/4840))
-- a normalization bug was fixed in `metrics.variation_of_information` 
+- A normalization bug was fixed in `metrics.variation_of_information` 
   ([#4875](https://github.com/scikit-image/scikit-image/pull/4875/))
-- fixed the behaviour of Richardson-Lucy deconvolution for images with 3
+- Fixed the behaviour of Richardson-Lucy deconvolution for images with 3
   dimensions or more ([#4823](https://github.com/scikit-image/scikit-image/pull/4823))
 
 Deprecations
