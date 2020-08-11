@@ -78,26 +78,23 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         raise ValueError("All elements of kernel_size must be greater zero.")
     kernel_size = kernel_size / 2
 
-    intensity_vertex = np.asarray(intensity_vertex)
-    if not np.issubdtype(intensity_vertex.dtype, np.number):
-        raise ValueError(
-            "Intensity_vertex must be convertible to a numeric array.")
-    if not intensity_vertex.shape == (2,):
-        raise ValueError(
-            "Intensity_vertex must be a scalar.")
+    intensity_vertex = np.asarray(intensity_vertex, dtype=np.float_)
+    if not intensity_vertex.shape == tuple():
+        raise ValueError("Intensity_vertex must be a scalar.")
     if np.any(intensity_vertex <= 0):
         raise ValueError("Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
 
-    image = np.asarray(image, dtype=np.float_)
+    image = np.asarray(image)
     if image.ndim != 2:
         raise ValueError("Image must be a two dimensional array.")
+    img = image.astype(np.float_)
 
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
     pad_amount = ((kernel_size_x, kernel_size_x),
                   (kernel_size_y, kernel_size_y))
-    img = np.pad(image, pad_amount,  constant_values=np.Inf, mode="constant")
+    img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
