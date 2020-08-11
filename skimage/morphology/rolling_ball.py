@@ -26,16 +26,22 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
 
+    Returns
+    -------
+    filtered_image : ndarray
+        The image with background removed.
+
     Notes
     -----
 
-    - For the pixel that has its background intensity estimated (wlog. at
-      ``(0,0)``) the rolling ellipsoid method places an ellipsoid under it and
-      raises it until it touches the image umbra at ``pos=(y,x)`` the
-      background intensity is then estimated using the image intensity at that
-      position (``image[*pos]``) plus the difference of ``intensity_vertex``
-      and the intensity of the ellipsoid at ``pos``. The intensity of the
-      ellipsoid is computed using the canonical ellipsis equation::
+    - For the pixel that has its background intensity estimated (at ``(0,0)``)
+      the rolling ellipsoid method places an ellipsoid under it and
+      raises the ellipsoid until it touches the image umbra at ``pos=(y,x)``.
+      The background intensity is then estimated using the image intensity at 
+      that position (``image[y, x]``) plus the difference of 
+      ``intensity_vertex`` and the intensity of the ellipsoid at ``pos``. The 
+      intensity of the ellipsoid is computed using the canonical ellipsis
+      equation::
 
             semi_spatial = kernel_size / 2
             semi_vertex = intensity_vertex / 2
@@ -48,10 +54,10 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
       noise). If this is a problem in your image, you can apply mild
       gaussian smoothing before passing the image to this function.
 
-    Returns
-    -------
-    filtered_image : ndarray
-        The image with background removed.
+    References
+    ----------
+    .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
+           (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
 
     Examples
     --------
@@ -59,11 +65,6 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ball
     >>> result = rolling_ball(data.coins())
-
-    References
-    ----------
-    .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
-           (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
     kernel_size = np.asarray(kernel_size)
@@ -147,6 +148,11 @@ def rolling_ball(image, radius=50, has_nan=False):
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
 
+    Returns
+    -------
+    filtered_image : ndarray
+        The image with background removed.
+
     Notes
     -----
     - If you are using images with a dtype other than `image.dtype == np.uint8`
@@ -160,10 +166,10 @@ def rolling_ball(image, radius=50, has_nan=False):
       noise). If this is a problem in your image, you can apply mild
       gaussian smoothing before passing the image to this function.
 
-    Returns
-    -------
-    filtered_image : ndarray
-        The image with background removed.
+    References
+    ----------
+    .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
+           (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
 
     Examples
     --------
@@ -171,11 +177,6 @@ def rolling_ball(image, radius=50, has_nan=False):
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ball
     >>> result = rolling_ball(data.coins(), radius=200)
-
-    References
-    ----------
-    .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
-           (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
     """
 
     if not np.issubdtype(np.asarray(radius).dtype, np.number):
