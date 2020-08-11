@@ -9,11 +9,39 @@ ctypedef np_floats DTYPE_FLOAT
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
-                     DTYPE_FLOAT[:,:] kernel,
-                     DTYPE_FLOAT[:,:] cap_height):
+                     DTYPE_FLOAT[:,::1] kernel,
+                     DTYPE_FLOAT[:,::1] cap_height):
+    """
+    apply_kernel_nan(windows, kernel, cap_height)
+
+    Apply a custom kernel to a windowed view of an image.
+
+    This function is the critical piece of code for 
+    `morphology.rolling_ellipsoid`. It was moved to cython for speed.
+
+    Parameters
+    ----------
+    windows : (N, M, K1, K2) ndarray
+        A windowed view into a 2D image.
+    kernel : (K1, K2) ndarray
+        Indicates if pixel inside the window belongs to the kernel. 
+        `kernel[x,y] == 1` if the pixel is inside, ``kernel[x,y] == np.Inf`` 
+        otherwise.
+    cap_height : (K1, K2) ndarray
+        Indicates the height/intensity of the ellipsoid at position ``(x,y)``
+
+    Returns
+    -------
+    out_data : (N, M) ndarray
+        2D Image estimating the background intensity.
+
+    See Also
+    --------
+    rolling_ellipsoid
+    """
     
     cdef DTYPE_FLOAT[:, ::1] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
-    cdef int im_x, im_y, kern_x, kern_y
+    cdef Py_ssize_t im_x, im_y, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
 
     with nogil:
@@ -39,9 +67,40 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:,:] windows,
 def apply_kernel(DTYPE_FLOAT[:,:,:,:] windows,
                  DTYPE_FLOAT[:, ::1] kernel,
                  DTYPE_FLOAT[:, ::1] cap_height):
+    """
+    apply_kernel(windows, kernel, cap_height)
+
+    Apply a custom kernel to a windowed view of an image.
+
+    This function is the critical piece of code for 
+    `morphology.rolling_ellipsoid`. It was moved to cython for speed.
+
+    This function assumes that the image doesn't contain ``NaN``s; this 
+    assumption allows for faster code (better compiler optimization).
+
+    Parameters
+    ----------
+    windows : (N, M, K1, K2) ndarray
+        A windowed view into a 2D image.
+    kernel : (K1, K2) ndarray
+        Indicates if pixel inside the window belongs to the kernel. 
+        `kernel[x,y] == 1` if the pixel is inside, ``kernel[x,y] == np.Inf`` 
+        otherwise.
+    cap_height : (K1, K2) ndarray
+        Indicates the height/intensity of the ellipsoid at position ``(x,y)``
+
+    Returns
+    -------
+    out_data : (N, M) ndarray
+        2D Image estimating the background intensity.
+
+    See Also
+    --------
+    rolling_ellipsoid
+    """
     
-    cdef DTYPE_FLOAT[:, :] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
-    cdef int im_x, im_y, kern_x, kern_y
+    cdef DTYPE_FLOAT[:, ::1] out_data = np.zeros((windows.shape[0], windows.shape[1]), dtype=windows.base.dtype)
+    cdef Py_ssize_t im_x, im_y, kern_x, kern_y
     cdef DTYPE_FLOAT min_value, tmp
 
     with nogil:
