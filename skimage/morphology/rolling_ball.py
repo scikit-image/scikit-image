@@ -15,8 +15,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
 
     Parameters
     ----------
-    image : (N, M) ndarray
-        The gray image to be filtered.
+    image : ndarray
+        The last two dimensions are treated as the columns and rows of the
+        image. The operation is broadcasted along the remaining ones.
     kernel_size: two-element tuple, numeric, optional
         The length of the spatial vertices of the ellipsoid.
     intensity_vertex : scalar, numeric, optional
@@ -108,9 +109,12 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     kernel[kernel == 0] = np.Inf
 
     if has_nan:
-        windowed = view_as_windows(img, kernel.shape)
-        background = apply_kernel_nan(
-            windowed, kernel, cap_height)
+        strides = (img.itemsize, img.strides[-2], img.itemsize)
+        shape = (img.size - (kernel.shape[0] - 1) * img.shape[-1] -
+                 (kernel.shape[1] - 1), *kernel.shape)
+        windowed = as_strided(img, shape, strides)
+        background = apply_kernel_nan(windowed, kernel, cap_height)
+        background = as_strided(background, image.shape, img.strides)
     else:
         # windowed = view_as_windows(img, kernel.shape)
         # background = apply_kernel(windowed, kernel, cap_height)
