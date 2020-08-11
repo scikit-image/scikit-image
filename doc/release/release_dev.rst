@@ -33,7 +33,7 @@ Documentation
   gallery example 
 - automatic formatting of docstrings for improved consistency ([#4849](https://github.com/scikit-image/scikit-image/pull/4849))
 - improved docstring for `rgb2lab` ([#4839](https://github.com/scikit-image/scikit-image/pull/4839)) and `marching_cubes` [#4846](https://github.com/scikit-image/scikit-image/pull/4846)
-- improved docstring for `measure.marching_cubes`, mentioning how to decimate a
+- Improved docstring for `measure.marching_cubes`, mentioning how to decimate a
   mesh using mayavi [4846](https://github.com/scikit-image/scikit-image/pull/4846)
 
 
