@@ -63,8 +63,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     --------
     >>> import numpy as np
     >>> from skimage import data
-    >>> from skimage.morphology import rolling_ball
-    >>> result = rolling_ball(data.coins())
+    >>> from skimage.morphology import rolling_ellipsoid
+    >>> result = rolling_ellipsoid(data.coins())
     """
 
     kernel_size = np.asarray(kernel_size)
@@ -89,18 +89,15 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
         raise ValueError("Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
 
-    image = np.asarray(image)
-    if not np.issubdtype(image.dtype, np.number):
-        raise ValueError("Image must be of numeric type.")
+    image = np.asarray(image, dtype=np.float_)
     if image.ndim != 2:
         raise ValueError("Image must be a two dimensional array.")
-    img = image.copy().astype(np.float_)
 
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
     pad_amount = ((kernel_size_x, kernel_size_x),
                   (kernel_size_y, kernel_size_y))
-    img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
+    img = np.pad(image, pad_amount,  constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
