@@ -1,12 +1,11 @@
 import numpy as np
-from itertools import product
-from scipy.ndimage import generic_filter
+from numpy.lib.stride_tricks import as_strided
 
 from skimage.util import invert, view_as_windows
-from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
+from ._rolling_ball_cy import apply_kernel, apply_kernel_nan, apply_kernel_flat
 
 
-def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
+def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
                       has_nan=False):
     """Estimate background intensity using a rolling ellipsoid.
 
@@ -86,14 +85,13 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     intensity_vertex = intensity_vertex / 2
 
     image = np.asarray(image)
-    if image.ndim != 2:
-        raise ValueError("Image must be a two dimensional array.")
     img = image.astype(np.float_)
 
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
-    pad_amount = ((kernel_size_x, kernel_size_x),
-                  (kernel_size_y, kernel_size_y))
+    pad_amount = [(0, 0)] * image.ndim
+    pad_amount[-2] = (kernel_size_x, kernel_size_x)
+    pad_amount[-1] = (kernel_size_y, kernel_size_y)
     img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
@@ -109,12 +107,19 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     kernel = np.asarray(tmp <= 1, dtype=np.float_)
     kernel[kernel == 0] = np.Inf
 
-    windowed = view_as_windows(img, kernel.shape)
     if has_nan:
+        windowed = view_as_windows(img, kernel.shape)
         background = apply_kernel_nan(
             windowed, kernel, cap_height)
     else:
-        background = apply_kernel(windowed, kernel, cap_height)
+        # windowed = view_as_windows(img, kernel.shape)
+        # background = apply_kernel(windowed, kernel, cap_height)
+        strides = (img.itemsize, img.strides[-2], img.itemsize)
+        shape = (img.size - (kernel.shape[0] - 1) * img.shape[-1] -
+                 (kernel.shape[1] - 1), *kernel.shape)
+        windowed = as_strided(img, shape, strides)
+        background = apply_kernel_flat(windowed, kernel, cap_height)
+        background = as_strided(background, image.shape, img.strides)
 
     background = background.astype(image.dtype)
 
