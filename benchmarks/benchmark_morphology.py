@@ -1,7 +1,9 @@
 """Benchmarks for `skimage.morphology`."""
 
-
 import numpy as np
+from numpy.lib import NumpyVersion as Version
+
+import skimage
 from skimage import data, filters, morphology, util
 
 
@@ -42,16 +44,19 @@ class Skeletonize3d(object):
 
     def setup(self, *args):
         try:
-            # skip tests unless skeletonize supports 3d inputs
-            from skimage.morphology import skeletonize
-            skeletonize(np.ones((5, 5, 5)))
-        except (ImportError, ValueError):
-            raise NotImplementedError("3D skeltonize unavailable")
+            # use a separate skeletonize_3d function on older scikit-image
+            if Version(skimage.__version__) < Version('0.16.0'):
+                self.skeletonize = morphology.skeletonize_3d
+            else:
+                self.skeletonize = morphology.skeletonize
+        except AttributeError:
+            raise NotImplementedError("3d skeletonize unavailable")
+
         # we stack the horse data 5 times to get an example volume
         self.image = np.stack(5 * [util.invert(data.horse())])
 
     def time_skeletonize_3d(self):
-        morphology.skeletonize(self.image)
+        self.skeletonize(self.image)
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -70,4 +75,4 @@ class Skeletonize3d(object):
         pass
 
     def peakmem_skeletonize_3d(self):
-        morphology.skeletonize(self.image)
+        self.skeletonize(self.image)
