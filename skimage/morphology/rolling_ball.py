@@ -57,8 +57,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     --------
     >>> import numpy as np
     >>> from skimage import data
-    >>> from skimage.morphology import rolling_ball
-    >>> result = rolling_ball(data.coins())
+    >>> from skimage.morphology import rolling_ellipsoid
+    >>> result = rolling_ellipsoid(data.coins())
 
     References
     ----------
@@ -70,28 +70,28 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     if not np.issubdtype(kernel_size.dtype, np.number):
         raise ValueError(
             "kernel_size must be convertible to a numeric array.")
-    if not kernel_size.size == 2 and not len(kernel_size.shape) == 1:
+    if not kernel_size.shape == (2,):
         raise ValueError(
             "kernel_size must be a two element tuple.")
     if np.any(kernel_size <= 0):
-        raise ValueError(f"All elements of kernel_size must be greater zero.")
+        raise ValueError("All elements of kernel_size must be greater zero.")
     kernel_size = kernel_size / 2
 
     intensity_vertex = np.asarray(intensity_vertex)
     if not np.issubdtype(intensity_vertex.dtype, np.number):
         raise ValueError(
             "Intensity_vertex must be convertible to a numeric array.")
-    if not intensity_vertex.size == 1 and len(intensity_vertex.shape) == 1:
+    if not intensity_vertex.shape == (2,):
         raise ValueError(
             "Intensity_vertex must be a scalar.")
     if np.any(intensity_vertex <= 0):
-        raise ValueError(f"Intensity_vertex must be greater zero.")
+        raise ValueError("Intensity_vertex must be greater zero.")
     intensity_vertex = intensity_vertex / 2
 
     image = np.asarray(image)
     if not np.issubdtype(image.dtype, np.number):
         raise ValueError("Image must be of numeric type.")
-    if not len(image.shape) == 2:
+    if image.ndim != 2:
         raise ValueError("Image must be a two dimensional array.")
     img = image.copy().astype(np.float_)
 
