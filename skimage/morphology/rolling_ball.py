@@ -37,9 +37,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=(100,),
     - For the pixel that has its background intensity estimated (at ``(0,0)``)
       the rolling ellipsoid method places an ellipsoid under it and
       raises the ellipsoid until it touches the image umbra at ``pos=(y,x)``.
-      The background intensity is then estimated using the image intensity at 
-      that position (``image[y, x]``) plus the difference of 
-      ``intensity_vertex`` and the intensity of the ellipsoid at ``pos``. The 
+      The background intensity is then estimated using the image intensity at
+      that position (``image[y, x]``) plus the difference of
+      ``intensity_vertex`` and the intensity of the ellipsoid at ``pos``. The
       intensity of the ellipsoid is computed using the canonical ellipsis
       equation::
 
