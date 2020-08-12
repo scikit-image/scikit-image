@@ -1,6 +1,7 @@
 import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
+from cython.parallel cimport prange
 
 from .._shared.fused_numerics cimport np_floats
 
@@ -45,7 +46,7 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:] windows,
     cdef DTYPE_FLOAT min_value, tmp
 
     with nogil:
-        for offset in range(windows.shape[0]):
+        for offset in prange(windows.shape[0]):
             min_value = INFINITY
             for kern_y in range(kernel.shape[0]):
                 for kern_x in range(kernel.shape[1]):
@@ -165,7 +166,7 @@ def apply_kernel_flat(DTYPE_FLOAT[:,:,:] windows,
     cdef DTYPE_FLOAT min_value, tmp
 
     with nogil:
-        for offset in range(windows.shape[0]):
+        for offset in prange(windows.shape[0]):
             min_value = INFINITY
             for kern_y in range(kernel.shape[0]):
                 for kern_x in range(kernel.shape[1]):
