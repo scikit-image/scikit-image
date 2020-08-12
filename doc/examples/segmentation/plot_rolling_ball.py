@@ -101,7 +101,7 @@ plot_result(image, filtered_image)
 plt.show()
 
 ######################################################################
-# However, you need to take care if you use floating point images that
+# However, you need to be careful if you use floating point images that
 # have been normalized to ``[0, 1]``. In this case the ball will be
 # much larger than the image intensity, which can lead to unexpected
 # results.
