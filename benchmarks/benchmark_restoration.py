@@ -3,7 +3,7 @@ from skimage.data import camera
 from skimage import restoration
 
 
-class RetorationSuite:
+class RestorationSuite:
     """Benchmark for restoration routines in scikit image."""
     def setup(self):
         nz = 32
