@@ -39,3 +39,5 @@ $ pip install -U -r requirements/test.txt
 * pillow 7.1.0 fails on png files, See https://github.com/scikit-image/scikit-image/issues/4548
 * pillow 7.1.1 fails due to https://github.com/python-pillow/Pillow/issues/4518
 * imread 0.7.2 fails due to bluid failure https://github.com/luispedro/imread/issues/36
+* sphinx 3.0.x are blocked due to broken search links https://github.com/scikit-image/scikit-image/issues/4616
+* sphinx 3.1.0 is blocked due to https://github.com/sphinx-doc/sphinx/issues/7802
