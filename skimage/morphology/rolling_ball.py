@@ -91,8 +91,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
     pad_amount = [(0, 0)] * image.ndim
-    pad_amount[-2] = (kernel_size_x, kernel_size_x)
-    pad_amount[-1] = (kernel_size_y, kernel_size_y)
+    pad_amount[-2] = (kernel_size_y, kernel_size_y)
+    pad_amount[-1] = (kernel_size_x, kernel_size_x)
     img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)

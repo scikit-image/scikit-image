@@ -7,7 +7,13 @@ import numpy as np
 import pytest
 
 from skimage import data
-from skimage.morphology import rolling_ball
+from skimage.morphology import rolling_ball, rolling_ellipsoid
+
+
+def test_ellipsoid_const():
+    img = 155 * np.ones((100, 100), dtype=np.uint8)
+    result = rolling_ellipsoid(img, kernel_size=(25, 53))
+    assert np.allclose(result, np.zeros_like(img))
 
 
 @pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50])
