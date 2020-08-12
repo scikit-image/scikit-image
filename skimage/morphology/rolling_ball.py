@@ -47,9 +47,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
             semi_vertex = intensity_vertex / 2
             np.sum((pos/semi_spatial)**2) + (intensity/semi_vertex)**2 = 1
 
-    - This algorithm assums that low intensity values (black) corresponds to
-      the background. If you have a light background, invert the image before
-      passing it into the function, e.g., using `utils.invert`.
+    - This algorithm assums that dark pixels correspond to the background. If
+      you have a bright background, invert the image before passing it to the
+      function, e.g., using `utils.invert`.
     - This algorithm is sensitive to noise (in particular salt-and-pepper
       noise). If this is a problem in your image, you can apply mild
       gaussian smoothing before passing the image to this function.
@@ -136,10 +136,10 @@ def rolling_ball(image, radius=50, has_nan=False):
     """
     Estimate background intensity using a rolling ball.
 
-    The rolling ball algorithm estimates background intensity of a grayscale
-    image in case of uneven exposure. It is frequently used in biomedical
-    image processing and was first proposed by Stanley R. Sternberg (1983) in
-    the paper Biomedical Image Processing [1]_.
+    This is a convenience function for the frequently used special case of
+    ``rolling_ellipsoid`` where the spacial vertices and intensity vertex
+    have the same value resulting in a spherical kernel. For details see
+    ``rolling_ellipsoid``.
 
     Parameters
     ----------
@@ -156,23 +156,16 @@ def rolling_ball(image, radius=50, has_nan=False):
     filtered_image : ndarray
         The image with background removed.
 
+    See Also
+    --------
+    rolling_ellipsoid : generalization to elliptical kernels; used internally
+
     Notes
     -----
     - If you are using images with a dtype other than `image.dtype == np.uint8`
       you may want to consider using `skimage.morphology.rolling_ellipsoid`
       instead. It allows you to specify different parameters for the spacial
       and intensity dimensions.
-    - This algorithm assums that low intensity values (black) corresponds to
-      the background. If you have a light background, invert the image before
-      passing it into the function, e.g., using `utils.invert`.
-    - This algorithm is sensitive to noise (in particular salt-and-pepper
-      noise). If this is a problem in your image, you can apply mild
-      gaussian smoothing before passing the image to this function.
-
-    References
-    ----------
-    .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
-           (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
 
     Examples
     --------
