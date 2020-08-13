@@ -70,16 +70,13 @@ class Skeletonize3d(object):
 
 class RollingBall(object):
     """Benchmark for Rolling Ball algorithm in scikit-image."""
-    params = [25, 50, 75, 100, 150, 200]
-    param_names = ["radius"]
 
     timeout = 120
 
-    def setup(self, radius):
-        self.black_bg = data.coins()
-
     def time_rollingball(self, radius):
-        morphology.rolling_ball(self.black_bg, radius=radius)
+        morphology.rolling_ball(data.coins(), radius=radius)
+    time_rollingball.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball.param_names = ["radius"]
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -98,10 +95,20 @@ class RollingBall(object):
         pass
 
     def peakmem_rollingball(self, radius):
-        morphology.rolling_ball(self.black_bg, radius=radius)
+        morphology.rolling_ball(data.coins(), radius=radius)
+    peakmem_rollingball.params = [25, 50, 75, 100, 150, 200]
+    peakmem_rollingball.param_names = ["radius"]
 
     def time_rollingball_nan(self, radius):
-        image = self.black_bg.copy().astype(np.float_)
+        image = data.coins().astype(np.float_)
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.NaN
         morphology.rolling_ball(image, radius=radius, has_nan=True)
+    time_rollingball_nan.params = [25, 50, 75, 100, 150, 200]
+    time_rollingball_nan.param_names = ["radius"]
+
+    def time_ndim_rollingball(self):
+        # would be nice to use cells()
+        # how can I load it here from skimage.data?
+        image = np.stack([data.coins()] * 20)
+        morphology.rolling_ball(image, radius=100)
