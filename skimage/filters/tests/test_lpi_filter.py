@@ -3,12 +3,12 @@ from numpy.testing import assert_, assert_equal
 import unittest
 
 from ..._shared import testing
-from ...data import camera
+from ...data import grass
 from ..lpi_filter import LPIFilter2D, inverse, wiener
 
 
 class TestLPIFilter2D(unittest.TestCase):
-    img = camera()[:50, :50]
+    img = grass()[:50, :50]
 
     def filt_func(self, r, c):
         return np.exp(-np.hypot(r, c) / 1)

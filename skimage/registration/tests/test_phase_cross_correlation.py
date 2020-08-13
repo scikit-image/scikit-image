@@ -3,7 +3,7 @@ from skimage._shared.testing import assert_allclose
 
 from skimage.registration._phase_cross_correlation import (
     phase_cross_correlation, _upsampled_dft)
-from skimage.data import camera, binary_blobs
+from skimage.data import grass, binary_blobs
 from scipy.ndimage import fourier_shift
 from skimage.util.dtype import img_as_float
 from skimage._shared import testing
@@ -11,7 +11,7 @@ from skimage._shared.fft import fftmodule as fft
 
 
 def test_correlation():
-    reference_image = fft.fftn(camera())
+    reference_image = fft.fftn(grass())
     shift = (-7, 12)
     shifted_image = fourier_shift(reference_image, shift)
 
@@ -23,7 +23,7 @@ def test_correlation():
 
 
 def test_subpixel_precision():
-    reference_image = fft.fftn(camera())
+    reference_image = fft.fftn(grass())
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
@@ -36,7 +36,7 @@ def test_subpixel_precision():
 
 
 def test_real_input():
-    reference_image = camera()
+    reference_image = grass()
     subpixel_shift = (-2.4, 1.32)
     shifted_image = fourier_shift(fft.fftn(reference_image), subpixel_shift)
     shifted_image = fft.ifftn(shifted_image)
@@ -50,7 +50,7 @@ def test_real_input():
 
 def test_size_one_dimension_input():
     # take a strip of the input image
-    reference_image = fft.fftn(camera()[:, 15]).reshape((-1, 1))
+    reference_image = fft.fftn(grass()[:, 15]).reshape((-1, 1))
     subpixel_shift = (-2.4, 4)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 

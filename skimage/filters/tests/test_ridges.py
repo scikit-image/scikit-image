@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_less, assert_equal
 from skimage.filters import meijering, sato, frangi, hessian
-from skimage.data import camera, retina
+from skimage.data import grass, retina
 from skimage.util import crop, invert
 from skimage.color import rgb2gray
 from skimage._shared._warnings import expected_warnings
@@ -164,9 +164,9 @@ def test_3d_linearity():
                     atol=1e-3)
 
 
-def test_2d_cropped_camera_image():
+def test_2d_cropped_grass_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(grass(), ((206, 206), (206, 206)))
     a_white = invert(a_black)
 
     zeros = np.zeros((100, 100))
@@ -187,9 +187,9 @@ def test_2d_cropped_camera_image():
                     ones, atol=1 - 1e-7)
 
 
-def test_3d_cropped_camera_image():
+def test_3d_cropped_grass_image():
 
-    a_black = crop(camera(), ((206, 206), (206, 206)))
+    a_black = crop(grass(), ((206, 206), (206, 206)))
     a_black = np.dstack([a_black, a_black, a_black])
     a_white = invert(a_black)
 

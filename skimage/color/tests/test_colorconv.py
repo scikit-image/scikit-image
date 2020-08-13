@@ -43,7 +43,7 @@ import colorsys
 class TestColorconv(TestCase):
 
     img_rgb = data.colorwheel()
-    img_grayscale = data.camera()
+    img_grayscale = data.grass()
     img_rgba = np.array([[[0, 0.5, 1, 0],
                           [0, 0.5, 1, 1],
                           [0, 0.5, 1, 0.5]]]).astype(np.float)

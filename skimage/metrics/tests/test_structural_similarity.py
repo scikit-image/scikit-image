@@ -10,10 +10,10 @@ from skimage._shared.testing import (assert_equal, assert_almost_equal,
                                      assert_array_almost_equal, fetch)
 
 np.random.seed(5)
-cam = data.camera()
+grass = data.grass()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
-cam_noisy = cam_noisy.astype(cam.dtype)
+grass_noisy = np.clip(grass + sigma * np.random.randn(*grass.shape), 0, 255)
+grass_noisy = grass_noisy.astype(grass.dtype)
 
 np.random.seed(1234)
 
@@ -161,7 +161,7 @@ def test_gaussian_structural_similarity_vs_IPOL():
     # Tests vs. imdiff result from the following IPOL article and code:
     # https://www.ipol.im/pub/art/2011/g_lmii/
     mssim_IPOL = 0.327309966087341
-    mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
+    mssim = structural_similarity(grass, grass_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
 
@@ -172,12 +172,12 @@ def test_gaussian_mssim_vs_author_ref():
     https://ece.uwaterloo.ca/~z70wang/research/ssim/
 
     Matlab test code:
-       img1 = imread('camera.png')
-       img2 = imread('camera_noisy.png')
+       img1 = imread('grassera.png')
+       img2 = imread('grassera_noisy.png')
        mssim = structural_similarity_index(img1, img2)
     """
     mssim_matlab = 0.327314295673357
-    mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
+    mssim = structural_similarity(grass, grass_noisy, gaussian_weights=True,
                                   use_sample_covariance=False)
     assert_almost_equal(mssim, mssim_matlab, decimal=10)
 
@@ -191,7 +191,7 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
     grad_matlab = ref['grad_matlab']
     mssim_matlab = float(ref['mssim_matlab'])
 
-    mssim, grad = structural_similarity(cam, cam_noisy, gaussian_weights=True,
+    mssim, grad = structural_similarity(grass, grass_noisy, gaussian_weights=True,
                                         gradient=True,
                                         use_sample_covariance=False)
 
@@ -204,19 +204,19 @@ def test_gaussian_mssim_and_gradient_vs_Matlab():
 def test_mssim_vs_legacy():
     # check that ssim with default options matches skimage 0.11 result
     mssim_skimage_0pt11 = 0.34192589699605191
-    mssim = structural_similarity(cam, cam_noisy)
+    mssim = structural_similarity(grass, grass_noisy)
     assert_almost_equal(mssim, mssim_skimage_0pt11)
 
 
 def test_mssim_mixed_dtype():
-    mssim = structural_similarity(cam, cam_noisy)
+    mssim = structural_similarity(grass, grass_noisy)
     with expected_warnings(['Inputs have mismatched dtype']):
-        mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.float32))
+        mssim_mixed = structural_similarity(grass, grass_noisy.astype(np.float32))
     assert_almost_equal(mssim, mssim_mixed)
 
     # no warning when user supplies data_range
     mssim_mixed = structural_similarity(
-        cam, cam_noisy.astype(np.float32), data_range=255)
+        grass, grass_noisy.astype(np.float32), data_range=255)
     assert_almost_equal(mssim, mssim_mixed)
 
 

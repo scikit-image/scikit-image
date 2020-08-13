@@ -121,7 +121,7 @@ def test_normalize():
 
 np.random.seed(0)
 
-test_img_int = data.camera()
+test_img_int = data.grass()
 # squeeze image intensities to lower image contrast
 test_img = util.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)

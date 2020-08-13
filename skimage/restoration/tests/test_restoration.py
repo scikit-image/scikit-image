@@ -5,11 +5,11 @@ from skimage._shared.testing import fetch
 
 import skimage
 from skimage.color import rgb2gray
-from skimage.data import astronaut, camera, image_fetcher
+from skimage.data import astronaut, grass, image_fetcher
 from skimage import restoration
 from skimage.restoration import uft
 
-test_img = skimage.img_as_float(camera())
+test_img = skimage.img_as_float(grass())
 
 
 def test_wiener():
@@ -63,7 +63,7 @@ def test_image_shape():
     point[2, 2] = 1.
     psf = ndi.gaussian_filter(point, sigma=1.)
     # image shape: (45, 45), as reported in #1172
-    image = skimage.img_as_float(camera()[110:155, 225:270]) # just the face
+    image = skimage.img_as_float(grass()[110:155, 225:270])
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]

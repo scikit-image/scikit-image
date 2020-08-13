@@ -9,42 +9,42 @@ from skimage.metrics import (peak_signal_noise_ratio, normalized_root_mse,
 
 
 np.random.seed(5)
-cam = data.camera()
+grass = data.grass()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * np.random.randn(*cam.shape), 0, 255)
-cam_noisy = cam_noisy.astype(cam.dtype)
+grass_noisy = np.clip(grass + sigma * np.random.randn(*grass.shape), 0, 255)
+grass_noisy = grass_noisy.astype(grass.dtype)
 
 
 def test_PSNR_vs_IPOL():
     # Tests vs. imdiff result from the following IPOL article and code:
     # https://www.ipol.im/pub/art/2011/g_lmii/
     p_IPOL = 22.4497
-    p = peak_signal_noise_ratio(cam, cam_noisy)
+    p = peak_signal_noise_ratio(grass, grass_noisy)
     assert_almost_equal(p, p_IPOL, decimal=4)
 
 
 def test_PSNR_float():
-    p_uint8 = peak_signal_noise_ratio(cam, cam_noisy)
-    p_float64 = peak_signal_noise_ratio(cam / 255., cam_noisy / 255.,
+    p_uint8 = peak_signal_noise_ratio(grass, grass_noisy)
+    p_float64 = peak_signal_noise_ratio(grass / 255., grass_noisy / 255.,
                                         data_range=1)
     assert_almost_equal(p_uint8, p_float64, decimal=5)
 
     # mixed precision inputs
-    p_mixed = peak_signal_noise_ratio(cam / 255., np.float32(cam_noisy / 255.),
+    p_mixed = peak_signal_noise_ratio(grass / 255., np.float32(grass_noisy / 255.),
                                       data_range=1)
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
     # mismatched dtype results in a warning if data_range is unspecified
     with expected_warnings(['Inputs have mismatched dtype']):
-        p_mixed = peak_signal_noise_ratio(cam / 255.,
-                                          np.float32(cam_noisy / 255.))
+        p_mixed = peak_signal_noise_ratio(grass / 255.,
+                                          np.float32(grass_noisy / 255.))
     assert_almost_equal(p_mixed, p_float64, decimal=5)
 
 
 def test_PSNR_errors():
     # shape mismatch
     with testing.raises(ValueError):
-        peak_signal_noise_ratio(cam, cam[:-1, :])
+        peak_signal_noise_ratio(grass, grass[:-1, :])
 
 
 def test_NRMSE():
@@ -64,12 +64,12 @@ def test_NRMSE():
 
 
 def test_NRMSE_no_int_overflow():
-    camf = cam.astype(np.float32)
-    cam_noisyf = cam_noisy.astype(np.float32)
-    assert_almost_equal(mean_squared_error(cam, cam_noisy),
-                        mean_squared_error(camf, cam_noisyf))
-    assert_almost_equal(normalized_root_mse(cam, cam_noisy),
-                        normalized_root_mse(camf, cam_noisyf))
+    grassf = grass.astype(np.float32)
+    grass_noisyf = grass_noisy.astype(np.float32)
+    assert_almost_equal(mean_squared_error(grass, grass_noisy),
+                        mean_squared_error(grassf, grass_noisyf))
+    assert_almost_equal(normalized_root_mse(grass, grass_noisy),
+                        normalized_root_mse(grassf, grass_noisyf))
 
 
 def test_NRMSE_errors():
