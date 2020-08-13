@@ -23,7 +23,6 @@ __all__ = ['data_dir',
            'astronaut',
            'binary_blobs',
            'brick',
-           'camera',
            'cell',
            'checkerboard',
            'chelsea',
@@ -332,19 +331,6 @@ def _load(f, as_gray=False):
     # we lazy import it here
     from ..io import imread
     return imread(_fetch(f), as_gray=as_gray)
-
-
-def camera():
-    """Gray-level "camera" image.
-
-    Often used for segmentation and denoising examples.
-
-    Returns
-    -------
-    camera : (512, 512) uint8 ndarray
-        Camera image.
-    """
-    return _load("data/camera.png")
 
 
 def astronaut():
