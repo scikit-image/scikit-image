@@ -112,7 +112,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     windowed = as_strided(img, shape, strides)
 
     offsets = np.arange(img.size).reshape(img.shape)
-    offsets = as_strided(offsets, image.shape, offsets.strides).ravel().astype(np.intp)
+    offsets = as_strided(offsets, image.shape,
+                         offsets.strides).ravel().astype(np.intp)
 
     if has_nan:
         background = apply_kernel_nan(windowed, kernel, cap_height, offsets)
