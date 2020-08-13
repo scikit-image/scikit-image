@@ -11,6 +11,8 @@ from ..util import crop, dtype_limits
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices_lut,
                                   _get_multiotsu_thresh_indices)
 
+from ._sparse import correlate_sparse
+
 
 __all__ = ['try_all_threshold',
            'threshold_otsu',
@@ -899,9 +901,9 @@ def _mean_std(image, w):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     total_window_size = np.prod(w)
-    sum_full = ndi.correlate(integral, kern, mode='constant')
+    sum_full = correlate_sparse(integral, kern, mode='constant')
     m = crop(sum_full, pad_width) / total_window_size
-    sum_sq_full = ndi.correlate(integral_sq, kern, mode='constant')
+    sum_sq_full = correlate_sparse(integral_sq, kern, mode='constant')
     g2 = crop(sum_sq_full, pad_width) / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
