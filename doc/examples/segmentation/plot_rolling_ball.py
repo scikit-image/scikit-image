@@ -42,7 +42,6 @@ import time
 from skimage import morphology
 from skimage import data
 from skimage import util
-from skimage import img_as_float
 
 
 def plot_result(image, background):
@@ -76,15 +75,60 @@ plt.show()
 #
 # If you have dark features on a bright background, you need to invert
 # the image before you pass it into the function, and then invert the
-# result. This can easily be accomplished via:
+# result. This can be accomplished via:
 
 image = data.page()
 image_inverted = util.invert(image)
 
-background = morphology.rolling_ball(image_inverted, radius=45)
-background = util.invert(background)
+background_inverted = morphology.rolling_ball(image_inverted, radius=45)
+filtered_image_inverted = image_inverted - background_inverted
+filtered_image = util.invert(filtered_image_inverted)
+background = util.invert(background_inverted)
 
-plot_result(image, background)
+fig, ax = plt.subplots(nrows=1, ncols=3)
+
+ax[0].imshow(image, cmap='gray')
+ax[0].set_title('Original image')
+ax[0].axis('off')
+
+ax[1].imshow(background, cmap='gray')
+ax[1].set_title('Background')
+ax[1].axis('off')
+
+ax[2].imshow(filtered_image, cmap='gray')
+ax[2].set_title('Result')
+ax[2].axis('off')
+
+fig.tight_layout()
+
+plt.show()
+
+######################################################################
+# Take care to not fall victim to an integer underflow when subtracting
+# a bright background. For example, this code looks correct, but may
+# suffer from an underflow leading to unwanted artifacts. You can see
+# this in the top right corner of the visualization.
+
+image = data.page()
+image_inverted = util.invert(image)
+
+background_inverted = morphology.rolling_ball(image_inverted, radius=45)
+background = util.invert(background_inverted)
+underflow_image = image - background  # integer underflow occurs here
+correct_image = util.invert(background - image)  # correct subtraction
+
+fig, ax = plt.subplots(nrows=1, ncols=2)
+
+ax[0].imshow(underflow_image, cmap='gray')
+ax[0].set_title('Background Removal with Underflow')
+ax[0].axis('off')
+
+ax[1].imshow(correct_image, cmap='gray')
+ax[1].set_title('Correct Background Removal')
+ax[1].axis('off')
+
+fig.tight_layout()
+
 plt.show()
 
 ######################################################################
@@ -101,12 +145,12 @@ plot_result(image, background)
 plt.show()
 
 ######################################################################
-# However, you need to be careful if you use floating point images that
-# have been normalized to ``[0, 1]``. In this case the ball will be
-# much larger than the image intensity, which can lead to unexpected
-# results.
+# However, you need to be careful if you use floating point images
+# that have been normalized to ``[0, 1]``. In this case the ball will
+# be much larger than the image intensity, which can lead to
+# unexpected results.
 
-image = img_as_float(data.coins())
+image = util.img_as_float(data.coins())
 
 background = morphology.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -126,7 +170,7 @@ plt.show()
 # parameters for the spatial dimensions and the intensity dimension of
 # the image.
 
-image = img_as_float(data.coins())
+image = util.img_as_float(data.coins())
 
 normalized_radius = 70.5 / 255
 background = morphology.rolling_ellipsoid(
