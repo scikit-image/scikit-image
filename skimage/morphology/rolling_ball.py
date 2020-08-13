@@ -2,7 +2,7 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from skimage.util import invert, view_as_windows
-from ._rolling_ball_cy import apply_kernel, apply_kernel_nan, apply_kernel_flat
+from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
@@ -118,7 +118,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     if has_nan:
         background = apply_kernel_nan(windowed, kernel, cap_height, offsets)
     else:
-        background = apply_kernel_flat(windowed, kernel, cap_height, offsets)
+        background = apply_kernel(windowed, kernel, cap_height, offsets)
 
     background = background.reshape(image.shape)
     background = background.astype(image.dtype)
@@ -128,7 +128,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     return filtered_image
 
 
-def rolling_ball(image, radius=50, has_nan=False):
+def rolling_ball(image, radius=50, **kwargs):
     """
     Estimate background intensity using a rolling ball.
 
@@ -154,7 +154,10 @@ def rolling_ball(image, radius=50, has_nan=False):
 
     See Also
     --------
-    rolling_ellipsoid : generalization to elliptical kernels; used internally
+    rolling_ellipsoid :
+        additional keyword arguments
+        generalization to elliptical kernels; used internally
+
 
     Notes
     -----
@@ -178,4 +181,4 @@ def rolling_ball(image, radius=50, has_nan=False):
 
     kernel = (radius * 2, radius * 2)
     intensity_vertex = radius * 2
-    return rolling_ellipsoid(image, kernel, intensity_vertex, has_nan)
+    return rolling_ellipsoid(image, kernel, intensity_vertex, **kwargs)
