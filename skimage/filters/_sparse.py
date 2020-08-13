@@ -53,7 +53,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
     indices = np.nonzero(kernel)
     offsets = np.ravel_multi_index(indices, padded_image.shape).astype(np.intp)
     values = kernel[indices].astype(padded_image.dtype)
-    
+
     result = np.zeros(
         [a - b + 1 for a, b in zip(padded_image.shape, kernel.shape)],
         dtype=padded_image.dtype,
