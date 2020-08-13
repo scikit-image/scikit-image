@@ -1,16 +1,19 @@
+import cython
 cimport numpy as np
+from .._shared.fused_numerics cimport np_floats
 
-ctypedef np.int_t DTYPE_INT_T
-ctypedef np.float_t DTYPE_FLOAT_T
-def _correlate_sparse_offsets(double[:] input, long long [:] indices, 
-                                long long [:] offsets, double[:] values, 
-                                double[:] output):
-    cdef int i, j
-    cdef int indices_len = indices.shape[0]
-    cdef int value_len = values.shape[0]
-    cdef int off
-    cdef float val
-    cdef int vindex
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def _correlate_sparse_offsets(np_floats[:] input, Py_ssize_t[:] indices, 
+                                Py_ssize_t[:] offsets, np_floats[:] values, 
+                                np_floats[:] output):
+    cdef Py_ssize_t i
+    cdef Py_ssize_t indices_len = indices.shape[0]
+    cdef Py_ssize_t value_len = values.shape[0]
+    cdef Py_ssize_t off
+    cdef np_floats val
+    cdef Py_ssize_t vindex
     
     for vindex in range(value_len):
         off = offsets[vindex]

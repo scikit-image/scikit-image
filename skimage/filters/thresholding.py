@@ -901,10 +901,10 @@ def _mean_std(image, w):
         kern[indices] = (-1) ** (image.ndim % 2 != np.sum(indices) % 2)
 
     total_window_size = np.prod(w)
-    sum_full = correlate_sparse(integral, kern, mode='constant')
-    m = crop(sum_full, pad_width) / total_window_size
-    sum_sq_full = correlate_sparse(integral_sq, kern, mode='constant')
-    g2 = crop(sum_sq_full, pad_width) / total_window_size
+    sum_full = correlate_sparse(integral, kern, mode='valid')
+    m = sum_full / total_window_size
+    sum_sq_full = correlate_sparse(integral_sq, kern, mode='valid')
+    g2 = sum_sq_full / total_window_size
     # Note: we use np.clip because g2 is not guaranteed to be greater than
     # m*m when floating point error is considered
     s = np.sqrt(np.clip(g2 - m * m, 0, None))
