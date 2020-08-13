@@ -16,6 +16,21 @@ def test_ellipsoid_const():
     assert np.allclose(result, np.zeros_like(img))
 
 
+def test_nan_const():
+    img = 123 * np.ones((100, 100), dtype=np.float_)
+    img[20, 20] = np.nan
+    img[50, 53] = np.nan
+
+    kernel_size = (10, 10)
+    x = np.arange(-kernel_size[1]//2, kernel_size[1]//2 + 1)[np.newaxis, :]
+    y = np.arange(-kernel_size[0]//2, kernel_size[0]//2 + 1)[:, np.newaxis]
+    expected_img = np.zeros_like(img)
+    expected_img[y + 20, x + 20] = np.nan
+    expected_img[y + 50, x + 53] = np.nan
+    result = rolling_ellipsoid(img, kernel_size, has_nan=True)
+    assert np.allclose(result, expected_img, equal_nan=True)
+
+
 @pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50])
 def test_const_image(radius):
     # infinite plane light source at top left corner
