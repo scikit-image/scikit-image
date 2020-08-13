@@ -128,7 +128,7 @@ plt.show()
 
 image = img_as_float(data.coins())
 
-normalized_radius = 70.5/255
+normalized_radius = 70.5 / 255
 filtered_image = morphology.rolling_ellipsoid(
     image,
     kernel_size=(70.5 * 2, 70.5 * 2),

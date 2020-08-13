@@ -34,14 +34,14 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     Notes
     -----
 
-    - For the pixel that has its background intensity estimated (at ``(0,0)``)
-      the rolling ellipsoid method places an ellipsoid under it and
-      raises the ellipsoid until it touches the image umbra at ``pos=(y,x)``.
-      The background intensity is then estimated using the image intensity at
-      that position (``image[y, x]``) plus the difference of
-      ``intensity_vertex`` and the intensity of the ellipsoid at ``pos``. The
-      intensity of the ellipsoid is computed using the canonical ellipsis
-      equation::
+    - For the pixel that has its background intensity estimated (without loss
+      of generality at ``(0,0)``) the rolling ellipsoid method places an
+      ellipsoid under it and raises the ellipsoid until its surface touches the
+      image umbra at ``pos=(y,x)``. The background intensity is then estimated
+      using the image intensity at that position (``image[y, x]``) plus the
+      difference of ``intensity_vertex`` and the surface of the ellipsoid at
+      ``pos``. The surface intensity of the ellipsoid is computed using the
+      canonical ellipsis equation::
 
             semi_spatial = kernel_size / 2
             semi_vertex = intensity_vertex / 2
@@ -90,10 +90,8 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
 
     kernel_size_y, kernel_size_x = np.round(kernel_size).astype(int)
 
-    pad_amount = [(0, 0)] * image.ndim
-    pad_amount[-2] = (kernel_size_y, kernel_size_y)
-    pad_amount[-1] = (kernel_size_x, kernel_size_x)
-    img = np.pad(img, pad_amount,  constant_values=np.Inf, mode="constant")
+    pad_amount = [[0]] * (image.ndim - 2) + [[kernel_size_y], [kernel_size_x]]
+    img = np.pad(img, pad_amount, constant_values=np.Inf, mode="constant")
 
     tmp_x = np.arange(-kernel_size_x, kernel_size_x + 1)
     tmp_y = np.arange(-kernel_size_y, kernel_size_y + 1)
@@ -108,23 +106,19 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     kernel = np.asarray(tmp <= 1, dtype=np.float_)
     kernel[kernel == 0] = np.Inf
 
+    strides = (img.itemsize, img.strides[-2], img.itemsize)
+    shape = (img.size - (kernel.shape[0] - 1) *
+             img.shape[-1] - (kernel.shape[1] - 1), *kernel.shape)
+    windowed = as_strided(img, shape, strides)
+
     if has_nan:
-        strides = (img.itemsize, img.strides[-2], img.itemsize)
-        shape = (img.size - (kernel.shape[0] - 1) * img.shape[-1] -
-                 (kernel.shape[1] - 1), *kernel.shape)
-        windowed = as_strided(img, shape, strides)
         background = apply_kernel_nan(windowed, kernel, cap_height)
-        background = as_strided(background, image.shape, img.strides)
     else:
         # windowed = view_as_windows(img, kernel.shape)
         # background = apply_kernel(windowed, kernel, cap_height)
-        strides = (img.itemsize, img.strides[-2], img.itemsize)
-        shape = (img.size - (kernel.shape[0] - 1) * img.shape[-1] -
-                 (kernel.shape[1] - 1), *kernel.shape)
-        windowed = as_strided(img, shape, strides)
         background = apply_kernel_flat(windowed, kernel, cap_height)
-        background = as_strided(background, image.shape, img.strides)
 
+    background = as_strided(background, image.shape, img.strides)
     background = background.astype(image.dtype)
 
     filtered_image = image - background
