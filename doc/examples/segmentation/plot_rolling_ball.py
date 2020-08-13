@@ -45,18 +45,18 @@ from skimage import util
 from skimage import img_as_float
 
 
-def plot_result(image, filtered_image):
+def plot_result(image, background):
     fig, ax = plt.subplots(nrows=1, ncols=3)
 
     ax[0].imshow(image, cmap='gray')
     ax[0].set_title('Original image')
     ax[0].axis('off')
 
-    ax[1].imshow(image - filtered_image, cmap='gray')
+    ax[1].imshow(background, cmap='gray')
     ax[1].set_title('Background')
     ax[1].axis('off')
 
-    ax[2].imshow(filtered_image, cmap='gray')
+    ax[2].imshow(image - background, cmap='gray')
     ax[2].set_title('Result')
     ax[2].axis('off')
 
@@ -65,9 +65,9 @@ def plot_result(image, filtered_image):
 
 image = data.coins()
 
-filtered_image = morphology.rolling_ball(image, radius=70.5)
+background = morphology.rolling_ball(image, radius=70.5)
 
-plot_result(image, filtered_image)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -81,10 +81,10 @@ plt.show()
 image = data.page()
 image_inverted = util.invert(image)
 
-filtered_image = morphology.rolling_ball(image_inverted, radius=45)
-filtered_image = util.invert(filtered_image)
+background = morphology.rolling_ball(image_inverted, radius=45)
+background = util.invert(background)
 
-plot_result(image, filtered_image)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -96,8 +96,8 @@ plt.show()
 
 image = data.coins().astype(np.uint16)
 
-filtered_image = morphology.rolling_ball(image, radius=70.5)
-plot_result(image, filtered_image)
+background = morphology.rolling_ball(image, radius=70.5)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -108,8 +108,8 @@ plt.show()
 
 image = img_as_float(data.coins())
 
-filtered_image = morphology.rolling_ball(image, radius=70.5)
-plot_result(image, filtered_image)
+background = morphology.rolling_ball(image, radius=70.5)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -129,12 +129,12 @@ plt.show()
 image = img_as_float(data.coins())
 
 normalized_radius = 70.5 / 255
-filtered_image = morphology.rolling_ellipsoid(
+background = morphology.rolling_ellipsoid(
     image,
     kernel_size=(70.5 * 2, 70.5 * 2),
     intensity_vertex=normalized_radius * 2
 )
-plot_result(image, filtered_image)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -160,12 +160,12 @@ plt.show()
 
 image = data.coins()
 
-filtered_image = morphology.rolling_ellipsoid(
+background = morphology.rolling_ellipsoid(
     image,
     kernel_size=(70.5 * 2, 70.5 * 2),
     intensity_vertex=70.5 * 2
 )
-plot_result(image, filtered_image)
+plot_result(image, background)
 plt.show()
 
 ######################################################################
@@ -175,10 +175,10 @@ plt.show()
 
 image = data.coins()
 
-filtered_image = morphology.rolling_ellipsoid(
+background = morphology.rolling_ellipsoid(
     image,
     kernel_size=(10 * 2, 10 * 2),
     intensity_vertex=255 * 2
 )
-plot_result(image, filtered_image)
+plot_result(image, background)
 plt.show()

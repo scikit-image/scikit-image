@@ -29,7 +29,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     Returns
     -------
     filtered_image : ndarray
-        The image with background removed.
+        The estimated background of the image.
 
     Notes
     -----
@@ -64,7 +64,9 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ellipsoid
-    >>> result = rolling_ellipsoid(data.coins())
+    >>> image = data.coins()
+    >>> background = rolling_ellipsoid(data.coins())
+    >>> filtered_image = image - background
     """
 
     kernel_size = np.asarray(kernel_size)
@@ -123,9 +125,7 @@ def rolling_ellipsoid(image, kernel_size=(100, 100), intensity_vertex=100,
     background = background.reshape(image.shape)
     background = background.astype(image.dtype)
 
-    filtered_image = image - background
-
-    return filtered_image
+    return background
 
 
 def rolling_ball(image, radius=50, **kwargs):
@@ -150,7 +150,7 @@ def rolling_ball(image, radius=50, **kwargs):
     Returns
     -------
     filtered_image : ndarray
-        The image with background removed.
+        The estimated background of the image.
 
     See Also
     --------
@@ -171,7 +171,9 @@ def rolling_ball(image, radius=50, **kwargs):
     >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.morphology import rolling_ball
-    >>> result = rolling_ball(data.coins(), radius=200)
+    >>> image = data.coins()
+    >>> background = rolling_ball(image, radius=200)
+    >>> filtered_image = image - background
     """
 
     if not np.issubdtype(np.asarray(radius).dtype, np.number):

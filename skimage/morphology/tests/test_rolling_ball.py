@@ -12,8 +12,8 @@ from skimage.morphology import rolling_ball, rolling_ellipsoid
 
 def test_ellipsoid_const():
     img = 155 * np.ones((100, 100), dtype=np.uint8)
-    result = rolling_ellipsoid(img, kernel_size=(25, 53))
-    assert np.allclose(result, np.zeros_like(img))
+    background = rolling_ellipsoid(img, kernel_size=(25, 53))
+    assert np.allclose(img - background, np.zeros_like(img))
 
 
 def test_nan_const():
@@ -27,16 +27,16 @@ def test_nan_const():
     expected_img = np.zeros_like(img)
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
-    result = rolling_ellipsoid(img, kernel_size, has_nan=True)
-    assert np.allclose(result, expected_img, equal_nan=True)
+    background = rolling_ellipsoid(img, kernel_size, has_nan=True)
+    assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
 @pytest.mark.parametrize("radius", [1, 2.5, 10.346, 50])
 def test_const_image(radius):
     # infinite plane light source at top left corner
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    result = rolling_ball(img, radius)
-    assert np.allclose(result, np.zeros_like(img))
+    background = rolling_ball(img, radius)
+    assert np.allclose(img - background, np.zeros_like(img))
 
 
 def test_radial_gradient():
@@ -45,8 +45,8 @@ def test_radial_gradient():
     x, y = np.meshgrid(range(5), range(5))
     img = np.sqrt(np.clip(spot_radius ** 2 - y ** 2 - x ** 2, 0, None))
 
-    result = rolling_ball(img, radius=5)
-    assert np.allclose(result, np.zeros_like(img))
+    background = rolling_ball(img, radius=5)
+    assert np.allclose(img - background, np.zeros_like(img))
 
 
 def test_linear_gradient():
@@ -57,8 +57,8 @@ def test_linear_gradient():
     expected_img = 19 * np.ones_like(img)
     expected_img[0, 0] = 0
 
-    result = rolling_ball(img, radius=1)
-    assert np.allclose(result, expected_img)
+    background = rolling_ball(img, radius=1)
+    assert np.allclose(img - background, expected_img)
 
 
 @pytest.mark.parametrize("radius", [2, 10, 12.5, 50])
@@ -70,5 +70,5 @@ def test_preserve_peaks(radius):
     img[45, 26] = 156
 
     expected_img = img - 10
-    result = rolling_ball(img, radius)
-    assert np.allclose(result, expected_img)
+    background = rolling_ball(img, radius)
+    assert np.allclose(img - background, expected_img)
