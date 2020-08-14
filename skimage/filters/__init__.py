@@ -14,7 +14,7 @@ from .thresholding import (threshold_local, threshold_otsu, threshold_yen,
                            threshold_mean, threshold_triangle,
                            threshold_niblack, threshold_sauvola,
                            threshold_multiotsu, try_all_threshold,
-                           apply_hysteresis_threshold)
+                           apply_hysteresis_threshold, threshold_phansalkar)
 from .ridges import (meijering, sato, frangi, hessian)
 from . import rank
 from ._median import median
@@ -58,6 +58,7 @@ __all__ = ['inverse',
            'threshold_mean',
            'threshold_niblack',
            'threshold_sauvola',
+           'threshold_phansalkar',
            'threshold_triangle',
            'threshold_multiotsu',
            'apply_hysteresis_threshold',

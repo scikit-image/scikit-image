@@ -24,7 +24,8 @@ __all__ = ['try_all_threshold',
            'threshold_sauvola',
            'threshold_triangle',
            'apply_hysteresis_threshold',
-           'threshold_multiotsu']
+           'threshold_multiotsu',
+           'threshold_phansalkar']
 
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
@@ -109,6 +110,10 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     * otsu
     * triangle
     * yen
+    * local
+    * niblack
+    * sauvola
+    * phansalkar
 
     Examples
     --------
@@ -117,10 +122,22 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """
     def thresh(func):
         """
-        A wrapper function to return a thresholded image.
+        Select a wrapper function to return a thresholded image.
         """
-        def wrapper(im):
-            return im > func(im)
+        if func is threshold_local:
+            # threshold_local requires the additional parameter 'block_size'
+            def wrapper(im):
+                return im > func(im, 15)
+        elif func is threshold_phansalkar:
+            # threshold_phansalkar requires an equalized image
+            def wrapper(im):
+                im_eq = equalize_adapthist(im)
+                return im_eq > func(im_eq)
+        else:
+            # standard case
+            def wrapper(im):
+                return im > func(im)
+
         try:
             wrapper.__orifunc__ = func.__orifunc__
         except AttributeError:
@@ -134,10 +151,14 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
                            'Minimum': thresh(threshold_minimum),
                            'Otsu': thresh(threshold_otsu),
                            'Triangle': thresh(threshold_triangle),
-                           'Yen': thresh(threshold_yen)})
+                           'Yen': thresh(threshold_yen),
+                           'Local': thresh(threshold_local),
+                           'Niblack': thresh(threshold_niblack),
+                           'Sauvola': thresh(threshold_sauvola),
+                           'Phansalkar': thresh(threshold_phansalkar)})
 
     return _try_all(image, figsize=figsize,
-                    methods=methods, verbose=verbose)
+                    methods=methods, num_cols=4, verbose=verbose)
 
 
 def threshold_local(image, block_size, method='gaussian', offset=0,
@@ -846,8 +867,9 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = ('Window size for `threshold_sauvola` or '
-                   '`threshold_niblack` must not be even on any dimension. '
+            msg = ('Window size for `threshold_sauvola`, '
+                   '`threshold_niblack` or `threshold_phansalkar` '
+                   'must not be even on any dimension. '
                    'Got {}'.format(axis_sizes))
             raise ValueError(msg)
 
@@ -855,8 +877,9 @@ def _validate_window_size(axis_sizes):
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
-    The algorithm uses integral images to speedup computation. This is
-    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
+    The algorithm uses integral images to speedup computation.
+    This is used by :func:`threshold_niblack`, :func:`threshold_sauvola`
+    and :func:`threshold_phansalkar`.
 
     Parameters
     ----------
@@ -1171,3 +1194,71 @@ def threshold_multiotsu(image, classes=3, nbins=256):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
+
+def threshold_phansalkar(image, window_size=15, k=0.25, r=None, p=2.0, q=10.0):
+    """Find the Phansalkar local threshold for an array.
+
+    Phansalkar is a modification of Sauvola thresholding designed to deal with
+    low contrast images.
+
+    This method is using the following formula::
+        T = m(x,y) * (1 + p * exp( -q * m(x,y) ) + k * ((s(x,y) / R) - 1))
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k, p and q are configurable parameters.
+    R is the maximum standard deviation of a greyscale image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    window_size : int, or iterable of int, optional
+        Window size specified as a single odd integer (3, 5, 7, …),
+        or an iterable of length ``image.ndim`` containing only odd
+        integers (e.g. ``(1, 5, 5)``).
+    k : float, optional
+        Value of the positive parameter k.
+    r : float, optional
+        Value of R, the dynamic range of standard deviation.
+        If None, set to the half of the image dtype range.
+    p : float, optional
+        Value of the parameter p.
+    q : float, optional
+        Value of the parameter q.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Threshold mask. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    Notes
+    -----
+    This algorithm is originally designed for detection of cell nuclei in low
+    contrast images. Therefore the historgram has to be equalized beforehand
+    using :func:`skimage.exposure.equalize_adapthist`.
+
+    References
+    ----------
+    .. [1] Phansalskar N. et al. "Adaptive local thresholding for detection of
+           nuclei in diversity stained cytology images.", International
+           Conference on Communications and Signal Processing (ICCSP),
+           pp. 218-220, 2011
+           :DOI:`10.1109/ICCSP.2011.5739305`
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.exposure import equalize_adapthist
+    >>> image = data.moon()
+    >>> image_eq = equalize_adapthist(image)
+    >>> t_phansalkar = threshold_phansalkar(image_eq, window_size=15, k=0.25)
+    >>> binary_image = image_eq > t_phansalkar
+    """
+
+    if r is None:
+        imin, imax = dtype_limits(image, clip_negative=False)
+        r = 0.5 * (imax - imin)
+    m, s = _mean_std(image, window_size)
+    return m * (1 + np.power(p, (-q * m)) + k * ((s / r) - 1))
