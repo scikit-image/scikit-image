@@ -1,18 +1,6 @@
 import numpy as np
 from ._sparse_cy import _correlate_sparse_offsets
 
-
-def broadcast_mgrid(arrays):
-    shape = tuple(map(len, arrays))
-    ndim = len(shape)
-    result = []
-    for i, arr in enumerate(arrays, start=1):
-        reshaped = np.broadcast_to(arr[(...,) + (np.newaxis,) * (ndim - i)],
-                                   shape)
-        result.append(reshaped)
-    return result
-
-
 def correlate_sparse(image, kernel, mode='reflect'):
     """Compute valid cross-correlation of `padded_array` and `kernel`.
 
@@ -58,8 +46,16 @@ def correlate_sparse(image, kernel, mode='reflect'):
         [a - b + 1 for a, b in zip(padded_image.shape, kernel.shape)],
         dtype=padded_image.dtype,
     )
-    corner_multi_indices = broadcast_mgrid([np.arange(i)
-                                            for i in result.shape])
+
+    # memory-efficient version of numpy.mgrid
+    corner_multi_indices = np.broadcast_arrays(
+                        *np.meshgrid(
+                            *[np.arange(i) for i in result.shape], 
+                            indexing='ij', 
+                            sparse=True
+                            )
+                        )
+
     corner_indices = np.ravel_multi_index(
         corner_multi_indices, padded_image.shape
     ).ravel().astype(np.intp)
