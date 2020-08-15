@@ -155,9 +155,12 @@ def configuration(parent_package='', top_path=None):
 
 
 if __name__ == "__main__":
+    cmdclass = {'build_py': build_py,
+                'sdist': sdist}
     try:
         from numpy.distutils.core import setup
         extra = {'configuration': configuration}
+        cmdclass['build_ext'] = openmp_build_ext()
     except ImportError:
         if len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or
                                    sys.argv[1] in ('--help-commands',
@@ -165,7 +168,8 @@ if __name__ == "__main__":
                                                    'clean',
                                                    'egg_info',
                                                    'install_egg_info',
-                                                   'rotate')):
+                                                   'rotate',
+                                                   'sdist')):
             # For these actions, NumPy is not required.
             #
             # They are required to succeed without Numpy for example when
@@ -230,8 +234,6 @@ if __name__ == "__main__":
             'console_scripts': ['skivi = skimage.scripts.skivi:main'],
         },
 
-        cmdclass={'build_py': build_py,
-                  'build_ext': openmp_build_ext(),
-                  'sdist': sdist},
+        cmdclass=cmdclass,
         **extra
     )
