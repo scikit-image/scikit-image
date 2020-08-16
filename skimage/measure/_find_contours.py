@@ -26,6 +26,9 @@ def find_contours(image, level=None,
     level : float, optional
         Value along which to find contours in the array. By default, the level
         is set to (max(image) - min(image)) / 2
+
+        .. versionchanged:: 0.18
+            This parameter is now optional.
     fully_connected : str, {'low', 'high'}
          Indicates whether array elements below the given level value are to be
          considered fully-connected (and hence elements above the value will
