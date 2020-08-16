@@ -30,7 +30,7 @@ $ pip install -U -r requirements/default.txt
 $ pip install -U -r requirements/test.txt
 ```
 
-## Blocked justification
+## Justification for blocked versions
 
 * Cython 0.28.2 was empircally found to fail tests while other patch-releases 0.28.x do not
 * Cython 0.29.0 erroneously sets the `__path__` to `None`. See https://github.com/cython/cython/issues/2662
