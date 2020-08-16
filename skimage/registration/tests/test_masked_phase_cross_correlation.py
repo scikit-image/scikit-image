@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import fourier_shift
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, fetch, expected_warnings
-from skimage.data import grass, stereo_motorcycle
+from skimage.data import camera, stereo_motorcycle
 from skimage.registration import phase_cross_correlation
 from skimage.registration._masked_phase_cross_correlation import (
     _masked_phase_cross_correlation as masked_register_translation,
@@ -24,7 +24,7 @@ def test_detrecated_masked_register_translation():
 def test_masked_registration_vs_phase_cross_correlation():
     """masked_register_translation should give the same results as
     phase_cross_correlation in the case of trivial masks."""
-    reference_image = grass()
+    reference_image = camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(
         fft.fft2(reference_image), shift)))
@@ -45,7 +45,7 @@ def test_masked_registration_random_masks():
     # See random number generator for reproducible results
     np.random.seed(23)
 
-    reference_image = grass()
+    reference_image = camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(
         fft.fft2(reference_image), shift)))
@@ -70,7 +70,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
     # See random number generator for reproducible results
     np.random.seed(23)
 
-    reference_image = grass()
+    reference_image = camera()
     shift = (-7, 12)
     shifted = np.real(fft.ifft2(fourier_shift(
         fft.fft2(reference_image), shift)))
@@ -243,7 +243,7 @@ def test_cross_correlate_masked_autocorrelation_trivial_masks():
     # See random number generator for reproducible results
     np.random.seed(23)
 
-    arr1 = grass()
+    arr1 = camera()
 
     # Random masks with 75% of pixels being valid
     m1 = np.random.choice([True, False], arr1.shape, p=[3 / 4, 1 / 4])

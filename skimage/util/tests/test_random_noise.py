@@ -2,28 +2,28 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_array_equal, assert_allclose
 
 import numpy as np
-from skimage.data import grass
+from skimage.data import camera
 from skimage.util import random_noise, img_as_float
 
 
 def test_set_seed():
     seed = 42
-    data = grass()
-    test = random_noise(data, seed=seed)
-    assert_array_equal(test, random_noise(data, seed=seed))
+    cam = camera()
+    test = random_noise(cam, seed=seed)
+    assert_array_equal(test, random_noise(cam, seed=seed))
 
 
 def test_salt():
     seed = 42
-    data = img_as_float(grass())
-    data_noisy = random_noise(data, seed=seed, mode='salt', amount=0.15)
-    saltmask = data != data_noisy
+    cam = img_as_float(camera())
+    cam_noisy = random_noise(cam, seed=seed, mode='salt', amount=0.15)
+    saltmask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
-    assert_allclose(data_noisy[saltmask], np.ones(saltmask.sum()))
+    assert_allclose(cam_noisy[saltmask], np.ones(saltmask.sum()))
 
     # Ensure approximately correct amount of noise was added
-    proportion = float(saltmask.sum()) / (data.shape[0] * data.shape[1])
+    proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
     assert 0.11 < proportion <= 0.15
 
 
@@ -42,44 +42,44 @@ def test_singleton_dim():
 
 def test_pepper():
     seed = 42
-    data = img_as_float(grass())
-    data_signed = data * 2. - 1.   # Same image, on range [-1, 1]
+    cam = img_as_float(camera())
+    data_signed = cam * 2. - 1.   # Same image, on range [-1, 1]
 
-    data_noisy = random_noise(data, seed=seed, mode='pepper', amount=0.15)
-    peppermask = data != data_noisy
+    cam_noisy = random_noise(cam, seed=seed, mode='pepper', amount=0.15)
+    peppermask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
-    assert_allclose(data_noisy[peppermask], np.zeros(peppermask.sum()))
+    assert_allclose(cam_noisy[peppermask], np.zeros(peppermask.sum()))
 
     # Ensure approximately correct amount of noise was added
-    proportion = float(peppermask.sum()) / (data.shape[0] * data.shape[1])
+    proportion = float(peppermask.sum()) / (cam.shape[0] * cam.shape[1])
     assert 0.11 < proportion <= 0.15
 
     # Check to make sure pepper gets added properly to signed images
     orig_zeros = (data_signed == -1).sum()
-    data_noisy_signed = random_noise(data_signed, seed=seed, mode='pepper',
+    cam_noisy_signed = random_noise(data_signed, seed=seed, mode='pepper',
                                     amount=.15)
 
-    proportion = (float((data_noisy_signed == -1).sum() - orig_zeros) /
-                  (data.shape[0] * data.shape[1]))
+    proportion = (float((cam_noisy_signed == -1).sum() - orig_zeros) /
+                  (cam.shape[0] * cam.shape[1]))
     assert 0.11 < proportion <= 0.15
 
 
 def test_salt_and_pepper():
     seed = 42
-    data = img_as_float(grass())
-    data_noisy = random_noise(data, seed=seed, mode='s&p', amount=0.15,
+    cam = img_as_float(camera())
+    cam_noisy = random_noise(cam, seed=seed, mode='s&p', amount=0.15,
                              salt_vs_pepper=0.25)
-    saltmask = np.logical_and(data != data_noisy, data_noisy == 1.)
-    peppermask = np.logical_and(data != data_noisy, data_noisy == 0.)
+    saltmask = np.logical_and(cam != cam_noisy, cam_noisy == 1.)
+    peppermask = np.logical_and(cam != cam_noisy, cam_noisy == 0.)
 
     # Ensure all changes are to 0. or 1.
-    assert_allclose(data_noisy[saltmask], np.ones(saltmask.sum()))
-    assert_allclose(data_noisy[peppermask], np.zeros(peppermask.sum()))
+    assert_allclose(cam_noisy[saltmask], np.ones(saltmask.sum()))
+    assert_allclose(cam_noisy[peppermask], np.zeros(peppermask.sum()))
 
     # Ensure approximately correct amount of noise was added
     proportion = float(
-        saltmask.sum() + peppermask.sum()) / (data.shape[0] * data.shape[1])
+        saltmask.sum() + peppermask.sum()) / (cam.shape[0] * cam.shape[1])
     assert 0.11 < proportion <= 0.18
 
     # Verify the relative amount of salt vs. pepper is close to expected
@@ -138,74 +138,74 @@ def test_speckle():
 
 def test_poisson():
     seed = 42
-    data = grass()  # 512x512 grayscale uint8
-    data_noisy = random_noise(data, mode='poisson', seed=seed)
-    data_noisy2 = random_noise(data, mode='poisson', seed=seed, clip=False)
+    data = camera()  # 512x512 grayscale uint8
+    cam_noisy = random_noise(data, mode='poisson', seed=seed)
+    cam_noisy2 = random_noise(data, mode='poisson', seed=seed, clip=False)
 
     np.random.seed(seed=seed)
     expected = np.random.poisson(img_as_float(data) * 256) / 256.
-    assert_allclose(data_noisy, np.clip(expected, 0., 1.))
-    assert_allclose(data_noisy2, expected)
+    assert_allclose(cam_noisy, np.clip(expected, 0., 1.))
+    assert_allclose(cam_noisy2, expected)
 
 
 def test_clip_poisson():
     seed = 42
-    data = grass()                             # 512x512 grayscale uint8
+    data = camera()                             # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
-    data_poisson = random_noise(data, mode='poisson', seed=seed, clip=True)
-    data_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
+    cam_poisson = random_noise(data, mode='poisson', seed=seed, clip=True)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
                                 clip=True)
-    assert (data_poisson.max() == 1.) and (data_poisson.min() == 0.)
-    assert (data_poisson2.max() == 1.) and (data_poisson2.min() == -1.)
+    assert (cam_poisson.max() == 1.) and (cam_poisson.min() == 0.)
+    assert (cam_poisson2.max() == 1.) and (cam_poisson2.min() == -1.)
 
     # Signed and unsigned, unclipped
-    data_poisson = random_noise(data, mode='poisson', seed=seed, clip=False)
-    data_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
+    cam_poisson = random_noise(data, mode='poisson', seed=seed, clip=False)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
                                 clip=False)
-    assert (data_poisson.max() > 1.15) and (data_poisson.min() == 0.)
-    assert (data_poisson2.max() > 1.3) and (data_poisson2.min() == -1.)
+    assert (cam_poisson.max() > 1.15) and (cam_poisson.min() == 0.)
+    assert (cam_poisson2.max() > 1.3) and (cam_poisson2.min() == -1.)
 
 
 def test_clip_gaussian():
     seed = 42
-    data = grass()
+    data = camera()                             # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
-    data_gauss = random_noise(data, mode='gaussian', seed=seed, clip=True)
-    data_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
+    cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=True)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
                               clip=True)
-    assert (data_gauss.max() == 1.) and (data_gauss.min() == 0.)
-    assert (data_gauss2.max() == 1.) and (data_gauss2.min() == -1.)
+    assert (cam_gauss.max() == 1.) and (cam_gauss.min() == 0.)
+    assert (cam_gauss2.max() == 1.) and (cam_gauss2.min() == -1.)
 
     # Signed and unsigned, unclipped
-    data_gauss = random_noise(data, mode='gaussian', seed=seed, clip=False)
-    data_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
+    cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=False)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
                               clip=False)
-    assert (data_gauss.max() > 1.22) and (data_gauss.min() < -0.36)
-    assert (data_gauss2.max() > 1.219) and (data_gauss2.min() < -1.337)
+    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.36)
+    assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.337)
 
 
 def test_clip_speckle():
     seed = 42
-    data = grass()
+    data = camera()                             # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2. - 1.  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
-    data_speckle = random_noise(data, mode='speckle', seed=seed, clip=True)
-    data_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
+    cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=True)
+    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
                                 clip=True)
-    assert (data_speckle.max() == 1.) and (data_speckle.min() == 0.)
-    assert (data_speckle2.max() == 1.) and (data_speckle2.min() == -1.)
+    assert (cam_speckle.max() == 1.) and (cam_speckle.min() == 0.)
+    assert (cam_speckle2.max() == 1.) and (cam_speckle2.min() == -1.)
 
     # Signed and unsigned, unclipped
-    data_speckle = random_noise(data, mode='speckle', seed=seed, clip=False)
-    data_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
+    cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=False)
+    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
                                 clip=False)
-    assert (data_speckle.max() > 1.219) and (data_speckle.min() == 0.)
-    assert (data_speckle2.max() > 1.219) and (data_speckle2.min() < -1.306)
+    assert (cam_speckle.max() > 1.219) and (cam_speckle.min() == 0.)
+    assert (cam_speckle2.max() > 1.219) and (cam_speckle2.min() < -1.306)
 
 
 def test_bad_mode():
