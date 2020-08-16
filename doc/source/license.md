@@ -1,0 +1,5 @@
+License
+=======
+
+```{literalinclude} ../../LICENSE.txt
+```
