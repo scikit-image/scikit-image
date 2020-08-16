@@ -42,6 +42,12 @@ def test_astronaut():
     assert_equal(astronaut.shape, (512, 512, 3))
 
 
+def test_camera():
+    """ Test that "camera" image can be loaded. """
+    cameraman = data.camera()
+    assert_equal(cameraman.ndim, 2)
+
+
 def test_checkerboard():
     """ Test that "checkerboard" image can be loaded. """
     data.checkerboard()
