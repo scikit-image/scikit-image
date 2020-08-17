@@ -29,7 +29,7 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(width, height, dtype=np.uint8):
+def rectangle(height, width, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -37,10 +37,10 @@ def rectangle(width, height, dtype=np.uint8):
 
     Parameters
     ----------
-    width : int
-        The width of the rectangle.
     height : int
         The height of the rectangle.
+    width : int
+        The width of the rectangle.
 
     Other Parameters
     ----------------
