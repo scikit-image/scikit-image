@@ -57,15 +57,12 @@ builtins.__SKIMAGE_SETUP__ = True
 def openmp_build_ext():
     from numpy.distutils.command.build_ext import build_ext
 
-    compile_flags = ['-fopenmp']
-    link_flags = ['-fopenmp']
-
     code = """#include <omp.h>
     int main(int argc, char** argv) { return(0); }"""
 
     class ConditionalOpenMP(build_ext):
 
-        def can_compile_link(self):
+        def can_compile_link(self, compile_flags, link_flags):
 
             cc = self.compiler
             fname = 'test.c'
@@ -94,9 +91,19 @@ def openmp_build_ext():
             return True
 
         def build_extensions(self):
-            """ Hook into extension building to check compiler flags """
+            """ Hook into extension building to set compiler flags """
 
-            if self.can_compile_link():
+            compile_flags = list()
+            link_flags = list()
+
+            if self.compiler.compiler_type == "msvc":
+                compile_flags += ['/openmp']
+                link_flags += ['/openmp']
+            else:
+                compile_flags += ['-fopenmp']
+                link_flags += ['-fopenmp']
+
+            if self.can_compile_link(compile_flags, link_flags):
 
                 for ext in self.extensions:
                     ext.extra_compile_args += compile_flags
