@@ -1,3 +1,6 @@
+import numpy
+
+
 __all__ = ['apply_parallel']
 
 
@@ -54,7 +57,7 @@ def _ensure_dask_array(array, chunks=None):
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
                    extra_arguments=(), extra_keywords={}, *, dtype=None,
-                   compute=None):
+                   multichannel=False, compute=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -91,8 +94,19 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         functions expecting RGB or multichannel data this may be problematic.
         In such cases, the user should manually specify this dtype argument
         instead.
+
         .. versionadded:: 0.18
            ``dtype`` was added in 0.18.
+    multichannel : bool, optional
+        If `chunks` is None and `multichannel` is True, this function will keep
+        only a single chunk along the channels axis. When `depth` is specified
+        as a scalar value, that depth will be applied only to the non-channels
+        axes (a depth of 0 will be used along the channels axis). If the user
+        manually specified both `chunks` and a `depth` tuple, then this
+        argument will have no effect.
+
+        .. versionadded:: 0.18
+           ``multichannel`` was added in 0.18.
     compute : bool, optional
         If ``True``, compute eagerly returning a NumPy Array.
         If ``False``, compute lazily returning a Dask Array.
@@ -135,7 +149,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4
-        chunks = _get_chunks(shape, ncpu)
+        if multichannel:
+            chunks = _get_chunks(shape[:-1], ncpu) + (shape[-1],)
+        else:
+            chunks = _get_chunks(shape, ncpu)
 
     if mode == 'wrap':
         mode = 'periodic'
@@ -143,6 +160,10 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         mode = 'reflect'
     elif mode == 'edge':
         mode = 'nearest'
+
+    if multichannel and numpy.isscalar(depth):
+        # depth is only used along the non-channel axes
+        depth = (depth,) * (len(array.shape) - 1) + (0,)
 
     def wrapped_func(arr):
         return function(arr, *extra_arguments, **extra_keywords)
