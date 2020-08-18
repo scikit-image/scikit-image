@@ -1,6 +1,7 @@
 import numpy as np
 
 from skimage._shared.testing import assert_array_almost_equal
+from skimage import color, data
 from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel
 
@@ -94,3 +95,16 @@ def test_apply_parallel_nearest():
                             mode='nearest')
 
     assert_array_almost_equal(result, expected)
+
+
+@pytest.mark.parametrize('chunks', (None, (128, 128, 3), 128))
+@pytest.mark.parametrize('depth', (0, 8, (8, 8, 0)))
+def test_apply_parallel_rgb(depth, chunks):
+    cat = data.chelsea() / 255.
+
+    func = color.rgb2ycbcr
+    cat_ycbcr_expected = func(cat)
+    cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
+                               dtype=cat.dtype, multichannel=True)
+
+    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
