@@ -89,11 +89,11 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
     dtype : data-type or None, optional
-        The data-type of the output array. If None, Dask will attempt to infer
-        this by calling the function on data of shape ``(1,) * ndim``. For
-        functions expecting RGB or multichannel data this may be problematic.
-        In such cases, the user should manually specify this dtype argument
-        instead.
+        The data-type of the `function` output. If None, Dask will attempt to
+        infer this by calling the function on data of shape ``(1,) * ndim``.
+        For functions expecting RGB or multichannel data this may be
+        problematic. In such cases, the user should manually specify this dtype
+        argument instead.
 
         .. versionadded:: 0.18
            ``dtype`` was added in 0.18.
