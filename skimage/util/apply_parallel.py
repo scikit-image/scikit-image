@@ -53,7 +53,8 @@ def _ensure_dask_array(array, chunks=None):
 
 
 def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords={}, *, compute=None):
+                   extra_arguments=(), extra_keywords={}, *, dtype=None,
+                   compute=None):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -84,6 +85,14 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
+    dtype : data-type or None, optional
+        The data-type of the output array. If None, Dask will attempt to infer
+        this by calling the function on data of shape ``(1,) * ndim``. For
+        functions expecting RGB or multichannel data this may be problematic.
+        In such cases, the user should manually specify this dtype argument
+        instead.
+        .. versionadded:: 0.18
+           ``dtype`` was added in 0.18.
     compute : bool, optional
         If ``True``, compute eagerly returning a NumPy Array.
         If ``False``, compute lazily returning a Dask Array.
@@ -140,7 +149,7 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode)
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
     if compute:
         res = res.compute()
 
