@@ -29,7 +29,7 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(height, width, dtype=np.uint8):
+def rectangle(nrows, ncols, dtype=np.uint8):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -54,7 +54,7 @@ def rectangle(height, width, dtype=np.uint8):
         pixel belongs to the neighborhood.
 
     """
-    return np.ones((height, width), dtype=dtype)
+    return np.ones((nrows, ncols), dtype=dtype)
 
 
 def diamond(radius, dtype=np.uint8):
