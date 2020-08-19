@@ -15,7 +15,7 @@ if LooseVersion(pil_version) < LooseVersion('7.1.0'):
          'Several security issues (CVE-2020-11538, '
          'CVE-2020-10379, CVE-2020-10994, CVE-2020-10177) '
          'have been fixed in pillow 7.1.0 or higher. '
-         'We recommand to upgrade this library.',
+         'We recommend to upgrade this library.',
          stacklevel=2)
 
 
