@@ -29,7 +29,7 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(nrows, ncols, dtype=np.uint8):
+def rectangle(nrows=None, ncols=None, dtype=np.uint8, width=None, height=None):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -37,15 +37,19 @@ def rectangle(nrows, ncols, dtype=np.uint8):
 
     Parameters
     ----------
-    height : int
-        The height of the rectangle.
-    width : int
-        The width of the rectangle.
+    nrows : int
+        The number of rows of the rectangle.
+    ncols : int
+        The number of columns of the rectangle.
 
     Other Parameters
     ----------------
     dtype : data-type
         The data type of the structuring element.
+    width : int, depreciated
+        The number of rows of the rectangle.
+    height : int, depreciated
+        The number of columns of the rectangle.
 
     Returns
     -------
@@ -53,7 +57,39 @@ def rectangle(nrows, ncols, dtype=np.uint8):
         A structuring element consisting only of ones, i.e. every
         pixel belongs to the neighborhood.
 
+    Notes
+    -----
+    ``nrows`` and ``ncols`` have None specified as a default value. This exists
+    for backwards compatibility with scikit-image v0.18 and older. You have to
+    specify values for both variables, and an exception will be raised
+    otherwise.
+
     """
+
+    if width is not None:
+        nrows = width
+
+        import warnings
+        warnings.warn("The usage of width is depreciated and the argument will"
+                      " be removed in a future version. Use"
+                      " `rectangle(nrows, ncols)` instead.",
+                      DeprecationWarning)
+
+    if height is not None:
+        ncols = height
+
+        import warnings
+        warnings.warn("The usage of height is depreciated and the argument"
+                      "will be removed in a future version. Use"
+                      " `rectangle(nrows, ncols)` instead.",
+                      DeprecationWarning)
+
+    if nrows is None:
+        raise ValueError("You must specify a value for nrows.")
+
+    if ncols is None:
+        raise ValueError("You must specify a value for ncols.")
+
     return np.ones((nrows, ncols), dtype=dtype)
 
 
