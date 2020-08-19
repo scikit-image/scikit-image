@@ -3,6 +3,7 @@ requires = [
     "wheel",
     "setuptools",
     "Cython>=0.29.18",
+    # AIX is IBM's variant of UNIX; it needs special handling.
     "numpy==1.15.1; python_version=='3.6' and platform_system!='AIX'",
     "numpy==1.15.1; python_version=='3.7' and platform_system!='AIX'",
     "numpy==1.17.3; python_version>='3.8' and platform_system!='AIX'",
