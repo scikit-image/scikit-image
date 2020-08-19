@@ -70,8 +70,7 @@ def test_coffee():
 
 def test_eagle():
     """ Test that "eagle" image can be loaded. """
-    path = fetch('data/eagle.png')
-    eagle = io.imread(path)
+    eagle = data.eagle()
     assert_equal(eagle.ndim, 2)
     assert_equal(eagle.dtype, np.dtype('uint8'))
 
