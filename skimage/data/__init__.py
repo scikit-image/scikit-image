@@ -117,7 +117,7 @@ def create_image_fetcher():
     # This helps pooch understand that it should look in master
     # to find the required files
     pooch_version = __version__.replace('.dev', '+')
-    url = "https://github.com/alexdesiqueira/scikit-image/tree/goodbye_cameraman/skimage"  # test url; checking new image
+    url = "https://github.com/alexdesiqueira/scikit-image/raw/goodbye_cameraman/skimage/"  # test url; checking new image
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
