@@ -221,7 +221,7 @@ class TestSimpleImage():
 
 def test_otsu_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 86 < threshold_otsu(camera) < 88
+    assert 90 < threshold_otsu(camera) < 92
 
 
 def test_otsu_coins_image():
@@ -254,7 +254,7 @@ def test_li_camera_image():
     image = util.img_as_ubyte(data.camera())
     threshold = threshold_li(image)
     ce_actual = _cross_entropy(image, threshold)
-    assert 62 < threshold_li(image) < 63
+    assert 69 < threshold_li(image) < 70
     assert ce_actual < _cross_entropy(image, threshold + 1)
     assert ce_actual < _cross_entropy(image, threshold - 1)
 
@@ -341,7 +341,7 @@ def test_li_pathological_arrays():
 
 def test_yen_camera_image():
     camera = util.img_as_ubyte(data.camera())
-    assert 197 < threshold_yen(camera) < 199
+    assert 198 < threshold_yen(camera) < 200
 
 
 def test_yen_coins_image():
@@ -366,7 +366,7 @@ def test_isodata_camera_image():
     threshold = threshold_isodata(camera)
     assert np.floor((camera[camera <= threshold].mean() +
                      camera[camera > threshold].mean()) / 2.0) == threshold
-    assert threshold == 87
+    assert threshold == 91
 
     assert threshold_isodata(camera, return_all=True) == [87]
 
@@ -429,7 +429,7 @@ def test_threshold_minimum():
     camera = util.img_as_ubyte(data.camera())
 
     threshold = threshold_minimum(camera)
-    assert_equal(threshold, 76)
+    assert_equal(threshold, 69)
 
     astronaut = util.img_as_ubyte(data.astronaut())
     threshold = threshold_minimum(astronaut)
