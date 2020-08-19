@@ -34,6 +34,9 @@ API Changes
 Bugfixes
 --------
 
+- In ``skimage.morphology.selem.rectangle`` the ``height`` argument
+  controlled the width and the ``width`` argument controlled the height.
+  They have been replaced with ``nrow`` and ``ncol``.
 
 
 Deprecations
@@ -44,6 +47,8 @@ Deprecations
 - ``skimage.feature.structure_tensor_eigvals`` has been deprecated and will be
   removed in version 0.20. Use ``skimage.feature.structure_tensor_eigenvalues``
   instead.
+- In ``skimage.morphology.selem.rectangle`` the arguments ``width`` and 
+  ``height`` have been depreciated. Use ``nrow`` and ``ncol`` instead.
 
 
 Contributors to this release
