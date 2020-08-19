@@ -73,14 +73,14 @@ class ConditionalOpenMP(build_ext):
                 fobj.write(code)
             try:
                 objects = cc.compile([fname],
-                                        extra_postargs=compile_flags)
+                                     extra_postargs=compile_flags)
             except CompileError:
                 return False
             try:
                 # Link shared lib rather then executable to avoid
                 # http://bugs.python.org/issue4431 with MSVC 10+
                 cc.link_shared_lib(objects, "testlib",
-                                    extra_postargs=link_flags)
+                                   extra_postargs=link_flags)
             except (LinkError, TypeError):
                 return False
         finally:
@@ -119,7 +119,7 @@ with open('skimage/__init__.py', encoding='utf-8') as fid:
 
 def parse_requirements_file(filename):
     with open(filename, encoding='utf-8') as fid:
-        requires = [l.strip() for l in fid.readlines() if l]
+        requires = [line.strip() for line in fid.readlines() if line]
 
     return requires
 
