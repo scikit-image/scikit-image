@@ -11,6 +11,7 @@ import setuptools
 from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 from distutils.errors import CompileError, LinkError
+from numpy.distutils.command.build_ext import build_ext
 
 
 DISTNAME = 'scikit-image'
@@ -54,64 +55,59 @@ builtins.__SKIMAGE_SETUP__ = True
 
 # Support for openmp
 
-def openmp_build_ext():
-    from numpy.distutils.command.build_ext import build_ext
+class ConditionalOpenMP(build_ext):
 
-    code = """#include <omp.h>
-    int main(int argc, char** argv) { return(0); }"""
+    def can_compile_link(self, compile_flags, link_flags):
 
-    class ConditionalOpenMP(build_ext):
+        cc = self.compiler
+        fname = 'test.c'
+        cwd = os.getcwd()
+        tmpdir = tempfile.mkdtemp()
 
-        def can_compile_link(self, compile_flags, link_flags):
+        code = ("#include <omp.h>"
+                "int main(int argc, char** argv) { return(0); }")
 
-            cc = self.compiler
-            fname = 'test.c'
-            cwd = os.getcwd()
-            tmpdir = tempfile.mkdtemp()
-
+        try:
+            os.chdir(tmpdir)
+            with open(fname, 'wt') as fobj:
+                fobj.write(code)
             try:
-                os.chdir(tmpdir)
-                with open(fname, 'wt') as fobj:
-                    fobj.write(code)
-                try:
-                    objects = cc.compile([fname],
-                                         extra_postargs=compile_flags)
-                except CompileError:
-                    return False
-                try:
-                    # Link shared lib rather then executable to avoid
-                    # http://bugs.python.org/issue4431 with MSVC 10+
-                    cc.link_shared_lib(objects, "testlib",
-                                       extra_postargs=link_flags)
-                except (LinkError, TypeError):
-                    return False
-            finally:
-                os.chdir(cwd)
-                shutil.rmtree(tmpdir)
-            return True
+                objects = cc.compile([fname],
+                                        extra_postargs=compile_flags)
+            except CompileError:
+                return False
+            try:
+                # Link shared lib rather then executable to avoid
+                # http://bugs.python.org/issue4431 with MSVC 10+
+                cc.link_shared_lib(objects, "testlib",
+                                    extra_postargs=link_flags)
+            except (LinkError, TypeError):
+                return False
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(tmpdir)
+        return True
 
-        def build_extensions(self):
-            """ Hook into extension building to set compiler flags """
+    def build_extensions(self):
+        """ Hook into extension building to set compiler flags """
 
-            compile_flags = list()
-            link_flags = list()
+        compile_flags = list()
+        link_flags = list()
 
-            if self.compiler.compiler_type == "msvc":
-                compile_flags += ['/openmp']
-                link_flags += ['/openmp']
-            else:
-                compile_flags += ['-fopenmp']
-                link_flags += ['-fopenmp']
+        if self.compiler.compiler_type == "msvc":
+            compile_flags += ['/openmp']
+            link_flags += ['/openmp']
+        else:
+            compile_flags += ['-fopenmp']
+            link_flags += ['-fopenmp']
 
-            if self.can_compile_link(compile_flags, link_flags):
+        if self.can_compile_link(compile_flags, link_flags):
 
-                for ext in self.extensions:
-                    ext.extra_compile_args += compile_flags
-                    ext.extra_link_args += link_flags
+            for ext in self.extensions:
+                ext.extra_compile_args += compile_flags
+                ext.extra_link_args += link_flags
 
-            build_ext.build_extensions(self)
-
-    return ConditionalOpenMP
+        build_ext.build_extensions(self)
 
 
 with open('skimage/__init__.py', encoding='utf-8') as fid:
@@ -238,7 +234,7 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py,
-                  'build_ext': openmp_build_ext(),
+                  'build_ext': ConditionalOpenMP,
                   'sdist': sdist},
         **extra
     )
