@@ -1,5 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
+import warnings
+
 from .. import draw
 
 
@@ -68,21 +70,18 @@ def rectangle(nrows=None, ncols=None, dtype=np.uint8, width=None, height=None):
 
     if width is not None:
         nrows = width
-
-        import warnings
         warnings.warn("The usage of width is depreciated and the argument will"
                       " be removed in a future version. Use"
                       " `rectangle(nrows, ncols)` instead.",
-                      DeprecationWarning)
+                      FutureWarning)
 
     if height is not None:
         ncols = height
 
-        import warnings
         warnings.warn("The usage of height is depreciated and the argument"
                       "will be removed in a future version. Use"
                       " `rectangle(nrows, ncols)` instead.",
-                      DeprecationWarning)
+                      FutureWarning)
 
     if nrows is None:
         raise ValueError("You must specify a value for nrows.")
