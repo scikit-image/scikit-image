@@ -185,7 +185,7 @@ def h_minima(image, h, selem=None):
     on which the maximal value is f(M) + h (i.e. the values along the path
     are not increasing by more than h with respect to the minimum's value)
     and no path to an equal or lower local minimum for which the maximal
-    value is greater.
+    value is smaller.
 
     The global minima of the image are also found by this function.
 
@@ -203,7 +203,7 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The local minima of height >= h and the global minima.
+       The local minima of depth >= h and the global minima.
        The resulting image is a binary image, where pixels belonging to
        the determined minima take value 1, the others take value 0.
 
