@@ -31,7 +31,9 @@ def square(width, dtype=np.uint8):
     return np.ones((width, width), dtype=dtype)
 
 
-def rectangle(nrows=None, ncols=None, dtype=np.uint8, width=None, height=None):
+def rectangle(nrows=None, ncols=None, dtype=np.uint8,
+              *,
+              height=None, width=None):
     """Generates a flat, rectangular-shaped structuring element.
 
     Every pixel in the rectangle generated for a given width and given height
@@ -62,7 +64,7 @@ def rectangle(nrows=None, ncols=None, dtype=np.uint8, width=None, height=None):
     Notes
     -----
     ``nrows`` and ``ncols`` have None specified as a default value. This exists
-    for backwards compatibility with scikit-image v0.18 and older. You have to
+    for backwards compatibility with scikit-image v0.18 and older. You must
     specify values for both variables, and an exception will be raised
     otherwise.
 
