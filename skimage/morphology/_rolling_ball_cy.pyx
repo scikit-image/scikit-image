@@ -23,8 +23,9 @@ def apply_kernel_nan(DTYPE_FLOAT[:,:,:] windows,
 
     Parameters
     ----------
-    windows : (N, M, K1, K2) ndarray
-        A windowed view into a 2D image.
+    windows : (N, K1, K2) ndarray
+        A windowed view into an nD image. K1 and K2 are the dimensions of the
+        window and N is the number of windows into the image.
     kernel : (K1, K2) ndarray
         Indicates if pixel inside the window belongs to the kernel. 
         `kernel[x,y] == 1` if the pixel is inside, ``kernel[x,y] == np.Inf`` 
