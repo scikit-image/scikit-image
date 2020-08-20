@@ -53,10 +53,13 @@ def h_maxima(image, h, selem=None):
     neighborhood of the set.
 
     A local maximum M of height h is a local maximum for which
-    there is at least one path joining M with a higher maximum on which the
-    minimal value is f(M) - h (i.e. the values along the path are not
-    decreasing by more than h with respect to the maximum's value) and no
-    path for which the minimal value is greater.
+    there is at least one path joining M with an equal or higher local maximum
+    on which the minimal value is f(M) - h (i.e. the values along the path
+    are not decreasing by more than h with respect to the maximum's value)
+    and no path to an equal or higher local maximum for which the minimal
+    value is greater.
+
+    The global maxima of the image are also found by this function.
 
     Parameters
     ----------
@@ -72,9 +75,9 @@ def h_maxima(image, h, selem=None):
     Returns
     -------
     h_max : ndarray
-       The maxima of height >= h. The resulting image is a binary image, where
-       pixels belonging to the selected maxima take value 1, the others
-       take value 0.
+       The local maxima of height >= h and the global maxima.
+       The resulting image is a binary image, where pixels belonging to
+       the determined maxima take value 1, the others take value 0.
 
     See also
     --------
@@ -178,10 +181,13 @@ def h_minima(image, h, selem=None):
     neighborhood of the set.
 
     A local minimum M of depth h is a local minimum for which
-    there is at least one path joining M with a deeper minimum on which the
-    maximal value is f(M) + h (i.e. the values along the path are not
-    increasing by more than h with respect to the minimum's value) and no
-    path for which the maximal value is smaller.
+    there is at least one path joining M with an equal or lower local minimum
+    on which the maximal value is f(M) + h (i.e. the values along the path
+    are not increasing by more than h with respect to the minimum's value)
+    and no path to an equal or lower local minimum for which the maximal
+    value is greater.
+
+    The global minima of the image are also found by this function.
 
     Parameters
     ----------
@@ -197,9 +203,9 @@ def h_minima(image, h, selem=None):
     Returns
     -------
     h_min : ndarray
-       The minima of depth >= h. The resulting image is a binary image, where
-       pixels belonging to the selected minima take value 1, the other pixels
-       take value 0.
+       The local minima of height >= h and the global minima.
+       The resulting image is a binary image, where pixels belonging to
+       the determined minima take value 1, the others take value 0.
 
     See also
     --------
