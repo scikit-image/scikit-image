@@ -67,6 +67,12 @@ class ConditionalOpenMP(build_ext):
         code = ("#include <omp.h>"
                 "int main(int argc, char** argv) { return(0); }")
 
+        if self.compiler.compiler_type == "msvc":
+            # make sure we build a DLL on Windows
+            local_link_flags = link_flags + ["/DLL"]
+        else:
+            local_link_flags = link_flags
+
         try:
             os.chdir(tmpdir)
             with open(fname, 'wt') as fobj:
@@ -80,7 +86,7 @@ class ConditionalOpenMP(build_ext):
                 # Link shared lib rather then executable to avoid
                 # http://bugs.python.org/issue4431 with MSVC 10+
                 cc.link_shared_lib(objects, "testlib",
-                                   extra_postargs=link_flags)
+                                   extra_postargs=local_link_flags)
             except (LinkError, TypeError):
                 return False
         finally:
@@ -96,13 +102,11 @@ class ConditionalOpenMP(build_ext):
 
         if self.compiler.compiler_type == "msvc":
             compile_flags += ['/openmp']
-            link_flags += ['/openmp']
         else:
             compile_flags += ['-fopenmp']
             link_flags += ['-fopenmp']
 
         if self.can_compile_link(compile_flags, link_flags):
-
             for ext in self.extensions:
                 ext.extra_compile_args += compile_flags
                 ext.extra_link_args += link_flags
