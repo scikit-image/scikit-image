@@ -337,12 +337,16 @@ def _load(f, as_gray=False):
 def camera():
     """Gray-level "camera" image.
 
-    Often used for segmentation and denoising examples.
+    Can be used for segmentation and denoising examples.
 
     Returns
     -------
     camera : (512, 512) uint8 ndarray
         Camera image.
+
+    Notes
+    -----
+    No copyright restrictions. CC0 by the photographer (Lav Varshney).
     """
     return _load("data/camera.png")
 
